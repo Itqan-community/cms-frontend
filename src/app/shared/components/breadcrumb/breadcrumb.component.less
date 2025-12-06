@@ -1,20 +1,19 @@
 // Custom breadcrumb styling (ng-zorro handles RTL automatically)
 nz-breadcrumb {
   padding: 1rem 0;
-  
+
   a {
     color: var(--color-primary-700);
     transition: all 0.2s ease;
-    
+
     &:hover {
       color: var(--color-primary-800);
     }
   }
-  
+
   // Current/active breadcrumb item
   span:not([nz-icon]) {
     color: var(--color-neutral-600);
     font-weight: 500;
   }
 }
-

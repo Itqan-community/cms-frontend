@@ -28,7 +28,7 @@ assignees: ''
 <!-- Describe the use cases for this feature -->
 
 1. As a [user type], I want to [action] so that [benefit]
-2. 
+2.
 
 ## Implementation Details
 
@@ -38,16 +38,16 @@ assignees: ''
 
 <!-- What are the benefits of implementing this feature? -->
 
-- 
-- 
-- 
+-
+-
+-
 
 ## Drawbacks
 
 <!-- Are there any potential drawbacks or challenges? -->
 
-- 
-- 
+-
+-
 
 ## Dependencies
 
@@ -78,4 +78,3 @@ assignees: ''
 - [ ] Yes, I can help with testing
 - [ ] Yes, I can help with documentation
 - [ ] No, but I'm happy to provide feedback
-

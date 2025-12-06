@@ -5,7 +5,7 @@ import { NzCarouselModule } from 'ng-zorro-antd/carousel';
   selector: 'app-image-carousel',
   imports: [NzCarouselModule],
   templateUrl: './image-carousel.component.html',
-  styleUrl: './image-carousel.component.less'
+  styleUrl: './image-carousel.component.less',
 })
 export class ImageCarouselComponent {
   images = input<string[]>([]);

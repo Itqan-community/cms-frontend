@@ -10,9 +10,16 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-filters',
-  imports: [NzInputModule, TranslatePipe, NzCheckboxGroupComponent, NzCheckboxComponent, FormsModule, LicenseTagComponent],
+  imports: [
+    NzInputModule,
+    TranslatePipe,
+    NzCheckboxGroupComponent,
+    NzCheckboxComponent,
+    FormsModule,
+    LicenseTagComponent,
+  ],
   templateUrl: './filters.component.html',
-  styleUrl: './filters.component.less'
+  styleUrl: './filters.component.less',
 })
 export class FiltersComponent implements OnDestroy {
   private readonly translate = inject(TranslateService);
@@ -22,16 +29,34 @@ export class FiltersComponent implements OnDestroy {
   readonly categoriesOptions = [
     { label: this.translate.instant(`CATEGORIES.${Categories.MUSHAF}`), value: Categories.MUSHAF },
     { label: this.translate.instant(`CATEGORIES.${Categories.TAFSIR}`), value: Categories.TAFSIR },
-    { label: this.translate.instant(`CATEGORIES.${Categories.RECITATION}`), value: Categories.RECITATION }
+    {
+      label: this.translate.instant(`CATEGORIES.${Categories.RECITATION}`),
+      value: Categories.RECITATION,
+    },
   ];
   readonly licensesOptions = [
     { label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC0}`), value: Licenses.CC0 },
     { label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC_BY}`), value: Licenses.CC_BY },
-    { label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC_BY_SA}`), value: Licenses.CC_BY_SA },
-    { label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC_BY_ND}`), value: Licenses.CC_BY_ND },
-    { label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC_BY_NC}`), value: Licenses.CC_BY_NC },
-    { label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC_BY_NC_SA}`), value: Licenses.CC_BY_NC_SA },
-    { label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC_BY_NC_ND}`), value: Licenses.CC_BY_NC_ND },
+    {
+      label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC_BY_SA}`),
+      value: Licenses.CC_BY_SA,
+    },
+    {
+      label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC_BY_ND}`),
+      value: Licenses.CC_BY_ND,
+    },
+    {
+      label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC_BY_NC}`),
+      value: Licenses.CC_BY_NC,
+    },
+    {
+      label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC_BY_NC_SA}`),
+      value: Licenses.CC_BY_NC_SA,
+    },
+    {
+      label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC_BY_NC_ND}`),
+      value: Licenses.CC_BY_NC_ND,
+    },
   ];
 
   searchQuery = signal<string>('');
@@ -46,12 +71,8 @@ export class FiltersComponent implements OnDestroy {
   constructor() {
     // Set up debounced search with 300ms delay
     this.searchSubject$
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntil(this.destroy$)
-      )
-      .subscribe(query => {
+      .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe((query) => {
         this.searchQueryChange.emit(query);
       });
   }

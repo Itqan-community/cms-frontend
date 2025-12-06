@@ -62,8 +62,7 @@ export class RegisterPage {
           this.authService.isLoading.set(false);
 
           this.errorMessage.set(
-            getErrorMessage(error) ||
-              this.translate.instant('AUTH.REGISTER.ERRORS.REGISTER_FAILED'),
+            getErrorMessage(error) || this.translate.instant('AUTH.REGISTER.ERRORS.REGISTER_FAILED')
           );
         },
       });

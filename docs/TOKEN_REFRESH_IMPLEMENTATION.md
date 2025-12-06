@@ -1,22 +1,27 @@
 # Token Refresh Implementation Documentation
 
 ## Overview
-This document describes the implementation of automatic token refresh and global 401/403 error handling in the CMS Frontend application.
+
+This document describes the implementation of automatic token refresh and global 401/403 error
+handling in the CMS Frontend application.
 
 ## Features Implemented
 
 ### 1. Automatic Token Refresh
+
 - **Endpoint**: `/auth/token/refresh`
 - **Request Body**: `{ refresh: string }`
 - **Response**: `{ access: string, refresh: string }`
 
 ### 2. Global Error Handling
+
 - Handles 401 (Unauthorized) and 403 (Forbidden) HTTP errors globally
 - Automatically attempts to refresh the access token
 - Retries the original failed request with the new token
 - Logs out the user if token refresh fails
 
 ### 3. Race Condition Prevention
+
 - Prevents multiple simultaneous token refresh requests
 - Queues failed requests while token refresh is in progress
 - All queued requests are retried once the token is refreshed
@@ -26,11 +31,14 @@ This document describes the implementation of automatic token refresh and global
 ### Modified Files
 
 #### 1. `src/app/core/auth/services/auth.service.ts`
+
 **Changes**:
+
 - Updated `refreshToken()` method to store both access and refresh tokens
 - Added `setRefreshToken()` private method for updating the refresh token in localStorage
 
 **Key Methods**:
+
 ```typescript
 refreshToken(): Observable<RefreshTokenResponse> {
   // Calls /auth/token/refresh/ endpoint
@@ -40,9 +48,11 @@ refreshToken(): Observable<RefreshTokenResponse> {
 ```
 
 #### 2. `src/app/core/interceptors/auth-error.interceptor.ts` (New File)
+
 **Purpose**: Global HTTP error interceptor for handling authentication errors
 
 **Key Features**:
+
 - Intercepts all HTTP responses
 - Catches 401 and 403 errors
 - Implements token refresh logic with queue management
@@ -50,6 +60,7 @@ refreshToken(): Observable<RefreshTokenResponse> {
 - Automatic logout on refresh failure
 
 **Implementation Details**:
+
 ```typescript
 // State management
 let isRefreshing = false; // Prevents multiple simultaneous refreshes
@@ -59,10 +70,11 @@ const refreshTokenSubject = new BehaviorSubject<string | null>(null); // Queues 
 export function authErrorInterceptor(
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
-): Observable<HttpEvent<unknown>>
+): Observable<HttpEvent<unknown>>;
 ```
 
 **Error Handling Flow**:
+
 1. Request fails with 401/403
 2. Check if token refresh is already in progress
 3. If not refreshing:
@@ -78,26 +90,33 @@ export function authErrorInterceptor(
    - Redirect to login page
 
 #### 3. `src/app/app.config.ts`
+
 **Changes**:
+
 - Imported `authErrorInterceptor`
 - Registered interceptor in the HTTP client configuration
 
 **Interceptor Order** (Important):
+
 ```typescript
-provideHttpClient(withInterceptors([
-  headersInterceptor,    // Adds Authorization header
-  authErrorInterceptor   // Handles 401/403 errors
-]))
+provideHttpClient(
+  withInterceptors([
+    headersInterceptor, // Adds Authorization header
+    authErrorInterceptor, // Handles 401/403 errors
+  ])
+);
 ```
 
 ## Token Storage
 
 ### LocalStorage Keys
+
 - `access_token` - JWT access token
 - `refresh_token` - JWT refresh token
 - `user` - User object (JSON string)
 
 ### Token Flow
+
 1. **Login**: Stores both access and refresh tokens
 2. **API Request**: Adds access token to Authorization header
 3. **Token Expired (401/403)**: Automatically refreshes tokens
@@ -107,36 +126,43 @@ provideHttpClient(withInterceptors([
 ## Best Practices Implemented
 
 ### 1. **Single Refresh Attempt**
+
 - Uses a flag (`isRefreshing`) to prevent multiple simultaneous refresh calls
 - All concurrent 401 errors wait for the same refresh operation
 
 ### 2. **Request Queuing**
+
 - Failed requests are queued using RxJS `BehaviorSubject`
 - All queued requests are retried once refresh completes
 - Uses `filter()` and `take(1)` to wait for the new token
 
 ### 3. **Graceful Degradation**
+
 - If no refresh token exists, immediately logout
 - If refresh endpoint itself fails, logout and redirect
 - Skips refresh logic for the refresh endpoint to prevent infinite loops
 
 ### 4. **Clean Separation of Concerns**
+
 - Headers interceptor: Only adds headers
 - Error interceptor: Only handles errors and token refresh
 - Auth service: Manages authentication state and storage
 
 ### 5. **Type Safety**
+
 - All models are properly typed using existing interfaces
 - No `any` types used
 - Follows Angular best practices
 
 ### 6. **Memory Leak Prevention**
+
 - Uses `take(1)` to automatically unsubscribe after receiving the token
 - Proper cleanup of BehaviorSubject state
 
 ## Testing Scenarios
 
 ### Scenario 1: Single 401 Error
+
 1. User makes API request
 2. Token is expired → 401 error
 3. Interceptor catches error
@@ -145,6 +171,7 @@ provideHttpClient(withInterceptors([
 6. User receives response (transparent to user)
 
 ### Scenario 2: Multiple Concurrent 401 Errors
+
 1. User makes 3 API requests simultaneously
 2. All tokens expired → 3x 401 errors
 3. First 401 triggers refresh
@@ -154,6 +181,7 @@ provideHttpClient(withInterceptors([
    - All return successfully
 
 ### Scenario 3: Refresh Token Expired
+
 1. Access token expires → 401 error
 2. Interceptor attempts refresh
 3. Refresh token also expired → 401 from refresh endpoint
@@ -161,6 +189,7 @@ provideHttpClient(withInterceptors([
 5. Redirected to login page
 
 ### Scenario 4: Network Error During Refresh
+
 1. Access token expires → 401 error
 2. Interceptor attempts refresh
 3. Network error occurs
@@ -189,7 +218,7 @@ this.http.get('/api/protected-resource').subscribe({
   error: (error) => {
     // Only non-401/403 errors reach here
     console.error(error);
-  }
+  },
 });
 ```
 
@@ -216,18 +245,25 @@ private readonly USER_KEY = 'user';
 ## Troubleshooting
 
 ### Issue: Infinite refresh loop
-**Solution**: Ensure the refresh endpoint URL is excluded from the interceptor logic (already implemented)
+
+**Solution**: Ensure the refresh endpoint URL is excluded from the interceptor logic (already
+implemented)
 
 ### Issue: Multiple refresh calls
+
 **Solution**: Check that `isRefreshing` flag is properly managed (already implemented)
 
 ### Issue: Requests not retried after refresh
-**Solution**: Verify `refreshTokenSubject` is properly broadcasting the new token (already implemented)
+
+**Solution**: Verify `refreshTokenSubject` is properly broadcasting the new token (already
+implemented)
 
 ### Issue: User not redirected after logout
+
 **Solution**: Ensure Router is properly injected in the interceptor (already implemented)
 
 ## Conclusion
 
-This implementation provides a robust, production-ready solution for automatic token refresh and global error handling. It follows Angular best practices, prevents common pitfalls like race conditions and infinite loops, and provides a seamless user experience.
-
+This implementation provides a robust, production-ready solution for automatic token refresh and
+global error handling. It follows Angular best practices, prevents common pitfalls like race
+conditions and infinite loops, and provides a seamless user experience.

@@ -44,7 +44,7 @@ export class PublisherService {
     publisherId: string,
     categories: string[] = [],
     searchQuery = '',
-    licenses: string[] = [],
+    licenses: string[] = []
   ): Observable<ApiAssets> {
     let params = new HttpParams().set('publisher_id', publisherId);
 

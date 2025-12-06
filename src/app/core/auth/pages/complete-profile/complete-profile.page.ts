@@ -52,7 +52,7 @@ export class CompleteProfilePage {
         error: (error: unknown) => {
           this.isLoading.set(false);
           this.errorMessage.set(
-            getErrorMessage(error) || this.translate.instant('ERRORS.SERVER_ERROR'),
+            getErrorMessage(error) || this.translate.instant('ERRORS.SERVER_ERROR')
           );
         },
       });

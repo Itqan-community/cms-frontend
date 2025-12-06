@@ -20,30 +20,80 @@
             {{ 'PROFILE.PROJECT_QUESTION' | translate }}
             <span class="complete__required">*</span>
           </label>
-          <textarea id="bio" name="bio" rows="4" formControlName="bio" [placeholder]="'PROFILE.BUSINESS_MODEL_PLACEHOLDER' | translate" class="complete__textarea" [class.complete__input--invalid]="profileForm.get('bio')?.invalid && profileForm.get('bio')?.touched" [attr.aria-invalid]="profileForm.get('bio')?.invalid && profileForm.get('bio')?.touched"></textarea>
+          <textarea
+            id="bio"
+            name="bio"
+            rows="4"
+            formControlName="bio"
+            [placeholder]="'PROFILE.BUSINESS_MODEL_PLACEHOLDER' | translate"
+            class="complete__textarea"
+            [class.complete__input--invalid]="
+              profileForm.get('bio')?.invalid && profileForm.get('bio')?.touched
+            "
+            [attr.aria-invalid]="profileForm.get('bio')?.invalid && profileForm.get('bio')?.touched"
+          ></textarea>
           @if (profileForm.get('bio')?.invalid && profileForm.get('bio')?.touched) {
             <p class="complete__error">{{ getFieldError('bio') }}</p>
           }
         </div>
 
         <div class="complete__field">
-          <label for="project_url" class="complete__label">{{ 'PROFILE.PROJECT_LINK_LABEL' | translate }}</label>
-          <input id="project_url" name="project_url" type="url" formControlName="project_url" [placeholder]="'FORMS.PLACEHOLDERS.PROJECT_LINK' | translate" class="complete__input" [class.complete__input--invalid]="profileForm.get('website')?.invalid && profileForm.get('website')?.touched" [attr.aria-invalid]="profileForm.get('website')?.invalid && profileForm.get('website')?.touched" />
+          <label for="project_url" class="complete__label">{{
+            'PROFILE.PROJECT_LINK_LABEL' | translate
+          }}</label>
+          <input
+            id="project_url"
+            name="project_url"
+            type="url"
+            formControlName="project_url"
+            [placeholder]="'FORMS.PLACEHOLDERS.PROJECT_LINK' | translate"
+            class="complete__input"
+            [class.complete__input--invalid]="
+              profileForm.get('website')?.invalid && profileForm.get('website')?.touched
+            "
+            [attr.aria-invalid]="
+              profileForm.get('website')?.invalid && profileForm.get('website')?.touched
+            "
+          />
           @if (profileForm.get('website')?.invalid && profileForm.get('website')?.touched) {
             <p class="complete__error">{{ getFieldError('website') }}</p>
           }
         </div>
 
         <div class="complete__field">
-          <label for="project_summary" class="complete__label">{{ 'PROFILE.ORGANIZATION' | translate }}</label>
-          <input id="project_summary" name="project_summary" type="text" formControlName="project_summary" [placeholder]="'PROFILE.ORGANIZATION_PLACEHOLDER' | translate" class="complete__input" [class.complete__input--invalid]="profileForm.get('organization')?.invalid && profileForm.get('organization')?.touched" [attr.aria-invalid]="profileForm.get('organization')?.invalid && profileForm.get('organization')?.touched" />
-          @if (profileForm.get('organization')?.invalid && profileForm.get('organization')?.touched) {
+          <label for="project_summary" class="complete__label">{{
+            'PROFILE.ORGANIZATION' | translate
+          }}</label>
+          <input
+            id="project_summary"
+            name="project_summary"
+            type="text"
+            formControlName="project_summary"
+            [placeholder]="'PROFILE.ORGANIZATION_PLACEHOLDER' | translate"
+            class="complete__input"
+            [class.complete__input--invalid]="
+              profileForm.get('organization')?.invalid && profileForm.get('organization')?.touched
+            "
+            [attr.aria-invalid]="
+              profileForm.get('organization')?.invalid && profileForm.get('organization')?.touched
+            "
+          />
+          @if (
+            profileForm.get('organization')?.invalid && profileForm.get('organization')?.touched
+          ) {
             <p class="complete__error">{{ getFieldError('organization') }}</p>
           }
         </div>
 
         <div class="complete__actions">
-          <button nz-button nzType="primary" type="submit" nzSize="large" class="ant-btn-xl" [disabled]="profileForm.invalid || isLoading()">
+          <button
+            nz-button
+            nzType="primary"
+            type="submit"
+            nzSize="large"
+            class="ant-btn-xl"
+            [disabled]="profileForm.invalid || isLoading()"
+          >
             @if (isLoading()) {
               <span class="complete__spinner" aria-hidden="true"></span>
               <span>{{ 'COMMON.LOADING' | translate }}</span>
@@ -52,7 +102,13 @@
             }
           </button>
 
-          <button nz-button type="button" nzSize="large" (click)="handleSkip()" [disabled]="isLoading()">
+          <button
+            nz-button
+            type="button"
+            nzSize="large"
+            (click)="handleSkip()"
+            [disabled]="isLoading()"
+          >
             {{ 'PROFILE.DO_IT_LATER' | translate }}
           </button>
         </div>
@@ -60,5 +116,3 @@
     </div>
   </div>
 </div>
-
-

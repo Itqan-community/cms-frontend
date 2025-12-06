@@ -2,7 +2,7 @@
   <app-breadcrumb />
 
   <!-- <nz-spin [nzSpinning]="loading()" nzSize="large"> -->
-    @if (asset()) {
+  @if (asset()) {
     <div class="asset-details-content">
       <!-- Main Content -->
       <div class="main-content">
@@ -38,7 +38,7 @@
             <i class="bx bx-cursor"></i>
             <h3 class="card-title">{{ 'UI.RESOURCE_ACTIONS' | translate }}</h3>
           </div>
-          
+
           <div class="card-content">
             <div class="actions-list">
               <a routerLink="/content-standards">
@@ -53,11 +53,22 @@
                   {{ 'GALLERY.VIEW_LICENSE' | translate }}
                 </button>
               </a>
-              <button nz-button nzBlock class="download-button-secondary" (click)="downloadOriginalResource()">
+              <button
+                nz-button
+                nzBlock
+                class="download-button-secondary"
+                (click)="downloadOriginalResource()"
+              >
                 {{ 'UI.DOWNLOAD_ORIGINAL_RESOURCE' | translate }}
                 <i class="bx bx-cloud-download"></i>
               </button>
-              <button nz-button nzType="primary" nzBlock class="download-button-primary" (click)="downloadResource()">
+              <button
+                nz-button
+                nzType="primary"
+                nzBlock
+                class="download-button-primary"
+                (click)="downloadResource()"
+              >
                 {{ 'UI.DOWNLOAD_RESOURCE' | translate }}
                 <i class="bx bx-cloud-download"></i>
               </button>
@@ -71,7 +82,7 @@
             <i class="bx bx-book-open"></i>
             <h3 class="card-title">{{ 'UI.PUBLISHER_LABEL' | translate }}</h3>
           </div>
-          
+
           <div class="card-content">
             <a [routerLink]="['/publisher', asset()!.publisher.id]" class="publisher-link">
               {{ asset()!.publisher.name }}
@@ -86,7 +97,7 @@
             <i class="bx bx-file-detail"></i>
             <h3 class="card-title">{{ 'UI.LICENSE_INFO' | translate }}</h3>
           </div>
-          
+
           <div class="card-content">
             <p class="license-name">{{ asset()!.license }}</p>
             <app-license-tag [license]="getLicenseType(asset()!.license)" />
@@ -94,7 +105,7 @@
         </div>
       </div>
     </div>
-    }
+  }
   <!-- </nz-spin> -->
 
   <!-- Access Request Modal -->
@@ -104,22 +115,33 @@
     [nzOkText]="'ACCESS_REQUEST.PROCEED' | translate"
     [nzCancelText]="'COMMON.CANCEL' | translate"
     (nzOnCancel)="handleModalCancel()"
-    (nzOnOk)="handleModalOk()">
+    (nzOnOk)="handleModalOk()"
+  >
     <div *nzModalContent>
       <p class="modal-caption">{{ asset()?.name }}</p>
-      
+
       <form [formGroup]="accessRequestForm" nz-form>
         <nz-form-item>
           <nz-form-label [nzRequired]="true">
             {{ 'ACCESS_REQUEST.USAGE_LABEL' | translate }}
           </nz-form-label>
-          <nz-form-control 
-            [nzErrorTip]="accessRequestForm.get('intended_use')?.hasError('required') && accessRequestForm.get('intended_use')?.touched ? ('FORMS.VALIDATION.REQUIRED' | translate) : ''">
+          <nz-form-control
+            [nzErrorTip]="
+              accessRequestForm.get('intended_use')?.hasError('required') &&
+              accessRequestForm.get('intended_use')?.touched
+                ? ('FORMS.VALIDATION.REQUIRED' | translate)
+                : ''
+            "
+          >
             <nz-select
               formControlName="intended_use"
-              [nzPlaceHolder]="'ACCESS_REQUEST.USAGE_PLACEHOLDER' | translate">
+              [nzPlaceHolder]="'ACCESS_REQUEST.USAGE_PLACEHOLDER' | translate"
+            >
               @for (option of usageOptions; track option.value) {
-                <nz-option [nzValue]="option.value" [nzLabel]="('ACCESS_REQUEST.USAGE_OPTIONS.' + option.value | translate)"></nz-option>
+                <nz-option
+                  [nzValue]="option.value"
+                  [nzLabel]="'ACCESS_REQUEST.USAGE_OPTIONS.' + option.value | translate"
+                ></nz-option>
               }
             </nz-select>
           </nz-form-control>
@@ -129,13 +151,20 @@
           <nz-form-label [nzRequired]="true">
             {{ 'ACCESS_REQUEST.REASON_LABEL' | translate }}
           </nz-form-label>
-          <nz-form-control 
-            [nzErrorTip]="accessRequestForm.get('purpose')?.hasError('required') && accessRequestForm.get('purpose')?.touched ? ('FORMS.VALIDATION.REQUIRED' | translate) : ''">
+          <nz-form-control
+            [nzErrorTip]="
+              accessRequestForm.get('purpose')?.hasError('required') &&
+              accessRequestForm.get('purpose')?.touched
+                ? ('FORMS.VALIDATION.REQUIRED' | translate)
+                : ''
+            "
+          >
             <textarea
               nz-input
               formControlName="purpose"
               [nzAutosize]="{ minRows: 3, maxRows: 3 }"
-              [placeholder]="'ACCESS_REQUEST.REASON_PLACEHOLDER' | translate">
+              [placeholder]="'ACCESS_REQUEST.REASON_PLACEHOLDER' | translate"
+            >
             </textarea>
           </nz-form-control>
         </nz-form-item>
@@ -151,16 +180,21 @@
     [nzCancelText]="'COMMON.CANCEL' | translate"
     [nzOkDisabled]="!canConfirmLicense()"
     (nzOnCancel)="closeLicenseModal()"
-    (nzOnOk)="handleLicenseConfirm()">
+    (nzOnOk)="handleLicenseConfirm()"
+  >
     <div *nzModalContent>
       <div class="license-modal-content">
         <div class="license-header">
-          <p class="license-subtitle">{{ asset()?.name }} - {{ asset()?.license }} {{ 'ACCESS_REQUEST.LICENSE_INFO' | translate }}</p>
+          <p class="license-subtitle">
+            {{ asset()?.name }} - {{ asset()?.license }}
+            {{ 'ACCESS_REQUEST.LICENSE_INFO' | translate }}
+          </p>
         </div>
-        
+
         <div class="license-card">
           <div class="license-terms-scroll" (scroll)="handleLicenseScroll($event)">
-            <pre class="license-text">اتفاقية الترخيص لـ {{ asset()?.name }}
+            <pre class="license-text">
+اتفاقية الترخيص لـ {{ asset()?.name }}
 
 نوع الترخيص: {{ asset()?.license }}
 
@@ -187,7 +221,8 @@
 ينتهي هذا الترخيص تلقائياً إذا انتهكت أي شروط.
 عند الإنهاء، يجب عليك التوقف عن جميع الاستخدامات وحذف جميع النسخ.
 
-بالنقر على "تأكيد"، فإنك تقر بأنك قد قرأت ووافقت على هذه الشروط.</pre>
+بالنقر على "تأكيد"، فإنك تقر بأنك قد قرأت ووافقت على هذه الشروط.</pre
+            >
           </div>
           @if (showScrollHint) {
             <div class="license-scroll-hint">

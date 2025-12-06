@@ -28,7 +28,7 @@ const refreshTokenSubject = new BehaviorSubject<string | null>(null);
  */
 export function authErrorInterceptor(
   req: HttpRequest<unknown>,
-  next: HttpHandlerFn,
+  next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> {
   const authService = inject(AuthService);
   const router = inject(Router);
@@ -53,7 +53,7 @@ export function authErrorInterceptor(
 
       // For other errors, pass them through
       return throwError(() => error);
-    }),
+    })
   );
 }
 
@@ -64,7 +64,7 @@ function handle401Or403Error(
   req: HttpRequest<unknown>,
   next: HttpHandlerFn,
   authService: AuthService,
-  router: Router,
+  router: Router
 ): Observable<HttpEvent<unknown>> {
   // Skip refresh logic if the request itself is a token refresh attempt
   if (req.url.includes('/auth/token/refresh')) {
@@ -112,7 +112,7 @@ function handle401Or403Error(
         });
 
         return throwError(() => error);
-      }),
+      })
     );
   } else {
     // If already refreshing, queue this request until refresh completes
@@ -122,7 +122,7 @@ function handle401Or403Error(
       switchMap((token) => {
         // Retry the request with the new token
         return next(addAuthHeader(req, token!));
-      }),
+      })
     );
   }
 }

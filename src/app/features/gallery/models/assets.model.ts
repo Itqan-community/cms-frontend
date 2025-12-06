@@ -1,21 +1,21 @@
-import { Categories } from "../../../core/enums/categories.enum";
-import { Licenses } from "../../../core/enums/licenses.enum";
+import { Categories } from '../../../core/enums/categories.enum';
+import { Licenses } from '../../../core/enums/licenses.enum';
 
 export interface ApiAssets {
-  results: Asset[],
+  results: Asset[];
   count: number;
 }
 
 export interface Asset {
-  id: number,
-  category: Categories,
-  name: string,
-  description: string,
+  id: number;
+  category: Categories;
+  name: string;
+  description: string;
   publisher: {
-    id: number,
-    name: string
-  },
-  license: Licenses
+    id: number;
+    name: string;
+  };
+  license: Licenses;
 }
 
 export interface AssetDetails {

@@ -7,13 +7,17 @@
   border-radius: 20px; // rounded-[20px]
   padding: 16px 0; // py-4
   background: white;
-  box-shadow: 0px 4px 6px -4px rgba(0,0,0,0.1), 0px 10px 15px -3px rgba(0,0,0,0.1);
+  box-shadow:
+    0px 4px 6px -4px rgba(0, 0, 0, 0.1),
+    0px 10px 15px -3px rgba(0, 0, 0, 0.1);
   transition: box-shadow 0.3s ease;
-  
+
   &:hover {
-    box-shadow: 0px 8px 10px -6px rgba(0,0,0,0.1), 0px 16px 20px -5px rgba(0,0,0,0.1);
+    box-shadow:
+      0px 8px 10px -6px rgba(0, 0, 0, 0.1),
+      0px 16px 20px -5px rgba(0, 0, 0, 0.1);
   }
-  
+
   &__header {
     display: flex;
     align-items: center;
@@ -33,14 +37,14 @@
     display: flex;
     flex-direction: column;
     min-height: 0; // Allow flex item to shrink below content size
-    
+
     .content-wrapper {
       display: flex;
       flex-direction: column;
       height: 100%;
       gap: 16px; // gap-4
       min-height: 0; // Allow flex item to shrink
-      
+
       .main-content {
         flex: 1;
         display: flex;
@@ -48,33 +52,33 @@
         justify-content: space-between;
         gap: 24px; // Reduced gap to fit better
         min-height: 0; // Allow flex item to shrink
-        
+
         .text-content {
           h3 {
-            font-size: 18px;              // text-lg
-            font-weight: 600;             // font-semibold
+            font-size: 18px; // text-lg
+            font-weight: 600; // font-semibold
             color: var(--color-neutral-600);
-            margin-bottom: 8px;           // mb-2
-            display: -webkit-box;         // line-clamp-2 (Webkit)
-            -webkit-line-clamp: 2;        // line-clamp-2
-            line-clamp: 2;                // Standard line-clamp
+            margin-bottom: 8px; // mb-2
+            display: -webkit-box; // line-clamp-2 (Webkit)
+            -webkit-line-clamp: 2; // line-clamp-2
+            line-clamp: 2; // Standard line-clamp
             -webkit-box-orient: vertical; // line-clamp-2
-            overflow: hidden;             // Prevents overflow
-            text-overflow: ellipsis;      // Shows ellipsis on overflow
+            overflow: hidden; // Prevents overflow
+            text-overflow: ellipsis; // Shows ellipsis on overflow
           }
           p {
             color: var(--color-neutral-400); // text-muted-foreground
-            font-size: 14px;                 // text-sm
-            margin-bottom: 16px;             // mb-4
-            display: -webkit-box;            // line-clamp-3 (Webkit)
-            -webkit-line-clamp: 3;           // line-clamp-3
-            line-clamp: 3;                   // Standard line-clamp
-            -webkit-box-orient: vertical;    // line-clamp-3
+            font-size: 14px; // text-sm
+            margin-bottom: 16px; // mb-4
+            display: -webkit-box; // line-clamp-3 (Webkit)
+            -webkit-line-clamp: 3; // line-clamp-3
+            line-clamp: 3; // Standard line-clamp
+            -webkit-box-orient: vertical; // line-clamp-3
             overflow: hidden;
             text-overflow: ellipsis;
           }
         }
-        
+
         .publisher-info {
           flex-shrink: 0; // Don't shrink publisher info
           .publisher-text {
@@ -82,14 +86,14 @@
             color: var(--color-neutral-400);
             display: flex;
             flex-direction: column;
-            
+
             .label {
               font-weight: 500;
             }
 
             a {
               max-width: max-content;
-              
+
               &:hover {
                 text-decoration: underline;
               }
@@ -97,7 +101,7 @@
           }
         }
       }
-      
+
       .button-container {
         flex-shrink: 0; // Don't shrink button
         margin-top: auto; // mt-auto
