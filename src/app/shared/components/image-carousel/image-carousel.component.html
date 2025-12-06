@@ -1,11 +1,11 @@
 @if (images().length > 0) {
-<nz-carousel nzEffect="fade" nzArrows="true">
-  @for (image of images(); track image) {
-  <div nz-carousel-content>
-    <a href="{{ image }}" target="_blank">
-      <img [src]="image" [alt]="image" />
-    </a>
-  </div>
-  }
-</nz-carousel>
+  <nz-carousel nzEffect="fade" nzArrows="true">
+    @for (image of images(); track image) {
+      <div nz-carousel-content>
+        <a href="{{ image }}" target="_blank">
+          <img [src]="image" [alt]="image" />
+        </a>
+      </div>
+    }
+  </nz-carousel>
 }

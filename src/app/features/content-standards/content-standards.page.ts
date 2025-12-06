@@ -8,8 +8,6 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule, TranslateModule, BreadcrumbComponent],
   templateUrl: './content-standards.page.html',
-  styleUrls: ['./content-standards.page.less']
+  styleUrls: ['./content-standards.page.less'],
 })
 export class UsageStandardsPage {}
-
-

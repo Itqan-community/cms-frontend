@@ -2,12 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
+adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
 
 ### Added
+
 - Upcoming features will be listed here
 
 ---
@@ -15,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2025-01-XX
 
 ### Added
+
 - **Quranic Asset Management System**
   - Gallery view for browsing Quranic content
   - Asset details pages with comprehensive information
@@ -48,6 +50,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Issue and PR templates
 
 ### Tech Stack
+
 - Angular 20.3.7
 - TypeScript 5.9.2
 - Ng-Zorro (Ant Design) 20.3.1
@@ -63,21 +66,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### [Version] - YYYY-MM-DD
 
 #### Added
+
 - New features
 
 #### Changed
+
 - Changes in existing functionality
 
 #### Deprecated
+
 - Soon-to-be removed features
 
 #### Removed
+
 - Removed features
 
 #### Fixed
+
 - Bug fixes
 
 #### Security
+
 - Security updates
 
 ---
@@ -88,4 +97,3 @@ Versioning Guidelines:
 - MINOR version for backwards-compatible functionality additions
 - PATCH version for backwards-compatible bug fixes
 -->
-

@@ -5,6 +5,7 @@
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit"
   },
+  "prettier.useEditorConfig": true,
   "[typescript]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },

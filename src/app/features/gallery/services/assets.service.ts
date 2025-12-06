@@ -4,14 +4,14 @@ import { environment } from '../../../../environments/environment';
 import { ApiAssets, AssetDetails } from '../models/assets.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AssetsService {
   private readonly http = inject(HttpClient);
   private readonly BASE_URL = environment.API_BASE_URL;
 
   /**
-   * Get assets 
+   * Get assets
    * @returns {Observable<ApiAssets>}
    * @description Get assets list, filtered by categories, search query and licenses
    * @example

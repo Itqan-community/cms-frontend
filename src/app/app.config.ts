@@ -25,10 +25,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideNzI18n(ar_EG),
     provideAnimationsAsync(),
-    provideHttpClient(withInterceptors([
-      headersInterceptor,
-      authErrorInterceptor
-    ])),
+    provideHttpClient(withInterceptors([headersInterceptor, authErrorInterceptor])),
     // ngx-translate setup
     provideTranslateService({
       loader: provideTranslateHttpLoader({

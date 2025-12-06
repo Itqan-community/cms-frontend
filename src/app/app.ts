@@ -8,13 +8,13 @@ import { HeaderComponent } from './shared/components/header/header.component';
   selector: 'app-root',
   imports: [RouterOutlet, HeaderComponent],
   templateUrl: './app.html',
-  styleUrl: './app.less'
+  styleUrl: './app.less',
 })
 export class App {
   private translate = inject(TranslateService);
   private titleService = inject(Title);
   protected router = inject(Router);
-  
+
   protected readonly title = signal('ITQAN | إتقان');
 
   constructor() {
@@ -49,7 +49,8 @@ export class App {
   }
 
   private setAppTitle(lang: string) {
-    const title = lang === 'ar' ? 'إتقان | نظام إدارة المحتوى' : 'ITQAN | Content Management System';
+    const title =
+      lang === 'ar' ? 'إتقان | نظام إدارة المحتوى' : 'ITQAN | Content Management System';
     this.titleService.setTitle(title);
   }
 }

@@ -69,7 +69,7 @@ export class PublisherDetailsPage implements OnInit {
         this.id,
         this.categoriesSelection(),
         this.searchQuery(),
-        this.licensesSelection(),
+        this.licensesSelection()
       )
       .subscribe({
         next: (response) => this.assets.set(response.results),

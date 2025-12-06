@@ -32,17 +32,20 @@ assignees: ''
 ## Environment
 
 **Desktop:**
+
 - OS: [e.g. Windows 10, macOS 13.0]
 - Browser: [e.g. Chrome 120, Firefox 121]
 - Version: [e.g. 22]
 
 **Mobile:**
+
 - Device: [e.g. iPhone 14, Samsung Galaxy S23]
 - OS: [e.g. iOS 17.0, Android 14]
 - Browser: [e.g. Safari, Chrome]
 - Version: [e.g. 22]
 
 **Application:**
+
 - Environment: [e.g. Development, Staging, Production]
 - URL: [e.g. https://develop.cms.itqan.dev]
 - Angular Version: [e.g. 20.3.7]
@@ -71,4 +74,3 @@ Paste console errors here
 ## Related Issues
 
 <!-- Optional: Link to related issues -->
-

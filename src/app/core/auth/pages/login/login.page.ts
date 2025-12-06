@@ -54,7 +54,7 @@ export class LoginPage {
         error: (error) => {
           this.authService.isLoading.set(false);
           this.errorMessage.set(
-            getErrorMessage(error) || this.translate.instant('AUTH.LOGIN.ERRORS.LOGIN_FAILED'),
+            getErrorMessage(error) || this.translate.instant('AUTH.LOGIN.ERRORS.LOGIN_FAILED')
           );
         },
       });

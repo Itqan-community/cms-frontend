@@ -35,26 +35,9 @@
     "format:check": "prettier --check .",
     "prepare": "husky install"
   },
-  "prettier": {
-    "printWidth": 100,
-    "singleQuote": true,
-    "overrides": [
-      {
-        "files": "*.html",
-        "options": {
-          "parser": "angular"
-        }
-      }
-    ]
-  },
   "lint-staged": {
-    "*.{ts,js}": [
-      "prettier --write",
-      "eslint --fix"
-    ],
-    "*.{json,html,css,less,md}": [
-      "prettier --write"
-    ]
+    "*.{ts,js}": ["eslint --fix", "prettier --write"],
+    "*.{json,html,css,less,md}": ["prettier --write"]
   },
   "private": true,
   "dependencies": {
@@ -81,6 +64,7 @@
     "@types/jasmine": "~5.1.0",
     "angular-eslint": "21.0.0",
     "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
     "husky": "^9.0.0",
     "jasmine-core": "~5.9.0",
     "karma": "~6.4.0",

@@ -2,34 +2,128 @@
   min-height: 100vh;
   background-color: var(--color-bg);
 
-  &__container { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 48px 16px; }
-  &__card { max-width: 512px; width: 100%; }
-  &__logo { text-align: center; margin-bottom: 12px; }
-  &__welcome { text-align: center; margin-bottom: 24px; }
-  &__title { font-weight: 700; color: #333333; font-size: 24px; }
-  &__subtitle { color: #333333; font-size: 16px; }
+  &__container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+  }
+  &__card {
+    max-width: 512px;
+    width: 100%;
+  }
+  &__logo {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  &__welcome {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  &__title {
+    font-weight: 700;
+    color: #333333;
+    font-size: 24px;
+  }
+  &__subtitle {
+    color: #333333;
+    font-size: 16px;
+  }
 
-  &__form { display: flex; flex-direction: column; row-gap: 24px; }
-  &__alert { padding: 12px; border-radius: var(--radius-lg); border: 1px solid #fecaca; background-color: #fef2f2; color: #dc2626; font-size: 14px; text-align: center; }
-  &__required { color: #ef4444; }
-  &__error { color: #ef4444; margin: 0; }
+  &__form {
+    display: flex;
+    flex-direction: column;
+    row-gap: 24px;
+  }
+  &__alert {
+    padding: 12px;
+    border-radius: var(--radius-lg);
+    border: 1px solid #fecaca;
+    background-color: #fef2f2;
+    color: #dc2626;
+    font-size: 14px;
+    text-align: center;
+  }
+  &__required {
+    color: #ef4444;
+  }
+  &__error {
+    color: #ef4444;
+    margin: 0;
+  }
 
-  &__field { display: flex; flex-direction: column; row-gap: 8px; }
-  &__label { font-size: 14px; font-weight: 500; color: #333333; }
-  &__input, &__textarea { width: 100%; background-color: #fff; border: 1px solid #d1d5db; border-radius: var(--radius-lg); padding: 8px 16px; font-size: 14px; }
-  &__textarea { resize: none; min-height: 96px; }
-  &__input::placeholder, &__textarea::placeholder { color: #9ca3af; }
-  &__input:focus, &__textarea:focus { outline: none; border-color: transparent; box-shadow: 0 0 0 2px var(--color-primary-700); }
-  &__input--invalid { border-color: #ef4444 !important; }
+  &__field {
+    display: flex;
+    flex-direction: column;
+    row-gap: 8px;
+  }
+  &__label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333333;
+  }
+  &__input,
+  &__textarea {
+    width: 100%;
+    background-color: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: var(--radius-lg);
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+  &__textarea {
+    resize: none;
+    min-height: 96px;
+  }
+  &__input::placeholder,
+  &__textarea::placeholder {
+    color: #9ca3af;
+  }
+  &__input:focus,
+  &__textarea:focus {
+    outline: none;
+    border-color: transparent;
+    box-shadow: 0 0 0 2px var(--color-primary-700);
+  }
+  &__input--invalid {
+    border-color: #ef4444 !important;
+  }
 
-  &__actions { display: flex; flex-direction: column; row-gap: 12px; }
+  &__actions {
+    display: flex;
+    flex-direction: column;
+    row-gap: 12px;
+  }
 
-  &__spinner { width: 16px; height: 16px; border-radius: 9999px; border: 2px solid rgba(255,255,255,.4); border-top-color: #fff; animation: complete-spinner .8s linear infinite; }
+  &__spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 9999px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #fff;
+    animation: complete-spinner 0.8s linear infinite;
+  }
 
-  &__skip { width: 100%; height: 40px; background-color: #fff; border: 1px solid #d1d5db; border-radius: var(--radius-lg); font-size: 14px; font-weight: 500; }
-  &__skip:hover { background-color: var(--color-neutral-100); }
+  &__skip {
+    width: 100%;
+    height: 40px;
+    background-color: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: var(--radius-lg);
+    font-size: 14px;
+    font-weight: 500;
+  }
+  &__skip:hover {
+    background-color: var(--color-neutral-100);
+  }
 }
 
-@keyframes complete-spinner { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-
+@keyframes complete-spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

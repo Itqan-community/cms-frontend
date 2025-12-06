@@ -1,6 +1,7 @@
 # Contributing to CMS Frontend
 
-Thank you for your interest in contributing to the CMS Frontend project! We welcome contributions from the community.
+Thank you for your interest in contributing to the CMS Frontend project! We welcome contributions
+from the community.
 
 ## Table of Contents
 
@@ -14,7 +15,8 @@ Thank you for your interest in contributing to the CMS Frontend project! We welc
 
 ## Code of Conduct
 
-This project adheres to a Code of Conduct that all contributors are expected to follow. Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before contributing.
+This project adheres to a Code of Conduct that all contributors are expected to follow. Please read
+[CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before contributing.
 
 ## Automated Quality Checks
 
@@ -47,7 +49,8 @@ This project uses automated tools to maintain code quality and consistency:
 
 1. Fork the repository
 2. Clone your fork: `git clone https://github.com/your-username/cms-frontend.git`
-3. Add the upstream repository: `git remote add upstream https://github.com/Itqan-community/cms-frontend.git`
+3. Add the upstream repository:
+   `git remote add upstream https://github.com/Itqan-community/cms-frontend.git`
 
 ## Development Setup
 
@@ -69,7 +72,8 @@ npm start
 # The application will be available at http://localhost:4200
 ```
 
-**Note:** The `npm install` command automatically runs `husky install` to set up git hooks. These hooks will help you maintain code quality.
+**Note:** The `npm install` command automatically runs `husky install` to set up git hooks. These
+hooks will help you maintain code quality.
 
 ### Environment Configuration
 
@@ -84,7 +88,8 @@ The project uses multiple environments:
 
 ### Reporting Bugs
 
-- Check if the bug has already been reported in [Issues](https://github.com/Itqan-community/cms-frontend/issues)
+- Check if the bug has already been reported in
+  [Issues](https://github.com/Itqan-community/cms-frontend/issues)
 - If not, create a new issue with:
   - Clear title and description
   - Steps to reproduce
@@ -260,7 +265,8 @@ test123
 
 **This is automatically enforced by commitlint.**
 
-All commits must follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
+All commits must follow the [Conventional Commits](https://www.conventionalcommits.org/)
+specification:
 
 ```
 <type>(<scope>): <subject>
@@ -358,7 +364,8 @@ npm run e2e
 
 ## Questions or Need Help?
 
-- Open a discussion in [GitHub Discussions](https://github.com/Itqan-community/cms-frontend/discussions)
+- Open a discussion in
+  [GitHub Discussions](https://github.com/Itqan-community/cms-frontend/discussions)
 - Visit our [Community Forum](https://community.itqan.dev)
 - Connect with us on [LinkedIn](https://www.linkedin.com/company/itqan-community/)
 

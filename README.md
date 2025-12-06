@@ -1,6 +1,9 @@
 # Itqan CMS Frontend
 
-> An open-source Quranic Content Management System frontend built with Angular 20. Itqan CMS empowers developers and publishers by providing a comprehensive platform to access, manage, and distribute Quranic assets with proper licensing. Built for the global Islamic tech community to create innovative Quranic applications and services.
+> An open-source Quranic Content Management System frontend built with Angular 20. Itqan CMS
+> empowers developers and publishers by providing a comprehensive platform to access, manage, and
+> distribute Quranic assets with proper licensing. Built for the global Islamic tech community to
+> create innovative Quranic applications and services.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Angular](https://img.shields.io/badge/Angular-20.3-red.svg)](https://angular.dev)
@@ -9,11 +12,16 @@
 
 ## 🌟 Features
 
-- **Quranic Asset Management** - Browse, search, and manage Quranic content including recitations, translations, tafsir, and more
-- **Publisher Portal** - Empowers publishers to safely publish and manage their Quranic content with proper licensing
-- **Developer-Friendly API** - Provides structured access to Quranic assets for building apps and services
-- **Content Standards** - Comprehensive guidelines ensuring quality and authenticity of Quranic content
-- **License Management** - Track, manage, and enforce content licenses to protect intellectual property
+- **Quranic Asset Management** - Browse, search, and manage Quranic content including recitations,
+  translations, tafsir, and more
+- **Publisher Portal** - Empowers publishers to safely publish and manage their Quranic content with
+  proper licensing
+- **Developer-Friendly API** - Provides structured access to Quranic assets for building apps and
+  services
+- **Content Standards** - Comprehensive guidelines ensuring quality and authenticity of Quranic
+  content
+- **License Management** - Track, manage, and enforce content licenses to protect intellectual
+  property
 - **Internationalization** - Multi-language support (English & Arabic) with RTL support
 - **Authentication & Authorization** - Secure user management with role-based access control
 - **Responsive Design** - Modern, accessible UI built with Ng-Zorro (Ant Design for Angular)
@@ -199,7 +207,8 @@ These hooks are automatically installed when you run `npm install`.
 
 ## 🤝 Contributing
 
-We welcome contributions from the community! Please read our [Contributing Guide](CONTRIBUTING.md) to get started.
+We welcome contributions from the community! Please read our [Contributing Guide](CONTRIBUTING.md)
+to get started.
 
 ### Development Workflow
 
@@ -227,7 +236,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Contributors
 
-Thanks to all our contributors! See the [Contributors](https://github.com/Itqan-community/cms-frontend/graphs/contributors) page.
+Thanks to all our contributors! See the
+[Contributors](https://github.com/Itqan-community/cms-frontend/graphs/contributors) page.
 
 ## 🤝 Community
 

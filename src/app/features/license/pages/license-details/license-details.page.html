@@ -4,13 +4,9 @@
   <div class="license-content">
     <h1 class="license-code">{{ licenseId }}</h1>
     <h2 class="license-description">{{ getLicenseTranslationKey(licenseId) | translate }}</h2>
-    
+
     <div class="license-actions">
-      <a 
-        [href]="getLicenseUrl(licenseId)" 
-        target="_blank" 
-        rel="noopener noreferrer"
-      >
+      <a [href]="getLicenseUrl(licenseId)" target="_blank" rel="noopener noreferrer">
         <button nz-button nzType="primary" nzBlock class="license-button">
           <i class="bx bx-arrow-out-up-right-square"></i>
           {{ 'LICENSE.VIEW_DOCUMENT' | translate }}
@@ -19,4 +15,3 @@
     </div>
   </div>
 </div>
-

@@ -11,11 +11,11 @@ import {
   RefreshTokenRequest,
   RefreshTokenResponse,
   UpdateProfileRequest,
-  UpdateProfileResponse
+  UpdateProfileResponse,
 } from '../models/auth.model';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -52,39 +52,37 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<AuthResponse> {
     this.isLoading.set(true);
 
-    return this.http.post<AuthResponse>(`${this.API_BASE_URL}/auth/login/`, credentials)
-      .pipe(
-        tap(response => {
-          this.setAuthData(response);
-          this.isAuthenticated.set(true);
-          this.currentUser.set(response.user);
-          this.authStateSubject.next(true);
-          this.isLoading.set(false);
-        }),
-        catchError(error => {
-          this.isLoading.set(false);
-          throw error;
-        })
-      );
+    return this.http.post<AuthResponse>(`${this.API_BASE_URL}/auth/login/`, credentials).pipe(
+      tap((response) => {
+        this.setAuthData(response);
+        this.isAuthenticated.set(true);
+        this.currentUser.set(response.user);
+        this.authStateSubject.next(true);
+        this.isLoading.set(false);
+      }),
+      catchError((error) => {
+        this.isLoading.set(false);
+        throw error;
+      })
+    );
   }
 
   register(userData: RegisterRequest): Observable<AuthResponse> {
     this.isLoading.set(true);
 
-    return this.http.post<AuthResponse>(`${this.API_BASE_URL}/auth/register/`, userData)
-      .pipe(
-        tap(response => {
-          this.setAuthData(response);
-          this.isAuthenticated.set(true);
-          this.currentUser.set(response.user);
-          this.authStateSubject.next(true);
-          this.isLoading.set(false);
-        }),
-        catchError(error => {
-          this.isLoading.set(false);
-          throw error;
-        })
-      );
+    return this.http.post<AuthResponse>(`${this.API_BASE_URL}/auth/register/`, userData).pipe(
+      tap((response) => {
+        this.setAuthData(response);
+        this.isAuthenticated.set(true);
+        this.currentUser.set(response.user);
+        this.authStateSubject.next(true);
+        this.isLoading.set(false);
+      }),
+      catchError((error) => {
+        this.isLoading.set(false);
+        throw error;
+      })
+    );
   }
 
   logout(): Observable<void> {
@@ -104,8 +102,8 @@ export class AuthService {
     //       })
     //     );
     // } else {
-      this.performLogout();
-      return of();
+    this.performLogout();
+    return of();
     // }
   }
 
@@ -125,17 +123,18 @@ export class AuthService {
     }
 
     const refreshData: RefreshTokenRequest = {
-      refresh: refreshToken
+      refresh: refreshToken,
     };
 
-    return this.http.post<RefreshTokenResponse>(`${this.API_BASE_URL}/auth/token/refresh/`, refreshData)
+    return this.http
+      .post<RefreshTokenResponse>(`${this.API_BASE_URL}/auth/token/refresh/`, refreshData)
       .pipe(
-        tap(response => {
+        tap((response) => {
           // Update both access and refresh tokens
           this.setToken(response.access);
           this.setRefreshToken(response.refresh);
         }),
-        catchError(error => {
+        catchError((error) => {
           this.performLogout();
           throw error;
         })
@@ -153,16 +152,17 @@ export class AuthService {
    * Update user profile
    */
   updateProfile(profileData: UpdateProfileRequest): Observable<UpdateProfileResponse> {
-    return this.http.put<UpdateProfileResponse>(`${this.API_BASE_URL}/auth/profile/`, profileData)
+    return this.http
+      .put<UpdateProfileResponse>(`${this.API_BASE_URL}/auth/profile/`, profileData)
       .pipe(
-        tap(response => {
+        tap((response) => {
           // Update the current user if profile was completed
           const currentUser = this.currentUser();
           if (currentUser && response.is_profile_completed) {
             const updatedUser = {
               ...currentUser,
               profile_completed: response.is_profile_completed,
-              ...profileData
+              ...profileData,
             };
             this.currentUser.set(updatedUser);
             this.setUser(updatedUser);

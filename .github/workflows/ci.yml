@@ -9,33 +9,33 @@ on:
 jobs:
   lint-and-test:
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         node-version: [20.x]
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Check code formatting
         run: npm run format:check
-      
+
       - name: Build project
         run: npm run build -- --configuration=production
-      
+
       - name: Run tests
         run: npm run test -- --browsers=ChromeHeadless --watch=false --code-coverage
-      
+
       - name: Upload coverage reports
         uses: codecov/codecov-action@v3
         if: always()
@@ -47,25 +47,24 @@ jobs:
 
   build-check:
     runs-on: ubuntu-latest
-    
+
     strategy:
       matrix:
         node-version: [20.x]
-        environment: [development, staging, production]
-    
+        environment: [develop, staging, production]
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Build ${{ matrix.environment }}
         run: npm run build -- --configuration=${{ matrix.environment }}
-
