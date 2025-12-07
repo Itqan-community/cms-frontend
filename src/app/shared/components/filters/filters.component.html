@@ -1,7 +1,13 @@
 @if (isMobileView()) {
   <ng-container *ngTemplateOutlet="searchFilter"></ng-container>
 
-  <button nz-button nzType="text" class="filters__toggle-btn" (click)="toggleFiltersDrawer()">
+  <button
+    nz-button
+    nzType="text"
+    class="filters__toggle-btn"
+    (click)="toggleFiltersDrawer()"
+    [attr.aria-label]="'UI.FILTERS' | translate"
+  >
     <i class="bx bx-filter"></i>
     {{ 'UI.FILTERS' | translate }}
   </button>

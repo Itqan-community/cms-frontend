@@ -11,15 +11,7 @@ import { ViewportService } from '../../../core/services/viewport.service';
 @Component({
   selector: 'app-license-tag',
   standalone: true,
-  imports: [
-    NgClass,
-    NgTemplateOutlet,
-    NzTagModule,
-    NzIconModule,
-    NzPopoverModule,
-    NzDrawerModule,
-    NgTemplateOutlet,
-  ],
+  imports: [NgClass, NgTemplateOutlet, NzTagModule, NzIconModule, NzPopoverModule, NzDrawerModule],
   templateUrl: './license-tag.component.html',
   styleUrls: ['./license-tag.component.less'],
 })
