@@ -1,18 +1,28 @@
-import { Component, inject, output, signal, OnDestroy } from '@angular/core';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { NzCheckboxComponent, NzCheckboxGroupComponent } from 'ng-zorro-antd/checkbox';
-import { NzInputModule } from 'ng-zorro-antd/input';
-import { Categories } from '../../../core/enums/categories.enum';
+import { NgTemplateOutlet } from '@angular/common';
+import { Component, OnDestroy, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzCheckboxComponent, NzCheckboxGroupComponent } from 'ng-zorro-antd/checkbox';
+import { NzDrawerModule } from 'ng-zorro-antd/drawer';
+import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { Categories } from '../../../core/enums/categories.enum';
 import { Licenses } from '../../../core/enums/licenses.enum';
 import { LicenseTagComponent } from '../license-tag/license-tag.component';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+
+import { ViewportService } from '../../../core/services/viewport.service';
 
 @Component({
   selector: 'app-filters',
   imports: [
     NzInputModule,
+    NzButtonModule,
+    NzIconModule,
+    NzDrawerModule,
     TranslatePipe,
+    NgTemplateOutlet,
     NzCheckboxGroupComponent,
     NzCheckboxComponent,
     FormsModule,
@@ -23,6 +33,7 @@ import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 })
 export class FiltersComponent implements OnDestroy {
   private readonly translate = inject(TranslateService);
+  private readonly viewportService = inject(ViewportService);
   private readonly destroy$ = new Subject<void>();
   private readonly searchSubject$ = new Subject<string>();
 
@@ -68,6 +79,9 @@ export class FiltersComponent implements OnDestroy {
   licensesSelection = signal<string[]>([]);
   licensesSelectionChange = output<string[]>();
 
+  readonly isMobileView = this.viewportService.isMobile;
+  showFiltersDrawer = signal(false);
+
   constructor() {
     // Set up debounced search with 300ms delay
     this.searchSubject$
@@ -75,6 +89,12 @@ export class FiltersComponent implements OnDestroy {
       .subscribe((query) => {
         this.searchQueryChange.emit(query);
       });
+  }
+
+  // ngOnInit removed as it was empty
+
+  toggleFiltersDrawer() {
+    this.showFiltersDrawer.update((v) => !v);
   }
 
   onSearchQueryChange(event: string) {

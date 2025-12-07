@@ -153,6 +153,7 @@
     "DETAILS_DESC": "This is a placeholder for asset details."
   },
   "UI": {
+    "FILTERS": "Filters",
     "SEARCH_IN_RESOURCES": "Search in resources",
     "CATEGORY_FILTERS": "Categories",
     "LICENSE_FILTERS": "Licenses (CreativeCommons)",
