@@ -153,6 +153,7 @@
     "DETAILS_DESC": "نص مؤقت لتفاصيل الأصل."
   },
   "UI": {
+    "FILTERS": "تصفية",
     "SEARCH_IN_RESOURCES": "البحث في الموارد",
     "CATEGORY_FILTERS": "الفئات",
     "LICENSE_FILTERS": "التراخيص (CreativeCommons)",

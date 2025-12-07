@@ -1,5 +1,6 @@
 import { isPlatformServer } from '@angular/common';
 import { Component, inject, PLATFORM_ID, signal } from '@angular/core';
+import { ViewportService } from '../../../../core/services/viewport.service';
 import { AssetCardSkeletonComponent } from '../../../../shared/components/asset-card-skeleton/asset-card-skeleton.component';
 import { FiltersComponent } from '../../../../shared/components/filters/filters.component';
 import { Asset } from '../../models/assets.model';
@@ -15,6 +16,7 @@ import { AssetCardComponent } from '../asset-card/asset-card.component';
 export class AssetsListingComponent {
   private readonly assetsService = inject(AssetsService);
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly viewportService = inject(ViewportService);
 
   isServer = isPlatformServer(this.platformId);
 
@@ -32,7 +34,7 @@ export class AssetsListingComponent {
     if (this.isServer) {
       return [];
     }
-    const count = window.innerWidth < 768 ? 4 : 8;
+    const count = this.viewportService.isMobile() ? 4 : 8;
     return Array.from({ length: count });
   }
 

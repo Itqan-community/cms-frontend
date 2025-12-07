@@ -2,6 +2,7 @@ import { isPlatformServer } from '@angular/common';
 import { Component, inject, OnInit, PLATFORM_ID, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { ViewportService } from '../../../../core/services/viewport.service';
 import { AssetCardComponent } from '../../../../features/gallery/components/asset-card/asset-card.component';
 import { AssetCardSkeletonComponent } from '../../../../shared/components/asset-card-skeleton/asset-card-skeleton.component';
 import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/breadcrumb.component';
@@ -27,6 +28,7 @@ export class PublisherDetailsPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
 
   private readonly platformId = inject(PLATFORM_ID);
+  private readonly viewportService = inject(ViewportService);
 
   isServer = isPlatformServer(this.platformId);
 
@@ -49,7 +51,7 @@ export class PublisherDetailsPage implements OnInit {
     if (this.isServer) {
       return [];
     }
-    const count = window.innerWidth < 768 ? 4 : 8;
+    const count = this.viewportService.isMobile() ? 4 : 8;
     return Array.from({ length: count });
   }
 
