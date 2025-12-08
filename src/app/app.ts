@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { TranslateService } from '@ngx-translate/core';
 import { Router, RouterOutlet } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { WebVitalsService } from './core/services/web-vitals.service';
 import { HeaderComponent } from './shared/components/header/header.component';
 
 @Component({
@@ -14,10 +15,13 @@ export class App {
   private translate = inject(TranslateService);
   private titleService = inject(Title);
   protected router = inject(Router);
+  private readonly webVitalsService = inject(WebVitalsService);
 
   protected readonly title = signal('ITQAN | إتقان');
 
   constructor() {
+    void this.webVitalsService;
+
     const currentLang = localStorage.getItem('lang') || 'ar';
     this.translate.addLangs(['ar', 'en']);
     this.translate.setFallbackLang('ar');
