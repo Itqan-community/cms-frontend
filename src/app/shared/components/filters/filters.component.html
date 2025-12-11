@@ -85,7 +85,11 @@
               <label nz-checkbox [nzValue]="license.value" [htmlFor]="license.value">{{
                 license.label | translate
               }}</label>
-              <app-license-tag [license]="license.value" [id]="license.value" />
+              <app-license-tag
+                [license]="license.value"
+                [id]="license.value"
+                [mode]="isMobileView() ? 'inline' : 'default'"
+              />
             </div>
           }
         </nz-checkbox-group>
