@@ -1,4 +1,27 @@
-// Unified content styling for both popover and drawer
+:host {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.tag-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tag-icon,
+.toggle-icon {
+  font-size: 16px;
+  line-height: 0;
+}
+
+.toggle-icon {
+  font-size: 1.2em;
+}
+
+/* Unified content styling for popover and drawer */
 .license-content {
   max-width: 320px;
   display: flex;
@@ -17,20 +40,63 @@
   display: inline-flex;
   gap: 4px;
   align-items: center;
-  padding: 8px 0px;
+  padding: 8px 0;
   font-size: 14px;
   transition: opacity 0.2s ease;
   align-self: flex-start;
   justify-content: center;
+}
 
-  &:hover {
-    opacity: 0.7;
+.license-link:hover {
+  opacity: 0.7;
+}
+
+.license-link span {
+  text-decoration: underline;
+}
+
+.license-link i {
+  font-size: 16px;
+  margin-inline-end: 2px;
+}
+
+/* Inline details styling */
+.inline-details {
+  margin-top: 8px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  border-radius: 8px;
+  animation: slideDown 0.2s ease-out;
+  width: 100%;
+}
+
+.inline-details .license-content {
+  max-width: 100%;
+  padding: 0;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
   }
-  span {
-    text-decoration: underline;
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  i {
-    font-size: 16px;
-    margin-inline-end: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .inline-details {
+    animation: none;
+  }
+
+  .license-link,
+  .tag-label,
+  .toggle-icon,
+  .tag-icon {
+    transition: none;
+    animation: none;
   }
 }
