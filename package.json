@@ -33,8 +33,7 @@
     "lint:fix": "ng lint --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "type-check": "tsc --noEmit",
-    "prepare": "husky install"
+    "type-check": "tsc --noEmit"
   },
   "lint-staged": {
     "*.{ts,js}": ["eslint --fix", "prettier --write"],
