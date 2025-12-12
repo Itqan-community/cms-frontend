@@ -1,5 +1,6 @@
 # Node dependencies
 node_modules/
+package-lock.json
 
 # Angular and Vite cache folders
 .angular/

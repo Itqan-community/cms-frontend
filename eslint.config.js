@@ -10,6 +10,7 @@ module.exports = defineConfig([
   //
   globalIgnores([
     'node_modules/**',
+    'package-lock.json',
     '.angular/**',
     '.vite/**',
     'dist/**',
