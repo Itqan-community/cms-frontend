@@ -1,12 +1,36 @@
 // @ts-check
 
 const eslint = require('@eslint/js');
-const { defineConfig } = require('eslint/config');
+const { defineConfig, globalIgnores } = require('eslint/config');
 const tseslint = require('typescript-eslint');
 const angular = require('angular-eslint');
 const eslintConfigPrettier = require('eslint-config-prettier/flat');
 
 module.exports = defineConfig([
+  //
+  globalIgnores([
+    'node_modules/**',
+    'package-lock.json',
+    '.angular/**',
+    '.vite/**',
+    'dist/**',
+    'out-tsc/**',
+    'coverage/**',
+    '*.log',
+    '*.tmp',
+    '*.temp',
+    '*.bak',
+    '.env',
+    '.env.local',
+    '.env.*.local',
+    '.vscode/**',
+    '.idea/**',
+    '*.sublime-project',
+    '*.sublime-workspace',
+    '.DS_Store',
+    'Thumbs.db',
+  ]),
+
   // TypeScript + Angular
   {
     files: ['**/*.ts'],
