@@ -29,14 +29,17 @@
     "build:staging": "ng build --configuration staging",
     "build:develop": "ng build --configuration develop",
     "test": "ng test",
-    "lint": "ng lint",
-    "lint:fix": "ng lint --fix",
+    "lint": "eslint . --cache --concurrency=auto --max-warnings=0",
+    "lint:fix": "eslint . --fix --cache --concurrency=auto",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "type-check": "tsc --noEmit"
   },
   "lint-staged": {
-    "*.{ts,js}": ["eslint --fix", "prettier --write"],
+    "*.{ts,js}": [
+      "eslint --fix --cache --concurrency=auto",
+      "prettier --write"
+    ],
     "*.{json,html,css,less,md}": ["prettier --write"]
   },
   "private": true,
