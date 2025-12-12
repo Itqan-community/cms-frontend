@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { authGuard } from './core/auth/guards/auth.guard';
+import { guestGuard } from './core/auth/guards/guest.guard';
 
 export const routes: Routes = [
   {
@@ -8,21 +10,28 @@ export const routes: Routes = [
   },
   {
     path: 'gallery',
-    loadChildren: () => import('./features/gallery/routes').then((m) => m.GALLERY_ROUTES),
+    loadComponent: () =>
+      import('./features/gallery/pages/gallery/gallery.page').then((m) => m.GalleryPage),
   },
   {
-    path: 'publishers',
-    loadChildren: () => import('./features/publishers/routes').then((m) => m.PUBLISHERS_ROUTES),
+    path: 'gallery/asset/:id',
+    loadComponent: () =>
+      import('./features/gallery/pages/asset-details/asset-details.page').then(
+        (m) => m.AssetDetailsPage
+      ),
   },
+
   {
     path: 'login',
     loadComponent: () => import('./core/auth/pages/login/login.page').then((m) => m.LoginPage),
+    canActivate: [guestGuard],
     data: { hideHeader: true },
   },
   {
     path: 'register',
     loadComponent: () =>
       import('./core/auth/pages/register/register.page').then((m) => m.RegisterPage),
+    canActivate: [guestGuard],
     data: { hideHeader: true },
   },
   {
@@ -39,12 +48,22 @@ export const routes: Routes = [
       import('./core/auth/pages/complete-profile/complete-profile.page').then(
         (m) => m.CompleteProfilePage
       ),
+    canActivate: [authGuard],
     data: { hideHeader: true },
   },
   {
     path: 'content-standards',
-    loadChildren: () =>
-      import('./features/content-standards/routes').then((m) => m.CONTENT_STANDARDS_ROUTES),
+    loadComponent: () =>
+      import('./features/content-standards/content-standards.page').then(
+        (m) => m.UsageStandardsPage
+      ),
+  },
+  {
+    path: 'publishers',
+    loadComponent: () =>
+      import('./features/publishers/pages/publishers/publishers.page').then(
+        (m) => m.PublishersPage
+      ),
   },
   {
     path: 'publisher/:id',

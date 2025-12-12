@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
@@ -18,6 +18,7 @@ import { AuthService } from '../../services/auth.service';
 export class LoginPage {
   readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly activatedRoute = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
   private readonly translate = inject(TranslateService);
 
@@ -49,7 +50,16 @@ export class LoginPage {
 
       this.authService.login(loginData).subscribe({
         next: () => {
-          this.router.navigate(['/gallery']);
+          // Get the return URL from query parameters, default to gallery
+          const returnUrl =
+            (this.activatedRoute.snapshot.queryParams['returnUrl'] as string) || '/gallery';
+
+          // Security: Ensure returnUrl is internal (starts with /)
+          if (returnUrl.startsWith('/')) {
+            this.router.navigateByUrl(returnUrl);
+          } else {
+            this.router.navigate(['/gallery']);
+          }
         },
         error: (error) => {
           this.authService.isLoading.set(false);
