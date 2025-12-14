@@ -9,6 +9,7 @@ export interface NavigationLink {
   disabled?: boolean;
   isExternal?: boolean;
   icon?: string;
+  hidden?: boolean;
 }
 
 @Component({
@@ -19,34 +20,36 @@ export interface NavigationLink {
   template: `
     <nav class="nav-menu">
       @for (link of links(); track link.link) {
-        @if (!link.isExternal) {
-        <a
-          [routerLink]="link.link"
-          routerLinkActive="nav-menu__link--active"
-          class="nav-menu__link"
-          [ngClass]="{'nav-menu__link--disabled': link.disabled}"
-        >
-          {{ link.label | translate }}
-          @if (link.icon) {
-            <i class="nav-menu__link-icon {{ link.icon }}"></i>
+        @if (!link.hidden) {
+          @if (!link.isExternal) {
+            <a
+              [routerLink]="link.link"
+              routerLinkActive="nav-menu__link--active"
+              class="nav-menu__link"
+              [ngClass]="{ 'nav-menu__link--disabled': link.disabled }"
+            >
+              {{ link.label | translate }}
+              @if (link.icon) {
+                <i class="nav-menu__link-icon {{ link.icon }}"></i>
+              }
+            </a>
+          } @else {
+            <a
+              [href]="link.link"
+              target="_blank"
+              class="nav-menu__link"
+              [ngClass]="{ 'nav-menu__link--disabled': link.disabled }"
+            >
+              {{ link.label | translate }}
+              @if (link.icon) {
+                <i class="nav-menu__link-icon {{ link.icon }}"></i>
+              }
+            </a>
           }
-        </a>
-        } @else {
-        <a
-          [href]="link.link"
-          target="_blank"
-          class="nav-menu__link"
-          [ngClass]="{'nav-menu__link--disabled': link.disabled}"
-        >
-          {{ link.label | translate }}
-          @if (link.icon) {
-            <i class="nav-menu__link-icon {{ link.icon }}"></i>
-          }
-        </a>
         }
       }
     </nav>
-  `
+  `,
 })
 export class NavigationMenuComponent {
   links = input.required<NavigationLink[]>();

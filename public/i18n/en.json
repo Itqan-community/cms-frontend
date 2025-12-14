@@ -123,7 +123,8 @@
     "PUBLISHERS": "Publishers",
     "ABOUT": "About",
     "CONTENT_STANDARDS": "Content Standards",
-    "API_DOCS": "API Docs"
+    "API_DOCS": "API Docs",
+    "PUBLISHER_DASHBOARD": "Publisher Dashboard"
   },
   "HOME": {
     "WELCOME": "Welcome to Itqan CMS",
