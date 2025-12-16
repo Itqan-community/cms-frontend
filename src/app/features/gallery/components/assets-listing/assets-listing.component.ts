@@ -2,6 +2,7 @@ import { isPlatformServer } from '@angular/common';
 import { Component, inject, PLATFORM_ID, signal } from '@angular/core';
 import { AssetCardSkeletonComponent } from '../../../../shared/components/asset-card-skeleton/asset-card-skeleton.component';
 import { FiltersComponent } from '../../../../shared/components/filters/filters.component';
+import { getPublisherId } from '../../../../shared/utils/publisherhost.util';
 import { Asset } from '../../models/assets.model';
 import { AssetsService } from '../../services/assets.service';
 import { AssetCardComponent } from '../asset-card/asset-card.component';
@@ -17,6 +18,7 @@ export class AssetsListingComponent {
   private readonly platformId = inject(PLATFORM_ID);
 
   isServer = isPlatformServer(this.platformId);
+  publisherId = getPublisherId();
 
   assets = signal<Asset[]>([]);
   loading = signal<boolean>(false);
@@ -39,7 +41,12 @@ export class AssetsListingComponent {
   getAssets() {
     this.loading.set(true);
     this.assetsService
-      .getAssets(this.categoriesSelection(), this.searchQuery(), this.licensesSelection())
+      .getAssets(
+        this.categoriesSelection(),
+        this.searchQuery(),
+        this.licensesSelection(),
+        this.publisherId,
+      )
       .subscribe({
         next: (response) => this.assets.set(response.results),
         complete: () => this.loading.set(false),
