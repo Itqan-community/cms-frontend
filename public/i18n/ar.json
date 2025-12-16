@@ -129,7 +129,8 @@
     "PUBLISHERS": "الناشرين",
     "ABOUT": "عن المشروع",
     "CONTENT_STANDARDS": "معايير المحتوى والتقنية",
-    "API_DOCS": "وثائق الواجهات البرمجية (API)"
+    "API_DOCS": "وثائق الواجهات البرمجية (API)",
+    "PUBLISHER_DASHBOARD": "لوحة التحكم للناشر"
   },
   "HOME": {
     "WELCOME": "مرحبًا بك في إتقان CMS",

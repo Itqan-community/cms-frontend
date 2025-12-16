@@ -13,13 +13,18 @@ export class AssetsService {
   /**
    * Get assets
    * @returns {Observable<ApiAssets>}
-   * @description Get assets list, filtered by categories, search query and licenses
+   * @description Get assets list, filtered by categories, search query, licenses and publisher
    * @example
-   * this.assetsService.getAssets(categories, searchQuery, licenses).subscribe((assets) => {
+   * this.assetsService.getAssets(categories, searchQuery, licenses, publisherId).subscribe((assets) => {
    *   console.log(assets.results);
    * });
    */
-  getAssets(categories: string[], searchQuery: string, licenses: string[]) {
+  getAssets(
+    categories: string[],
+    searchQuery: string,
+    licenses: string[],
+    publisherId?: number | null
+  ) {
     let params = {};
 
     if (categories && categories.length > 0) {
@@ -32,6 +37,10 @@ export class AssetsService {
 
     if (licenses && licenses.length > 0) {
       params = { ...params, license_code: licenses };
+    }
+
+    if (publisherId) {
+      params = { ...params, publisher: publisherId };
     }
 
     return this.http.get<ApiAssets>(`${this.BASE_URL}/assets/`, { params: params });

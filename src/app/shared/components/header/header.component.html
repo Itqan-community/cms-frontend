@@ -4,15 +4,35 @@
       <!-- Logo and Navigation -->
       <div class="app-header__brand">
         <a class="app-header__logo" [routerLink]="['/']">
-          <img
-            alt="Itqan CMS"
-            loading="lazy"
-            width="120"
-            height="40"
-            decoding="async"
-            class="app-header__logo-img"
-            src="assets/images/logo.svg"
-          />
+          @if (isPublisherHost) {
+            <!-- Mock Publisher Logo -->
+            <div class="publisher-logo">
+              <svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+                <rect width="120" height="40" rx="4" fill="#4F46E5" />
+                <text
+                  x="60"
+                  y="24"
+                  font-family="Arial"
+                  font-size="16"
+                  font-weight="bold"
+                  fill="white"
+                  text-anchor="middle"
+                >
+                  Publisher
+                </text>
+              </svg>
+            </div>
+          } @else {
+            <img
+              alt="Itqan CMS"
+              loading="lazy"
+              width="120"
+              height="40"
+              decoding="async"
+              class="app-header__logo-img"
+              src="assets/images/logo.svg"
+            />
+          }
         </a>
         <app-navigation-menu [links]="NAV_LINKS"></app-navigation-menu>
       </div>
@@ -27,7 +47,7 @@
 
         <!-- Mobile Menu Button -->
         <div class="app-header__actions-mobile">
-          <button (click)="onMobileMenuToggle()" class="app-header__menu-btn">
+          <button ((click))="onMobileMenuToggle()" class="app-header__menu-btn">
             <i class="bx bx-menu"></i>
           </button>
         </div>
@@ -35,9 +55,3 @@
     </div>
   </div>
 </header>
-
-<app-mobile-menu
-  [(isOpen)]="isMobileMenuOpen"
-  [links]="NAV_LINKS"
-  (logout)="authService.logout()"
-></app-mobile-menu>
