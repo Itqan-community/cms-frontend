@@ -253,9 +253,14 @@ export class AssetDetailsPage implements OnInit {
     const link = document.createElement('a');
     link.href = fileUrl;
     link.download = filename;
+    link.target = '_blank';
     document.body.appendChild(link);
     link.click();
-    document.body.removeChild(link);
+
+    // Remove the link after a short delay
+    setTimeout(() => {
+      document.body.removeChild(link);
+    }, 100);
   }
 
   private extractFilenameFromPath(path: string): string {
