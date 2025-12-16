@@ -4,15 +4,6 @@
       <!-- Logo and Navigation -->
       <div class="app-header__brand">
         <a class="app-header__logo" [routerLink]="['/']">
-          <img
-            alt="Itqan CMS"
-            loading="lazy"
-            width="120"
-            height="40"
-            decoding="async"
-            class="app-header__logo-img"
-            src="assets/images/logo.svg"
-          />
           @if (isPublisherHost) {
             <!-- Mock Publisher Logo -->
             <div class="publisher-logo">
@@ -31,6 +22,16 @@
                 </text>
               </svg>
             </div>
+          } @else {
+            <img
+              alt="Itqan CMS"
+              loading="lazy"
+              width="120"
+              height="40"
+              decoding="async"
+              class="app-header__logo-img"
+              src="assets/images/logo.svg"
+            />
           }
         </a>
         <app-navigation-menu [links]="NAV_LINKS"></app-navigation-menu>
