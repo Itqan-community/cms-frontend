@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/guards/auth.guard';
 import { guestGuard } from './core/auth/guards/guest.guard';
+import { publisherHostGuard } from './core/guards/publisher-host.guard';
 
 export const routes: Routes = [
   {
@@ -57,6 +58,7 @@ export const routes: Routes = [
       import('./features/content-standards/content-standards.page').then(
         (m) => m.UsageStandardsPage
       ),
+    canActivate: [publisherHostGuard], // Restrict access for publisher hosts
   },
   {
     path: 'publishers',
@@ -64,6 +66,7 @@ export const routes: Routes = [
       import('./features/publishers/pages/publishers/publishers.page').then(
         (m) => m.PublishersPage
       ),
+    canActivate: [publisherHostGuard], // Restrict access for publisher hosts
   },
   {
     path: 'publisher/:id',
@@ -71,6 +74,7 @@ export const routes: Routes = [
       import('./features/publishers/pages/publisher-details/publisher-details.page').then(
         (m) => m.PublisherDetailsPage
       ),
+    canActivate: [publisherHostGuard], // Restrict access for publisher hosts
   },
   {
     path: 'license/:id',
