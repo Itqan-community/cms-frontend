@@ -5,7 +5,7 @@ const hostname = window.location.hostname;
 const publisherMap: Record<string, number> = {
   // Subdomain examples
   customorg: 1,
-  publisher1: 1,
+  publisher: 1, // development env for publisher website
   publisher2: 2,
 
   // Full domain examples (add actual publisher domains here)

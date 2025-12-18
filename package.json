@@ -28,6 +28,7 @@
     "build:production": "ng build --configuration production",
     "build:staging": "ng build --configuration staging",
     "build:develop": "ng build --configuration develop",
+    "build:publisher": "ng build --configuration publisher",
     "test": "ng test",
     "lint": "eslint . --cache --concurrency=auto --max-warnings=0",
     "lint:fix": "eslint . --fix --cache --concurrency=auto",

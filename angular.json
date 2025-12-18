@@ -88,6 +88,17 @@
                   "with": "src/environments/environment.develop.ts"
                 }
               ]
+            },
+            "publisher": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.publisher.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -103,6 +114,9 @@
             },
             "develop": {
               "buildTarget": "cms-frontend:build:develop"
+            },
+            "publisher": {
+              "buildTarget": "cms-frontend:build:publisher"
             }
           },
           "defaultConfiguration": "develop"

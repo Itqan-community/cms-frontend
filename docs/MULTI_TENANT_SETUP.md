@@ -136,5 +136,3 @@ For a production-ready implementation, consider:
 5. Custom domain configuration
 6. Analytics per publisher
 7. Publisher dashboard with statistics
-
-_End_

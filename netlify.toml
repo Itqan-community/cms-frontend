@@ -13,6 +13,11 @@
   command = "npm run build:develop"
   publish = "dist/browser"
 
+# Publisher environment
+[context.publisher]
+  command = "npm run build:publisher"
+  publish = "dist/browser"
+
 # Security headers
 [[headers]]
   for = "/*"
