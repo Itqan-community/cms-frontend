@@ -32,6 +32,13 @@ export const NAV_LINKS = [
     hidden: isPublisher, // Hide API docs for publisher hosts
   },
   {
+    label: 'NAV.ASSET_REQUEST_FORM',
+    link: `https://forms.gle/23eA86Jr56grUSes5`,
+    isExternal: true,
+    icon: 'bx bx-arrow-out-up-left-stroke-square',
+    hidden: isPublisher, // Hide API docs for publisher hosts
+  },
+  {
     label: 'NAV.PUBLISHER_DASHBOARD',
     link: `/dashboard`,
     hidden: !publisher,
