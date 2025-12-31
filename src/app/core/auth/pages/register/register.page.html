@@ -150,6 +150,65 @@
         </div>
 
         <div class="register__field">
+          <label for="confirmPassword" class="register__label">{{
+            'AUTH.REGISTER.CONFIRM_PASSWORD_LABEL' | translate
+          }}</label>
+          <div class="register__input-wrapper">
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              [type]="confirmPasswordVisible() ? 'text' : 'password'"
+              autocomplete="new-password"
+              formControlName="confirmPassword"
+              [placeholder]="'FORMS.PLACEHOLDERS.CONFIRM_PASSWORD' | translate"
+              class="register__input"
+              [class.register__input--invalid]="
+                (registerForm.get('confirmPassword')?.invalid &&
+                  registerForm.get('confirmPassword')?.touched) ||
+                (registerForm.errors?.['passwordMismatch'] &&
+                  registerForm.get('confirmPassword')?.touched)
+              "
+              [attr.aria-invalid]="
+                (registerForm.get('confirmPassword')?.invalid &&
+                  registerForm.get('confirmPassword')?.touched) ||
+                (registerForm.errors?.['passwordMismatch'] &&
+                  registerForm.get('confirmPassword')?.touched)
+              "
+            />
+            <button
+              type="button"
+              class="register__password-toggle"
+              (click)="toggleConfirmPasswordVisibility()"
+              [attr.aria-label]="
+                (confirmPasswordVisible()
+                  ? 'AUTH.REGISTER.HIDE_PASSWORD'
+                  : 'AUTH.REGISTER.SHOW_PASSWORD'
+                ) | translate
+              "
+            >
+              <i class="bx" [ngClass]="confirmPasswordVisible() ? 'bx-eye-closed' : 'bx-eye'"></i>
+            </button>
+          </div>
+          @if (
+            registerForm.get('confirmPassword')?.hasError('required') &&
+            registerForm.get('confirmPassword')?.touched
+          ) {
+            <p class="register__error">
+              {{ 'AUTH.REGISTER.ERRORS.PASSWORD_REQUIRED' | translate }}
+            </p>
+          }
+          @if (
+            registerForm.hasError('passwordMismatch') &&
+            registerForm.get('confirmPassword')?.touched &&
+            !registerForm.get('confirmPassword')?.hasError('required')
+          ) {
+            <p class="register__error">
+              {{ 'AUTH.REGISTER.ERRORS.PASSWORD_MISMATCH' | translate }}
+            </p>
+          }
+        </div>
+
+        <div class="register__field">
           <label for="title" class="register__label">{{
             'AUTH.REGISTER.TITLE_LABEL' | translate
           }}</label>
