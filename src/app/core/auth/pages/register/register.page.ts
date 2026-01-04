@@ -25,20 +25,35 @@ export class RegisterPage {
   errorMessage = signal<string>('');
 
   constructor() {
-    this.registerForm = this.fb.group({
-      first_name: ['', [Validators.required]],
-      last_name: ['', [Validators.required]],
-      email: ['', [Validators.required, Validators.email]],
-      password: ['', [Validators.required, Validators.minLength(6)]],
-      phone: [''],
-      title: [''],
-    });
+    this.registerForm = this.fb.group(
+      {
+        first_name: ['', [Validators.required]],
+        last_name: ['', [Validators.required]],
+        email: ['', [Validators.required, Validators.email]],
+        password: ['', [Validators.required, Validators.minLength(6)]],
+        confirmPassword: ['', [Validators.required]],
+        phone: [''],
+        title: [''],
+      },
+      { validators: this.passwordMatchValidator }
+    );
   }
 
   passwordVisible = signal(false);
+  confirmPasswordVisible = signal(false);
 
   togglePasswordVisibility(): void {
     this.passwordVisible.set(!this.passwordVisible());
+  }
+
+  toggleConfirmPasswordVisibility(): void {
+    this.confirmPasswordVisible.set(!this.confirmPasswordVisible());
+  }
+
+  private passwordMatchValidator(group: FormGroup) {
+    return group.get('password')?.value === group.get('confirmPassword')?.value
+      ? null
+      : { passwordMismatch: true };
   }
 
   onSubmit(): void {

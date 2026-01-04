@@ -29,6 +29,7 @@
       "LAST_NAME_LABEL": "Last Name",
       "EMAIL_LABEL": "Email",
       "PASSWORD_LABEL": "Password",
+      "CONFIRM_PASSWORD_LABEL": "Confirm Password",
       "PHONE_LABEL": "Phone Number",
       "TITLE_LABEL": "Professional Title",
       "SUBMIT_BUTTON": "Create account",
@@ -45,6 +46,7 @@
         "LAST_NAME_REQUIRED": "Last name is required",
         "EMAIL_REQUIRED": "Please enter a valid email address",
         "PASSWORD_REQUIRED": "Password must be at least 6 characters",
+        "PASSWORD_MISMATCH": "Passwords do not match",
         "REGISTER_FAILED": "Registration failed. Please try again."
       }
     },
@@ -84,6 +86,7 @@
     "PLACEHOLDERS": {
       "EMAIL": "Enter your email",
       "PASSWORD": "Enter your password",
+      "CONFIRM_PASSWORD": "Confirm your password",
       "FIRST_NAME": "Enter your first name",
       "LAST_NAME": "Enter your last name",
       "PHONE_NUMBER": "Enter your phone number",

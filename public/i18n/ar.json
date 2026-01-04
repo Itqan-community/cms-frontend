@@ -29,6 +29,7 @@
       "LAST_NAME_LABEL": "اسم العائلة",
       "EMAIL_LABEL": "البريد الإلكتروني",
       "PASSWORD_LABEL": "كلمة المرور",
+      "CONFIRM_PASSWORD_LABEL": "تأكيد كلمة المرور",
       "PHONE_LABEL": "رقم الهاتف",
       "TITLE_LABEL": "المسمى الوظيفي",
       "SUBMIT_BUTTON": "إنشاء الحساب",
@@ -45,6 +46,7 @@
         "LAST_NAME_REQUIRED": "اسم العائلة مطلوب",
         "EMAIL_REQUIRED": "يرجى إدخال عنوان بريد إلكتروني صحيح",
         "PASSWORD_REQUIRED": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
+        "PASSWORD_MISMATCH": "كلمات المرور غير متطابقة",
         "REGISTER_FAILED": "فشل إنشاء الحساب. يرجى المحاولة مرة أخرى."
       }
     },
@@ -84,6 +86,7 @@
     "PLACEHOLDERS": {
       "EMAIL": "أدخل بريدك الإلكتروني",
       "PASSWORD": "أدخل كلمة المرور",
+      "CONFIRM_PASSWORD": "أكّد كلمة المرور",
       "FIRST_NAME": "أدخل اسمك الأول",
       "LAST_NAME": "أدخل اسم العائلة",
       "PHONE_NUMBER": "أدخل رقم هاتفك",
