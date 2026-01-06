@@ -2,6 +2,7 @@ import { Component, inject, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { Router, RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { GoogleAnalyticsService } from './core/services/google-analytics.service';
 import { WebVitalsService } from './core/services/web-vitals.service';
 import { HeaderComponent } from './shared/components/header/header.component';
 
@@ -16,11 +17,13 @@ export class App {
   private titleService = inject(Title);
   protected router = inject(Router);
   private readonly webVitalsService = inject(WebVitalsService);
+  private readonly googleAnalyticsService = inject(GoogleAnalyticsService);
 
   protected readonly title = signal('ITQAN | إتقان');
 
   constructor() {
     void this.webVitalsService;
+    void this.googleAnalyticsService;
 
     const currentLang = localStorage.getItem('lang') || 'ar';
     this.translate.addLangs(['ar', 'en']);
