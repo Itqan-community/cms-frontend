@@ -7,7 +7,7 @@
   />
   <div class="assets-listing__grid" [attr.aria-busy]="loading()">
     @if (!isServer && loading()) {
-      @for (item of getSkeletonArray(); track item) {
+      @for (item of getSkeletonArray(); track $index) {
         <app-asset-card-skeleton />
       }
     } @else {
