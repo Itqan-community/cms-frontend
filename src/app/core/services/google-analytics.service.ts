@@ -5,8 +5,17 @@ import { environment } from '../../../environments/environment';
   providedIn: 'root',
 })
 export class GoogleAnalyticsService {
-  constructor() {
-    this.initialize();
+  private initialized = false;
+
+  init(): void {
+    if (this.initialized) return;
+    if (!environment.production) return;
+    this.initialized = true;
+
+    const scheduleIdle = window.requestIdleCallback
+      ? (cb: () => void) => window.requestIdleCallback(() => cb())
+      : (cb: () => void) => setTimeout(cb, 0);
+    scheduleIdle(() => this.initialize());
   }
 
   private initialize(): void {

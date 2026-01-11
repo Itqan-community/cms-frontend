@@ -23,7 +23,7 @@ export class App {
 
   constructor() {
     void this.webVitalsService;
-    void this.googleAnalyticsService;
+    this.googleAnalyticsService.init();
 
     const currentLang = localStorage.getItem('lang') || 'ar';
     this.translate.addLangs(['ar', 'en']);
