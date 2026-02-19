@@ -1,0 +1,53 @@
+@if (loadingService.isLoading()) {
+  <div class="loading-overlay" role="status" aria-label="جارٍ التحميل..." @overlayAnim>
+    <div class="loading-card">
+      <!-- Animated ring around the logo -->
+      <div class="logo-ring">
+        <svg class="ring-svg" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Track circle -->
+          <circle
+            cx="60"
+            cy="60"
+            r="52"
+            stroke="var(--color-primary-100)"
+            stroke-width="6"
+            fill="none"
+          />
+          <!-- Spinning arc -->
+          <circle
+            class="arc"
+            cx="60"
+            cy="60"
+            r="52"
+            stroke="url(#arcGradient)"
+            stroke-width="6"
+            fill="none"
+            stroke-linecap="round"
+            stroke-dasharray="90 240"
+          />
+          <defs>
+            <linearGradient id="arcGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="var(--color-primary-400)" />
+              <stop offset="100%" stop-color="var(--color-primary-700)" />
+            </linearGradient>
+          </defs>
+        </svg>
+
+        <!-- ITQAN logo centred inside the ring -->
+        <div class="logo-inner">
+          <img src="/assets/images/logo.svg" alt="إتقان" class="logo-img" />
+        </div>
+      </div>
+
+      <!-- Brand wordmark -->
+      <p class="brand-name">إتقان</p>
+
+      <!-- Animated dots -->
+      <div class="dots" aria-hidden="true">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+    </div>
+  </div>
+}
