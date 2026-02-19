@@ -5,10 +5,11 @@ import { TranslateService } from '@ngx-translate/core';
 import { GoogleAnalyticsService } from './core/services/google-analytics.service';
 import { WebVitalsService } from './core/services/web-vitals.service';
 import { HeaderComponent } from './shared/components/header/header.component';
+import { LoadingOverlayComponent } from './shared/components/loading-overlay/loading-overlay.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent],
+  imports: [RouterOutlet, HeaderComponent, LoadingOverlayComponent],
   templateUrl: './app.html',
   styleUrl: './app.less',
 })
