@@ -83,5 +83,11 @@ export const routes: Routes = [
         (m) => m.LicenseDetailsPage
       ),
   },
+  {
+    path: 'reciters',
+    loadComponent: () =>
+      import('./features/reciters/pages/reciters/reciters.page').then((m) => m.RecitersPage),
+    canActivate: [authGuard],
+  },
   { path: '**', redirectTo: 'gallery' },
 ];

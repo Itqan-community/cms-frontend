@@ -268,6 +268,34 @@
       "non-commercial": "غير تجاري"
     }
   },
+  "RECITERS": {
+    "TITLE": "إدارة القرّاء",
+    "DESCRIPTION": "إدارة القرّاء ومعلوماتهم.",
+    "FORM": {
+      "ADD_NEW_RECITER": "إضافة قارئ جديد",
+      "HIDE_FORM": "إلغاء",
+      "IDENTIFIER_LABEL": "معرّف القارئ",
+      "NAME_AR_LABEL": "الاسم (بالعربية)",
+      "NAME_EN_LABEL": "الاسم (بالإنجليزية)",
+      "NATIONALITY_LABEL": "الجنسية",
+      "DATE_OF_BIRTH_LABEL": "تاريخ الميلاد",
+      "DATE_OF_DEATH_LABEL": "تاريخ الوفاة",
+      "ABOUT_LABEL": "نبذة عن القارئ",
+      "SUBMIT_BUTTON": "إنشاء القارئ",
+      "SUBMIT_LOADING": "جاري الإنشاء...",
+      "SUCCESS": "تم إنشاء القارئ بنجاح!",
+      "PLACEHOLDERS": {
+        "IDENTIFIER": "مثال: abdul-basit",
+        "NAME_AR": "مثال: عبد الباسط عبد الصمد",
+        "NAME_EN": "مثال: Abdul Basit Abdul Samad",
+        "NATIONALITY": "مثال: مصري",
+        "ABOUT": "اكتب نبذة مختصرة عن القارئ..."
+      },
+      "ERRORS": {
+        "CREATE_FAILED": "فشل إنشاء القارئ. يرجى المحاولة مرة أخرى."
+      }
+    }
+  },
   "CONTENT_STANDARDS": {
     "TITLE": "الوثائق: معايير الوصول إلى البيانات",
     "DESCRIPTION": "يوضح هذا المستند معايير الوصول إلى البيانات في الملفات. يرجى اتباع الإرشادات أدناه لكل فئة.",

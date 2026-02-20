@@ -1,0 +1,199 @@
+<div class="reciter-form">
+  <button
+    nz-button
+    nzType="primary"
+    nzSize="large"
+    (click)="toggleForm()"
+    class="reciter-form__toggle"
+  >
+    <i class="bx" [ngClass]="formVisible() ? 'bx-x' : 'bx-plus'"></i>
+    {{ (formVisible() ? 'RECITERS.FORM.HIDE_FORM' : 'RECITERS.FORM.ADD_NEW_RECITER') | translate }}
+  </button>
+
+  @if (formVisible()) {
+    <div class="reciter-form__container">
+      @if (successMessage()) {
+        <div class="reciter-form__alert reciter-form__alert--success">
+          {{ successMessage() }}
+        </div>
+      }
+
+      @if (errorMessage()) {
+        <div class="reciter-form__alert reciter-form__alert--error">
+          {{ errorMessage() }}
+        </div>
+      }
+
+      <form [formGroup]="reciterForm" (ngSubmit)="onSubmit()" class="reciter-form__form">
+        <div class="reciter-form__grid">
+          <!-- Identifier -->
+          <div class="reciter-form__field">
+            <label for="identifier" class="reciter-form__label">
+              {{ 'RECITERS.FORM.IDENTIFIER_LABEL' | translate }}
+              <span class="reciter-form__required">*</span>
+            </label>
+            <input
+              id="identifier"
+              type="text"
+              formControlName="identifier"
+              [placeholder]="'RECITERS.FORM.PLACEHOLDERS.IDENTIFIER' | translate"
+              class="reciter-form__input"
+              [class.reciter-form__input--invalid]="
+                reciterForm.get('identifier')?.invalid && reciterForm.get('identifier')?.touched
+              "
+            />
+            @if (
+              reciterForm.get('identifier')?.hasError('required') &&
+              reciterForm.get('identifier')?.touched
+            ) {
+              <p class="reciter-form__error">
+                {{ 'FORMS.VALIDATION.REQUIRED' | translate }}
+              </p>
+            }
+          </div>
+
+          <!-- Name Arabic -->
+          <div class="reciter-form__field">
+            <label for="name_ar" class="reciter-form__label">
+              {{ 'RECITERS.FORM.NAME_AR_LABEL' | translate }}
+              <span class="reciter-form__required">*</span>
+            </label>
+            <input
+              id="name_ar"
+              type="text"
+              formControlName="name_ar"
+              dir="rtl"
+              [placeholder]="'RECITERS.FORM.PLACEHOLDERS.NAME_AR' | translate"
+              class="reciter-form__input"
+              [class.reciter-form__input--invalid]="
+                reciterForm.get('name_ar')?.invalid && reciterForm.get('name_ar')?.touched
+              "
+            />
+            @if (
+              reciterForm.get('name_ar')?.hasError('required') &&
+              reciterForm.get('name_ar')?.touched
+            ) {
+              <p class="reciter-form__error">
+                {{ 'FORMS.VALIDATION.REQUIRED' | translate }}
+              </p>
+            }
+          </div>
+
+          <!-- Name English -->
+          <div class="reciter-form__field">
+            <label for="name_en" class="reciter-form__label">
+              {{ 'RECITERS.FORM.NAME_EN_LABEL' | translate }}
+              <span class="reciter-form__required">*</span>
+            </label>
+            <input
+              id="name_en"
+              type="text"
+              formControlName="name_en"
+              dir="ltr"
+              [placeholder]="'RECITERS.FORM.PLACEHOLDERS.NAME_EN' | translate"
+              class="reciter-form__input"
+              [class.reciter-form__input--invalid]="
+                reciterForm.get('name_en')?.invalid && reciterForm.get('name_en')?.touched
+              "
+            />
+            @if (
+              reciterForm.get('name_en')?.hasError('required') &&
+              reciterForm.get('name_en')?.touched
+            ) {
+              <p class="reciter-form__error">
+                {{ 'FORMS.VALIDATION.REQUIRED' | translate }}
+              </p>
+            }
+          </div>
+
+          <!-- Nationality -->
+          <div class="reciter-form__field">
+            <label for="nationality" class="reciter-form__label">
+              {{ 'RECITERS.FORM.NATIONALITY_LABEL' | translate }}
+              <span class="reciter-form__required">*</span>
+            </label>
+            <input
+              id="nationality"
+              type="text"
+              formControlName="nationality"
+              [placeholder]="'RECITERS.FORM.PLACEHOLDERS.NATIONALITY' | translate"
+              class="reciter-form__input"
+              [class.reciter-form__input--invalid]="
+                reciterForm.get('nationality')?.invalid && reciterForm.get('nationality')?.touched
+              "
+            />
+            @if (
+              reciterForm.get('nationality')?.hasError('required') &&
+              reciterForm.get('nationality')?.touched
+            ) {
+              <p class="reciter-form__error">
+                {{ 'FORMS.VALIDATION.REQUIRED' | translate }}
+              </p>
+            }
+          </div>
+
+          <!-- Date of Birth -->
+          <div class="reciter-form__field">
+            <label for="date_of_birth" class="reciter-form__label">
+              {{ 'RECITERS.FORM.DATE_OF_BIRTH_LABEL' | translate }}
+            </label>
+            <input
+              id="date_of_birth"
+              type="date"
+              formControlName="date_of_birth"
+              class="reciter-form__input"
+            />
+          </div>
+
+          <!-- Date of Death -->
+          <div class="reciter-form__field">
+            <label for="date_of_death" class="reciter-form__label">
+              {{ 'RECITERS.FORM.DATE_OF_DEATH_LABEL' | translate }}
+            </label>
+            <input
+              id="date_of_death"
+              type="date"
+              formControlName="date_of_death"
+              class="reciter-form__input"
+            />
+          </div>
+        </div>
+
+        <!-- About -->
+        <div class="reciter-form__field reciter-form__field--full">
+          <label for="about" class="reciter-form__label">
+            {{ 'RECITERS.FORM.ABOUT_LABEL' | translate }}
+          </label>
+          <textarea
+            id="about"
+            formControlName="about"
+            rows="4"
+            [placeholder]="'RECITERS.FORM.PLACEHOLDERS.ABOUT' | translate"
+            class="reciter-form__textarea"
+          ></textarea>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="reciter-form__actions">
+          <button
+            nz-button
+            nzType="primary"
+            nzSize="large"
+            type="submit"
+            [disabled]="reciterForm.invalid || isLoading()"
+          >
+            @if (isLoading()) {
+              <span class="reciter-form__spinner" aria-hidden="true"></span>
+              {{ 'RECITERS.FORM.SUBMIT_LOADING' | translate }}
+            } @else {
+              {{ 'RECITERS.FORM.SUBMIT_BUTTON' | translate }}
+            }
+          </button>
+          <button nz-button nzSize="large" type="button" (click)="toggleForm()">
+            {{ 'COMMON.CANCEL' | translate }}
+          </button>
+        </div>
+      </form>
+    </div>
+  }
+</div>

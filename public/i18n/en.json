@@ -268,6 +268,34 @@
       "non-commercial": "Non-Commercial"
     }
   },
+  "RECITERS": {
+    "TITLE": "Reciters Management",
+    "DESCRIPTION": "Manage Quranic reciters and their information.",
+    "FORM": {
+      "ADD_NEW_RECITER": "Add New Reciter",
+      "HIDE_FORM": "Cancel",
+      "IDENTIFIER_LABEL": "Reciter Identifier",
+      "NAME_AR_LABEL": "Name (Arabic)",
+      "NAME_EN_LABEL": "Name (English)",
+      "NATIONALITY_LABEL": "Nationality",
+      "DATE_OF_BIRTH_LABEL": "Date of Birth",
+      "DATE_OF_DEATH_LABEL": "Date of Death",
+      "ABOUT_LABEL": "About the Reciter",
+      "SUBMIT_BUTTON": "Create Reciter",
+      "SUBMIT_LOADING": "Creating...",
+      "SUCCESS": "Reciter created successfully!",
+      "PLACEHOLDERS": {
+        "IDENTIFIER": "e.g., abdul-basit",
+        "NAME_AR": "e.g., عبد الباسط عبد الصمد",
+        "NAME_EN": "e.g., Abdul Basit Abdul Samad",
+        "NATIONALITY": "e.g., Egyptian",
+        "ABOUT": "Write a brief biography of the reciter..."
+      },
+      "ERRORS": {
+        "CREATE_FAILED": "Failed to create reciter. Please try again."
+      }
+    }
+  },
   "CONTENT_STANDARDS": {
     "TITLE": "Documents: Data Access Standards",
     "DESCRIPTION": "This document outlines the standards for accessing data in files. Please follow the guidelines below for each category.",
