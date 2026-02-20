@@ -330,6 +330,24 @@
       "TOTAL_RECITATIONS": "Recitations",
       "LOAD_ERROR": "Failed to load statistics.",
       "RETRY": "Retry"
+    },
+    "LIST": {
+      "SEARCH_PLACEHOLDER": "Search by Arabic or English name...",
+      "FILTER_RIWAYAH": "Filter by Riwayah",
+      "FILTER_TYPE": "Filter by Recitation Type",
+      "CLEAR_FILTERS": "Clear filters",
+      "COLUMNS": {
+        "RECITER": "Reciter",
+        "RIWAYAH": "Riwayah",
+        "TYPE": "Recitation Type",
+        "SURAHS": "Total Surahs",
+        "QUALITY": "Audio Quality"
+      },
+      "EMPTY": "No recitations found. Add a new recitation to get started.",
+      "NO_FILTER_RESULTS": "No recitations match your filters.",
+      "ERRORS": {
+        "LOAD_FAILED": "Failed to load recitations. Please try again."
+      }
     }
   },
   "CONTENT_STANDARDS": {
