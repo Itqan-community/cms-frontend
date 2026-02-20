@@ -1,4 +1,21 @@
 .reciters-list {
+  &__search {
+    margin-bottom: 16px;
+
+    nz-input-group {
+      max-width: 400px;
+    }
+
+    input {
+      font-size: 14px;
+    }
+  }
+
+  &__search-icon {
+    color: var(--color-text-muted, #9ca3af);
+    font-size: 16px;
+  }
+
   &__name-ar {
     font-weight: 600;
     font-size: 15px;
@@ -6,10 +23,10 @@
 
   &__identifier {
     padding: 2px 8px;
-    background: #f3f4f6;
+    background: var(--color-neutral-100, #f3f4f6);
     border-radius: 4px;
     font-size: 13px;
-    color: #6b7280;
+    color: var(--color-text-secondary, #6b7280);
   }
 
   &__empty {
@@ -18,7 +35,7 @@
     align-items: center;
     justify-content: center;
     padding: 48px 16px;
-    color: #9ca3af;
+    color: var(--color-text-muted, #9ca3af);
   }
 
   &__empty-icon {

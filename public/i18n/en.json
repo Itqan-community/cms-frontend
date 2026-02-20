@@ -304,6 +304,8 @@
         "DATE_OF_DEATH": "Date of Death",
         "IDENTIFIER": "Identifier"
       },
+      "SEARCH_PLACEHOLDER": "Search by Arabic or English name...",
+      "NO_SEARCH_RESULTS": "No reciters match your search.",
       "EMPTY": "No reciters found. Add a new reciter to get started.",
       "ERRORS": {
         "LOAD_FAILED": "Failed to load reciters. Please try again."

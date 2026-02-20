@@ -1,4 +1,19 @@
 <div class="reciters-list">
+  <div class="reciters-list__search">
+    <nz-input-group [nzPrefix]="searchIconTpl">
+      <input
+        nz-input
+        type="text"
+        [placeholder]="'RECITERS.LIST.SEARCH_PLACEHOLDER' | translate"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearchInput($event)"
+      />
+    </nz-input-group>
+    <ng-template #searchIconTpl>
+      <i class="bx bx-search reciters-list__search-icon"></i>
+    </ng-template>
+  </div>
+
   <nz-table
     #recitersTable
     [nzData]="reciters()"
@@ -67,6 +82,10 @@
 <ng-template #emptyTpl>
   <div class="reciters-list__empty">
     <i class="bx bx-user-voice reciters-list__empty-icon"></i>
-    <p>{{ 'RECITERS.LIST.EMPTY' | translate }}</p>
+    @if (searchQuery()) {
+      <p>{{ 'RECITERS.LIST.NO_SEARCH_RESULTS' | translate }}</p>
+    } @else {
+      <p>{{ 'RECITERS.LIST.EMPTY' | translate }}</p>
+    }
   </div>
 </ng-template>

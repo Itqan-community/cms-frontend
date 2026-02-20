@@ -11,11 +11,15 @@ export class RecitersService {
   private readonly http = inject(HttpClient);
   private readonly BASE_URL = environment.API_BASE_URL;
 
-  getReciters(ordering = 'name_ar', page = 1, pageSize = 10): Observable<ApiReciters> {
-    const params = new HttpParams()
+  getReciters(ordering = 'name_ar', page = 1, pageSize = 10, search = ''): Observable<ApiReciters> {
+    let params = new HttpParams()
       .set('ordering', ordering)
       .set('page', page.toString())
       .set('page_size', pageSize.toString());
+
+    if (search) {
+      params = params.set('search', search);
+    }
 
     return this.http.get<ApiReciters>(`${this.BASE_URL}/reciters/`, { params });
   }
