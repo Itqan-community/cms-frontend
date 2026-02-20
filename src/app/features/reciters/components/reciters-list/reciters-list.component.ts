@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzTableModule, NzTableSortOrder } from 'ng-zorro-antd/table';
@@ -15,7 +16,7 @@ import { RecitersService } from '../../services/reciters.service';
 @Component({
   selector: 'app-reciters-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, TranslateModule, NzTableModule, NzTagModule, NzInputModule],
+  imports: [CommonModule, FormsModule, RouterModule, TranslateModule, NzTableModule, NzTagModule, NzInputModule],
   templateUrl: './reciters-list.component.html',
   styleUrls: ['./reciters-list.component.less'],
 })

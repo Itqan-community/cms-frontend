@@ -29,6 +29,29 @@
     color: var(--color-text-secondary, #6b7280);
   }
 
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    color: var(--color-text-secondary, #6b7280);
+    transition: background-color 0.2s, color 0.2s;
+    font-size: 18px;
+
+    &:hover {
+      background-color: var(--color-neutral-100, #f3f4f6);
+      color: var(--color-primary-700, #1d4ed8);
+    }
+  }
+
   &__empty {
     display: flex;
     flex-direction: column;

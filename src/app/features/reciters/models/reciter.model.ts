@@ -29,3 +29,13 @@ export interface CreateReciterRequest {
   date_of_death?: string;
   about?: string;
 }
+
+export interface UpdateReciterRequest {
+  identifier?: string;
+  name_ar?: string;
+  name_en?: string;
+  nationality?: string;
+  date_of_birth?: string | null;
+  date_of_death?: string | null;
+  about?: string | null;
+}

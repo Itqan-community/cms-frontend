@@ -1,0 +1,79 @@
+@if (loading()) {
+  <div class="reciter-detail__loading">
+    <span class="reciter-detail__spinner"></span>
+    {{ 'COMMON.LOADING' | translate }}
+  </div>
+} @else if (notFound()) {
+  <div class="reciter-detail__not-found">
+    <i class="bx bx-error-circle reciter-detail__not-found-icon"></i>
+    <h2>{{ 'RECITERS.DETAIL.NOT_FOUND_TITLE' | translate }}</h2>
+    <p>{{ 'RECITERS.DETAIL.NOT_FOUND_MESSAGE' | translate }}</p>
+    <button nz-button nzType="primary" nzSize="large" (click)="navigateToList()">
+      {{ 'RECITERS.DETAIL.BACK_TO_LIST' | translate }}
+    </button>
+  </div>
+} @else if (reciter(); as r) {
+  <div class="reciter-detail">
+    <div class="reciter-detail__header">
+      <div class="reciter-detail__header-info">
+        <h1 class="reciter-detail__title">{{ r.name_ar }}</h1>
+        <p class="reciter-detail__subtitle">{{ r.name_en }}</p>
+      </div>
+      <div class="reciter-detail__header-actions">
+        <button nz-button nzType="primary" nzSize="large" (click)="navigateToEdit()">
+          <i class="bx bx-edit"></i>
+          {{ 'RECITERS.DETAIL.EDIT_BUTTON' | translate }}
+        </button>
+        <button nz-button nzSize="large" (click)="navigateToList()">
+          <i class="bx bx-arrow-back"></i>
+          {{ 'RECITERS.DETAIL.BACK_TO_LIST' | translate }}
+        </button>
+      </div>
+    </div>
+
+    <div class="reciter-detail__card">
+      <h3 class="reciter-detail__section-title">
+        {{ 'RECITERS.DETAIL.BASIC_INFO' | translate }}
+      </h3>
+
+      <div class="reciter-detail__grid">
+        <div class="reciter-detail__field">
+          <span class="reciter-detail__label">{{ 'RECITERS.FORM.IDENTIFIER_LABEL' | translate }}</span>
+          <code class="reciter-detail__identifier">{{ r.identifier }}</code>
+        </div>
+
+        <div class="reciter-detail__field">
+          <span class="reciter-detail__label">{{ 'RECITERS.FORM.NAME_AR_LABEL' | translate }}</span>
+          <span class="reciter-detail__value" dir="rtl">{{ r.name_ar }}</span>
+        </div>
+
+        <div class="reciter-detail__field">
+          <span class="reciter-detail__label">{{ 'RECITERS.FORM.NAME_EN_LABEL' | translate }}</span>
+          <span class="reciter-detail__value">{{ r.name_en }}</span>
+        </div>
+
+        <div class="reciter-detail__field">
+          <span class="reciter-detail__label">{{ 'RECITERS.FORM.NATIONALITY_LABEL' | translate }}</span>
+          <nz-tag nzColor="blue">{{ r.nationality }}</nz-tag>
+        </div>
+
+        <div class="reciter-detail__field">
+          <span class="reciter-detail__label">{{ 'RECITERS.FORM.DATE_OF_BIRTH_LABEL' | translate }}</span>
+          <span class="reciter-detail__value">{{ r.date_of_birth || '—' }}</span>
+        </div>
+
+        <div class="reciter-detail__field">
+          <span class="reciter-detail__label">{{ 'RECITERS.FORM.DATE_OF_DEATH_LABEL' | translate }}</span>
+          <span class="reciter-detail__value">{{ r.date_of_death || '—' }}</span>
+        </div>
+      </div>
+
+      @if (r.about) {
+        <div class="reciter-detail__about">
+          <span class="reciter-detail__label">{{ 'RECITERS.FORM.ABOUT_LABEL' | translate }}</span>
+          <p class="reciter-detail__about-text">{{ r.about }}</p>
+        </div>
+      }
+    </div>
+  </div>
+}

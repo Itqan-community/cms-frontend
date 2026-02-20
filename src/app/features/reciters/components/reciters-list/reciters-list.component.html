@@ -58,6 +58,7 @@
         <th>{{ 'RECITERS.LIST.COLUMNS.DATE_OF_BIRTH' | translate }}</th>
         <th>{{ 'RECITERS.LIST.COLUMNS.DATE_OF_DEATH' | translate }}</th>
         <th>{{ 'RECITERS.LIST.COLUMNS.IDENTIFIER' | translate }}</th>
+        <th>{{ 'RECITERS.LIST.COLUMNS.ACTIONS' | translate }}</th>
       </tr>
     </thead>
     <tbody>
@@ -72,6 +73,14 @@
           <td>{{ reciter.date_of_death || '—' }}</td>
           <td>
             <code class="reciters-list__identifier">{{ reciter.identifier }}</code>
+          </td>
+          <td class="reciters-list__actions">
+            <a [routerLink]="['/reciters', reciter.id]" class="reciters-list__action-btn" title="View">
+              <i class="bx bx-show"></i>
+            </a>
+            <a [routerLink]="['/reciters', reciter.id, 'edit']" class="reciters-list__action-btn" title="Edit">
+              <i class="bx bx-edit"></i>
+            </a>
           </td>
         </tr>
       }

@@ -311,13 +311,37 @@
         "NATIONALITY": "Nationality",
         "DATE_OF_BIRTH": "Date of Birth",
         "DATE_OF_DEATH": "Date of Death",
-        "IDENTIFIER": "Identifier"
+        "IDENTIFIER": "Identifier",
+        "ACTIONS": "Actions"
       },
       "SEARCH_PLACEHOLDER": "Search by Arabic or English name...",
       "NO_SEARCH_RESULTS": "No reciters match your search.",
       "EMPTY": "No reciters found. Add a new reciter to get started.",
       "ERRORS": {
         "LOAD_FAILED": "Failed to load reciters. Please try again."
+      }
+    },
+    "DETAIL": {
+      "BASIC_INFO": "Basic Information",
+      "EDIT_BUTTON": "Edit Reciter",
+      "BACK_TO_LIST": "Back to List",
+      "NOT_FOUND_TITLE": "Reciter Not Found",
+      "NOT_FOUND_MESSAGE": "The reciter you're looking for doesn't exist or has been removed.",
+      "ERRORS": {
+        "LOAD_FAILED": "Failed to load reciter details."
+      }
+    },
+    "EDIT": {
+      "TITLE": "Edit Reciter",
+      "SAVE_BUTTON": "Save Changes",
+      "SAVING": "Saving...",
+      "SUCCESS": "Reciter updated successfully!",
+      "BACK_TO_LIST": "Back to List",
+      "NOT_FOUND_TITLE": "Reciter Not Found",
+      "NOT_FOUND_MESSAGE": "The reciter you're trying to edit doesn't exist.",
+      "ERRORS": {
+        "LOAD_FAILED": "Failed to load reciter.",
+        "UPDATE_FAILED": "Failed to update reciter."
       }
     }
   },

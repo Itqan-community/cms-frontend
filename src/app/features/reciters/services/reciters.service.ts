@@ -2,7 +2,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { ApiReciters, CreateReciterRequest, Reciter, RecitersStats } from '../models/reciter.model';
+import {
+  ApiReciters,
+  CreateReciterRequest,
+  Reciter,
+  RecitersStats,
+  UpdateReciterRequest,
+} from '../models/reciter.model';
 
 @Injectable({
   providedIn: 'root',
@@ -30,5 +36,13 @@ export class RecitersService {
 
   createReciter(data: CreateReciterRequest): Observable<Reciter> {
     return this.http.post<Reciter>(`${this.BASE_URL}/reciters/`, data);
+  }
+
+  getReciter(id: number): Observable<Reciter> {
+    return this.http.get<Reciter>(`${this.BASE_URL}/reciters/${id}/`);
+  }
+
+  updateReciter(id: number, data: UpdateReciterRequest): Observable<Reciter> {
+    return this.http.patch<Reciter>(`${this.BASE_URL}/reciters/${id}/`, data);
   }
 }
