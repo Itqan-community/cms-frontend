@@ -271,6 +271,13 @@
   "RECITERS": {
     "TITLE": "إدارة القرّاء",
     "DESCRIPTION": "إدارة القرّاء ومعلوماتهم.",
+    "STATS": {
+      "TOTAL_RECITERS": "إجمالي القرّاء المسجلين",
+      "TOTAL_NATIONALITIES": "عدد الجنسيات",
+      "CONTEMPORARY_RECITERS": "القرّاء المعاصرون",
+      "LOAD_ERROR": "تعذّر تحميل الإحصائيات.",
+      "RETRY": "إعادة المحاولة"
+    },
     "FORM": {
       "ADD_NEW_RECITER": "إضافة قارئ جديد",
       "HIDE_FORM": "إلغاء",

@@ -271,6 +271,13 @@
   "RECITERS": {
     "TITLE": "Reciters Management",
     "DESCRIPTION": "Manage Quranic reciters and their information.",
+    "STATS": {
+      "TOTAL_RECITERS": "Registered Reciters",
+      "TOTAL_NATIONALITIES": "Nationalities",
+      "CONTEMPORARY_RECITERS": "Contemporary Reciters",
+      "LOAD_ERROR": "Failed to load statistics.",
+      "RETRY": "Retry"
+    },
     "FORM": {
       "ADD_NEW_RECITER": "Add New Reciter",
       "HIDE_FORM": "Cancel",

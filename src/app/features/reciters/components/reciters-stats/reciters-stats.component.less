@@ -1,0 +1,135 @@
+.reciters-stats {
+  margin-bottom: 24px;
+
+  &__loading {
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  &__error {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 16px;
+    background-color: var(--color-neutral-100, #f3f4f6);
+    border-radius: 8px;
+    color: var(--color-text-secondary, #6b7280);
+    font-size: 14px;
+  }
+
+  &__error-icon {
+    font-size: 20px;
+    color: #ef4444;
+  }
+
+  &__retry-btn {
+    margin-inline-start: auto;
+    padding: 4px 12px;
+    background: transparent;
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: 6px;
+    color: var(--color-primary-700, #4338ca);
+    cursor: pointer;
+    font-size: 13px;
+    transition: background-color 0.2s;
+
+    &:hover {
+      background-color: var(--color-neutral-100, #f3f4f6);
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  &__card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    background-color: var(--color-surface, #fff);
+    border-radius: 12px;
+    box-shadow: 0 1px 2px 0 var(--color-card-shadow, rgba(0, 0, 0, 0.05));
+    transition:
+      background-color 0.3s ease,
+      box-shadow 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 4px 12px 0 var(--color-card-shadow, rgba(0, 0, 0, 0.08));
+    }
+  }
+
+  &__icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    font-size: 24px;
+    flex-shrink: 0;
+
+    &--blue {
+      background-color: #dbeafe;
+      color: #2563eb;
+    }
+
+    &--green {
+      background-color: #d1fae5;
+      color: #059669;
+    }
+
+    &--purple {
+      background-color: #ede9fe;
+      color: #7c3aed;
+    }
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  &__value {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--color-text-primary, #111827);
+  }
+
+  &__label {
+    font-size: 13px;
+    color: var(--color-text-secondary, #6b7280);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  @media (max-width: 768px) {
+    &__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+// Dark mode icon background adjustments
+html[data-theme='dark'] {
+  .reciters-stats__icon-wrapper {
+    &--blue {
+      background-color: rgba(37, 99, 235, 0.15);
+    }
+
+    &--green {
+      background-color: rgba(5, 150, 105, 0.15);
+    }
+
+    &--purple {
+      background-color: rgba(124, 58, 237, 0.15);
+    }
+  }
+}

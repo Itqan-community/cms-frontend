@@ -4,6 +4,8 @@
     <p class="reciters__description">{{ 'RECITERS.DESCRIPTION' | translate }}</p>
   </div>
 
+  <app-reciters-stats />
+
   <div class="reciters__content">
     <app-reciter-form (reciterCreated)="onReciterCreated()" />
     <app-reciters-list />

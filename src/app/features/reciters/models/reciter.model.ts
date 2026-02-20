@@ -14,6 +14,12 @@ export interface ApiReciters {
   count: number;
 }
 
+export interface RecitersStats {
+  total_reciters: number;
+  total_nationalities: number;
+  contemporary_reciters: number;
+}
+
 export interface CreateReciterRequest {
   identifier: string;
   name_ar: string;
