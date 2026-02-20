@@ -5,14 +5,19 @@ import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
 import { ToastService } from '../../../../shared/services/toast.service';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
 import { Recitation } from '../../models/recitation.model';
+import { RecitationCardComponent } from '../recitation-card/recitation-card.component';
 import { RecitationsService } from '../../services/recitations.service';
+
+export type ViewMode = 'table' | 'cards';
 
 @Component({
   selector: 'app-recitations-list',
@@ -26,6 +31,9 @@ import { RecitationsService } from '../../services/recitations.service';
     NzInputModule,
     NzSelectModule,
     NzButtonModule,
+    NzSpinModule,
+    NzPaginationModule,
+    RecitationCardComponent,
   ],
   templateUrl: './recitations-list.component.html',
   styleUrls: ['./recitations-list.component.less'],
@@ -40,7 +48,8 @@ export class RecitationsListComponent implements OnInit {
   loading = signal(true);
   total = signal(0);
   pageIndex = signal(1);
-  pageSize = signal(10);
+  pageSize = signal(12);
+  viewMode = signal<ViewMode>('cards');
 
   searchQuery = signal('');
   riwayahFilter = signal('');
@@ -98,6 +107,10 @@ export class RecitationsListComponent implements OnInit {
     return !!this.searchQuery() || !!this.riwayahFilter() || !!this.recitationTypeFilter();
   }
 
+  toggleView(mode: ViewMode): void {
+    this.viewMode.set(mode);
+  }
+
   loadRecitations(): void {
     this.loading.set(true);
 
@@ -122,6 +135,20 @@ export class RecitationsListComponent implements OnInit {
           );
         },
       });
+  }
+
+  onDeleteRecitation(id: number): void {
+    this.recitationsService.deleteRecitation(id).subscribe({
+      next: () => {
+        this.toast.success(this.translate.instant('RECITATIONS.CARDS.DELETE_SUCCESS'));
+        this.loadRecitations();
+      },
+      error: (error: unknown) => {
+        this.toast.error(
+          getErrorMessage(error) || this.translate.instant('RECITATIONS.CARDS.DELETE_FAILED')
+        );
+      },
+    });
   }
 
   onPageChange(page: number): void {

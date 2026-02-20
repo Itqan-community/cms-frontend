@@ -21,6 +21,14 @@
     font-size: 16px;
   }
 
+  &__controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
   &__filters {
     display: flex;
     align-items: center;
@@ -36,6 +44,60 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
+  }
+
+  &__view-toggle {
+    display: flex;
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+
+  &__view-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 32px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--color-text-secondary, #6b7280);
+    font-size: 18px;
+    transition:
+      background-color 0.2s,
+      color 0.2s;
+
+    &:hover {
+      background-color: var(--color-neutral-100, #f3f4f6);
+    }
+
+    &--active {
+      background-color: var(--color-primary-700, #4338ca);
+      color: #fff;
+
+      &:hover {
+        background-color: var(--color-primary-800, #3730a3);
+      }
+    }
+  }
+
+  &__loading {
+    display: flex;
+    justify-content: center;
+    padding: 48px;
+  }
+
+  &__cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+
+  &__pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
   }
 
   &__reciter-name {
@@ -73,11 +135,19 @@
     margin: 0;
   }
 
-  @media (min-width: 640px) {
+  @media (max-width: 992px) {
+    &__cards-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    &__cards-grid {
+      grid-template-columns: 1fr;
+    }
+
     &__toolbar {
-      flex-direction: row;
-      align-items: center;
-      justify-content: space-between;
+      flex-direction: column;
     }
   }
 }

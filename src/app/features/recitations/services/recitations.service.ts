@@ -38,4 +38,8 @@ export class RecitationsService {
 
     return this.http.get<ApiRecitations>(`${this.BASE_URL}/recitations/`, { params });
   }
+
+  deleteRecitation(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.BASE_URL}/recitations/${id}/`);
+  }
 }

@@ -6,12 +6,14 @@ export interface RecitationsStats {
 
 export interface Recitation {
   id: number;
+  reciter_id: number;
   reciter_name_ar: string;
   reciter_name_en: string;
   riwayah: string;
   recitation_type: string;
+  recitation_style: string;
   total_surahs: number;
-  audio_quality: string;
+  audio_qualities: string[];
 }
 
 export interface ApiRecitations {

@@ -1,0 +1,56 @@
+<div class="recitation-card">
+  <div class="recitation-card__header">
+    <div class="recitation-card__avatar">
+      <i class="bx bx-user-voice"></i>
+    </div>
+    <div class="recitation-card__names">
+      <h3 class="recitation-card__name-ar">{{ recitation().reciter_name_ar }}</h3>
+      <p class="recitation-card__name-en">{{ recitation().reciter_name_en }}</p>
+    </div>
+  </div>
+
+  <div class="recitation-card__meta">
+    <div class="recitation-card__meta-row">
+      <span class="recitation-card__meta-label">{{ 'RECITATIONS.CARDS.RIWAYAH' | translate }}</span>
+      <nz-tag nzColor="geekblue">{{ recitation().riwayah }}</nz-tag>
+    </div>
+    <div class="recitation-card__meta-row">
+      <span class="recitation-card__meta-label">{{ 'RECITATIONS.CARDS.TYPE' | translate }}</span>
+      <nz-tag nzColor="green">{{ recitation().recitation_type }}</nz-tag>
+    </div>
+    <div class="recitation-card__meta-row">
+      <span class="recitation-card__meta-label">{{ 'RECITATIONS.CARDS.STYLE' | translate }}</span>
+      <nz-tag nzColor="purple">{{ recitation().recitation_style }}</nz-tag>
+    </div>
+    <div class="recitation-card__meta-row">
+      <span class="recitation-card__meta-label">{{ 'RECITATIONS.CARDS.SURAHS' | translate }}</span>
+      <span class="recitation-card__meta-value">{{ recitation().total_surahs }}</span>
+    </div>
+  </div>
+
+  <div class="recitation-card__qualities">
+    <span class="recitation-card__qualities-label">{{
+      'RECITATIONS.CARDS.AUDIO_QUALITIES' | translate
+    }}</span>
+    <div class="recitation-card__qualities-tags">
+      @for (quality of recitation().audio_qualities; track quality) {
+        <nz-tag nzColor="orange">{{ quality }}</nz-tag>
+      } @empty {
+        <span class="recitation-card__no-quality">{{
+          'RECITATIONS.CARDS.NO_AUDIO' | translate
+        }}</span>
+      }
+    </div>
+  </div>
+
+  <div class="recitation-card__actions">
+    <button nz-button nzType="primary" nzSize="small" (click)="viewReciter()">
+      <i class="bx bx-user"></i>
+      {{ 'RECITATIONS.CARDS.VIEW_RECITER' | translate }}
+    </button>
+    <button nz-button nzDanger nzSize="small" (click)="confirmDelete()">
+      <i class="bx bx-trash"></i>
+      {{ 'RECITATIONS.CARDS.DELETE' | translate }}
+    </button>
+  </div>
+</div>

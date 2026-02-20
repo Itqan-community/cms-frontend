@@ -336,18 +336,36 @@
       "FILTER_RIWAYAH": "Filter by Riwayah",
       "FILTER_TYPE": "Filter by Recitation Type",
       "CLEAR_FILTERS": "Clear filters",
+      "EMPTY": "No recitations found. Add a new recitation to get started.",
+      "NO_FILTER_RESULTS": "No recitations match your filters.",
+      "VIEW_CARDS": "Card view",
+      "VIEW_TABLE": "Table view",
       "COLUMNS": {
         "RECITER": "Reciter",
         "RIWAYAH": "Riwayah",
         "TYPE": "Recitation Type",
         "SURAHS": "Total Surahs",
-        "QUALITY": "Audio Quality"
+        "QUALITY": "Audio Quality",
+        "ACTIONS": "Actions"
       },
-      "EMPTY": "No recitations found. Add a new recitation to get started.",
-      "NO_FILTER_RESULTS": "No recitations match your filters.",
       "ERRORS": {
         "LOAD_FAILED": "Failed to load recitations. Please try again."
       }
+    },
+    "CARDS": {
+      "RIWAYAH": "Riwayah",
+      "TYPE": "Recitation Type",
+      "STYLE": "Recitation Style",
+      "SURAHS": "Total Surahs",
+      "AUDIO_QUALITIES": "Available Audio Qualities",
+      "NO_AUDIO": "No audio recordings",
+      "VIEW_RECITER": "View Reciter",
+      "DELETE": "Delete",
+      "DELETE_CONFIRM_TITLE": "Confirm Delete",
+      "DELETE_CONFIRM_MESSAGE": "Are you sure you want to delete this recitation? This action cannot be undone.",
+      "DELETE_OK": "Delete",
+      "DELETE_SUCCESS": "Recitation deleted successfully.",
+      "DELETE_FAILED": "Failed to delete recitation. Please try again."
     }
   },
   "CONTENT_STANDARDS": {
