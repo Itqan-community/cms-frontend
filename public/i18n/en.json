@@ -294,6 +294,20 @@
       "ERRORS": {
         "CREATE_FAILED": "Failed to create reciter. Please try again."
       }
+    },
+    "LIST": {
+      "COLUMNS": {
+        "NAME_AR": "Name (Arabic)",
+        "NAME_EN": "Name (English)",
+        "NATIONALITY": "Nationality",
+        "DATE_OF_BIRTH": "Date of Birth",
+        "DATE_OF_DEATH": "Date of Death",
+        "IDENTIFIER": "Identifier"
+      },
+      "EMPTY": "No reciters found. Add a new reciter to get started.",
+      "ERRORS": {
+        "LOAD_FAILED": "Failed to load reciters. Please try again."
+      }
     }
   },
   "CONTENT_STANDARDS": {

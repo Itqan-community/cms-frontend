@@ -9,6 +9,11 @@ export interface Reciter {
   about: string;
 }
 
+export interface ApiReciters {
+  results: Reciter[];
+  count: number;
+}
+
 export interface CreateReciterRequest {
   identifier: string;
   name_ar: string;
