@@ -1,0 +1,41 @@
+<div class="stats-cards">
+  @if (loading()) {
+    <div class="stats-cards__card stats-cards__card--skeleton" aria-busy="true">
+      <div class="skeleton skeleton--icon"></div>
+      <div class="skeleton skeleton--value"></div>
+      <div class="skeleton skeleton--label"></div>
+    </div>
+    <div class="stats-cards__card stats-cards__card--skeleton" aria-busy="true">
+      <div class="skeleton skeleton--icon"></div>
+      <div class="skeleton skeleton--value"></div>
+      <div class="skeleton skeleton--label"></div>
+    </div>
+    <div class="stats-cards__card stats-cards__card--skeleton" aria-busy="true">
+      <div class="skeleton skeleton--icon"></div>
+      <div class="skeleton skeleton--value"></div>
+      <div class="skeleton skeleton--label"></div>
+    </div>
+  } @else if (stats()) {
+    <div class="stats-cards__card">
+      <div class="stats-cards__icon stats-cards__icon--riwayas">
+        <i class="bx bx-info-circle"></i>
+      </div>
+      <span class="stats-cards__value">{{ stats()!.riwayas }}</span>
+      <span class="stats-cards__label">{{ 'GALLERY.STATS.RIWAYAS' | translate }}</span>
+    </div>
+    <div class="stats-cards__card">
+      <div class="stats-cards__icon stats-cards__icon--recitations">
+        <i class="bx bx-music"></i>
+      </div>
+      <span class="stats-cards__value">{{ stats()!.recitations }}</span>
+      <span class="stats-cards__label">{{ 'GALLERY.STATS.RECITATIONS' | translate }}</span>
+    </div>
+    <div class="stats-cards__card">
+      <div class="stats-cards__icon stats-cards__icon--reciters">
+        <i class="bx bx-volume-full"></i>
+      </div>
+      <span class="stats-cards__value">{{ stats()!.reciters }}</span>
+      <span class="stats-cards__label">{{ 'GALLERY.STATS.RECITERS' | translate }}</span>
+    </div>
+  }
+</div>
