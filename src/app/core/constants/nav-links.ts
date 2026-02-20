@@ -20,6 +20,11 @@ export const NAV_LINKS = [
   //   disabled: true
   // },
   {
+    label: 'NAV.RECITERS',
+    link: '/reciters',
+    icon: 'bx bx-user-voice',
+  },
+  {
     label: 'NAV.CONTENT_STANDARDS',
     link: '/content-standards',
     hidden: isPublisher, // Hide content standards for publisher hosts

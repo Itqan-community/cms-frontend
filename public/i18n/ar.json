@@ -134,7 +134,8 @@
     "CONTENT_STANDARDS": "معايير المحتوى والتقنية",
     "API_DOCS": "وثائق الواجهات البرمجية (API)",
     "PUBLISHER_DASHBOARD": "لوحة التحكم للناشر",
-    "ASSET_REQUEST_FORM": "أضف محتوى قرآني في إتقان"
+    "ASSET_REQUEST_FORM": "أضف محتوى قرآني في إتقان",
+    "RECITERS": "القرّاء"
   },
   "HOME": {
     "WELCOME": "مرحبًا بك في إتقان CMS",

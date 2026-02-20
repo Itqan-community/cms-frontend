@@ -134,7 +134,8 @@
     "CONTENT_STANDARDS": "Content Standards",
     "API_DOCS": "API Docs",
     "PUBLISHER_DASHBOARD": "Publisher Dashboard",
-    "ASSET_REQUEST_FORM": "Add Quranic Content to ITQAN"
+    "ASSET_REQUEST_FORM": "Add Quranic Content to ITQAN",
+    "RECITERS": "Reciters"
   },
   "HOME": {
     "WELCOME": "Welcome to Itqan CMS",
