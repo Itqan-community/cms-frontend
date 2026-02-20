@@ -1,0 +1,183 @@
+<div class="recitations-list">
+  <div class="recitations-list__toolbar">
+    <div class="recitations-list__search">
+      <nz-input-group [nzPrefix]="searchIconTpl">
+        <input
+          nz-input
+          type="text"
+          [placeholder]="'RECITATIONS.LIST.SEARCH_PLACEHOLDER' | translate"
+          [ngModel]="searchQuery()"
+          (ngModelChange)="onSearchInput($event)"
+        />
+      </nz-input-group>
+      <ng-template #searchIconTpl>
+        <i class="bx bx-search recitations-list__search-icon"></i>
+      </ng-template>
+    </div>
+
+    <div class="recitations-list__controls">
+      <div class="recitations-list__filters">
+        <nz-select
+          class="recitations-list__filter-select"
+          [nzPlaceHolder]="'RECITATIONS.LIST.FILTER_RIWAYAH' | translate"
+          [ngModel]="riwayahFilter()"
+          (ngModelChange)="onRiwayahChange($event)"
+          nzAllowClear
+        >
+          @for (option of RIWAYAH_OPTIONS; track option) {
+            <nz-option [nzValue]="option" [nzLabel]="option"></nz-option>
+          }
+        </nz-select>
+
+        <nz-select
+          class="recitations-list__filter-select"
+          [nzPlaceHolder]="'RECITATIONS.LIST.FILTER_TYPE' | translate"
+          [ngModel]="recitationTypeFilter()"
+          (ngModelChange)="onRecitationTypeChange($event)"
+          nzAllowClear
+        >
+          @for (option of RECITATION_TYPE_OPTIONS; track option) {
+            <nz-option [nzValue]="option" [nzLabel]="option"></nz-option>
+          }
+        </nz-select>
+
+        @if (hasActiveFilters) {
+          <button
+            nz-button
+            nzType="default"
+            nzSize="small"
+            class="recitations-list__clear-btn"
+            (click)="clearFilters()"
+          >
+            <i class="bx bx-x"></i>
+            {{ 'RECITATIONS.LIST.CLEAR_FILTERS' | translate }}
+          </button>
+        }
+      </div>
+
+      <div class="recitations-list__view-toggle">
+        <button
+          class="recitations-list__view-btn"
+          [class.recitations-list__view-btn--active]="viewMode() === 'cards'"
+          (click)="toggleView('cards')"
+          [title]="'RECITATIONS.LIST.VIEW_CARDS' | translate"
+        >
+          <i class="bx bx-grid-alt"></i>
+        </button>
+        <button
+          class="recitations-list__view-btn"
+          [class.recitations-list__view-btn--active]="viewMode() === 'table'"
+          (click)="toggleView('table')"
+          [title]="'RECITATIONS.LIST.VIEW_TABLE' | translate"
+        >
+          <i class="bx bx-list-ul"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (viewMode() === 'cards') {
+    @if (loading()) {
+      <div class="recitations-list__loading">
+        <nz-spin nzSimple></nz-spin>
+      </div>
+    } @else if (recitations().length === 0) {
+      <div class="recitations-list__empty">
+        <i class="bx bx-headphone recitations-list__empty-icon"></i>
+        @if (hasActiveFilters) {
+          <p>{{ 'RECITATIONS.LIST.NO_FILTER_RESULTS' | translate }}</p>
+        } @else {
+          <p>{{ 'RECITATIONS.LIST.EMPTY' | translate }}</p>
+        }
+      </div>
+    } @else {
+      <div class="recitations-list__cards-grid">
+        @for (item of recitations(); track item.id) {
+          <app-recitation-card [recitation]="item" (deleted)="onDeleteRecitation($event)" />
+        }
+      </div>
+      <div class="recitations-list__pagination">
+        <nz-pagination
+          [nzPageIndex]="pageIndex()"
+          [nzPageSize]="pageSize()"
+          [nzTotal]="total()"
+          [nzShowSizeChanger]="true"
+          [nzPageSizeOptions]="[6, 12, 24]"
+          (nzPageIndexChange)="onPageChange($event)"
+          (nzPageSizeChange)="onPageSizeChange($event)"
+        ></nz-pagination>
+      </div>
+    }
+  } @else {
+    <nz-table
+      #recitationsTable
+      [nzData]="recitations()"
+      [nzLoading]="loading()"
+      [nzTotal]="total()"
+      [nzPageIndex]="pageIndex()"
+      [nzPageSize]="pageSize()"
+      [nzFrontPagination]="false"
+      [nzShowSizeChanger]="true"
+      [nzPageSizeOptions]="[5, 10, 20]"
+      nzSize="middle"
+      [nzNoResult]="emptyTpl"
+      (nzPageIndexChange)="onPageChange($event)"
+      (nzPageSizeChange)="onPageSizeChange($event)"
+    >
+      <thead>
+        <tr>
+          <th>{{ 'RECITATIONS.LIST.COLUMNS.RECITER' | translate }}</th>
+          <th>{{ 'RECITATIONS.LIST.COLUMNS.RIWAYAH' | translate }}</th>
+          <th>{{ 'RECITATIONS.LIST.COLUMNS.TYPE' | translate }}</th>
+          <th>{{ 'RECITATIONS.LIST.COLUMNS.SURAHS' | translate }}</th>
+          <th>{{ 'RECITATIONS.LIST.COLUMNS.QUALITY' | translate }}</th>
+          <th>{{ 'RECITATIONS.LIST.COLUMNS.ACTIONS' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (item of recitationsTable.data; track item.id) {
+          <tr>
+            <td class="recitations-list__reciter-name">
+              <span class="recitations-list__name-ar">{{ item.reciter_name_ar }}</span>
+              <span class="recitations-list__name-en">{{ item.reciter_name_en }}</span>
+            </td>
+            <td>
+              <nz-tag nzColor="geekblue">{{ item.riwayah }}</nz-tag>
+            </td>
+            <td>
+              <nz-tag nzColor="green">{{ item.recitation_type }}</nz-tag>
+            </td>
+            <td>{{ item.total_surahs }}</td>
+            <td>
+              @for (q of item.audio_qualities; track q) {
+                <nz-tag nzColor="orange">{{ q }}</nz-tag>
+              }
+            </td>
+            <td>
+              <button
+                nz-button
+                nzDanger
+                nzType="text"
+                nzSize="small"
+                (click)="onDeleteRecitation(item.id)"
+              >
+                <i class="bx bx-trash"></i>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </nz-table>
+
+    <ng-template #emptyTpl>
+      <div class="recitations-list__empty">
+        <i class="bx bx-headphone recitations-list__empty-icon"></i>
+        @if (hasActiveFilters) {
+          <p>{{ 'RECITATIONS.LIST.NO_FILTER_RESULTS' | translate }}</p>
+        } @else {
+          <p>{{ 'RECITATIONS.LIST.EMPTY' | translate }}</p>
+        }
+      </div>
+    </ng-template>
+  }
+</div>

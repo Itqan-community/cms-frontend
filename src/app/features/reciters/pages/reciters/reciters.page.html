@@ -1,0 +1,13 @@
+<div class="reciters">
+  <div class="reciters__header">
+    <h1 class="reciters__title">{{ 'RECITERS.TITLE' | translate }}</h1>
+    <p class="reciters__description">{{ 'RECITERS.DESCRIPTION' | translate }}</p>
+  </div>
+
+  <app-reciters-stats />
+
+  <div class="reciters__content">
+    <app-reciter-form (reciterCreated)="onReciterCreated()" />
+    <app-reciters-list />
+  </div>
+</div>

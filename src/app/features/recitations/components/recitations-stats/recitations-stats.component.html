@@ -1,0 +1,53 @@
+<div class="recitations-stats">
+  @if (loading()) {
+    <div class="recitations-stats__loading">
+      <nz-spin nzSimple></nz-spin>
+    </div>
+  } @else if (error()) {
+    <div class="recitations-stats__error">
+      <i class="bx bx-error-circle recitations-stats__error-icon"></i>
+      <span>{{ 'RECITATIONS.STATS.LOAD_ERROR' | translate }}</span>
+      <button class="recitations-stats__retry-btn" (click)="loadStats()">
+        {{ 'RECITATIONS.STATS.RETRY' | translate }}
+      </button>
+    </div>
+  } @else if (stats(); as s) {
+    <div class="recitations-stats__grid">
+      <div class="recitations-stats__card">
+        <div class="recitations-stats__icon-wrapper recitations-stats__icon-wrapper--teal">
+          <i class="bx bx-book-open"></i>
+        </div>
+        <div class="recitations-stats__info">
+          <span class="recitations-stats__value">{{ s.total_riwayas }}</span>
+          <span class="recitations-stats__label">{{
+            'RECITATIONS.STATS.TOTAL_RIWAYAS' | translate
+          }}</span>
+        </div>
+      </div>
+
+      <div class="recitations-stats__card">
+        <div class="recitations-stats__icon-wrapper recitations-stats__icon-wrapper--blue">
+          <i class="bx bx-user-voice"></i>
+        </div>
+        <div class="recitations-stats__info">
+          <span class="recitations-stats__value">{{ s.total_reciters }}</span>
+          <span class="recitations-stats__label">{{
+            'RECITATIONS.STATS.TOTAL_RECITERS' | translate
+          }}</span>
+        </div>
+      </div>
+
+      <div class="recitations-stats__card">
+        <div class="recitations-stats__icon-wrapper recitations-stats__icon-wrapper--amber">
+          <i class="bx bx-headphone"></i>
+        </div>
+        <div class="recitations-stats__info">
+          <span class="recitations-stats__value">{{ s.total_recitations }}</span>
+          <span class="recitations-stats__label">{{
+            'RECITATIONS.STATS.TOTAL_RECITATIONS' | translate
+          }}</span>
+        </div>
+      </div>
+    </div>
+  }
+</div>

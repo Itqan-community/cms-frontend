@@ -1,0 +1,18 @@
+<div class="toast-container" aria-live="polite">
+  @for (toast of toastService.toasts(); track toast.id) {
+    <div class="toast toast--{{ toast.type }}" role="alert">
+      <div class="toast__icon">
+        <i [class]="getIcon(toast.type)"></i>
+      </div>
+      <div class="toast__message">{{ toast.message }}</div>
+      @if (toast.dismissible) {
+        <button class="toast__close" (click)="dismiss(toast)" aria-label="Dismiss notification">
+          <i class="bx bx-x"></i>
+        </button>
+      }
+      @if (toast.duration > 0) {
+        <div class="toast__progress" [style.animation-duration.ms]="toast.duration"></div>
+      }
+    </div>
+  }
+</div>

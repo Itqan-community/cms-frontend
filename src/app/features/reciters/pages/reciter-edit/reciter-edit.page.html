@@ -1,0 +1,194 @@
+@if (loading()) {
+  <div class="reciter-edit__loading">
+    <span class="reciter-edit__spinner" aria-hidden="true"></span>
+    {{ 'COMMON.LOADING' | translate }}
+  </div>
+} @else if (notFound()) {
+  <div class="reciter-edit__not-found">
+    <i class="bx bx-error-circle reciter-edit__not-found-icon"></i>
+    <h2>{{ 'RECITERS.EDIT.NOT_FOUND_TITLE' | translate }}</h2>
+    <p>{{ 'RECITERS.EDIT.NOT_FOUND_MESSAGE' | translate }}</p>
+    <button nz-button nzType="primary" nzSize="large" (click)="cancel()">
+      {{ 'RECITERS.EDIT.BACK_TO_LIST' | translate }}
+    </button>
+  </div>
+} @else {
+  <div class="reciter-edit">
+    <div class="reciter-edit__header">
+      <h1 class="reciter-edit__title">{{ 'RECITERS.EDIT.TITLE' | translate }}</h1>
+    </div>
+
+    <div class="reciter-edit__container">
+      <form [formGroup]="editForm" (ngSubmit)="onSubmit()" class="reciter-edit__form">
+        <div class="reciter-edit__grid">
+          <!-- Identifier -->
+          <div class="reciter-edit__field">
+            <label for="identifier" class="reciter-edit__label">
+              {{ 'RECITERS.FORM.IDENTIFIER_LABEL' | translate }}
+              <span class="reciter-edit__required">*</span>
+            </label>
+            <input
+              id="identifier"
+              type="text"
+              formControlName="identifier"
+              [placeholder]="'RECITERS.FORM.PLACEHOLDERS.IDENTIFIER' | translate"
+              class="reciter-edit__input"
+              [class.reciter-edit__input--invalid]="
+                editForm.get('identifier')?.invalid && editForm.get('identifier')?.touched
+              "
+            />
+            @if (
+              editForm.get('identifier')?.hasError('required') &&
+              editForm.get('identifier')?.touched
+            ) {
+              <p class="reciter-edit__error">
+                {{ 'FORMS.VALIDATION.REQUIRED' | translate }}
+              </p>
+            }
+          </div>
+
+          <!-- Name Arabic -->
+          <div class="reciter-edit__field">
+            <label for="name_ar" class="reciter-edit__label">
+              {{ 'RECITERS.FORM.NAME_AR_LABEL' | translate }}
+              <span class="reciter-edit__required">*</span>
+            </label>
+            <input
+              id="name_ar"
+              type="text"
+              formControlName="name_ar"
+              dir="rtl"
+              [placeholder]="'RECITERS.FORM.PLACEHOLDERS.NAME_AR' | translate"
+              class="reciter-edit__input"
+              [class.reciter-edit__input--invalid]="
+                editForm.get('name_ar')?.invalid && editForm.get('name_ar')?.touched
+              "
+            />
+            @if (
+              editForm.get('name_ar')?.hasError('required') &&
+              editForm.get('name_ar')?.touched
+            ) {
+              <p class="reciter-edit__error">
+                {{ 'FORMS.VALIDATION.REQUIRED' | translate }}
+              </p>
+            }
+          </div>
+
+          <!-- Name English -->
+          <div class="reciter-edit__field">
+            <label for="name_en" class="reciter-edit__label">
+              {{ 'RECITERS.FORM.NAME_EN_LABEL' | translate }}
+              <span class="reciter-edit__required">*</span>
+            </label>
+            <input
+              id="name_en"
+              type="text"
+              formControlName="name_en"
+              dir="ltr"
+              [placeholder]="'RECITERS.FORM.PLACEHOLDERS.NAME_EN' | translate"
+              class="reciter-edit__input"
+              [class.reciter-edit__input--invalid]="
+                editForm.get('name_en')?.invalid && editForm.get('name_en')?.touched
+              "
+            />
+            @if (
+              editForm.get('name_en')?.hasError('required') &&
+              editForm.get('name_en')?.touched
+            ) {
+              <p class="reciter-edit__error">
+                {{ 'FORMS.VALIDATION.REQUIRED' | translate }}
+              </p>
+            }
+          </div>
+
+          <!-- Nationality -->
+          <div class="reciter-edit__field">
+            <label for="nationality" class="reciter-edit__label">
+              {{ 'RECITERS.FORM.NATIONALITY_LABEL' | translate }}
+              <span class="reciter-edit__required">*</span>
+            </label>
+            <input
+              id="nationality"
+              type="text"
+              formControlName="nationality"
+              [placeholder]="'RECITERS.FORM.PLACEHOLDERS.NATIONALITY' | translate"
+              class="reciter-edit__input"
+              [class.reciter-edit__input--invalid]="
+                editForm.get('nationality')?.invalid && editForm.get('nationality')?.touched
+              "
+            />
+            @if (
+              editForm.get('nationality')?.hasError('required') &&
+              editForm.get('nationality')?.touched
+            ) {
+              <p class="reciter-edit__error">
+                {{ 'FORMS.VALIDATION.REQUIRED' | translate }}
+              </p>
+            }
+          </div>
+
+          <!-- Date of Birth -->
+          <div class="reciter-edit__field">
+            <label for="date_of_birth" class="reciter-edit__label">
+              {{ 'RECITERS.FORM.DATE_OF_BIRTH_LABEL' | translate }}
+            </label>
+            <input
+              id="date_of_birth"
+              type="date"
+              formControlName="date_of_birth"
+              class="reciter-edit__input"
+            />
+          </div>
+
+          <!-- Date of Death -->
+          <div class="reciter-edit__field">
+            <label for="date_of_death" class="reciter-edit__label">
+              {{ 'RECITERS.FORM.DATE_OF_DEATH_LABEL' | translate }}
+            </label>
+            <input
+              id="date_of_death"
+              type="date"
+              formControlName="date_of_death"
+              class="reciter-edit__input"
+            />
+          </div>
+        </div>
+
+        <!-- About -->
+        <div class="reciter-edit__field reciter-edit__field--full">
+          <label for="about" class="reciter-edit__label">
+            {{ 'RECITERS.FORM.ABOUT_LABEL' | translate }}
+          </label>
+          <textarea
+            id="about"
+            formControlName="about"
+            rows="4"
+            [placeholder]="'RECITERS.FORM.PLACEHOLDERS.ABOUT' | translate"
+            class="reciter-edit__textarea"
+          ></textarea>
+        </div>
+
+        <!-- Form Actions -->
+        <div class="reciter-edit__actions">
+          <button
+            nz-button
+            nzType="primary"
+            nzSize="large"
+            type="submit"
+            [disabled]="editForm.invalid || saving()"
+          >
+            @if (saving()) {
+              <span class="reciter-edit__spinner" aria-hidden="true"></span>
+              {{ 'RECITERS.EDIT.SAVING' | translate }}
+            } @else {
+              {{ 'RECITERS.EDIT.SAVE_BUTTON' | translate }}
+            }
+          </button>
+          <button nz-button nzSize="large" type="button" (click)="cancel()">
+            {{ 'COMMON.CANCEL' | translate }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

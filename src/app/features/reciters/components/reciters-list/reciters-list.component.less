@@ -1,0 +1,73 @@
+.reciters-list {
+  &__search {
+    margin-bottom: 16px;
+
+    nz-input-group {
+      max-width: 400px;
+    }
+
+    input {
+      font-size: 14px;
+    }
+  }
+
+  &__search-icon {
+    color: var(--color-text-muted, #9ca3af);
+    font-size: 16px;
+  }
+
+  &__name-ar {
+    font-weight: 600;
+    font-size: 15px;
+  }
+
+  &__identifier {
+    padding: 2px 8px;
+    background: var(--color-neutral-100, #f3f4f6);
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--color-text-secondary, #6b7280);
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    color: var(--color-text-secondary, #6b7280);
+    transition: background-color 0.2s, color 0.2s;
+    font-size: 18px;
+
+    &:hover {
+      background-color: var(--color-neutral-100, #f3f4f6);
+      color: var(--color-primary-700, #1d4ed8);
+    }
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+    color: var(--color-text-muted, #9ca3af);
+  }
+
+  &__empty-icon {
+    font-size: 48px;
+    margin-bottom: 12px;
+  }
+
+  &__empty p {
+    font-size: 15px;
+    margin: 0;
+  }
+}

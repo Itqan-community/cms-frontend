@@ -1,0 +1,53 @@
+<div class="reciters-stats">
+  @if (loading()) {
+    <div class="reciters-stats__loading">
+      <nz-spin nzSimple></nz-spin>
+    </div>
+  } @else if (error()) {
+    <div class="reciters-stats__error">
+      <i class="bx bx-error-circle reciters-stats__error-icon"></i>
+      <span>{{ 'RECITERS.STATS.LOAD_ERROR' | translate }}</span>
+      <button class="reciters-stats__retry-btn" (click)="loadStats()">
+        {{ 'RECITERS.STATS.RETRY' | translate }}
+      </button>
+    </div>
+  } @else if (stats(); as s) {
+    <div class="reciters-stats__grid">
+      <div class="reciters-stats__card">
+        <div class="reciters-stats__icon-wrapper reciters-stats__icon-wrapper--blue">
+          <i class="bx bx-user-voice"></i>
+        </div>
+        <div class="reciters-stats__info">
+          <span class="reciters-stats__value">{{ s.total_reciters }}</span>
+          <span class="reciters-stats__label">{{
+            'RECITERS.STATS.TOTAL_RECITERS' | translate
+          }}</span>
+        </div>
+      </div>
+
+      <div class="reciters-stats__card">
+        <div class="reciters-stats__icon-wrapper reciters-stats__icon-wrapper--green">
+          <i class="bx bx-globe"></i>
+        </div>
+        <div class="reciters-stats__info">
+          <span class="reciters-stats__value">{{ s.total_nationalities }}</span>
+          <span class="reciters-stats__label">{{
+            'RECITERS.STATS.TOTAL_NATIONALITIES' | translate
+          }}</span>
+        </div>
+      </div>
+
+      <div class="reciters-stats__card">
+        <div class="reciters-stats__icon-wrapper reciters-stats__icon-wrapper--purple">
+          <i class="bx bx-microphone"></i>
+        </div>
+        <div class="reciters-stats__info">
+          <span class="reciters-stats__value">{{ s.contemporary_reciters }}</span>
+          <span class="reciters-stats__label">{{
+            'RECITERS.STATS.CONTEMPORARY_RECITERS' | translate
+          }}</span>
+        </div>
+      </div>
+    </div>
+  }
+</div>

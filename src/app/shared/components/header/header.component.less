@@ -3,51 +3,88 @@
   top: 0;
   z-index: 50;
   width: 100%;
-  height: 64px; // h-16
-  background-color: #fff;
+  background-color: var(--color-surface);
   border-bottom: 1px solid var(--color-neutral-100);
+  transition: background-color 0.3s ease;
 
   &__container {
     max-width: var(--container-max-width);
     height: 100%;
-    padding-left: 16px; // px-4
-    padding-right: 16px;
-    margin-left: auto; // mx-auto
+    padding-left: 24px;
+    padding-right: 24px;
+    margin-left: auto;
     margin-right: auto;
   }
 
   &__row {
     display: flex;
-    height: 100%;
+    height: 64px;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
   }
 
   &__brand {
     display: flex;
     align-items: center;
-    column-gap: 56px; // gap-14
+    gap: 12px;
+    flex-shrink: 0;
+  }
+
+  &__logo {
+    display: flex;
+    align-items: center;
   }
 
   &__logo-img {
     width: auto;
-    height: auto;
+    height: 36px;
+  }
+
+  &__divider {
+    width: 1px;
+    height: 24px;
+    background-color: var(--color-neutral-200);
+    flex-shrink: 0;
+  }
+
+  &__nav-wrapper {
+    display: none;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none; // Firefox
+    -ms-overflow-style: none; // IE/Edge
+
+    &::-webkit-scrollbar {
+      display: none; // Chrome/Safari
+    }
   }
 
   &__actions {
     display: flex;
     align-items: center;
-    column-gap: 16px; // gap-4
+    flex-shrink: 0;
   }
 
   &__actions-desktop {
     display: none;
   }
 
+  &__actions-group {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px;
+    background-color: var(--color-neutral-50, #f9fafb);
+    border-radius: 12px;
+    border: 1px solid var(--color-neutral-100, #f3f4f6);
+  }
+
   &__actions-mobile {
     display: flex;
     align-items: center;
-    column-gap: 12px; // gap-3
+    gap: 8px;
   }
 
   &__menu-btn {
@@ -55,27 +92,49 @@
     align-items: center;
     justify-content: center;
     background: transparent;
-    border: none;
+    border: 1px solid var(--color-neutral-200);
+    border-radius: 10px;
     padding: 0;
-    height: 32px;
-    width: 32px;
+    height: 36px;
+    width: 36px;
     cursor: pointer;
-  }
+    color: var(--color-text-secondary, #6b7280);
+    transition:
+      background-color 0.2s,
+      color 0.2s;
 
-  &__menu-icon {
-    width: 20px; // w-5
-    height: 20px; // h-5
+    &:hover {
+      background-color: var(--color-neutral-100);
+      color: var(--color-text-primary);
+    }
+
+    i {
+      font-size: 20px;
+    }
   }
 
   @media (min-width: 992px) {
-    // lg breakpoint
+    &__nav-wrapper {
+      display: flex;
+      align-items: center;
+    }
+
     &__actions-desktop {
       display: flex;
       align-items: center;
-      column-gap: 16px;
+      gap: 12px;
     }
+
     &__actions-mobile {
       display: none;
     }
+  }
+}
+
+// Dark mode overrides
+html[data-theme='dark'] {
+  .app-header__actions-group {
+    background-color: var(--color-neutral-100, #1f2937);
+    border-color: var(--color-border, #374151);
   }
 }

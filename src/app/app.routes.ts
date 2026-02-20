@@ -83,5 +83,35 @@ export const routes: Routes = [
         (m) => m.LicenseDetailsPage
       ),
   },
+  {
+    path: 'reciters',
+    loadComponent: () =>
+      import('./features/reciters/pages/reciters/reciters.page').then((m) => m.RecitersPage),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'reciters/:id',
+    loadComponent: () =>
+      import('./features/reciters/pages/reciter-detail/reciter-detail.page').then(
+        (m) => m.ReciterDetailPage
+      ),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'reciters/:id/edit',
+    loadComponent: () =>
+      import('./features/reciters/pages/reciter-edit/reciter-edit.page').then(
+        (m) => m.ReciterEditPage
+      ),
+    canActivate: [authGuard],
+  },
+  {
+    path: 'recitations',
+    loadComponent: () =>
+      import('./features/recitations/pages/recitations/recitations.page').then(
+        (m) => m.RecitationsPage
+      ),
+    canActivate: [authGuard],
+  },
   { path: '**', redirectTo: 'gallery' },
 ];

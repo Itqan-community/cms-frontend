@@ -5,10 +5,12 @@ import { TranslateService } from '@ngx-translate/core';
 import { GoogleAnalyticsService } from './core/services/google-analytics.service';
 import { WebVitalsService } from './core/services/web-vitals.service';
 import { HeaderComponent } from './shared/components/header/header.component';
+import { ToastContainerComponent } from './shared/components/toast-container/toast-container.component';
+import { ThemeService } from './shared/services/theme.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent],
+  imports: [RouterOutlet, HeaderComponent, ToastContainerComponent],
   templateUrl: './app.html',
   styleUrl: './app.less',
 })
@@ -18,12 +20,14 @@ export class App {
   protected router = inject(Router);
   private readonly webVitalsService = inject(WebVitalsService);
   private readonly googleAnalyticsService = inject(GoogleAnalyticsService);
+  private readonly themeService = inject(ThemeService);
 
   protected readonly title = signal('ITQAN | إتقان');
 
   constructor() {
     void this.webVitalsService;
     this.googleAnalyticsService.init();
+    this.themeService.init();
 
     const currentLang = localStorage.getItem('lang') || 'ar';
     this.translate.addLangs(['ar', 'en']);

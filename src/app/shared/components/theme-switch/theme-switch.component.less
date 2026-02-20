@@ -1,0 +1,25 @@
+.theme-switch__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  color: var(--color-text-secondary, #6b7280);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
+
+  &:hover {
+    background-color: var(--color-neutral-200, #e5e7eb);
+    color: var(--color-text-primary);
+  }
+
+  i {
+    font-size: 18px;
+  }
+}

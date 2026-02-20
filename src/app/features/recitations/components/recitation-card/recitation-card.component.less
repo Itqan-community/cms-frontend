@@ -1,0 +1,120 @@
+.recitation-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 20px;
+  background-color: var(--color-surface, #fff);
+  border-radius: 12px;
+  box-shadow: 0 1px 2px 0 var(--color-card-shadow, rgba(0, 0, 0, 0.05));
+  transition:
+    background-color 0.3s ease,
+    box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px 0 var(--color-card-shadow, rgba(0, 0, 0, 0.08));
+  }
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #dbeafe;
+    color: #2563eb;
+    font-size: 24px;
+    flex-shrink: 0;
+  }
+
+  &__names {
+    min-width: 0;
+  }
+
+  &__name-ar {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--color-text-primary, #111827);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__name-en {
+    font-size: 13px;
+    color: var(--color-text-secondary, #6b7280);
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  &__meta-label {
+    font-size: 13px;
+    color: var(--color-text-secondary, #6b7280);
+  }
+
+  &__meta-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--color-text-primary, #111827);
+  }
+
+  &__qualities {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding-top: 8px;
+    border-top: 1px solid var(--color-border, #e5e7eb);
+  }
+
+  &__qualities-label {
+    font-size: 13px;
+    color: var(--color-text-secondary, #6b7280);
+  }
+
+  &__qualities-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  &__no-quality {
+    font-size: 12px;
+    color: var(--color-text-muted, #9ca3af);
+    font-style: italic;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--color-border, #e5e7eb);
+  }
+}
+
+html[data-theme='dark'] {
+  .recitation-card__avatar {
+    background-color: rgba(37, 99, 235, 0.15);
+  }
+}
