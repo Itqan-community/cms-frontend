@@ -135,7 +135,8 @@
     "API_DOCS": "API Docs",
     "PUBLISHER_DASHBOARD": "Publisher Dashboard",
     "ASSET_REQUEST_FORM": "Add Quranic Content to ITQAN",
-    "RECITERS": "Reciters"
+    "RECITERS": "Reciters",
+    "RECITATIONS": "Recitations"
   },
   "HOME": {
     "WELCOME": "Welcome to Itqan CMS",
@@ -318,6 +319,17 @@
       "ERRORS": {
         "LOAD_FAILED": "Failed to load reciters. Please try again."
       }
+    }
+  },
+  "RECITATIONS": {
+    "TITLE": "Audio Recitations",
+    "DESCRIPTION": "View statistics and data about the Quranic audio recitations library.",
+    "STATS": {
+      "TOTAL_RIWAYAS": "Riwayas",
+      "TOTAL_RECITERS": "Reciters",
+      "TOTAL_RECITATIONS": "Recitations",
+      "LOAD_ERROR": "Failed to load statistics.",
+      "RETRY": "Retry"
     }
   },
   "CONTENT_STANDARDS": {

@@ -89,5 +89,13 @@ export const routes: Routes = [
       import('./features/reciters/pages/reciters/reciters.page').then((m) => m.RecitersPage),
     canActivate: [authGuard],
   },
+  {
+    path: 'recitations',
+    loadComponent: () =>
+      import('./features/recitations/pages/recitations/recitations.page').then(
+        (m) => m.RecitationsPage
+      ),
+    canActivate: [authGuard],
+  },
   { path: '**', redirectTo: 'gallery' },
 ];

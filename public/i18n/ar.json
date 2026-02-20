@@ -135,7 +135,8 @@
     "API_DOCS": "وثائق الواجهات البرمجية (API)",
     "PUBLISHER_DASHBOARD": "لوحة التحكم للناشر",
     "ASSET_REQUEST_FORM": "أضف محتوى قرآني في إتقان",
-    "RECITERS": "القرّاء"
+    "RECITERS": "القرّاء",
+    "RECITATIONS": "المصاحف الصوتية"
   },
   "HOME": {
     "WELCOME": "مرحبًا بك في إتقان CMS",
@@ -318,6 +319,17 @@
       "ERRORS": {
         "LOAD_FAILED": "فشل تحميل القرّاء. يرجى المحاولة مرة أخرى."
       }
+    }
+  },
+  "RECITATIONS": {
+    "TITLE": "المصاحف الصوتية",
+    "DESCRIPTION": "عرض إحصائيات وبيانات المصاحف الصوتية في المكتبة القرآنية.",
+    "STATS": {
+      "TOTAL_RIWAYAS": "عدد الروايات",
+      "TOTAL_RECITERS": "عدد القرّاء",
+      "TOTAL_RECITATIONS": "عدد المصاحف الصوتية",
+      "LOAD_ERROR": "تعذّر تحميل الإحصائيات.",
+      "RETRY": "إعادة المحاولة"
     }
   },
   "CONTENT_STANDARDS": {

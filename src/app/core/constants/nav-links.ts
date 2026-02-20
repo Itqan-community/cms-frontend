@@ -25,6 +25,11 @@ export const NAV_LINKS = [
     icon: 'bx bx-user-voice',
   },
   {
+    label: 'NAV.RECITATIONS',
+    link: '/recitations',
+    icon: 'bx bx-headphone',
+  },
+  {
     label: 'NAV.CONTENT_STANDARDS',
     link: '/content-standards',
     hidden: isPublisher, // Hide content standards for publisher hosts
