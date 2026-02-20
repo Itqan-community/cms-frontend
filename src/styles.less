@@ -37,6 +37,10 @@ html[dir='rtl'] {
 
 body {
   background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 }
 
 .bx {
@@ -49,6 +53,106 @@ body {
   gap: 1rem;
   padding: 1rem;
   border-radius: 20px;
-  background-color: #fff;
-  box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.05);
+  background-color: var(--color-surface);
+  box-shadow: 0px 1px 2px 0px var(--color-card-shadow);
+}
+
+// Dark mode overrides for Ng-Zorro components
+html[data-theme='dark'] {
+  .ant-btn {
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+    border-color: var(--color-border);
+
+    &:not(.ant-btn-dangerous):hover,
+    &:not(.ant-btn-dangerous):focus,
+    &:not(.ant-btn-dangerous):active {
+      background-color: var(--color-neutral-100);
+      color: var(--color-text-primary);
+    }
+  }
+
+  .ant-input {
+    background-color: var(--color-input-bg);
+    color: var(--color-text-primary);
+    border-color: var(--color-border);
+
+    &::placeholder {
+      color: var(--color-text-muted);
+    }
+  }
+
+  .ant-table {
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+
+    .ant-table-thead > tr > th {
+      background-color: var(--color-bg);
+      color: var(--color-text-secondary);
+      border-color: var(--color-border);
+    }
+
+    .ant-table-tbody > tr > td {
+      border-color: var(--color-border);
+    }
+
+    .ant-table-tbody > tr:hover > td {
+      background-color: var(--color-neutral-100);
+    }
+  }
+
+  .ant-pagination {
+    .ant-pagination-item {
+      background-color: var(--color-surface);
+      border-color: var(--color-border);
+
+      a {
+        color: var(--color-text-primary);
+      }
+    }
+
+    .ant-pagination-item-active {
+      border-color: var(--color-primary-700);
+    }
+  }
+
+  .ant-select-selector {
+    background-color: var(--color-input-bg) !important;
+    color: var(--color-text-primary) !important;
+    border-color: var(--color-border) !important;
+  }
+
+  .ant-modal .ant-modal-content {
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+  }
+
+  .ant-modal .ant-modal-header {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+  }
+
+  .ant-drawer .ant-drawer-content {
+    background-color: var(--color-surface);
+    color: var(--color-text-primary);
+  }
+
+  .ant-tag {
+    background-color: var(--color-neutral-100);
+    border-color: var(--color-border);
+    color: var(--color-text-primary);
+  }
+
+  .ant-empty-description {
+    color: var(--color-text-muted);
+  }
+
+  .ant-spin-text {
+    color: var(--color-text-secondary);
+  }
+
+  .slick-arrow {
+    background-color: var(--color-surface) !important;
+    border-color: var(--color-border) !important;
+  }
 }

@@ -41,6 +41,7 @@
       <div class="app-header__actions">
         <!-- Desktop Actions -->
         <div class="app-header__actions-desktop">
+          <app-theme-switch></app-theme-switch>
           <app-lang-switch></app-lang-switch>
           <app-user-actions (logoutClicked)="authService.logout()"></app-user-actions>
         </div>

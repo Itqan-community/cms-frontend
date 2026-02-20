@@ -6,6 +6,7 @@ import { isPublisherHost } from '../../utils/publisherhost.util';
 import { LangSwitchComponent } from '../lang-switch/lang-switch.component';
 import { MobileMenuComponent } from '../mobile-menu/mobile-menu.component';
 import { NavigationMenuComponent } from '../navigation-menu/navigation-menu.component';
+import { ThemeSwitchComponent } from '../theme-switch/theme-switch.component';
 import { UserActionsComponent } from '../user-actions/user-actions.component';
 
 @Component({
@@ -17,6 +18,7 @@ import { UserActionsComponent } from '../user-actions/user-actions.component';
     NavigationMenuComponent,
     UserActionsComponent,
     MobileMenuComponent,
+    ThemeSwitchComponent,
   ],
   styleUrls: ['./header.component.less'],
   templateUrl: './header.component.html',
