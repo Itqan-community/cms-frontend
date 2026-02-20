@@ -152,7 +152,12 @@
     "VIEW_LICENSE": "عرض الترخيص",
     "DETAILS_TITLE": "تفاصيل الأصل",
     "ASSET_ID": "معرّف الأصل",
-    "DETAILS_DESC": "نص مؤقت لتفاصيل الأصل."
+    "DETAILS_DESC": "نص مؤقت لتفاصيل الأصل.",
+    "STATS": {
+      "RIWAYAS": "رواية متاحة",
+      "RECITERS": "قارئ متاح",
+      "RECITATIONS": "قراءة متاحة"
+    }
   },
   "UI": {
     "FILTERS": "تصفية",
