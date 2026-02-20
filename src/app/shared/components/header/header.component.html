@@ -1,11 +1,10 @@
 <header class="app-header">
   <div class="app-header__container">
     <div class="app-header__row">
-      <!-- Logo and Navigation -->
+      <!-- Logo -->
       <div class="app-header__brand">
         <a class="app-header__logo" [routerLink]="['/']">
           @if (isPublisherHost) {
-            <!-- Mock Publisher Logo -->
             <div class="publisher-logo">
               <svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
                 <rect width="120" height="40" rx="4" fill="#4F46E5" />
@@ -27,13 +26,18 @@
               alt="Itqan CMS"
               loading="lazy"
               width="120"
-              height="40"
+              height="36"
               decoding="async"
               class="app-header__logo-img"
               src="assets/images/logo.svg"
             />
           }
         </a>
+        <span class="app-header__divider"></span>
+      </div>
+
+      <!-- Navigation -->
+      <div class="app-header__nav-wrapper">
         <app-navigation-menu [links]="NAV_LINKS"></app-navigation-menu>
       </div>
 
@@ -41,13 +45,16 @@
       <div class="app-header__actions">
         <!-- Desktop Actions -->
         <div class="app-header__actions-desktop">
-          <app-theme-switch></app-theme-switch>
-          <app-lang-switch></app-lang-switch>
+          <div class="app-header__actions-group">
+            <app-theme-switch></app-theme-switch>
+            <app-lang-switch></app-lang-switch>
+          </div>
           <app-user-actions (logoutClicked)="authService.logout()"></app-user-actions>
         </div>
 
         <!-- Mobile Menu Button -->
         <div class="app-header__actions-mobile">
+          <app-theme-switch></app-theme-switch>
           <button (click)="onMobileMenuToggle()" class="app-header__menu-btn">
             <i class="bx bx-menu"></i>
           </button>

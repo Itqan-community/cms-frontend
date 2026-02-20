@@ -1,26 +1,30 @@
 .lang-switch__btn {
-  background-color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   white-space: nowrap;
-  border-radius: var(--radius-lg);
-  font-size: 14px;
-  font-weight: 500;
-  border: 1px solid var(--color-neutral-200);
-  height: 32px;
-  min-width: 32px;
-  padding: 0 10px;
-  box-shadow: var(--shadow-sm);
-  transition: background-color 0.2s ease;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  background: transparent;
+  height: 34px;
+  min-width: 34px;
+  padding: 0 8px;
+  color: var(--color-text-secondary, #6b7280);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease;
 
   &:hover {
-    background-color: var(--color-neutral-100);
+    background-color: var(--color-neutral-200, #e5e7eb);
+    color: var(--color-text-primary);
   }
 
   &.--icon-only {
-    width: 32px;
+    width: 34px;
     padding: 0;
     justify-content: center;
   }
