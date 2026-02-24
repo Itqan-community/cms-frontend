@@ -9,6 +9,10 @@ export const NAV_LINKS = [
     label: 'NAV.GALLERY_FULL',
     link: '/gallery',
   },
+  {
+    label: 'نظام إدارة المحتوى القرآني',
+    link: '/quranic-cms',
+  },
   // {
   //   label: 'NAV.PUBLISHERS',
   //   link: '/publishers',

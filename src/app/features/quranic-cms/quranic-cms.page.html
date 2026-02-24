@@ -1,0 +1,70 @@
+<div class="qcms-page" dir="rtl">
+
+  <!-- Green Header Bar -->
+  <div class="qcms-header">
+    <div class="qcms-header__inner">
+      <div class="qcms-header__title">
+        <span>📖</span>
+        <span>نظام إدارة المحتوى القرآني</span>
+      </div>
+      <div class="qcms-header__actions">
+        <a class="qcms-header__nav-link" [routerLink]="['/gallery']">مكتبة الأصول والموارد</a>
+        <button class="qcms-header__refresh-btn" (click)="onRefresh()">
+          <span>🔄</span>
+          <span>تحديث البيانات</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Tabs -->
+  <div class="qcms-tabs-wrapper">
+    <div class="qcms-tabs">
+      @for (tab of tabs; track tab.id) {
+        <button
+          class="qcms-tabs__tab"
+          [ngClass]="{ 'qcms-tabs__tab--active': activeTab() === tab.id }"
+          (click)="setActiveTab(tab.id)"
+        >
+          <span class="qcms-tabs__tab-emoji">{{ tab.emoji }}</span>
+          <span class="qcms-tabs__tab-label">{{ tab.label }}</span>
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="qcms-content">
+
+    @if (activeTab() === 'search') {
+      <div class="qcms-search-panel">
+        <h2 class="qcms-search-panel__title">البحث في القرآن الكريم</h2>
+        <p class="qcms-search-panel__subtitle">ابحث عن كلمة أو عبارة لعرض جميع الآيات التي تحتوي عليها</p>
+        <label class="qcms-search-panel__label">أدخل كلمة أو عبارة للبحث</label>
+        <div class="qcms-search-panel__input-row">
+          <span class="qcms-search-panel__search-icon">🔍</span>
+          <input
+            class="qcms-search-panel__input"
+            type="text"
+            placeholder="مثال: الله، الرحمن، الصلاة..."
+          />
+          <button class="qcms-search-panel__btn" (click)="onSearch()">
+            <span>🔍</span>
+            بحث
+          </button>
+        </div>
+        <div class="qcms-search-panel__empty">
+          <span class="qcms-search-panel__empty-icon">🔍</span>
+          <p class="qcms-search-panel__empty-title">ابدأ بإدخال كلمة في حقل البحث أعلاه</p>
+          <p class="qcms-search-panel__empty-subtitle">سيتم عرض جميع الآيات التي تحتوي على الكلمة المطلوبة</p>
+        </div>
+      </div>
+    } @else {
+      <div class="qcms-coming-soon">
+        <span class="qcms-coming-soon__emoji">{{ activeTabEmoji() }}</span>
+        <p class="qcms-coming-soon__text">قريباً</p>
+      </div>
+    }
+
+  </div>
+</div>
