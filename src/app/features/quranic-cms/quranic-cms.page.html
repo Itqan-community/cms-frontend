@@ -59,6 +59,8 @@
           <p class="qcms-search-panel__empty-subtitle">سيتم عرض جميع الآيات التي تحتوي على الكلمة المطلوبة</p>
         </div>
       </div>
+    } @else if (activeTab() === 'audio') {
+      <app-qcms-recitations-stats-cards />
     } @else {
       <div class="qcms-coming-soon">
         <span class="qcms-coming-soon__emoji">{{ activeTabEmoji() }}</span>
