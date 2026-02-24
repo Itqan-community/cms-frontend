@@ -158,13 +158,13 @@ that have been created or updated.
 #### 19. **src/environments/environment.ts** ✏️ UPDATED
 
 - Fixed TODO comment
-- Changed API_BASE_URL to `https://develop.api.cms.itqan.dev`
+- Changed API_BASE_URL to `https://staging.api.cms.itqan.dev`
 
 ## 🎯 Environment Configuration
 
 | Environment | Branch    | API URL                           | Build Config  |
 | ----------- | --------- | --------------------------------- | ------------- |
-| Development | `develop` | https://develop.api.cms.itqan.dev | `development` |
+| Development | `develop` | https://staging.api.cms.itqan.dev | `development` |
 | Staging     | `staging` | https://staging.api.cms.itqan.dev | `staging`     |
 | Production  | `master`  | https://api.cms.itqan.dev         | `production`  |
 
@@ -296,6 +296,4 @@ proper CI/CD, code quality tools, and comprehensive documentation.
 
 ---
 
-**Created**: November 3, 2025  
-**By**: AI Assistant  
-**For**: Itqan Community CMS Frontend
+**Created**: November 3, 2025 **By**: AI Assistant **For**: Itqan Community CMS Frontend
