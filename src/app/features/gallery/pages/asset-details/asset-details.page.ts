@@ -1,5 +1,6 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
@@ -49,11 +50,13 @@ export class AssetDetailsPage implements OnInit {
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   private readonly fb = inject(FormBuilder);
+  private readonly destroyRef = inject(DestroyRef);
 
-  readonly id = this.route.snapshot.params['id'];
+  readonly id: string = this.route.snapshot.params['id'] ?? '';
   asset = signal<AssetDetails | null>(null);
   images = signal<string[]>([]);
   loading = signal<boolean>(true);
+  errorState = signal<'not-found' | 'server-error' | null>(null);
   isModalVisible = signal<boolean>(false);
   isLicenseModalVisible = signal<boolean>(false);
   canConfirmLicense = signal<boolean>(false);
@@ -70,21 +73,36 @@ export class AssetDetailsPage implements OnInit {
   }
 
   ngOnInit() {
+    if (!this.id) {
+      this.loading.set(false);
+      this.errorState.set('not-found');
+      return;
+    }
     this.getAssetDetails(this.id);
   }
 
   getAssetDetails(id: string) {
     this.loading.set(true);
-    this.assetsService.getAssetDetails(id).subscribe({
+    this.errorState.set(null);
+    this.assetsService.getAssetDetails(id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (asset) => {
         this.asset.set(asset);
         this.images.set(asset.snapshots.map((snapshot) => snapshot.image_url));
         this.loading.set(false);
       },
-      error: () => {
+      error: (error: HttpErrorResponse) => {
         this.loading.set(false);
+        if (error.status === 404) {
+          this.errorState.set('not-found');
+        } else {
+          this.errorState.set('server-error');
+        }
       },
     });
+  }
+
+  retryLoad() {
+    this.getAssetDetails(this.id);
   }
 
   getCategoryIcon(category: string): string {

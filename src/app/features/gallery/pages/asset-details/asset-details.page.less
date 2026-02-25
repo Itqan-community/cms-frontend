@@ -234,9 +234,57 @@
   color: var(--color-neutral-600);
 }
 
-// Loading state
-nz-spin {
+// Loading & Error states
+.state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   min-height: 400px;
+  text-align: center;
+  padding: 2rem;
+}
+
+.state-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+}
+
+.not-found-icon {
+  color: var(--color-neutral-400);
+}
+
+.error-icon {
+  color: var(--color-danger-500, #d73a4a);
+}
+
+.state-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--color-neutral-600);
+  margin: 0 0 0.5rem 0;
+}
+
+.state-message {
+  font-size: 1rem;
+  color: var(--color-neutral-400);
+  margin: 0.5rem 0 1.5rem 0;
+  max-width: 400px;
+}
+
+.state-action-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+// Flip back-arrow icon in RTL so it points right (semantically "back")
+:host-context([dir="rtl"]) .bx-arrow-back {
+  transform: scaleX(-1);
+}
+
+nz-spin {
+  min-height: 0;
   display: flex;
   align-items: center;
   justify-content: center;

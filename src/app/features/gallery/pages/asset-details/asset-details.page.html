@@ -1,8 +1,33 @@
 <div class="asset-details-container">
   <app-breadcrumb />
 
-  <!-- <nz-spin [nzSpinning]="loading()" nzSize="large"> -->
-  @if (asset()) {
+  <!-- Loading / Error / Content states (mutually exclusive) -->
+  @if (loading()) {
+    <div class="state-container" role="status" aria-live="polite">
+      <nz-spin nzSize="large"></nz-spin>
+      <p class="state-message">{{ 'UI.LOADING_ASSET_DETAILS' | translate }}</p>
+    </div>
+  } @else if (errorState() === 'not-found') {
+    <div class="state-container" role="alert">
+      <i class="bx bx-search-alt state-icon not-found-icon"></i>
+      <h2 class="state-title">{{ 'UI.ASSET_NOT_FOUND' | translate }}</h2>
+      <p class="state-message">{{ 'ERRORS.NOT_FOUND' | translate }}</p>
+      <a routerLink="/gallery" nz-button nzType="primary" class="state-action-button">
+        <i class="bx bx-arrow-back"></i>
+        {{ 'UI.BACK_TO_GALLERY' | translate }}
+      </a>
+    </div>
+  } @else if (errorState() === 'server-error') {
+    <div class="state-container" role="alert">
+      <i class="bx bx-error-circle state-icon error-icon"></i>
+      <h2 class="state-title">{{ 'UI.SOMETHING_WENT_WRONG' | translate }}</h2>
+      <p class="state-message">{{ 'ERRORS.SERVER_ERROR' | translate }}</p>
+      <button nz-button nzType="primary" class="state-action-button" (click)="retryLoad()">
+        <i class="bx bx-refresh"></i>
+        {{ 'UI.TRY_AGAIN' | translate }}
+      </button>
+    </div>
+  } @else if (asset()) {
     <div class="asset-details-content">
       <!-- Main Content -->
       <div class="main-content">
@@ -105,8 +130,12 @@
         </div>
       </div>
     </div>
+  } @else {
+    <div class="state-container" role="status" aria-live="polite">
+      <nz-spin nzSize="large"></nz-spin>
+      <p class="state-message">{{ 'UI.LOADING_ASSET_DETAILS' | translate }}</p>
+    </div>
   }
-  <!-- </nz-spin> -->
 
   <!-- Access Request Modal -->
   <nz-modal
