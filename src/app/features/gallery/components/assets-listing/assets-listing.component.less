@@ -40,4 +40,46 @@
       height: 100%;
     }
   }
+
+  // Shared empty & error state
+  &__state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 3rem 1.5rem;
+    min-height: 300px;
+    flex: 3; // match grid flex to fill available width
+
+    // When placed inside the grid, span all columns
+    &--in-grid {
+      grid-column: 1 / -1;
+    }
+  }
+
+  &__state-icon {
+    font-size: 3rem;
+    color: var(--color-neutral-400);
+    margin-bottom: 1rem;
+
+    &--error {
+      color: var(--color-danger-500, #d73a4a);
+    }
+  }
+
+  &__state-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--color-neutral-600);
+    margin: 0 0 0.5rem 0;
+  }
+
+  &__state-message {
+    font-size: 0.875rem;
+    color: var(--color-neutral-400);
+    margin: 0 0 1.25rem 0;
+    max-width: 360px;
+    line-height: 1.6;
+  }
 }

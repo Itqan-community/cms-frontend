@@ -5,15 +5,41 @@
     (categoriesSelectionChange)="categoriesSelectionChange($event)"
     (licensesSelectionChange)="licensesSelectionChange($event)"
   />
-  <div class="assets-listing__grid" [attr.aria-busy]="loading()">
-    @if (!isServer && loading()) {
-      @for (item of getSkeletonArray(); track item) {
-        <app-asset-card-skeleton />
+
+  @if (errorState()) {
+    <!-- Error State -->
+    <div class="assets-listing__state" role="alert">
+      <i class="bx bx-error-circle assets-listing__state-icon assets-listing__state-icon--error" aria-hidden="true"></i>
+      <h3 class="assets-listing__state-title">{{ 'UI.SOMETHING_WENT_WRONG' | translate }}</h3>
+      <p class="assets-listing__state-message">{{ 'ERRORS.SERVER_ERROR' | translate }}</p>
+      <button nz-button nzType="primary" (click)="getAssets()" [disabled]="loading()">
+        <i class="bx bx-refresh" aria-hidden="true"></i>
+        {{ 'UI.TRY_AGAIN' | translate }}
+      </button>
+    </div>
+  } @else {
+    <div class="assets-listing__grid" [attr.aria-busy]="loading()">
+      @if (!isServer && loading()) {
+        @for (item of getSkeletonArray(); track item) {
+          <app-asset-card-skeleton />
+        }
+      } @else if (assets().length === 0) {
+        <!-- Empty State (spans full grid) -->
+        <div class="assets-listing__state assets-listing__state--in-grid" role="status">
+          <i class="bx bx-search-alt assets-listing__state-icon" aria-hidden="true"></i>
+          @if (hasActiveFilters) {
+            <h3 class="assets-listing__state-title">{{ 'UI.NO_RESULTS_FOUND' | translate }}</h3>
+            <p class="assets-listing__state-message">{{ 'UI.NO_RESULTS_MESSAGE' | translate }}</p>
+          } @else {
+            <h3 class="assets-listing__state-title">{{ 'UI.NO_ASSETS_AVAILABLE' | translate }}</h3>
+            <p class="assets-listing__state-message">{{ 'UI.NO_ASSETS_MESSAGE' | translate }}</p>
+          }
+        </div>
+      } @else {
+        @for (asset of assets(); track asset.id) {
+          <app-asset-card [asset]="asset" />
+        }
       }
-    } @else {
-      @for (asset of assets(); track asset.id) {
-        <app-asset-card [asset]="asset" />
-      }
-    }
-  </div>
+    </div>
+  }
 </div>

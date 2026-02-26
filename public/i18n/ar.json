@@ -190,7 +190,10 @@
     "VERSION": "الإصدار",
     "LANGUAGE": "اللغة",
     "VIEWS": "المشاهدات",
-    "CREATED": "تاريخ الإنشاء"
+    "CREATED": "تاريخ الإنشاء",
+    "SOMETHING_WENT_WRONG": "حدث خطأ ما",
+    "NO_RESULTS_MESSAGE": "جرّب تعديل معايير البحث أو الفلترة.",
+    "NO_ASSETS_MESSAGE": "لا توجد أصول متاحة حالياً."
   },
   "CATEGORIES": {
     "mushaf": "المصحف",

@@ -190,7 +190,10 @@
     "VERSION": "Version",
     "LANGUAGE": "Language",
     "VIEWS": "Views",
-    "CREATED": "Created"
+    "CREATED": "Created",
+    "SOMETHING_WENT_WRONG": "Something went wrong",
+    "NO_RESULTS_MESSAGE": "Try adjusting your search or filter criteria.",
+    "NO_ASSETS_MESSAGE": "There are no assets available at the moment."
   },
   "CATEGORIES": {
     "mushaf": "Mushaf",
