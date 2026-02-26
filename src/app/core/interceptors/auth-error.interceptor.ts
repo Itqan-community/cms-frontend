@@ -1,8 +1,7 @@
 import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, catchError, filter, Observable, of, switchMap, take, throwError } from 'rxjs';
-import { SKIP_AUTH_ERROR } from '../../features/gallery/services/recitations-stats.service';
+import { BehaviorSubject, catchError, filter, Observable, switchMap, take, throwError } from 'rxjs';
 import { AuthService } from '../auth/services/auth.service';
 
 /**
@@ -36,17 +35,6 @@ export function authErrorInterceptor(
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      // Skip auth error handling for requests that opted out (e.g., public stats endpoints)
-      // But still throw the error so the service can handle it (e.g., 404 errors)
-      if (req.context.get(SKIP_AUTH_ERROR)) {
-        // Only skip 401/403 handling, but pass through other errors (like 404)
-        if (error.status === 401 || error.status === 403) {
-          return throwError(() => error);
-        }
-        // For other errors (like 404), pass them through so the service can handle them
-        return throwError(() => error);
-      }
-
       const isAuthRequest =
         req.url.endsWith('/login') ||
         req.url.endsWith('/register') ||
