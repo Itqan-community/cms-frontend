@@ -2,6 +2,7 @@
   "APP_TITLE": "Itqan CMS",
   "WELCOME": "Welcome to the Store",
   "AUTH": {
+    "MUST_LOGIN_TO_VIEW": "You must be logged in to view this page.",
     "LOGIN": {
       "TITLE": "Welcome back",
       "SUBTITLE": "Sign in to continue to Itqan",

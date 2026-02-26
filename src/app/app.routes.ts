@@ -19,6 +19,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/quranic-cms/quranic-cms.page').then((m) => m.QuranicCmsPage),
     data: { hideHeader: true, fullWidth: true },
+    canActivate: [authGuard],
   },
   {
     path: 'gallery/asset/:id',
