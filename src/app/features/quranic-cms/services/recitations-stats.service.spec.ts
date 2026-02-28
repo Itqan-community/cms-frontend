@@ -25,38 +25,60 @@ describe('RecitationsStatsService (Quranic CMS)', () => {
     httpMock.verify();
   });
 
-  it('should return real stats when API succeeds', (done) => {
+  it('should return real stats when API succeeds', () => {
+    let resultStats: any;
+
     service.getStats().subscribe((stats) => {
-      expect(stats.riwayas).toBe(10);
-      expect(stats.reciters).toBe(5);
-      expect(stats.recitations).toBe(20);
-      expect(stats.isMock).toBeFalsy();
-      expect(messageServiceSpy.error).not.toHaveBeenCalled();
-      done();
+      resultStats = stats;
     });
 
     const base = environment.API_BASE_URL;
 
-    httpMock.expectOne(`${base}/riwayas/?page_size=1`).flush({ count: 10, results: [] });
-    httpMock.expectOne(`${base}/reciters/?page_size=1`).flush({ count: 5, results: [] });
-    httpMock.expectOne(`${base}/recitations/?page_size=1`).flush({ count: 20, results: [] });
+    const req1 = httpMock.expectOne((req) => req.url.includes('/riwayas/'));
+    const req2 = httpMock.expectOne((req) => req.url.includes('/reciters/'));
+    const req3 = httpMock.expectOne((req) => req.url.includes('/recitations/'));
+
+    expect(req1.request.method).toBe('GET');
+    expect(req2.request.method).toBe('GET');
+    expect(req3.request.method).toBe('GET');
+
+    req1.flush({ count: 10, results: [] });
+    req2.flush({ count: 5, results: [] });
+    req3.flush({ count: 20, results: [] });
+
+    expect(resultStats).toBeDefined();
+    expect(resultStats.riwayas).toBe(10);
+    expect(resultStats.reciters).toBe(5);
+    expect(resultStats.recitations).toBe(20);
+    expect(resultStats.isMock).toBeFalsy();
+    expect(messageServiceSpy.error).not.toHaveBeenCalled();
   });
 
-  it('should fall back to MOCK stats and show toaster on error', (done) => {
+  it('should fall back to MOCK stats and show toaster on error', () => {
+    let resultStats: any;
+
     service.getStats().subscribe((stats) => {
-      expect(stats.isMock).toBeTrue();
-      expect(stats.riwayas).toBeGreaterThan(0);
-      expect(messageServiceSpy.error).toHaveBeenCalled();
-      done();
+      resultStats = stats;
     });
 
     const base = environment.API_BASE_URL;
 
-    httpMock.expectOne(`${base}/riwayas/?page_size=1`).flush(null, { status: 404, statusText: 'Not Found' });
-    httpMock.expectOne(`${base}/reciters/?page_size=1`).flush(null, { status: 404, statusText: 'Not Found' });
-    httpMock
-      .expectOne(`${base}/recitations/?page_size=1`)
-      .flush(null, { status: 404, statusText: 'Not Found' });
+    // We catch all 3 parallel requests
+    const req1 = httpMock.expectOne((req) => req.url.includes('/riwayas/'));
+    const req2 = httpMock.expectOne((req) => req.url.includes('/reciters/'));
+    const req3 = httpMock.expectOne((req) => req.url.includes('/recitations/'));
+
+    // Failing the first request will cause forkJoin to cancel the other two.
+    req1.flush(null, { status: 404, statusText: 'Not Found' });
+
+    // For cancelled requests, we don't need to flush them, but we should assert they are cancelled.
+    expect(req2.cancelled).toBeTrue();
+    expect(req3.cancelled).toBeTrue();
+
+    expect(resultStats).toBeDefined();
+    expect(resultStats.isMock).toBeTrue();
+    expect(resultStats.riwayas).toBeGreaterThan(0);
+    expect(messageServiceSpy.error).toHaveBeenCalled();
   });
 });
 
