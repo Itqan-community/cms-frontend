@@ -265,6 +265,16 @@
       "non-commercial": "Non-Commercial"
     }
   },
+  "QURANIC_CMS": {
+    "RECITERS": {
+      "PAGE_TITLE": "Reciters",
+      "EMPTY_STATE": "No reciters found",
+      "RECITATIONS_COUNT": "recitations",
+      "ERRORS": {
+        "LOAD_FAILED": "Failed to load reciters. Please try again."
+      }
+    }
+  },
   "CONTENT_STANDARDS": {
     "TITLE": "Documents: Data Access Standards",
     "DESCRIPTION": "This document outlines the standards for accessing data in files. Please follow the guidelines below for each category.",

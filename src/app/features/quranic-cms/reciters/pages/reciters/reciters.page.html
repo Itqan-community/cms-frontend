@@ -1,0 +1,32 @@
+<div class="reciters-page">
+  <h2 class="reciters-page__title">{{ 'QURANIC_CMS.RECITERS.PAGE_TITLE' | translate }}</h2>
+
+  <nz-spin [nzSpinning]="loading()">
+    <nz-list>
+      @for (reciter of reciters(); track reciter.id) {
+        <nz-list-item>
+          <span class="reciter-name">{{ reciter.name }}</span>
+          <span class="reciter-count">
+            {{ reciter.recitations_count }}
+            {{ 'QURANIC_CMS.RECITERS.RECITATIONS_COUNT' | translate }}
+          </span>
+        </nz-list-item>
+      }
+    </nz-list>
+
+    @if (isEmpty()) {
+      <nz-empty [nzNotFoundContent]="'QURANIC_CMS.RECITERS.EMPTY_STATE' | translate"></nz-empty>
+    }
+  </nz-spin>
+
+  @if (!isEmpty()) {
+    <div class="pagination-wrapper">
+      <nz-pagination
+        [nzTotal]="total()"
+        [nzPageSize]="pageSize()"
+        [nzPageIndex]="page()"
+        (nzPageIndexChange)="onPageChange($event)"
+      ></nz-pagination>
+    </div>
+  }
+</div>
