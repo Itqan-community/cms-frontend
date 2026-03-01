@@ -9,7 +9,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ### Added
 
-- Upcoming features will be listed here
+- **Reciters Feature** (`quranic-cms/reciters`)
+  - Reciters listing page with loading state and pagination
+  - `ReciterService` for API integration
+  - `Reciter` model definition
+  - Mock data for local development and testing
+  - Error handling for API failures
+  - Arabic and English localization strings for the reciters module
 
 ---
 
