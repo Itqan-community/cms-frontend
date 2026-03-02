@@ -2,6 +2,7 @@ import { NgClass } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { RecitationsStatsCardsComponent } from './components/recitations-stats-cards/recitations-stats-cards.component';
 
 interface CmsTab {
   id: string;
@@ -12,7 +13,7 @@ interface CmsTab {
 @Component({
   selector: 'app-quranic-cms-page',
   standalone: true,
-  imports: [NgClass, NzModalModule, RouterLink],
+  imports: [NgClass, NzModalModule, RouterLink, RecitationsStatsCardsComponent],
   templateUrl: './quranic-cms.page.html',
   styleUrls: ['./quranic-cms.page.less'],
 })

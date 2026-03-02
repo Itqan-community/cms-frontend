@@ -153,7 +153,12 @@
     "VIEW_LICENSE": "View License",
     "DETAILS_TITLE": "Asset Details",
     "ASSET_ID": "Asset ID",
-    "DETAILS_DESC": "This is a placeholder for asset details."
+    "DETAILS_DESC": "This is a placeholder for asset details.",
+    "STATS": {
+      "RIWAYAS": "Riwayas",
+      "RECITERS": "Reciters",
+      "RECITATIONS": "Recitations"
+    }
   },
   "UI": {
     "FILTERS": "Filters",
