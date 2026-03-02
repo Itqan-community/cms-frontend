@@ -1,8 +1,30 @@
 <div class="asset-details-container">
   <app-breadcrumb />
 
-  <!-- <nz-spin [nzSpinning]="loading()" nzSize="large"> -->
-  @if (asset()) {
+  @if (loading()) {
+    <app-asset-detail-skeleton />
+  } @else if (notFound()) {
+    <app-state-message
+      icon="bx-search-alt"
+      iconVariant="default"
+      [title]="'UI.ASSET_NOT_FOUND' | translate"
+      [message]="'ERRORS.NOT_FOUND' | translate"
+      [secondaryActionLabel]="'UI.BACK_TO_GALLERY' | translate"
+      secondaryRouterLink="/gallery"
+    />
+  } @else if (errorState()) {
+    <app-state-message
+      icon="bx-error-circle"
+      iconVariant="error"
+      [title]="'UI.SOMETHING_WENT_WRONG' | translate"
+      [message]="'ERRORS.SERVER_ERROR' | translate"
+      [actionLabel]="'UI.TRY_AGAIN' | translate"
+      actionIcon="bx-refresh"
+      actionType="primary"
+      [actionLoading]="loading()"
+      (actionClick)="retryLoad()"
+    />
+  } @else if (asset()) {
     <div class="asset-details-content">
       <!-- Main Content -->
       <div class="main-content">
@@ -53,15 +75,6 @@
                   {{ 'GALLERY.VIEW_LICENSE' | translate }}
                 </button>
               </a>
-              <!-- <button
-                nz-button
-                nzBlock
-                class="download-button-secondary"
-                (click)="downloadOriginalResource()"
-              >
-                {{ 'UI.DOWNLOAD_ORIGINAL_RESOURCE' | translate }}
-                <i class="bx bx-cloud-download"></i>
-              </button> -->
               <button
                 nz-button
                 nzType="primary"
@@ -106,7 +119,6 @@
       </div>
     </div>
   }
-  <!-- </nz-spin> -->
 
   <!-- Access Request Modal -->
   <nz-modal

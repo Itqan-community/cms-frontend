@@ -5,15 +5,39 @@
     (categoriesSelectionChange)="categoriesSelectionChange($event)"
     (licensesSelectionChange)="licensesSelectionChange($event)"
   />
-  <div class="assets-listing__grid" [attr.aria-busy]="loading()">
-    @if (!isServer && loading()) {
-      @for (item of getSkeletonArray(); track item) {
-        <app-asset-card-skeleton />
+
+  @if (errorState()) {
+    <app-state-message
+      class="assets-listing__state-wrapper"
+      icon="bx-error-circle"
+      iconVariant="error"
+      [title]="'UI.SOMETHING_WENT_WRONG' | translate"
+      [message]="'ERRORS.SERVER_ERROR' | translate"
+      [actionLabel]="'UI.TRY_AGAIN' | translate"
+      actionIcon="bx-refresh"
+      actionType="primary"
+      [actionLoading]="loading()"
+      (actionClick)="getAssets()"
+    />
+  } @else {
+    <div class="assets-listing__grid" [attr.aria-busy]="loading()">
+      @if (!isServer && loading()) {
+        @for (item of getSkeletonArray(); track item) {
+          <app-asset-card-skeleton />
+        }
+      } @else if (!loading() && assets().length === 0) {
+        <app-state-message
+          class="assets-listing__state--in-grid"
+          [icon]="hasActiveFilters() ? 'bx-search-alt' : 'bx-folder-open'"
+          iconVariant="default"
+          [title]="hasActiveFilters() ? ('UI.NO_RESULTS_FOUND' | translate) : ('UI.NO_ASSETS_AVAILABLE' | translate)"
+          [message]="hasActiveFilters() ? ('UI.NO_RESULTS_MESSAGE' | translate) : ('UI.NO_ASSETS_MESSAGE' | translate)"
+        />
+      } @else {
+        @for (asset of assets(); track asset.id) {
+          <app-asset-card [asset]="asset" />
+        }
       }
-    } @else {
-      @for (asset of assets(); track asset.id) {
-        <app-asset-card [asset]="asset" />
-      }
-    }
-  </div>
+    </div>
+  }
 </div>
