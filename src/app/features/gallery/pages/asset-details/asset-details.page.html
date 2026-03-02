@@ -58,6 +58,7 @@
                 nzBlock
                 class="download-button-secondary"
                 (click)="downloadOriginalResource()"
+                [nzLoading]="isDownloadLoading()"
               >
                 {{ 'UI.DOWNLOAD_ORIGINAL_RESOURCE' | translate }}
                 <i class="bx bx-cloud-download"></i>
@@ -68,6 +69,7 @@
                 nzBlock
                 class="download-button-primary"
                 (click)="downloadResource()"
+                [nzLoading]="isDownloadLoading()"
               >
                 {{ 'UI.DOWNLOAD_RESOURCE' | translate }}
                 <i class="bx bx-cloud-download"></i>
@@ -116,9 +118,19 @@
     [nzCancelText]="'COMMON.CANCEL' | translate"
     (nzOnCancel)="handleModalCancel()"
     (nzOnOk)="handleModalOk()"
+    [nzOkLoading]="isAccessRequestLoading()"
   >
     <div *nzModalContent>
       <p class="modal-caption">{{ asset()?.name }}</p>
+
+      @if (accessRequestError()) {
+        <nz-alert
+          nzType="error"
+          [nzMessage]="accessRequestError()!"
+          nzShowIcon
+          class="mb-4"
+        ></nz-alert>
+      }
 
       <form [formGroup]="accessRequestForm" nz-form>
         <nz-form-item>

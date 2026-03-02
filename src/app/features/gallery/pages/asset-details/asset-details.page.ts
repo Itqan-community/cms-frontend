@@ -3,11 +3,13 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NzNotificationService } from 'ng-zorro-antd/notification';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTagModule } from 'ng-zorro-antd/tag';
@@ -37,6 +39,7 @@ import { AssetsService } from '../../services/assets.service';
     NzFormModule,
     NzInputModule,
     NzSelectModule,
+    NzAlertModule,
     ReactiveFormsModule,
   ],
   templateUrl: './asset-details.page.html',
@@ -49,6 +52,7 @@ export class AssetDetailsPage implements OnInit {
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   private readonly fb = inject(FormBuilder);
+  private readonly notification = inject(NzNotificationService);
 
   readonly id = this.route.snapshot.params['id'];
   asset = signal<AssetDetails | null>(null);
@@ -57,6 +61,9 @@ export class AssetDetailsPage implements OnInit {
   isModalVisible = signal<boolean>(false);
   isLicenseModalVisible = signal<boolean>(false);
   canConfirmLicense = signal<boolean>(false);
+  isDownloadLoading = signal<boolean>(false);
+  isAccessRequestLoading = signal<boolean>(false);
+  accessRequestError = signal<string | null>(null);
 
   accessRequestForm: FormGroup;
 
@@ -123,6 +130,7 @@ export class AssetDetailsPage implements OnInit {
   closeAccessRequestModal() {
     this.isModalVisible.set(false);
     this.accessRequestForm.reset();
+    this.accessRequestError.set(null);
   }
 
   handleModalCancel() {
@@ -131,8 +139,12 @@ export class AssetDetailsPage implements OnInit {
 
   handleModalOk() {
     if (this.accessRequestForm.valid) {
+      this.accessRequestError.set(null);
+      this.isAccessRequestLoading.set(true);
+
       const asset = this.asset();
       if (!asset?.id) {
+        this.isAccessRequestLoading.set(false);
         return;
       }
 
@@ -145,10 +157,15 @@ export class AssetDetailsPage implements OnInit {
         .post(`${environment.API_BASE_URL}/assets/${asset.id}/request-access/`, formData)
         .subscribe({
           next: () => {
+            this.isAccessRequestLoading.set(false);
             this.closeAccessRequestModal();
             this.openLicenseModal();
           },
           error: (error) => {
+            this.isAccessRequestLoading.set(false);
+            this.accessRequestError.set(
+              error?.error?.detail || 'Failed to request access / فشل في طلب الوصول'
+            );
             console.error('Access request failed:', error);
           },
         });
@@ -211,6 +228,7 @@ export class AssetDetailsPage implements OnInit {
   }
 
   private downloadAsset(assetId: number): void {
+    this.isDownloadLoading.set(true);
     // Step 1: Get the download_url from backend
     this.http
       .get<{ download_url: string }>(`${environment.API_BASE_URL}/assets/${assetId}/download/`)
@@ -221,14 +239,21 @@ export class AssetDetailsPage implements OnInit {
           const filename = this.extractFilenameFromPath(downloadUrl);
           // Step 2: Download the actual file
           this.downloadFileFromUrl(downloadUrl, filename);
+          this.isDownloadLoading.set(false);
         },
         error: (error) => {
+          this.isDownloadLoading.set(false);
+          this.notification.error(
+            'Download Failed / فشل التنزيل',
+            'An error occurred while downloading the resource. / حدث خطأ أثناء تنزيل المورد.'
+          );
           console.error('Failed to get download URL:', error);
         },
       });
   }
 
   private performResourceDownload(resourceId: number): void {
+    this.isDownloadLoading.set(true);
     // Step 1: Get the download_url from backend
     this.http
       .get<{
@@ -241,8 +266,14 @@ export class AssetDetailsPage implements OnInit {
           const filename = this.extractFilenameFromPath(downloadUrl);
           // Step 2: Download the actual file
           this.downloadFileFromUrl(downloadUrl, filename);
+          this.isDownloadLoading.set(false);
         },
         error: (error) => {
+          this.isDownloadLoading.set(false);
+          this.notification.error(
+            'Download Failed / فشل التنزيل',
+            'An error occurred while downloading the resource. / حدث خطأ أثناء تنزيل المورد.'
+          );
           console.error('Failed to get download URL:', error);
         },
       });
