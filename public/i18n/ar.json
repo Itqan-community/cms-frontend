@@ -316,5 +316,24 @@
       "SCHEMA_DOCS": "توثيق المخطط",
       "EXAMPLE_FILE": "ملف مثال"
     }
+  },
+  "RECITATIONS": {
+    "TITLE": "المصاحف الصوتية",
+    "DESCRIPTION": "إدارة القراء والتلاوات القرآنية مع دعم القراءات والروايات المختلفة وجودات متعددة",
+    "TOTAL_RECITERS": "قارئ متاح",
+    "TOTAL_RIWAYAS": "رواية متاحة",
+    "FILE_FORMAT": "تنسيق الملفات",
+    "ADD_RECITER": "إضافة قارئ",
+    "SEARCH_PLACEHOLDER": "ابحث عن قارئ...",
+    "ALL_RIWAYAS": "كل الروايات",
+    "ALL_TYPES": "كل القراءات",
+    "RIWAYAH": "الرواية:",
+    "RECITATION": "القراءة:",
+    "PERFORMANCE": "الأداء:",
+    "STYLE": "الأسلوب:",
+    "PLAY_AUDIO": "تجربة الصوت",
+    "ERROR_LOADING_STATS": "فشل في تحميل الإحصائيات",
+    "ERROR_LOADING_RECITATIONS": "فشل في تحميل المصاحف",
+    "NO_RESULTS": "لا يوجد نتائج"
   }
 }

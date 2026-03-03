@@ -316,5 +316,24 @@
       "SCHEMA_DOCS": "Schema Documentation",
       "EXAMPLE_FILE": "Example File"
     }
+  },
+  "RECITATIONS": {
+    "TITLE": "Audio Recitations",
+    "DESCRIPTION": "Manage Quranic reciters and recitations with support for different Riwayas and audio qualities",
+    "TOTAL_RECITERS": "Available Reciters",
+    "TOTAL_RIWAYAS": "Available Riwayas",
+    "FILE_FORMAT": "File Format",
+    "ADD_RECITER": "Add Reciter",
+    "SEARCH_PLACEHOLDER": "Search for a reciter...",
+    "ALL_RIWAYAS": "All Riwayas",
+    "ALL_TYPES": "All Types",
+    "RIWAYAH": "Riwayah",
+    "RECITATION": "Recitation",
+    "PERFORMANCE": "Performance",
+    "STYLE": "Style",
+    "PLAY_AUDIO": "Play Audio",
+    "ERROR_LOADING_STATS": "Failed to load statistics",
+    "ERROR_LOADING_RECITATIONS": "Failed to load recitations",
+    "NO_RESULTS": "No results found"
   }
 }

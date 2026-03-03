@@ -1,0 +1,244 @@
+.recitations-page {
+  padding: 24px;
+  background-color: #f8fafc;
+  min-height: 100vh;
+  font-family: Arial, sans-serif;
+
+  .header-card {
+    background: linear-gradient(90deg, #9900ff 0%, #d500f9 100%);
+    border-radius: 12px;
+    padding: 30px;
+    color: white;
+    margin-bottom: 24px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+
+    h1 {
+      color: white;
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 16px;
+      margin: 0;
+    }
+  }
+
+  .stats-grid {
+    margin-bottom: 24px;
+
+    .stat-card {
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+
+      .stat-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+        .stat-info {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+
+          .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #1e293b;
+            line-height: 1;
+          }
+          .stat-label {
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 4px;
+          }
+        }
+
+        .stat-icon {
+          width: 48px;
+          height: 48px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 24px;
+
+          &.blue {
+            background: #eff6ff;
+            color: #3b82f6;
+          }
+          &.green {
+            background: #f0fdf4;
+            color: #22c55e;
+          }
+          &.orange {
+            background: #fff7ed;
+            color: #f97316;
+          }
+          &.purple {
+            background: #faf5ff;
+            color: #a855f7;
+          }
+        }
+      }
+    }
+  }
+
+  .filters-bar {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+
+    .search-input {
+      flex: 1;
+      border-radius: 8px;
+    }
+
+    .filter-select {
+      width: 180px;
+
+      ::ng-deep .ant-select-selector {
+        border-radius: 8px;
+      }
+    }
+
+    .add-btn {
+      background: #7c3aed;
+      border-color: #7c3aed;
+      color: white;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      &:hover {
+        background: #6d28d9;
+        border-color: #6d28d9;
+      }
+    }
+  }
+
+  .recitations-grid {
+    .recitation-card {
+      border-radius: 12px;
+      border: 1px solid #e2e8f0;
+      position: relative;
+      margin-bottom: 24px;
+
+      .delete-btn {
+        position: absolute;
+        top: 16px;
+        left: 16px; /* RTL top right */
+        color: #ef4444;
+        cursor: pointer;
+        padding: 4px;
+        &:hover {
+          color: #b91c1c;
+        }
+      }
+
+      .card-header {
+        text-align: center;
+        margin-bottom: 16px;
+
+        h3 {
+          font-size: 18px;
+          font-weight: bold;
+          margin: 0;
+          color: #0f172a;
+        }
+
+        p {
+          color: #64748b;
+          font-size: 13px;
+          margin: 4px 0 0 0;
+        }
+      }
+
+      .card-info-row {
+        background: #f8fafc;
+        border-radius: 6px;
+        padding: 8px;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        font-size: 14px;
+
+        strong {
+          color: #7c3aed;
+          font-weight: 600;
+        }
+        span {
+          color: #475569;
+        }
+      }
+
+      .card-meta {
+        display: flex;
+        justify-content: space-between;
+        font-size: 13px;
+        padding: 0 8px;
+        margin-top: 16px;
+
+        .meta-item {
+          display: flex;
+          gap: 6px;
+          color: #475569;
+
+          strong {
+            color: #1e293b;
+          }
+        }
+      }
+
+      .card-qualities {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 12px;
+
+        .quality-tag {
+          background: #f1f5f9;
+          border: 1px solid #e2e8f0;
+          color: #64748b;
+          border-radius: 4px;
+          padding: 2px 8px;
+          font-size: 12px;
+        }
+      }
+
+      .action-btns {
+        margin-top: 20px;
+        display: flex;
+        gap: 8px;
+
+        .play-btn {
+          flex: 1;
+          background: #a855f7;
+          border-color: #a855f7;
+          color: white;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+
+          &:hover {
+            background: #9333ea;
+            border-color: #9333ea;
+          }
+        }
+      }
+    }
+  }
+}

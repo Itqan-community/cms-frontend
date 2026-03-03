@@ -25,6 +25,12 @@ export const NAV_LINKS = [
     hidden: isPublisher, // Hide content standards for publisher hosts
   },
   {
+    label: 'RECITATIONS.TITLE',
+    link: '/quranic-cms',
+    icon: 'bx bx-music',
+    hidden: isPublisher,
+  },
+  {
     label: 'NAV.API_DOCS',
     link: `${environment.API_DOCS_URL}`,
     isExternal: true,
