@@ -1,7 +1,7 @@
 <div class="recitations-page">
   <div class="header-card">
     <h1>
-      <i nz-icon nzType="music" nzTheme="outline"></i>
+      <i class="bx bx-volume-full"></i>
       {{ 'RECITATIONS.TITLE' | translate }}
     </h1>
     <p>{{ 'RECITATIONS.DESCRIPTION' | translate }}</p>
@@ -11,67 +11,52 @@
     <div nz-row [nzGutter]="[24, 24]">
       <!-- Reciters Stats -->
       <div nz-col nzXs="24" nzMd="8">
-        <nz-card class="stat-card">
-          <nz-spin [nzSpinning]="statsLoading()">
-            <div class="stat-content">
-              <div class="stat-icon purple">
-                <i nz-icon nzType="sound" nzTheme="outline"></i>
-              </div>
-              <div class="stat-info">
-                <span class="stat-value">{{ stats()?.totalReciters || 0 }}</span>
-                <span class="stat-label">{{ 'RECITATIONS.TOTAL_RECITERS' | translate }}</span>
-              </div>
-            </div>
-          </nz-spin>
-        </nz-card>
+        <nz-spin [nzSpinning]="statsLoading()">
+          <app-stat-card
+            [value]="stats()?.totalReciters || 0"
+            [label]="'RECITATIONS.TOTAL_RECITERS'"
+            icon="bx-user-voice"
+            colorTheme="purple"
+          ></app-stat-card>
+        </nz-spin>
       </div>
 
       <!-- Riwayas Stats -->
       <div nz-col nzXs="24" nzMd="8">
-        <nz-card class="stat-card">
-          <nz-spin [nzSpinning]="statsLoading()">
-            <div class="stat-content">
-              <div class="stat-icon green">
-                <i nz-icon nzType="appstore" nzTheme="outline"></i>
-              </div>
-              <div class="stat-info">
-                <span class="stat-value">{{ stats()?.totalRiwayas || 0 }}</span>
-                <span class="stat-label">{{ 'RECITATIONS.TOTAL_RIWAYAS' | translate }}</span>
-              </div>
-            </div>
-          </nz-spin>
-        </nz-card>
+        <nz-spin [nzSpinning]="statsLoading()">
+          <app-stat-card
+            [value]="stats()?.totalRiwayas || 0"
+            [label]="'RECITATIONS.TOTAL_RIWAYAS'"
+            icon="bx-bookmarks"
+            colorTheme="green"
+          ></app-stat-card>
+        </nz-spin>
       </div>
 
       <!-- General Formats Data -->
       <div nz-col nzXs="24" nzMd="8">
-        <nz-card class="stat-card">
-          <nz-spin [nzSpinning]="statsLoading()">
-            <div class="stat-content">
-              <div class="stat-icon orange">
-                <i nz-icon nzType="cloud-download" nzTheme="outline"></i>
-              </div>
-              <div class="stat-info">
-                <span class="stat-value">MP3</span>
-                <span class="stat-label">{{ 'RECITATIONS.FILE_FORMAT' | translate }}</span>
-              </div>
-            </div>
-          </nz-spin>
-        </nz-card>
+        <nz-spin [nzSpinning]="statsLoading()">
+          <app-stat-card
+            [value]="stats()?.totalRecitations || 0"
+            [label]="'RECITATIONS.TOTAL_RECITATIONS'"
+            icon="bx-headphone"
+            colorTheme="orange"
+          ></app-stat-card>
+        </nz-spin>
       </div>
     </div>
   </div>
 
   <div class="filters-bar">
     <button nz-button class="add-btn" (click)="onAddRecitation()">
-      <i nz-icon nzType="plus" nzTheme="outline"></i> {{ 'RECITATIONS.ADD_RECITER' | translate }}
+      <i class="bx bx-plus"></i> {{ 'RECITATIONS.ADD_RECITER' | translate }}
     </button>
 
     <nz-select
       class="filter-select"
       [nzPlaceHolder]="'RECITATIONS.ALL_RIWAYAS' | translate"
-      [(ngModel)]="selectedRiwayah"
-      (ngModelChange)="onFilterChange()"
+      [ngModel]="selectedRiwayah()"
+      (ngModelChange)="selectedRiwayah.set($event); onFilterChange()"
       nzAllowClear
     >
       <nz-option
@@ -84,8 +69,8 @@
     <nz-select
       class="filter-select"
       [nzPlaceHolder]="'RECITATIONS.ALL_TYPES' | translate"
-      [(ngModel)]="selectedType"
-      (ngModelChange)="onFilterChange()"
+      [ngModel]="selectedType()"
+      (ngModelChange)="selectedType.set($event); onFilterChange()"
       nzAllowClear
     >
       <nz-option
@@ -100,12 +85,12 @@
         type="text"
         nz-input
         [placeholder]="'RECITATIONS.SEARCH_PLACEHOLDER' | translate"
-        [(ngModel)]="searchQuery"
-        (ngModelChange)="onFilterChange()"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="searchQuery.set($event); onFilterChange()"
       />
     </nz-input-group>
     <ng-template #searchIcon>
-      <i nz-icon nzType="search"></i>
+      <i class="bx bx-search"></i>
     </ng-template>
   </div>
 
@@ -113,46 +98,11 @@
     <nz-spin [nzSpinning]="recitationsLoading()">
       <div nz-row [nzGutter]="[24, 24]">
         <div nz-col nzXs="24" nzSm="12" nzMd="8" *ngFor="let recitation of recitations()">
-          <nz-card class="recitation-card">
-            <i nz-icon nzType="delete" class="delete-btn" (click)="onDelete(recitation)"></i>
-
-            <div class="card-header">
-              <!-- Hardcoded logic here but normally you'd use a language service to check if current lang is en or ar and return reciterNameEn or reciterNameAr -->
-              <h3>{{ currentLang === 'en' ? recitation.reciterNameEn : recitation.reciterNameAr }}</h3>
-              <p>{{ currentLang === 'ar' ? recitation.reciterNameEn : recitation.reciterNameAr }}</p>
-            </div>
-
-            <div class="card-info-row">
-              <span>{{ 'RECITATIONS.RECITATION' | translate }}</span>
-              <strong>{{ recitation.riwayah }}</strong>
-            </div>
-
-            <div class="card-info-row" style="background: #eef2ff">
-              <span>{{ 'RECITATIONS.RIWAYAH' | translate }}</span>
-              <strong>{{ recitation.riwayah }}</strong>
-            </div>
-
-            <div class="card-meta">
-              <div class="meta-item">
-                <span>{{ 'RECITATIONS.PERFORMANCE' | translate }}</span>
-                <strong>متوسط</strong>
-              </div>
-              <div class="meta-item">
-                <span>{{ 'RECITATIONS.STYLE' | translate }}</span>
-                <strong>{{ recitation.recitationType }}</strong>
-              </div>
-            </div>
-
-            <div class="card-qualities">
-              <span class="quality-tag" *ngFor="let q of recitation.audioQuality">{{ q }}</span>
-            </div>
-
-            <div class="action-btns">
-              <button nz-button class="play-btn" (click)="onPlayAudio(recitation)">
-                <i nz-icon nzType="sound" nzTheme="outline"></i> {{ 'RECITATIONS.PLAY_AUDIO' | translate }}
-              </button>
-            </div>
-          </nz-card>
+          <app-recitation-card
+            [recitation]="recitation"
+            (delete)="onDelete($event)"
+            (playClick)="onPlayAudio($event)"
+          ></app-recitation-card>
         </div>
       </div>
 
@@ -161,5 +111,14 @@
         [nzNotFoundContent]="'RECITATIONS.NO_RESULTS' | translate"
       ></nz-empty>
     </nz-spin>
+  </div>
+
+  <div class="pagination-container" *ngIf="totalCount() > pageSize">
+    <nz-pagination
+      [nzPageIndex]="currentPage()"
+      [nzTotal]="totalCount()"
+      [nzPageSize]="pageSize"
+      (nzPageIndexChange)="onPageChange($event)"
+    ></nz-pagination>
   </div>
 </div>

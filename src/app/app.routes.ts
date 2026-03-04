@@ -83,5 +83,12 @@ export const routes: Routes = [
         (m) => m.LicenseDetailsPage
       ),
   },
+  {
+    path: 'quranic-cms',
+    loadComponent: () =>
+      import('./features/quranic-cms/components/recitations/recitations.page').then(
+        (m) => m.RecitationsPage
+      ),
+  },
   { path: '**', redirectTo: 'gallery' },
 ];

@@ -10,6 +10,7 @@ import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 
@@ -18,6 +19,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Recitation, RecitationStats } from '../../models/recitations.models';
 import { RecitationsService } from '../../services/recitations/recitations.service';
 import { finalize } from 'rxjs';
+import { StatCardComponent } from '../../../../shared/components/stat-card/stat-card.component';
+import { RecitationCardComponent } from '../../../../shared/components/recitation-card/recitation-card.component';
 
 @Component({
   selector: 'app-recitations-page',
@@ -35,6 +38,9 @@ import { finalize } from 'rxjs';
     NzTagModule,
     NzEmptyModule,
     TranslateModule,
+    StatCardComponent,
+    RecitationCardComponent,
+    NzPaginationModule,
   ],
   templateUrl: './recitations.page.html',
   styleUrls: ['./recitations.page.less'],
@@ -58,10 +64,14 @@ export class RecitationsPage implements OnInit {
   selectedRiwayah = signal<string | null>(null);
   selectedType = signal<string | null>(null);
 
+  currentPage = signal(1);
+  pageSize = 20; // Fixed by API
+  totalCount = signal(0);
+
   riwayahOptions = ['حفص عن عاصم', 'ورش عن نافع', 'قالون عن نافع'];
   typeOptions = ['مرتل', 'مجود'];
-
   ngOnInit() {
+    console.log('RECITATIONS.TITLE:', this.translate.instant('RECITATIONS.TITLE'));
     this.loadStats();
     this.loadRecitations();
   }
@@ -73,7 +83,6 @@ export class RecitationsPage implements OnInit {
       .pipe(finalize(() => this.statsLoading.set(false)))
       .subscribe({
         next: (res) => this.stats.set(res),
-        error: () => this.message.error(this.translate.instant('RECITATIONS.ERROR_LOADING_STATS')),
       });
   }
 
@@ -84,28 +93,31 @@ export class RecitationsPage implements OnInit {
         searchQuery: this.searchQuery(),
         riwayah: this.selectedRiwayah() || undefined,
         recitationType: this.selectedType() || undefined,
+        page: this.currentPage(),
       })
       .pipe(finalize(() => this.recitationsLoading.set(false)))
       .subscribe({
-        next: (res) => this.recitations.set(res),
-        error: () =>
-          this.message.error(this.translate.instant('RECITATIONS.ERROR_LOADING_RECITATIONS')),
+        next: (res) => {
+          this.recitations.set(res.results || []);
+          this.totalCount.set(res.count || 0);
+        },
       });
   }
 
   onFilterChange() {
+    this.currentPage.set(1);
     this.loadRecitations();
   }
 
-  onAddRecitation() {
-    // No-op per requirements
+  onPageChange(page: number) {
+    this.currentPage.set(page);
+    this.loadRecitations();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
-  onPlayAudio(recitation: Recitation) {
-    // No-op per requirements
-  }
+  onAddRecitation() {}
 
-  onDelete(recitation: Recitation) {
-    // No-op per requirements
-  }
+  onPlayAudio(recitation: Recitation) {}
+
+  onDelete(recitation: Recitation) {}
 }

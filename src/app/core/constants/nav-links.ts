@@ -27,7 +27,7 @@ export const NAV_LINKS = [
   {
     label: 'RECITATIONS.TITLE',
     link: '/quranic-cms',
-    icon: 'bx bx-music',
+    icon: 'bx bx-volume-full',
     hidden: isPublisher,
   },
   {

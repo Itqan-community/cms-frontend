@@ -41,11 +41,14 @@
       "eslint --fix --cache --concurrency=auto",
       "prettier --write"
     ],
-    "*.{json,html,css,less,md}": ["prettier --write"]
+    "*.{json,html,css,less,md}": [
+      "prettier --write"
+    ]
   },
   "private": true,
   "dependencies": {
     "@angular/animations": "^20.3.7",
+    "@angular/cdk": "^21.2.0",
     "@angular/common": "^20.3.7",
     "@angular/compiler": "^20.3.7",
     "@angular/core": "^20.3.7",
