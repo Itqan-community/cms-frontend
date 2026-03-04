@@ -185,6 +185,7 @@
     "DOWNLOAD_ORIGINAL_RESOURCE": "Download Original Resource",
     "DOWNLOAD_RESOURCE": "Download Resource",
     "DOWNLOADING": "Downloading...",
+    "DOWNLOAD_FAILED": "Download failed. Please try again.",
     "LICENSE_INFO": "License Information",
     "TECHNICAL_DETAILS": "Technical Details",
     "STATISTICS": "Statistics",
@@ -266,6 +267,9 @@
     "USAGE_OPTIONS": {
       "commercial": "Commercial",
       "non-commercial": "Non-Commercial"
+    },
+    "ERRORS": {
+      "SUBMISSION_FAILED": "Failed to submit access request. Please try again."
     }
   },
   "CONTENT_STANDARDS": {

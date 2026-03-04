@@ -1,4 +1,4 @@
-<div class="asset-details-container">
+  <div class="asset-details-container">
   <app-breadcrumb />
 
   <!-- <nz-spin [nzSpinning]="loading()" nzSize="large"> -->
@@ -68,8 +68,10 @@
                 nzBlock
                 class="download-button-primary"
                 (click)="downloadResource()"
+                [nzLoading]="isDownloading()"
+                [disabled]="isDownloading()"
               >
-                {{ 'UI.DOWNLOAD_RESOURCE' | translate }}
+                {{ (isDownloading() ? 'UI.DOWNLOADING' : 'UI.DOWNLOAD_RESOURCE') | translate }}
                 <i class="bx bx-cloud-download"></i>
               </button>
             </div>
@@ -114,11 +116,22 @@
     [nzTitle]="'ACCESS_REQUEST.TITLE' | translate"
     [nzOkText]="'ACCESS_REQUEST.PROCEED' | translate"
     [nzCancelText]="'COMMON.CANCEL' | translate"
+    [nzOkLoading]="isSubmittingRequest()"
+    [nzOkDisabled]="isSubmittingRequest()"
     (nzOnCancel)="handleModalCancel()"
     (nzOnOk)="handleModalOk()"
   >
     <div *nzModalContent>
       <p class="modal-caption">{{ asset()?.name }}</p>
+
+      @if (requestError()) {
+        <nz-alert
+          nzType="error"
+          [nzMessage]="requestError()! | translate"
+          nzShowIcon
+          class="modal-error-alert"
+        ></nz-alert>
+      }
 
       <form [formGroup]="accessRequestForm" nz-form>
         <nz-form-item>

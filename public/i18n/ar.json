@@ -185,6 +185,7 @@
     "DOWNLOAD_ORIGINAL_RESOURCE": "تحميل المورد الأصلي",
     "DOWNLOAD_RESOURCE": "تحميل المورد",
     "DOWNLOADING": "جاري التحميل...",
+    "DOWNLOAD_FAILED": "فشل التحميل. يرجى المحاولة مرة أخرى.",
     "LICENSE_INFO": "معلومات الترخيص",
     "TECHNICAL_DETAILS": "التفاصيل التقنية",
     "STATISTICS": "الإحصائيات",
@@ -266,6 +267,9 @@
     "USAGE_OPTIONS": {
       "commercial": "تجاري",
       "non-commercial": "غير تجاري"
+    },
+    "ERRORS": {
+      "SUBMISSION_FAILED": "فشل إرسال طلب الوصول. يرجى المحاولة مرة أخرى."
     }
   },
   "CONTENT_STANDARDS": {
