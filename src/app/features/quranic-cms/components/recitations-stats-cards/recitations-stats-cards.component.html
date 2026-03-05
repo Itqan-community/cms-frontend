@@ -1,0 +1,52 @@
+<div class="qcms-audio-stats">
+  <div class="qcms-audio-stats__header">
+    <div>
+      <h2 class="qcms-audio-stats__title">المصاحف الصوتية</h2>
+      <p class="qcms-audio-stats__subtitle">
+        نظرة سريعة على عدد الروايات، القرّاء، والتسجيلات المتاحة في المكتبة الصوتية.
+      </p>
+    </div>
+    @if (usingMock()) {
+      <span class="qcms-audio-stats__badge">بيانات تجريبية (MOCK)</span>
+    }
+  </div>
+
+  <div class="qcms-audio-stats__cards">
+    @if (loading()) {
+      <div class="qcms-audio-stats__card qcms-audio-stats__card--skeleton">
+        <div class="qcms-audio-stats__icon-skeleton"></div>
+        <div class="qcms-audio-stats__value-skeleton"></div>
+        <div class="qcms-audio-stats__label-skeleton"></div>
+      </div>
+      <div class="qcms-audio-stats__card qcms-audio-stats__card--skeleton">
+        <div class="qcms-audio-stats__icon-skeleton"></div>
+        <div class="qcms-audio-stats__value-skeleton"></div>
+        <div class="qcms-audio-stats__label-skeleton"></div>
+      </div>
+      <div class="qcms-audio-stats__card qcms-audio-stats__card--skeleton">
+        <div class="qcms-audio-stats__icon-skeleton"></div>
+        <div class="qcms-audio-stats__value-skeleton"></div>
+        <div class="qcms-audio-stats__label-skeleton"></div>
+      </div>
+    } @else if (stats()) {
+      <div class="qcms-audio-stats__card">
+        <div class="qcms-audio-stats__icon qcms-audio-stats__icon--riwayas">📘</div>
+        <div class="qcms-audio-stats__value">{{ stats()!.riwayas }}</div>
+        <div class="qcms-audio-stats__label">رواية متاحة</div>
+      </div>
+
+      <div class="qcms-audio-stats__card">
+        <div class="qcms-audio-stats__icon qcms-audio-stats__icon--recitations">🎵</div>
+        <div class="qcms-audio-stats__value">{{ stats()!.recitations }}</div>
+        <div class="qcms-audio-stats__label">قراءة متاحة</div>
+      </div>
+
+      <div class="qcms-audio-stats__card">
+        <div class="qcms-audio-stats__icon qcms-audio-stats__icon--reciters">🔊</div>
+        <div class="qcms-audio-stats__value">{{ stats()!.reciters }}</div>
+        <div class="qcms-audio-stats__label">قارئ متاح</div>
+      </div>
+    }
+  </div>
+</div>
+

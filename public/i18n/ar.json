@@ -2,6 +2,7 @@
   "APP_TITLE": "إتقان لإدارة المحتوى",
   "WELCOME": "مرحباً بك في المتجر",
   "AUTH": {
+    "MUST_LOGIN_TO_VIEW": "يجب تسجيل الدخول لعرض هذه الصفحة.",
     "LOGIN": {
       "TITLE": "مرحباً بعودتك",
       "SUBTITLE": "سجّل دخولك للمتابعة إلى إتقان",
@@ -174,7 +175,12 @@
     "VIEW_LICENSE": "عرض الترخيص",
     "DETAILS_TITLE": "تفاصيل الأصل",
     "ASSET_ID": "معرّف الأصل",
-    "DETAILS_DESC": "نص مؤقت لتفاصيل الأصل."
+    "DETAILS_DESC": "نص مؤقت لتفاصيل الأصل.",
+    "STATS": {
+      "RIWAYAS": "رواية متاحة",
+      "RECITERS": "قارئ متاح",
+      "RECITATIONS": "قراءة متاحة"
+    }
   },
   "UI": {
     "FILTERS": "تصفية",
@@ -183,6 +189,10 @@
     "LICENSE_FILTERS": "التراخيص (CreativeCommons)",
     "LOADING_ASSETS": "جاري تحميل الأصول...",
     "NO_RESULTS_FOUND": "لم يتم العثور على نتائج",
+    "NO_RESULTS_MESSAGE": "حاول تعديل البحث أو التصفية للعثور على ما تبحث عنه.",
+    "NO_ASSETS_MESSAGE": "لا توجد أصول متاحة حاليًا. تحقق مرة أخرى لاحقًا.",
+    "SOMETHING_WENT_WRONG": "حدث خطأ ما",
+    "BACK_TO_GALLERY": "العودة إلى المكتبة",
     "PUBLISHER_LABEL": "الناشر:",
     "LOADING_ASSET_DETAILS": "جاري تحميل تفاصيل الأصل...",
     "ASSET_NOT_FOUND": "الأصل غير موجود",
