@@ -1,0 +1,222 @@
+<div class="pub-page" dir="rtl">
+
+  <!-- Sub-Navigation Tabs -->
+  <div class="pub-subtabs">
+    <button class="pub-subtabs__tab" [ngClass]="{'pub-subtabs__tab--active': activeSubTab() === 'publishers'}" (click)="setSubTab('publishers')">الناشرون</button>
+    <button class="pub-subtabs__tab" [ngClass]="{'pub-subtabs__tab--active': activeSubTab() === 'authors'}" (click)="setSubTab('authors')">المؤلفون</button>
+    <button class="pub-subtabs__tab" [ngClass]="{'pub-subtabs__tab--active': activeSubTab() === 'sources'}" (click)="setSubTab('sources')">المصادر</button>
+  </div>
+
+  @if (activeSubTab() === 'publishers') {
+
+    <!-- Banner -->
+    <div class="pub-banner">
+      <div class="pub-banner__content">
+        <h2 class="pub-banner__title">الناشرون والمصادر</h2>
+        <p class="pub-banner__desc">إدارة الناشرين ودور النشر المعتمدة للمحتوى القرآني</p>
+      </div>
+      @if (usingMock()) {
+        <span class="pub-banner__badge">بيانات تجريبية (MOCK)</span>
+      }
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="pub-stats">
+      @if (statsLoading()) {
+        @for (i of getSkeletonArray().slice(0, 3); track i) {
+          <div class="pub-stats__card pub-stats__card--skel">
+            <div class="pub-stats__icon-skel"></div>
+            <div class="pub-stats__value-skel"></div>
+            <div class="pub-stats__label-skel"></div>
+          </div>
+        }
+      } @else if (stats()) {
+        <div class="pub-stats__card">
+          <div class="pub-stats__icon pub-stats__icon--total">📰</div>
+          <div class="pub-stats__value">{{ stats()!.total_publishers }}</div>
+          <div class="pub-stats__label">إجمالي الناشرين</div>
+        </div>
+        <div class="pub-stats__card">
+          <div class="pub-stats__icon pub-stats__icon--active">✅</div>
+          <div class="pub-stats__value">{{ stats()!.total_active }}</div>
+          <div class="pub-stats__label">ناشرون نشطون</div>
+        </div>
+        <div class="pub-stats__card">
+          <div class="pub-stats__icon pub-stats__icon--countries">🌍</div>
+          <div class="pub-stats__value">{{ stats()!.total_countries }}</div>
+          <div class="pub-stats__label">إجمالي الدول</div>
+        </div>
+      }
+    </div>
+
+    <!-- Toolbar: Search + Filter + Add -->
+    <div class="pub-toolbar">
+      <div class="pub-toolbar__search">
+        <span class="pub-toolbar__search-icon">🔍</span>
+        <input class="pub-toolbar__search-input" type="text" placeholder="ابحث عن ناشر..." (input)="onSearchInput($event)" />
+      </div>
+      <nz-select class="pub-toolbar__filter" nzPlaceHolder="حالة النشاط" (ngModelChange)="onActiveFilterChange($event)" [ngModel]="'all'" nzSize="default">
+        <nz-option nzValue="all" nzLabel="الكل"></nz-option>
+        <nz-option nzValue="true" nzLabel="نشط"></nz-option>
+        <nz-option nzValue="false" nzLabel="غير نشط"></nz-option>
+      </nz-select>
+      <button nz-button nzType="primary" (click)="toggleAddForm()">
+        @if (showAddForm()) { إلغاء } @else { + إضافة ناشر }
+      </button>
+    </div>
+
+    <!-- Add Publisher Form (slide-down) -->
+    @if (showAddForm()) {
+      <div class="pub-add">
+        <h3 class="pub-add__title">إضافة ناشر جديد</h3>
+        <form nz-form [formGroup]="addForm" (ngSubmit)="onSubmitAdd()" nzLayout="vertical" class="pub-add__form">
+          <div class="pub-add__row">
+            <nz-form-item>
+              <nz-form-label nzRequired>الاسم بالعربية</nz-form-label>
+              <nz-form-control nzErrorTip="الاسم بالعربية مطلوب">
+                <input nz-input formControlName="name_ar" placeholder="مثال: مجمع الملك فهد" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label nzRequired>الاسم بالإنجليزية</nz-form-label>
+              <nz-form-control nzErrorTip="الاسم بالإنجليزية مطلوب">
+                <input nz-input formControlName="name_en" placeholder="e.g. King Fahd Complex" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div class="pub-add__row">
+            <nz-form-item>
+              <nz-form-label>الدولة</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="country" placeholder="مثال: السعودية" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label>سنة التأسيس</nz-form-label>
+              <nz-form-control>
+                <input nz-input type="number" formControlName="foundation_year" placeholder="مثال: 1984" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div class="pub-add__row">
+            <nz-form-item>
+              <nz-form-label>العنوان</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="address" placeholder="مثال: المدينة المنورة" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label>البريد الإلكتروني</nz-form-label>
+              <nz-form-control nzErrorTip="بريد إلكتروني غير صالح">
+                <input nz-input formControlName="contact_email" placeholder="info@example.com" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div class="pub-add__row">
+            <nz-form-item>
+              <nz-form-label>الموقع الإلكتروني</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="website" placeholder="https://example.com" />
+              </nz-form-control>
+            </nz-form-item>
+            <nz-form-item>
+              <nz-form-label>رابط الشعار</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="icon_url" placeholder="https://example.com/logo.png" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <nz-form-item>
+            <nz-form-label>الوصف</nz-form-label>
+            <nz-form-control>
+              <textarea nz-input formControlName="description" placeholder="وصف مختصر عن الناشر..." [nzAutosize]="{ minRows: 2, maxRows: 4 }"></textarea>
+            </nz-form-control>
+          </nz-form-item>
+          <div class="pub-add__footer">
+            <label class="pub-add__verified">
+              <nz-switch formControlName="is_verified" nzSize="small"></nz-switch>
+              <span>موثّق</span>
+            </label>
+            <button nz-button nzType="primary" [disabled]="addForm.invalid" [nzLoading]="addLoading()">حفظ</button>
+          </div>
+        </form>
+      </div>
+    }
+
+    <!-- Publishers Grid -->
+    <div class="pub-grid">
+      @if (publishersLoading()) {
+        @for (i of getSkeletonArray(); track i) {
+          <div class="pub-card pub-card--skel">
+            <div class="pub-card__icon-skel"></div>
+            <div class="pub-card__name-skel"></div>
+            <div class="pub-card__info-skel"></div>
+            <div class="pub-card__info-skel pub-card__info-skel--short"></div>
+          </div>
+        }
+      } @else if (publishers().length === 0) {
+        <div class="pub-empty">
+          <span class="pub-empty__icon">📰</span>
+          <p class="pub-empty__text">لا يوجد ناشرون</p>
+          <p class="pub-empty__sub">جرّب تغيير معايير البحث أو أضف ناشرًا جديدًا</p>
+        </div>
+      } @else {
+        @for (pub of publishers(); track pub.name_en) {
+          <div class="pub-card">
+            <div class="pub-card__header">
+              @if (pub.icon_url) {
+                <img class="pub-card__icon" [src]="pub.icon_url" [alt]="pub.name_ar" />
+              } @else {
+                <div class="pub-card__icon-placeholder">📰</div>
+              }
+              @if (pub.is_verified) {
+                <span class="pub-card__verified" title="موثّق">✓</span>
+              }
+            </div>
+            <h3 class="pub-card__name">{{ pub.name_ar }}</h3>
+            <p class="pub-card__name-en">{{ pub.name_en }}</p>
+            @if (pub.country) {
+              <div class="pub-card__info">
+                <span>🌍</span>
+                <span>{{ pub.country }}</span>
+              </div>
+            }
+            @if (pub.foundation_year) {
+              <div class="pub-card__info">
+                <span>📅</span>
+                <span>تأسس {{ pub.foundation_year }}</span>
+              </div>
+            }
+            @if (pub.website) {
+              <div class="pub-card__info">
+                <span>🔗</span>
+                <a class="pub-card__link" [href]="pub.website" target="_blank" rel="noopener">{{ pub.website }}</a>
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (!publishersLoading() && totalPublishers() > pageSize) {
+      <div class="pub-pagination">
+        <nz-pagination
+          [nzPageIndex]="currentPage()"
+          [nzTotal]="totalPublishers()"
+          [nzPageSize]="pageSize"
+          (nzPageIndexChange)="onPageChange($event)"
+          nzSimple
+        ></nz-pagination>
+      </div>
+    }
+
+  } @else {
+    <!-- Coming soon for Authors / Sources tabs -->
+    <div class="pub-coming-soon">
+      <span class="pub-coming-soon__icon">🚧</span>
+      <p class="pub-coming-soon__text">قريباً</p>
+    </div>
+  }
+
+</div>
