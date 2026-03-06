@@ -1,12 +1,11 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { NgClass, NgIf } from '@angular/common';
-import { RecitationsStats } from '../../models/recitations-stats.model';
-import { RecitationsStatsService } from '../../services/recitations-stats.service';
+import { RecitationsStats } from '../../../models/recitations-stats.model';
+import { RecitationsStatsService } from '../../../services/recitations-stats.service';
 
 @Component({
-  selector: 'app-qcms-recitations-stats-cards',
+  selector: 'app-recitation-local-stats-cards',
   standalone: true,
-  imports: [NgIf, NgClass],
+  imports: [],
   templateUrl: './recitations-stats-cards.component.html',
   styleUrls: ['./recitations-stats-cards.component.less'],
 })

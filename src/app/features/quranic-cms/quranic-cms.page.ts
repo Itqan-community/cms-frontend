@@ -2,8 +2,7 @@ import { NgClass } from '@angular/common';
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { RecitationsStatsCardsComponent } from './components/recitations-stats-cards/recitations-stats-cards.component';
-
+import { RecitationListComponent } from './recitations/components/recitation-list/recitation-list.component';
 interface CmsTab {
   id: string;
   label: string;
@@ -13,7 +12,7 @@ interface CmsTab {
 @Component({
   selector: 'app-quranic-cms-page',
   standalone: true,
-  imports: [NgClass, NzModalModule, RouterLink, RecitationsStatsCardsComponent],
+  imports: [NgClass, NzModalModule, RouterLink, RecitationListComponent],
   templateUrl: './quranic-cms.page.html',
   styleUrls: ['./quranic-cms.page.less'],
 })
@@ -21,6 +20,7 @@ export class QuranicCmsPage {
   private modal = inject(NzModalService);
 
   activeTab = signal('search');
+  showRecitations = signal(false);
 
   readonly tabs: CmsTab[] = [
     { id: 'search', label: 'بحث', emoji: '🔍' },
@@ -40,6 +40,9 @@ export class QuranicCmsPage {
 
   setActiveTab(id: string): void {
     this.activeTab.set(id);
+    if (id !== 'audio') {
+      this.showRecitations.set(false);
+    }
   }
 
   onSearch(): void {

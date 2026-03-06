@@ -1,5 +1,4 @@
 <div class="qcms-page" dir="rtl">
-
   <!-- Green Header Bar -->
   <div class="qcms-header">
     <div class="qcms-header__inner">
@@ -35,11 +34,12 @@
 
   <!-- Tab Content -->
   <div class="qcms-content">
-
     @if (activeTab() === 'search') {
       <div class="qcms-search-panel">
         <h2 class="qcms-search-panel__title">البحث في القرآن الكريم</h2>
-        <p class="qcms-search-panel__subtitle">ابحث عن كلمة أو عبارة لعرض جميع الآيات التي تحتوي عليها</p>
+        <p class="qcms-search-panel__subtitle">
+          ابحث عن كلمة أو عبارة لعرض جميع الآيات التي تحتوي عليها
+        </p>
         <label class="qcms-search-panel__label">أدخل كلمة أو عبارة للبحث</label>
         <div class="qcms-search-panel__input-row">
           <span class="qcms-search-panel__search-icon">🔍</span>
@@ -56,17 +56,31 @@
         <div class="qcms-search-panel__empty">
           <span class="qcms-search-panel__empty-icon">🔍</span>
           <p class="qcms-search-panel__empty-title">ابدأ بإدخال كلمة في حقل البحث أعلاه</p>
-          <p class="qcms-search-panel__empty-subtitle">سيتم عرض جميع الآيات التي تحتوي على الكلمة المطلوبة</p>
+          <p class="qcms-search-panel__empty-subtitle">
+            سيتم عرض جميع الآيات التي تحتوي على الكلمة المطلوبة
+          </p>
         </div>
       </div>
     } @else if (activeTab() === 'audio') {
-      <app-qcms-recitations-stats-cards />
+      <div class="audio-tab-view">
+        <!--just for testing to be deleted-->
+        @if (!showRecitations()) {
+          <div class="audio-links-grid">
+            <button class="audio-link-item" (click)="showRecitations.set(true)">
+              <span class="audio-link-item__emoji">🎵</span>
+              <span class="audio-link-item__label">المصاحف الصوتية</span>
+              <span class="audio-link-item__arrow">←</span>
+            </button>
+          </div>
+        } @else {
+          <app-recitation-list></app-recitation-list>
+        }
+      </div>
     } @else {
       <div class="qcms-coming-soon">
         <span class="qcms-coming-soon__emoji">{{ activeTabEmoji() }}</span>
         <p class="qcms-coming-soon__text">قريباً</p>
       </div>
     }
-
   </div>
 </div>

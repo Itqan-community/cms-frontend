@@ -60,12 +60,9 @@ export class RecitationsStatsService {
     return forkJoin([riwayas$, reciters$, recitations$]).pipe(
       map(([riwayas, reciters, recitations]) => ({ riwayas, reciters, recitations })),
       catchError(() => {
-        this.messages.error(
-          'تعذر تحميل إحصائيات التلاوات، يتم عرض بيانات تجريبية (MOCK) مؤقتًا.'
-        );
+        this.messages.error('تعذر تحميل إحصائيات التلاوات، يتم عرض بيانات تجريبية (MOCK) مؤقتًا.');
         return of(MOCK_STATS);
       })
     );
   }
 }
-

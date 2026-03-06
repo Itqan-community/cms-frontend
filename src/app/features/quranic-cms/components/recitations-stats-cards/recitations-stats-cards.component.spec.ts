@@ -33,9 +33,9 @@ describe('RecitationsStatsCardsComponent (Quranic CMS)', () => {
   it('should render KPI values correctly', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
-    const values = Array.from(
-      compiled.querySelectorAll('.qcms-audio-stats__value')
-    ).map((el) => el.textContent?.trim());
+    const values = Array.from(compiled.querySelectorAll('.qcms-audio-stats__value')).map((el) =>
+      el.textContent?.trim()
+    );
 
     expect(values).toEqual(['2', '2', '6']);
   });
@@ -46,4 +46,3 @@ describe('RecitationsStatsCardsComponent (Quranic CMS)', () => {
     expect(badge).not.toBeNull();
   });
 });
-
