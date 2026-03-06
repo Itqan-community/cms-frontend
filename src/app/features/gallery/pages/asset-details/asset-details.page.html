@@ -1,4 +1,4 @@
-  <div class="asset-details-container">
+<div class="asset-details-container">
   <app-breadcrumb />
 
   <!-- <nz-spin [nzSpinning]="loading()" nzSize="large"> -->
@@ -123,15 +123,6 @@
   >
     <div *nzModalContent>
       <p class="modal-caption">{{ asset()?.name }}</p>
-
-      @if (requestError()) {
-        <nz-alert
-          nzType="error"
-          [nzMessage]="requestError()! | translate"
-          nzShowIcon
-          class="modal-error-alert"
-        ></nz-alert>
-      }
 
       <form [formGroup]="accessRequestForm" nz-form>
         <nz-form-item>
