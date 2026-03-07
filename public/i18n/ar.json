@@ -266,6 +266,9 @@
     "USAGE_OPTIONS": {
       "commercial": "تجاري",
       "non-commercial": "غير تجاري"
+    },
+    "ERRORS": {
+      "SUBMISSION_FAILED": "فشل إرسال طلب الوصول. يرجى المحاولة مرة أخرى."
     }
   },
   "CONTENT_STANDARDS": {
