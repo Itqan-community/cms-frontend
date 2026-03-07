@@ -1,7 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { Router, RouterOutlet } from '@angular/router';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { filter } from 'rxjs';
 import { GoogleAnalyticsService } from './core/services/google-analytics.service';
 import { WebVitalsService } from './core/services/web-vitals.service';
 import { HeaderComponent } from './shared/components/header/header.component';
@@ -20,10 +21,20 @@ export class App {
   private readonly googleAnalyticsService = inject(GoogleAnalyticsService);
 
   protected readonly title = signal('ITQAN | إتقان');
+  protected hideHeader = signal(false);
+  protected fullWidth = signal(false);
 
   constructor() {
     void this.webVitalsService;
     this.googleAnalyticsService.init();
+
+    this.router.events
+      .pipe(filter((e) => e instanceof NavigationEnd))
+      .subscribe(() => {
+        const data = this.router.routerState.snapshot.root.firstChild?.data ?? {};
+        this.hideHeader.set(!!data['hideHeader']);
+        this.fullWidth.set(!!data['fullWidth']);
+      });
 
     const currentLang = localStorage.getItem('lang') || 'ar';
     this.translate.addLangs(['ar', 'en']);

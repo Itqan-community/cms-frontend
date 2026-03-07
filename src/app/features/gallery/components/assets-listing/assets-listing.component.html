@@ -10,10 +10,6 @@
       @for (item of getSkeletonArray(); track $index) {
         <app-asset-card-skeleton />
       }
-    } @else {
-      @for (asset of assets(); track asset.id) {
-        <app-asset-card [asset]="asset" />
-      }
-    }
-  </div>
+    </div>
+  }
 </div>

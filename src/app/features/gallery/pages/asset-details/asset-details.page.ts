@@ -1,5 +1,6 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -10,30 +11,31 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { Licenses } from '../../../../core/enums/licenses.enum';
+import { AssetDetailSkeletonComponent } from '../../../../shared/components/asset-detail-skeleton/asset-detail-skeleton.component';
 import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/breadcrumb.component';
 import { ImageCarouselComponent } from '../../../../shared/components/image-carousel/image-carousel.component';
 import { LicenseTagComponent } from '../../../../shared/components/license-tag/license-tag.component';
+import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
 import { AssetDetails } from '../../models/assets.model';
 import { AssetsService } from '../../services/assets.service';
 
 @Component({
   selector: 'app-asset-details-page',
-  standalone: true,
   imports: [
     RouterModule,
     ImageCarouselComponent,
     BreadcrumbComponent,
     LicenseTagComponent,
+    StateMessageComponent,
+    AssetDetailSkeletonComponent,
     TranslateModule,
     NzButtonModule,
     NzTagModule,
     NzIconModule,
-    NzSpinModule,
     NzModalModule,
     NzFormModule,
     NzInputModule,
@@ -57,6 +59,8 @@ export class AssetDetailsPage implements OnInit {
   asset = signal<AssetDetails | null>(null);
   images = signal<string[]>([]);
   loading = signal<boolean>(true);
+  errorState = signal<boolean>(false);
+  notFound = signal<boolean>(false);
   isModalVisible = signal<boolean>(false);
   isLicenseModalVisible = signal<boolean>(false);
   canConfirmLicense = signal<boolean>(false);
@@ -80,16 +84,30 @@ export class AssetDetailsPage implements OnInit {
 
   getAssetDetails(id: string) {
     this.loading.set(true);
-    this.assetsService.getAssetDetails(id).subscribe({
-      next: (asset) => {
-        this.asset.set(asset);
-        this.images.set(asset.snapshots.map((snapshot) => snapshot.image_url));
-        this.loading.set(false);
-      },
-      error: () => {
-        this.loading.set(false);
-      },
-    });
+    this.errorState.set(false);
+    this.notFound.set(false);
+    this.assetsService
+      .getAssetDetails(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (asset) => {
+          this.asset.set(asset);
+          this.images.set(asset.snapshots.map((snapshot) => snapshot.image_url));
+          this.loading.set(false);
+        },
+        error: (err) => {
+          this.loading.set(false);
+          if (err instanceof HttpErrorResponse && err.status === 404) {
+            this.notFound.set(true);
+          } else {
+            this.errorState.set(true);
+          }
+        },
+      });
+  }
+
+  retryLoad() {
+    this.getAssetDetails(this.id);
   }
 
   getCategoryIcon(category: string): string {
