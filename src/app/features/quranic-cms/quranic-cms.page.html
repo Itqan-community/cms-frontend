@@ -61,6 +61,8 @@
       </div>
     } @else if (activeTab() === 'audio') {
       <app-qcms-recitations-stats-cards />
+    } @else if (activeTab() === 'publishers') {
+      <app-qcms-publishers-tab />
     } @else {
       <div class="qcms-coming-soon">
         <span class="qcms-coming-soon__emoji">{{ activeTabEmoji() }}</span>

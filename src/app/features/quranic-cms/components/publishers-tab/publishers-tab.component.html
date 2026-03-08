@@ -1,0 +1,349 @@
+<div class="pt" dir="rtl">
+
+  <!-- Banner -->
+  <div class="pt-banner">
+    <div class="pt-banner__text">
+      <h2 class="pt-banner__title">
+        <span>📋</span> الناشرون والمصادر
+      </h2>
+      <p class="pt-banner__subtitle">إدارة الجهات والمؤسسات التي تحصل منها على المحتوى القرآني</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="pt-loading">
+      <nz-spin nzSize="large" />
+    </div>
+  } @else {
+
+    <!-- Stats Row -->
+    <div class="pt-stats">
+      <div class="pt-stat">
+        <span class="pt-stat__value">{{ totalPublishers() }}</span>
+        <span class="pt-stat__icon pt-stat__icon--publishers">📋</span>
+        <span class="pt-stat__label">ناشر</span>
+      </div>
+      <div class="pt-stat">
+        <span class="pt-stat__value">{{ audioSources() }}</span>
+        <span class="pt-stat__icon pt-stat__icon--audio">🎵</span>
+        <span class="pt-stat__label">مصادر صوتية</span>
+      </div>
+      <div class="pt-stat">
+        <span class="pt-stat__value">{{ textSources() }}</span>
+        <span class="pt-stat__icon pt-stat__icon--text">📄</span>
+        <span class="pt-stat__label">مصادر نصية</span>
+      </div>
+      <div class="pt-stat">
+        <span class="pt-stat__value">{{ totalCountries() }}</span>
+        <span class="pt-stat__icon pt-stat__icon--countries">📍</span>
+        <span class="pt-stat__label">دولة</span>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="pt-toolbar">
+      <div class="pt-toolbar__start">
+        <button class="pt-toolbar__add-btn" (click)="toggleAddForm()">
+          <span>+</span> إضافة ناشر
+        </button>
+        <button class="pt-toolbar__sort-btn">↓</button>
+        <select
+          class="pt-toolbar__filter"
+          [ngModel]="typeFilter()"
+          (ngModelChange)="typeFilter.set($event)"
+        >
+          <option value="all">كل الأنواع</option>
+          <option value="audio">صوتيات</option>
+          <option value="text">نصوص</option>
+        </select>
+      </div>
+      <div class="pt-toolbar__search">
+        <span class="pt-toolbar__search-icon">🔍</span>
+        <input
+          class="pt-toolbar__search-input"
+          type="text"
+          placeholder="ابحث عن ناشر..."
+          [ngModel]="searchQuery()"
+          (ngModelChange)="searchQuery.set($event)"
+        />
+      </div>
+    </div>
+
+    <!-- Inline Add Publisher Form -->
+    @if (isAddingPublisher()) {
+      <div class="pt-add-form">
+        <!-- Form Header -->
+        <div class="pt-add-form__header">
+          <span class="pt-add-form__title">إضافة ناشر جديد</span>
+          <button class="pt-add-form__collapse" (click)="toggleAddForm()">←</button>
+        </div>
+
+        <form [formGroup]="addForm" class="pt-add-form__body">
+
+          <!-- Row 1: name_ar + unique_identifier -->
+          <div class="pt-add-form__row">
+            <div class="pt-add-form__field">
+              <label class="pt-add-form__label">
+                اسم الناشر <span class="pt-add-form__required">*</span>
+              </label>
+              <input
+                class="pt-add-form__input"
+                [class.pt-add-form__input--error]="addForm.get('name_ar')?.invalid && addForm.get('name_ar')?.dirty"
+                formControlName="name_ar"
+                placeholder="كل آية"
+              />
+            </div>
+            <div class="pt-add-form__field">
+              <label class="pt-add-form__label">
+                المعرّف الفريد <span class="pt-add-form__required">*</span>
+              </label>
+              <input
+                class="pt-add-form__input"
+                [class.pt-add-form__input--error]="addForm.get('unique_identifier')?.invalid && addForm.get('unique_identifier')?.dirty"
+                formControlName="unique_identifier"
+                placeholder="كل-آية"
+              />
+              <span class="pt-add-form__hint">معرف فريد / استخدم - للفصل بين الكلمات / الفصل بين اللغات</span>
+            </div>
+          </div>
+
+          <!-- Row 2: name_en + content type select -->
+          <div class="pt-add-form__row">
+            <div class="pt-add-form__field">
+              <label class="pt-add-form__label">الاسم بالحروف اللاتينية</label>
+              <input
+                class="pt-add-form__input"
+                formControlName="name_en"
+                placeholder="EveryAyah.com"
+              />
+            </div>
+            <div class="pt-add-form__field">
+              <label class="pt-add-form__label">نوع المحتوى الرئيسي</label>
+              <select class="pt-add-form__select">
+                <option value="">اختيار فقط</option>
+                @for (opt of contentTypeOptions; track opt.value) {
+                  <option [value]="opt.value">{{ opt.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <!-- Row 3: country + address -->
+          <div class="pt-add-form__row">
+            <div class="pt-add-form__field">
+              <label class="pt-add-form__label">الدولة</label>
+              <input
+                class="pt-add-form__input"
+                formControlName="country"
+                placeholder="المملكة العربية السعودية"
+              />
+            </div>
+            <div class="pt-add-form__field">
+              <label class="pt-add-form__label">العنوان</label>
+              <input
+                class="pt-add-form__input"
+                formControlName="address"
+                placeholder="أدخل العنوان..."
+              />
+            </div>
+          </div>
+
+          <!-- Row 4: email + website -->
+          <div class="pt-add-form__row">
+            <div class="pt-add-form__field">
+              <label class="pt-add-form__label">البريد الإلكتروني</label>
+              <input
+                class="pt-add-form__input"
+                formControlName="contact_email"
+                placeholder="info@example.com"
+              />
+            </div>
+            <div class="pt-add-form__field">
+              <label class="pt-add-form__label">الموقع الإلكتروني</label>
+              <input
+                class="pt-add-form__input"
+                formControlName="website"
+                placeholder="https://example.com"
+              />
+            </div>
+          </div>
+
+          <!-- Row 5: foundation_year + extra type -->
+          <div class="pt-add-form__row">
+            <div class="pt-add-form__field">
+              <label class="pt-add-form__label">سنة التأسيس</label>
+              <input
+                class="pt-add-form__input"
+                type="number"
+                formControlName="foundation_year"
+                placeholder="2005"
+              />
+            </div>
+            <div class="pt-add-form__field">
+              <label class="pt-add-form__label">نوع اخرى</label>
+              <select class="pt-add-form__select">
+                <option value="">↓</option>
+                @for (opt of contentTypeOptions; track opt.value) {
+                  <option [value]="opt.value">{{ opt.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          <!-- Content Types Section -->
+          <div class="pt-add-form__section">
+            <label class="pt-add-form__label">أنواع المحتوى المتاح</label>
+            <div class="pt-add-form__tag-input-row">
+              <button
+                type="button"
+                class="pt-add-form__tag-add-btn"
+                (click)="addContentType(contentTypeInput())"
+              >+</button>
+              <select
+                class="pt-add-form__tag-select"
+                [ngModel]="contentTypeInput()"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="contentTypeInput.set($event)"
+              >
+                <option value="">اختر نوع المحتوى...</option>
+                @for (opt of contentTypeOptions; track opt.value) {
+                  <option [value]="opt.value">{{ opt.label }}</option>
+                }
+              </select>
+            </div>
+            @if (selectedContentTypes().length) {
+              <div class="pt-add-form__tags">
+                @for (type of selectedContentTypes(); track type) {
+                  <span class="pt-add-form__tag">
+                    {{ contentTypeLabel(type) }}
+                    <button type="button" class="pt-add-form__tag-remove" (click)="removeContentType(type)">×</button>
+                  </span>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Description -->
+          <div class="pt-add-form__section">
+            <label class="pt-add-form__label">الرسف</label>
+            <textarea
+              class="pt-add-form__textarea"
+              formControlName="description"
+              placeholder="وصف مختصر عن الناشر..."
+              rows="3"
+            ></textarea>
+          </div>
+
+          <!-- Submit -->
+          <button
+            type="button"
+            class="pt-add-form__submit"
+            [disabled]="saving()"
+            (click)="onSubmitAdd()"
+          >
+            <span>💾</span>
+            {{ saving() ? 'جارٍ الحفظ...' : 'حفظ الناشر' }}
+          </button>
+
+        </form>
+      </div>
+    }
+
+    <!-- Cards Grid -->
+    @if (filtered().length === 0) {
+      <div class="pt-empty">
+        <span>📰</span>
+        <p>لا توجد نتائج</p>
+      </div>
+    } @else {
+      <div class="pt-grid">
+        @for (publisher of filtered(); track publisher.id ?? publisher.unique_identifier) {
+          <div
+            class="pt-card"
+            [routerLink]="['/quranic-cms/publishers', publisher.id ?? publisher.unique_identifier, 'details']"
+          >
+
+            <!-- Card top row: badge + actions -->
+            <div class="pt-card__top">
+              <div class="pt-card__actions">
+                <button
+                  class="pt-card__action-btn pt-card__action-btn--delete"
+                  title="حذف"
+                  (click)="$event.stopPropagation()"
+                >🗑️</button>
+                <button
+                  class="pt-card__action-btn pt-card__action-btn--edit"
+                  title="تعديل"
+                  (click)="$event.stopPropagation()"
+                >✏️</button>
+              </div>
+              @if (publisherBadge(publisher); as badge) {
+                <span class="pt-card__badge pt-card__badge--{{ badge.type }}">
+                  @if (badge.type === 'audio' || badge.type === 'both') { 🎵 }
+                  @if (badge.type === 'text') { 📄 }
+                  {{ badge.label }}
+                </span>
+              }
+            </div>
+
+            <!-- Publisher identity -->
+            <div class="pt-card__identity">
+              <h3 class="pt-card__name-ar">{{ publisher.name_ar }}</h3>
+              @if (publisher.name_en) {
+                <span class="pt-card__name-en">{{ publisher.name_en }}</span>
+              }
+            </div>
+
+            <!-- Description -->
+            @if (publisher.description) {
+              <p class="pt-card__desc">{{ publisher.description }}</p>
+            }
+
+            <!-- Meta -->
+            <div class="pt-card__meta">
+              @if (publisher.country) {
+                <div class="pt-card__meta-row">
+                  <span class="pt-card__meta-icon">📍</span>
+                  <span>{{ publisher.country }}</span>
+                </div>
+              }
+              @if (publisher.foundation_year) {
+                <div class="pt-card__meta-row">
+                  <span class="pt-card__meta-icon">📅</span>
+                  <span>تأسس عام {{ publisher.foundation_year }}</span>
+                </div>
+              }
+              @if (publisher.website) {
+                <div class="pt-card__meta-row">
+                  <span class="pt-card__meta-icon">🌐</span>
+                  <span class="pt-card__meta-link">{{ publisher.website }}</span>
+                </div>
+              }
+              @if (publisher.contact_email) {
+                <div class="pt-card__meta-row">
+                  <span class="pt-card__meta-icon">✉️</span>
+                  <span class="pt-card__meta-link">{{ publisher.contact_email }}</span>
+                </div>
+              }
+            </div>
+
+            <!-- Content Types -->
+            @if (publisher.content_types?.length) {
+              <div class="pt-card__types">
+                <span class="pt-card__types-label">أنواع المحتوى:</span>
+                <div class="pt-card__tags">
+                  @for (type of publisher.content_types!; track type) {
+                    <nz-tag class="pt-card__tag">{{ contentTypeLabel(type) }}</nz-tag>
+                  }
+                </div>
+              </div>
+            }
+
+          </div>
+        }
+      </div>
+    }
+
+  }
+
+</div>

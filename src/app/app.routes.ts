@@ -17,9 +17,23 @@ export const routes: Routes = [
   {
     path: 'quranic-cms',
     loadComponent: () =>
-      import('./features/quranic-cms/quranic-cms.page').then((m) => m.QuranicCmsPage),
+      import('./features/quranic-cms/quranic-cms.layout').then((m) => m.QuranicCmsLayout),
     data: { hideHeader: true, fullWidth: true },
     canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./features/quranic-cms/quranic-cms.page').then((m) => m.QuranicCmsPage),
+      },
+      {
+        path: 'publishers/:id/details',
+        loadComponent: () =>
+          import(
+            './features/quranic-cms/publishers/components/publisher-details/publisher-details.component'
+          ).then((m) => m.PublisherDetailsComponent),
+      },
+    ],
   },
   {
     path: 'gallery/asset/:id',

@@ -1,0 +1,234 @@
+.pe {
+  direction: rtl;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  // ── Actions bar ─────────────────────────────────────────────
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+
+  &__save-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #16a34a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 9px 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover { background: #15803d; }
+  }
+
+  &__cancel-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fff;
+    color: #555;
+    border: 1px solid #d9d9d9;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+
+    &:hover { border-color: #aaa; color: #333; }
+  }
+
+  // ── Cards grid ───────────────────────────────────────────────
+  &__cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+
+    @media (max-width: 768px) { grid-template-columns: 1fr; }
+  }
+
+  &__card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+  }
+
+  &__card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 20px;
+    border-bottom: 1px solid #f0f0f0;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #1a1a1a;
+  }
+
+  &__card-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  // ── Fields ───────────────────────────────────────────────────
+  &__row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+
+    @media (max-width: 500px) { grid-template-columns: 1fr; }
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  &__label {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-align: right;
+  }
+
+  &__required {
+    color: #dc2626;
+    margin-right: 2px;
+  }
+
+  &__input {
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 0.9rem;
+    color: #1a1a1a;
+    background: #fff;
+    outline: none;
+    width: 100%;
+    box-sizing: border-box;
+    direction: rtl;
+    transition: border-color 0.15s;
+
+    &:focus { border-color: #6366f1; }
+    &::placeholder { color: #c4c4c4; }
+    &--error { border-color: #dc2626; }
+    &--textarea { resize: vertical; min-height: 80px; }
+  }
+
+  &__badge {
+    display: inline-block;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 4px 12px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+    width: fit-content;
+  }
+
+  &__hint {
+    font-size: 0.78rem;
+    color: #aaa;
+  }
+
+  // ── Content Types section ────────────────────────────────────
+  &__types {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  &__types-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #1a1a1a;
+  }
+
+  &__types-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__types-add {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    background: #16a34a;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+
+    &:hover { background: #15803d; }
+  }
+
+  &__types-select {
+    flex: 1;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 0.9rem;
+    color: #333;
+    background: #fff;
+    outline: none;
+    direction: rtl;
+    cursor: pointer;
+
+    &:focus { border-color: #6366f1; }
+  }
+
+  &__types-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #e0e7ff;
+    color: #3730a3;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+
+  &__tag-remove {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #6366f1;
+    font-size: 1rem;
+    padding: 0;
+    line-height: 1;
+
+    &:hover { color: #dc2626; }
+  }
+}

@@ -1,7 +1,8 @@
 import { NgClass } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { PublishersTabComponent } from './components/publishers-tab/publishers-tab.component';
 import { RecitationsStatsCardsComponent } from './components/recitations-stats-cards/recitations-stats-cards.component';
 
 interface CmsTab {
@@ -13,14 +14,20 @@ interface CmsTab {
 @Component({
   selector: 'app-quranic-cms-page',
   standalone: true,
-  imports: [NgClass, NzModalModule, RouterLink, RecitationsStatsCardsComponent],
+  imports: [NgClass, NzModalModule, RouterLink, RecitationsStatsCardsComponent, PublishersTabComponent],
   templateUrl: './quranic-cms.page.html',
   styleUrls: ['./quranic-cms.page.less'],
 })
-export class QuranicCmsPage {
+export class QuranicCmsPage implements OnInit {
   private modal = inject(NzModalService);
+  private route = inject(ActivatedRoute);
 
   activeTab = signal('search');
+
+  ngOnInit(): void {
+    const tab = this.route.snapshot.queryParamMap.get('tab');
+    if (tab) this.activeTab.set(tab);
+  }
 
   readonly tabs: CmsTab[] = [
     { id: 'search', label: 'بحث', emoji: '🔍' },
