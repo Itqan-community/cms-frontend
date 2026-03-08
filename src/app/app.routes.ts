@@ -18,6 +18,8 @@ export const routes: Routes = [
     path: 'quranic-cms',
     loadComponent: () =>
       import('./features/quranic-cms/quranic-cms.page').then((m) => m.QuranicCmsPage),
+    loadChildren: () =>
+      import('./features/quranic-cms/quranic-cms.routes').then((m) => m.quranicCmsRoutes),
     data: { hideHeader: true, fullWidth: true },
     canActivate: [authGuard],
   },

@@ -1,0 +1,75 @@
+.qcms-section-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  &__header {
+    background: #fff;
+    border-radius: 14px;
+    padding: 24px 28px;
+    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+  }
+
+  &__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 6px;
+  }
+
+  &__description {
+    font-size: 0.88rem;
+    color: #888;
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  // Inline / max-content tabs (not full width)
+  &__sub-tabs {
+    display: flex;
+    gap: 4px;
+    background: #fff;
+    border-radius: 14px;
+    padding: 6px;
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+    width: fit-content;
+  }
+
+  &__sub-tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 16px;
+    border-radius: 10px;
+    background: transparent;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #555;
+    text-decoration: none;
+    transition:
+      background 0.15s,
+      color 0.15s;
+
+    &:hover {
+      background: #f0fdf4;
+      color: #16a34a;
+    }
+
+    &--active {
+      background: #f0fdf4;
+      color: #16a34a;
+      font-weight: 700;
+      box-shadow: 0 1px 6px rgba(22, 163, 74, 0.15);
+    }
+  }
+
+  &__sub-tab-emoji {
+    font-size: 1rem;
+    line-height: 1;
+  }
+
+  &__outlet {
+    min-height: 200px;
+  }
+}
