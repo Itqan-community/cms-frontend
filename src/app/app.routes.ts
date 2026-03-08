@@ -61,6 +61,23 @@ export const routes: Routes = [
     canActivate: [publisherHostGuard], // Restrict access for publisher hosts
   },
   {
+    path: 'quranic-cms',
+    children: [
+      {
+        path: 'publishers',
+        loadChildren: () =>
+          import('./features/quranic-cms/publishers/publishers/publishers.routes').then(
+            (m) => m.publishersRoutes
+          ),
+      },
+      {
+        path: '',
+        redirectTo: 'publishers',
+        pathMatch: 'full',
+      },
+    ],
+  },
+  {
     path: 'publishers',
     loadComponent: () =>
       import('./features/publishers/pages/publishers/publishers.page').then(
