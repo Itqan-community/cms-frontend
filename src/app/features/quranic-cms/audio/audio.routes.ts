@@ -14,10 +14,9 @@ export const audioRoutes: Routes = [
       {
         path: 'reciters',
         loadComponent: () =>
-          import('../components/coming-soon/coming-soon.component').then(
-            (m) => m.ComingSoonComponent
+          import('./reciters/reciters.page').then(
+            (m) => m.RecitersPage
           ),
-        data: { emoji: '🔊' },
       },
       {
         path: 'recitations',
