@@ -86,7 +86,7 @@ export class PublishersStatsCardsComponent implements OnInit {
       iconColor: '#1890ff',
     },
     {
-      key: 'active_publishers',
+      key: 'total_active',
       label: 'ناشرون نشطون',
       value: 0,
       icon: 'bx bx-check-circle',

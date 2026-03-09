@@ -31,6 +31,6 @@ export interface PublisherFilters {
 
 export interface PublisherStatistics {
   total_publishers: number;
-  active_publishers: number;
+  total_active: number;
   total_countries: number;
 }

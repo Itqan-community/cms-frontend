@@ -19,7 +19,7 @@ import { debounceTime, distinctUntilChanged, Subject, takeUntil } from 'rxjs';
               type="text"
               class="searchInput"
               nz-input
-              placeholder="Search publisher"
+              placeholder="بحث عن ناشر..."
               [(ngModel)]="searchTerm"
               (ngModelChange)="onSearchChange($event)"
             />

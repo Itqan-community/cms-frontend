@@ -1,9 +1,6 @@
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { CommonModule } from '@angular/common';
-import {
-    Component,
-    Input
-} from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -41,7 +38,10 @@ import { PublisherCardComponent } from '../publisher-card/publisher-card.compone
       </div>
 
       <div *ngIf="!loading && publishers.length === 0" class="empty-state">
-        <nz-empty nzNotFoundImage="simple" nzNotFoundContent="No publishers found"></nz-empty>
+        <nz-empty
+          nzNotFoundImage="simple"
+          nzNotFoundContent="عذراً، لا يوجد ناشرون حالياً"
+        ></nz-empty>
       </div>
 
       <div *ngIf="!hasMore && publishers.length > 0" class="no-more">

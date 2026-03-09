@@ -102,6 +102,33 @@ import { PublishersService } from '../../services/publishers.service';
             </div>
           </div>
 
+          <div nz-row [nzGutter]="24">
+            <div nz-col nzSpan="12">
+              <nz-form-item>
+                <nz-form-label>العنوان</nz-form-label>
+                <nz-form-control>
+                  <input
+                    nz-input
+                    formControlName="address"
+                    placeholder="مثلاً: الرياض، حي المروج"
+                  />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col nzSpan="12">
+              <nz-form-item>
+                <nz-form-label>رابط الأيقونة (URL)</nz-form-label>
+                <nz-form-control>
+                  <input
+                    nz-input
+                    formControlName="icon_url"
+                    placeholder="https://example.com/logo.png"
+                  />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+
           <nz-form-item>
             <nz-form-label>الوصف</nz-form-label>
             <nz-form-control>
