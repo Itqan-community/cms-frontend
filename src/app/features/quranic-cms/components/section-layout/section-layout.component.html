@@ -1,0 +1,26 @@
+<div class="qcms-section-layout" dir="rtl">
+  <div class="qcms-section-layout__header">
+    <h2 class="qcms-section-layout__title">{{ title() }}</h2>
+    <p class="qcms-section-layout__description">{{ description() }}</p>
+  </div>
+
+  <div class="qcms-section-layout__sub-tabs">
+    @for (tab of tabs(); track tab.id) {
+      <a
+        [routerLink]="[basePath(), tab.path]"
+        routerLinkActive="qcms-section-layout__sub-tab--active"
+        [routerLinkActiveOptions]="{ exact: exactActiveMatch() }"
+        class="qcms-section-layout__sub-tab"
+      >
+        @if (tab.emoji) {
+          <span class="qcms-section-layout__sub-tab-emoji">{{ tab.emoji }}</span>
+        }
+        <span>{{ tab.label }}</span>
+      </a>
+    }
+  </div>
+
+  <div class="qcms-section-layout__outlet">
+    <router-outlet />
+  </div>
+</div>

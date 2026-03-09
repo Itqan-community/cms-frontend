@@ -19,24 +19,32 @@
     <!-- Stats Row -->
     <div class="pt-stats">
       <div class="pt-stat">
-        <span class="pt-stat__value">{{ totalPublishers() }}</span>
         <span class="pt-stat__icon pt-stat__icon--publishers">📋</span>
-        <span class="pt-stat__label">ناشر</span>
+        <div class="pt-stat__text">
+          <span class="pt-stat__value">{{ totalPublishers() }}</span>
+          <span class="pt-stat__label">ناشر</span>
+        </div>
       </div>
       <div class="pt-stat">
-        <span class="pt-stat__value">{{ audioSources() }}</span>
         <span class="pt-stat__icon pt-stat__icon--audio">🎵</span>
-        <span class="pt-stat__label">مصادر صوتية</span>
+        <div class="pt-stat__text">
+          <span class="pt-stat__value">{{ audioSources() }}</span>
+          <span class="pt-stat__label">مصادر صوتية</span>
+        </div>
       </div>
       <div class="pt-stat">
-        <span class="pt-stat__value">{{ textSources() }}</span>
         <span class="pt-stat__icon pt-stat__icon--text">📄</span>
-        <span class="pt-stat__label">مصادر نصية</span>
+        <div class="pt-stat__text">
+          <span class="pt-stat__value">{{ textSources() }}</span>
+          <span class="pt-stat__label">مصادر نصية</span>
+        </div>
       </div>
       <div class="pt-stat">
-        <span class="pt-stat__value">{{ totalCountries() }}</span>
         <span class="pt-stat__icon pt-stat__icon--countries">📍</span>
-        <span class="pt-stat__label">دولة</span>
+        <div class="pt-stat__text">
+          <span class="pt-stat__value">{{ totalCountries() }}</span>
+          <span class="pt-stat__label">دولة</span>
+        </div>
       </div>
     </div>
 

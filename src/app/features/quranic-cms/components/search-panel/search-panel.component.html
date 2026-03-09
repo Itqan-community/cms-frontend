@@ -1,0 +1,24 @@
+<div class="qcms-search-panel">
+  <h2 class="qcms-search-panel__title">البحث في القرآن الكريم</h2>
+  <p class="qcms-search-panel__subtitle">ابحث عن كلمة أو عبارة لعرض جميع الآيات التي تحتوي عليها</p>
+  <label class="qcms-search-panel__label">أدخل كلمة أو عبارة للبحث</label>
+  <div class="qcms-search-panel__input-row">
+    <span class="qcms-search-panel__search-icon">🔍</span>
+    <input
+      class="qcms-search-panel__input"
+      type="text"
+      placeholder="مثال: الله، الرحمن، الصلاة..."
+    />
+    <button class="qcms-search-panel__btn" (click)="onSearch()">
+      <span>🔍</span>
+      بحث
+    </button>
+  </div>
+  <div class="qcms-search-panel__empty">
+    <span class="qcms-search-panel__empty-icon">🔍</span>
+    <p class="qcms-search-panel__empty-title">ابدأ بإدخال كلمة في حقل البحث أعلاه</p>
+    <p class="qcms-search-panel__empty-subtitle">
+      سيتم عرض جميع الآيات التي تحتوي على الكلمة المطلوبة
+    </p>
+  </div>
+</div>

@@ -112,18 +112,23 @@
       <span>📦</span> أنواع المحتوى المتاح
     </div>
     <div class="pe__types-row">
-      <button type="button" class="pe__types-add" (click)="addType(typeInput())">+</button>
-      <select
-        class="pe__types-select"
-        [ngModel]="typeInput()"
-        [ngModelOptions]="{ standalone: true }"
-        (ngModelChange)="typeInput.set($event)"
-      >
-        <option value="">اختر نوع المحتوى...</option>
-        @for (opt of contentTypeOptions; track opt.value) {
-          <option [value]="opt.value">{{ opt.label }}</option>
-        }
-      </select>
+      <div class="pe__types-select-wrap">
+        <select
+          class="pe__types-select"
+          [ngModel]="typeInput()"
+          [ngModelOptions]="{ standalone: true }"
+          (ngModelChange)="typeInput.set($event)"
+        >
+          <option value="">اختر نوع المحتوى...</option>
+          @for (opt of contentTypeOptions; track opt.value) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+        <span class="pe__types-select-arrow">&#8964;</span>
+      </div>
+      <button type="button" class="pe__types-add" (click)="addType(typeInput())">
+        <span>+</span> إضافة
+      </button>
     </div>
     @if (selectedTypes().length) {
       <div class="pe__types-tags">
