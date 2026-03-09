@@ -26,7 +26,9 @@
     cursor: pointer;
     transition: background 0.2s;
 
-    &:hover { background: #15803d; }
+    &:hover {
+      background: #15803d;
+    }
   }
 
   &__cancel-btn {
@@ -41,9 +43,14 @@
     font-size: 0.9rem;
     font-weight: 500;
     cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
+    transition:
+      border-color 0.2s,
+      color 0.2s;
 
-    &:hover { border-color: #aaa; color: #333; }
+    &:hover {
+      border-color: #aaa;
+      color: #333;
+    }
   }
 
   // ── Cards grid ───────────────────────────────────────────────
@@ -52,7 +59,9 @@
     grid-template-columns: 1fr 1fr;
     gap: 20px;
 
-    @media (max-width: 768px) { grid-template-columns: 1fr; }
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
   }
 
   &__card {
@@ -86,7 +95,9 @@
     grid-template-columns: 1fr 1fr;
     gap: 14px;
 
-    @media (max-width: 500px) { grid-template-columns: 1fr; }
+    @media (max-width: 500px) {
+      grid-template-columns: 1fr;
+    }
   }
 
   &__field {
@@ -120,10 +131,19 @@
     direction: rtl;
     transition: border-color 0.15s;
 
-    &:focus { border-color: #6366f1; }
-    &::placeholder { color: #c4c4c4; }
-    &--error { border-color: #dc2626; }
-    &--textarea { resize: vertical; min-height: 80px; }
+    &:focus {
+      border-color: #6366f1;
+    }
+    &::placeholder {
+      color: #c4c4c4;
+    }
+    &--error {
+      border-color: #dc2626;
+    }
+    &--textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
   }
 
   &__badge {
@@ -188,7 +208,9 @@
     outline: none;
     direction: rtl;
     cursor: pointer;
-    transition: border-color 0.15s, box-shadow 0.15s;
+    transition:
+      border-color 0.15s,
+      box-shadow 0.15s;
 
     &:focus {
       border-color: #6366f1;
@@ -221,10 +243,16 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    transition: background 0.2s, transform 0.1s;
+    transition:
+      background 0.2s,
+      transform 0.1s;
 
-    &:hover { background: #15803d; }
-    &:active { transform: scale(0.97); }
+    &:hover {
+      background: #15803d;
+    }
+    &:active {
+      transform: scale(0.97);
+    }
   }
 
   &__types-tags {
@@ -254,6 +282,8 @@
     padding: 0;
     line-height: 1;
 
-    &:hover { color: #dc2626; }
+    &:hover {
+      color: #dc2626;
+    }
   }
 }

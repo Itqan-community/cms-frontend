@@ -23,11 +23,7 @@
     <div class="pd-banner">
       <!-- Right (RTL start): arrow + name block -->
       <div class="pd-banner__info">
-        <button
-          class="pd-banner__arrow"
-          (click)="isEditing() ? cancelEdit() : goBack()"
-          >→</button
-        >
+        <button class="pd-banner__arrow" (click)="isEditing() ? cancelEdit() : goBack()">→</button>
         <div class="pd-banner__name-block">
           <h1 class="pd-banner__name">
             <span class="pd-banner__content-icon">{{ publisherIcon() }}</span>

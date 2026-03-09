@@ -1,5 +1,11 @@
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -53,7 +59,12 @@ export class PublishersTabComponent implements OnInit {
   // ── Stats ──────────────────────────────────────────────────
   totalPublishers = computed(() => this.publishers().length);
   totalCountries = computed(
-    () => new Set(this.publishers().map((p) => p.country).filter(Boolean)).size
+    () =>
+      new Set(
+        this.publishers()
+          .map((p) => p.country)
+          .filter(Boolean)
+      ).size
   );
   audioSources = computed(
     () => this.publishers().filter((p) => p.content_types?.some((t) => AUDIO_TYPES.has(t))).length

@@ -30,8 +30,16 @@
           class="assets-listing__state--in-grid"
           [icon]="hasActiveFilters() ? 'bx-search-alt' : 'bx-folder-open'"
           iconVariant="default"
-          [title]="hasActiveFilters() ? ('UI.NO_RESULTS_FOUND' | translate) : ('UI.NO_ASSETS_AVAILABLE' | translate)"
-          [message]="hasActiveFilters() ? ('UI.NO_RESULTS_MESSAGE' | translate) : ('UI.NO_ASSETS_MESSAGE' | translate)"
+          [title]="
+            hasActiveFilters()
+              ? ('UI.NO_RESULTS_FOUND' | translate)
+              : ('UI.NO_ASSETS_AVAILABLE' | translate)
+          "
+          [message]="
+            hasActiveFilters()
+              ? ('UI.NO_RESULTS_MESSAGE' | translate)
+              : ('UI.NO_ASSETS_MESSAGE' | translate)
+          "
         />
       } @else {
         @for (asset of assets(); track asset.id) {

@@ -51,7 +51,13 @@ export interface PublisherListParams {
   country?: string;
   content_type?: ContentType;
   is_verified?: boolean;
-  ordering?: 'name_ar' | '-name_ar' | 'foundation_year' | '-foundation_year' | 'created_at' | '-created_at';
+  ordering?:
+    | 'name_ar'
+    | '-name_ar'
+    | 'foundation_year'
+    | '-foundation_year'
+    | 'created_at'
+    | '-created_at';
 }
 
 /** Body for POST /portal/publishers/ */
@@ -75,7 +81,8 @@ const MOCK_PUBLISHERS: CmsPublisher[] = [
     foundation_year: 2008,
     website: 'https://everyayah.com',
     contact_email: 'info@everyayah.com',
-    description: 'موقع متخصص في التلاوات القرآنية بأصوات القراء المشهورين حول العالم، يوفر ملفات صوتية عالية الجودة.',
+    description:
+      'موقع متخصص في التلاوات القرآنية بأصوات القراء المشهورين حول العالم، يوفر ملفات صوتية عالية الجودة.',
     content_types: ['recitations', 'audio_mushaf'],
     is_verified: true,
     created_at: '2024-01-10T08:00:00Z',
@@ -91,7 +98,8 @@ const MOCK_PUBLISHERS: CmsPublisher[] = [
     foundation_year: 1998,
     website: 'https://islamweb.net',
     contact_email: 'info@islamweb.net',
-    description: 'شبكة إسلام ويب – مركز الفتوى والمكتبة الإسلامية الشاملة، تضم آلاف التفاسير والأحاديث والفتاوى.',
+    description:
+      'شبكة إسلام ويب – مركز الفتوى والمكتبة الإسلامية الشاملة، تضم آلاف التفاسير والأحاديث والفتاوى.',
     content_types: ['tafseer', 'translations'],
     is_verified: true,
     created_at: '2024-01-12T09:00:00Z',
@@ -123,7 +131,8 @@ const MOCK_PUBLISHERS: CmsPublisher[] = [
     foundation_year: 1984,
     website: 'https://qurancomplex.gov.sa',
     contact_email: 'contact@qurancomplex.gov.sa',
-    description: 'المصدر الرسمي للمصاحف المطبوعة والرقمية، يصدر ترجمات معتمدة للقرآن الكريم بأكثر من 70 لغة.',
+    description:
+      'المصدر الرسمي للمصاحف المطبوعة والرقمية، يصدر ترجمات معتمدة للقرآن الكريم بأكثر من 70 لغة.',
     content_types: ['tafseer', 'translations', 'recitations', 'text_mushaf'],
     is_verified: true,
     created_at: '2024-01-20T07:00:00Z',
@@ -139,7 +148,8 @@ const MOCK_PUBLISHERS: CmsPublisher[] = [
     foundation_year: 2007,
     website: 'https://tanzil.net',
     contact_email: 'contact@tanzil.net',
-    description: 'مشروع النصوص القرآنية الرقمية يوفر نصوص المصحف بالقراءات المختلفة وترجمات متعددة.',
+    description:
+      'مشروع النصوص القرآنية الرقمية يوفر نصوص المصحف بالقراءات المختلفة وترجمات متعددة.',
     content_types: ['text_mushaf', 'translations'],
     is_verified: false,
     created_at: '2024-02-01T10:00:00Z',
@@ -155,7 +165,8 @@ const MOCK_PUBLISHERS: CmsPublisher[] = [
     foundation_year: 2005,
     website: 'https://mp3quran.net',
     contact_email: 'info@mp3quran.net',
-    description: 'مكتبة صوتية شاملة لتلاوات القرآن الكريم بأصوات أكثر من 150 قارئاً من مختلف دول العالم.',
+    description:
+      'مكتبة صوتية شاملة لتلاوات القرآن الكريم بأصوات أكثر من 150 قارئاً من مختلف دول العالم.',
     content_types: ['recitations', 'audio_mushaf', 'adhan'],
     is_verified: true,
     created_at: '2024-02-10T12:00:00Z',
@@ -219,7 +230,8 @@ const MOCK_PUBLISHERS: CmsPublisher[] = [
     foundation_year: 2012,
     website: 'https://quranmiracle.org',
     contact_email: 'info@quranmiracle.org',
-    description: 'موقع متخصص في الإعجاز العلمي للقرآن الكريم، يقدم محتوى باللغتين العربية والتركية.',
+    description:
+      'موقع متخصص في الإعجاز العلمي للقرآن الكريم، يقدم محتوى باللغتين العربية والتركية.',
     content_types: ['tafseer', 'translations'],
     is_verified: false,
     created_at: '2024-03-20T14:00:00Z',
@@ -275,9 +287,7 @@ export class CmsPublishersService {
     let results = [...MOCK_PUBLISHERS];
     if (params?.search) {
       const q = params.search.toLowerCase();
-      results = results.filter(
-        (p) => p.name_ar.includes(q) || p.name_en.toLowerCase().includes(q),
-      );
+      results = results.filter((p) => p.name_ar.includes(q) || p.name_en.toLowerCase().includes(q));
     }
     if (params?.country) {
       results = results.filter((p) => p.country === params.country);
@@ -330,7 +340,11 @@ export class CmsPublishersService {
     // ── MOCK ──────────────────────────────────────────────────
     const index = MOCK_PUBLISHERS.findIndex((p) => String(p.id) === String(id));
     if (index !== -1) {
-      MOCK_PUBLISHERS[index] = { ...MOCK_PUBLISHERS[index], ...data, updated_at: new Date().toISOString() };
+      MOCK_PUBLISHERS[index] = {
+        ...MOCK_PUBLISHERS[index],
+        ...data,
+        updated_at: new Date().toISOString(),
+      };
       return of({ ...MOCK_PUBLISHERS[index] });
     }
     return of({ ...MOCK_PUBLISHERS[0], ...data });
@@ -360,7 +374,9 @@ export class CmsPublishersService {
   /** GET /portal/publishers/countries/ — distinct country list */
   getCountries(): Observable<string[]> {
     // ── MOCK ──────────────────────────────────────────────────
-    const countries = [...new Set(MOCK_PUBLISHERS.map((p) => p.country).filter(Boolean))] as string[];
+    const countries = [
+      ...new Set(MOCK_PUBLISHERS.map((p) => p.country).filter(Boolean)),
+    ] as string[];
     return of(countries);
     // ── REAL ──────────────────────────────────────────────────
     // return this.http.get<string[]>(`${this.BASE_URL}/portal/publishers/countries/`);

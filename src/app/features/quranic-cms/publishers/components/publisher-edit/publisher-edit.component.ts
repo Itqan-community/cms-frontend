@@ -1,5 +1,11 @@
 import { Component, EventEmitter, Input, OnInit, Output, signal } from '@angular/core';
-import { FormsModule, FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormsModule,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { CmsPublisher } from '../../services/publishers.service';
 
 const CONTENT_TYPE_OPTIONS = [

@@ -1,11 +1,8 @@
 <div class="pt" dir="rtl">
-
   <!-- Banner -->
   <div class="pt-banner">
     <div class="pt-banner__text">
-      <h2 class="pt-banner__title">
-        <span>📋</span> الناشرون والمصادر
-      </h2>
+      <h2 class="pt-banner__title"><span>📋</span> الناشرون والمصادر</h2>
       <p class="pt-banner__subtitle">إدارة الجهات والمؤسسات التي تحصل منها على المحتوى القرآني</p>
     </div>
   </div>
@@ -15,7 +12,6 @@
       <nz-spin nzSize="large" />
     </div>
   } @else {
-
     <!-- Stats Row -->
     <div class="pt-stats">
       <div class="pt-stat">
@@ -87,7 +83,6 @@
         </div>
 
         <form [formGroup]="addForm" class="pt-add-form__body">
-
           <!-- Row 1: name_ar + unique_identifier -->
           <div class="pt-add-form__row">
             <div class="pt-add-form__field">
@@ -96,7 +91,9 @@
               </label>
               <input
                 class="pt-add-form__input"
-                [class.pt-add-form__input--error]="addForm.get('name_ar')?.invalid && addForm.get('name_ar')?.dirty"
+                [class.pt-add-form__input--error]="
+                  addForm.get('name_ar')?.invalid && addForm.get('name_ar')?.dirty
+                "
                 formControlName="name_ar"
                 placeholder="كل آية"
               />
@@ -107,11 +104,16 @@
               </label>
               <input
                 class="pt-add-form__input"
-                [class.pt-add-form__input--error]="addForm.get('unique_identifier')?.invalid && addForm.get('unique_identifier')?.dirty"
+                [class.pt-add-form__input--error]="
+                  addForm.get('unique_identifier')?.invalid &&
+                  addForm.get('unique_identifier')?.dirty
+                "
                 formControlName="unique_identifier"
                 placeholder="كل-آية"
               />
-              <span class="pt-add-form__hint">معرف فريد / استخدم - للفصل بين الكلمات / الفصل بين اللغات</span>
+              <span class="pt-add-form__hint"
+                >معرف فريد / استخدم - للفصل بين الكلمات / الفصل بين اللغات</span
+              >
             </div>
           </div>
 
@@ -206,7 +208,9 @@
                 type="button"
                 class="pt-add-form__tag-add-btn"
                 (click)="addContentType(contentTypeInput())"
-              >+</button>
+              >
+                +
+              </button>
               <select
                 class="pt-add-form__tag-select"
                 [ngModel]="contentTypeInput()"
@@ -224,7 +228,13 @@
                 @for (type of selectedContentTypes(); track type) {
                   <span class="pt-add-form__tag">
                     {{ contentTypeLabel(type) }}
-                    <button type="button" class="pt-add-form__tag-remove" (click)="removeContentType(type)">×</button>
+                    <button
+                      type="button"
+                      class="pt-add-form__tag-remove"
+                      (click)="removeContentType(type)"
+                    >
+                      ×
+                    </button>
                   </span>
                 }
               </div>
@@ -252,7 +262,6 @@
             <span>💾</span>
             {{ saving() ? 'جارٍ الحفظ...' : 'حفظ الناشر' }}
           </button>
-
         </form>
       </div>
     }
@@ -268,9 +277,12 @@
         @for (publisher of filtered(); track publisher.id ?? publisher.unique_identifier) {
           <div
             class="pt-card"
-            [routerLink]="['/quranic-cms/publishers', publisher.id ?? publisher.unique_identifier, 'details']"
+            [routerLink]="[
+              '/quranic-cms/publishers',
+              publisher.id ?? publisher.unique_identifier,
+              'details',
+            ]"
           >
-
             <!-- Card top row: badge + actions -->
             <div class="pt-card__top">
               <div class="pt-card__actions">
@@ -278,17 +290,25 @@
                   class="pt-card__action-btn pt-card__action-btn--delete"
                   title="حذف"
                   (click)="$event.stopPropagation()"
-                >🗑️</button>
+                >
+                  🗑️
+                </button>
                 <button
                   class="pt-card__action-btn pt-card__action-btn--edit"
                   title="تعديل"
                   (click)="$event.stopPropagation()"
-                >✏️</button>
+                >
+                  ✏️
+                </button>
               </div>
               @if (publisherBadge(publisher); as badge) {
                 <span class="pt-card__badge pt-card__badge--{{ badge.type }}">
-                  @if (badge.type === 'audio' || badge.type === 'both') { 🎵 }
-                  @if (badge.type === 'text') { 📄 }
+                  @if (badge.type === 'audio' || badge.type === 'both') {
+                    🎵
+                  }
+                  @if (badge.type === 'text') {
+                    📄
+                  }
                   {{ badge.label }}
                 </span>
               }
@@ -346,12 +366,9 @@
                 </div>
               </div>
             }
-
           </div>
         }
       </div>
     }
-
   }
-
 </div>

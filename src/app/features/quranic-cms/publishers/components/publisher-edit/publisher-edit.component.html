@@ -1,25 +1,18 @@
 <form [formGroup]="form" class="pe" dir="rtl">
-
   <!-- Save / Cancel bar -->
   <div class="pe__actions">
     <button class="pe__save-btn" type="button" (click)="onSave()">
       <span>💾</span> حفظ التغييرات
     </button>
-    <button class="pe__cancel-btn" type="button" (click)="onCancel()">
-      <span>×</span> إلغاء
-    </button>
+    <button class="pe__cancel-btn" type="button" (click)="onCancel()"><span>×</span> إلغاء</button>
   </div>
 
   <!-- Cards row -->
   <div class="pe__cards">
-
     <!-- Basic Info Card -->
     <div class="pe__card">
-      <div class="pe__card-header">
-        <span>📋</span> المعلومات الأساسية
-      </div>
+      <div class="pe__card-header"><span>📋</span> المعلومات الأساسية</div>
       <div class="pe__card-body">
-
         <!-- Names row -->
         <div class="pe__row">
           <div class="pe__field">
@@ -33,11 +26,7 @@
           </div>
           <div class="pe__field">
             <label class="pe__label">الاسم اللاتيني</label>
-            <input
-              class="pe__input"
-              formControlName="name_en"
-              placeholder="Enter Latin name..."
-            />
+            <input class="pe__input" formControlName="name_en" placeholder="Enter Latin name..." />
           </div>
         </div>
 
@@ -60,25 +49,30 @@
             <span class="pe__hint">لا يمكن تغيير المعرّف</span>
           </div>
         }
-
       </div>
     </div>
 
     <!-- Contact Info Card -->
     <div class="pe__card">
-      <div class="pe__card-header">
-        <span>✉️</span> معلومات التواصل
-      </div>
+      <div class="pe__card-header"><span>✉️</span> معلومات التواصل</div>
       <div class="pe__card-body">
-
         <div class="pe__field">
           <label class="pe__label">الدولة</label>
-          <input class="pe__input" formControlName="country" placeholder="المملكة العربية السعودية" />
+          <input
+            class="pe__input"
+            formControlName="country"
+            placeholder="المملكة العربية السعودية"
+          />
         </div>
 
         <div class="pe__field">
           <label class="pe__label">سنة التأسيس</label>
-          <input class="pe__input" type="number" formControlName="foundation_year" placeholder="2005" />
+          <input
+            class="pe__input"
+            type="number"
+            formControlName="foundation_year"
+            placeholder="2005"
+          />
         </div>
 
         <div class="pe__field">
@@ -90,7 +84,9 @@
           <label class="pe__label">البريد الإلكتروني</label>
           <input
             class="pe__input"
-            [class.pe__input--error]="form.get('contact_email')?.invalid && form.get('contact_email')?.dirty"
+            [class.pe__input--error]="
+              form.get('contact_email')?.invalid && form.get('contact_email')?.dirty
+            "
             formControlName="contact_email"
             placeholder="info@example.com"
           />
@@ -100,17 +96,13 @@
           <label class="pe__label">العنوان</label>
           <input class="pe__input" formControlName="address" placeholder="أدخل العنوان..." />
         </div>
-
       </div>
     </div>
-
   </div>
 
   <!-- Content Types Section -->
   <div class="pe__types">
-    <div class="pe__types-header">
-      <span>📦</span> أنواع المحتوى المتاح
-    </div>
+    <div class="pe__types-header"><span>📦</span> أنواع المحتوى المتاح</div>
     <div class="pe__types-row">
       <div class="pe__types-select-wrap">
         <select
@@ -141,5 +133,4 @@
       </div>
     }
   </div>
-
 </form>
