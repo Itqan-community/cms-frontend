@@ -146,8 +146,8 @@ git push origin fix_bug
 ### Test Case: Protected Branches (Always Allowed)
 
 ```bash
-git checkout develop
-git push origin develop
+git checkout staging
+git push origin staging
 ```
 
 **Expected:** ✅ Push succeeds (protected branch)
@@ -158,7 +158,7 @@ Try a full workflow from start to finish:
 
 ```bash
 # 1. Create a valid branch
-git checkout develop
+git checkout staging
 git checkout -b feature/test-complete-workflow
 
 # 2. Make a change
@@ -230,7 +230,7 @@ Edit `package.json`:
 
 ### Issue: Pre-push Hook Fails on Protected Branch
 
-This is expected! You shouldn't be pushing directly to `develop`, `staging`, or `master`.
+This is expected! You shouldn't be pushing directly to `staging` or `master`.
 
 Create a feature branch instead:
 

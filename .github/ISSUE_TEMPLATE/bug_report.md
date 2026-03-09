@@ -46,8 +46,8 @@ assignees: ''
 
 **Application:**
 
-- Environment: [e.g. Development, Staging, Production]
-- URL: [e.g. https://develop.cms.itqan.dev]
+- Environment: [e.g. Local, Staging, Production]
+- URL: [e.g. https://staging.cms.itqan.dev]
 - Angular Version: [e.g. 20.3.7]
 - Node Version: [e.g. 20.11.0]
 

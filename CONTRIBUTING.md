@@ -79,8 +79,7 @@ hooks will help you maintain code quality.
 
 The project uses multiple environments:
 
-- `environment.ts` - Default development environment
-- `environment.develop.ts` - Development deployment (develop branch)
+- `environment.ts` - Default (points to staging API for local development)
 - `environment.staging.ts` - Staging deployment (staging branch)
 - `environment.prod.ts` - Production deployment (master branch)
 
@@ -106,11 +105,11 @@ The project uses multiple environments:
 
 ### Code Contributions
 
-1. **Create a branch** from `develop`:
+1. **Create a branch** from `staging`:
 
    ```bash
-   git checkout develop
-   git pull upstream develop
+   git checkout staging
+   git pull upstream staging
    git checkout -b feature/your-feature-name
    ```
 
@@ -140,7 +139,7 @@ The project uses multiple environments:
    git push origin feature/your-feature-name
    ```
 
-6. **Create a Pull Request** from your fork to the `develop` branch
+6. **Create a Pull Request** from your fork to the `staging` branch
 
 ## Pull Request Process
 
@@ -240,7 +239,7 @@ Branch names must follow this pattern: `type/description-in-kebab-case`
 
 ### Protected Branches
 
-These branches are always allowed: `master`, `develop`, `staging`
+These branches are always allowed: `master`, `staging`
 
 ### Examples
 

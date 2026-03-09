@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: [develop, staging, master]
+    branches: [staging, master]
   push:
-    branches: [develop, staging, master]
+    branches: [staging, master]
 
 jobs:
   lint-and-test:
@@ -74,7 +74,7 @@ jobs:
     strategy:
       matrix:
         node-version: [20.x]
-        environment: [develop, staging, production]
+        environment: [staging, production]
 
     steps:
       - name: Checkout code
