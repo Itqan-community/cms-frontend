@@ -1,7 +1,5 @@
 {
   "permissions": {
-    "allow": [
-      "Bash(npm run build:staging:*)"
-    ]
+    "allow": ["Bash(npm run build:staging:*)", "Bash(npx prettier --write .)"]
   }
 }
