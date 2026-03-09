@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx prettier --check .)"
+      "Bash(npx prettier --check .)",
+      "Bash(npx prettier --write src/app/features/quranic-cms/audio/reciters/reciters.page.ts src/app/features/quranic-cms/audio/services/reciters.service.spec.ts src/app/features/quranic-cms/audio/services/reciters.service.ts)"
     ]
   }
 }
