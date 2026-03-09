@@ -2,6 +2,7 @@
   "APP_TITLE": "Itqan CMS",
   "WELCOME": "Welcome to the Store",
   "AUTH": {
+    "MUST_LOGIN_TO_VIEW": "You must be logged in to view this page.",
     "LOGIN": {
       "TITLE": "Welcome back",
       "SUBTITLE": "Sign in to continue to Itqan",
@@ -155,7 +156,12 @@
     "VIEW_LICENSE": "View License",
     "DETAILS_TITLE": "Asset Details",
     "ASSET_ID": "Asset ID",
-    "DETAILS_DESC": "This is a placeholder for asset details."
+    "DETAILS_DESC": "This is a placeholder for asset details.",
+    "STATS": {
+      "RIWAYAS": "Riwayas",
+      "RECITERS": "Reciters",
+      "RECITATIONS": "Recitations"
+    }
   },
   "UI": {
     "FILTERS": "Filters",
@@ -164,6 +170,10 @@
     "LICENSE_FILTERS": "Licenses (CreativeCommons)",
     "LOADING_ASSETS": "Loading assets...",
     "NO_RESULTS_FOUND": "No results found",
+    "NO_RESULTS_MESSAGE": "Try adjusting your search or filters to find what you're looking for.",
+    "NO_ASSETS_MESSAGE": "There are no assets available at the moment. Check back later.",
+    "SOMETHING_WENT_WRONG": "Something went wrong",
+    "BACK_TO_GALLERY": "Back to Gallery",
     "PUBLISHER_LABEL": "Publisher:",
     "LOADING_ASSET_DETAILS": "Loading asset details...",
     "ASSET_NOT_FOUND": "Asset not found",

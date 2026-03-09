@@ -15,6 +15,15 @@ export const routes: Routes = [
       import('./features/gallery/pages/gallery/gallery.page').then((m) => m.GalleryPage),
   },
   {
+    path: 'quranic-cms',
+    loadComponent: () =>
+      import('./features/quranic-cms/quranic-cms.page').then((m) => m.QuranicCmsPage),
+    loadChildren: () =>
+      import('./features/quranic-cms/quranic-cms.routes').then((m) => m.quranicCmsRoutes),
+    data: { hideHeader: true, fullWidth: true },
+    canActivate: [authGuard],
+  },
+  {
     path: 'gallery/asset/:id',
     loadComponent: () =>
       import('./features/gallery/pages/asset-details/asset-details.page').then(
