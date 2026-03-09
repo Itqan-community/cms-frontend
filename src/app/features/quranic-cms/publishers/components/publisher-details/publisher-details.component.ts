@@ -2,6 +2,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
+import { Location } from '@angular/common';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -20,6 +21,7 @@ export class PublisherDetailsComponent implements OnInit {
   private readonly service = inject(CmsPublishersService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly location = inject(Location);
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
 
@@ -42,6 +44,10 @@ export class PublisherDetailsComponent implements OnInit {
       },
       complete: () => this.loading.set(false),
     });
+  }
+
+  goBack(): void {
+    this.location.back();
   }
 
   startEdit(): void {

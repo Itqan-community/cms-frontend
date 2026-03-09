@@ -23,11 +23,10 @@
     <div class="pd-banner">
       <!-- Right (RTL start): arrow + name block -->
       <div class="pd-banner__info">
-        <a
+        <button
           class="pd-banner__arrow"
-          [routerLink]="['/quranic-cms']"
-          [queryParams]="{ tab: 'publishers' }"
-          >→</a
+          (click)="isEditing() ? cancelEdit() : goBack()"
+          >→</button
         >
         <div class="pd-banner__name-block">
           <h1 class="pd-banner__name">

@@ -7,6 +7,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import {
   CmsPublisher,
   CmsPublishersService,
+  CreatePublisherDto,
 } from '../../publishers/services/publishers.service';
 
 const AUDIO_TYPES = new Set(['recitations', 'audio_mushaf', 'adhan']);
@@ -130,10 +131,10 @@ export class PublishersTabComponent implements OnInit {
       return;
     }
     this.saving.set(true);
-    const payload: Partial<CmsPublisher> = {
+    const payload = {
       ...this.addForm.value,
       content_types: this.selectedContentTypes(),
-    };
+    } as CreatePublisherDto;
     this.service.createPublisher(payload).subscribe({
       next: (created) => {
         this.publishers.update((list) => [created, ...list]);
