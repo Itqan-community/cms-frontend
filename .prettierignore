@@ -34,3 +34,6 @@ Thumbs.db
 
 # ESLint cache
 .eslintcache
+
+# Claude Code
+.claude/

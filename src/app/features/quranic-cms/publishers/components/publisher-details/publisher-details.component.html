@@ -1,0 +1,197 @@
+<div class="pd-page" dir="rtl">
+  <!-- Green Header -->
+  <!-- <div class="pd-header">
+    <div class="pd-header__inner">
+      <div class="pd-header__title">
+        <span>📖</span>
+        <span>نظام إدارة المحتوى القرآني</span>
+      </div>
+      <div class="pd-header__actions">
+        <a class="pd-header__back-btn" [routerLink]="['/quranic-cms']">العودة للرئيسية</a>
+        <button class="pd-header__refresh-btn"><span>🔄</span> تحديث البيانات</button>
+        <button class="pd-header__lang-btn">EN <span>🌐</span></button>
+      </div>
+    </div>
+  </div> -->
+
+  @if (loading()) {
+    <div class="pd-loading">
+      <nz-spin nzSize="large" />
+    </div>
+  } @else if (publisher()) {
+    <!-- Publisher Banner -->
+    <div class="pd-banner">
+      <!-- Right (RTL start): arrow + name block -->
+      <div class="pd-banner__info">
+        <button class="pd-banner__arrow" (click)="isEditing() ? cancelEdit() : goBack()">→</button>
+        <div class="pd-banner__name-block">
+          <h1 class="pd-banner__name">
+            <span class="pd-banner__content-icon">{{ publisherIcon() }}</span>
+            {{ publisher()!.name_ar }}
+          </h1>
+          <p class="pd-banner__subtitle">
+            @if (isEditing()) {
+              تحرير معلومات الناشر
+            } @else {
+              معلومات تفصيلية عن {{ publisher()!.name_ar }}
+            }
+          </p>
+        </div>
+      </div>
+
+      <!-- Left (RTL end): edit action -->
+      @if (!isEditing()) {
+        <div class="pd-banner__actions">
+          <button class="pd-banner__edit-btn" (click)="startEdit()"><span>✏️</span> تحرير</button>
+        </div>
+      }
+    </div>
+
+    <div class="pd-content">
+      @if (isEditing()) {
+        <app-publisher-edit
+          [publisher]="publisher()!"
+          (saved)="onSave($event)"
+          (cancelled)="cancelEdit()"
+        />
+      } @else {
+        <!-- Read-only Mode -->
+        <div class="pd-cards">
+          <!-- Basic Info Card -->
+          <div class="pd-card">
+            <div class="pd-card__header">
+              <span>📋</span>
+              <span>المعلومات الأساسية</span>
+            </div>
+            <div class="pd-card__body">
+              <!-- Names row: name_ar (right) | name_en (left) -->
+              <div class="pd-names-row">
+                <div class="pd-field">
+                  <span class="pd-field__label">الاسم العربي</span>
+                  <span class="pd-field__value pd-field__value--large">{{
+                    publisher()!.name_ar
+                  }}</span>
+                </div>
+                @if (publisher()!.name_en) {
+                  <div class="pd-field">
+                    <span class="pd-field__label">الاسم اللاتيني</span>
+                    <span class="pd-field__value pd-field__value--large">{{
+                      publisher()!.name_en
+                    }}</span>
+                  </div>
+                }
+              </div>
+
+              @if (publisher()!.description) {
+                <div class="pd-field">
+                  <span class="pd-field__label">الوصف</span>
+                  <span class="pd-field__value">{{ publisher()!.description }}</span>
+                </div>
+              }
+
+              @if (publisher()!.content_types?.length) {
+                <div class="pd-field">
+                  <span class="pd-field__label">نوع المحتوى</span>
+                  <span class="pd-field__value">
+                    {{ publisherIcon() }} {{ contentTypeLabel(publisher()!.content_types![0]) }}
+                  </span>
+                </div>
+              }
+
+              @if (publisher()!.unique_identifier) {
+                <div class="pd-field">
+                  <span class="pd-field__label">المعرّف الفريد</span>
+                  <span class="pd-badge">{{ publisher()!.unique_identifier }}</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Contact Info Card -->
+          <div class="pd-card">
+            <div class="pd-card__header">
+              <span>✉️</span>
+              <span>معلومات التواصل</span>
+            </div>
+            <div class="pd-card__body">
+              @if (publisher()!.country) {
+                <div class="pd-contact-row">
+                  <span class="pd-contact-row__icon">📍</span>
+                  <div class="pd-contact-row__text">
+                    <span class="pd-field__label">الدولة</span>
+                    <span class="pd-field__value pd-field__value--bold">{{
+                      publisher()!.country
+                    }}</span>
+                  </div>
+                </div>
+              }
+
+              @if (publisher()!.foundation_year) {
+                <div class="pd-contact-row">
+                  <span class="pd-contact-row__icon">📅</span>
+                  <div class="pd-contact-row__text">
+                    <span class="pd-field__label">سنة التأسيس</span>
+                    <span class="pd-field__value pd-field__value--bold"
+                      >عام {{ publisher()!.foundation_year }}</span
+                    >
+                  </div>
+                </div>
+              }
+
+              @if (publisher()!.website) {
+                <div class="pd-contact-row">
+                  <span class="pd-contact-row__icon">🌐</span>
+                  <div class="pd-contact-row__text">
+                    <span class="pd-field__label">الموقع الإلكتروني</span>
+                    <a class="pd-link" [href]="publisher()!.website" target="_blank" rel="noopener">
+                      {{ publisher()!.website }}
+                    </a>
+                  </div>
+                </div>
+              }
+
+              @if (publisher()!.contact_email) {
+                <div class="pd-contact-row">
+                  <span class="pd-contact-row__icon">✉️</span>
+                  <div class="pd-contact-row__text">
+                    <span class="pd-field__label">البريد الإلكتروني</span>
+                    <a class="pd-link" [href]="'mailto:' + publisher()!.contact_email">
+                      {{ publisher()!.contact_email }}
+                    </a>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Content Types Section -->
+        @if (publisher()!.content_types?.length) {
+          <div class="pd-section">
+            <div class="pd-section__header">
+              <span>📦</span>
+              <span>أنواع المحتوى المتاح</span>
+            </div>
+            <p class="pd-section__subtitle">جميع أنواع المحتوى القرآني المتوفر من هذا الناشر</p>
+            <div class="pd-section__pills">
+              @for (type of publisher()!.content_types!; track type) {
+                <span class="pd-section__pill">{{ contentTypeLabel(type) }}</span>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Delete action (below cards) -->
+        <div class="pd-danger-zone">
+          <button class="pd-danger-zone__btn" (click)="onDelete()">🗑️ حذف الناشر</button>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="pd-error">
+      <span>⚠️</span>
+      <p>تعذر تحميل بيانات الناشر</p>
+      <a [routerLink]="['/quranic-cms']">العودة للرئيسية</a>
+    </div>
+  }
+</div>

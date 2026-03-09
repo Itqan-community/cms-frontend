@@ -1,0 +1,136 @@
+<form [formGroup]="form" class="pe" dir="rtl">
+  <!-- Save / Cancel bar -->
+  <div class="pe__actions">
+    <button class="pe__save-btn" type="button" (click)="onSave()">
+      <span>💾</span> حفظ التغييرات
+    </button>
+    <button class="pe__cancel-btn" type="button" (click)="onCancel()"><span>×</span> إلغاء</button>
+  </div>
+
+  <!-- Cards row -->
+  <div class="pe__cards">
+    <!-- Basic Info Card -->
+    <div class="pe__card">
+      <div class="pe__card-header"><span>📋</span> المعلومات الأساسية</div>
+      <div class="pe__card-body">
+        <!-- Names row -->
+        <div class="pe__row">
+          <div class="pe__field">
+            <label class="pe__label">الاسم العربي <span class="pe__required">*</span></label>
+            <input
+              class="pe__input"
+              [class.pe__input--error]="form.get('name_ar')?.invalid && form.get('name_ar')?.dirty"
+              formControlName="name_ar"
+              placeholder="أدخل الاسم العربي..."
+            />
+          </div>
+          <div class="pe__field">
+            <label class="pe__label">الاسم اللاتيني</label>
+            <input class="pe__input" formControlName="name_en" placeholder="Enter Latin name..." />
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="pe__field">
+          <label class="pe__label">الوصف</label>
+          <textarea
+            class="pe__input pe__input--textarea"
+            formControlName="description"
+            placeholder="وصف مختصر عن الناشر..."
+            rows="3"
+          ></textarea>
+        </div>
+
+        <!-- Unique identifier (read-only) -->
+        @if (publisher.unique_identifier) {
+          <div class="pe__field">
+            <label class="pe__label">المعرّف الفريد</label>
+            <span class="pe__badge">{{ publisher.unique_identifier }}</span>
+            <span class="pe__hint">لا يمكن تغيير المعرّف</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Contact Info Card -->
+    <div class="pe__card">
+      <div class="pe__card-header"><span>✉️</span> معلومات التواصل</div>
+      <div class="pe__card-body">
+        <div class="pe__field">
+          <label class="pe__label">الدولة</label>
+          <input
+            class="pe__input"
+            formControlName="country"
+            placeholder="المملكة العربية السعودية"
+          />
+        </div>
+
+        <div class="pe__field">
+          <label class="pe__label">سنة التأسيس</label>
+          <input
+            class="pe__input"
+            type="number"
+            formControlName="foundation_year"
+            placeholder="2005"
+          />
+        </div>
+
+        <div class="pe__field">
+          <label class="pe__label">الموقع الإلكتروني</label>
+          <input class="pe__input" formControlName="website" placeholder="https://example.com" />
+        </div>
+
+        <div class="pe__field">
+          <label class="pe__label">البريد الإلكتروني</label>
+          <input
+            class="pe__input"
+            [class.pe__input--error]="
+              form.get('contact_email')?.invalid && form.get('contact_email')?.dirty
+            "
+            formControlName="contact_email"
+            placeholder="info@example.com"
+          />
+        </div>
+
+        <div class="pe__field">
+          <label class="pe__label">العنوان</label>
+          <input class="pe__input" formControlName="address" placeholder="أدخل العنوان..." />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Content Types Section -->
+  <div class="pe__types">
+    <div class="pe__types-header"><span>📦</span> أنواع المحتوى المتاح</div>
+    <div class="pe__types-row">
+      <div class="pe__types-select-wrap">
+        <select
+          class="pe__types-select"
+          [ngModel]="typeInput()"
+          [ngModelOptions]="{ standalone: true }"
+          (ngModelChange)="typeInput.set($event)"
+        >
+          <option value="">اختر نوع المحتوى...</option>
+          @for (opt of contentTypeOptions; track opt.value) {
+            <option [value]="opt.value">{{ opt.label }}</option>
+          }
+        </select>
+        <span class="pe__types-select-arrow">&#8964;</span>
+      </div>
+      <button type="button" class="pe__types-add" (click)="addType(typeInput())">
+        <span>+</span> إضافة
+      </button>
+    </div>
+    @if (selectedTypes().length) {
+      <div class="pe__types-tags">
+        @for (type of selectedTypes(); track type) {
+          <span class="pe__tag">
+            {{ contentTypeLabel(type) }}
+            <button type="button" class="pe__tag-remove" (click)="removeType(type)">×</button>
+          </span>
+        }
+      </div>
+    }
+  </div>
+</form>
