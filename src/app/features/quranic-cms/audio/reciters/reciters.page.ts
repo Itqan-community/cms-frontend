@@ -1,28 +1,17 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
-import { NgClass } from '@angular/common';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
+import { Reciter, ReciterCreate, RecitersStats } from '../models/reciter.model';
 import { RecitersService } from '../services/reciters.service';
-import {
-  Reciter,
-  RecitersStats,
-  ReciterCreate,
-} from '../models/reciter.model';
 
 @Component({
   selector: 'app-reciters-page',
   standalone: true,
   imports: [
-    NgClass,
     ReactiveFormsModule,
     NzButtonComponent,
     NzInputModule,
