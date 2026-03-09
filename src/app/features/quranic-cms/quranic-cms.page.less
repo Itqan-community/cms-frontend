@@ -1,0 +1,263 @@
+.qcms-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+  font-family: inherit;
+}
+
+// ── Green Header ──────────────────────────────────────────────
+.qcms-header {
+  background-color: #16a34a;
+  padding: 14px 24px;
+  width: 100%;
+
+  &__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.01em;
+  }
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__nav-link {
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+    padding: 6px 16px;
+    border-radius: 8px;
+    transition: background 0.2s;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+  }
+
+  &__refresh-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 6px 16px;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
+  }
+}
+
+// ── Floating Tabs ─────────────────────────────────────────────
+.qcms-tabs-wrapper {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 20px 24px 0;
+}
+
+.qcms-tabs {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px;
+  width: 100%;
+
+  &__tab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    border-radius: 14px;
+    background: transparent;
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 500;
+    color: #555;
+    transition: background 0.15s, color 0.15s;
+    white-space: nowrap;
+
+    &:hover {
+      background: #f0fdf4;
+      color: #16a34a;
+    }
+
+    &--active {
+      background: #f0fdf4;
+      color: #16a34a;
+      font-weight: 700;
+      box-shadow: 0 1px 6px rgba(22, 163, 74, 0.15);
+    }
+  }
+
+  &__tab-emoji {
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+
+  &__tab-label {
+    line-height: 1;
+  }
+}
+
+// ── Content Area ──────────────────────────────────────────────
+.qcms-content {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 24px;
+}
+
+// Search Panel
+.qcms-search-panel {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px 32px;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+
+  &__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 6px;
+  }
+
+  &__subtitle {
+    font-size: 0.88rem;
+    color: #888;
+    margin: 0 0 20px;
+  }
+
+  &__label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+  }
+
+  &__input-row {
+    display: flex;
+    align-items: center;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fafafa;
+    gap: 0;
+  }
+
+  &__search-icon {
+    padding: 0 12px;
+    font-size: 1rem;
+    color: #aaa;
+    flex-shrink: 0;
+  }
+
+  &__input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 12px 4px;
+    font-size: 0.95rem;
+    color: #333;
+    outline: none;
+    direction: rtl;
+
+    &::placeholder {
+      color: #bbb;
+    }
+  }
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #4b5563;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+
+    &:hover {
+      background: #374151;
+    }
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 10px;
+  }
+
+  &__empty-icon {
+    font-size: 3rem;
+    opacity: 0.3;
+  }
+
+  &__empty-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #555;
+    margin: 0;
+  }
+
+  &__empty-subtitle {
+    font-size: 0.85rem;
+    color: #aaa;
+    margin: 0;
+  }
+}
+
+// Coming Soon (other tabs)
+.qcms-coming-soon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+  gap: 12px;
+
+  &__emoji {
+    font-size: 3.5rem;
+  }
+
+  &__text {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #aaa;
+    margin: 0;
+  }
+}

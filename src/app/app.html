@@ -1,6 +1,8 @@
-@if (!router.routerState.snapshot.root.firstChild?.data?.['hideHeader']) {
+@if (!hideHeader()) {
+  <!-- Header -->
   <app-header />
 }
-<div class="app-container">
+<div [class]="fullWidth() ? '' : 'app-container'">
+  <!-- Content -->
   <router-outlet></router-outlet>
 </div>

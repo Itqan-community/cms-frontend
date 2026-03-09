@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
-import { AssetsListingComponent } from '../../components/assets-listing/assets-listing.component';
 import { TranslateModule } from '@ngx-translate/core';
+import { AssetsListingComponent } from '../../components/assets-listing/assets-listing.component';
 
 @Component({
   selector: 'app-gallery-page',

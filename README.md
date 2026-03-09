@@ -69,7 +69,6 @@ The application will be available at `http://localhost:4200/`
 | -------------------------- | --------------------------------------------------- |
 | `npm start`                | Start development server on `http://localhost:4200` |
 | `npm run build`            | Build for production                                |
-| `npm run build:develop`    | Build for development environment                   |
 | `npm run build:staging`    | Build for staging environment                       |
 | `npm run build:production` | Build for production environment                    |
 | `npm run test`             | Run unit tests with Karma                           |
@@ -124,21 +123,17 @@ ng generate --help
 
 ## 🌍 Environments
 
-The application supports three deployment environments:
+The application supports two deployment environments:
 
-| Environment     | Branch    | URL                           | Config File              |
-| --------------- | --------- | ----------------------------- | ------------------------ |
-| **Development** | `develop` | https://develop.cms.itqan.dev | `environment.develop.ts` |
-| **Staging**     | `staging` | https://staging.cms.itqan.dev | `environment.staging.ts` |
-| **Production**  | `master`  | https://cms.itqan.dev         | `environment.prod.ts`    |
+| Environment    | Branch    | URL                           | Config File              |
+| -------------- | --------- | ----------------------------- | ------------------------ |
+| **Staging**    | `staging` | https://staging.cms.itqan.dev | `environment.staging.ts` |
+| **Production** | `master`  | https://cms.itqan.dev         | `environment.prod.ts`    |
 
 ### Building for Different Environments
 
 ```bash
-# Development build
-npm run build -- --configuration=development
-
-# Staging build
+# Staging build (default for local development)
 npm run build -- --configuration=staging
 
 # Production build
@@ -149,7 +144,6 @@ npm run build -- --configuration=production
 
 The project is configured for automatic deployment on Netlify:
 
-- **Develop Branch** → Development environment
 - **Staging Branch** → Staging environment
 - **Master Branch** → Production environment
 
@@ -213,11 +207,11 @@ to get started.
 ### Development Workflow
 
 1. Fork the repository
-2. Create a feature branch from `develop`
+2. Create a feature branch from `staging`
 3. Make your changes
 4. Write/update tests as needed
 5. Ensure all tests pass
-6. Submit a Pull Request to `develop` branch
+6. Submit a Pull Request to `staging` branch
 
 Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before contributing.
 

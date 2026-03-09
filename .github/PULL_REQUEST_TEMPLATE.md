@@ -45,7 +45,7 @@ Closes #(issue number)
 - [ ] Tested on Firefox
 - [ ] Tested on Safari
 - [ ] Tested on mobile browsers
-- [ ] Tested in development environment
+- [ ] Tested locally
 - [ ] Tested in staging environment (if applicable)
 
 ## Checklist
