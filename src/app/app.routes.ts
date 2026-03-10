@@ -70,21 +70,28 @@ export const routes: Routes = [
     canActivate: [publisherHostGuard], // Restrict access for publisher hosts
   },
   {
-    path: 'publishers',
+    path: 'quranic-cms',
     loadComponent: () =>
-      import('./features/publishers/pages/publishers/publishers.page').then(
-        (m) => m.PublishersPage
-      ),
-    canActivate: [publisherHostGuard], // Restrict access for publisher hosts
+      import('./features/quranic-cms/quranic-cms.page').then((m) => m.QuranicCmsPage),
+    canActivate: [authGuard],
+    data: { hideHeader: true, fullWidth: true },
+    children: [
+      {
+        path: '',
+        loadChildren: () =>
+          import('./features/quranic-cms/quranic-cms.routes').then((m) => m.quranicCmsRoutes),
+      },
+      {
+        path: 'publishers',
+        loadChildren: () =>
+          import('./features/quranic-cms/publishers/publishers.routes').then(
+            (m) => m.publishersRoutes
+          ),
+        canActivate: [publisherHostGuard],
+      },
+    ],
   },
-  {
-    path: 'publisher/:id',
-    loadComponent: () =>
-      import('./features/publishers/pages/publisher-details/publisher-details.page').then(
-        (m) => m.PublisherDetailsPage
-      ),
-    canActivate: [publisherHostGuard], // Restrict access for publisher hosts
-  },
+
   {
     path: 'license/:id',
     loadComponent: () =>
