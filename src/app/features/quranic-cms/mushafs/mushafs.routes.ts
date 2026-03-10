@@ -10,10 +10,7 @@ export const mushafsRoutes: Routes = [
       {
         path: 'pages',
         loadComponent: () =>
-          import('../components/coming-soon/coming-soon.component').then(
-            (m) => m.ComingSoonComponent
-          ),
-        data: { emoji: '📄' },
+          import('./pages/mushaf-pages.page').then((m) => m.MushafPagesPage),
       },
       {
         path: 'words',
