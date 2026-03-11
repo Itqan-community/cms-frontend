@@ -26,10 +26,7 @@ export const mushafsRoutes: Routes = [
       {
         path: 'ayahs',
         loadComponent: () =>
-          import('../components/coming-soon/coming-soon.component').then(
-            (m) => m.ComingSoonComponent
-          ),
-        data: { emoji: '📖' },
+          import('./ayahs/ayahs.page').then((m) => m.AyahsPage),
       },
       {
         path: 'surahs',
