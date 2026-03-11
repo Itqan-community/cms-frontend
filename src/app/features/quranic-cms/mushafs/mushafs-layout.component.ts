@@ -8,8 +8,8 @@ import { SectionLayoutComponent } from '../components/section-layout/section-lay
   imports: [SectionLayoutComponent],
   template: `
     <app-section-layout
-      title="المصاحف"
-      description="إدارة المصاحف والنسخ القرآنية"
+      title="📖 المصاحف"
+      description="إدارة النص القرآني على ثلاثة مستويات: السور الكاملة، الآيات المقطعة، والكلمات المنفردة"
       basePath="/quranic-cms/mushafs"
       [tabs]="subTabs"
     />
