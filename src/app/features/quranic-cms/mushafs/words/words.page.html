@@ -1,0 +1,119 @@
+<div class="words-page" dir="rtl">
+
+  <!-- Banner -->
+  <div class="words-banner">
+    <div class="words-banner__content">
+      <h2 class="words-banner__title">كلمات المصحف</h2>
+      <p class="words-banner__desc">تصفّح جميع كلمات القرآن الكريم مع إمكانية البحث والتصفية حسب السورة</p>
+    </div>
+    <span class="words-banner__count">عدد النتائج: {{ totalFiltered() | number }} كلمة</span>
+  </div>
+
+  <!-- Toolbar: Search + Surah Filter + Clear -->
+  <div class="words-toolbar">
+    <div class="words-toolbar__search">
+      <span class="words-toolbar__search-icon">🔍</span>
+      <input
+        class="words-toolbar__search-input"
+        type="text"
+        placeholder="ابحث عن كلمة..."
+        (input)="onSearchInput($event)"
+      />
+    </div>
+    <nz-select
+      class="words-toolbar__filter"
+      nzPlaceHolder="جميع السور"
+      nzAllowClear
+      nzShowSearch
+      [ngModel]="selectedSurah()"
+      (ngModelChange)="onSurahChange($event)"
+      nzSize="default"
+    >
+      @for (surah of surahs; track surah.id) {
+        <nz-option [nzValue]="surah.id" [nzLabel]="surah.id + ' - ' + surah.name_ar"></nz-option>
+      }
+    </nz-select>
+    @if (searchQuery() || selectedSurah()) {
+      <a class="words-toolbar__clear" (click)="clearFilters()">مسح جميع الفلاتر</a>
+    }
+  </div>
+
+  <!-- Words Table -->
+  @if (loading()) {
+    <div class="words-table-wrapper">
+      <div class="words-skel">
+        @for (i of [0, 1, 2, 3, 4, 5, 6, 7]; track i) {
+          <div class="words-skel__row">
+            <div class="words-skel__cell words-skel__cell--sm"></div>
+            <div class="words-skel__cell words-skel__cell--md"></div>
+            <div class="words-skel__cell words-skel__cell--md"></div>
+            <div class="words-skel__cell words-skel__cell--md"></div>
+            <div class="words-skel__cell words-skel__cell--sm"></div>
+            <div class="words-skel__cell words-skel__cell--sm"></div>
+            <div class="words-skel__cell words-skel__cell--sm"></div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else if (paginatedWords().length === 0) {
+    <div class="words-empty">
+      <span class="words-empty__icon">📝</span>
+      <p class="words-empty__title">لا توجد كلمات</p>
+      <p class="words-empty__subtitle">لم يتم العثور على نتائج. حاول تغيير كلمة البحث أو السورة.</p>
+    </div>
+  } @else {
+    <div class="words-table-wrapper">
+      <nz-table
+        #wordsTable
+        [nzData]="paginatedWords()"
+        [nzFrontPagination]="false"
+        [nzShowPagination]="false"
+        nzSize="middle"
+        [nzScroll]="{ x: '900px' }"
+      >
+        <thead>
+          <tr>
+            <th nzWidth="120px">رقم الكلمة في القاعدة</th>
+            <th nzWidth="140px">الرسم العثماني</th>
+            <th nzWidth="140px">الرسم الإملائي</th>
+            <th nzWidth="120px">اسم السورة</th>
+            <th nzWidth="90px">رقم السورة</th>
+            <th nzWidth="90px">رقم الآية</th>
+            <th nzWidth="120px">رقم الكلمة في الآية</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (word of wordsTable.data; track word.id) {
+            <tr>
+              <td>
+                <nz-tag nzColor="blue">{{ word.id }}</nz-tag>
+              </td>
+              <td class="words-table__uthmani">{{ word.text_uthmani }}</td>
+              <td>{{ word.text_spelling }}</td>
+              <td>{{ word.surah_name }}</td>
+              <td>{{ word.surah_id }}</td>
+              <td>{{ word.ayah_id }}</td>
+              <td>
+                <nz-tag nzColor="green">{{ word.position }}</nz-tag>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </div>
+  }
+
+  <!-- Pagination -->
+  @if (!loading() && totalFiltered() > pageSize) {
+    <div class="words-pagination">
+      <nz-pagination
+        [nzPageIndex]="currentPage()"
+        [nzTotal]="totalFiltered()"
+        [nzPageSize]="pageSize"
+        (nzPageIndexChange)="onPageChange($event)"
+        nzSimple
+      ></nz-pagination>
+    </div>
+  }
+
+</div>
