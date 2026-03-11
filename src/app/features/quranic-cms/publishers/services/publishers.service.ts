@@ -13,6 +13,7 @@ import {
 
 const MOCK_PUBLISHERS: Publisher[] = [
   {
+    id: 'mock-1',
     name_ar: 'مجمع الملك فهد لطباعة المصحف الشريف',
     name_en: 'King Fahd Complex',
     country: 'السعودية',
@@ -25,6 +26,7 @@ const MOCK_PUBLISHERS: Publisher[] = [
     description: 'مجمع الملك فهد لطباعة المصحف الشريف بالمدينة المنورة',
   },
   {
+    id: 'mock-2',
     name_ar: 'دار السلام للطباعة والنشر',
     name_en: 'Dar Al-Salam',
     country: 'مصر',
@@ -37,6 +39,7 @@ const MOCK_PUBLISHERS: Publisher[] = [
     description: 'دار السلام للطباعة والنشر والتوزيع',
   },
   {
+    id: 'mock-3',
     name_ar: 'مؤسسة الرسالة',
     name_en: 'Al-Risala Foundation',
     country: 'لبنان',

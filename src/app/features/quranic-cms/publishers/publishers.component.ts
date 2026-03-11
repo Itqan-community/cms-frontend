@@ -5,7 +5,7 @@ import { PublisherFiltersComponent } from './components/publisher-filters/publis
 import { PublisherListComponent } from './components/publisher-list/publisher-list.component';
 import { PublishersBannerComponent } from './components/publishers-banner/publishers-banner.component';
 import { PublishersStatsCardsComponent } from './components/publishers-stats-cards/publishers-stats-cards.component';
-import { Publisher } from './models/publishers-stats.models';
+import { Publisher } from './models/publisher.model';
 import { PublishersService } from './services/publishers.service';
 
 @Component({
@@ -91,15 +91,15 @@ export class PublishersComponent implements OnInit {
 
     this.loading = true;
     this.publishersService
-      .getPublishers({
-        page: this.page,
-        limit: this.limit,
-        search: this.searchTerm,
-        is_active: this.activeFilter ?? undefined,
-      })
+      .getPublishers(
+        this.searchTerm,
+        this.page,
+        this.limit,
+        this.activeFilter ?? undefined
+      )
       .subscribe((data) => {
-        this.publishers = [...this.publishers, ...data];
-        this.hasMore = data.length === this.limit;
+        this.publishers = [...this.publishers, ...data.results];
+        this.hasMore = data.results.length === this.limit;
         this.loading = false;
       });
   }

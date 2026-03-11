@@ -1,4 +1,5 @@
 export interface Publisher {
+  id: string;
   name_ar: string;
   name_en: string;
   country: string;
@@ -9,6 +10,9 @@ export interface Publisher {
   is_verified: boolean;
   contact_email: string;
   description: string;
+  is_active?: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface PublisherCreate {
