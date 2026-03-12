@@ -14,7 +14,7 @@ import { RouterLink } from '@angular/router';
       <div class="recitation-card__header">
         <div class="recitation-card__info">
           <h3 class="recitation-card__name">
-            {{ recitation.reciter.name || 'مقرئ غير معروف' }}
+            {{ recitation.name || 'مصحف غير معروف' }}
             @if (recitation.style) {
               <span>({{ recitation.style }})</span>
             }
@@ -30,6 +30,11 @@ import { RouterLink } from '@angular/router';
       </div>
 
       <div class="recitation-card__body">
+        <div class="info-row">
+          <span class="info-row__label">القارئ:</span>
+          <span class="info-row__value">{{ recitation.reciter?.name || 'غير محدد' }}</span>
+        </div>
+
         <div class="info-row info-row--purple">
           <span class="info-row__label">القراءة:</span>
           <span class="info-row__value">{{ recitation.qiraah?.name || 'غير محدد' }}</span>
@@ -55,14 +60,7 @@ import { RouterLink } from '@angular/router';
       </div>
 
       <div class="recitation-card__footer">
-        <a
-          nz-button
-          nzType="primary"
-          [routerLink]="['/quranic-cms/audio/reciters', recitation.reciter.id]"
-          class="recitation-card__btn"
-        >
-          عرض المقرئ
-        </a>
+        <a nz-button nzType="primary" [routerLink]="" class="recitation-card__btn"> عرض المصحف </a>
       </div>
     </div>
   `,
