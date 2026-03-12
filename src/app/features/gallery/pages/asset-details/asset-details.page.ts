@@ -3,11 +3,12 @@ import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTagModule } from 'ng-zorro-antd/tag';
@@ -51,6 +52,8 @@ export class AssetDetailsPage implements OnInit {
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   private readonly fb = inject(FormBuilder);
+  private readonly message = inject(NzMessageService);
+  private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly id = this.route.snapshot.params['id'];
@@ -62,6 +65,8 @@ export class AssetDetailsPage implements OnInit {
   isModalVisible = signal<boolean>(false);
   isLicenseModalVisible = signal<boolean>(false);
   canConfirmLicense = signal<boolean>(false);
+  isSubmittingRequest = signal<boolean>(false);
+  isDownloading = signal<boolean>(false);
 
   accessRequestForm: FormGroup;
 
@@ -160,14 +165,23 @@ export class AssetDetailsPage implements OnInit {
         purpose: this.accessRequestForm.value.purpose,
       };
 
+      this.isSubmittingRequest.set(true);
+
       this.http
         .post(`${environment.API_BASE_URL}/assets/${asset.id}/request-access/`, formData)
         .subscribe({
           next: () => {
+            this.isSubmittingRequest.set(false);
             this.closeAccessRequestModal();
             this.openLicenseModal();
           },
           error: (error) => {
+            this.isSubmittingRequest.set(false);
+            const errorKey =
+              error.status === 0
+                ? 'ERRORS.NETWORK_ERROR'
+                : 'ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED';
+            this.message.error(this.translate.instant(errorKey));
             console.error('Access request failed:', error);
           },
         });
@@ -230,11 +244,13 @@ export class AssetDetailsPage implements OnInit {
   }
 
   private downloadAsset(assetId: number): void {
+    this.isDownloading.set(true);
     // Step 1: Get the download_url from backend
     this.http
       .get<{ download_url: string }>(`${environment.API_BASE_URL}/assets/${assetId}/download/`)
       .subscribe({
         next: (response) => {
+          this.isDownloading.set(false);
           const downloadUrl = response.download_url;
           // Extract filename from URL path
           const filename = this.extractFilenameFromPath(downloadUrl);
@@ -242,12 +258,18 @@ export class AssetDetailsPage implements OnInit {
           this.downloadFileFromUrl(downloadUrl, filename);
         },
         error: (error) => {
+          this.isDownloading.set(false);
+          const defaultErrorKey =
+            error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR';
+          const errorMessage = error.error?.message || this.translate.instant(defaultErrorKey);
+          this.message.error(errorMessage);
           console.error('Failed to get download URL:', error);
         },
       });
   }
 
   private performResourceDownload(resourceId: number): void {
+    this.isDownloading.set(true);
     // Step 1: Get the download_url from backend
     this.http
       .get<{
@@ -255,6 +277,7 @@ export class AssetDetailsPage implements OnInit {
       }>(`${environment.API_BASE_URL}/resources/${resourceId}/download/`)
       .subscribe({
         next: (response) => {
+          this.isDownloading.set(false);
           const downloadUrl = response.download_url;
           // Extract filename from URL path
           const filename = this.extractFilenameFromPath(downloadUrl);
@@ -262,6 +285,11 @@ export class AssetDetailsPage implements OnInit {
           this.downloadFileFromUrl(downloadUrl, filename);
         },
         error: (error) => {
+          this.isDownloading.set(false);
+          const defaultErrorKey =
+            error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR';
+          const errorMessage = error.error?.message || this.translate.instant(defaultErrorKey);
+          this.message.error(errorMessage);
           console.error('Failed to get download URL:', error);
         },
       });

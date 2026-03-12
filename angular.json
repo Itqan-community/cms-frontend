@@ -78,17 +78,6 @@
                 }
               ]
             },
-            "develop": {
-              "optimization": false,
-              "extractLicenses": false,
-              "sourceMap": true,
-              "fileReplacements": [
-                {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.develop.ts"
-                }
-              ]
-            },
             "publisher": {
               "optimization": false,
               "extractLicenses": false,
@@ -112,14 +101,11 @@
             "staging": {
               "buildTarget": "cms-frontend:build:staging"
             },
-            "develop": {
-              "buildTarget": "cms-frontend:build:develop"
-            },
             "publisher": {
               "buildTarget": "cms-frontend:build:publisher"
             }
           },
-          "defaultConfiguration": "develop"
+          "defaultConfiguration": "staging"
         },
         "extract-i18n": {
           "builder": "@angular/build:extract-i18n"

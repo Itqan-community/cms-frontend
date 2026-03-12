@@ -37,7 +37,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   - Profile completion workflow
   - Role-based access control
 - **Development Infrastructure**
-  - Netlify deployment configuration for 3 environments (develop, staging, production)
+  - Netlify deployment configuration for 2 environments (staging, production)
   - Code formatting with Prettier
   - Pre-commit hooks with Husky and lint-staged
   - Comprehensive project documentation

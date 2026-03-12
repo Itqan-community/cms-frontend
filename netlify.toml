@@ -8,11 +8,6 @@
   command = "npm run build:staging"
   publish = "dist/browser"
 
-# Develop environment
-[context.develop]
-  command = "npm run build:develop"
-  publish = "dist/browser"
-
 # Publisher environment
 [context.publisher]
   command = "npm run build:publisher"

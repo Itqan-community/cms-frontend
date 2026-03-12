@@ -16,10 +16,9 @@ that have been created or updated.
 
 #### 1. **netlify.toml** ✨ NEW
 
-- Deployment configuration for 3 environments:
+- Deployment configuration for 2 environments:
   - **Production** (master branch) → https://cms.itqan.dev
   - **Staging** (staging branch) → https://staging.cms.itqan.dev
-  - **Development** (develop branch) → https://develop.cms.itqan.dev
 - Build commands for Angular
 - SPA routing redirects
 - Security headers
@@ -28,7 +27,7 @@ that have been created or updated.
 #### 2. **angular.json** ✏️ UPDATED
 
 - Added `staging` build configuration
-- Added `fileReplacements` for all environments (production, staging, development)
+- Added `fileReplacements` for all environments (production, staging)
 - Configured build budgets for bundle size monitoring
 
 #### 3. **package.json** ✏️ UPDATED
@@ -162,11 +161,10 @@ that have been created or updated.
 
 ## 🎯 Environment Configuration
 
-| Environment | Branch    | API URL                           | Build Config  |
-| ----------- | --------- | --------------------------------- | ------------- |
-| Development | `develop` | https://staging.api.cms.itqan.dev | `development` |
-| Staging     | `staging` | https://staging.api.cms.itqan.dev | `staging`     |
-| Production  | `master`  | https://api.cms.itqan.dev         | `production`  |
+| Environment | Branch    | API URL                           | Build Config |
+| ----------- | --------- | --------------------------------- | ------------ |
+| Staging     | `staging` | https://staging.api.cms.itqan.dev | `staging`    |
+| Production  | `master`  | https://api.cms.itqan.dev         | `production` |
 
 ## 🚀 Deployment
 
@@ -179,9 +177,6 @@ that have been created or updated.
 ### Build Commands
 
 ```bash
-# Development
-npm run build -- --configuration=development
-
 # Staging
 npm run build -- --configuration=staging
 
