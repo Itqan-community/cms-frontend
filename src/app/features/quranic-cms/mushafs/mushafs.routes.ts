@@ -15,10 +15,7 @@ export const mushafsRoutes: Routes = [
       {
         path: 'words',
         loadComponent: () =>
-          import('../components/coming-soon/coming-soon.component').then(
-            (m) => m.ComingSoonComponent
-          ),
-        data: { emoji: '📝' },
+          import('./words/mushaf-words.page').then((m) => m.MushafWordsPage),
       },
       {
         path: 'ayahs',
