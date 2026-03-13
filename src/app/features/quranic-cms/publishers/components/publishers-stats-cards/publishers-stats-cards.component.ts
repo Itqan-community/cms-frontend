@@ -1,34 +1,46 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { PublisherStatistics } from '../../models/publishers-stats.models';
 import { PublishersStatsService } from '../../services/publishers-stats.service';
+
+interface StatsCard {
+  key: keyof PublisherStatistics;
+  label: string;
+  value: number;
+  icon: string;
+  bgColor: string;
+  iconColor: string;
+}
 
 @Component({
   selector: 'app-publishers-stats-cards',
   standalone: true,
-  imports: [CommonModule, NzGridModule, NzCardModule, NzSpinModule],
+  imports: [NzGridModule, NzCardModule, NzSpinModule],
   template: `
     <div nz-row [nzGutter]="16" class="stats-container">
-      <div nz-col [nzSpan]="8" *ngFor="let card of cards">
-        <nz-card class="stat-card" [nzLoading]="loading">
-          <div class="stat-content">
-            <div
-              class="stat-icon"
-              [style.backgroundColor]="card.bgColor"
-              [style.color]="card.iconColor"
-            >
-              <i [class]="card.icon"></i>
-            </div>
+      @for (card of cards; track card.key) {
+        <div nz-col [nzSpan]="8">
+          <nz-card class="stat-card" [nzLoading]="loading">
+            <div class="stat-content">
+              <div
+                class="stat-icon"
+                [style.backgroundColor]="card.bgColor"
+                [style.color]="card.iconColor"
+              >
+                <i [class]="card.icon"></i>
+              </div>
 
-            <div class="stat-info">
-              <div class="stat-value">{{ card.value }}</div>
-              <div class="stat-label">{{ card.label }}</div>
+              <div class="stat-info">
+                <div class="stat-value">{{ card.value }}</div>
+                <div class="stat-label">{{ card.label }}</div>
+              </div>
             </div>
-          </div>
-        </nz-card>
-      </div>
+          </nz-card>
+        </div>
+      }
     </div>
   `,
   styles: [
@@ -73,10 +85,11 @@ import { PublishersStatsService } from '../../services/publishers-stats.service'
   ],
 })
 export class PublishersStatsCardsComponent implements OnInit {
-  private statsService = inject(PublishersStatsService);
+  private readonly statsService = inject(PublishersStatsService);
+  private readonly destroyRef = inject(DestroyRef);
   loading = true;
 
-  cards: any[] = [
+  cards: StatsCard[] = [
     {
       key: 'total_publishers',
       label: 'إجمالي الناشرين',
@@ -104,16 +117,19 @@ export class PublishersStatsCardsComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.statsService.getStatistics().subscribe({
-      next: (stats) => {
-        this.cards.forEach((card) => {
-          card.value = (stats as any)[card.key] || 0;
-        });
-        this.loading = false;
-      },
-      error: () => {
-        this.loading = false;
-      },
-    });
+    this.statsService
+      .getStatistics()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (stats) => {
+          this.cards.forEach((card) => {
+            card.value = stats[card.key] ?? 0;
+          });
+          this.loading = false;
+        },
+        error: () => {
+          this.loading = false;
+        },
+      });
   }
 }
