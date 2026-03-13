@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, Input, Output, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -13,7 +13,6 @@ import { PublishersService } from '../../services/publishers.service';
   selector: 'app-publisher-add',
   standalone: true,
   imports: [
-    CommonModule,
     ReactiveFormsModule,
     NzFormModule,
     NzInputModule,
@@ -22,14 +21,17 @@ import { PublishersService } from '../../services/publishers.service';
     NzIconModule,
   ],
   template: `
-    <div *ngIf="!isAdding" class="add-button-container">
-      <button nz-button nzType="primary" (click)="showForm()" class="add-btn">
-        <span nz-icon nzType="plus"></span>
-        إضافة ناشر جديد
-      </button>
-    </div>
+    @if (!isAdding) {
+      <div class="add-button-container">
+        <button nz-button nzType="primary" (click)="showForm()" class="add-btn">
+          <span nz-icon nzType="plus"></span>
+          إضافة ناشر جديد
+        </button>
+      </div>
+    }
 
-    <div *ngIf="isAdding" class="form-page-wrapper">
+    @if (isAdding) {
+    <div class="form-page-wrapper">
       <div class="inline-form-card">
         <div class="form-header">
           <h2 class="form-title">إضافة ناشر جديد</h2>
@@ -160,6 +162,7 @@ import { PublishersService } from '../../services/publishers.service';
         </form>
       </div>
     </div>
+    }
   `,
   styles: [
     `
@@ -264,9 +267,10 @@ export class PublisherAddComponent {
   @Output() isAddingChange = new EventEmitter<boolean>();
   @Output() publisherAdded = new EventEmitter<void>();
 
-  private fb = inject(FormBuilder);
-  private publishersService = inject(PublishersService);
-  private message = inject(NzMessageService);
+  private readonly fb = inject(FormBuilder);
+  private readonly publishersService = inject(PublishersService);
+  private readonly message = inject(NzMessageService);
+  private readonly destroyRef = inject(DestroyRef);
 
   isConfirmLoading = false;
 
@@ -291,7 +295,7 @@ export class PublisherAddComponent {
   handleOk(): void {
     if (this.publisherForm.valid) {
       this.isConfirmLoading = true;
-      this.publishersService.createPublisher(this.publisherForm.value).subscribe({
+      this.publishersService.createPublisher(this.publisherForm.value).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           this.message.success('تمت إضافة الناشر بنجاح');
           this.isConfirmLoading = false;
