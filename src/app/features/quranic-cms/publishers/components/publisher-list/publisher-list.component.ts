@@ -1,5 +1,4 @@
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { CommonModule } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -11,7 +10,6 @@ import { PublisherCardComponent } from '../publisher-card/publisher-card.compone
   selector: 'app-publisher-list',
   standalone: true,
   imports: [
-    CommonModule,
     NzGridModule,
     NzEmptyModule,
     NzSpinModule,
@@ -21,32 +19,39 @@ import { PublisherCardComponent } from '../publisher-card/publisher-card.compone
   template: `
     <div class="list-container" #scrollContainer>
       <div nz-row [nzGutter]="[16, 16]">
-        <div
-          nz-col
-          [nzXs]="24"
-          [nzSm]="12"
-          [nzMd]="8"
-          [nzLg]="8"
-          *ngFor="let publisher of publishers"
-        >
-          <app-publisher-card [publisher]="publisher"></app-publisher-card>
+        @for (publisher of publishers; track publisher.id) {
+          <div
+            nz-col
+            [nzXs]="24"
+            [nzSm]="12"
+            [nzMd]="8"
+            [nzLg]="8"
+          >
+            <app-publisher-card [publisher]="publisher"></app-publisher-card>
+          </div>
+        }
+      </div>
+
+      @if (loading) {
+        <div class="loading-spinner">
+          <nz-spin nzSimple nzSize="large"></nz-spin>
         </div>
-      </div>
+      }
 
-      <div *ngIf="loading" class="loading-spinner">
-        <nz-spin nzSimple nzSize="large"></nz-spin>
-      </div>
+      @if (!loading && publishers.length === 0) {
+        <div class="empty-state">
+          <nz-empty
+            nzNotFoundImage="simple"
+            nzNotFoundContent="عذراً، لا يوجد ناشرون حالياً"
+          ></nz-empty>
+        </div>
+      }
 
-      <div *ngIf="!loading && publishers.length === 0" class="empty-state">
-        <nz-empty
-          nzNotFoundImage="simple"
-          nzNotFoundContent="عذراً، لا يوجد ناشرون حالياً"
-        ></nz-empty>
-      </div>
-
-      <div *ngIf="!hasMore && publishers.length > 0" class="no-more">
-        <p>لا يوجد المزيد من الناشرين</p>
-      </div>
+      @if (!hasMore && publishers.length > 0) {
+        <div class="no-more">
+          <p>لا يوجد المزيد من الناشرين</p>
+        </div>
+      }
     </div>
   `,
   styles: [
