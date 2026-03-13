@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
@@ -8,7 +7,7 @@ import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/br
 @Component({
   selector: 'app-license-details-page',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslateModule, BreadcrumbComponent, NzButtonModule],
+  imports: [RouterModule, TranslateModule, BreadcrumbComponent, NzButtonModule],
   templateUrl: './license-details.page.html',
   styleUrls: ['./license-details.page.less'],
 })
