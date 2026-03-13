@@ -139,7 +139,7 @@
                   | translate
               "
             >
-              <i class="bx" [ngClass]="passwordVisible() ? 'bx-eye-closed' : 'bx-eye'"></i>
+              <i class="bx" [class.bx-eye-closed]="passwordVisible()" [class.bx-eye]="!passwordVisible()"></i>
             </button>
           </div>
           @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
@@ -185,7 +185,7 @@
                 ) | translate
               "
             >
-              <i class="bx" [ngClass]="confirmPasswordVisible() ? 'bx-eye-closed' : 'bx-eye'"></i>
+              <i class="bx" [class.bx-eye-closed]="confirmPasswordVisible()" [class.bx-eye]="!confirmPasswordVisible()"></i>
             </button>
           </div>
           @if (
@@ -244,7 +244,7 @@
                 ) | translate
               "
             >
-              <i class="bx" [ngClass]="confirmPasswordVisible() ? 'bx-eye-closed' : 'bx-eye'"></i>
+              <i class="bx" [class.bx-eye-closed]="confirmPasswordVisible()" [class.bx-eye]="!confirmPasswordVisible()"></i>
             </button>
           </div>
           @if (
