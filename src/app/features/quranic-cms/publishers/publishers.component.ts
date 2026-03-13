@@ -100,10 +100,15 @@ export class PublishersComponent implements OnInit {
         is_active: this.activeFilter ?? undefined,
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((data) => {
-        this.publishers = [...this.publishers, ...data];
-        this.hasMore = data.length === this.limit;
-        this.loading = false;
+      .subscribe({
+        next: (data) => {
+          this.publishers = [...this.publishers, ...data];
+          this.hasMore = data.length === this.limit;
+          this.loading = false;
+        },
+        error: () => {
+          this.loading = false;
+        },
       });
   }
 
