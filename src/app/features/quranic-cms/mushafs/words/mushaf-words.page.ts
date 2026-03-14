@@ -32,20 +32,20 @@ export class MushafWordsPage implements OnInit {
     const surahId = this.selectedSurahId();
 
     if (surahId !== null && surahId !== undefined && String(surahId) !== 'null') {
-      words = words.filter(w => w.surah_id === Number(surahId));
+      words = words.filter((w) => w.surah_id === Number(surahId));
     }
 
     if (term) {
-      words = words.filter(
-        w => w.text_uthmani.includes(term) || w.text_spelling.includes(term)
-      );
+      words = words.filter((w) => w.text_uthmani.includes(term) || w.text_spelling.includes(term));
     }
 
     return words;
   });
 
   readonly totalResults = computed(() => this.filteredWords().length);
-  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalResults() / this.pageSize())));
+  readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.totalResults() / this.pageSize()))
+  );
 
   readonly paginatedWords = computed(() => {
     const start = (this.currentPage() - 1) * this.pageSize();
@@ -54,18 +54,24 @@ export class MushafWordsPage implements OnInit {
 
   ngOnInit(): void {
     // Load words
-    this.quranData.getWords().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (words) => {
-        this.allWords.set(words);
-        this.loading.set(false);
-      },
-      error: () => this.loading.set(false)
-    });
+    this.quranData
+      .getWords()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (words) => {
+          this.allWords.set(words);
+          this.loading.set(false);
+        },
+        error: () => this.loading.set(false),
+      });
 
     // Load surahs
-    this.quranData.getSurahs().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (surahs) => this.surahs.set(surahs)
-    });
+    this.quranData
+      .getSurahs()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (surahs) => this.surahs.set(surahs),
+      });
   }
 
   onSearchChange(term: string) {
@@ -74,7 +80,7 @@ export class MushafWordsPage implements OnInit {
   }
 
   onSurahChange(surahId: any) {
-    const sid = (surahId === 'null' || surahId === null) ? null : Number(surahId);
+    const sid = surahId === 'null' || surahId === null ? null : Number(surahId);
     this.selectedSurahId.set(sid);
     this.currentPage.set(1);
   }
@@ -87,13 +93,13 @@ export class MushafWordsPage implements OnInit {
 
   nextPage() {
     if (this.currentPage() < this.totalPages()) {
-      this.currentPage.update(p => p + 1);
+      this.currentPage.update((p) => p + 1);
     }
   }
 
   prevPage() {
     if (this.currentPage() > 1) {
-      this.currentPage.update(p => p - 1);
+      this.currentPage.update((p) => p - 1);
     }
   }
 

@@ -81,4 +81,3 @@ describe('RecitationsStatsService (Quranic CMS)', () => {
     expect(messageServiceSpy.error).toHaveBeenCalled();
   });
 });
-

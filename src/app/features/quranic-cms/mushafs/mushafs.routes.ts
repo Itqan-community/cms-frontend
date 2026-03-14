@@ -9,13 +9,15 @@ export const mushafsRoutes: Routes = [
       { path: '', redirectTo: 'pages', pathMatch: 'full' },
       {
         path: 'pages',
-        loadComponent: () =>
-          import('./pages/mushaf-pages.page').then((m) => m.MushafPagesPage),
+        loadComponent: () => import('./pages/mushaf-pages.page').then((m) => m.MushafPagesPage),
       },
       {
         path: 'words',
         loadComponent: () =>
-          import('./words/mushaf-words.page').then((m) => m.MushafWordsPage),
+          import('../components/coming-soon/coming-soon.component').then(
+            (m) => m.ComingSoonComponent
+          ),
+        data: { emoji: '📝' },
       },
       {
         path: 'ayahs',
