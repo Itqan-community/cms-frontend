@@ -28,6 +28,7 @@ export const NAV_LINKS = [
     link: '/content-standards',
     hidden: isPublisher, // Hide content standards for publisher hosts
   },
+
   {
     label: 'NAV.API_DOCS',
     link: `${environment.API_DOCS_URL}`,
