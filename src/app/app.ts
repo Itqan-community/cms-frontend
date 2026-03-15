@@ -28,13 +28,11 @@ export class App {
     void this.webVitalsService;
     this.googleAnalyticsService.init();
 
-    this.router.events
-      .pipe(filter((e) => e instanceof NavigationEnd))
-      .subscribe(() => {
-        const data = this.router.routerState.snapshot.root.firstChild?.data ?? {};
-        this.hideHeader.set(!!data['hideHeader']);
-        this.fullWidth.set(!!data['fullWidth']);
-      });
+    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(() => {
+      const data = this.router.routerState.snapshot.root.firstChild?.data ?? {};
+      this.hideHeader.set(!!data['hideHeader']);
+      this.fullWidth.set(!!data['fullWidth']);
+    });
 
     const currentLang = localStorage.getItem('lang') || 'ar';
     this.translate.addLangs(['ar', 'en']);
