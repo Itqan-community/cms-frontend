@@ -1,4 +1,5 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RecitationsStats } from '../../models/recitations-stats.model';
 import { RecitationsStatsService } from '../../services/recitations-stats.service';
 
@@ -11,6 +12,7 @@ import { RecitationsStatsService } from '../../services/recitations-stats.servic
 })
 export class RecitationsStatsCardsComponent implements OnInit {
   private readonly statsService = inject(RecitationsStatsService);
+  private readonly destroyRef = inject(DestroyRef);
 
   loading = signal(true);
   stats = signal<RecitationsStats | null>(null);
@@ -23,7 +25,7 @@ export class RecitationsStatsCardsComponent implements OnInit {
 
   private loadStats(): void {
     this.loading.set(true);
-    this.statsService.getStats().subscribe({
+    this.statsService.getStats().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => this.stats.set(data),
       error: () => {
         // In case something unexpected happens before catchError,
