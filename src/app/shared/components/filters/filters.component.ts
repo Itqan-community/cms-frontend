@@ -5,7 +5,6 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCheckboxComponent, NzCheckboxGroupComponent } from 'ng-zorro-antd/checkbox';
 import { NzDrawerModule } from 'ng-zorro-antd/drawer';
-import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { Categories } from '../../../core/enums/categories.enum';
@@ -19,7 +18,6 @@ import { ViewportService } from '../../../core/services/viewport.service';
   imports: [
     NzInputModule,
     NzButtonModule,
-    NzIconModule,
     NzDrawerModule,
     TranslatePipe,
     NgTemplateOutlet,
