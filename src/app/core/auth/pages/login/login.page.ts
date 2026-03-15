@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, DestroyRef, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -11,7 +11,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, LangSwitchComponent],
+  imports: [ReactiveFormsModule, RouterLink, TranslateModule, LangSwitchComponent],
   styleUrls: ['./login.page.less'],
   templateUrl: './login.page.html',
 })
@@ -21,6 +21,7 @@ export class LoginPage {
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
   private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   passwordVisible = signal(false);
 
@@ -48,7 +49,7 @@ export class LoginPage {
         password: this.loginForm.value.password,
       };
 
-      this.authService.login(loginData).subscribe({
+      this.authService.login(loginData).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
         next: () => {
           // Get the return URL from query parameters, default to gallery
           const returnUrl =
