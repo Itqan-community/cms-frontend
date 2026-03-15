@@ -94,7 +94,7 @@ export class PublisherFiltersComponent implements OnInit, OnDestroy {
   @Output() searchChanged = new EventEmitter<string>();
   @Output() filterChanged = new EventEmitter<boolean | null>();
 
-  searchTerm: string = '';
+  searchTerm = '';
   activeFilter: boolean | null = null;
 
   private searchSubject = new Subject<string>();
