@@ -1,5 +1,4 @@
 import { Component, input } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 export interface UserAvatarData {
   avatar_url?: string;
@@ -10,7 +9,7 @@ export interface UserAvatarData {
 @Component({
   selector: 'app-user-avatar',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   styleUrls: ['./user-avatar.component.less'],
   template: `
     @if (user()?.avatar_url) {

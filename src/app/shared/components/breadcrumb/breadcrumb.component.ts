@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
@@ -16,7 +15,7 @@ interface Breadcrumb {
 @Component({
   selector: 'app-breadcrumb',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslateModule, NzBreadCrumbModule, NzIconModule],
+  imports: [RouterModule, TranslateModule, NzBreadCrumbModule, NzIconModule],
   templateUrl: './breadcrumb.component.html',
   styleUrl: './breadcrumb.component.less',
 })
