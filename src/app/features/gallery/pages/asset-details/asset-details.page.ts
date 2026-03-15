@@ -169,6 +169,7 @@ export class AssetDetailsPage implements OnInit {
 
       this.http
         .post(`${environment.API_BASE_URL}/assets/${asset.id}/request-access/`, formData)
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
             this.isSubmittingRequest.set(false);
@@ -182,7 +183,6 @@ export class AssetDetailsPage implements OnInit {
                 ? 'ERRORS.NETWORK_ERROR'
                 : 'ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED';
             this.message.error(this.translate.instant(errorKey));
-            console.error('Access request failed:', error);
           },
         });
     } else {
@@ -248,6 +248,7 @@ export class AssetDetailsPage implements OnInit {
     // Step 1: Get the download_url from backend
     this.http
       .get<{ download_url: string }>(`${environment.API_BASE_URL}/assets/${assetId}/download/`)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           this.isDownloading.set(false);
@@ -263,7 +264,6 @@ export class AssetDetailsPage implements OnInit {
             error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR';
           const errorMessage = error.error?.message || this.translate.instant(defaultErrorKey);
           this.message.error(errorMessage);
-          console.error('Failed to get download URL:', error);
         },
       });
   }
@@ -275,6 +275,7 @@ export class AssetDetailsPage implements OnInit {
       .get<{
         download_url: string;
       }>(`${environment.API_BASE_URL}/resources/${resourceId}/download/`)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           this.isDownloading.set(false);
@@ -290,7 +291,6 @@ export class AssetDetailsPage implements OnInit {
             error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR';
           const errorMessage = error.error?.message || this.translate.instant(defaultErrorKey);
           this.message.error(errorMessage);
-          console.error('Failed to get download URL:', error);
         },
       });
   }
