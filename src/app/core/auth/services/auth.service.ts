@@ -161,7 +161,7 @@ export class AuthService {
           if (currentUser && response.is_profile_completed) {
             const updatedUser = {
               ...currentUser,
-              profile_completed: response.is_profile_completed,
+              is_profile_completed: response.is_profile_completed,
               ...profileData,
             };
             this.currentUser.set(updatedUser);
