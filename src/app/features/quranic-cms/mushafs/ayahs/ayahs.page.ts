@@ -6,6 +6,7 @@ import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { take } from 'rxjs';
 import { EnrichedAyah, QuranDataService } from '../../services/quran-data.service';
 import { SURAHS_METADATA, SurahMetadata } from '../../models/quran-metadata';
 
@@ -68,10 +69,12 @@ export class AyahsPage implements OnInit {
   private searchTimeout: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
-    this.quranDataService.getAyahs().subscribe({
-      next: (ayahs) => this.allAyahs.set(ayahs),
-      complete: () => this.loading.set(false),
-    });
+    this.quranDataService.getAyahs()
+      .pipe(take(1))
+      .subscribe(ayahs => {
+        this.allAyahs.set(ayahs);
+        this.loading.set(false);
+      });
   }
 
   onSearchInput(event: Event): void {
