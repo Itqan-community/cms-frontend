@@ -13,10 +13,7 @@ export const mushafsRoutes: Routes = [
       },
       {
         path: 'words',
-        loadComponent: () =>
-          import('./words/mushaf-words.page').then(
-            (m) => m.MushafWordsPage
-          ),
+        loadComponent: () => import('./words/mushaf-words.page').then((m) => m.MushafWordsPage),
         data: { emoji: '📝' },
       },
       {

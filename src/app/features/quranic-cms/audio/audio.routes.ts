@@ -17,10 +17,7 @@ export const audioRoutes: Routes = [
       },
       {
         path: 'recitations',
-        loadChildren: () =>
-          import('../recitations/recitations.routes').then(
-            (m) => m.routes
-          ),
+        loadChildren: () => import('../recitations/recitations.routes').then((m) => m.routes),
       },
       {
         path: '**',
