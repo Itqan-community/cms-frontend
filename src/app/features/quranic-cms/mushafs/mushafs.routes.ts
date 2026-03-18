@@ -13,23 +13,16 @@ export const mushafsRoutes: Routes = [
       },
       {
         path: 'words',
-        loadComponent: () =>
-          import('./words/mushaf-words.page').then(
-            (m) => m.MushafWordsPage
-          ),
+        loadComponent: () => import('./words/mushaf-words.page').then((m) => m.MushafWordsPage),
         data: { emoji: '📝' },
       },
       {
         path: 'ayahs',
-        loadComponent: () =>
-          import('./ayahs/ayahs.page').then((m) => m.AyahsPage),
+        loadComponent: () => import('./ayahs/ayahs.page').then((m) => m.AyahsPage),
       },
       {
         path: 'surahs',
-        loadComponent: () =>
-          import('../components/coming-soon/coming-soon.component').then(
-            (m) => m.ComingSoonComponent
-          ),
+        loadComponent: () => import('./surahs/surahs').then((m) => m.Surahs),
         data: { emoji: '📚' },
       },
     ],

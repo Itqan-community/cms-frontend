@@ -1,0 +1,48 @@
+<section>
+  <div class="overflow-x-auto container w-[600] mx-auto mt-7">
+    <table class="w-full text-sm text-center border-collapse">
+      <!-- Header -->
+      <thead class="bg-green-600 text-white">
+        <tr>
+          <th class="py-3">رقم السورة</th>
+          <th class="py-3">اسم السورة</th>
+          <th class="py-3">الاسم بالإنجليزية</th>
+          <th class="py-3">عدد الآيات</th>
+          <th class="py-3">النوع</th>
+        </tr>
+      </thead>
+
+      @for (item of surahs(); track $index) {
+        <!-- Row -->
+        <tbody class="bg-gray-100">
+          <tr class="border-t">
+            <!-- رقم السورة -->
+            <td class="py-4">
+              <span
+                class="bg-green-600 text-white rounded-full size-8 flex items-center justify-center mx-auto"
+              >
+                {{ item.ayahs_count }}
+              </span>
+            </td>
+
+            <!-- اسم السورة -->
+            <td class="font-semibold text-green-700">{{ item.name_ar }}</td>
+
+            <!-- الاسم بالانجليزي -->
+            <td class="text-gray-600">{{ item.name_en }}</td>
+
+            <!-- عدد الآيات -->
+            <td class="text-gray-700">{{ item.surah_number }}</td>
+
+            <!-- النوع -->
+            <td>
+              <span class="bg-orange-100 text-orange-600 px-3 py-1 rounded-full text-xs">
+                {{ item.revelation_type }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      }
+    </table>
+  </div>
+</section>
