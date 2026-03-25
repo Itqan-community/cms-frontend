@@ -1,4 +1,5 @@
 import { Component, HostListener, inject, OnInit } from '@angular/core';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { PublisherAddComponent } from './components/publisher-add/publisher-add.component';
 import { PublisherFiltersComponent } from './components/publisher-filters/publisher-filters.component';
 import { PublisherListComponent } from './components/publisher-list/publisher-list.component';
@@ -72,6 +73,7 @@ import { PublishersService } from './services/publishers.service';
 })
 export class PublishersComponent implements OnInit {
   private publishersService = inject(PublishersService);
+  private message = inject(NzMessageService);
 
   publishers: Publisher[] = [];
   page = 1;
@@ -97,10 +99,16 @@ export class PublishersComponent implements OnInit {
         search: this.searchTerm,
         is_active: this.activeFilter ?? undefined,
       })
-      .subscribe((data) => {
-        this.publishers = [...this.publishers, ...data];
-        this.hasMore = data.length === this.limit;
-        this.loading = false;
+      .subscribe({
+        next: (data) => {
+          this.publishers = [...this.publishers, ...data];
+          this.hasMore = data.length === this.limit;
+          this.loading = false;
+        },
+        error: () => {
+          this.loading = false;
+          this.message.error('تعذر تحميل قائمة الناشرين');
+        },
       });
   }
 
