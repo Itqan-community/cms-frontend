@@ -1,7 +1,7 @@
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { environment } from '../../../../environments/environment';
+import { RecitationsStats } from '../models/recitations-stats.model';
 import { RecitationsStatsService } from './recitations-stats.service';
 
 describe('RecitationsStatsService (Quranic CMS)', () => {
@@ -26,13 +26,11 @@ describe('RecitationsStatsService (Quranic CMS)', () => {
   });
 
   it('should return real stats when API succeeds', () => {
-    let resultStats: any;
+    let resultStats: RecitationsStats | undefined;
 
     service.getStats().subscribe((stats) => {
       resultStats = stats;
     });
-
-    const base = environment.API_BASE_URL;
 
     const req1 = httpMock.expectOne((req) => req.url.includes('/riwayas/'));
     const req2 = httpMock.expectOne((req) => req.url.includes('/reciters/'));
@@ -47,21 +45,19 @@ describe('RecitationsStatsService (Quranic CMS)', () => {
     req3.flush({ count: 20, results: [] });
 
     expect(resultStats).toBeDefined();
-    expect(resultStats.riwayas).toBe(10);
-    expect(resultStats.reciters).toBe(5);
-    expect(resultStats.recitations).toBe(20);
-    expect(resultStats.isMock).toBeFalsy();
+    expect(resultStats!.riwayas).toBe(10);
+    expect(resultStats!.reciters).toBe(5);
+    expect(resultStats!.recitations).toBe(20);
+    expect(resultStats!.isMock).toBeFalsy();
     expect(messageServiceSpy.error).not.toHaveBeenCalled();
   });
 
   it('should fall back to MOCK stats and show toaster on error', () => {
-    let resultStats: any;
+    let resultStats: RecitationsStats | undefined;
 
     service.getStats().subscribe((stats) => {
       resultStats = stats;
     });
-
-    const base = environment.API_BASE_URL;
 
     // We catch all 3 parallel requests
     const req1 = httpMock.expectOne((req) => req.url.includes('/riwayas/'));
@@ -76,8 +72,8 @@ describe('RecitationsStatsService (Quranic CMS)', () => {
     expect(req3.cancelled).toBeTrue();
 
     expect(resultStats).toBeDefined();
-    expect(resultStats.isMock).toBeTrue();
-    expect(resultStats.riwayas).toBeGreaterThan(0);
+    expect(resultStats!.isMock).toBeTrue();
+    expect(resultStats!.riwayas).toBeGreaterThan(0);
     expect(messageServiceSpy.error).toHaveBeenCalled();
   });
 });
