@@ -1,4 +1,5 @@
-import { Component, HostListener, inject, OnInit } from '@angular/core';
+import { Component, DestroyRef, HostListener, inject, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { PublisherAddComponent } from './components/publisher-add/publisher-add.component';
 import { PublisherFiltersComponent } from './components/publisher-filters/publisher-filters.component';
@@ -72,7 +73,8 @@ import { PublishersService } from './services/publishers.service';
   ],
 })
 export class PublishersComponent implements OnInit {
-  private publishersService = inject(PublishersService);
+  private readonly publishersService = inject(PublishersService);
+  private readonly destroyRef = inject(DestroyRef);
   private message = inject(NzMessageService);
 
   publishers: Publisher[] = [];
@@ -99,6 +101,7 @@ export class PublishersComponent implements OnInit {
         search: this.searchTerm,
         is_active: this.activeFilter ?? undefined,
       })
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
           this.publishers = [...this.publishers, ...data];
@@ -107,7 +110,6 @@ export class PublishersComponent implements OnInit {
         },
         error: () => {
           this.loading = false;
-          this.message.error('تعذر تحميل قائمة الناشرين');
         },
       });
   }
