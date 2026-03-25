@@ -25,6 +25,7 @@ export class RecitersPage implements OnInit, OnDestroy {
   private readonly recitersService = inject(RecitersService);
   private readonly fb = inject(FormBuilder);
   private readonly messages = inject(NzMessageService);
+  private readonly destroyRef = inject(DestroyRef);
 
   // Sub-navigation
   activeSubTab = signal<'reciters' | 'recitations'>('reciters');
@@ -79,7 +80,7 @@ export class RecitersPage implements OnInit, OnDestroy {
   // --- Stats ---
   private loadStats(): void {
     this.statsLoading.set(true);
-    this.recitersService.getStats().subscribe({
+    this.recitersService.getStats().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => this.stats.set(data),
       error: () => {
         this.stats.set({
@@ -98,6 +99,7 @@ export class RecitersPage implements OnInit, OnDestroy {
     this.recitersLoading.set(true);
     this.recitersService
       .getReciters(this.searchQuery(), this.currentPage(), this.pageSize)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           this.reciters.set(response.results);
@@ -146,7 +148,7 @@ export class RecitersPage implements OnInit, OnDestroy {
     this.addLoading.set(true);
     const data: ReciterCreate = this.addForm.value;
 
-    this.recitersService.createReciter(data).subscribe({
+    this.recitersService.createReciter(data).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.messages.success('تمت إضافة القارئ بنجاح');
         this.addForm.reset();
