@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { NzIconModule } from 'ng-zorro-antd/icon';
 
 @Component({
   selector: 'app-publishers-banner',
   standalone: true,
-  imports: [NzIconModule],
+  imports: [],
   template: `
     <div class="banner-container">
       <div class="banner-content">

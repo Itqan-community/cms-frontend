@@ -1,5 +1,4 @@
 <div class="mushaf-pages" dir="rtl">
-
   <!-- ── Mushaf Selection Filter Card ──────────────────────────── -->
   <div class="mushaf-filter-card">
     <div class="mushaf-filter-card__header">
@@ -10,11 +9,7 @@
     <div class="mushaf-filter-card__body">
       <label class="mushaf-filter-card__label" for="mushaf-select">نوع المصحف</label>
       <div class="mushaf-filter-card__select-wrap" [class.is-open]="selectOpen()">
-        <button
-          type="button"
-          class="mushaf-filter-card__select-btn"
-          (click)="toggleDropdown()"
-        >
+        <button type="button" class="mushaf-filter-card__select-btn" (click)="toggleDropdown()">
           {{ selectedMushaf().name }} {{ selectedMushaf().pageCount }} صفحة
         </button>
         <span class="mushaf-filter-card__chevron">&#8249;</span>
@@ -42,7 +37,6 @@
 
   <!-- ── Pages Table Card ───────────────────────────────────────── -->
   <div class="mushaf-table-card">
-
     @if (loading()) {
       <!-- Skeleton loading rows -->
       <div class="mushaf-table-card__top mushaf-table-card__top--skeleton">
@@ -69,14 +63,12 @@
           }
         </tbody>
       </table>
-
     } @else if (pages().length === 0) {
       <!-- Empty state -->
       <div class="mushaf-table-card__empty">
         <span class="mushaf-table-card__empty-icon">📭</span>
         <p class="mushaf-table-card__empty-text">لا توجد صفحات متاحة لهذا المصحف</p>
       </div>
-
     } @else {
       <!-- Top row: badge + title -->
       <div class="mushaf-table-card__top">
@@ -120,6 +112,5 @@
         </table>
       </div>
     }
-
   </div>
 </div>

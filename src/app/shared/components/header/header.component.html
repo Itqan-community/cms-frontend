@@ -3,7 +3,7 @@
     <div class="app-header__row">
       <!-- Logo and Navigation -->
       <div class="app-header__brand">
-        <a class="app-header__logo" [routerLink]="['/']">
+        <a class="app-header__logo" [routerLink]="['/']" aria-label="الصفحة الرئيسية">
           @if (isPublisherHost) {
             <!-- Mock Publisher Logo -->
             <div class="publisher-logo">
@@ -47,7 +47,7 @@
 
         <!-- Mobile Menu Button -->
         <div class="app-header__actions-mobile">
-          <button (click)="onMobileMenuToggle()" class="app-header__menu-btn">
+          <button (click)="onMobileMenuToggle()" class="app-header__menu-btn" aria-label="فتح القائمة">
             <i class="bx bx-menu"></i>
           </button>
         </div>

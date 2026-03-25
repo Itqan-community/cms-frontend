@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, map, shareReplay, tap } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, map, of, shareReplay, tap } from 'rxjs';
 import { SURAHS_METADATA, JUZ_PAGE_MAPPING, SurahMetadata } from '../models/quran-metadata';
 
 export interface AyahMarker {
@@ -85,6 +85,10 @@ export class QuranDataService {
       .get<QuranDataJson>(this.JSON_PATH)
       .pipe(
         tap((data: QuranDataJson) => this.dataSubject.next(data)),
+        catchError(() => {
+          this.dataSubject.next({ pages: {} });
+          return of(null);
+        }),
         shareReplay(1)
       )
       .subscribe();

@@ -1,12 +1,11 @@
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, inject, OnInit } from '@angular/core';
 import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { PublisherStatistics } from '../../models/publishers-stats.models';
 import { PublishersStatsService } from '../../services/publishers-stats.service';
 
-interface StatsCard {
+interface StatCard {
   key: keyof PublisherStatistics;
   label: string;
   value: number;
@@ -89,7 +88,7 @@ export class PublishersStatsCardsComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   loading = true;
 
-  cards: StatsCard[] = [
+  cards: StatCard[] = [
     {
       key: 'total_publishers',
       label: 'إجمالي الناشرين',
@@ -117,19 +116,16 @@ export class PublishersStatsCardsComponent implements OnInit {
   ];
 
   ngOnInit(): void {
-    this.statsService
-      .getStatistics()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (stats) => {
-          this.cards.forEach((card) => {
-            card.value = stats[card.key] ?? 0;
-          });
-          this.loading = false;
-        },
-        error: () => {
-          this.loading = false;
-        },
-      });
+    this.statsService.getStatistics().subscribe({
+      next: (stats) => {
+        this.cards.forEach((card) => {
+          card.value = stats[card.key] || 0;
+        });
+        this.loading = false;
+      },
+      error: () => {
+        this.loading = false;
+      },
+    });
   }
 }
