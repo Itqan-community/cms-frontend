@@ -4,12 +4,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { Observable, of, map } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../../../environments/environment';
-import {
-  Reciter,
-  ReciterCreate,
-  RecitersResponse,
-  RecitersStats,
-} from '../models/reciter.model';
+import { Reciter, ReciterCreate, RecitersResponse, RecitersStats } from '../models/reciter.model';
 
 const MOCK_STATS: RecitersStats = {
   total_reciters: 6,
@@ -54,9 +49,7 @@ export class RecitersService {
           total_nationalities: 0,
         })),
         catchError(() => {
-          this.messages.error(
-            'تعذر تحميل إحصائيات القرّاء، يتم عرض بيانات تجريبية مؤقتًا.'
-          );
+          this.messages.error('تعذر تحميل إحصائيات القرّاء، يتم عرض بيانات تجريبية مؤقتًا.');
           return of(MOCK_STATS);
         })
       );

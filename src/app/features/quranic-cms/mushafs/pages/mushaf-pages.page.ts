@@ -1,4 +1,12 @@
-import { Component, DestroyRef, ElementRef, HostListener, inject, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  ElementRef,
+  HostListener,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { QuranDataService, QuranPage } from '../../services/quran-data.service';
 
@@ -8,9 +16,7 @@ export interface MushafOption {
   pageCount: number;
 }
 
-const MUSHAF_OPTIONS: MushafOption[] = [
-  { id: 'medina', name: 'مصحف المدينة', pageCount: 604 },
-];
+const MUSHAF_OPTIONS: MushafOption[] = [{ id: 'medina', name: 'مصحف المدينة', pageCount: 604 }];
 
 @Component({
   selector: 'app-mushaf-pages',

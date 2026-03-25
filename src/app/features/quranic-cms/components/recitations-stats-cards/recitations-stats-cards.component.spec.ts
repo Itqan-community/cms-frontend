@@ -5,7 +5,6 @@ import { RecitationsStatsService } from '../../services/recitations-stats.servic
 import { RecitationsStatsCardsComponent } from './recitations-stats-cards.component';
 
 describe('RecitationsStatsCardsComponent (Quranic CMS)', () => {
-  let component: RecitationsStatsCardsComponent;
   let fixture: ComponentFixture<RecitationsStatsCardsComponent>;
   let statsServiceSpy: jasmine.SpyObj<RecitationsStatsService>;
 
@@ -26,16 +25,15 @@ describe('RecitationsStatsCardsComponent (Quranic CMS)', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(RecitationsStatsCardsComponent);
-    component = fixture.componentInstance;
     fixture.detectChanges();
   });
 
   it('should render KPI values correctly', () => {
     const compiled = fixture.nativeElement as HTMLElement;
 
-    const values = Array.from(
-      compiled.querySelectorAll('.qcms-audio-stats__value')
-    ).map((el) => el.textContent?.trim());
+    const values = Array.from(compiled.querySelectorAll('.qcms-audio-stats__value')).map((el) =>
+      el.textContent?.trim()
+    );
 
     expect(values).toEqual(['2', '2', '6']);
   });
@@ -46,4 +44,3 @@ describe('RecitationsStatsCardsComponent (Quranic CMS)', () => {
     expect(badge).not.toBeNull();
   });
 });
-

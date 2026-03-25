@@ -1,0 +1,121 @@
+:host {
+  display: block;
+}
+
+.recitation-card {
+  border-radius: var(--radius-lg, 12px);
+  border: 1px solid var(--color-neutral-200);
+  position: relative;
+  height: 100%;
+
+  ::ng-deep .ant-card-body {
+    padding: 24px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .delete-btn {
+    position: absolute;
+    top: 12px;
+    inset-inline-end: 12px;
+    color: var(--color-red-600);
+    cursor: pointer;
+    padding: 4px;
+    z-index: 2;
+    &:hover {
+      color: var(--color-red-700);
+    }
+  }
+
+  .card-header {
+    text-align: center;
+    margin: 8px 0 16px 0;
+    padding: 0 32px; /* Prevent collision with absolute buttons */
+
+    h3 {
+      font-size: 18px;
+      font-weight: bold;
+      margin: 0;
+      color: var(--color-neutral-800);
+      word-break: break-word;
+    }
+
+    p {
+      color: var(--color-neutral-500);
+      font-size: 13px;
+      margin: 4px 0 0 0;
+      word-break: break-word;
+    }
+  }
+
+  .card-info-row {
+    background: var(--color-neutral-100);
+    border-radius: var(--radius-md, 6px);
+    padding: 8px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 14px;
+    word-break: break-word;
+
+    strong {
+      color: var(--color-primary-700);
+      font-weight: 600;
+    }
+    span {
+      color: var(--color-neutral-500);
+      flex-shrink: 0;
+    }
+  }
+
+  .card-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 13px;
+    padding: 8px 12px;
+    margin-top: 12px;
+    border-top: 1px dashed var(--color-neutral-200);
+
+    .meta-item {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--color-neutral-500);
+
+      strong {
+        color: var(--color-neutral-700);
+        word-break: break-word;
+      }
+      span {
+        flex-shrink: 0;
+      }
+    }
+  }
+
+  .action-btns {
+    margin-top: auto;
+    padding-top: 20px;
+    display: flex;
+    gap: 8px;
+
+    .play-btn {
+      flex: 1;
+      background: var(--color-primary-700);
+      border-color: var(--color-primary-700);
+      color: white;
+      border-radius: var(--radius-md, 8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+
+      &:hover {
+        background: var(--color-primary-800);
+        border-color: var(--color-primary-800);
+      }
+    }
+  }
+}

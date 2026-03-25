@@ -1,5 +1,6 @@
 import { Component, DestroyRef, HostListener, inject, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { PublisherAddComponent } from './components/publisher-add/publisher-add.component';
 import { PublisherFiltersComponent } from './components/publisher-filters/publisher-filters.component';
 import { PublisherListComponent } from './components/publisher-list/publisher-list.component';
@@ -74,6 +75,7 @@ import { PublishersService } from './services/publishers.service';
 export class PublishersComponent implements OnInit {
   private readonly publishersService = inject(PublishersService);
   private readonly destroyRef = inject(DestroyRef);
+  private message = inject(NzMessageService);
 
   publishers: Publisher[] = [];
   page = 1;

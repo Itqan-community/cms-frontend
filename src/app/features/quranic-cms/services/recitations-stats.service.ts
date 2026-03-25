@@ -39,6 +39,8 @@ export class RecitationsStatsService {
    *   a global toaster message.
    */
   getStats(): Observable<RecitationsStats> {
+    return of(MOCK_STATS);
+    /*
     const riwayas$ = this.http
       .get<PaginatedResponse>(`${this.BASE_URL}/riwayas/`, {
         params: { page_size: '1' },
@@ -60,12 +62,10 @@ export class RecitationsStatsService {
     return forkJoin([riwayas$, reciters$, recitations$]).pipe(
       map(([riwayas, reciters, recitations]) => ({ riwayas, reciters, recitations })),
       catchError(() => {
-        this.messages.error(
-          'تعذر تحميل إحصائيات التلاوات، يتم عرض بيانات تجريبية (MOCK) مؤقتًا.'
-        );
+        this.messages.error('تعذر تحميل إحصائيات التلاوات، يتم عرض بيانات تجريبية (MOCK) مؤقتًا.');
         return of(MOCK_STATS);
       })
     );
+    */
   }
 }
-

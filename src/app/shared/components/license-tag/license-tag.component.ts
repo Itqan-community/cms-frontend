@@ -2,7 +2,6 @@ import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { Component, inject, input, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { NzDrawerModule } from 'ng-zorro-antd/drawer';
-import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzPopoverModule } from 'ng-zorro-antd/popover';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { Licenses, LicensesColors } from '../../../core/enums/licenses.enum';
@@ -11,7 +10,7 @@ import { ViewportService } from '../../../core/services/viewport.service';
 @Component({
   selector: 'app-license-tag',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, NzTagModule, NzIconModule, NzPopoverModule, NzDrawerModule],
+  imports: [NgClass, NgTemplateOutlet, NzTagModule, NzPopoverModule, NzDrawerModule],
   templateUrl: './license-tag.component.html',
   styleUrls: ['./license-tag.component.less'],
 })
