@@ -13,16 +13,13 @@ export const audioRoutes: Routes = [
       },
       {
         path: 'reciters',
-        loadComponent: () =>
-          import('./reciters/reciters.page').then(
-            (m) => m.RecitersPage
-          ),
+        loadComponent: () => import('./reciters/reciters.page').then((m) => m.RecitersPage),
       },
       {
         path: 'recitations',
-        loadComponent: () =>
-          import('../components/recitations-stats-cards/recitations-stats-cards.component').then(
-            (m) => m.RecitationsStatsCardsComponent
+        loadChildren: () =>
+          import('../recitations/recitations.routes').then(
+            (m) => m.routes
           ),
       },
       {

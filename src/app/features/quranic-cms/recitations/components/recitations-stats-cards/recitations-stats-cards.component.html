@@ -1,0 +1,45 @@
+<div class="qcms-audio-stats">
+  <div class="qcms-audio-stats__cards">
+    @if (loading()) {
+      <div class="qcms-audio-stats__card qcms-audio-stats__card--skeleton">
+        <div class="qcms-audio-stats__icon-skeleton"></div>
+        <div class="qcms-audio-stats__value-skeleton"></div>
+        <div class="qcms-audio-stats__label-skeleton"></div>
+      </div>
+      <div class="qcms-audio-stats__card qcms-audio-stats__card--skeleton">
+        <div class="qcms-audio-stats__icon-skeleton"></div>
+        <div class="qcms-audio-stats__value-skeleton"></div>
+        <div class="qcms-audio-stats__label-skeleton"></div>
+      </div>
+      <div class="qcms-audio-stats__card qcms-audio-stats__card--skeleton">
+        <div class="qcms-audio-stats__icon-skeleton"></div>
+        <div class="qcms-audio-stats__value-skeleton"></div>
+        <div class="qcms-audio-stats__label-skeleton"></div>
+      </div>
+    } @else if (stats()) {
+      <div class="qcms-audio-stats__card">
+        <div class="qcms-audio-stats__icon qcms-audio-stats__icon--riwayas">
+          <i class="bx bx-book-open"></i>
+        </div>
+        <div class="qcms-audio-stats__value">{{ stats()!.riwayas }}</div>
+        <div class="qcms-audio-stats__label">رواية متاحة</div>
+      </div>
+
+      <div class="qcms-audio-stats__card">
+        <div class="qcms-audio-stats__icon qcms-audio-stats__icon--recitations">
+          <i class="bx bx-microphone"></i>
+        </div>
+        <div class="qcms-audio-stats__value">{{ stats()!.recitations }}</div>
+        <div class="qcms-audio-stats__label">قراءة متاحة</div>
+      </div>
+
+      <div class="qcms-audio-stats__card">
+        <div class="qcms-audio-stats__icon qcms-audio-stats__icon--reciters">
+          <i class="bx bx-user-voice"></i>
+        </div>
+        <div class="qcms-audio-stats__value">{{ stats()!.reciters }}</div>
+        <div class="qcms-audio-stats__label">قارئ متاح</div>
+      </div>
+    }
+  </div>
+</div>

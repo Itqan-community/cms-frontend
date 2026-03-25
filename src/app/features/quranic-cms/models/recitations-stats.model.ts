@@ -8,4 +8,3 @@ export interface RecitationsStats {
    */
   isMock?: boolean;
 }
-

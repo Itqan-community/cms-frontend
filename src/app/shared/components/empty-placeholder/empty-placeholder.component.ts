@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
@@ -6,7 +5,7 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
 @Component({
   selector: 'app-empty-placeholder',
   standalone: true,
-  imports: [CommonModule, NzEmptyModule],
+  imports: [NzEmptyModule],
   template: `
     <div class="placeholder-container">
       <nz-empty
@@ -19,17 +18,19 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
       </nz-empty>
     </div>
   `,
-  styles: [`
-    .placeholder-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 400px;
-      background: white;
-      border-radius: 12px;
-      padding: 40px;
-    }
-  `]
+  styles: [
+    `
+      .placeholder-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 400px;
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+      }
+    `,
+  ],
 })
 export class EmptyPlaceholderComponent {
   private route = inject(ActivatedRoute);

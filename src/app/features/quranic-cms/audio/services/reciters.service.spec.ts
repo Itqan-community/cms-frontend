@@ -42,9 +42,7 @@ describe('RecitersService', () => {
         expect(response.results.length).toBe(2);
       });
 
-      const req = httpMock.expectOne(
-        (r) => r.url === `${environment.API_BASE_URL}/reciters/`
-      );
+      const req = httpMock.expectOne((r) => r.url === `${environment.API_BASE_URL}/reciters/`);
       expect(req.request.method).toBe('GET');
       expect(req.request.params.get('page')).toBe('1');
       expect(req.request.params.get('page_size')).toBe('12');
@@ -55,9 +53,7 @@ describe('RecitersService', () => {
     it('should include search param when provided', () => {
       service.getReciters('عبد الباسط', 2, 6).subscribe();
 
-      const req = httpMock.expectOne(
-        (r) => r.url === `${environment.API_BASE_URL}/reciters/`
-      );
+      const req = httpMock.expectOne((r) => r.url === `${environment.API_BASE_URL}/reciters/`);
       expect(req.request.params.get('search')).toBe('عبد الباسط');
       expect(req.request.params.get('page')).toBe('2');
       expect(req.request.params.get('page_size')).toBe('6');
@@ -67,9 +63,7 @@ describe('RecitersService', () => {
     it('should not include search param for whitespace-only input', () => {
       service.getReciters('   ').subscribe();
 
-      const req = httpMock.expectOne(
-        (r) => r.url === `${environment.API_BASE_URL}/reciters/`
-      );
+      const req = httpMock.expectOne((r) => r.url === `${environment.API_BASE_URL}/reciters/`);
       expect(req.request.params.has('search')).toBeFalse();
       req.flush({ count: 0, next: null, previous: null, results: [] });
     });
@@ -100,8 +94,7 @@ describe('RecitersService', () => {
 
       const req = httpMock.expectOne(
         (r) =>
-          r.url === `${environment.API_BASE_URL}/reciters/` &&
-          r.params.get('page_size') === '1'
+          r.url === `${environment.API_BASE_URL}/reciters/` && r.params.get('page_size') === '1'
       );
       expect(req.request.method).toBe('GET');
       req.flush({ count: 15, next: null, previous: null, results: [] });
@@ -113,9 +106,7 @@ describe('RecitersService', () => {
         expect(stats.total_reciters).toBe(6);
       });
 
-      const req = httpMock.expectOne(
-        (r) => r.url === `${environment.API_BASE_URL}/reciters/`
-      );
+      const req = httpMock.expectOne((r) => r.url === `${environment.API_BASE_URL}/reciters/`);
       req.flush(null, { status: 500, statusText: 'Server Error' });
 
       expect(messageServiceSpy.error).toHaveBeenCalled();

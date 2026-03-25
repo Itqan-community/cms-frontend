@@ -1,6 +1,11 @@
 @keyframes pulse {
-  0%, 100% { opacity: 0.6; }
-  50%       { opacity: 1;   }
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
 }
 
 .skel() {
@@ -213,11 +218,34 @@
 
 // ── Skeleton helpers ───────────────────────────────────────────
 .skel {
-  &--badge  { .skel(); width: 120px; height: 26px; border-radius: 20px; }
-  &--title  { .skel(); width: 200px; height: 20px; }
-  &--cell-sm { .skel(); width: 36px;  height: 24px; border-radius: 12px; }
-  &--cell-md { .skel(); width: 72px;  height: 24px; border-radius: 12px; }
-  &--cell-lg { .skel(); width: 160px; height: 16px; }
+  &--badge {
+    .skel();
+    width: 120px;
+    height: 26px;
+    border-radius: 20px;
+  }
+  &--title {
+    .skel();
+    width: 200px;
+    height: 20px;
+  }
+  &--cell-sm {
+    .skel();
+    width: 36px;
+    height: 24px;
+    border-radius: 12px;
+  }
+  &--cell-md {
+    .skel();
+    width: 72px;
+    height: 24px;
+    border-radius: 12px;
+  }
+  &--cell-lg {
+    .skel();
+    width: 160px;
+    height: 16px;
+  }
 }
 
 // ── Table ──────────────────────────────────────────────────────
@@ -244,8 +272,12 @@
     white-space: nowrap;
     font-size: 0.88rem;
 
-    &:first-child { border-radius: 8px 0 0 8px; }
-    &:last-child  { border-radius: 0 8px 8px 0; }
+    &:first-child {
+      border-radius: 8px 0 0 8px;
+    }
+    &:last-child {
+      border-radius: 0 8px 8px 0;
+    }
   }
 
   td {
@@ -258,12 +290,18 @@
   tbody tr {
     transition: background 0.12s;
 
-    &:hover { background: #f9fafb; }
-    &:last-child td { border-bottom: none; }
+    &:hover {
+      background: #f9fafb;
+    }
+    &:last-child td {
+      border-bottom: none;
+    }
   }
 
   // Skeleton rows
-  &__skeleton-row td { padding: 14px 16px; }
+  &__skeleton-row td {
+    padding: 14px 16px;
+  }
 
   // Page / Juz badges
   &__badge {
@@ -307,7 +345,10 @@
     color: #374151;
     cursor: pointer;
     white-space: nowrap;
-    transition: background 0.15s, border-color 0.15s, color 0.15s;
+    transition:
+      background 0.15s,
+      border-color 0.15s,
+      color 0.15s;
 
     &:hover {
       background: #f0fdf4;

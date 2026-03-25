@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -21,10 +21,11 @@ import { RecitersService } from '../services/reciters.service';
   templateUrl: './reciters.page.html',
   styleUrls: ['./reciters.page.less'],
 })
-export class RecitersPage implements OnInit {
+export class RecitersPage implements OnInit, OnDestroy {
   private readonly recitersService = inject(RecitersService);
   private readonly fb = inject(FormBuilder);
   private readonly messages = inject(NzMessageService);
+  private readonly destroyRef = inject(DestroyRef);
 
   // Sub-navigation
   activeSubTab = signal<'reciters' | 'recitations'>('reciters');
@@ -66,6 +67,12 @@ export class RecitersPage implements OnInit {
     this.loadReciters();
   }
 
+  ngOnDestroy(): void {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
+  }
+
   setSubTab(tab: 'reciters' | 'recitations'): void {
     this.activeSubTab.set(tab);
   }
@@ -73,7 +80,7 @@ export class RecitersPage implements OnInit {
   // --- Stats ---
   private loadStats(): void {
     this.statsLoading.set(true);
-    this.recitersService.getStats().subscribe({
+    this.recitersService.getStats().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (data) => this.stats.set(data),
       error: () => {
         this.stats.set({
@@ -92,6 +99,7 @@ export class RecitersPage implements OnInit {
     this.recitersLoading.set(true);
     this.recitersService
       .getReciters(this.searchQuery(), this.currentPage(), this.pageSize)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           this.reciters.set(response.results);
@@ -140,7 +148,7 @@ export class RecitersPage implements OnInit {
     this.addLoading.set(true);
     const data: ReciterCreate = this.addForm.value;
 
-    this.recitersService.createReciter(data).subscribe({
+    this.recitersService.createReciter(data).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: () => {
         this.messages.success('تمت إضافة القارئ بنجاح');
         this.addForm.reset();

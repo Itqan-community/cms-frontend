@@ -149,6 +149,28 @@
     "TITLE": "لوحة التحكم",
     "DESCRIPTION": "إدارة المشاريع والموارد"
   },
+  "RECITATIONS": {
+    "TITLE": "المصاحف الصوتية",
+    "DESCRIPTION": "إدارة القراء والتلاوات القرآنية مع دعم القراءات والروايات المختلفة وجودات متعددة",
+    "TOTAL_RECITERS": "قارئ متاح",
+    "TOTAL_RIWAYAS": "رواية متاحة",
+    "TOTAL_RECITATIONS": "قراءة متاحة",
+    "FILE_FORMAT": "تنسيق الملفات",
+    "ADD_RECITER": "إضافة قارئ",
+    "SEARCH_PLACEHOLDER": "ابحث عن قارئ...",
+    "ALL_RIWAYAS": "كل الروايات",
+    "ALL_TYPES": "كل أنواع القراءة",
+    "RIWAYAH": "الرواية:",
+    "QIRAAH": "القراءة:",
+    "PERFORMANCE": "الأداء:",
+    "STYLE": "الأسلوب:",
+    "SURAHS_COUNT": "عدد السور:",
+    "PUBLISHER": "الناشر:",
+    "PLAY_AUDIO": "تجربة الصوت",
+    "ERROR_LOADING_STATS": "فشل في تحميل الإحصائيات",
+    "ERROR_LOADING_RECITATIONS": "فشل في تحميل المصاحف",
+    "NO_RESULTS": "لا يوجد نتائج"
+  },
   "GALLERY": {
     "TITLE": "مكتبة الموارد",
     "VIEW": "عرض",
@@ -325,7 +347,7 @@
       "TITLE": "صيغ الملفات",
       "SUPPORTED": "الصيغ المدعومة",
       "RECOMMENDED": "الصيغ الموصى بها",
-      "SPECIFICATIONS": "مواصفات الصيغ",
+      "SPECIFICATIONS": "موا مواصفات الصيغ",
       "SCHEMA_DOCS": "توثيق المخطط",
       "EXAMPLE_FILE": "ملف مثال"
     }
