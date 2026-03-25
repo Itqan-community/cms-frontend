@@ -1,0 +1,50 @@
+.search-bar-container {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 24px;
+  background: #fff;
+  padding: 16px;
+  border-radius: 12px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+}
+
+.search-bar__input-wrapper {
+  flex: 1;
+}
+
+.search-bar__filters {
+  display: flex;
+  gap: 12px;
+  width: 400px;
+
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+nz-select {
+  flex: 1;
+}
+
+.search-bar__actions {
+  display: flex;
+  align-items: center;
+}
+
+.add-btn {
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  i {
+    font-size: 1.2rem;
+  }
+}

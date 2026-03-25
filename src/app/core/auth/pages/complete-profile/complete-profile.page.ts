@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -11,7 +10,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-complete-profile-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslateModule, NzButtonComponent],
+  imports: [ReactiveFormsModule, TranslateModule, NzButtonComponent],
   templateUrl: './complete-profile.page.html',
   styleUrls: ['./complete-profile.page.less'],
 })

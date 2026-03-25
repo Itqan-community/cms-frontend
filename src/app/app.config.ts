@@ -15,6 +15,7 @@ import { provideTranslateService } from '@ngx-translate/core';
 import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { headersInterceptor } from './core/interceptors/global.interceptor';
 import { authErrorInterceptor } from './core/interceptors/auth-error.interceptor';
+import { errorInterceptor } from './core/interceptors/error.interceptor';
 
 registerLocaleData(ar);
 
@@ -25,7 +26,9 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes),
     provideNzI18n(ar_EG),
     provideAnimationsAsync(),
-    provideHttpClient(withInterceptors([headersInterceptor, authErrorInterceptor])),
+    provideHttpClient(
+      withInterceptors([headersInterceptor, authErrorInterceptor, errorInterceptor])
+    ),
     // ngx-translate setup
     provideTranslateService({
       loader: provideTranslateHttpLoader({

@@ -1,5 +1,4 @@
-import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -22,7 +21,7 @@ import { RecitersService } from '../services/reciters.service';
   templateUrl: './reciters.page.html',
   styleUrls: ['./reciters.page.less'],
 })
-export class RecitersPage implements OnInit {
+export class RecitersPage implements OnInit, OnDestroy {
   private readonly recitersService = inject(RecitersService);
   private readonly fb = inject(FormBuilder);
   private readonly messages = inject(NzMessageService);
@@ -66,6 +65,12 @@ export class RecitersPage implements OnInit {
 
     this.loadStats();
     this.loadReciters();
+  }
+
+  ngOnDestroy(): void {
+    if (this.searchTimeout) {
+      clearTimeout(this.searchTimeout);
+    }
   }
 
   setSubTab(tab: 'reciters' | 'recitations'): void {

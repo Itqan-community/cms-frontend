@@ -18,11 +18,25 @@ export const routes: Routes = [
     path: 'quranic-cms',
     loadComponent: () =>
       import('./features/quranic-cms/quranic-cms.page').then((m) => m.QuranicCmsPage),
-    loadChildren: () =>
-      import('./features/quranic-cms/quranic-cms.routes').then((m) => m.quranicCmsRoutes),
-    data: { hideHeader: true, fullWidth: true },
     canActivate: [authGuard],
+    data: { hideHeader: true, fullWidth: true },
+    children: [
+      {
+        path: 'publishers',
+        loadChildren: () =>
+          import('./features/quranic-cms/publishers/publishers.routes').then(
+            (m) => m.publishersRoutes
+          ),
+        canActivate: [publisherHostGuard],
+      },
+      {
+        path: '',
+        loadChildren: () =>
+          import('./features/quranic-cms/quranic-cms.routes').then((m) => m.quranicCmsRoutes),
+      },
+    ],
   },
+
   {
     path: 'gallery/asset/:id',
     loadComponent: () =>
@@ -70,34 +84,12 @@ export const routes: Routes = [
     canActivate: [publisherHostGuard], // Restrict access for publisher hosts
   },
   {
-    path: 'quranic-cms',
-    loadComponent: () =>
-      import('./features/quranic-cms/quranic-cms.page').then((m) => m.QuranicCmsPage),
-    canActivate: [authGuard],
-    data: { hideHeader: true, fullWidth: true },
-    children: [
-      {
-        path: '',
-        loadChildren: () =>
-          import('./features/quranic-cms/quranic-cms.routes').then((m) => m.quranicCmsRoutes),
-      },
-      {
-        path: 'publishers',
-        loadChildren: () =>
-          import('./features/quranic-cms/publishers/publishers.routes').then(
-            (m) => m.publishersRoutes
-          ),
-        canActivate: [publisherHostGuard],
-      },
-    ],
-  },
-
-  {
     path: 'license/:id',
     loadComponent: () =>
       import('./features/license/pages/license-details/license-details.page').then(
         (m) => m.LicenseDetailsPage
       ),
   },
+
   { path: '**', redirectTo: 'gallery' },
 ];

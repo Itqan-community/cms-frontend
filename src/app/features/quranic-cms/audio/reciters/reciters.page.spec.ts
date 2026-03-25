@@ -34,10 +34,7 @@ describe('RecitersPage', () => {
       'getStats',
       'createReciter',
     ]);
-    messageServiceSpy = jasmine.createSpyObj('NzMessageService', [
-      'success',
-      'error',
-    ]);
+    messageServiceSpy = jasmine.createSpyObj('NzMessageService', ['success', 'error']);
 
     recitersServiceSpy.getStats.and.returnValue(of(mockStats));
     recitersServiceSpy.getReciters.and.returnValue(of(mockResponse));
@@ -73,9 +70,7 @@ describe('RecitersPage', () => {
   });
 
   it('should handle stats error gracefully', () => {
-    recitersServiceSpy.getStats.and.returnValue(
-      throwError(() => new Error('fail'))
-    );
+    recitersServiceSpy.getStats.and.returnValue(throwError(() => new Error('fail')));
 
     component.ngOnInit();
 
@@ -83,9 +78,7 @@ describe('RecitersPage', () => {
   });
 
   it('should handle reciters error gracefully', () => {
-    recitersServiceSpy.getReciters.and.returnValue(
-      throwError(() => new Error('fail'))
-    );
+    recitersServiceSpy.getReciters.and.returnValue(throwError(() => new Error('fail')));
 
     component.loadReciters();
 
@@ -161,9 +154,7 @@ describe('RecitersPage', () => {
   });
 
   it('should show error message when create fails', () => {
-    recitersServiceSpy.createReciter.and.returnValue(
-      throwError(() => new Error('fail'))
-    );
+    recitersServiceSpy.createReciter.and.returnValue(throwError(() => new Error('fail')));
 
     component.addForm.setValue({
       id: 'rec-4',

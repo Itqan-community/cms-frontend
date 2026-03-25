@@ -25,19 +25,22 @@ export class RecitationsStatsCardsComponent implements OnInit {
 
   private loadStats(): void {
     this.loading.set(true);
-    this.statsService.getStats().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (data) => this.stats.set(data),
-      error: () => {
-        // In case something unexpected happens before catchError,
-        // we still want to show a safe fallback.
-        this.stats.set({
-          riwayas: 0,
-          reciters: 0,
-          recitations: 0,
-          isMock: true,
-        });
-      },
-      complete: () => this.loading.set(false),
-    });
+    this.statsService.getStats()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
+          this.stats.set(data);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.stats.set({
+            riwayas: 0,
+            reciters: 0,
+            recitations: 0,
+            isMock: true,
+          });
+          this.loading.set(false);
+        },
+      });
   }
 }
