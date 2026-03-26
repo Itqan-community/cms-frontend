@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, Input, Output, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -269,6 +270,7 @@ export class PublisherAddComponent {
   private fb = inject(FormBuilder);
   private publishersService = inject(PublishersService);
   private message = inject(NzMessageService);
+  private destroyRef = inject(DestroyRef);
 
   isConfirmLoading = false;
 
@@ -293,7 +295,9 @@ export class PublisherAddComponent {
   handleOk(): void {
     if (this.publisherForm.valid) {
       this.isConfirmLoading = true;
-      this.publishersService.createPublisher(this.publisherForm.value).subscribe({
+      this.publishersService.createPublisher(this.publisherForm.value).pipe(
+        takeUntilDestroyed(this.destroyRef)
+      ).subscribe({
         next: () => {
           this.message.success('تمت إضافة الناشر بنجاح');
           this.isConfirmLoading = false;
