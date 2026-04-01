@@ -4,7 +4,7 @@ import { NzCardModule } from 'ng-zorro-antd/card';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { Recitation } from '../../../features/quranic-cms/models/recitations.models';
+import { Recitation } from '../../../features/admin/models/recitations.models';
 
 @Component({
   selector: 'app-recitation-card',

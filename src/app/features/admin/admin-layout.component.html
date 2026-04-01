@@ -1,0 +1,44 @@
+<div class="admin-page" dir="rtl">
+  <!-- Green Header Bar -->
+  <div class="admin-header">
+    <div class="admin-header__inner">
+      <div class="admin-header__title">
+        <span>📖</span>
+        <span>نظام إدارة المحتوى القرآني</span>
+      </div>
+      <div class="admin-header__actions">
+        <a class="admin-header__nav-link" [routerLink]="['/gallery']">مكتبة الأصول والموارد</a>
+        <button class="admin-header__refresh-btn" (click)="onRefresh()">
+          <span>🔄</span>
+          <span>تحديث البيانات</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating Tabs -->
+  <div class="admin-tabs-wrapper">
+    <div class="admin-tabs">
+      @for (tab of tabs(); track tab.id) {
+        <a
+          [routerLink]="['/admin', tab.path]"
+          routerLinkActive="admin-tabs__tab--active"
+          [routerLinkActiveOptions]="
+            ['audio', 'publishers', 'mushafs', 'software'].includes(tab.path)
+              ? { exact: false }
+              : { exact: true }
+          "
+          class="admin-tabs__tab"
+        >
+          <span class="admin-tabs__tab-emoji">{{ tab.emoji }}</span>
+          <span class="admin-tabs__tab-label">{{ tab.label }}</span>
+        </a>
+      }
+    </div>
+  </div>
+
+  <!-- Tab Content -->
+  <div class="admin-content">
+    <router-outlet />
+  </div>
+</div>

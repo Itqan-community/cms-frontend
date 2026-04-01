@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/guards/auth.guard';
 import { guestGuard } from './core/auth/guards/guest.guard';
 import { publisherHostGuard } from './core/guards/publisher-host.guard';
+import { itqanAdminGuard } from './features/admin/guards/itqan-admin.guard';
 
 export const routes: Routes = [
   {
@@ -15,24 +16,21 @@ export const routes: Routes = [
       import('./features/gallery/pages/gallery/gallery.page').then((m) => m.GalleryPage),
   },
   {
-    path: 'quranic-cms',
+    path: 'admin',
     loadComponent: () =>
-      import('./features/quranic-cms/quranic-cms.page').then((m) => m.QuranicCmsPage),
-    canActivate: [authGuard],
+      import('./features/admin/admin-layout.component').then((m) => m.AdminLayoutComponent),
+    // canActivate: [authGuard, adminGuard],
     data: { hideHeader: true, fullWidth: true },
     children: [
       {
         path: 'publishers',
         loadChildren: () =>
-          import('./features/quranic-cms/publishers/publishers.routes').then(
-            (m) => m.publishersRoutes
-          ),
-        canActivate: [publisherHostGuard],
+          import('./features/admin/publishers/publishers.routes').then((m) => m.publishersRoutes),
+        canActivate: [itqanAdminGuard],
       },
       {
         path: '',
-        loadChildren: () =>
-          import('./features/quranic-cms/quranic-cms.routes').then((m) => m.quranicCmsRoutes),
+        loadChildren: () => import('./features/admin/admin.routes').then((m) => m.adminRoutes),
       },
     ],
   },

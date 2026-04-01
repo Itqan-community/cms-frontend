@@ -9,6 +9,8 @@ export interface User {
   phone: string;
   is_active: boolean;
   is_profile_completed: boolean;
+  is_admin?: boolean;
+  publisher_id?: number | null;
 }
 
 export interface AuthResponse {

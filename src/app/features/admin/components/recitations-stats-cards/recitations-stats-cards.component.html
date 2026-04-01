@@ -1,0 +1,51 @@
+<div class="admin-audio-stats">
+  <div class="admin-audio-stats__header">
+    <div>
+      <h2 class="admin-audio-stats__title">المصاحف الصوتية</h2>
+      <p class="admin-audio-stats__subtitle">
+        نظرة سريعة على عدد الروايات، القرّاء، والتسجيلات المتاحة في المكتبة الصوتية.
+      </p>
+    </div>
+    @if (usingMock()) {
+      <span class="admin-audio-stats__badge">بيانات تجريبية (MOCK)</span>
+    }
+  </div>
+
+  <div class="admin-audio-stats__cards">
+    @if (loading()) {
+      <div class="admin-audio-stats__card admin-audio-stats__card--skeleton">
+        <div class="admin-audio-stats__icon-skeleton"></div>
+        <div class="admin-audio-stats__value-skeleton"></div>
+        <div class="admin-audio-stats__label-skeleton"></div>
+      </div>
+      <div class="admin-audio-stats__card admin-audio-stats__card--skeleton">
+        <div class="admin-audio-stats__icon-skeleton"></div>
+        <div class="admin-audio-stats__value-skeleton"></div>
+        <div class="admin-audio-stats__label-skeleton"></div>
+      </div>
+      <div class="admin-audio-stats__card admin-audio-stats__card--skeleton">
+        <div class="admin-audio-stats__icon-skeleton"></div>
+        <div class="admin-audio-stats__value-skeleton"></div>
+        <div class="admin-audio-stats__label-skeleton"></div>
+      </div>
+    } @else if (stats()) {
+      <div class="admin-audio-stats__card">
+        <div class="admin-audio-stats__icon admin-audio-stats__icon--riwayas">📘</div>
+        <div class="admin-audio-stats__value">{{ stats()!.riwayas }}</div>
+        <div class="admin-audio-stats__label">رواية متاحة</div>
+      </div>
+
+      <div class="admin-audio-stats__card">
+        <div class="admin-audio-stats__icon admin-audio-stats__icon--recitations">🎵</div>
+        <div class="admin-audio-stats__value">{{ stats()!.recitations }}</div>
+        <div class="admin-audio-stats__label">قراءة متاحة</div>
+      </div>
+
+      <div class="admin-audio-stats__card">
+        <div class="admin-audio-stats__icon admin-audio-stats__icon--reciters">🔊</div>
+        <div class="admin-audio-stats__value">{{ stats()!.reciters }}</div>
+        <div class="admin-audio-stats__label">قارئ متاح</div>
+      </div>
+    }
+  </div>
+</div>

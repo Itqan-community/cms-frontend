@@ -1,0 +1,105 @@
+.admin-search-panel {
+  background: #fff;
+  border-radius: 14px;
+  padding: 28px 32px;
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+
+  &__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #1a1a1a;
+    margin: 0 0 6px;
+  }
+
+  &__subtitle {
+    font-size: 0.88rem;
+    color: #888;
+    margin: 0 0 20px;
+  }
+
+  &__label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 10px;
+  }
+
+  &__input-row {
+    display: flex;
+    align-items: center;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #fafafa;
+    gap: 0;
+  }
+
+  &__search-icon {
+    padding: 0 12px;
+    font-size: 1rem;
+    color: #aaa;
+    flex-shrink: 0;
+  }
+
+  &__input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    padding: 12px 4px;
+    font-size: 0.95rem;
+    color: #333;
+    outline: none;
+    direction: rtl;
+
+    &::placeholder {
+      color: #bbb;
+    }
+  }
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: #4b5563;
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    flex-shrink: 0;
+
+    &:hover {
+      background: #374151;
+    }
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 10px;
+  }
+
+  &__empty-icon {
+    font-size: 3rem;
+    opacity: 0.3;
+  }
+
+  &__empty-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #555;
+    margin: 0;
+  }
+
+  &__empty-subtitle {
+    font-size: 0.85rem;
+    color: #aaa;
+    margin: 0;
+  }
+}

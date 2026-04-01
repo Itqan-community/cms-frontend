@@ -11,7 +11,7 @@ export const NAV_LINKS = [
   },
   {
     label: 'نظام إدارة المحتوى القرآني',
-    link: '/quranic-cms',
+    link: '/admin',
   },
   // {
   //   label: 'NAV.PUBLISHERS',
