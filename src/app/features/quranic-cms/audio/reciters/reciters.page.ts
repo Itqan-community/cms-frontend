@@ -1,4 +1,5 @@
-import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -80,18 +81,21 @@ export class RecitersPage implements OnInit, OnDestroy {
   // --- Stats ---
   private loadStats(): void {
     this.statsLoading.set(true);
-    this.recitersService.getStats().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (data) => this.stats.set(data),
-      error: () => {
-        this.stats.set({
-          total_reciters: 0,
-          total_contemporary: 0,
-          total_nationalities: 0,
-          isMock: true,
-        });
-      },
-      complete: () => this.statsLoading.set(false),
-    });
+    this.recitersService
+      .getStats()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => this.stats.set(data),
+        error: () => {
+          this.stats.set({
+            total_reciters: 0,
+            total_contemporary: 0,
+            total_nationalities: 0,
+            isMock: true,
+          });
+        },
+        complete: () => this.statsLoading.set(false),
+      });
   }
 
   // --- Reciters List ---
@@ -148,19 +152,22 @@ export class RecitersPage implements OnInit, OnDestroy {
     this.addLoading.set(true);
     const data: ReciterCreate = this.addForm.value;
 
-    this.recitersService.createReciter(data).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: () => {
-        this.messages.success('تمت إضافة القارئ بنجاح');
-        this.addForm.reset();
-        this.showAddForm.set(false);
-        this.loadReciters();
-        this.loadStats();
-      },
-      error: () => {
-        this.messages.error('حدث خطأ أثناء إضافة القارئ');
-      },
-      complete: () => this.addLoading.set(false),
-    });
+    this.recitersService
+      .createReciter(data)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.messages.success('تمت إضافة القارئ بنجاح');
+          this.addForm.reset();
+          this.showAddForm.set(false);
+          this.loadReciters();
+          this.loadStats();
+        },
+        error: () => {
+          this.messages.error('حدث خطأ أثناء إضافة القارئ');
+        },
+        complete: () => this.addLoading.set(false),
+      });
   }
 
   getSkeletonArray(): number[] {

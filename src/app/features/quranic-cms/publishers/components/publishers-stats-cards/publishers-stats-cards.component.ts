@@ -85,7 +85,6 @@ interface StatCard {
 })
 export class PublishersStatsCardsComponent implements OnInit {
   private readonly statsService = inject(PublishersStatsService);
-  private readonly destroyRef = inject(DestroyRef);
   loading = true;
 
   cards: StatCard[] = [
