@@ -9,7 +9,7 @@
             <button class="app-header__menu-btn admin-desktop-toggle" (click)="isCollapsed.set(!isCollapsed())" style="font-size: 24px;">
               <i class="bx bx-menu"></i>
             </button>
-            <a class="app-header__logo" [routerLink]="['/']" aria-label="الصفحة الرئيسية">
+            <a class="app-header__logo" [routerLink]="['/']" [attr.aria-label]="'ADMIN.HOME' | translate">
               @if (isPublisherHost) {
                 <div class="publisher-logo">
                   <svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
@@ -55,7 +55,7 @@
           <li nz-menu-item nzMatchRouter>
             <a [routerLink]="['/admin', tab.path]">
               <span class="admin-sidenav-emoji">{{ tab.emoji }}</span>
-              <span>{{ tab.label }}</span>
+              <span>{{ tab.label | translate }}</span>
             </a>
           </li>
         }

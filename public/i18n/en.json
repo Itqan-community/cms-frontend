@@ -351,5 +351,46 @@
       "SCHEMA_DOCS": "Schema Documentation",
       "EXAMPLE_FILE": "Example File"
     }
+  },
+  "ADMIN": {
+    "HOME": "Home",
+    "REFRESH_PROMPT": {
+      "TITLE": "Do you want to reset data?",
+      "CONTENT": "All projects and experimental data will be updated.",
+      "OK": "Confirm",
+      "CANCEL": "Cancel"
+    },
+    "MENU": {
+      "MUSHAFS": "Mushafs",
+      "TAFSIRS": "Tafsirs",
+      "TRANSLATIONS": "Translations",
+      "PUBLISHERS": "Publishers & Sources",
+      "AUDIO": "Audio"
+    },
+    "PUBLISHER_ADD": {
+      "TITLE": "Add New Publisher",
+      "NAME_EN_LABEL": "Publisher Name (English) *",
+      "NAME_AR_LABEL": "Publisher Name (Arabic) *",
+      "COUNTRY": "Country",
+      "FOUNDATION_YEAR": "Foundation Year",
+      "WEBSITE": "Website",
+      "EMAIL": "Email",
+      "ADDRESS": "Address",
+      "ICON_URL": "Icon URL",
+      "DESCRIPTION": "Description",
+      "CANCEL": "Cancel",
+      "SAVE": "Save Publisher",
+      "SUCCESS": "Publisher added successfully",
+      "ERROR": "Error occurred while adding publisher"
+    },
+    "PUBLISHER_BANNER": {
+      "TITLE": "Publishers & Sources",
+      "DESCRIPTION": "Manage entities and organizations providing Quranic content"
+    },
+    "PUBLISHER_STATS": {
+      "TOTAL_PUBLISHERS": "Total Publishers",
+      "ACTIVE_PUBLISHERS": "Active Publishers",
+      "TOTAL_COUNTRIES": "Total Countries"
+    }
   }
 }

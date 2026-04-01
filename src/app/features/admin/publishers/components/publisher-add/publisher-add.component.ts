@@ -6,6 +6,7 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { PublishersService } from '../../services/publishers.service';
 
 @Component({
@@ -18,13 +19,14 @@ import { PublishersService } from '../../services/publishers.service';
     NzButtonModule,
     NzGridModule,
     NzIconModule,
+    TranslateModule,
   ],
   template: `
     @if (!isAdding) {
       <div class="add-button-container">
         <button nz-button nzType="primary" (click)="showForm()" class="add-btn">
           <span nz-icon nzType="plus"></span>
-          إضافة ناشر جديد
+          {{ 'ADMIN.PUBLISHER_ADD.TITLE' | translate }}
         </button>
       </div>
     }
@@ -33,14 +35,14 @@ import { PublishersService } from '../../services/publishers.service';
     <div class="form-page-wrapper">
       <div class="inline-form-card">
         <div class="form-header">
-          <h2 class="form-title">إضافة ناشر جديد</h2>
+          <h2 class="form-title">{{ 'ADMIN.PUBLISHER_ADD.TITLE' | translate }}</h2>
         </div>
 
         <form nz-form [formGroup]="publisherForm" [nzLayout]="'vertical'">
           <div nz-row [nzGutter]="24">
             <div nz-col nzSpan="12">
               <nz-form-item>
-                <nz-form-label nzRequired>اسم الناشر بالإنجليزي (name_en) *</nz-form-label>
+                <nz-form-label nzRequired>{{ 'ADMIN.PUBLISHER_ADD.NAME_EN_LABEL' | translate }}</nz-form-label>
                 <nz-form-control nzExtra="(English Name)">
                   <input nz-input formControlName="name_en" placeholder="Every Ayah" />
                 </nz-form-control>
@@ -48,7 +50,7 @@ import { PublishersService } from '../../services/publishers.service';
             </div>
             <div nz-col nzSpan="12">
               <nz-form-item>
-                <nz-form-label nzRequired>اسم الناشر بالعربي (name_ar) *</nz-form-label>
+                <nz-form-label nzRequired>{{ 'ADMIN.PUBLISHER_ADD.NAME_AR_LABEL' | translate }}</nz-form-label>
                 <nz-form-control nzExtra="(Arabic Name)">
                   <input nz-input formControlName="name_ar" placeholder="كل آية" />
                 </nz-form-control>
@@ -59,7 +61,7 @@ import { PublishersService } from '../../services/publishers.service';
           <div nz-row [nzGutter]="24">
             <div nz-col nzSpan="12">
               <nz-form-item>
-                <nz-form-label>الدولة</nz-form-label>
+                <nz-form-label>{{ 'ADMIN.PUBLISHER_ADD.COUNTRY' | translate }}</nz-form-label>
                 <nz-form-control>
                   <input
                     nz-input
@@ -71,7 +73,7 @@ import { PublishersService } from '../../services/publishers.service';
             </div>
             <div nz-col nzSpan="12">
               <nz-form-item>
-                <nz-form-label>سنة التأسيس</nz-form-label>
+                <nz-form-label>{{ 'ADMIN.PUBLISHER_ADD.FOUNDATION_YEAR' | translate }}</nz-form-label>
                 <nz-form-control>
                   <input
                     nz-input
@@ -87,7 +89,7 @@ import { PublishersService } from '../../services/publishers.service';
           <div nz-row [nzGutter]="24">
             <div nz-col nzSpan="12">
               <nz-form-item>
-                <nz-form-label>الموقع الإلكتروني</nz-form-label>
+                <nz-form-label>{{ 'ADMIN.PUBLISHER_ADD.WEBSITE' | translate }}</nz-form-label>
                 <nz-form-control>
                   <input nz-input formControlName="website" placeholder="https://example.com" />
                 </nz-form-control>
@@ -95,7 +97,7 @@ import { PublishersService } from '../../services/publishers.service';
             </div>
             <div nz-col nzSpan="12">
               <nz-form-item>
-                <nz-form-label>البريد الإلكتروني</nz-form-label>
+                <nz-form-label>{{ 'ADMIN.PUBLISHER_ADD.EMAIL' | translate }}</nz-form-label>
                 <nz-form-control>
                   <input nz-input formControlName="contact_email" placeholder="info@example.com" />
                 </nz-form-control>
@@ -106,7 +108,7 @@ import { PublishersService } from '../../services/publishers.service';
           <div nz-row [nzGutter]="24">
             <div nz-col nzSpan="12">
               <nz-form-item>
-                <nz-form-label>العنوان</nz-form-label>
+                <nz-form-label>{{ 'ADMIN.PUBLISHER_ADD.ADDRESS' | translate }}</nz-form-label>
                 <nz-form-control>
                   <input
                     nz-input
@@ -118,7 +120,7 @@ import { PublishersService } from '../../services/publishers.service';
             </div>
             <div nz-col nzSpan="12">
               <nz-form-item>
-                <nz-form-label>رابط الأيقونة (URL)</nz-form-label>
+                <nz-form-label>{{ 'ADMIN.PUBLISHER_ADD.ICON_URL' | translate }}</nz-form-label>
                 <nz-form-control>
                   <input
                     nz-input
@@ -131,7 +133,7 @@ import { PublishersService } from '../../services/publishers.service';
           </div>
 
           <nz-form-item>
-            <nz-form-label>الوصف</nz-form-label>
+            <nz-form-label>{{ 'ADMIN.PUBLISHER_ADD.DESCRIPTION' | translate }}</nz-form-label>
             <nz-form-control>
               <textarea
                 nz-input
@@ -144,7 +146,7 @@ import { PublishersService } from '../../services/publishers.service';
 
           <div class="form-footer">
             <button nz-button nzType="link" (click)="handleCancel()" class="cancel-link">
-              إلغاء
+              {{ 'ADMIN.PUBLISHER_ADD.CANCEL' | translate }}
             </button>
             <button
               nz-button
@@ -155,7 +157,7 @@ import { PublishersService } from '../../services/publishers.service';
               class="full-width-save-btn"
             >
               <span nz-icon nzType="save"></span>
-              حفظ الناشر
+              {{ 'ADMIN.PUBLISHER_ADD.SAVE' | translate }}
             </button>
           </div>
         </form>
@@ -191,7 +193,7 @@ import { PublishersService } from '../../services/publishers.service';
       }
 
       .form-header {
-        text-align: right;
+        text-align: end;
         margin-bottom: 32px;
       }
 
@@ -224,7 +226,7 @@ import { PublishersService } from '../../services/publishers.service';
       ::ng-deep .ant-form-item-extra {
         font-size: 11px;
         color: #bfbfbf;
-        text-align: right;
+        text-align: end;
         margin-top: 4px;
       }
 
@@ -269,6 +271,7 @@ export class PublisherAddComponent {
   private fb = inject(FormBuilder);
   private publishersService = inject(PublishersService);
   private message = inject(NzMessageService);
+  private translate = inject(TranslateService);
 
   isConfirmLoading = false;
 
@@ -295,7 +298,7 @@ export class PublisherAddComponent {
       this.isConfirmLoading = true;
       this.publishersService.createPublisher(this.publisherForm.value).subscribe({
         next: () => {
-          this.message.success('تمت إضافة الناشر بنجاح');
+          this.message.success(this.translate.instant('ADMIN.PUBLISHER_ADD.SUCCESS'));
           this.isConfirmLoading = false;
           this.publisherForm.reset();
           this.isAdding = false;
@@ -303,7 +306,7 @@ export class PublisherAddComponent {
           this.publisherAdded.emit();
         },
         error: () => {
-          this.message.error('عذراً، حدث خطأ أثناء إضافة الناشر');
+          this.message.error(this.translate.instant('ADMIN.PUBLISHER_ADD.ERROR'));
           this.isConfirmLoading = false;
         },
       });

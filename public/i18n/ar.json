@@ -351,5 +351,46 @@
       "SCHEMA_DOCS": "توثيق المخطط",
       "EXAMPLE_FILE": "ملف مثال"
     }
+  },
+  "ADMIN": {
+    "HOME": "الرئيسية",
+    "REFRESH_PROMPT": {
+      "TITLE": "هل تريد إعادة تهيئة البيانات؟",
+      "CONTENT": "سيتم تحديث جميع المشاريع والبيانات التجريبية.",
+      "OK": "تأكيد",
+      "CANCEL": "إلغاء"
+    },
+    "MENU": {
+      "MUSHAFS": "المصاحف",
+      "TAFSIRS": "التفاسير",
+      "TRANSLATIONS": "الترجمات",
+      "PUBLISHERS": "الناشرون والمصادر",
+      "AUDIO": "الصوتيات"
+    },
+    "PUBLISHER_ADD": {
+      "TITLE": "إضافة ناشر جديد",
+      "NAME_EN_LABEL": "اسم الناشر بالإنجليزي (name_en) *",
+      "NAME_AR_LABEL": "اسم الناشر بالعربي (name_ar) *",
+      "COUNTRY": "الدولة",
+      "FOUNDATION_YEAR": "سنة التأسيس",
+      "WEBSITE": "الموقع الإلكتروني",
+      "EMAIL": "البريد الإلكتروني",
+      "ADDRESS": "العنوان",
+      "ICON_URL": "رابط الأيقونة (URL)",
+      "DESCRIPTION": "الوصف",
+      "CANCEL": "إلغاء",
+      "SAVE": "حفظ الناشر",
+      "SUCCESS": "تمت إضافة الناشر بنجاح",
+      "ERROR": "عذراً، حدث خطأ أثناء إضافة الناشر"
+    },
+    "PUBLISHER_BANNER": {
+      "TITLE": "الناشرون والمصادر",
+      "DESCRIPTION": "إدارة الجهات والمؤسسات التي نحصل منها على المحتوى القرآني"
+    },
+    "PUBLISHER_STATS": {
+      "TOTAL_PUBLISHERS": "إجمالي الناشرين",
+      "ACTIVE_PUBLISHERS": "ناشرون نشطون",
+      "TOTAL_COUNTRIES": "إجمالي الدول"
+    }
   }
 }

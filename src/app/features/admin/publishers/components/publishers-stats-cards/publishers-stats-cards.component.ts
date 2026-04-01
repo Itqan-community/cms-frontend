@@ -67,7 +67,7 @@ interface StatCard {
         font-size: 24px;
       }
       .stat-info {
-        text-align: right;
+        text-align: end;
       }
       .stat-value {
         font-size: 1.6rem;

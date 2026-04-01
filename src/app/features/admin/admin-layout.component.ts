@@ -8,6 +8,7 @@ import { AuthService } from '../../core/auth/services/auth.service';
 import { LangSwitchComponent } from '../../shared/components/lang-switch/lang-switch.component';
 import { UserActionsComponent } from '../../shared/components/user-actions/user-actions.component';
 import { isPublisherHost } from '../../shared/utils/publisherhost.util';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AdminAuthService } from './services/admin-auth.service';
 
 interface CmsTab {
@@ -18,16 +19,16 @@ interface CmsTab {
 }
 
 const ALL_TABS: CmsTab[] = [
-  // { id: 'search', path: 'search', label: 'بحث', emoji: '🔍' },
-  { id: 'mushafs', path: 'mushafs', label: 'المصاحف', emoji: '📖' },
-  // { id: 'fonts', path: 'fonts', label: 'الخطوط', emoji: '✏️' },
-  { id: 'tafsirs', path: 'tafsirs', label: 'التفاسير', emoji: '📚' },
-  { id: 'translations', path: 'translations', label: 'الترجمات', emoji: '🌍' },
-  // { id: 'linguistics', path: 'linguistics', label: 'اللغويات', emoji: '🌐' },
-  // { id: 'tajweed', path: 'tajweed', label: 'التجويد', emoji: '🎓' },
-  { id: 'publishers', path: 'publishers', label: 'الناشرون والمصادر', emoji: '📰' },
-  { id: 'audio', path: 'audio', label: 'الصوتيات', emoji: '🔊' },
-  // { id: 'software', path: 'software', label: 'البرمجيات', emoji: '💻' },
+  // { id: 'search', path: 'search', label: 'ADMIN.MENU.SEARCH', emoji: '🔍' },
+  { id: 'mushafs', path: 'mushafs', label: 'ADMIN.MENU.MUSHAFS', emoji: '📖' },
+  // { id: 'fonts', path: 'fonts', label: 'ADMIN.MENU.FONTS', emoji: '✏️' },
+  { id: 'tafsirs', path: 'tafsirs', label: 'ADMIN.MENU.TAFSIRS', emoji: '📚' },
+  { id: 'translations', path: 'translations', label: 'ADMIN.MENU.TRANSLATIONS', emoji: '🌍' },
+  // { id: 'linguistics', path: 'linguistics', label: 'ADMIN.MENU.LINGUISTICS', emoji: '🌐' },
+  // { id: 'tajweed', path: 'tajweed', label: 'ADMIN.MENU.TAJWEED', emoji: '🎓' },
+  { id: 'publishers', path: 'publishers', label: 'ADMIN.MENU.PUBLISHERS', emoji: '📰' },
+  { id: 'audio', path: 'audio', label: 'ADMIN.MENU.AUDIO', emoji: '🔊' },
+  // { id: 'software', path: 'software', label: 'ADMIN.MENU.SOFTWARE', emoji: '💻' },
 ];
 
 @Component({
@@ -43,6 +44,7 @@ const ALL_TABS: CmsTab[] = [
     NzIconModule,
     LangSwitchComponent,
     UserActionsComponent,
+    TranslateModule,
   ],
   templateUrl: './admin-layout.component.html',
   styleUrls: ['./admin-layout.component.less'],
@@ -51,6 +53,7 @@ export class AdminLayoutComponent {
   private readonly modal = inject(NzModalService);
   private readonly adminAuth = inject(AdminAuthService);
   public readonly authService = inject(AuthService);
+  private readonly translate = inject(TranslateService);
   readonly isPublisherHost = isPublisherHost();
 
   isCollapsed = signal(false);
@@ -65,11 +68,11 @@ export class AdminLayoutComponent {
 
   onRefresh(): void {
     this.modal.confirm({
-      nzTitle: 'هل تريد إعادة تهيئة البيانات؟',
-      nzContent: 'سيتم تحديث جميع المشاريع والبيانات التجريبية.',
-      nzOkText: 'تأكيد',
-      nzCancelText: 'إلغاء',
-      nzDirection: 'rtl',
+      nzTitle: this.translate.instant('ADMIN.REFRESH_PROMPT.TITLE'),
+      nzContent: this.translate.instant('ADMIN.REFRESH_PROMPT.CONTENT'),
+      nzOkText: this.translate.instant('ADMIN.REFRESH_PROMPT.OK'),
+      nzCancelText: this.translate.instant('ADMIN.REFRESH_PROMPT.CANCEL'),
+      nzDirection: this.translate.currentLang === 'ar' ? 'rtl' : 'ltr',
       nzOnOk: () => {
         // Refresh logic here
       },

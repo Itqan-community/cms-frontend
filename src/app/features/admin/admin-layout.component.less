@@ -28,12 +28,12 @@
 
 .admin-sider {
   background: #fff;
-  border-left: 1px solid var(--color-neutral-200);
+  border-inline-start: 1px solid var(--color-neutral-200);
 }
 
 .admin-sidenav-menu {
   height: 100%;
-  border-left: none; /* zorro defaults borders */
+  border-inline-start: none; /* zorro defaults borders */
   background: transparent;
 }
 
@@ -68,7 +68,7 @@
 }
 
 .admin-sidenav-emoji {
-  margin-left: 12px;
+  margin-inline-start: 12px;
   font-size: 1.25rem;
   vertical-align: middle;
 }
@@ -88,8 +88,9 @@
 }
 
 // Specific override for Zorro layout alignment (RTL)
-[dir='rtl'] .ant-menu-inline.ant-menu-root .ant-menu-item {
-  padding-right: 16px !important;
+[dir='rtl'] .ant-menu-inline.ant-menu-root .ant-menu-item,
+[dir='ltr'] .ant-menu-inline.ant-menu-root .ant-menu-item {
+  padding-inline-end: 16px !important;
   display: flex;
   align-items: center;
 }

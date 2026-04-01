@@ -51,7 +51,7 @@ import { Component } from '@angular/core';
       }
 
       .text-group {
-        text-align: right;
+        text-align: end;
       }
       .banner-title {
         font-size: 2rem;
