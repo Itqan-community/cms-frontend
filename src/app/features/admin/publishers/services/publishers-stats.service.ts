@@ -9,7 +9,7 @@ import { PublisherStatistics } from '../models/publishers-stats.models';
 })
 export class PublishersStatsService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.API_BASE_URL}/portal/publishers/statistics`;
+  private apiUrl = `${environment.ADMIN_API_BASE_URL}/publishers/stats/`;
 
   getStatistics(): Observable<PublisherStatistics> {
     return this.http.get<PublisherStatistics>(this.apiUrl);

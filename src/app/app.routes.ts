@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/guards/auth.guard';
 import { guestGuard } from './core/auth/guards/guest.guard';
 import { publisherHostGuard } from './core/guards/publisher-host.guard';
-import { itqanAdminGuard } from './features/admin/guards/itqan-admin.guard';
 
 export const routes: Routes = [
   {
@@ -26,7 +25,7 @@ export const routes: Routes = [
         path: 'publishers',
         loadChildren: () =>
           import('./features/admin/publishers/publishers.routes').then((m) => m.publishersRoutes),
-        canActivate: [itqanAdminGuard],
+        // canActivate: [itqanAdminGuard],
       },
       {
         path: '',

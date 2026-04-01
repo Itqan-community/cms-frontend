@@ -1,32 +1,34 @@
 export interface Publisher {
-  id: string;
+  id: number;
+  name: string;
+  slug: string;
   name_ar: string;
   name_en: string;
-  country?: string;
-  website?: string;
-  icon_url?: string;
-  foundation_year?: number;
-  address?: string;
-  is_verified?: boolean;
-  contact_email?: string;
   description?: string;
-  is_active?: boolean;
+  description_ar?: string;
+  description_en?: string;
+  address?: string;
+  website?: string;
+  contact_email?: string;
+  is_verified?: boolean;
+  foundation_year?: number;
+  country?: string;
+  icon_url?: string;
   created_at?: string;
   updated_at?: string;
 }
 
 export interface PublishersListResponse {
-  data: Publisher[];
-  total: number;
-  page: number;
-  limit: number;
+  results: Publisher[];
+  count: number;
 }
 
 export interface PublisherFilters {
   search?: string;
-  is_active?: boolean;
+  is_verified?: boolean;
+  country?: string;
   page: number;
-  limit: number;
+  page_size: number;
 }
 
 export interface PublisherStatistics {

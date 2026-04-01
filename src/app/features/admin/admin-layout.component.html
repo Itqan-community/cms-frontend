@@ -1,44 +1,72 @@
-<div class="admin-page" dir="rtl">
-  <!-- Green Header Bar -->
-  <div class="admin-header">
-    <div class="admin-header__inner">
-      <div class="admin-header__title">
-        <span>📖</span>
-        <span>نظام إدارة المحتوى القرآني</span>
-      </div>
-      <div class="admin-header__actions">
-        <a class="admin-header__nav-link" [routerLink]="['/gallery']">مكتبة الأصول والموارد</a>
-        <button class="admin-header__refresh-btn" (click)="onRefresh()">
-          <span>🔄</span>
-          <span>تحديث البيانات</span>
-        </button>
+<nz-layout class="admin-layout" dir="rtl">
+  <!-- Top Header Component styled like main CMS header -->
+  <nz-header class="admin-header-shell">
+    <div class="app-header">
+      <div class="app-header__container">
+        <div class="app-header__row">
+          <!-- Logo -->
+          <div class="app-header__brand">
+            <button class="app-header__menu-btn admin-desktop-toggle" (click)="isCollapsed.set(!isCollapsed())" style="font-size: 24px;">
+              <i class="bx bx-menu"></i>
+            </button>
+            <a class="app-header__logo" [routerLink]="['/']" aria-label="الصفحة الرئيسية">
+              @if (isPublisherHost) {
+                <div class="publisher-logo">
+                  <svg width="120" height="40" viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg">
+                    <rect width="120" height="40" rx="4" fill="#4F46E5" />
+                    <text x="60" y="24" font-family="Arial" font-size="16" font-weight="bold" fill="white" text-anchor="middle">Publisher</text>
+                  </svg>
+                </div>
+              } @else {
+                <img alt="Itqan CMS" loading="lazy" width="120" height="40" decoding="async" class="app-header__logo-img" src="assets/images/logo.svg" />
+              }
+            </a>
+          </div>
+
+          <!-- Actions -->
+          <div class="app-header__actions">
+            <!-- Ensure actions display flex properly always -->
+            <div style="display: flex; gap: 16px; align-items: center;">
+              <app-lang-switch></app-lang-switch>
+              <app-user-actions (logoutClicked)="authService.logout()"></app-user-actions>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+  </nz-header>
 
-  <!-- Floating Tabs -->
-  <div class="admin-tabs-wrapper">
-    <div class="admin-tabs">
-      @for (tab of tabs(); track tab.id) {
-        <a
-          [routerLink]="['/admin', tab.path]"
-          routerLinkActive="admin-tabs__tab--active"
-          [routerLinkActiveOptions]="
-            ['audio', 'publishers', 'mushafs', 'software'].includes(tab.path)
-              ? { exact: false }
-              : { exact: true }
-          "
-          class="admin-tabs__tab"
-        >
-          <span class="admin-tabs__tab-emoji">{{ tab.emoji }}</span>
-          <span class="admin-tabs__tab-label">{{ tab.label }}</span>
-        </a>
-      }
-    </div>
-  </div>
+  <nz-layout class="admin-body">
+    <!-- Sidebar Navigation -->
+    <nz-sider 
+      class="admin-sider" 
+      nzCollapsible 
+      [nzCollapsed]="isCollapsed()" 
+      (nzCollapsedChange)="isCollapsed.set($event)"
+      [nzWidth]="260"
+      [nzCollapsedWidth]="0"
+      [nzTrigger]="null"
+      nzBreakpoint="lg"
+      [nzReverseArrow]="true"
+      nzTheme="light"
+    >
+      <ul nz-menu nzMode="inline" class="admin-sidenav-menu" nzTheme="light">
+        @for (tab of tabs(); track tab.id) {
+          <li nz-menu-item nzMatchRouter>
+            <a [routerLink]="['/admin', tab.path]">
+              <span class="admin-sidenav-emoji">{{ tab.emoji }}</span>
+              <span>{{ tab.label }}</span>
+            </a>
+          </li>
+        }
+      </ul>
+    </nz-sider>
 
-  <!-- Tab Content -->
-  <div class="admin-content">
-    <router-outlet />
-  </div>
-</div>
+    <!-- Main Content Panel -->
+    <nz-content class="admin-content-area">
+      <div class="admin-content-inner">
+        <router-outlet></router-outlet>
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

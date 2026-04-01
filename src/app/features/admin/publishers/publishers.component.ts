@@ -97,15 +97,15 @@ export class PublishersComponent implements OnInit {
     this.publishersService
       .getPublishers({
         page: this.page,
-        limit: this.limit,
+        page_size: this.limit,
         search: this.searchTerm,
-        is_active: this.activeFilter ?? undefined,
+        is_verified: this.activeFilter ?? undefined,
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (data) => {
-          this.publishers = [...this.publishers, ...data];
-          this.hasMore = data.length === this.limit;
+        next: (response) => {
+          this.publishers = [...this.publishers, ...response.results];
+          this.hasMore = response.results.length === this.limit;
           this.loading = false;
         },
         error: () => {
