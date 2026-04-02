@@ -399,6 +399,59 @@
       "TOTAL_PUBLISHERS": "Total Publishers",
       "ACTIVE_PUBLISHERS": "Active Publishers",
       "TOTAL_COUNTRIES": "Total Countries"
+    },
+    "TAFSIRS": {
+      "TITLE": "Tafsirs",
+      "ADD_BUTTON": "Add Tafsir",
+      "SEARCH_PLACEHOLDER": "Search tafsirs...",
+      "COLUMNS": {
+        "NAME": "Name",
+        "DESCRIPTION": "Description",
+        "PUBLISHER": "Publisher",
+        "LICENSE": "License",
+        "CREATED_AT": "Date Added",
+        "ACTIONS": "Actions"
+      },
+      "FILTERS": {
+        "PUBLISHER": "Publisher",
+        "LICENSE": "License",
+        "LANGUAGE": "Language",
+        "IS_EXTERNAL": "Type"
+      },
+      "FORM": {
+        "CREATE_TITLE": "Add New Tafsir",
+        "EDIT_TITLE": "Edit Tafsir",
+        "SUBMIT_CREATE": "Add Tafsir",
+        "SUBMIT_EDIT": "Save Changes",
+        "CANCEL": "Cancel",
+        "NAME_AR": "Name (Arabic)",
+        "NAME_EN": "Name (English)",
+        "DESCRIPTION_AR": "Description (Arabic)",
+        "DESCRIPTION_EN": "Description (English)",
+        "LONG_DESCRIPTION_AR": "Long Description (Arabic)",
+        "LONG_DESCRIPTION_EN": "Long Description (English)",
+        "THUMBNAIL": "Thumbnail",
+        "LICENSE": "License",
+        "LANGUAGE": "Language",
+        "PUBLISHER": "Publisher"
+      },
+      "DELETE": {
+        "CONFIRM_TITLE": "Delete this tafsir?",
+        "CONFIRM_CONTENT": "This action cannot be undone.",
+        "OK": "Yes, Delete",
+        "CANCEL": "Cancel"
+      },
+      "DETAIL": {
+        "VERSIONS_TITLE": "Versions",
+        "EDIT": "Edit",
+        "DELETE": "Delete"
+      },
+      "MESSAGES": {
+        "CREATE_SUCCESS": "Tafsir added successfully",
+        "UPDATE_SUCCESS": "Tafsir updated successfully",
+        "DELETE_SUCCESS": "Tafsir deleted successfully",
+        "ERROR": "An error occurred. Please try again."
+      }
     }
   }
 }

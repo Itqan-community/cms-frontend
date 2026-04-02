@@ -399,6 +399,59 @@
       "TOTAL_PUBLISHERS": "إجمالي الناشرين",
       "ACTIVE_PUBLISHERS": "ناشرون نشطون",
       "TOTAL_COUNTRIES": "إجمالي الدول"
+    },
+    "TAFSIRS": {
+      "TITLE": "التفاسير",
+      "ADD_BUTTON": "إضافة تفسير",
+      "SEARCH_PLACEHOLDER": "ابحث عن تفسير...",
+      "COLUMNS": {
+        "NAME": "الاسم",
+        "DESCRIPTION": "الوصف",
+        "PUBLISHER": "الناشر",
+        "LICENSE": "الترخيص",
+        "CREATED_AT": "تاريخ الإضافة",
+        "ACTIONS": "الإجراءات"
+      },
+      "FILTERS": {
+        "PUBLISHER": "الناشر",
+        "LICENSE": "الترخيص",
+        "LANGUAGE": "اللغة",
+        "IS_EXTERNAL": "النوع"
+      },
+      "FORM": {
+        "CREATE_TITLE": "إضافة تفسير جديد",
+        "EDIT_TITLE": "تعديل التفسير",
+        "SUBMIT_CREATE": "إضافة التفسير",
+        "SUBMIT_EDIT": "حفظ التعديلات",
+        "CANCEL": "إلغاء",
+        "NAME_AR": "الاسم بالعربية",
+        "NAME_EN": "الاسم بالإنجليزية",
+        "DESCRIPTION_AR": "الوصف بالعربية",
+        "DESCRIPTION_EN": "الوصف بالإنجليزية",
+        "LONG_DESCRIPTION_AR": "الوصف المطوّل بالعربية",
+        "LONG_DESCRIPTION_EN": "الوصف المطوّل بالإنجليزية",
+        "THUMBNAIL": "الصورة المصغّرة",
+        "LICENSE": "الترخيص",
+        "LANGUAGE": "لغة التفسير",
+        "PUBLISHER": "الناشر"
+      },
+      "DELETE": {
+        "CONFIRM_TITLE": "هل أنت متأكد من حذف هذا التفسير؟",
+        "CONFIRM_CONTENT": "هذا الإجراء لا يمكن التراجع عنه.",
+        "OK": "نعم، احذف",
+        "CANCEL": "إلغاء"
+      },
+      "DETAIL": {
+        "VERSIONS_TITLE": "الإصدارات",
+        "EDIT": "تعديل",
+        "DELETE": "حذف"
+      },
+      "MESSAGES": {
+        "CREATE_SUCCESS": "تم إضافة التفسير بنجاح",
+        "UPDATE_SUCCESS": "تم تحديث التفسير بنجاح",
+        "DELETE_SUCCESS": "تم حذف التفسير بنجاح",
+        "ERROR": "حدث خطأ. يرجى المحاولة مرة أخرى."
+      }
     }
   }
 }

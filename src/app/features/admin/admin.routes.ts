@@ -21,9 +21,7 @@ export const adminRoutes: Routes = [
   },
   {
     path: 'tafsirs',
-    loadComponent: () =>
-      import('./components/coming-soon/coming-soon.component').then((m) => m.ComingSoonComponent),
-    data: { emoji: '📚' },
+    loadChildren: () => import('./tafsirs/tafsirs.routes').then((m) => m.tafsirRoutes),
   },
   {
     path: 'translations',
