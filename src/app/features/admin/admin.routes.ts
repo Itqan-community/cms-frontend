@@ -44,10 +44,6 @@ export const adminRoutes: Routes = [
     data: { emoji: '🎓' },
   },
   {
-    path: 'publishers',
-    loadChildren: () => import('./publishers/publishers.routes').then((m) => m.publishersRoutes),
-  },
-  {
     path: 'audio',
     loadChildren: () => import('./audio/audio.routes').then((m) => m.audioRoutes),
   },

@@ -1,4 +1,4 @@
-<nz-layout class="admin-layout" dir="rtl">
+<nz-layout class="admin-layout" [attr.dir]="layoutDir()">
   <!-- Top Header Component styled like main CMS header -->
   <nz-header class="admin-header-shell">
     <div class="app-header">
@@ -59,6 +59,12 @@
             </a>
           </li>
         }
+        <li nz-menu-item class="admin-sidenav-footer">
+          <a [routerLink]="['/']">
+            <span class="admin-sidenav-emoji">🏠</span>
+            <span>{{ 'ADMIN.MENU.BACK_TO_CMS' | translate }}</span>
+          </a>
+        </li>
       </ul>
     </nz-sider>
 

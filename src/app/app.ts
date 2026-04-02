@@ -28,11 +28,13 @@ export class App {
     void this.webVitalsService;
     this.googleAnalyticsService.init();
 
-    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(() => {
+    const syncShellFromRoute = (): void => {
       const data = this.router.routerState.snapshot.root.firstChild?.data ?? {};
       this.hideHeader.set(!!data['hideHeader']);
       this.fullWidth.set(!!data['fullWidth']);
-    });
+    };
+    syncShellFromRoute();
+    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(syncShellFromRoute);
 
     const currentLang = localStorage.getItem('lang') || 'ar';
     this.translate.addLangs(['ar', 'en']);

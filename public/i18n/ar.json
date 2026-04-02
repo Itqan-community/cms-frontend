@@ -67,7 +67,8 @@
     "ABOUT_PROJECT": "حول المشروع",
     "LICENSES": "التراخيص",
     "LOGIN": "تسجيل الدخول",
-    "LOGOUT": "تسجيل الخروج"
+    "LOGOUT": "تسجيل الخروج",
+    "ADMIN_PORTAL": "لوحة الإدارة"
   },
   "SETTINGS": "الإعدادات",
   "REGISTER": "إنشاء حساب",
@@ -365,7 +366,14 @@
       "TAFSIRS": "التفاسير",
       "TRANSLATIONS": "الترجمات",
       "PUBLISHERS": "الناشرون والمصادر",
-      "AUDIO": "الصوتيات"
+      "AUDIO": "الصوتيات",
+      "MANAGE_PROFILE": "إدارة الملف",
+      "BACK_TO_CMS": "العودة للموقع"
+    },
+    "PROFILE": {
+      "TITLE": "ملف الناشر",
+      "HINT": "حدّث بيانات حسابك وتفضيلاتك.",
+      "EDIT_ACCOUNT": "تعديل الحساب"
     },
     "PUBLISHER_ADD": {
       "TITLE": "إضافة ناشر جديد",

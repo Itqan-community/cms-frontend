@@ -67,7 +67,8 @@
     "ABOUT_PROJECT": "About the Project",
     "LICENSES": "Licenses",
     "LOGIN": "Login",
-    "LOGOUT": "Logout"
+    "LOGOUT": "Logout",
+    "ADMIN_PORTAL": "Admin portal"
   },
   "SETTINGS": "Settings",
   "REGISTER": "Register",
@@ -365,7 +366,14 @@
       "TAFSIRS": "Tafsirs",
       "TRANSLATIONS": "Translations",
       "PUBLISHERS": "Publishers & Sources",
-      "AUDIO": "Audio"
+      "AUDIO": "Audio",
+      "MANAGE_PROFILE": "Manage profile",
+      "BACK_TO_CMS": "Back to main site"
+    },
+    "PROFILE": {
+      "TITLE": "Publisher profile",
+      "HINT": "Update your account details and preferences.",
+      "EDIT_ACCOUNT": "Edit account"
     },
     "PUBLISHER_ADD": {
       "TITLE": "Add New Publisher",

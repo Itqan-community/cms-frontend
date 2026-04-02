@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { RouterLink, RouterOutlet } from '@angular/router';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
@@ -18,18 +18,29 @@ interface CmsTab {
   emoji: string;
 }
 
-const ALL_TABS: CmsTab[] = [
-  // { id: 'search', path: 'search', label: 'ADMIN.MENU.SEARCH', emoji: '🔍' },
-  { id: 'mushafs', path: 'mushafs', label: 'ADMIN.MENU.MUSHAFS', emoji: '📖' },
-  // { id: 'fonts', path: 'fonts', label: 'ADMIN.MENU.FONTS', emoji: '✏️' },
-  { id: 'tafsirs', path: 'tafsirs', label: 'ADMIN.MENU.TAFSIRS', emoji: '📚' },
-  { id: 'translations', path: 'translations', label: 'ADMIN.MENU.TRANSLATIONS', emoji: '🌍' },
-  // { id: 'linguistics', path: 'linguistics', label: 'ADMIN.MENU.LINGUISTICS', emoji: '🌐' },
-  // { id: 'tajweed', path: 'tajweed', label: 'ADMIN.MENU.TAJWEED', emoji: '🎓' },
-  { id: 'publishers', path: 'publishers', label: 'ADMIN.MENU.PUBLISHERS', emoji: '📰' },
-  { id: 'audio', path: 'audio', label: 'ADMIN.MENU.AUDIO', emoji: '🔊' },
-  // { id: 'software', path: 'software', label: 'ADMIN.MENU.SOFTWARE', emoji: '💻' },
-];
+const TAB_MUSHAFS: CmsTab = { id: 'mushafs', path: 'mushafs', label: 'ADMIN.MENU.MUSHAFS', emoji: '📖' };
+const TAB_TAFSIRS: CmsTab = { id: 'tafsirs', path: 'tafsirs', label: 'ADMIN.MENU.TAFSIRS', emoji: '📚' };
+const TAB_TRANSLATIONS: CmsTab = {
+  id: 'translations',
+  path: 'translations',
+  label: 'ADMIN.MENU.TRANSLATIONS',
+  emoji: '🌍',
+};
+const TAB_PUBLISHERS: CmsTab = {
+  id: 'publishers',
+  path: 'publishers',
+  label: 'ADMIN.MENU.PUBLISHERS',
+  emoji: '📰',
+};
+const TAB_AUDIO: CmsTab = { id: 'audio', path: 'audio', label: 'ADMIN.MENU.AUDIO', emoji: '🔊' };
+const TAB_PROFILE: CmsTab = {
+  id: 'profile',
+  path: 'profile',
+  label: 'ADMIN.MENU.MANAGE_PROFILE',
+  emoji: '🪪',
+};
+
+const CORE_TABS: CmsTab[] = [TAB_MUSHAFS, TAB_TAFSIRS, TAB_TRANSLATIONS, TAB_AUDIO];
 
 @Component({
   selector: 'app-admin-layout',
@@ -37,7 +48,6 @@ const ALL_TABS: CmsTab[] = [
   imports: [
     NzModalModule,
     RouterLink,
-    RouterLinkActive,
     RouterOutlet,
     NzLayoutModule,
     NzMenuModule,
@@ -58,13 +68,29 @@ export class AdminLayoutComponent {
 
   isCollapsed = signal(false);
 
+  readonly layoutDir = signal<'rtl' | 'ltr'>(
+    this.translate.getCurrentLang() === 'ar' ? 'rtl' : 'ltr'
+  );
+
   readonly tabs = computed(() => {
-    // if (this.adminAuth.isItqanAdmin()) {
-    return ALL_TABS;
-    // }
-    // Publisher admin sees all except publishers tab
-    // return ALL_TABS.filter((t) => t.id !== 'publishers');
+    if (this.adminAuth.isItqanAdmin()) {
+      return [TAB_MUSHAFS, TAB_TAFSIRS, TAB_TRANSLATIONS, TAB_PUBLISHERS, TAB_AUDIO];
+    }
+    if (this.adminAuth.isPublisherAdmin()) {
+      return [TAB_PROFILE, ...CORE_TABS];
+    }
+    return CORE_TABS;
   });
+
+  constructor() {
+    const syncDir = (): void => {
+      this.layoutDir.set(this.translate.getCurrentLang() === 'ar' ? 'rtl' : 'ltr');
+    };
+    syncDir();
+    this.translate.onLangChange.subscribe((e) => {
+      this.layoutDir.set(e.lang === 'ar' ? 'rtl' : 'ltr');
+    });
+  }
 
   onRefresh(): void {
     this.modal.confirm({

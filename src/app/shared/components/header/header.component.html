@@ -34,7 +34,7 @@
             />
           }
         </a>
-        <app-navigation-menu [links]="NAV_LINKS"></app-navigation-menu>
+        <app-navigation-menu [links]="navLinks()"></app-navigation-menu>
       </div>
 
       <!-- Actions -->
@@ -58,6 +58,6 @@
 
 <app-mobile-menu
   [(isOpen)]="isMobileMenuOpen"
-  [links]="NAV_LINKS"
+  [links]="navLinks()"
   (logout)="authService.logout()"
 ></app-mobile-menu>

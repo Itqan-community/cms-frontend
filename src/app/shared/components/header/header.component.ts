@@ -1,11 +1,14 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { NAV_LINKS } from '../../../core/constants/nav-links';
 import { isPublisherHost } from '../../utils/publisherhost.util';
 import { LangSwitchComponent } from '../lang-switch/lang-switch.component';
 import { MobileMenuComponent } from '../mobile-menu/mobile-menu.component';
-import { NavigationMenuComponent } from '../navigation-menu/navigation-menu.component';
+import {
+  NavigationLink,
+  NavigationMenuComponent,
+} from '../navigation-menu/navigation-menu.component';
 import { UserActionsComponent } from '../user-actions/user-actions.component';
 
 @Component({
@@ -23,8 +26,18 @@ import { UserActionsComponent } from '../user-actions/user-actions.component';
 })
 export class HeaderComponent {
   public readonly authService = inject(AuthService);
-  readonly NAV_LINKS = NAV_LINKS;
   readonly isPublisherHost = isPublisherHost();
+
+  readonly navLinks = computed((): NavigationLink[] => {
+    const links: NavigationLink[] = [...NAV_LINKS];
+    if (this.authService.currentUser()?.is_admin) {
+      links.push({
+        label: 'NAVIGATION.ADMIN_PORTAL',
+        link: '/admin',
+      });
+    }
+    return links;
+  });
 
   isMobileMenuOpen = signal(false);
 

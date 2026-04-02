@@ -1,6 +1,9 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/auth/guards/auth.guard';
 import { guestGuard } from './core/auth/guards/guest.guard';
+import { adminGuard } from './features/admin/guards/admin.guard';
+import { itqanAdminGuard } from './features/admin/guards/itqan-admin.guard';
+import { publisherAdminGuard } from './features/admin/guards/publisher-admin.guard';
 import { publisherHostGuard } from './core/guards/publisher-host.guard';
 
 export const routes: Routes = [
@@ -18,14 +21,22 @@ export const routes: Routes = [
     path: 'admin',
     loadComponent: () =>
       import('./features/admin/admin-layout.component').then((m) => m.AdminLayoutComponent),
-    // canActivate: [authGuard, adminGuard],
+    canActivate: [authGuard, adminGuard],
     data: { hideHeader: true, fullWidth: true },
     children: [
       {
         path: 'publishers',
+        canActivate: [itqanAdminGuard],
         loadChildren: () =>
           import('./features/admin/publishers/publishers.routes').then((m) => m.publishersRoutes),
-        // canActivate: [itqanAdminGuard],
+      },
+      {
+        path: 'profile',
+        canActivate: [publisherAdminGuard],
+        loadComponent: () =>
+          import('./features/admin/pages/publisher-admin-profile.page').then(
+            (m) => m.PublisherAdminProfilePage
+          ),
       },
       {
         path: '',
