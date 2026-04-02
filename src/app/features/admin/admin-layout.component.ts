@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
@@ -8,7 +9,6 @@ import { AuthService } from '../../core/auth/services/auth.service';
 import { LangSwitchComponent } from '../../shared/components/lang-switch/lang-switch.component';
 import { UserActionsComponent } from '../../shared/components/user-actions/user-actions.component';
 import { isPublisherHost } from '../../shared/utils/publisherhost.util';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AdminAuthService } from './services/admin-auth.service';
 
 interface CmsTab {
@@ -18,8 +18,18 @@ interface CmsTab {
   emoji: string;
 }
 
-const TAB_MUSHAFS: CmsTab = { id: 'mushafs', path: 'mushafs', label: 'ADMIN.MENU.MUSHAFS', emoji: '📖' };
-const TAB_TAFSIRS: CmsTab = { id: 'tafsirs', path: 'tafsirs', label: 'ADMIN.MENU.TAFSIRS', emoji: '📚' };
+const TAB_MUSHAFS: CmsTab = {
+  id: 'mushafs',
+  path: 'mushafs',
+  label: 'ADMIN.MENU.MUSHAFS',
+  emoji: '📖',
+};
+const TAB_TAFSIRS: CmsTab = {
+  id: 'tafsirs',
+  path: 'tafsirs',
+  label: 'ADMIN.MENU.TAFSIRS',
+  emoji: '📚',
+};
 const TAB_TRANSLATIONS: CmsTab = {
   id: 'translations',
   path: 'translations',
@@ -73,13 +83,13 @@ export class AdminLayoutComponent {
   );
 
   readonly tabs = computed(() => {
-    if (this.adminAuth.isItqanAdmin()) {
-      return [TAB_MUSHAFS, TAB_TAFSIRS, TAB_TRANSLATIONS, TAB_PUBLISHERS, TAB_AUDIO];
-    }
-    if (this.adminAuth.isPublisherAdmin()) {
-      return [TAB_PROFILE, ...CORE_TABS];
-    }
-    return CORE_TABS;
+    // if (this.adminAuth.isItqanAdmin()) {
+    //   return [TAB_MUSHAFS, TAB_TAFSIRS, TAB_TRANSLATIONS, TAB_PUBLISHERS, TAB_AUDIO];
+    // }
+    // if (this.adminAuth.isPublisherAdmin()) {
+    return [TAB_PROFILE, ...CORE_TABS, TAB_PUBLISHERS];
+    // }
+    // return CORE_TABS;
   });
 
   constructor() {
