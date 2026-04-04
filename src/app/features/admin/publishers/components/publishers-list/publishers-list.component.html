@@ -1,0 +1,133 @@
+<div class="publishers-list" dir="rtl">
+
+  <div class="publishers-list__header">
+    <div class="publishers-list__header-text">
+      <h2 class="publishers-list__title">الناشرون</h2>
+      <p class="publishers-list__subtitle">إدارة الجهات والمؤسسات الناشرة للمحتوى القرآني</p>
+    </div>
+    <a routerLink="/admin/publishers/create">
+      <button nz-button nzType="primary" class="publishers-list__add-btn">
+        <i class="bx bx-plus" aria-hidden="true"></i>
+        إضافة ناشر
+      </button>
+    </a>
+  </div>
+
+  <app-publisher-filters (filtersChange)="onFiltersChange($event)"></app-publisher-filters>
+
+  <div class="publishers-list__table-wrap">
+    <nz-spin [nzSpinning]="loading()">
+      <nz-table
+        #pubTable
+        [nzData]="publishers()"
+        [nzFrontPagination]="false"
+        [nzShowPagination]="false"
+        nzSize="middle"
+        [nzNoResult]="emptyTpl"
+      >
+        <thead>
+          <tr>
+            <th
+              nzWidth="200px"
+              [nzSortFn]="true"
+              (nzSortOrderChange)="onSortChange('name_ar', $event)"
+            >
+              الاسم (عربي)
+            </th>
+            <th
+              nzWidth="180px"
+              [nzSortFn]="true"
+              (nzSortOrderChange)="onSortChange('name_en', $event)"
+            >
+              الاسم (إنجليزي)
+            </th>
+            <th nzWidth="120px">الدولة</th>
+            <th nzWidth="100px">موثق</th>
+            <th>الوصف</th>
+            <th nzWidth="130px">تاريخ الإضافة</th>
+            <th nzWidth="120px">الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of pubTable.data; track p.id) {
+            <tr class="publishers-list__row">
+              <td class="publishers-list__name">{{ p.name_ar }}</td>
+              <td class="publishers-list__name-en" dir="ltr">{{ p.name_en }}</td>
+              <td>{{ p.country ?? '—' }}</td>
+              <td>
+                @if (p.is_verified) {
+                  <nz-tag nzColor="success">موثق</nz-tag>
+                } @else {
+                  <nz-tag>غير موثق</nz-tag>
+                }
+              </td>
+              <td class="publishers-list__desc">{{ truncate(p.description) }}</td>
+              <td>{{ p.created_at | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                <div class="publishers-list__actions">
+                  <button
+                    type="button"
+                    nz-button
+                    nzType="text"
+                    class="action-icon action-icon--view"
+                    nz-tooltip
+                    nzTooltipTitle="عرض"
+                    (click)="onView(p.id)"
+                  >
+                    <i class="bx bx-eye" aria-hidden="true"></i>
+                  </button>
+                  <button
+                    type="button"
+                    nz-button
+                    nzType="text"
+                    class="action-icon action-icon--edit"
+                    nz-tooltip
+                    nzTooltipTitle="تعديل"
+                    (click)="onEdit(p.id)"
+                  >
+                    <i class="bx bx-edit-alt" aria-hidden="true"></i>
+                  </button>
+                  <button
+                    type="button"
+                    nz-button
+                    nzType="text"
+                    class="action-icon action-icon--delete"
+                    nz-tooltip
+                    nzTooltipTitle="حذف"
+                    (click)="onDelete(p)"
+                  >
+                    <i class="bx bx-trash" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-spin>
+  </div>
+
+  <ng-template #emptyTpl>
+    <div class="publishers-list__empty">
+      <span class="publishers-list__empty-icon">🏢</span>
+      <p class="publishers-list__empty-title">لا يوجد ناشرون</p>
+      <p class="publishers-list__empty-sub">لم يتم العثور على نتائج. حاول تعديل معايير البحث.</p>
+    </div>
+  </ng-template>
+
+  @if (!loading() && total() > 0) {
+    <div class="publishers-list__pagination">
+      <nz-pagination
+        [nzPageIndex]="page()"
+        [nzTotal]="total()"
+        [nzPageSize]="pageSize()"
+        [nzShowSizeChanger]="true"
+        [nzPageSizeOptions]="[10, 25, 50]"
+        nzShowQuickJumper
+        (nzPageIndexChange)="onPageChange($event)"
+        (nzPageSizeChange)="onPageSizeChange($event)"
+      ></nz-pagination>
+    </div>
+  }
+
+</div>

@@ -29,10 +29,25 @@ export interface PublisherFilters {
   country?: string;
   page: number;
   page_size: number;
+  ordering?: string;
 }
 
-export interface PublisherStatistics {
-  total_publishers: number;
-  total_active: number;
-  total_countries: number;
+export interface PublisherUiFilters {
+  search?: string;
+  is_verified?: boolean;
+  country?: string;
 }
+
+export type PublisherUpdatePayload = Pick<
+  Publisher,
+  | 'name_ar'
+  | 'name_en'
+  | 'country'
+  | 'website'
+  | 'icon_url'
+  | 'foundation_year'
+  | 'address'
+  | 'is_verified'
+  | 'contact_email'
+  | 'description'
+>;

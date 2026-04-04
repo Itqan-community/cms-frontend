@@ -1,0 +1,33 @@
+<div class="publisher-filters" dir="rtl">
+  <nz-input-group [nzPrefix]="searchIcon" class="publisher-filters__search">
+    <input
+      nz-input
+      type="text"
+      placeholder="ابحث عن ناشر..."
+      [ngModel]="searchValue"
+      (ngModelChange)="onSearchChange($event)"
+    />
+  </nz-input-group>
+  <ng-template #searchIcon><span nz-icon nzType="search"></span></ng-template>
+
+  <nz-input-group class="publisher-filters__country">
+    <input
+      nz-input
+      type="text"
+      placeholder="الدولة"
+      [ngModel]="countryValue"
+      (ngModelChange)="onCountryChange($event)"
+    />
+  </nz-input-group>
+
+  <nz-select
+    class="publisher-filters__select"
+    nzPlaceHolder="حالة التوثيق"
+    nzAllowClear
+    [ngModel]="selectedVerified"
+    (ngModelChange)="onVerifiedChange($event)"
+  >
+    <nz-option nzLabel="موثق" [nzValue]="true"></nz-option>
+    <nz-option nzLabel="غير موثق" [nzValue]="false"></nz-option>
+  </nz-select>
+</div>

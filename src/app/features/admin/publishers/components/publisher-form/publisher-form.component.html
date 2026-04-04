@@ -1,0 +1,143 @@
+<div class="publisher-form" dir="rtl">
+
+  <div class="publisher-form__header">
+    <div class="publisher-form__header-text">
+      <h2 class="publisher-form__title">
+        {{ isEditMode() ? 'تعديل الناشر' : 'إضافة ناشر جديد' }}
+      </h2>
+      <p class="publisher-form__subtitle">
+        {{ isEditMode() ? 'قم بتحديث بيانات الناشر' : 'أدخل بيانات الناشر الجديد' }}
+      </p>
+    </div>
+    <button type="button" nz-button nzType="default" class="publisher-form__back-btn" (click)="onCancel()">
+      <span nz-icon nzType="arrow-right"></span>
+      إلغاء
+    </button>
+  </div>
+
+  @if (loadingDetail()) {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 10 }"></nz-skeleton>
+  } @else {
+    <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="onSubmit()">
+
+      <div class="publisher-form__card">
+        <h3 class="publisher-form__card-title">
+          <span nz-icon nzType="edit"></span>
+          الاسم
+        </h3>
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>الاسم بالعربية</nz-form-label>
+              <nz-form-control nzErrorTip="الاسم بالعربية مطلوب">
+                <input nz-input formControlName="name_ar" placeholder="مثال: مجمع الملك فهد" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Name in English</nz-form-label>
+              <nz-form-control nzErrorTip="English name is required">
+                <input nz-input formControlName="name_en" placeholder="e.g. King Fahd Complex" dir="ltr" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </div>
+
+      <div class="publisher-form__card">
+        <h3 class="publisher-form__card-title">
+          <span nz-icon nzType="environment"></span>
+          الموقع والتواصل
+        </h3>
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label>الدولة</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="country" placeholder="المملكة العربية السعودية" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label>سنة التأسيس</nz-form-label>
+              <nz-form-control>
+                <input nz-input type="number" formControlName="foundation_year" placeholder="2020" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label>الموقع الإلكتروني</nz-form-label>
+              <nz-form-control>
+                <input nz-input formControlName="website" placeholder="https://example.com" dir="ltr" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label>البريد الإلكتروني</nz-form-label>
+              <nz-form-control nzErrorTip="البريد غير صالح">
+                <input nz-input formControlName="contact_email" placeholder="info@example.com" dir="ltr" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+        <nz-form-item>
+          <nz-form-label>العنوان</nz-form-label>
+          <nz-form-control>
+            <input nz-input formControlName="address" placeholder="المدينة، الحي، الشارع..." />
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="publisher-form__card">
+        <h3 class="publisher-form__card-title">
+          <span nz-icon nzType="picture"></span>
+          الأيقونة والوصف
+        </h3>
+        <nz-form-item>
+          <nz-form-label>رابط الأيقونة (URL)</nz-form-label>
+          <nz-form-control>
+            <input nz-input formControlName="icon_url" placeholder="https://example.com/logo.png" dir="ltr" />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label>الوصف</nz-form-label>
+          <nz-form-control>
+            <textarea
+              nz-input
+              formControlName="description"
+              placeholder="وصف مختصر عن الناشر..."
+              [nzAutosize]="{ minRows: 4, maxRows: 8 }"
+            ></textarea>
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label>ناشر موثق</nz-form-label>
+          <nz-form-control>
+            <nz-switch formControlName="is_verified"></nz-switch>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="publisher-form__footer">
+        <button type="button" nz-button nzType="default" (click)="onCancel()">إلغاء</button>
+        <button
+          nz-button
+          nzType="primary"
+          [nzLoading]="submitting()"
+          [disabled]="form.invalid"
+          type="submit"
+        >
+          {{ isEditMode() ? 'حفظ التعديلات' : 'إضافة الناشر' }}
+        </button>
+      </div>
+
+    </form>
+  }
+
+</div>

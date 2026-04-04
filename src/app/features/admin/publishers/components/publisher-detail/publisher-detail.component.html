@@ -1,0 +1,109 @@
+<div class="publisher-detail" dir="rtl">
+
+  <div class="publisher-detail__breadcrumb">
+    <a routerLink="/admin/publishers" class="publisher-detail__breadcrumb-link">الناشرون</a>
+    <span nz-icon nzType="left" class="publisher-detail__breadcrumb-sep"></span>
+    @if (loading()) {
+      <span class="publisher-detail__breadcrumb-cur">جاري التحميل...</span>
+    } @else {
+      <span class="publisher-detail__breadcrumb-cur">{{ publisher()?.name_ar }}</span>
+    }
+  </div>
+
+  @if (loading()) {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 8 }"></nz-skeleton>
+  } @else if (publisher(); as p) {
+
+    <div class="publisher-detail__hero">
+      @if (p.icon_url) {
+        <nz-avatar [nzSrc]="p.icon_url" nzIcon="user" [nzSize]="100" class="publisher-detail__avatar"></nz-avatar>
+      } @else {
+        <div class="publisher-detail__avatar-placeholder">🏢</div>
+      }
+
+      <div class="publisher-detail__hero-info">
+        <div class="publisher-detail__names">
+          <h1 class="publisher-detail__name-ar">{{ p.name_ar }}</h1>
+          <p class="publisher-detail__name-en" dir="ltr">{{ p.name_en }}</p>
+        </div>
+        <div class="publisher-detail__meta">
+          @if (p.is_verified) {
+            <nz-tag nzColor="success">موثق</nz-tag>
+          } @else {
+            <nz-tag>غير موثق</nz-tag>
+          }
+          @if (p.created_at) {
+            <span class="publisher-detail__meta-date">
+              <span nz-icon nzType="calendar"></span>
+              {{ p.created_at | date: 'dd/MM/yyyy' }}
+            </span>
+          }
+        </div>
+      </div>
+
+      <div class="publisher-detail__actions">
+        <button nz-button nzType="primary" (click)="onEdit()">
+          <span nz-icon nzType="edit"></span>
+          تعديل
+        </button>
+        <button nz-button nzDanger (click)="onDelete()">
+          <span nz-icon nzType="delete"></span>
+          حذف
+        </button>
+      </div>
+    </div>
+
+    <div class="publisher-detail__panel">
+      <h3 class="publisher-detail__panel-title">
+        <span nz-icon nzType="profile"></span>
+        البيانات التفصيلية
+      </h3>
+      <nz-descriptions nzBordered [nzColumn]="{ xxl: 2, xl: 2, lg: 2, md: 1, sm: 1, xs: 1 }">
+        <nz-descriptions-item nzTitle="الدولة">{{ p.country ?? '—' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="سنة التأسيس">
+          {{ p.foundation_year != null ? p.foundation_year : '—' }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="العنوان" [nzSpan]="2">{{ p.address ?? '—' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="البريد الإلكتروني">
+          @if (p.contact_email) {
+            <a [href]="'mailto:' + p.contact_email">{{ p.contact_email }}</a>
+          } @else {
+            —
+          }
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="الموقع الإلكتروني">
+          @if (p.website) {
+            <a [href]="p.website" target="_blank" rel="noopener noreferrer">{{ p.website }}</a>
+          } @else {
+            —
+          }
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="رابط الأيقونة" [nzSpan]="2">
+          @if (p.icon_url) {
+            <span class="publisher-detail__mono">{{ p.icon_url }}</span>
+          } @else {
+            —
+          }
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="الوصف" [nzSpan]="2">{{ p.description ?? '—' }}</nz-descriptions-item>
+      </nz-descriptions>
+    </div>
+
+    <div class="publisher-detail__back">
+      <a routerLink="/admin/publishers">
+        <button nz-button nzType="default">
+          <span nz-icon nzType="arrow-right"></span>
+          العودة للقائمة
+        </button>
+      </a>
+    </div>
+
+  } @else {
+    <div class="publisher-detail__not-found">
+      <span>⚠️</span>
+      <p>لم يتم العثور على الناشر المطلوب.</p>
+      <a routerLink="/admin/publishers">العودة للقائمة</a>
+    </div>
+  }
+
+</div>

@@ -1,6 +1,5 @@
 import { Routes } from '@angular/router';
 import { PublishersLayoutComponent } from './publishers-layout.component';
-import { PublishersComponent } from './publishers.component';
 
 export const publishersRoutes: Routes = [
   {
@@ -9,23 +8,31 @@ export const publishersRoutes: Routes = [
     children: [
       {
         path: '',
-        component: PublishersComponent,
+        loadComponent: () =>
+          import('./components/publishers-list/publishers-list.component').then(
+            (m) => m.PublishersListComponent
+          ),
       },
       {
-        path: 'authors',
+        path: 'create',
         loadComponent: () =>
-          import('../../../shared/components/empty-placeholder/empty-placeholder.component').then(
-            (m) => m.EmptyPlaceholderComponent
+          import('./components/publisher-form/publisher-form.component').then(
+            (m) => m.PublisherFormComponent
           ),
-        data: { title: 'المؤلفون' },
       },
       {
-        path: 'sources',
+        path: ':id/edit',
         loadComponent: () =>
-          import('../../../shared/components/empty-placeholder/empty-placeholder.component').then(
-            (m) => m.EmptyPlaceholderComponent
+          import('./components/publisher-form/publisher-form.component').then(
+            (m) => m.PublisherFormComponent
           ),
-        data: { title: 'المصادر' },
+      },
+      {
+        path: ':id',
+        loadComponent: () =>
+          import('./components/publisher-detail/publisher-detail.component').then(
+            (m) => m.PublisherDetailComponent
+          ),
       },
     ],
   },
