@@ -2,9 +2,8 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzModalService } from 'ng-zorro-antd/modal';
+import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule, NzTableSortOrder } from 'ng-zorro-antd/table';
@@ -25,8 +24,8 @@ import { TafsirFiltersComponent } from '../tafsir-filters/tafsir-filters.compone
   imports: [
     DatePipe,
     RouterLink,
+    NzModalModule,
     NzButtonModule,
-    NzIconModule,
     NzPaginationModule,
     NzSpinModule,
     NzTableModule,

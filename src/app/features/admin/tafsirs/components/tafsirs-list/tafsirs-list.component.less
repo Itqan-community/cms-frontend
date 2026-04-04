@@ -40,7 +40,11 @@
     font-weight: 500;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+
+    .bx {
+      font-size: 1.125rem;
+    }
   }
 
   &__table-wrap {
@@ -92,11 +96,17 @@
 }
 
 .action-icon {
-  font-size: 17px;
+  font-size: 1.1rem;
   cursor: pointer;
-  padding: 4px;
+  padding: 2px 6px;
   border-radius: 6px;
   transition: background 0.15s, color 0.15s;
+  min-width: auto;
+  height: auto;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 
   &--view {
     color: #1890ff;

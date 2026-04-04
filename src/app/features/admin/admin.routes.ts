@@ -20,10 +20,6 @@ export const adminRoutes: Routes = [
     data: { emoji: '✏️' },
   },
   {
-    path: 'tafsirs',
-    loadChildren: () => import('./tafsirs/tafsirs.routes').then((m) => m.tafsirRoutes),
-  },
-  {
     path: 'translations',
     loadComponent: () =>
       import('./components/coming-soon/coming-soon.component').then((m) => m.ComingSoonComponent),
