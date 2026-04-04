@@ -452,6 +452,59 @@
         "DELETE_SUCCESS": "Tafsir deleted successfully",
         "ERROR": "An error occurred. Please try again."
       }
+    },
+    "TRANSLATIONS": {
+      "TITLE": "Translations",
+      "ADD_BUTTON": "Add translation",
+      "SEARCH_PLACEHOLDER": "Search translations...",
+      "COLUMNS": {
+        "NAME": "Name",
+        "DESCRIPTION": "Description",
+        "PUBLISHER": "Publisher",
+        "LICENSE": "License",
+        "CREATED_AT": "Date Added",
+        "ACTIONS": "Actions"
+      },
+      "FILTERS": {
+        "PUBLISHER": "Publisher",
+        "LICENSE": "License",
+        "LANGUAGE": "Language",
+        "IS_EXTERNAL": "Type"
+      },
+      "FORM": {
+        "CREATE_TITLE": "Add New Translation",
+        "EDIT_TITLE": "Edit Translation",
+        "SUBMIT_CREATE": "Add Translation",
+        "SUBMIT_EDIT": "Save Changes",
+        "CANCEL": "Cancel",
+        "NAME_AR": "Name (Arabic)",
+        "NAME_EN": "Name (English)",
+        "DESCRIPTION_AR": "Description (Arabic)",
+        "DESCRIPTION_EN": "Description (English)",
+        "LONG_DESCRIPTION_AR": "Long Description (Arabic)",
+        "LONG_DESCRIPTION_EN": "Long Description (English)",
+        "THUMBNAIL": "Thumbnail",
+        "LICENSE": "License",
+        "LANGUAGE": "Language",
+        "PUBLISHER": "Publisher"
+      },
+      "DELETE": {
+        "CONFIRM_TITLE": "Delete this translation?",
+        "CONFIRM_CONTENT": "This action cannot be undone.",
+        "OK": "Yes, Delete",
+        "CANCEL": "Cancel"
+      },
+      "DETAIL": {
+        "VERSIONS_TITLE": "Versions",
+        "EDIT": "Edit",
+        "DELETE": "Delete"
+      },
+      "MESSAGES": {
+        "CREATE_SUCCESS": "Translation added successfully",
+        "UPDATE_SUCCESS": "Translation updated successfully",
+        "DELETE_SUCCESS": "Translation deleted successfully",
+        "ERROR": "An error occurred. Please try again."
+      }
     }
   }
 }

@@ -1,0 +1,130 @@
+<div class="translations-list" dir="rtl">
+
+  <div class="translations-list__header">
+    <div class="translations-list__header-text">
+      <h2 class="translations-list__title">الترجمات</h2>
+      <p class="translations-list__subtitle">إدارة ترجمات معاني القرآن الكريم</p>
+    </div>
+    <a routerLink="/admin/translations/create">
+      <button nz-button nzType="primary" class="translations-list__add-btn">
+        <i class="bx bx-plus" aria-hidden="true"></i>
+        إضافة ترجمة
+      </button>
+    </a>
+  </div>
+
+  <app-translation-filters (filtersChange)="onFiltersChange($event)"></app-translation-filters>
+
+  <div class="translations-list__table-wrap">
+    <nz-spin [nzSpinning]="loading()">
+      <nz-table
+        #translationTable
+        [nzData]="translations()"
+        [nzFrontPagination]="false"
+        [nzShowPagination]="false"
+        nzSize="middle"
+        [nzScroll]="{ x: '900px' }"
+        [nzNoResult]="emptyTpl"
+      >
+        <thead>
+          <tr>
+            <th
+              nzWidth="220px"
+              [nzSortFn]="true"
+              (nzSortOrderChange)="onSortChange('name', $event)"
+            >
+              الاسم
+            </th>
+            <th>الوصف</th>
+            <th
+              nzWidth="180px"
+              [nzSortFn]="true"
+              (nzSortOrderChange)="onSortChange('publisher_id', $event)"
+            >
+              الناشر
+            </th>
+            <th nzWidth="130px">الترخيص</th>
+            <th nzWidth="140px">تاريخ الإضافة</th>
+            <th nzWidth="120px">الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (tr of translationTable.data; track tr.id) {
+            <tr class="translations-list__row">
+              <td class="translations-list__name">{{ tr.name }}</td>
+              <td class="translations-list__desc">{{ truncate(tr.description) }}</td>
+              <td>{{ tr.publisher.name }}</td>
+              <td>
+                <nz-tag [nzColor]="getLicenseColor(tr.license)">
+                  {{ tr.license }}
+                </nz-tag>
+              </td>
+              <td>{{ tr.created_at | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                <div class="translations-list__actions">
+                  <button
+                    type="button"
+                    nz-button
+                    nzType="text"
+                    class="action-icon action-icon--view"
+                    nz-tooltip
+                    nzTooltipTitle="عرض"
+                    (click)="onView(tr.id)"
+                  >
+                    <i class="bx bx-show" aria-hidden="true"></i>
+                  </button>
+                  <button
+                    type="button"
+                    nz-button
+                    nzType="text"
+                    class="action-icon action-icon--edit"
+                    nz-tooltip
+                    nzTooltipTitle="تعديل"
+                    (click)="onEdit(tr.id)"
+                  >
+                    <i class="bx bx-edit-alt" aria-hidden="true"></i>
+                  </button>
+                  <button
+                    type="button"
+                    nz-button
+                    nzType="text"
+                    class="action-icon action-icon--delete"
+                    nz-tooltip
+                    nzTooltipTitle="حذف"
+                    (click)="onDelete(tr)"
+                  >
+                    <i class="bx bx-trash" aria-hidden="true"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-spin>
+  </div>
+
+  <ng-template #emptyTpl>
+    <div class="translations-list__empty">
+      <span class="translations-list__empty-icon">🌍</span>
+      <p class="translations-list__empty-title">لا توجد ترجمات</p>
+      <p class="translations-list__empty-sub">لم يتم العثور على نتائج. حاول تعديل معايير البحث.</p>
+    </div>
+  </ng-template>
+
+  @if (!loading() && total() > 0) {
+    <div class="translations-list__pagination">
+      <nz-pagination
+        [nzPageIndex]="page()"
+        [nzTotal]="total()"
+        [nzPageSize]="pageSize()"
+        [nzShowSizeChanger]="true"
+        [nzPageSizeOptions]="[10, 25, 50]"
+        nzShowQuickJumper
+        (nzPageIndexChange)="onPageChange($event)"
+        (nzPageSizeChange)="onPageSizeChange($event)"
+      ></nz-pagination>
+    </div>
+  }
+
+</div>

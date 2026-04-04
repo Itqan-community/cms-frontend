@@ -20,12 +20,6 @@ export const adminRoutes: Routes = [
     data: { emoji: '✏️' },
   },
   {
-    path: 'translations',
-    loadComponent: () =>
-      import('./components/coming-soon/coming-soon.component').then((m) => m.ComingSoonComponent),
-    data: { emoji: '🌍' },
-  },
-  {
     path: 'linguistics',
     loadComponent: () =>
       import('./components/coming-soon/coming-soon.component').then((m) => m.ComingSoonComponent),

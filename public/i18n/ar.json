@@ -452,6 +452,59 @@
         "DELETE_SUCCESS": "تم حذف التفسير بنجاح",
         "ERROR": "حدث خطأ. يرجى المحاولة مرة أخرى."
       }
+    },
+    "TRANSLATIONS": {
+      "TITLE": "الترجمات",
+      "ADD_BUTTON": "إضافة ترجمة",
+      "SEARCH_PLACEHOLDER": "ابحث عن ترجمة...",
+      "COLUMNS": {
+        "NAME": "الاسم",
+        "DESCRIPTION": "الوصف",
+        "PUBLISHER": "الناشر",
+        "LICENSE": "الترخيص",
+        "CREATED_AT": "تاريخ الإضافة",
+        "ACTIONS": "الإجراءات"
+      },
+      "FILTERS": {
+        "PUBLISHER": "الناشر",
+        "LICENSE": "الترخيص",
+        "LANGUAGE": "اللغة",
+        "IS_EXTERNAL": "النوع"
+      },
+      "FORM": {
+        "CREATE_TITLE": "إضافة ترجمة جديدة",
+        "EDIT_TITLE": "تعديل الترجمة",
+        "SUBMIT_CREATE": "إضافة الترجمة",
+        "SUBMIT_EDIT": "حفظ التعديلات",
+        "CANCEL": "إلغاء",
+        "NAME_AR": "الاسم بالعربية",
+        "NAME_EN": "الاسم بالإنجليزية",
+        "DESCRIPTION_AR": "الوصف بالعربية",
+        "DESCRIPTION_EN": "الوصف بالإنجليزية",
+        "LONG_DESCRIPTION_AR": "الوصف المطوّل بالعربية",
+        "LONG_DESCRIPTION_EN": "الوصف المطوّل بالإنجليزية",
+        "THUMBNAIL": "الصورة المصغّرة",
+        "LICENSE": "الترخيص",
+        "LANGUAGE": "لغة الترجمة",
+        "PUBLISHER": "الناشر"
+      },
+      "DELETE": {
+        "CONFIRM_TITLE": "هل أنت متأكد من حذف هذه الترجمة؟",
+        "CONFIRM_CONTENT": "هذا الإجراء لا يمكن التراجع عنه.",
+        "OK": "نعم، احذف",
+        "CANCEL": "إلغاء"
+      },
+      "DETAIL": {
+        "VERSIONS_TITLE": "الإصدارات",
+        "EDIT": "تعديل",
+        "DELETE": "حذف"
+      },
+      "MESSAGES": {
+        "CREATE_SUCCESS": "تم إضافة الترجمة بنجاح",
+        "UPDATE_SUCCESS": "تم تحديث الترجمة بنجاح",
+        "DELETE_SUCCESS": "تم حذف الترجمة بنجاح",
+        "ERROR": "حدث خطأ. يرجى المحاولة مرة أخرى."
+      }
     }
   }
 }

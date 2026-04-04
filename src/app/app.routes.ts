@@ -41,6 +41,13 @@ export const routes: Routes = [
           import('./features/admin/tafsirs/tafsirs.routes').then((m) => m.tafsirRoutes),
       },
       {
+        path: 'translations',
+        loadChildren: () =>
+          import('./features/admin/translations/translations.routes').then(
+            (m) => m.translationRoutes
+          ),
+      },
+      {
         path: '',
         loadChildren: () => import('./features/admin/admin.routes').then((m) => m.adminRoutes),
       },
