@@ -50,6 +50,10 @@
                 }
               ],
               "outputHashing": "all",
+              "sourceMap": {
+                "scripts": true,
+                "hidden": true
+              },
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -71,6 +75,10 @@
                 }
               ],
               "outputHashing": "all",
+              "sourceMap": {
+                "scripts": true,
+                "hidden": true
+              },
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",

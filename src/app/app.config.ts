@@ -1,9 +1,14 @@
 import {
   ApplicationConfig,
+  ErrorHandler,
+  inject,
+  provideAppInitializer,
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
 } from '@angular/core';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
+import * as Sentry from '@sentry/angular';
+import { environment } from '../environments/environment';
 
 import { routes } from './app.routes';
 import { ar_EG, provideNzI18n } from 'ng-zorro-antd/i18n';
@@ -24,6 +29,21 @@ export const appConfig: ApplicationConfig = {
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
+    ...(environment.sentryDsn
+      ? [
+          {
+            provide: ErrorHandler,
+            useValue: Sentry.createErrorHandler(),
+          },
+          {
+            provide: Sentry.TraceService,
+            deps: [Router],
+          },
+          provideAppInitializer(() => {
+            inject(Sentry.TraceService);
+          }),
+        ]
+      : []),
     provideNzI18n(ar_EG),
     provideAnimationsAsync(),
     provideHttpClient(
