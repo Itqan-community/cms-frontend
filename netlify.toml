@@ -1,11 +1,11 @@
 # Production environment (master branch)
 [build]
-  command = "npm install --legacy-peer-deps && npm run build:production"
+  command = "npm run build:production"
   publish = "dist/browser"
 
 # Staging environment
 [context.staging]
-  command = "npm install --legacy-peer-deps && npm run build:staging"
+  command = "npm run build:staging"
   publish = "dist/browser"
 
 # Publisher environment
