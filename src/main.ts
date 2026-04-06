@@ -10,11 +10,7 @@ if (environment.sentryDsn) {
     environment: environment.production ? 'production' : 'staging',
     integrations: [Sentry.browserTracingIntegration()],
     tracesSampleRate: environment.production ? 0.2 : 1.0,
-    tracePropagationTargets: [
-      'localhost',
-      /^https:\/\/.*\.api\.cms\.itqan\.dev/,
-      /^https:\/\/api\.cms\.itqan\.dev/,
-    ],
+    tracePropagationTargets: ['localhost'],
   });
 }
 
