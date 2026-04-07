@@ -1,11 +1,39 @@
 import { Routes } from '@angular/router';
+import { RecitationsLayoutComponent } from './recitations-layout.component';
 
-export const routes: Routes = [
+export const recitationRoutes: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('./components/recitation-list/recitation-list.component').then(
-        (m) => m.RecitationListComponent
-      ),
+    component: RecitationsLayoutComponent,
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./components/recitations-list/recitations-list.component').then(
+            (m) => m.RecitationsListComponent
+          ),
+      },
+      {
+        path: 'create',
+        loadComponent: () =>
+          import('./components/recitation-form/recitation-form.component').then(
+            (m) => m.RecitationFormComponent
+          ),
+      },
+      {
+        path: ':id/edit',
+        loadComponent: () =>
+          import('./components/recitation-form/recitation-form.component').then(
+            (m) => m.RecitationFormComponent
+          ),
+      },
+      {
+        path: ':id',
+        loadComponent: () =>
+          import('./components/recitation-detail/recitation-detail.component').then(
+            (m) => m.RecitationDetailComponent
+          ),
+      },
+    ],
   },
 ];

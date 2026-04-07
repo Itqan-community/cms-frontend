@@ -42,7 +42,18 @@ const TAB_PUBLISHERS: CmsTab = {
   label: 'ADMIN.MENU.PUBLISHERS',
   emoji: '📰',
 };
-const TAB_AUDIO: CmsTab = { id: 'audio', path: 'audio', label: 'ADMIN.MENU.AUDIO', emoji: '🔊' };
+const TAB_RECITATIONS: CmsTab = {
+  id: 'recitations',
+  path: 'recitations',
+  label: 'ADMIN.MENU.RECITATIONS',
+  emoji: '🎵',
+};
+const TAB_RECITERS: CmsTab = {
+  id: 'reciters',
+  path: 'reciters',
+  label: 'ADMIN.MENU.RECITERS',
+  emoji: '🔊',
+};
 const TAB_PROFILE: CmsTab = {
   id: 'profile',
   path: 'profile',
@@ -50,7 +61,13 @@ const TAB_PROFILE: CmsTab = {
   emoji: '🪪',
 };
 
-const CORE_TABS: CmsTab[] = [TAB_MUSHAFS, TAB_TAFSIRS, TAB_TRANSLATIONS, TAB_AUDIO];
+const CORE_TABS: CmsTab[] = [
+  TAB_MUSHAFS,
+  TAB_TAFSIRS,
+  TAB_TRANSLATIONS,
+  TAB_RECITATIONS,
+  TAB_RECITERS,
+];
 
 @Component({
   selector: 'app-admin-layout',

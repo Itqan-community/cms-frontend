@@ -1,0 +1,50 @@
+.reciter-filters {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+
+  &__search {
+    flex: 1;
+    min-width: 220px;
+  }
+
+  &__select {
+    min-width: 160px;
+  }
+}
+
+:host ::ng-deep {
+  .ant-input-affix-wrapper {
+    border-radius: 10px;
+    border-color: #e5e7eb;
+    height: 40px;
+
+    &:hover,
+    &:focus-within {
+      border-color: #16a34a;
+      box-shadow: none;
+    }
+  }
+
+  .ant-input {
+    font-size: 0.9rem;
+  }
+
+  .ant-select-selector {
+    border-radius: 10px !important;
+    border-color: #e5e7eb !important;
+    height: 40px !important;
+    align-items: center !important;
+
+    &:hover {
+      border-color: #16a34a !important;
+    }
+  }
+
+  .ant-select-focused .ant-select-selector {
+    border-color: #16a34a !important;
+    box-shadow: none !important;
+  }
+}

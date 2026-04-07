@@ -1,13 +1,10 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
-import { RecitationsService, PaginatedResponse } from './recitations.service';
-import { RecitationItem } from '../models/recitations.models';
-import { environment } from '../../../../../environments/environment';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RecitationsService } from './recitations.service';
+import { MaddLevel, MeemBehavior } from '../models/recitations.models';
 
 describe('RecitationsService', () => {
   let service: RecitationsService;
-  let httpMock: HttpTestingController;
-  const apiUrl = `${environment.API_BASE_URL}/recitations/`;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -15,63 +12,47 @@ describe('RecitationsService', () => {
       providers: [RecitationsService],
     });
     service = TestBed.inject(RecitationsService);
-    httpMock = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => {
-    httpMock.verify();
   });
 
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
-  it('should fetch recitations with correct parameters', () => {
-    const mockResponse: PaginatedResponse<RecitationItem> = {
-      count: 1,
-      next: null,
-      previous: null,
-      results: [
-        {
-          id: 1,
-          name: 'Test Recitation',
-          description: 'Description',
-          publisher: { id: 1, name: 'Publisher' },
-          reciter: { id: 'reciter1', name: 'Reciter', name_en: 'Reciter EN' },
-          riwayah: { id: 1, name: 'Hafs' },
-          qiraah: { id: 1, name: 'Asim' },
-          surahs_count: 114,
-        },
-      ],
-    };
-
-    service.getRecitations(1, 10, 'search text', 'Hafs', 'murattal').subscribe((res) => {
-      expect(res.results.length).toBe(1);
-      expect(res.results).toEqual(mockResponse.results);
+  it('should expose qiraah and riwayah options (mock)', (done) => {
+    service.qiraahOptions().subscribe((q) => {
+      expect(q.length).toBeGreaterThan(0);
+      service.riwayahOptions().subscribe((r) => {
+        expect(r.length).toBeGreaterThan(0);
+        done();
+      });
     });
-
-    const req = httpMock.expectOne(
-      (request) =>
-        request.url === apiUrl &&
-        request.params.get('page') === '1' &&
-        request.params.get('page_size') === '10' &&
-        request.params.get('search') === 'search text' &&
-        request.params.get('riwayah') === 'Hafs' &&
-        request.params.get('type') === 'murattal'
-    );
-
-    expect(req.request.method).toBe('GET');
-    req.flush(mockResponse);
   });
 
-  it('should delete a recitation', () => {
-    const id = 123;
-    service.deleteRecitation(id).subscribe((res) => {
-      expect(res).toBeDefined();
-    });
+  it('getList should return mock results without HTTP', (done) => {
+    service
+      .getList({
+        page: 1,
+        page_size: 10,
+        search: 'تلاوة',
+      })
+      .subscribe((res) => {
+        expect(res.count).toBeGreaterThanOrEqual(0);
+        expect(Array.isArray(res.results)).toBe(true);
+        done();
+      });
+  });
 
-    const req = httpMock.expectOne(`${apiUrl}${id}/`);
-    expect(req.request.method).toBe('DELETE');
-    req.flush(null);
+  it('getDetail should return mock detail', (done) => {
+    service.getDetail(1).subscribe((d) => {
+      expect(d.id).toBe(1);
+      expect(d.madd_level).toBeDefined();
+      expect([MaddLevel.TWASSUT, MaddLevel.QASR]).toContain(d.madd_level);
+      expect([MeemBehavior.SILAH, MeemBehavior.SKOUN]).toContain(d.meem_behavior);
+      done();
+    });
+  });
+
+  it('delete should complete (mock)', (done) => {
+    service.delete(1).subscribe(() => done());
   });
 });

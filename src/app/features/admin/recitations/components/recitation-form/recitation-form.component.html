@@ -1,0 +1,206 @@
+<div class="recitation-form" dir="rtl">
+
+  <div class="recitation-form__header">
+    <div class="recitation-form__header-text">
+      <h2 class="recitation-form__title">
+        {{ isEditMode() ? 'تعديل التلاوة' : 'إضافة تلاوة جديدة' }}
+      </h2>
+      <p class="recitation-form__subtitle">
+        {{ isEditMode() ? 'قم بتحديث بيانات التلاوة' : 'أدخل بيانات التلاوة الجديدة' }}
+      </p>
+    </div>
+    <a routerLink="/admin/recitations">
+      <button nz-button nzType="default" class="recitation-form__back-btn">
+        <span nz-icon nzType="arrow-right"></span>
+        العودة للقائمة
+      </button>
+    </a>
+  </div>
+
+  @if (loadingDetail() || loadingOptions()) {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 10 }"></nz-skeleton>
+  } @else {
+    <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="onSubmit()">
+
+      <div class="recitation-form__card">
+        <h3 class="recitation-form__card-title">
+          <span nz-icon nzType="edit"></span> الاسم
+        </h3>
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>الاسم بالعربية</nz-form-label>
+              <nz-form-control nzErrorTip="الاسم بالعربية مطلوب">
+                <input nz-input formControlName="name_ar" placeholder="مثال: مصحف مرتل — حفص" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Name in English</nz-form-label>
+              <nz-form-control nzErrorTip="Name in English is required">
+                <input nz-input formControlName="name_en" placeholder="e.g. Murattal Mushaf" dir="ltr" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </div>
+
+      <div class="recitation-form__card">
+        <h3 class="recitation-form__card-title">
+          <span nz-icon nzType="file-text"></span> الوصف
+        </h3>
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>الوصف بالعربية</nz-form-label>
+              <nz-form-control nzErrorTip="مطلوب">
+                <textarea
+                  nz-input
+                  formControlName="description_ar"
+                  [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+                ></textarea>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Description (EN)</nz-form-label>
+              <nz-form-control nzErrorTip="Required">
+                <textarea
+                  nz-input
+                  formControlName="description_en"
+                  dir="ltr"
+                  [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+                ></textarea>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </div>
+
+      <div class="recitation-form__card">
+        <h3 class="recitation-form__card-title">
+          <span nz-icon nzType="link"></span> الربط والخصائص
+        </h3>
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>الناشر</nz-form-label>
+              <nz-form-control nzErrorTip="اختر الناشر">
+                <nz-select
+                  formControlName="publisher_id"
+                  nzShowSearch
+                  nzServerSearch
+                  nzAllowClear
+                  [nzLoading]="publishersLoading()"
+                  (nzOnSearch)="onPublisherSearch($event)"
+                >
+                  @for (p of publisherOptions(); track p.id) {
+                    <nz-option [nzValue]="p.id" [nzLabel]="p.name"></nz-option>
+                  }
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>القارئ</nz-form-label>
+              <nz-form-control nzErrorTip="اختر القارئ">
+                <nz-select formControlName="reciter_id" nzShowSearch nzAllowClear>
+                  @for (r of reciterOptions(); track r.id) {
+                    <nz-option [nzValue]="r.id" [nzLabel]="r.name"></nz-option>
+                  }
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>القراءة</nz-form-label>
+              <nz-form-control nzErrorTip="اختر القراءة">
+                <nz-select formControlName="qiraah_id" nzAllowClear>
+                  @for (q of qiraahOptions(); track q.id) {
+                    <nz-option [nzValue]="q.id" [nzLabel]="q.name"></nz-option>
+                  }
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>الرواية</nz-form-label>
+              <nz-form-control nzErrorTip="اختر الرواية">
+                <nz-select formControlName="riwayah_id" nzAllowClear>
+                  @for (rw of riwayahOptions(); track rw.id) {
+                    <nz-option [nzValue]="rw.id" [nzLabel]="rw.name"></nz-option>
+                  }
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+            <nz-form-item>
+              <nz-form-label nzRequired>مستوى المد</nz-form-label>
+              <nz-form-control>
+                <nz-select formControlName="madd_level">
+                  @for (m of maddOptions; track m.v) {
+                    <nz-option [nzValue]="m.v" [nzLabel]="m.l"></nz-option>
+                  }
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+            <nz-form-item>
+              <nz-form-label nzRequired>همز الميم</nz-form-label>
+              <nz-form-control>
+                <nz-select formControlName="meem_behavior">
+                  @for (m of meemOptions; track m.v) {
+                    <nz-option [nzValue]="m.v" [nzLabel]="m.l"></nz-option>
+                  }
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+            <nz-form-item>
+              <nz-form-label nzRequired>السنة</nz-form-label>
+              <nz-form-control nzErrorTip="أدخل سنة صحيحة">
+                <nz-input-number
+                  formControlName="year"
+                  [nzMin]="1900"
+                  [nzMax]="2100"
+                  [nzStep]="1"
+                  class="recitation-form__year-input"
+                ></nz-input-number>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>الترخيص</nz-form-label>
+              <nz-form-control nzErrorTip="اختر الترخيص">
+                <nz-select formControlName="license" nzAllowClear>
+                  @for (l of licenseOptions; track l) {
+                    <nz-option [nzValue]="l" [nzLabel]="l"></nz-option>
+                  }
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </div>
+
+      <div class="recitation-form__footer">
+        <a routerLink="/admin/recitations">
+          <button nz-button type="button">إلغاء</button>
+        </a>
+        <button nz-button nzType="primary" [nzLoading]="submitting()" [disabled]="submitting()">
+          {{ isEditMode() ? 'حفظ التعديلات' : 'إضافة التلاوة' }}
+        </button>
+      </div>
+    </form>
+  }
+
+</div>

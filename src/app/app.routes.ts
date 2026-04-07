@@ -48,6 +48,18 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'recitations',
+        loadChildren: () =>
+          import('./features/admin/recitations/recitations.routes').then(
+            (m) => m.recitationRoutes
+          ),
+      },
+      {
+        path: 'reciters',
+        loadChildren: () =>
+          import('./features/admin/reciters/reciters.routes').then((m) => m.reciterRoutes),
+      },
+      {
         path: '',
         loadChildren: () => import('./features/admin/admin.routes').then((m) => m.adminRoutes),
       },
