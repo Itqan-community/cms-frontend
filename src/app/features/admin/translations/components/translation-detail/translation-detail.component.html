@@ -1,5 +1,4 @@
 <div class="translation-detail" dir="rtl">
-
   <div class="translation-detail__breadcrumb">
     <a routerLink="/admin/translations" class="translation-detail__breadcrumb-link">الترجمات</a>
     <span nz-icon nzType="left" class="translation-detail__breadcrumb-sep"></span>
@@ -13,7 +12,6 @@
   @if (loading()) {
     <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 8 }"></nz-skeleton>
   } @else if (translation()) {
-
     <div class="translation-detail__hero">
       @if (translation()!.thumbnail_url) {
         <img
@@ -35,9 +33,9 @@
           <nz-tag [nzColor]="getLicenseColor(translation()!.license)">
             {{ translation()!.license }}
           </nz-tag>
-          <nz-tag nzColor="blue">
-            {{ translation()!.language === 'ar' ? 'عربي' : 'English' }}
-          </nz-tag>
+          @if (translation()!.is_external) {
+            <nz-tag nzColor="orange">خارجي</nz-tag>
+          }
           <span class="translation-detail__meta-date">
             <span nz-icon nzType="calendar"></span>
             {{ translation()!.created_at | date: 'dd/MM/yyyy' }}
@@ -47,10 +45,16 @@
         <div class="translation-detail__publisher">
           <span nz-icon nzType="shop"></span>
           <span>{{ translation()!.publisher.name }}</span>
-          @if (translation()!.publisher.description) {
-            <span class="translation-detail__publisher-desc">— {{ translation()!.publisher.description }}</span>
-          }
         </div>
+
+        @if (translation()!.external_url) {
+          <div class="translation-detail__external-url">
+            <span nz-icon nzType="link"></span>
+            <a [href]="translation()!.external_url!" target="_blank" rel="noopener">
+              {{ translation()!.external_url }}
+            </a>
+          </div>
+        }
       </div>
 
       <div class="translation-detail__actions">
@@ -87,7 +91,9 @@
         <h3 class="translation-detail__desc-title" dir="ltr">
           <span nz-icon nzType="align-left"></span> Long Description (EN)
         </h3>
-        <p class="translation-detail__desc-text" dir="ltr">{{ translation()!.long_description_en }}</p>
+        <p class="translation-detail__desc-text" dir="ltr">
+          {{ translation()!.long_description_en }}
+        </p>
       </div>
     </div>
 
@@ -139,7 +145,6 @@
         </button>
       </a>
     </div>
-
   } @else {
     <div class="translation-detail__not-found">
       <span>⚠️</span>
@@ -147,5 +152,4 @@
       <a routerLink="/admin/translations">العودة للقائمة</a>
     </div>
   }
-
 </div>

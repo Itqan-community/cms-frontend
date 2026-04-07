@@ -1,5 +1,4 @@
 <div class="translation-form" dir="rtl">
-
   <div class="translation-form__header">
     <div class="translation-form__header-text">
       <h2 class="translation-form__title">
@@ -21,11 +20,8 @@
     <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 10 }"></nz-skeleton>
   } @else {
     <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="onSubmit()">
-
       <div class="translation-form__card">
-        <h3 class="translation-form__card-title">
-          <span nz-icon nzType="edit"></span> الاسم
-        </h3>
+        <h3 class="translation-form__card-title"><span nz-icon nzType="edit"></span> الاسم</h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
@@ -39,7 +35,12 @@
             <nz-form-item>
               <nz-form-label nzRequired>Name in English</nz-form-label>
               <nz-form-control nzErrorTip="Name in English is required">
-                <input nz-input formControlName="name_en" placeholder="e.g. Sahih International" dir="ltr" />
+                <input
+                  nz-input
+                  formControlName="name_en"
+                  placeholder="e.g. Sahih International"
+                  dir="ltr"
+                />
               </nz-form-control>
             </nz-form-item>
           </div>
@@ -121,7 +122,6 @@
           <span nz-icon nzType="setting"></span> البيانات التعريفية
         </h3>
         <div nz-row [nzGutter]="20">
-
           <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
             <nz-form-item>
               <nz-form-label nzRequired>الترخيص</nz-form-label>
@@ -167,7 +167,31 @@
               </nz-form-control>
             </nz-form-item>
           </div>
+        </div>
 
+        <!-- Is External + External URL -->
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+            <nz-form-item>
+              <nz-form-label>ترجمة خارجية؟</nz-form-label>
+              <nz-form-control>
+                <nz-switch formControlName="is_external"></nz-switch>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="16" [nzXs]="24" [nzSm]="16">
+            <nz-form-item>
+              <nz-form-label>رابط خارجي</nz-form-label>
+              <nz-form-control>
+                <input
+                  nz-input
+                  formControlName="external_url"
+                  placeholder="https://example.com/translation"
+                  dir="ltr"
+                />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
         </div>
 
         <nz-form-item>
@@ -222,8 +246,6 @@
           {{ isEditMode() ? 'حفظ التعديلات' : 'إضافة الترجمة' }}
         </button>
       </div>
-
     </form>
   }
-
 </div>

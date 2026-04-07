@@ -21,14 +21,14 @@ export const tafsirRoutes: Routes = [
           ),
       },
       {
-        path: ':id/edit',
+        path: ':slug/edit',
         loadComponent: () =>
           import('./components/tafsir-form/tafsir-form.component').then(
             (m) => m.TafsirFormComponent
           ),
       },
       {
-        path: ':id',
+        path: ':slug',
         loadComponent: () =>
           import('./components/tafsir-detail/tafsir-detail.component').then(
             (m) => m.TafsirDetailComponent

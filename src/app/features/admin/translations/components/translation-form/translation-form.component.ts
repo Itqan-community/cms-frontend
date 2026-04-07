@@ -10,10 +10,11 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
+import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
-import { PublisherFilterItem } from '../../models/translations.models';
+import { PublisherFilterItem, TranslationFormValue } from '../../models/translations.models';
 import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
 import { TranslationsService } from '../../services/translations.service';
 
@@ -30,6 +31,7 @@ import { TranslationsService } from '../../services/translations.service';
     NzInputModule,
     NzSelectModule,
     NzSkeletonModule,
+    NzSwitchModule,
     NzToolTipModule,
     NzUploadModule,
   ],
@@ -66,15 +68,17 @@ export class TranslationFormComponent implements OnInit {
     license: ['', [Validators.required]],
     language: ['', [Validators.required]],
     publisher_id: [null as number | null, [Validators.required]],
+    is_external: [false],
+    external_url: [''],
   });
 
-  private editId: number | null = null;
+  private editSlug: string | null = null;
 
   ngOnInit(): void {
-    const idParam = this.route.snapshot.params['id'];
-    if (idParam) {
+    const slugParam = this.route.snapshot.params['slug'];
+    if (slugParam) {
       this.isEditMode.set(true);
-      this.editId = Number(idParam);
+      this.editSlug = slugParam;
       this.loadForEdit();
     }
     this.loadPublishers();
@@ -113,17 +117,19 @@ export class TranslationFormComponent implements OnInit {
       return;
     }
 
-    const fd = this.buildFormData();
+    const body = this.buildBody();
     this.submitting.set(true);
 
     const request$ =
-      this.isEditMode() && this.editId != null
-        ? this.translationsService.patch(this.editId, fd)
-        : this.translationsService.create(fd);
+      this.isEditMode() && this.editSlug != null
+        ? this.translationsService.patch(this.editSlug, body)
+        : this.translationsService.create(body as TranslationFormValue);
 
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
-        this.message.success(this.isEditMode() ? 'تم تحديث الترجمة بنجاح' : 'تم إضافة الترجمة بنجاح');
+        this.message.success(
+          this.isEditMode() ? 'تم تحديث الترجمة بنجاح' : 'تم إضافة الترجمة بنجاح'
+        );
         this.submitting.set(false);
         void this.router.navigate(['/admin/translations', res.id]);
       },
@@ -134,31 +140,28 @@ export class TranslationFormComponent implements OnInit {
     });
   }
 
-  private buildFormData(): FormData {
+  private buildBody(): TranslationFormValue {
     const v = this.form.value;
-    const fd = new FormData();
-    fd.append('name_ar', v.name_ar ?? '');
-    fd.append('name_en', v.name_en ?? '');
-    fd.append('description_ar', v.description_ar ?? '');
-    fd.append('description_en', v.description_en ?? '');
-    fd.append('long_description_ar', v.long_description_ar ?? '');
-    fd.append('long_description_en', v.long_description_en ?? '');
-    fd.append('license', v.license ?? '');
-    fd.append('language', v.language ?? '');
-    fd.append('publisher_id', String(v.publisher_id ?? ''));
-
-    const thumb = this.thumbnailFile();
-    if (thumb) {
-      fd.append('thumbnail', thumb, thumb.name);
-    }
-    return fd;
+    return {
+      name_ar: v.name_ar ?? '',
+      name_en: v.name_en ?? '',
+      description_ar: v.description_ar ?? '',
+      description_en: v.description_en ?? '',
+      long_description_ar: v.long_description_ar ?? '',
+      long_description_en: v.long_description_en ?? '',
+      license: (v.license ?? '') as Licenses,
+      language: v.language ?? '',
+      publisher_id: v.publisher_id!,
+      is_external: v.is_external ?? false,
+      external_url: v.external_url || null,
+    };
   }
 
   private loadForEdit(): void {
-    if (this.editId == null) return;
+    if (this.editSlug == null) return;
     this.loadingDetail.set(true);
     this.translationsService
-      .getDetail(this.editId)
+      .getDetail(this.editSlug)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
@@ -170,8 +173,9 @@ export class TranslationFormComponent implements OnInit {
             long_description_ar: data.long_description_ar,
             long_description_en: data.long_description_en,
             license: data.license,
-            language: data.language,
             publisher_id: data.publisher.id,
+            is_external: data.is_external,
+            external_url: data.external_url ?? '',
           });
 
           if (data.thumbnail_url) {

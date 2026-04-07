@@ -41,16 +41,16 @@ export class TranslationDetailComponent implements OnInit {
   readonly loading = signal(true);
   readonly licensesColors = LicensesColors;
 
-  private id!: number;
+  private slug!: string;
 
   ngOnInit(): void {
-    this.id = Number(this.route.snapshot.params['id']);
+    this.slug = this.route.snapshot.params['slug'];
     this.load();
   }
 
   load(): void {
     this.loading.set(true);
-    this.translationsService.getDetail(this.id).subscribe({
+    this.translationsService.getDetail(this.slug).subscribe({
       next: (data) => {
         this.translation.set(data);
         this.loading.set(false);
@@ -63,7 +63,7 @@ export class TranslationDetailComponent implements OnInit {
   }
 
   onEdit(): void {
-    void this.router.navigate(['/admin/translations', this.id, 'edit']);
+    void this.router.navigate(['/admin/translations', this.slug, 'edit']);
   }
 
   onDelete(): void {
@@ -77,7 +77,7 @@ export class TranslationDetailComponent implements OnInit {
       nzCancelText: 'إلغاء',
       nzDirection: 'rtl',
       nzOnOk: () =>
-        this.translationsService.delete(this.id).subscribe({
+        this.translationsService.delete(this.slug).subscribe({
           next: () => {
             this.message.success('تم حذف الترجمة بنجاح');
             void this.router.navigate(['/admin/translations']);

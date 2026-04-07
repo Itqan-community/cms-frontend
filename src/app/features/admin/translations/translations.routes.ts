@@ -21,14 +21,14 @@ export const translationRoutes: Routes = [
           ),
       },
       {
-        path: ':id/edit',
+        path: ':slug/edit',
         loadComponent: () =>
           import('./components/translation-form/translation-form.component').then(
             (m) => m.TranslationFormComponent
           ),
       },
       {
-        path: ':id',
+        path: ':slug',
         loadComponent: () =>
           import('./components/translation-detail/translation-detail.component').then(
             (m) => m.TranslationDetailComponent

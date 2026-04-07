@@ -125,7 +125,7 @@ export class TranslationsListComponent implements OnInit {
       nzCancelText: 'إلغاء',
       nzDirection: 'rtl',
       nzOnOk: () =>
-        this.translationsService.delete(item.id).subscribe({
+        this.translationsService.delete(String(item.id)).subscribe({
           next: () => {
             this.message.success('تم حذف الترجمة بنجاح');
             this.load();

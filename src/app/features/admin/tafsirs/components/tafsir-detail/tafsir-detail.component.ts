@@ -41,16 +41,16 @@ export class TafsirDetailComponent implements OnInit {
   readonly loading = signal(true);
   readonly licensesColors = LicensesColors;
 
-  private id!: number;
+  private slug!: string;
 
   ngOnInit(): void {
-    this.id = Number(this.route.snapshot.params['id']);
+    this.slug = this.route.snapshot.params['slug'];
     this.load();
   }
 
   load(): void {
     this.loading.set(true);
-    this.tafsirsService.getDetail(this.id).subscribe({
+    this.tafsirsService.getDetail(this.slug).subscribe({
       next: (data) => {
         this.tafsir.set(data);
         this.loading.set(false);
@@ -63,7 +63,7 @@ export class TafsirDetailComponent implements OnInit {
   }
 
   onEdit(): void {
-    void this.router.navigate(['/admin/tafsirs', this.id, 'edit']);
+    void this.router.navigate(['/admin/tafsirs', this.slug, 'edit']);
   }
 
   onDelete(): void {
@@ -77,7 +77,7 @@ export class TafsirDetailComponent implements OnInit {
       nzCancelText: 'إلغاء',
       nzDirection: 'rtl',
       nzOnOk: () =>
-        this.tafsirsService.delete(this.id).subscribe({
+        this.tafsirsService.delete(this.slug).subscribe({
           next: () => {
             this.message.success('تم حذف التفسير بنجاح');
             void this.router.navigate(['/admin/tafsirs']);

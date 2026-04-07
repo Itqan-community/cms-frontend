@@ -6,7 +6,11 @@ export type AssetSortingQuery =
   | 'name'
   | '-name'
   | 'publisher_id'
-  | '-publisher_id';
+  | '-publisher_id'
+  | 'created_at'
+  | '-created_at'
+  | 'updated_at'
+  | '-updated_at';
 
 export type AssetLangFilter = 'ar' | 'en';
 
@@ -30,10 +34,11 @@ export interface TafsirItem {
   description: string;
   publisher: PublisherRef;
   license: string;
+  is_external: boolean;
   created_at: string;
 }
 
-/** Shape returned by the detail endpoint: GET /portal/tafsirs/:id/ */
+/** Shape returned by the detail endpoint: GET /portal/tafsirs/{tafsir_slug}/ */
 export interface TafsirDetails {
   id: number;
   name_ar: string;
@@ -43,9 +48,10 @@ export interface TafsirDetails {
   long_description_ar: string;
   long_description_en: string;
   thumbnail_url: string | null;
-  publisher: PublisherRef & { description: string };
+  publisher: PublisherRef;
   license: string;
-  language: AssetLangFilter;
+  is_external: boolean;
+  external_url: string | null;
   versions: AssetVersion[];
   created_at: string;
 }
@@ -68,7 +74,7 @@ export interface TafsirFilters {
   ordering?: AssetSortingQuery;
 }
 
-/** Payload for create / update */
+/** JSON payload for create / update */
 export interface TafsirFormValue {
   name_ar: string;
   name_en: string;
@@ -77,8 +83,10 @@ export interface TafsirFormValue {
   long_description_ar: string;
   long_description_en: string;
   license: Licenses;
-  language: AssetLangFilter;
+  language: string;
   publisher_id: number;
+  is_external: boolean;
+  external_url?: string | null;
 }
 
 /** Publisher option returned by /portal/filters/publishers/ */

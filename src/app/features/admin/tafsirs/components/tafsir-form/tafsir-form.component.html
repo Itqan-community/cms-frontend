@@ -1,5 +1,4 @@
 <div class="tafsir-form" dir="rtl">
-
   <!-- Header -->
   <div class="tafsir-form__header">
     <div class="tafsir-form__header-text">
@@ -22,12 +21,9 @@
     <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 10 }"></nz-skeleton>
   } @else {
     <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="onSubmit()">
-
       <!-- Bilingual names -->
       <div class="tafsir-form__card">
-        <h3 class="tafsir-form__card-title">
-          <span nz-icon nzType="edit"></span> الاسم
-        </h3>
+        <h3 class="tafsir-form__card-title"><span nz-icon nzType="edit"></span> الاسم</h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
@@ -41,7 +37,12 @@
             <nz-form-item>
               <nz-form-label nzRequired>Name in English</nz-form-label>
               <nz-form-control nzErrorTip="Name in English is required">
-                <input nz-input formControlName="name_en" placeholder="e.g. Tafsir Ibn Kathir" dir="ltr" />
+                <input
+                  nz-input
+                  formControlName="name_en"
+                  placeholder="e.g. Tafsir Ibn Kathir"
+                  dir="ltr"
+                />
               </nz-form-control>
             </nz-form-item>
           </div>
@@ -126,7 +127,6 @@
           <span nz-icon nzType="setting"></span> البيانات التعريفية
         </h3>
         <div nz-row [nzGutter]="20">
-
           <!-- License -->
           <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
             <nz-form-item>
@@ -175,7 +175,31 @@
               </nz-form-control>
             </nz-form-item>
           </div>
+        </div>
 
+        <!-- Is External + External URL -->
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+            <nz-form-item>
+              <nz-form-label>تفسير خارجي؟</nz-form-label>
+              <nz-form-control>
+                <nz-switch formControlName="is_external"></nz-switch>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="16" [nzXs]="24" [nzSm]="16">
+            <nz-form-item>
+              <nz-form-label>رابط خارجي</nz-form-label>
+              <nz-form-control>
+                <input
+                  nz-input
+                  formControlName="external_url"
+                  placeholder="https://example.com/tafsir"
+                  dir="ltr"
+                />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
         </div>
 
         <!-- Thumbnail upload -->
@@ -232,8 +256,6 @@
           {{ isEditMode() ? 'حفظ التعديلات' : 'إضافة التفسير' }}
         </button>
       </div>
-
     </form>
   }
-
 </div>
