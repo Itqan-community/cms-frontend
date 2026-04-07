@@ -13,7 +13,7 @@ import { Subject, debounceTime, distinctUntilChanged, forkJoin } from 'rxjs';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NgIcon } from '@ng-icons/core';
 import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
 import { PublisherFilterItem } from '../../../tafsirs/models/tafsirs.models';
 import { RecitersAdminService } from '../../../reciters/services/reciters.service';
@@ -29,7 +29,7 @@ import { RecitationsService } from '../../services/recitations.service';
 @Component({
   selector: 'app-recitation-filters',
   standalone: true,
-  imports: [FormsModule, NzInputModule, NzSelectModule, NzIconModule],
+  imports: [FormsModule, NzInputModule, NzSelectModule, NgIcon],
   template: `
     <div class="recitation-filters" dir="rtl">
       <nz-input-group [nzPrefix]="searchIcon" class="recitation-filters__search">
@@ -41,7 +41,7 @@ import { RecitationsService } from '../../services/recitations.service';
           (ngModelChange)="onSearchChange($event)"
         />
       </nz-input-group>
-      <ng-template #searchIcon><span nz-icon nzType="search"></span></ng-template>
+      <ng-template #searchIcon><ng-icon name="lucideSearch" /></ng-template>
 
       <nz-select
         class="recitation-filters__select"

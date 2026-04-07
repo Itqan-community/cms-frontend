@@ -41,7 +41,9 @@
       "eslint --fix --cache --concurrency=auto",
       "prettier --write"
     ],
-    "*.{json,html,css,less,md}": ["prettier --write"]
+    "*.{json,html,css,less,md}": [
+      "prettier --write"
+    ]
   },
   "private": true,
   "dependencies": {
@@ -53,6 +55,8 @@
     "@angular/forms": "^20.3.7",
     "@angular/platform-browser": "^20.3.7",
     "@angular/router": "^20.3.7",
+    "@ng-icons/core": "^32.5.0",
+    "@ng-icons/lucide": "^32.5.0",
     "@ngx-translate/core": "^17.0.0",
     "@ngx-translate/http-loader": "^17.0.0",
     "ng-zorro-antd": "^20.3.1",

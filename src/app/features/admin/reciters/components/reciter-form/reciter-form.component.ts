@@ -5,7 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NgIcon } from '@ng-icons/core';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSelectModule } from 'ng-zorro-antd/select';
@@ -22,7 +22,7 @@ import { RecitersAdminService } from '../../services/reciters.service';
     NzButtonModule,
     NzFormModule,
     NzGridModule,
-    NzIconModule,
+    NgIcon,
     NzInputModule,
     NzSelectModule,
     NzSkeletonModule,

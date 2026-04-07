@@ -6,6 +6,7 @@ import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NgIcon } from '@ng-icons/core';
 import { take } from 'rxjs';
 import { EnrichedAyah, QuranDataService } from '../../services/quran-data.service';
 import { SURAHS_METADATA, SurahMetadata } from '../../models/quran-metadata';
@@ -18,6 +19,7 @@ const PAGE_SIZE = 20;
   imports: [
     DecimalPipe,
     FormsModule,
+    NgIcon,
     NzInputModule,
     NzPaginationModule,
     NzSelectModule,

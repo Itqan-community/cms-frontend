@@ -10,7 +10,7 @@ export const NAV_LINKS = [
     link: '/gallery',
   },
   {
-    label: 'نظام إدارة المحتوى القرآني',
+    label: 'NAV.ADMIN_PORTAL',
     link: '/admin',
   },
   // {
@@ -33,14 +33,14 @@ export const NAV_LINKS = [
     label: 'NAV.API_DOCS',
     link: `${environment.API_DOCS_URL}`,
     isExternal: true,
-    icon: 'bx bx-arrow-out-up-left-stroke-square',
+    icon: 'lucideExternalLink',
     hidden: isPublisher, // Hide API docs for publisher hosts
   },
   {
     label: 'NAV.ASSET_REQUEST_FORM',
     link: `https://forms.gle/23eA86Jr56grUSes5`,
     isExternal: true,
-    icon: 'bx bx-arrow-out-up-left-stroke-square',
+    icon: 'lucideExternalLink',
     hidden: isPublisher, // Hide API docs for publisher hosts
   },
   {

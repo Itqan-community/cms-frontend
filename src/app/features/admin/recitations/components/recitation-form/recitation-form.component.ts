@@ -7,7 +7,7 @@ import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NgIcon } from '@ng-icons/core';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -29,7 +29,7 @@ import { RecitationsService } from '../../services/recitations.service';
     NzButtonModule,
     NzFormModule,
     NzGridModule,
-    NzIconModule,
+    NgIcon,
     NzInputModule,
     NzInputNumberModule,
     NzSelectModule,

@@ -3,6 +3,7 @@ import { Component, inject, input, output } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { NzDrawerModule, NzDrawerPlacement } from 'ng-zorro-antd/drawer';
+import { NgIcon } from '@ng-icons/core';
 import { LangSwitchComponent } from '../lang-switch/lang-switch.component';
 import { NavigationLink } from '../navigation-menu/navigation-menu.component';
 import { UserActionsComponent } from '../user-actions/user-actions.component';
@@ -17,6 +18,7 @@ import { UserActionsComponent } from '../user-actions/user-actions.component';
     UserActionsComponent,
     TranslatePipe,
     NgClass,
+    NgIcon,
   ],
   templateUrl: './mobile-menu.component.html',
   styleUrls: ['./mobile-menu.component.less'],

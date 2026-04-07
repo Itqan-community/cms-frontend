@@ -8,6 +8,7 @@ import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule, NzTableSortOrder } from 'ng-zorro-antd/table';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { NgIcon } from '@ng-icons/core';
 import {
   ReciterListFilters,
   ReciterListItem,
@@ -28,6 +29,7 @@ import { ReciterFiltersComponent } from '../reciter-filters/reciter-filters.comp
     NzSpinModule,
     NzTableModule,
     NzToolTipModule,
+    NgIcon,
     ReciterFiltersComponent,
   ],
   templateUrl: './reciters-list.component.html',

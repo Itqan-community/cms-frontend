@@ -1,17 +1,18 @@
 import { Component, input } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NgIcon } from '@ng-icons/core';
 
 export interface SectionTab {
   id: string;
   path: string;
   label: string;
-  emoji?: string;
+  icon?: string;
 }
 
 @Component({
   selector: 'app-section-layout',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, RouterOutlet],
+  imports: [RouterLink, RouterLinkActive, RouterOutlet, NgIcon],
   templateUrl: './section-layout.component.html',
   styleUrls: ['./section-layout.component.less'],
 })

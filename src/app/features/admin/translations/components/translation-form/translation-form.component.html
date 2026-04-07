@@ -10,7 +10,7 @@
     </div>
     <a routerLink="/admin/translations">
       <button nz-button nzType="default" class="translation-form__back-btn">
-        <span nz-icon nzType="arrow-right"></span>
+        <ng-icon name="lucideArrowRight" />
         العودة للقائمة
       </button>
     </a>
@@ -21,7 +21,7 @@
   } @else {
     <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="onSubmit()">
       <div class="translation-form__card">
-        <h3 class="translation-form__card-title"><span nz-icon nzType="edit"></span> الاسم</h3>
+        <h3 class="translation-form__card-title"><ng-icon name="lucideSquarePen" /> الاسم</h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
@@ -49,7 +49,7 @@
 
       <div class="translation-form__card">
         <h3 class="translation-form__card-title">
-          <span nz-icon nzType="file-text"></span> الوصف المختصر
+          <ng-icon name="lucideFileText" /> الوصف المختصر
         </h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
@@ -84,7 +84,7 @@
 
       <div class="translation-form__card">
         <h3 class="translation-form__card-title">
-          <span nz-icon nzType="align-right"></span> الوصف المطوّل
+          <ng-icon name="lucideAlignRight" /> الوصف المطوّل
         </h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
@@ -119,7 +119,7 @@
 
       <div class="translation-form__card">
         <h3 class="translation-form__card-title">
-          <span nz-icon nzType="setting"></span> البيانات التعريفية
+          <ng-icon name="lucideSettings" /> البيانات التعريفية
         </h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
@@ -208,7 +208,7 @@
                     nz-tooltip
                     nzTooltipTitle="إزالة الصورة"
                   >
-                    <span nz-icon nzType="close-circle" nzTheme="fill"></span>
+                    <ng-icon name="lucideCircleX" />
                   </button>
                 </div>
               } @else {
@@ -221,7 +221,7 @@
                   [nzShowUploadList]="false"
                 >
                   <p class="ant-upload-drag-icon">
-                    <span nz-icon nzType="inbox"></span>
+                    <ng-icon name="lucideInbox" />
                   </p>
                   <p class="ant-upload-text">انقر أو اسحب الصورة هنا</p>
                   <p class="ant-upload-hint">PNG, JPG, WEBP — بحد أقصى 5MB</p>

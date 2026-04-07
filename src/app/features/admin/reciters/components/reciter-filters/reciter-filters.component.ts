@@ -11,14 +11,14 @@ import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NgIcon } from '@ng-icons/core';
 import { NATIONALITY } from '../../nationality.enum';
 import { ReciterListFilters } from '../../models/reciters.models';
 
 @Component({
   selector: 'app-reciter-filters',
   standalone: true,
-  imports: [FormsModule, NzInputModule, NzSelectModule, NzIconModule],
+  imports: [FormsModule, NzInputModule, NzSelectModule, NgIcon],
   template: `
     <div class="reciter-filters" dir="rtl">
       <nz-input-group [nzPrefix]="searchIcon" class="reciter-filters__search">
@@ -30,7 +30,7 @@ import { ReciterListFilters } from '../../models/reciters.models';
           (ngModelChange)="onSearchChange($event)"
         />
       </nz-input-group>
-      <ng-template #searchIcon><span nz-icon nzType="search"></span></ng-template>
+      <ng-template #searchIcon><ng-icon name="lucideSearch" /></ng-template>
 
       <nz-select
         class="reciter-filters__select"

@@ -4,34 +4,33 @@
   gap: 20px;
 
   &__header {
-    background: #fff;
-    border-radius: 14px;
+    background: var(--admin-surface-white);
+    border-radius: var(--radius-xl);
     padding: 24px 28px;
-    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--shadow-card);
   }
 
   &__title {
     font-size: 1.15rem;
     font-weight: 700;
-    color: #1a1a1a;
+    color: var(--admin-text-800);
     margin: 0 0 6px;
   }
 
   &__description {
     font-size: 0.88rem;
-    color: #888;
+    color: var(--admin-text-muted);
     margin: 0;
     line-height: 1.6;
   }
 
-  // Inline / max-content tabs (not full width)
   &__sub-tabs {
     display: flex;
     gap: 4px;
-    background: #fff;
-    border-radius: 14px;
+    background: var(--admin-surface-white);
+    border-radius: var(--radius-xl);
     padding: 6px;
-    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
+    box-shadow: var(--shadow-card);
     width: fit-content;
   }
 
@@ -41,30 +40,28 @@
     justify-content: center;
     gap: 6px;
     padding: 10px 16px;
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     background: transparent;
     font-size: 0.9rem;
     font-weight: 500;
-    color: #555;
+    color: var(--admin-text-600);
     text-decoration: none;
-    transition:
-      background 0.15s,
-      color 0.15s;
+    transition: background 0.15s, color 0.15s;
 
     &:hover {
-      background: #f0fdf4;
-      color: #16a34a;
+      background: var(--admin-accent-50);
+      color: var(--admin-accent-600);
     }
 
     &--active {
-      background: #f0fdf4;
-      color: #16a34a;
+      background: var(--admin-accent-50);
+      color: var(--admin-accent-600);
       font-weight: 700;
       box-shadow: 0 1px 6px rgba(22, 163, 74, 0.15);
     }
   }
 
-  &__sub-tab-emoji {
+  &__sub-tab-icon {
     font-size: 1rem;
     line-height: 1;
   }

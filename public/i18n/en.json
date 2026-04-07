@@ -136,7 +136,8 @@
     "CONTENT_STANDARDS": "Content Standards",
     "API_DOCS": "API Docs",
     "PUBLISHER_DASHBOARD": "Publisher Dashboard",
-    "ASSET_REQUEST_FORM": "Add Quranic Content to ITQAN"
+    "ASSET_REQUEST_FORM": "Add Quranic Content to ITQAN",
+    "ADMIN_PORTAL": "Admin Portal"
   },
   "HOME": {
     "WELCOME": "Welcome to Itqan CMS",
@@ -370,7 +371,7 @@
       "PUBLISHERS": "Publishers",
       "AUDIO": "Audio",
       "MANAGE_PROFILE": "Manage profile",
-      "BACK_TO_CMS": "Back to main site"
+      "BACK_TO_GALLERY": "Back to gallery"
     },
     "PROFILE": {
       "TITLE": "Publisher profile",

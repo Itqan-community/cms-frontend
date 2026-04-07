@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { NgIcon } from '@ng-icons/core';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { NAV_LINKS } from '../../../core/constants/nav-links';
 import { isPublisherHost } from '../../utils/publisherhost.util';
@@ -20,6 +21,7 @@ import { UserActionsComponent } from '../user-actions/user-actions.component';
     NavigationMenuComponent,
     UserActionsComponent,
     MobileMenuComponent,
+    NgIcon,
   ],
   styleUrls: ['./header.component.less'],
   templateUrl: './header.component.html',

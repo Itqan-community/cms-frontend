@@ -13,14 +13,14 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NgIcon } from '@ng-icons/core';
 import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
 import { PublisherFilterItem, TranslationFilters } from '../../models/translations.models';
 
 @Component({
   selector: 'app-translation-filters',
   standalone: true,
-  imports: [FormsModule, NzInputModule, NzSelectModule, NzIconModule],
+  imports: [FormsModule, NzInputModule, NzSelectModule, NgIcon],
   template: `
     <div class="translation-filters" dir="rtl">
       <nz-input-group [nzPrefix]="searchIcon" class="translation-filters__search">
@@ -32,7 +32,7 @@ import { PublisherFilterItem, TranslationFilters } from '../../models/translatio
           (ngModelChange)="onSearchChange($event)"
         />
       </nz-input-group>
-      <ng-template #searchIcon><span nz-icon nzType="search"></span></ng-template>
+      <ng-template #searchIcon><ng-icon name="lucideSearch" /></ng-template>
 
       <nz-select
         class="translation-filters__select"

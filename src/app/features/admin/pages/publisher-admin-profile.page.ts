@@ -26,6 +26,7 @@ import { NzCardModule } from 'ng-zorro-antd/card';
         margin: 0 0 12px;
         font-size: 18px;
         font-weight: 600;
+        color: var(--admin-text-900);
       }
     `,
   ],

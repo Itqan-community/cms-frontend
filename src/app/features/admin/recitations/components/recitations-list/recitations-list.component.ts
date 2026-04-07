@@ -9,6 +9,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule, NzTableSortOrder } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { NgIcon } from '@ng-icons/core';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
 import {
   RecitationListFilters,
@@ -31,6 +32,7 @@ import { RecitationFiltersComponent } from '../recitation-filters/recitation-fil
     NzTableModule,
     NzTagModule,
     NzToolTipModule,
+    NgIcon,
     RecitationFiltersComponent,
   ],
   templateUrl: './recitations-list.component.html',

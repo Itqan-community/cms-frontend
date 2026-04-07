@@ -1,102 +1,95 @@
-<div class="recitation-detail" dir="rtl">
-
-  <div class="recitation-detail__breadcrumb">
-    <a routerLink="/admin/recitations" class="recitation-detail__breadcrumb-link">التلاوات</a>
-    <span nz-icon nzType="left" class="recitation-detail__breadcrumb-sep"></span>
+<div class="recitation-detail admin-list-page" dir="rtl">
+  <div class="admin-breadcrumb">
+    <a routerLink="/admin/recitations" class="admin-breadcrumb__link">التلاوات</a>
+    <ng-icon name="lucideChevronLeft" class="admin-breadcrumb__sep" />
     @if (loading()) {
-      <span class="recitation-detail__breadcrumb-cur">جاري التحميل...</span>
+      <span class="admin-breadcrumb__current">جاري التحميل...</span>
     } @else {
-      <span class="recitation-detail__breadcrumb-cur">{{ recitation()?.name_ar }}</span>
+      <span class="admin-breadcrumb__current">{{ recitation()?.name_ar }}</span>
     }
   </div>
 
   @if (loading()) {
     <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 8 }"></nz-skeleton>
   } @else if (recitation()) {
-
-    <div class="recitation-detail__hero">
-      <div class="recitation-detail__hero-info">
-        <div class="recitation-detail__names">
-          <h1 class="recitation-detail__name-ar">{{ recitation()!.name_ar }}</h1>
-          <p class="recitation-detail__name-en">{{ recitation()!.name_en }}</p>
+    <div class="admin-hero recitation-detail__hero">
+      <div class="admin-hero-info recitation-detail__hero-info">
+        <div class="admin-hero-names">
+          <h1 class="admin-hero-name-ar">{{ recitation()!.name_ar }}</h1>
+          <p class="admin-hero-name-en">{{ recitation()!.name_en }}</p>
         </div>
 
-        <div class="recitation-detail__meta">
-          <nz-tag [nzColor]="getLicenseColor(recitation()!.license)">
-            {{ recitation()!.license }}
-          </nz-tag>
+        <div class="admin-hero-meta">
+          <nz-tag [nzColor]="getLicenseColor(recitation()!.license)">{{ recitation()!.license }}</nz-tag>
           <nz-tag nzColor="cyan">{{ maddLabel(recitation()!.madd_level) }}</nz-tag>
           <nz-tag nzColor="purple">{{ meemLabel(recitation()!.meem_behavior) }}</nz-tag>
           <nz-tag nzColor="default">{{ recitation()!.year }}</nz-tag>
-          <span class="recitation-detail__meta-date">
-            <span nz-icon nzType="calendar"></span>
+          <span class="admin-hero-meta__date">
+            <ng-icon name="lucideCalendar" />
             {{ recitation()!.created_at | date: 'dd/MM/yyyy' }}
           </span>
         </div>
 
-        <div class="recitation-detail__relations">
+        <div class="admin-relations">
           <p>
-            <span nz-icon nzType="user"></span>
+            <ng-icon name="lucideUser" />
             <strong>القارئ:</strong> {{ recitation()!.reciter.name }}
           </p>
           <p>
-            <span nz-icon nzType="sound"></span>
+            <ng-icon name="lucideVolume2" />
             <strong>القراءة:</strong> {{ recitation()!.qiraah.name }}
           </p>
           <p>
-            <span nz-icon nzType="book"></span>
+            <ng-icon name="lucideBookOpen" />
             <strong>الرواية:</strong> {{ recitation()!.riwayah.name }}
           </p>
           <p>
-            <span nz-icon nzType="shop"></span>
+            <ng-icon name="lucideStore" />
             <strong>الناشر:</strong> {{ recitation()!.publisher.name }}
           </p>
         </div>
       </div>
 
-      <div class="recitation-detail__actions">
+      <div class="admin-hero-actions">
         <button nz-button nzType="primary" (click)="onEdit()">
-          <span nz-icon nzType="edit"></span>
+          <ng-icon name="lucideSquarePen" />
           تعديل
         </button>
         <button nz-button nzDanger (click)="onDelete()">
-          <span nz-icon nzType="delete"></span>
+          <ng-icon name="lucideTrash2" />
           حذف
         </button>
       </div>
     </div>
 
-    <div class="recitation-detail__descriptions">
-      <div class="recitation-detail__desc-col">
-        <h3 class="recitation-detail__desc-title">
-          <span nz-icon nzType="file-text"></span> الوصف (عربي)
+    <div class="admin-descriptions">
+      <div class="admin-desc-col">
+        <h3 class="admin-desc-title">
+          <ng-icon name="lucideFileText" /> الوصف (عربي)
         </h3>
-        <p class="recitation-detail__desc-text">{{ recitation()!.description_ar }}</p>
+        <p class="admin-desc-text">{{ recitation()!.description_ar }}</p>
       </div>
-
-      <div class="recitation-detail__desc-col">
-        <h3 class="recitation-detail__desc-title" dir="ltr">
-          <span nz-icon nzType="file-text"></span> Description (EN)
+      <div class="admin-desc-col">
+        <h3 class="admin-desc-title" dir="ltr">
+          <ng-icon name="lucideFileText" /> Description (EN)
         </h3>
-        <p class="recitation-detail__desc-text" dir="ltr">{{ recitation()!.description_en }}</p>
+        <p class="admin-desc-text" dir="ltr">{{ recitation()!.description_en }}</p>
       </div>
     </div>
 
-    <div class="recitation-detail__back">
+    <div class="admin-back">
       <a routerLink="/admin/recitations">
         <button nz-button nzType="default">
-          <span nz-icon nzType="arrow-right"></span>
+          <ng-icon name="lucideArrowRight" />
           العودة للقائمة
         </button>
       </a>
     </div>
-
   } @else {
-    <div class="recitation-detail__not-found">
-      <span>⚠️</span>
+    <div class="admin-not-found">
+      <ng-icon name="lucideAlertTriangle" class="admin-not-found__icon" />
       <p>لم يتم العثور على التلاوة المطلوبة.</p>
       <a routerLink="/admin/recitations">العودة للقائمة</a>
     </div>
   }
-
 </div>

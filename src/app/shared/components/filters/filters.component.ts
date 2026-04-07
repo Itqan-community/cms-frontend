@@ -9,6 +9,7 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { Categories } from '../../../core/enums/categories.enum';
 import { Licenses } from '../../../core/enums/licenses.enum';
+import { NgIcon } from '@ng-icons/core';
 import { LicenseTagComponent } from '../license-tag/license-tag.component';
 
 import { ViewportService } from '../../../core/services/viewport.service';
@@ -25,6 +26,7 @@ import { ViewportService } from '../../../core/services/viewport.service';
     NzCheckboxComponent,
     FormsModule,
     LicenseTagComponent,
+    NgIcon,
   ],
   templateUrl: './filters.component.html',
   styleUrl: './filters.component.less',

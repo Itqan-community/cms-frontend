@@ -1,178 +1,104 @@
-<div class="mushaf-pages" dir="rtl">
-  <!-- ── Filters Card ──────────────────────────── -->
+<div class="mushaf-words" dir="rtl">
   <div class="mushaf-filter-card">
     <div class="mushaf-filter-card__header">
       <h3 class="mushaf-filter-card__title">جدول الكلمات</h3>
-      <p class="mushaf-filter-card__hint">
-        انقر على أي كلمة لعرض الإعراب والمعاني والمشاريع المرتبطة بها
-      </p>
+      <p class="mushaf-filter-card__hint">انقر على أي كلمة لعرض الإعراب والمعاني والمشاريع المرتبطة بها</p>
     </div>
 
-    <div class="mushaf-filter-card__body words-filter-grid">
+    <div class="words-filter-grid">
       <div class="filter-group">
-        <label class="mushaf-filter-card__label" for="surah-select">فلترة حسب السورة</label>
-        <div class="mushaf-filter-card__select-wrap">
-          <select
-            id="surah-select"
-            class="mushaf-filter-card__select-btn select-dropdown"
-            [ngModel]="selectedSurahId()"
-            (ngModelChange)="onSurahChange($event)"
-          >
-            <option [value]="null">جميع السور</option>
-            @for (s of surahs(); track s.surah_number) {
-              <option [value]="s.surah_number">{{ s.surah_number }}. {{ s.name_ar }}</option>
-            }
-          </select>
-          <span class="mushaf-filter-card__chevron">&#8249;</span>
-        </div>
+        <label class="mushaf-filter-card__label">فلترة حسب السورة</label>
+        <nz-select
+          nzPlaceHolder="جميع السور"
+          nzAllowClear
+          nzShowSearch
+          [ngModel]="selectedSurahId()"
+          (ngModelChange)="onSurahChange($event)"
+          style="width: 100%"
+        >
+          @for (s of surahs(); track s.surah_number) {
+            <nz-option [nzValue]="s.surah_number" [nzLabel]="s.surah_number + '. ' + s.name_ar"></nz-option>
+          }
+        </nz-select>
       </div>
-
       <div class="filter-group">
-        <label class="mushaf-filter-card__label" for="word-search">بحث عن كلمة</label>
-        <div class="mushaf-filter-card__select-wrap">
-          <span
-            class="mushaf-filter-card__search-icon"
-            style="
-              position: absolute;
-              inset-inline-end: 12px;
-              font-size: 1.1em;
-              color: #9ca3af;
-              pointer-events: none;
-            "
-            >🔍</span
-          >
+        <label class="mushaf-filter-card__label">بحث عن كلمة</label>
+        <nz-input-group [nzSuffix]="searchSuffix">
           <input
+            nz-input
             type="text"
-            id="word-search"
-            class="mushaf-filter-card__select-btn search-input"
             [ngModel]="searchTerm()"
             (ngModelChange)="onSearchChange($event)"
             placeholder="ابحث عن كلمة..."
           />
-        </div>
+        </nz-input-group>
+        <ng-template #searchSuffix>
+          <ng-icon name="lucideSearch" class="mushaf-filter-card__search-icon" />
+        </ng-template>
       </div>
     </div>
 
     <div class="mushaf-filter-card__actions">
-      <span class="results-count"
-        >عدد النتائج: <span class="count-number">{{ totalResults() }}</span> كلمة</span
-      >
-      <button class="clear-filters-btn" (click)="clearFilters()">مسح جميع الفلاتر</button>
+      <span class="results-count">عدد النتائج: <strong>{{ totalResults() }}</strong> كلمة</span>
+      <button nz-button nzType="default" nzSize="small" (click)="clearFilters()">
+        <ng-icon name="lucideX" />
+        مسح جميع الفلاتر
+      </button>
     </div>
   </div>
 
-  <!-- ── Words Table Card ───────────────────────────────────────── -->
-  <div class="mushaf-table-card">
+  <div class="admin-table-wrap">
     @if (loading()) {
-      <!-- Skeleton loading rows -->
-      <table class="mushaf-table">
+      <nz-spin nzSimple class="mushaf-words__spinner"></nz-spin>
+    } @else if (filteredWords().length === 0) {
+      <div class="admin-empty-state">
+        <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
+        <p class="admin-empty-state__title">لا توجد كلمات مطابقة للبحث</p>
+      </div>
+    } @else {
+      <nz-table
+        #wordsTable
+        [nzData]="paginatedWords()"
+        [nzFrontPagination]="false"
+        [nzShowPagination]="false"
+        nzSize="middle"
+      >
         <thead>
           <tr>
-            <th>رقم الكلمة في القاعدة</th>
-            <th>الرسم العثماني</th>
-            <th>الرسم الإملائي</th>
-            <th>اسم السورة</th>
-            <th>رقم السورة</th>
-            <th>رقم الآية</th>
-            <th>رقم الكلمة في الآية</th>
+            <th nzWidth="140px">رقم الكلمة</th>
+            <th nzWidth="180px">الرسم العثماني</th>
+            <th nzWidth="160px">الرسم الإملائي</th>
+            <th nzWidth="130px">اسم السورة</th>
+            <th nzWidth="90px">رقم السورة</th>
+            <th nzWidth="90px">رقم الآية</th>
+            <th nzWidth="120px">رقم الكلمة في الآية</th>
           </tr>
         </thead>
         <tbody>
-          @for (i of [1, 2, 3, 4, 5]; track i) {
-            <tr class="mushaf-table__skeleton-row">
-              <td><span class="skel skel--badge"></span></td>
-              <td><span class="skel skel--title"></span></td>
-              <td><span class="skel skel--title"></span></td>
-              <td><span class="skel skel--cell-md"></span></td>
-              <td><span class="skel skel--cell-sm"></span></td>
-              <td><span class="skel skel--cell-sm"></span></td>
-              <td><span class="skel skel--badge"></span></td>
+          @for (word of wordsTable.data; track word.id) {
+            <tr>
+              <td><nz-tag nzColor="blue">{{ word.id }}</nz-tag></td>
+              <td class="uthmani-text">{{ word.text_uthmani }}</td>
+              <td>{{ word.text_spelling }}</td>
+              <td>{{ word.surah_name }}</td>
+              <td>{{ word.surah_id }}</td>
+              <td>{{ word.ayah_id }}</td>
+              <td><nz-tag nzColor="green">{{ word.position }}</nz-tag></td>
             </tr>
           }
         </tbody>
-      </table>
-    } @else if (filteredWords().length === 0) {
-      <!-- Empty state -->
-      <div class="mushaf-table-card__empty">
-        <span class="mushaf-table-card__empty-icon">📭</span>
-        <p class="mushaf-table-card__empty-text">لا توجد كلمات مطابقة للبحث</p>
-      </div>
-    } @else {
-      <!-- Data Table -->
-      <div class="mushaf-table-wrap">
-        <table class="mushaf-table">
-          <thead>
-            <tr>
-              <th>رقم الكلمة في القاعدة</th>
-              <th>الرسم العثماني</th>
-              <th>الرسم الإملائي</th>
-              <th>اسم السورة</th>
-              <th>رقم السورة</th>
-              <th>رقم الآية</th>
-              <th>رقم الكلمة في الآية</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (word of paginatedWords(); track word.id) {
-              <tr>
-                <td>
-                  <span class="mushaf-table__badge mushaf-table__badge--blue">{{ word.id }}</span>
-                </td>
-                <td class="uthmani-text">{{ word.text_uthmani }}</td>
-                <td>{{ word.text_spelling }}</td>
-                <td>{{ word.surah_name }}</td>
-                <td>{{ word.surah_id }}</td>
-                <td>{{ word.ayah_id }}</td>
-                <td>
-                  <span class="mushaf-table__badge mushaf-table__badge--green">{{
-                    word.position
-                  }}</span>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+      </nz-table>
 
-      <!-- Pagination Footer -->
-      <div class="pagination-footer">
-        <div class="page-size-selector">
-          <span>صفوف في الصفحة:</span>
-          <div
-            class="mushaf-filter-card__select-wrap"
-            style="display: inline-block; width: auto; margin-inline-end: 8px"
-          >
-            <select
-              class="mushaf-filter-card__select-btn"
-              style="padding: 6px 16px 6px 36px; min-width: 80px"
-              (change)="onPageSizeChange($event)"
-            >
-              <option [value]="10" [selected]="pageSize() === 10">10</option>
-              <option [value]="25" [selected]="pageSize() === 25">25</option>
-              <option [value]="50" [selected]="pageSize() === 50">50</option>
-              <option [value]="100" [selected]="pageSize() === 100">100</option>
-            </select>
-            <span class="mushaf-filter-card__chevron">&#8249;</span>
-          </div>
-        </div>
-
-        <div class="pagination-controls">
-          <button
-            class="mushaf-table__details-btn"
-            (click)="nextPage()"
-            [disabled]="currentPage() === totalPages()"
-          >
-            التالي
-          </button>
-          <span class="page-info">الصفحة {{ currentPage() }} من {{ totalPages() }}</span>
-          <button
-            class="mushaf-table__details-btn"
-            (click)="prevPage()"
-            [disabled]="currentPage() === 1"
-          >
-            السابق
-          </button>
-        </div>
+      <div class="admin-pagination">
+        <nz-pagination
+          [nzPageIndex]="currentPage()"
+          [nzTotal]="totalResults()"
+          [nzPageSize]="pageSize()"
+          [nzShowSizeChanger]="true"
+          [nzPageSizeOptions]="[10, 25, 50, 100]"
+          (nzPageIndexChange)="currentPage.set($event)"
+          (nzPageSizeChange)="pageSize.set($event); currentPage.set(1)"
+        ></nz-pagination>
       </div>
     }
   </div>

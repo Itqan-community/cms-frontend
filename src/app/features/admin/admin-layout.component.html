@@ -6,8 +6,8 @@
         <div class="app-header__row">
           <!-- Logo -->
           <div class="app-header__brand">
-            <button class="app-header__menu-btn admin-desktop-toggle" (click)="isCollapsed.set(!isCollapsed())" style="font-size: 24px;">
-              <i class="bx bx-menu"></i>
+            <button class="app-header__menu-btn admin-desktop-toggle" (click)="isCollapsed.set(!isCollapsed())">
+              <ng-icon name="lucideMenu" aria-hidden="true" />
             </button>
             <a class="app-header__logo" [routerLink]="['/']" [attr.aria-label]="'ADMIN.HOME' | translate">
               @if (isPublisherHost) {
@@ -26,7 +26,7 @@
           <!-- Actions -->
           <div class="app-header__actions">
             <!-- Ensure actions display flex properly always -->
-            <div style="display: flex; gap: 16px; align-items: center;">
+            <div class="admin-header-actions">
               <app-lang-switch></app-lang-switch>
               <app-user-actions (logoutClicked)="authService.logout()"></app-user-actions>
             </div>
@@ -52,17 +52,24 @@
     >
       <ul nz-menu nzMode="inline" class="admin-sidenav-menu" nzTheme="light">
         @for (tab of tabs(); track tab.id) {
-          <li nz-menu-item nzMatchRouter>
-            <a [routerLink]="['/admin', tab.path]">
-              <span class="admin-sidenav-emoji">{{ tab.emoji }}</span>
-              <span>{{ tab.label | translate }}</span>
-            </a>
+          <li nz-menu-item [nzDisabled]="!!tab.disabled" [nzMatchRouter]="!tab.disabled">
+            @if (tab.disabled) {
+              <span class="admin-sidenav-link" role="presentation" tabindex="-1" aria-disabled="true">
+                <ng-icon [name]="tab.icon" class="admin-sidenav-icon" />
+                <span>{{ tab.label | translate }}</span>
+              </span>
+            } @else {
+              <a [routerLink]="['/admin', tab.path]" class="admin-sidenav-link">
+                <ng-icon [name]="tab.icon" class="admin-sidenav-icon" />
+                <span>{{ tab.label | translate }}</span>
+              </a>
+            }
           </li>
         }
-        <li nz-menu-item class="admin-sidenav-footer">
-          <a [routerLink]="['/']">
-            <span class="admin-sidenav-emoji">🏠</span>
-            <span>{{ 'ADMIN.MENU.BACK_TO_CMS' | translate }}</span>
+        <li nz-menu-item>
+          <a [routerLink]="['/gallery']" class="admin-sidenav-link">
+            <ng-icon name="lucideHouse" class="admin-sidenav-icon" />
+            <span>{{ 'ADMIN.MENU.BACK_TO_GALLERY' | translate }}</span>
           </a>
         </li>
       </ul>

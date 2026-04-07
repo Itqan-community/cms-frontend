@@ -21,6 +21,12 @@ export const routes: Routes = [
     // canActivate: [authGuard, adminGuard],
     data: { hideHeader: true, fullWidth: true },
     children: [
+      // Resolve /admin before the lazy '' adminRoutes (avoids ** catch-all flashing Coming Soon on redirect)
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'publishers',
+      },
       {
         path: 'publishers',
         // canActivate: [itqanAdminGuard],
@@ -29,11 +35,8 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
-        // canActivate: [publisherAdminGuard],
-        loadComponent: () =>
-          import('./features/admin/pages/publisher-admin-profile.page').then(
-            (m) => m.PublisherAdminProfilePage
-          ),
+        redirectTo: 'publishers',
+        pathMatch: 'full',
       },
       {
         path: 'tafsirs',

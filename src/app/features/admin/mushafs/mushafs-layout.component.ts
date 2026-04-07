@@ -8,7 +8,7 @@ import { SectionLayoutComponent } from '../components/section-layout/section-lay
   imports: [SectionLayoutComponent],
   template: `
     <app-section-layout
-      title="📖 المصاحف"
+      title="المصاحف"
       description="إدارة النص القرآني على ثلاثة مستويات: السور الكاملة، الآيات المقطعة، والكلمات المنفردة"
       basePath="/admin/mushafs"
       [tabs]="subTabs"
@@ -17,9 +17,9 @@ import { SectionLayoutComponent } from '../components/section-layout/section-lay
 })
 export class MushafsLayoutComponent {
   readonly subTabs: SectionTab[] = [
-    { id: 'pages', path: 'pages', label: 'الصفحات' },
-    { id: 'surahs', path: 'surahs', label: 'السور' },
-    { id: 'ayahs', path: 'ayahs', label: 'الآيات' },
-    { id: 'words', path: 'words', label: 'الكلمات' },
+    { id: 'pages', path: 'pages', label: 'الصفحات', icon: 'lucideLayers' },
+    { id: 'surahs', path: 'surahs', label: 'السور', icon: 'lucideBookOpen' },
+    { id: 'ayahs', path: 'ayahs', label: 'الآيات', icon: 'lucideList' },
+    { id: 'words', path: 'words', label: 'الكلمات', icon: 'lucideBookmark' },
   ];
 }

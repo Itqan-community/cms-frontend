@@ -1,35 +1,25 @@
 import { Routes } from '@angular/router';
 
 export const adminRoutes: Routes = [
-  { path: '', redirectTo: 'search', pathMatch: 'full' },
-  {
-    path: 'search',
-    loadComponent: () =>
-      import('./components/search-panel/search-panel.component').then(
-        (m) => m.SearchPanelComponent
-      ),
-  },
-  {
-    path: 'mushafs',
-    loadChildren: () => import('./mushafs/mushafs.routes').then((m) => m.mushafsRoutes),
-  },
+  { path: 'search', redirectTo: 'publishers', pathMatch: 'full' },
+  { path: 'mushafs', redirectTo: 'publishers', pathMatch: 'prefix' },
   {
     path: 'fonts',
     loadComponent: () =>
       import('./components/coming-soon/coming-soon.component').then((m) => m.ComingSoonComponent),
-    data: { emoji: '✏️' },
+    data: { icon: 'lucidePalette' },
   },
   {
     path: 'linguistics',
     loadComponent: () =>
       import('./components/coming-soon/coming-soon.component').then((m) => m.ComingSoonComponent),
-    data: { emoji: '🌐' },
+    data: { icon: 'lucideLanguages' },
   },
   {
     path: 'tajweed',
     loadComponent: () =>
       import('./components/coming-soon/coming-soon.component').then((m) => m.ComingSoonComponent),
-    data: { emoji: '🎓' },
+    data: { icon: 'lucideSparkles' },
   },
   {
     path: 'audio',
@@ -43,6 +33,6 @@ export const adminRoutes: Routes = [
     path: '**',
     loadComponent: () =>
       import('./components/coming-soon/coming-soon.component').then((m) => m.ComingSoonComponent),
-    data: { emoji: '📋' },
+    data: { icon: 'lucideClock' },
   },
 ];

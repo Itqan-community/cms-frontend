@@ -1,13 +1,13 @@
-<div class="reciters-list" dir="rtl">
+<div class="reciters-list admin-list-page" dir="rtl">
 
-  <div class="reciters-list__header">
-    <div class="reciters-list__header-text">
-      <h2 class="reciters-list__title">القرّاء</h2>
-      <p class="reciters-list__subtitle">إدارة القرّاء والمقرئين</p>
+  <div class="admin-list-header">
+    <div class="admin-list-header__text">
+      <h2 class="admin-list-header__title">القرّاء</h2>
+      <p class="admin-list-header__subtitle">إدارة القرّاء والمقرئين</p>
     </div>
     <a routerLink="/admin/reciters/create">
-      <button nz-button nzType="primary" class="reciters-list__add-btn">
-        <i class="bx bx-plus" aria-hidden="true"></i>
+      <button nz-button nzType="primary" class="admin-add-btn">
+        <ng-icon name="lucidePlus" aria-hidden="true" />
         إضافة قارئ
       </button>
     </a>
@@ -15,7 +15,7 @@
 
   <app-reciter-filters (filtersChange)="onFiltersChange($event)"></app-reciter-filters>
 
-  <div class="reciters-list__table-wrap">
+  <div class="admin-table-wrap">
     <nz-spin [nzSpinning]="loading()">
       <nz-table
         #reciterTable
@@ -27,74 +27,32 @@
       >
         <thead>
           <tr>
-            <th
-              nzWidth="200px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('name', $event)"
-            >
-              الاسم
-            </th>
+            <th nzWidth="200px" [nzSortFn]="true" (nzSortOrderChange)="onSortChange('name', $event)">الاسم</th>
             <th>النبذة</th>
             <th nzWidth="100px">الجنسية</th>
-            <th
-              nzWidth="110px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('recitations_count', $event)"
-            >
-              التلاوات
-            </th>
-            <th
-              nzWidth="130px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('created_at', $event)"
-            >
-              تاريخ الإضافة
-            </th>
+            <th nzWidth="110px" [nzSortFn]="true" (nzSortOrderChange)="onSortChange('recitations_count', $event)">التلاوات</th>
+            <th nzWidth="130px" [nzSortFn]="true" (nzSortOrderChange)="onSortChange('created_at', $event)">تاريخ الإضافة</th>
             <th nzWidth="120px">الإجراءات</th>
           </tr>
         </thead>
         <tbody>
           @for (reciter of reciterTable.data; track reciter.id) {
-            <tr class="reciters-list__row">
-              <td class="reciters-list__name">{{ reciter.name }}</td>
-              <td class="reciters-list__desc">{{ truncate(reciter.bio) }}</td>
+            <tr class="admin-list-row">
+              <td class="admin-list-name">{{ reciter.name }}</td>
+              <td class="admin-list-desc">{{ truncate(reciter.bio) }}</td>
               <td>{{ reciter.nationality }}</td>
               <td>{{ reciter.recitations_count }}</td>
               <td>{{ reciter.created_at | date: 'dd/MM/yyyy' }}</td>
               <td>
-                <div class="reciters-list__actions">
-                  <button
-                    type="button"
-                    nz-button
-                    nzType="text"
-                    class="action-icon action-icon--view"
-                    nz-tooltip
-                    nzTooltipTitle="عرض"
-                    (click)="onView(reciter.id)"
-                  >
-                    <i class="bx bx-eye" aria-hidden="true"></i>
+                <div class="admin-list-actions">
+                  <button type="button" nz-button nzType="text" class="action-icon action-icon--view" nz-tooltip nzTooltipTitle="عرض" (click)="onView(reciter.id)">
+                    <ng-icon name="lucideEye" aria-hidden="true" />
                   </button>
-                  <button
-                    type="button"
-                    nz-button
-                    nzType="text"
-                    class="action-icon action-icon--edit"
-                    nz-tooltip
-                    nzTooltipTitle="تعديل"
-                    (click)="onEdit(reciter.id)"
-                  >
-                    <i class="bx bx-edit-alt" aria-hidden="true"></i>
+                  <button type="button" nz-button nzType="text" class="action-icon action-icon--edit" nz-tooltip nzTooltipTitle="تعديل" (click)="onEdit(reciter.id)">
+                    <ng-icon name="lucideSquarePen" aria-hidden="true" />
                   </button>
-                  <button
-                    type="button"
-                    nz-button
-                    nzType="text"
-                    class="action-icon action-icon--delete"
-                    nz-tooltip
-                    nzTooltipTitle="حذف"
-                    (click)="onDelete(reciter)"
-                  >
-                    <i class="bx bx-trash" aria-hidden="true"></i>
+                  <button type="button" nz-button nzType="text" class="action-icon action-icon--delete" nz-tooltip nzTooltipTitle="حذف" (click)="onDelete(reciter)">
+                    <ng-icon name="lucideTrash2" aria-hidden="true" />
                   </button>
                 </div>
               </td>
@@ -106,15 +64,15 @@
   </div>
 
   <ng-template #emptyTpl>
-    <div class="reciters-list__empty">
-      <span class="reciters-list__empty-icon">🔊</span>
-      <p class="reciters-list__empty-title">لا يوجد قرّاء</p>
-      <p class="reciters-list__empty-sub">لم يتم العثور على نتائج. حاول تعديل معايير البحث.</p>
+    <div class="admin-empty-state">
+      <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
+      <p class="admin-empty-state__title">لا يوجد قرّاء</p>
+      <p class="admin-empty-state__subtitle">لم يتم العثور على نتائج. حاول تعديل معايير البحث.</p>
     </div>
   </ng-template>
 
   @if (!loading() && total() > 0) {
-    <div class="reciters-list__pagination">
+    <div class="admin-pagination">
       <nz-pagination
         [nzPageIndex]="page()"
         [nzTotal]="total()"

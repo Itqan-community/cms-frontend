@@ -9,6 +9,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule, NzTableSortOrder } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { NgIcon } from '@ng-icons/core';
 import { Publisher, PublisherUiFilters } from '../../models/publishers-stats.models';
 import { PublishersService } from '../../services/publishers.service';
 import { PublisherFiltersComponent } from '../publisher-filters/publisher-filters.component';
@@ -26,6 +27,7 @@ import { PublisherFiltersComponent } from '../publisher-filters/publisher-filter
     NzTableModule,
     NzTagModule,
     NzToolTipModule,
+    NgIcon,
     PublisherFiltersComponent,
   ],
   templateUrl: './publishers-list.component.html',
@@ -89,7 +91,7 @@ export class PublishersListComponent implements OnInit {
     this.load();
   }
 
-  onSortChange(column: 'name_ar' | 'name_en', order: NzTableSortOrder): void {
+  onSortChange(column: 'name', order: NzTableSortOrder): void {
     if (!order) {
       this.ordering = undefined;
     } else {
@@ -109,7 +111,7 @@ export class PublishersListComponent implements OnInit {
   }
 
   onDelete(item: Publisher): void {
-    const name = item.name_ar ?? item.name_en ?? 'هذا الناشر';
+    const name = item.name ?? item.name_ar ?? item.name_en ?? 'هذا الناشر';
     this.modal.confirm({
       nzTitle: 'تأكيد الحذف (Confirm Deletion)',
       nzContent: `<b>${name}</b> — هذا الإجراء لا يمكن التراجع عنه.`,

@@ -1,6 +1,5 @@
 <div class="ayahs-page" dir="rtl">
 
-  <!-- Banner -->
   <div class="ayahs-banner">
     <div class="ayahs-banner__content">
       <h2 class="ayahs-banner__title">الآيات القرآنية</h2>
@@ -9,17 +8,18 @@
     <span class="ayahs-banner__count">{{ totalFiltered() | number }} آية</span>
   </div>
 
-  <!-- Toolbar: Search + Surah Filter -->
   <div class="ayahs-toolbar">
-    <div class="ayahs-toolbar__search">
-      <span class="ayahs-toolbar__search-icon">🔍</span>
+    <nz-input-group [nzPrefix]="searchPrefixTpl" class="ayahs-toolbar__search">
       <input
-        class="ayahs-toolbar__search-input"
+        nz-input
         type="text"
         placeholder="ابحث في نص الآيات..."
         (input)="onSearchInput($event)"
       />
-    </div>
+    </nz-input-group>
+    <ng-template #searchPrefixTpl>
+      <ng-icon name="lucideSearch" class="ayahs-toolbar__search-icon" />
+    </ng-template>
     <nz-select
       class="ayahs-toolbar__filter"
       nzPlaceHolder="جميع السور"
@@ -35,7 +35,6 @@
     </nz-select>
   </div>
 
-  <!-- Ayahs Table -->
   @if (loading()) {
     <div class="ayahs-table-wrapper">
       <div class="ayahs-skel">
@@ -51,10 +50,10 @@
       </div>
     </div>
   } @else if (paginatedAyahs().length === 0) {
-    <div class="ayahs-empty">
-      <span class="ayahs-empty__icon">📖</span>
-      <p class="ayahs-empty__title">لا توجد آيات</p>
-      <p class="ayahs-empty__subtitle">لم يتم العثور على نتائج. حاول تغيير كلمة البحث أو السورة.</p>
+    <div class="admin-empty-state ayahs-empty-wrap">
+      <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
+      <p class="admin-empty-state__title">لا توجد آيات</p>
+      <p class="admin-empty-state__subtitle">لم يتم العثور على نتائج. حاول تغيير كلمة البحث أو السورة.</p>
     </div>
   } @else {
     <div class="ayahs-table-wrapper">
@@ -78,9 +77,7 @@
         <tbody>
           @for (ayah of ayahsTable.data; track ayah.id) {
             <tr>
-              <td>
-                <nz-tag nzColor="green">{{ ayah.number }}</nz-tag>
-              </td>
+              <td><nz-tag nzColor="green">{{ ayah.number }}</nz-tag></td>
               <td>{{ ayah.chapter }}</td>
               <td>{{ ayah.surah_name }}</td>
               <td class="ayahs-table__ayah-text">{{ ayah.text }}</td>
@@ -92,9 +89,8 @@
     </div>
   }
 
-  <!-- Pagination -->
   @if (!loading() && totalFiltered() > pageSize) {
-    <div class="ayahs-pagination">
+    <div class="admin-pagination">
       <nz-pagination
         [nzPageIndex]="currentPage()"
         [nzTotal]="totalFiltered()"

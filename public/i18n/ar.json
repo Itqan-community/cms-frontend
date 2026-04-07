@@ -136,7 +136,8 @@
     "CONTENT_STANDARDS": "معايير المحتوى والتقنية",
     "API_DOCS": "وثائق الواجهات البرمجية (API)",
     "PUBLISHER_DASHBOARD": "لوحة التحكم للناشر",
-    "ASSET_REQUEST_FORM": "أضف محتوى قرآني في إتقان"
+    "ASSET_REQUEST_FORM": "أضف محتوى قرآني في إتقان",
+    "ADMIN_PORTAL": "لوحة الإدارة"
   },
   "HOME": {
     "WELCOME": "مرحبًا بك في إتقان CMS",
@@ -370,7 +371,7 @@
       "PUBLISHERS": "الناشرون",
       "AUDIO": "الصوتيات",
       "MANAGE_PROFILE": "إدارة الملف",
-      "BACK_TO_CMS": "العودة للموقع"
+      "BACK_TO_GALLERY": "العودة إلى المعرض"
     },
     "PROFILE": {
       "TITLE": "ملف الناشر",

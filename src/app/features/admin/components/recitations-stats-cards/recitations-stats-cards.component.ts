@@ -1,12 +1,13 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RecitationsStats } from '../../models/recitations-stats.model';
+import { NgIcon } from '@ng-icons/core';
 import { RecitationsStatsService } from '../../services/recitations-stats.service';
 
 @Component({
   selector: 'app-admin-recitations-stats-cards',
   standalone: true,
-  imports: [],
+  imports: [NgIcon],
   templateUrl: './recitations-stats-cards.component.html',
   styleUrls: ['./recitations-stats-cards.component.less'],
 })

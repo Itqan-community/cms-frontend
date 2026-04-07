@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NgIcon } from '@ng-icons/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
@@ -21,7 +21,7 @@ import { TafsirsService } from '../../services/tafsirs.service';
     RouterLink,
     NzModalModule,
     NzButtonModule,
-    NzIconModule,
+    NgIcon,
     NzSkeletonModule,
     NzTableModule,
     NzTagModule,

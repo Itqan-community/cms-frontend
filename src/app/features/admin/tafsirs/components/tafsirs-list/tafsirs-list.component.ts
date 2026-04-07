@@ -9,6 +9,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule, NzTableSortOrder } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { NgIcon } from '@ng-icons/core';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
 import { AssetSortingQuery, TafsirFilters, TafsirItem } from '../../models/tafsirs.models';
 import { TafsirsService } from '../../services/tafsirs.service';
@@ -27,6 +28,7 @@ import { TafsirFiltersComponent } from '../tafsir-filters/tafsir-filters.compone
     NzTableModule,
     NzTagModule,
     NzToolTipModule,
+    NgIcon,
     TafsirFiltersComponent,
   ],
   templateUrl: './tafsirs-list.component.html',

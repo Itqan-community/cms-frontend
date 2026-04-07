@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NgIcon } from '@ng-icons/core';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
@@ -17,7 +17,7 @@ import { PublisherUiFilters } from '../../models/publishers-stats.models';
 @Component({
   selector: 'app-publisher-filters',
   standalone: true,
-  imports: [FormsModule, NzInputModule, NzSelectModule, NzIconModule],
+  imports: [FormsModule, NzInputModule, NzSelectModule, NgIcon],
   templateUrl: './publisher-filters.component.html',
   styleUrl: './publisher-filters.component.less',
 })

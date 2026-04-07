@@ -8,6 +8,13 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NgIcon } from '@ng-icons/core';
+import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzTagModule } from 'ng-zorro-antd/tag';
+import { FormsModule } from '@angular/forms';
 import { QuranDataService, QuranPage } from '../../services/quran-data.service';
 
 export interface MushafOption {
@@ -21,7 +28,7 @@ const MUSHAF_OPTIONS: MushafOption[] = [{ id: 'medina', name: 'مصحف المد
 @Component({
   selector: 'app-mushaf-pages',
   standalone: true,
-  imports: [],
+  imports: [FormsModule, NzButtonModule, NgIcon, NzSelectModule, NzSpinModule, NzTableModule, NzTagModule],
   templateUrl: './mushaf-pages.page.html',
   styleUrls: ['./mushaf-pages.page.less'],
 })

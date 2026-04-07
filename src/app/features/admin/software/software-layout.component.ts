@@ -17,8 +17,8 @@ import type { SectionTab } from '../components/section-layout/section-layout.com
 })
 export class SoftwareLayoutComponent {
   readonly subTabs: SectionTab[] = [
-    { id: 'resources', path: 'resources', label: 'موارد المطورين' },
-    { id: 'backend', path: 'backend', label: 'Backend' },
-    { id: 'import', path: 'import', label: 'إستيراد البيانات' },
+    { id: 'resources', path: 'resources', label: 'موارد المطورين', icon: 'lucideWrench' },
+    { id: 'backend', path: 'backend', label: 'Backend', icon: 'lucideSettings' },
+    { id: 'import', path: 'import', label: 'إستيراد البيانات', icon: 'lucideDownloadCloud' },
   ];
 }

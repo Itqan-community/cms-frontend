@@ -3,23 +3,26 @@
   <p class="admin-search-panel__subtitle">ابحث عن كلمة أو عبارة لعرض جميع الآيات التي تحتوي عليها</p>
   <label class="admin-search-panel__label" for="quran-search-input">أدخل كلمة أو عبارة للبحث</label>
   <div class="admin-search-panel__input-row">
-    <span class="admin-search-panel__search-icon">🔍</span>
-    <input
-      id="quran-search-input"
-      class="admin-search-panel__input"
-      type="text"
-      placeholder="مثال: الله، الرحمن، الصلاة..."
-    />
-    <button class="admin-search-panel__btn" (click)="onSearch()">
-      <span>🔍</span>
+    <nz-input-group [nzPrefix]="searchIconTpl" class="admin-search-panel__input-group">
+      <input
+        nz-input
+        id="quran-search-input"
+        class="admin-search-panel__input"
+        type="text"
+        placeholder="مثال: الله، الرحمن، الصلاة..."
+      />
+    </nz-input-group>
+    <button nz-button nzType="primary" class="admin-search-panel__btn" (click)="onSearch()">
+      <ng-icon name="lucideSearch" />
       بحث
     </button>
   </div>
+  <ng-template #searchIconTpl>
+    <ng-icon name="lucideSearch" class="admin-search-panel__prefix-icon" />
+  </ng-template>
   <div class="admin-search-panel__empty">
-    <span class="admin-search-panel__empty-icon">🔍</span>
+    <ng-icon name="lucideSearch" class="admin-search-panel__empty-icon" />
     <p class="admin-search-panel__empty-title">ابدأ بإدخال كلمة في حقل البحث أعلاه</p>
-    <p class="admin-search-panel__empty-subtitle">
-      سيتم عرض جميع الآيات التي تحتوي على الكلمة المطلوبة
-    </p>
+    <p class="admin-search-panel__empty-subtitle">سيتم عرض جميع الآيات التي تحتوي على الكلمة المطلوبة</p>
   </div>
 </div>

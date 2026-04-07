@@ -13,7 +13,7 @@ export const softwareRoutes: Routes = [
           import('../components/coming-soon/coming-soon.component').then(
             (m) => m.ComingSoonComponent
           ),
-        data: { emoji: '🛠️' },
+        data: { icon: 'lucideWrench' },
       },
       {
         path: 'backend',
@@ -21,7 +21,7 @@ export const softwareRoutes: Routes = [
           import('../components/coming-soon/coming-soon.component').then(
             (m) => m.ComingSoonComponent
           ),
-        data: { emoji: '⚙️' },
+        data: { icon: 'lucideSettings' },
       },
       {
         path: 'import',
@@ -29,7 +29,7 @@ export const softwareRoutes: Routes = [
           import('../components/coming-soon/coming-soon.component').then(
             (m) => m.ComingSoonComponent
           ),
-        data: { emoji: '📥' },
+        data: { icon: 'lucideDownloadCloud' },
       },
     ],
   },

@@ -1,108 +1,97 @@
-<div class="translation-detail" dir="rtl">
-  <div class="translation-detail__breadcrumb">
-    <a routerLink="/admin/translations" class="translation-detail__breadcrumb-link">الترجمات</a>
-    <span nz-icon nzType="left" class="translation-detail__breadcrumb-sep"></span>
+<div class="translation-detail admin-list-page" dir="rtl">
+  <div class="admin-breadcrumb">
+    <a routerLink="/admin/translations" class="admin-breadcrumb__link">الترجمات</a>
+    <ng-icon name="lucideChevronLeft" class="admin-breadcrumb__sep" />
     @if (loading()) {
-      <span class="translation-detail__breadcrumb-cur">جاري التحميل...</span>
+      <span class="admin-breadcrumb__current">جاري التحميل...</span>
     } @else {
-      <span class="translation-detail__breadcrumb-cur">{{ translation()?.name_ar }}</span>
+      <span class="admin-breadcrumb__current">{{ translation()?.name_ar }}</span>
     }
   </div>
 
   @if (loading()) {
     <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 8 }"></nz-skeleton>
   } @else if (translation()) {
-    <div class="translation-detail__hero">
+    <div class="admin-hero">
       @if (translation()!.thumbnail_url) {
-        <img
-          [src]="translation()!.thumbnail_url!"
-          alt="thumbnail"
-          class="translation-detail__thumbnail"
-        />
+        <img [src]="translation()!.thumbnail_url!" alt="thumbnail" class="admin-hero-thumbnail" />
       } @else {
-        <div class="translation-detail__thumbnail-placeholder">🌍</div>
+        <div class="admin-hero-placeholder">
+          <ng-icon name="lucideGlobe" />
+        </div>
       }
 
-      <div class="translation-detail__hero-info">
-        <div class="translation-detail__names">
-          <h1 class="translation-detail__name-ar">{{ translation()!.name_ar }}</h1>
-          <p class="translation-detail__name-en">{{ translation()!.name_en }}</p>
+      <div class="admin-hero-info">
+        <div class="admin-hero-names">
+          <h1 class="admin-hero-name-ar">{{ translation()!.name_ar }}</h1>
+          <p class="admin-hero-name-en">{{ translation()!.name_en }}</p>
         </div>
 
-        <div class="translation-detail__meta">
-          <nz-tag [nzColor]="getLicenseColor(translation()!.license)">
-            {{ translation()!.license }}
-          </nz-tag>
+        <div class="admin-hero-meta">
+          <nz-tag [nzColor]="getLicenseColor(translation()!.license)">{{ translation()!.license }}</nz-tag>
           @if (translation()!.is_external) {
             <nz-tag nzColor="orange">خارجي</nz-tag>
           }
-          <span class="translation-detail__meta-date">
-            <span nz-icon nzType="calendar"></span>
+          <span class="admin-hero-meta__date">
+            <ng-icon name="lucideCalendar" />
             {{ translation()!.created_at | date: 'dd/MM/yyyy' }}
           </span>
         </div>
 
-        <div class="translation-detail__publisher">
-          <span nz-icon nzType="shop"></span>
+        <div class="admin-publisher-row">
+          <ng-icon name="lucideStore" />
           <span>{{ translation()!.publisher.name }}</span>
         </div>
 
         @if (translation()!.external_url) {
-          <div class="translation-detail__external-url">
-            <span nz-icon nzType="link"></span>
-            <a [href]="translation()!.external_url!" target="_blank" rel="noopener">
-              {{ translation()!.external_url }}
-            </a>
+          <div class="admin-external-url">
+            <ng-icon name="lucideLink" />
+            <a [href]="translation()!.external_url!" target="_blank" rel="noopener">{{ translation()!.external_url }}</a>
           </div>
         }
       </div>
 
-      <div class="translation-detail__actions">
+      <div class="admin-hero-actions">
         <button nz-button nzType="primary" (click)="onEdit()">
-          <span nz-icon nzType="edit"></span>
+          <ng-icon name="lucideSquarePen" />
           تعديل
         </button>
         <button nz-button nzDanger (click)="onDelete()">
-          <span nz-icon nzType="delete"></span>
+          <ng-icon name="lucideTrash2" />
           حذف
         </button>
       </div>
     </div>
 
-    <div class="translation-detail__descriptions">
-      <div class="translation-detail__desc-col">
-        <h3 class="translation-detail__desc-title">
-          <span nz-icon nzType="file-text"></span> الوصف (عربي)
+    <div class="admin-descriptions">
+      <div class="admin-desc-col">
+        <h3 class="admin-desc-title">
+          <ng-icon name="lucideFileText" /> الوصف (عربي)
         </h3>
-        <p class="translation-detail__desc-text">{{ translation()!.description_ar }}</p>
-
-        <h3 class="translation-detail__desc-title">
-          <span nz-icon nzType="align-right"></span> الوصف المطوّل (عربي)
+        <p class="admin-desc-text">{{ translation()!.description_ar }}</p>
+        <h3 class="admin-desc-title">
+          <ng-icon name="lucideAlignRight" /> الوصف المطوّل (عربي)
         </h3>
-        <p class="translation-detail__desc-text">{{ translation()!.long_description_ar }}</p>
+        <p class="admin-desc-text">{{ translation()!.long_description_ar }}</p>
       </div>
-
-      <div class="translation-detail__desc-col">
-        <h3 class="translation-detail__desc-title" dir="ltr">
-          <span nz-icon nzType="file-text"></span> Description (EN)
+      <div class="admin-desc-col">
+        <h3 class="admin-desc-title" dir="ltr">
+          <ng-icon name="lucideFileText" /> Description (EN)
         </h3>
-        <p class="translation-detail__desc-text" dir="ltr">{{ translation()!.description_en }}</p>
-
-        <h3 class="translation-detail__desc-title" dir="ltr">
-          <span nz-icon nzType="align-left"></span> Long Description (EN)
+        <p class="admin-desc-text" dir="ltr">{{ translation()!.description_en }}</p>
+        <h3 class="admin-desc-title" dir="ltr">
+          <ng-icon name="lucideAlignLeft" /> Long Description (EN)
         </h3>
-        <p class="translation-detail__desc-text" dir="ltr">
-          {{ translation()!.long_description_en }}
-        </p>
+        <p class="admin-desc-text" dir="ltr">{{ translation()!.long_description_en }}</p>
       </div>
     </div>
 
     @if (translation()!.versions.length > 0) {
-      <div class="translation-detail__versions">
-        <h3 class="translation-detail__versions-title">
-          <span nz-icon nzType="history"></span> الإصدارات
+      <div class="admin-versions">
+        <h3 class="admin-versions__title">
+          <ng-icon name="lucideRotateCw" /> الإصدارات
         </h3>
-        <div class="translation-detail__versions-table-wrap">
+        <div class="admin-versions__table-wrap">
           <nz-table
             #versionsTable
             [nzData]="translation()!.versions"
@@ -126,7 +115,7 @@
                   <td>{{ ver.created_at | date: 'dd/MM/yyyy' }}</td>
                   <td>
                     <a [href]="ver.file_url" target="_blank" rel="noopener">
-                      <span nz-icon nzType="download"></span> تحميل
+                      <ng-icon name="lucideDownload" /> تحميل
                     </a>
                   </td>
                 </tr>
@@ -137,17 +126,17 @@
       </div>
     }
 
-    <div class="translation-detail__back">
+    <div class="admin-back">
       <a routerLink="/admin/translations">
         <button nz-button nzType="default">
-          <span nz-icon nzType="arrow-right"></span>
+          <ng-icon name="lucideArrowRight" />
           العودة للقائمة
         </button>
       </a>
     </div>
   } @else {
-    <div class="translation-detail__not-found">
-      <span>⚠️</span>
+    <div class="admin-not-found">
+      <ng-icon name="lucideAlertTriangle" class="admin-not-found__icon" />
       <p>لم يتم العثور على الترجمة المطلوبة.</p>
       <a routerLink="/admin/translations">العودة للقائمة</a>
     </div>

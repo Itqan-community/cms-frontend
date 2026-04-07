@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink, RouterOutlet } from '@angular/router';
+import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
@@ -15,54 +15,56 @@ interface CmsTab {
   id: string;
   path: string;
   label: string;
-  emoji: string;
+  icon: string;
+  /** Visible in sidebar but not navigable; route redirects away. */
+  disabled?: boolean;
 }
 
+const TAB_PROFILE: CmsTab = {
+  id: 'profile',
+  path: 'profile',
+  label: 'ADMIN.MENU.MANAGE_PROFILE',
+  icon: 'lucideIdCard',
+  disabled: true,
+};
 const TAB_MUSHAFS: CmsTab = {
   id: 'mushafs',
   path: 'mushafs',
   label: 'ADMIN.MENU.MUSHAFS',
-  emoji: '📖',
+  icon: 'lucideBookOpen',
+  disabled: true,
 };
 const TAB_TAFSIRS: CmsTab = {
   id: 'tafsirs',
   path: 'tafsirs',
   label: 'ADMIN.MENU.TAFSIRS',
-  emoji: '📚',
+  icon: 'lucideGraduationCap',
 };
 const TAB_TRANSLATIONS: CmsTab = {
   id: 'translations',
   path: 'translations',
   label: 'ADMIN.MENU.TRANSLATIONS',
-  emoji: '🌍',
+  icon: 'lucideGlobe',
 };
 const TAB_PUBLISHERS: CmsTab = {
   id: 'publishers',
   path: 'publishers',
   label: 'ADMIN.MENU.PUBLISHERS',
-  emoji: '📰',
+  icon: 'lucideUsers',
 };
 const TAB_RECITATIONS: CmsTab = {
   id: 'recitations',
   path: 'recitations',
   label: 'ADMIN.MENU.RECITATIONS',
-  emoji: '🎵',
+  icon: 'lucideVolume2',
 };
 const TAB_RECITERS: CmsTab = {
   id: 'reciters',
   path: 'reciters',
   label: 'ADMIN.MENU.RECITERS',
-  emoji: '🔊',
+  icon: 'lucideMic',
 };
-const TAB_PROFILE: CmsTab = {
-  id: 'profile',
-  path: 'profile',
-  label: 'ADMIN.MENU.MANAGE_PROFILE',
-  emoji: '🪪',
-};
-
 const CORE_TABS: CmsTab[] = [
-  TAB_MUSHAFS,
   TAB_TAFSIRS,
   TAB_TRANSLATIONS,
   TAB_RECITATIONS,
@@ -78,7 +80,7 @@ const CORE_TABS: CmsTab[] = [
     RouterOutlet,
     NzLayoutModule,
     NzMenuModule,
-    NzIconModule,
+    NgIcon,
     LangSwitchComponent,
     UserActionsComponent,
     TranslateModule,
@@ -104,7 +106,7 @@ export class AdminLayoutComponent {
     //   return [TAB_MUSHAFS, TAB_TAFSIRS, TAB_TRANSLATIONS, TAB_PUBLISHERS, TAB_AUDIO];
     // }
     // if (this.adminAuth.isPublisherAdmin()) {
-    return [TAB_PROFILE, ...CORE_TABS, TAB_PUBLISHERS];
+    return [TAB_PROFILE, TAB_MUSHAFS, ...CORE_TABS, TAB_PUBLISHERS];
     // }
     // return CORE_TABS;
   });

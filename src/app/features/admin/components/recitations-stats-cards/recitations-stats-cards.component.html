@@ -30,19 +30,25 @@
       </div>
     } @else if (stats()) {
       <div class="admin-audio-stats__card">
-        <div class="admin-audio-stats__icon admin-audio-stats__icon--riwayas">📘</div>
+        <div class="admin-audio-stats__icon admin-audio-stats__icon--riwayas">
+          <ng-icon name="lucideBookOpen" />
+        </div>
         <div class="admin-audio-stats__value">{{ stats()!.riwayas }}</div>
         <div class="admin-audio-stats__label">رواية متاحة</div>
       </div>
 
       <div class="admin-audio-stats__card">
-        <div class="admin-audio-stats__icon admin-audio-stats__icon--recitations">🎵</div>
+        <div class="admin-audio-stats__icon admin-audio-stats__icon--recitations">
+          <ng-icon name="lucideMusic" />
+        </div>
         <div class="admin-audio-stats__value">{{ stats()!.recitations }}</div>
         <div class="admin-audio-stats__label">قراءة متاحة</div>
       </div>
 
       <div class="admin-audio-stats__card">
-        <div class="admin-audio-stats__icon admin-audio-stats__icon--reciters">🔊</div>
+        <div class="admin-audio-stats__icon admin-audio-stats__icon--reciters">
+          <ng-icon name="lucideVolume2" />
+        </div>
         <div class="admin-audio-stats__value">{{ stats()!.reciters }}</div>
         <div class="admin-audio-stats__label">قارئ متاح</div>
       </div>

@@ -1,0 +1,59 @@
+// ============================================================
+// Admin Shared Mixin (per-component ::ng-deep overrides)
+// Import this in admin component .less files that use nz-table.
+// ============================================================
+
+.admin-table-overrides() {
+  :host ::ng-deep {
+    .ant-table {
+      direction: rtl;
+
+      table {
+        width: 100%;
+        table-layout: auto;
+      }
+    }
+
+    .ant-table-thead > tr > th {
+      background: var(--admin-surface-50);
+      font-weight: 600;
+      color: var(--admin-text-700);
+      border-bottom: 2px solid var(--admin-border-200);
+    }
+
+    .ant-table-tbody > tr > td {
+      vertical-align: middle;
+      transition: background 0.15s ease;
+    }
+
+    .ant-table-tbody > tr:hover > td {
+      background: var(--admin-accent-50);
+    }
+
+    .ant-table-tbody > tr:active > td {
+      background: var(--color-primary-50);
+    }
+
+    .ant-table-column-sorter {
+      margin-right: 4px;
+    }
+
+    nz-pagination {
+      direction: rtl;
+    }
+
+    .ant-skeleton {
+      padding: 24px;
+    }
+
+    .ant-descriptions {
+      direction: rtl;
+    }
+
+    .ant-descriptions-item-label {
+      font-weight: 600;
+      color: var(--admin-text-700);
+      width: 160px;
+    }
+  }
+}

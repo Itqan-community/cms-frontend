@@ -5,7 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NgIcon } from '@ng-icons/core';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
@@ -23,7 +23,7 @@ import { PublishersService } from '../../services/publishers.service';
     NzButtonModule,
     NzFormModule,
     NzGridModule,
-    NzIconModule,
+    NgIcon,
     NzInputModule,
     NzSkeletonModule,
     NzSwitchModule,

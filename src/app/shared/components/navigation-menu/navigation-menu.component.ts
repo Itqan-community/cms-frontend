@@ -2,6 +2,7 @@ import { NgClass } from '@angular/common';
 import { Component, input } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { NgIcon } from '@ng-icons/core';
 
 export interface NavigationLink {
   link: string;
@@ -15,7 +16,7 @@ export interface NavigationLink {
 @Component({
   selector: 'app-navigation-menu',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, TranslatePipe, NgClass],
+  imports: [RouterLink, RouterLinkActive, TranslatePipe, NgClass, NgIcon],
   styleUrls: ['./navigation-menu.component.less'],
   template: `
     <nav class="nav-menu">
@@ -30,7 +31,7 @@ export interface NavigationLink {
             >
               {{ link.label | translate }}
               @if (link.icon) {
-                <i class="nav-menu__link-icon {{ link.icon }}"></i>
+                <ng-icon [name]="link.icon" class="nav-menu__link-icon" />
               }
             </a>
           } @else {
@@ -42,7 +43,7 @@ export interface NavigationLink {
             >
               {{ link.label | translate }}
               @if (link.icon) {
-                <i class="nav-menu__link-icon {{ link.icon }}"></i>
+                <ng-icon [name]="link.icon" class="nav-menu__link-icon" />
               }
             </a>
           }

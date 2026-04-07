@@ -13,14 +13,14 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NgIcon } from '@ng-icons/core';
 import { PublishersFilterService } from '../../services/publishers-filter.service';
 import { PublisherFilterItem, TafsirFilters } from '../../models/tafsirs.models';
 
 @Component({
   selector: 'app-tafsir-filters',
   standalone: true,
-  imports: [FormsModule, NzInputModule, NzSelectModule, NzIconModule],
+  imports: [FormsModule, NzInputModule, NzSelectModule, NgIcon],
   template: `
     <div class="tafsir-filters" dir="rtl">
       <!-- Search -->
@@ -33,7 +33,7 @@ import { PublisherFilterItem, TafsirFilters } from '../../models/tafsirs.models'
           (ngModelChange)="onSearchChange($event)"
         />
       </nz-input-group>
-      <ng-template #searchIcon><span nz-icon nzType="search"></span></ng-template>
+      <ng-template #searchIcon><ng-icon name="lucideSearch" /></ng-template>
 
       <!-- Publisher filter (server-searchable) -->
       <nz-select

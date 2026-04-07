@@ -17,7 +17,7 @@ export const mushafsRoutes: Routes = [
           import('./words/mushaf-words.page').then(
             (m) => m.MushafWordsPage
           ),
-        data: { emoji: '📝' },
+        data: { icon: 'lucideBookmark' },
       },
       {
         path: 'ayahs',
@@ -30,7 +30,7 @@ export const mushafsRoutes: Routes = [
           import('../components/coming-soon/coming-soon.component').then(
             (m) => m.ComingSoonComponent
           ),
-        data: { emoji: '📚' },
+        data: { icon: 'lucideGraduationCap' },
       },
     ],
   },

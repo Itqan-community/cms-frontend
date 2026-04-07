@@ -1,4 +1,4 @@
-<div class="admin-section-layout" dir="rtl">
+<div class="admin-section-layout">
   <div class="admin-section-layout__header">
     <h2 class="admin-section-layout__title">{{ title() }}</h2>
     <p class="admin-section-layout__description">{{ description() }}</p>
@@ -12,8 +12,8 @@
         [routerLinkActiveOptions]="{ exact: exactActiveMatch() }"
         class="admin-section-layout__sub-tab"
       >
-        @if (tab.emoji) {
-          <span class="admin-section-layout__sub-tab-emoji">{{ tab.emoji }}</span>
+        @if (tab.icon) {
+          <ng-icon [name]="tab.icon!" class="admin-section-layout__sub-tab-icon" />
         }
         <span>{{ tab.label }}</span>
       </a>

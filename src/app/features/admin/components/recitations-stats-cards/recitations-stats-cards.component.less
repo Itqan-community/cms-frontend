@@ -1,8 +1,8 @@
 .admin-audio-stats {
-  background: #ffffff;
-  border-radius: 14px;
+  background: var(--admin-surface-white);
+  border-radius: var(--radius-xl);
   padding: 24px 28px;
-  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-card);
   margin-bottom: 24px;
 
   &__header {
@@ -17,13 +17,13 @@
     margin: 0;
     font-size: 1.1rem;
     font-weight: 700;
-    color: #1f2937;
+    color: var(--admin-text-900);
   }
 
   &__subtitle {
     margin: 4px 0 0;
     font-size: 0.85rem;
-    color: #6b7280;
+    color: var(--admin-text-500);
   }
 
   &__badge {
@@ -48,12 +48,12 @@
 
   &__card {
     border-radius: 12px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid var(--admin-border-200);
     padding: 18px 20px;
     display: flex;
     flex-direction: column;
     gap: 10px;
-    background: #ffffff;
+    background: var(--admin-surface-white);
     transition: box-shadow 0.15s ease;
 
     &:hover {
@@ -69,7 +69,7 @@
   &__icon {
     width: 40px;
     height: 40px;
-    border-radius: 10px;
+    border-radius: var(--radius-lg);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -94,22 +94,21 @@
   &__value {
     font-size: 1.8rem;
     font-weight: 800;
-    color: #111827;
+    color: var(--admin-text-800);
     line-height: 1;
   }
 
   &__label {
     font-size: 0.9rem;
-    color: #6b7280;
+    color: var(--admin-text-500);
     font-weight: 500;
   }
 
-  // Skeleton styles
   &__icon-skeleton,
   &__value-skeleton,
   &__label-skeleton {
     border-radius: 8px;
-    background: linear-gradient(90deg, #f3f4f6 25%, #e5e7eb 50%, #f3f4f6 75%);
+    background: linear-gradient(90deg, var(--admin-surface-100) 25%, var(--admin-border-200) 50%, var(--admin-surface-100) 75%);
     background-size: 800px 100%;
     animation: admin-skeleton-shimmer 1.4s infinite;
   }
@@ -133,10 +132,6 @@
 }
 
 @keyframes admin-skeleton-shimmer {
-  0% {
-    background-position: -400px 0;
-  }
-  100% {
-    background-position: 400px 0;
-  }
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
 }

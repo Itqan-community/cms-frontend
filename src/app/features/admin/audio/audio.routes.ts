@@ -8,6 +8,6 @@ export const audioRoutes: Routes = [
       import('../components/coming-soon/coming-soon.component').then(
         (m) => m.ComingSoonComponent
       ),
-    data: { emoji: '🔊' },
+    data: { icon: 'lucideVolume2' },
   },
 ];

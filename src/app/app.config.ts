@@ -7,6 +7,7 @@ import { provideRouter } from '@angular/router';
 
 import { routes } from './app.routes';
 import { ar_EG, provideNzI18n } from 'ng-zorro-antd/i18n';
+import { appLucideIconsProvider } from './icons/provide-app-lucide-icons';
 import { registerLocaleData } from '@angular/common';
 import ar from '@angular/common/locales/ar';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -25,6 +26,7 @@ export const appConfig: ApplicationConfig = {
     provideZoneChangeDetection({ eventCoalescing: true }),
     provideRouter(routes),
     provideNzI18n(ar_EG),
+    appLucideIconsProvider,
     provideAnimationsAsync(),
     provideHttpClient(
       withInterceptors([headersInterceptor, authErrorInterceptor, errorInterceptor])

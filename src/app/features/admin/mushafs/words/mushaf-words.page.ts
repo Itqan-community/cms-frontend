@@ -2,12 +2,19 @@ import { Component, DestroyRef, inject, OnInit, signal, computed } from '@angula
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { QuranDataService, QuranWord, SurahStats } from '../../services/quran-data.service';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NgIcon } from '@ng-icons/core';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
+import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzTagModule } from 'ng-zorro-antd/tag';
 
 @Component({
   selector: 'app-mushaf-words',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule, NzButtonModule, NgIcon, NzInputModule, NzPaginationModule, NzSelectModule, NzSpinModule, NzTableModule, NzTagModule],
   templateUrl: './mushaf-words.page.html',
   styleUrls: ['./mushaf-words.page.less'],
 })

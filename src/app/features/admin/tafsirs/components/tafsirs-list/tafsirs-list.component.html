@@ -1,24 +1,21 @@
-<div class="tafsirs-list" dir="rtl">
+<div class="tafsirs-list admin-list-page" dir="rtl">
 
-  <!-- Page Header -->
-  <div class="tafsirs-list__header">
-    <div class="tafsirs-list__header-text">
-      <h2 class="tafsirs-list__title">التفاسير</h2>
-      <p class="tafsirs-list__subtitle">إدارة تفاسير القرآن الكريم</p>
+  <div class="admin-list-header">
+    <div class="admin-list-header__text">
+      <h2 class="admin-list-header__title">التفاسير</h2>
+      <p class="admin-list-header__subtitle">إدارة تفاسير القرآن الكريم</p>
     </div>
     <a routerLink="/admin/tafsirs/create">
-      <button nz-button nzType="primary" class="tafsirs-list__add-btn">
-        <i class="bx bx-plus" aria-hidden="true"></i>
+      <button nz-button nzType="primary" class="admin-add-btn">
+        <ng-icon name="lucidePlus" aria-hidden="true" />
         إضافة تفسير
       </button>
     </a>
   </div>
 
-  <!-- Filters -->
   <app-tafsir-filters (filtersChange)="onFiltersChange($event)"></app-tafsir-filters>
 
-  <!-- Table -->
-  <div class="tafsirs-list__table-wrap">
+  <div class="admin-table-wrap">
     <nz-spin [nzSpinning]="loading()">
       <nz-table
         #tafsirTable
@@ -30,72 +27,34 @@
       >
         <thead>
           <tr>
-            <th
-              nzWidth="220px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('name', $event)"
-            >
-              الاسم
-            </th>
+            <th nzWidth="200px" [nzSortFn]="true" (nzSortOrderChange)="onSortChange('name', $event)">الاسم</th>
             <th>الوصف</th>
-            <th
-              nzWidth="180px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('publisher_id', $event)"
-            >
-              الناشر
-            </th>
-            <th nzWidth="130px">الترخيص</th>
-            <th nzWidth="140px">تاريخ الإضافة</th>
+            <th nzWidth="160px" [nzSortFn]="true" (nzSortOrderChange)="onSortChange('publisher_id', $event)">الناشر</th>
+            <th nzWidth="120px">الترخيص</th>
+            <th nzWidth="130px">تاريخ الإضافة</th>
             <th nzWidth="120px">الإجراءات</th>
           </tr>
         </thead>
         <tbody>
           @for (tafsir of tafsirTable.data; track tafsir.id) {
-            <tr class="tafsirs-list__row">
-              <td class="tafsirs-list__name">{{ tafsir.name }}</td>
-              <td class="tafsirs-list__desc">{{ truncate(tafsir.description) }}</td>
+            <tr class="admin-list-row">
+              <td class="admin-list-name">{{ tafsir.name }}</td>
+              <td class="admin-list-desc">{{ truncate(tafsir.description) }}</td>
               <td>{{ tafsir.publisher.name }}</td>
               <td>
-                <nz-tag [nzColor]="getLicenseColor(tafsir.license)">
-                  {{ tafsir.license }}
-                </nz-tag>
+                <nz-tag [nzColor]="getLicenseColor(tafsir.license)">{{ tafsir.license }}</nz-tag>
               </td>
               <td>{{ tafsir.created_at | date: 'dd/MM/yyyy' }}</td>
               <td>
-                <div class="tafsirs-list__actions">
-                  <button
-                    type="button"
-                    nz-button
-                    nzType="text"
-                    class="action-icon action-icon--view"
-                    nz-tooltip
-                    nzTooltipTitle="عرض"
-                    (click)="onView(tafsir.id)"
-                  >
-                    <i class="bx bx-eye" aria-hidden="true"></i>
+                <div class="admin-list-actions">
+                  <button type="button" nz-button nzType="text" class="action-icon action-icon--view" nz-tooltip nzTooltipTitle="عرض" (click)="onView(tafsir.id)">
+                    <ng-icon name="lucideEye" aria-hidden="true" />
                   </button>
-                  <button
-                    type="button"
-                    nz-button
-                    nzType="text"
-                    class="action-icon action-icon--edit"
-                    nz-tooltip
-                    nzTooltipTitle="تعديل"
-                    (click)="onEdit(tafsir.id)"
-                  >
-                    <i class="bx bx-edit-alt" aria-hidden="true"></i>
+                  <button type="button" nz-button nzType="text" class="action-icon action-icon--edit" nz-tooltip nzTooltipTitle="تعديل" (click)="onEdit(tafsir.id)">
+                    <ng-icon name="lucideSquarePen" aria-hidden="true" />
                   </button>
-                  <button
-                    type="button"
-                    nz-button
-                    nzType="text"
-                    class="action-icon action-icon--delete"
-                    nz-tooltip
-                    nzTooltipTitle="حذف"
-                    (click)="onDelete(tafsir)"
-                  >
-                    <i class="bx bx-trash" aria-hidden="true"></i>
+                  <button type="button" nz-button nzType="text" class="action-icon action-icon--delete" nz-tooltip nzTooltipTitle="حذف" (click)="onDelete(tafsir)">
+                    <ng-icon name="lucideTrash2" aria-hidden="true" />
                   </button>
                 </div>
               </td>
@@ -106,18 +65,16 @@
     </nz-spin>
   </div>
 
-  <!-- Empty state template -->
   <ng-template #emptyTpl>
-    <div class="tafsirs-list__empty">
-      <span class="tafsirs-list__empty-icon">📚</span>
-      <p class="tafsirs-list__empty-title">لا توجد تفاسير</p>
-      <p class="tafsirs-list__empty-sub">لم يتم العثور على نتائج. حاول تعديل معايير البحث.</p>
+    <div class="admin-empty-state">
+      <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
+      <p class="admin-empty-state__title">لا توجد تفاسير</p>
+      <p class="admin-empty-state__subtitle">لم يتم العثور على نتائج. حاول تعديل معايير البحث.</p>
     </div>
   </ng-template>
 
-  <!-- Pagination -->
   @if (!loading() && total() > 0) {
-    <div class="tafsirs-list__pagination">
+    <div class="admin-pagination">
       <nz-pagination
         [nzPageIndex]="page()"
         [nzTotal]="total()"
