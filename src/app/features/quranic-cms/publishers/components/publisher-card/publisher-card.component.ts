@@ -11,10 +11,18 @@ import { EventEmitter, Output } from '@angular/core';
   standalone: true,
   imports: [NzCardModule, NzAvatarModule],
   template: `
-    <nz-card class="publisher-card">
+    <nz-card
+      class="publisher-card"
+      role="button"
+      tabindex="0"
+      aria-label="عرض تفاصيل الناشر"
+      (click)="onOpenDetails()"
+      (keyup.enter)="onOpenDetails()"
+      (keyup.space)="onOpenDetails()"
+    >
       <div class="card-actions">
-        <i class="bx bx-edit-alt edit-btn" role="button" tabindex="0" aria-label="تعديل الناشر" (click)="onEdit()" (keyup.enter)="onEdit()"></i>
-        <i class="bx bx-trash delete-btn" role="button" tabindex="0" aria-label="حذف الناشر" (click)="onDelete()" (keyup.enter)="onDelete()"></i>
+        <i class="bx bx-edit-alt edit-btn" role="button" tabindex="0" aria-label="تعديل الناشر" (click)="onEdit($event)" (keyup.enter)="onEdit($event)"></i>
+        <i class="bx bx-trash delete-btn" role="button" tabindex="0" aria-label="حذف الناشر" (click)="onDelete($event)" (keyup.enter)="onDelete($event)"></i>
       </div>
 
       <div class="card-identity">
@@ -181,14 +189,22 @@ export class PublisherCardComponent {
   @Input() publisher!: Publisher;
 
   // Events to notify the parent component
+  @Output() details = new EventEmitter<Publisher>();
   @Output() edit = new EventEmitter<Publisher>();
   @Output() delete = new EventEmitter<Publisher>();
 
-  onEdit() {
+  onOpenDetails(): void {
+    this.details.emit(this.publisher);
+  }
+
+  onEdit(event?: Event): void {
+    event?.stopPropagation();
+    this.details.emit(this.publisher);
     this.edit.emit(this.publisher);
   }
 
-  onDelete() {
+  onDelete(event?: Event): void {
+    event?.stopPropagation();
     this.delete.emit(this.publisher);
   }
 }

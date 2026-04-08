@@ -1,6 +1,6 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { Publisher } from '../models/publishers-stats.models';
 
@@ -34,5 +34,27 @@ export class PublishersService {
 
   createPublisher(publisher: Partial<Publisher>): Observable<Publisher> {
     return this.http.post<Publisher>(this.apiUrl, publisher);
+  }
+
+  getPublisherById(id: string): Observable<Publisher> {
+    return this.http.get<Publisher>(`${this.apiUrl}${id}`);
+  }
+
+  updatePublisher(id: string, publisher: Partial<Publisher>): Observable<Publisher> {
+    const url = `${this.apiUrl}${id}`;
+
+    return this.http.put<Publisher>(url, publisher).pipe(
+      catchError((error: HttpErrorResponse) => {
+        if (error.status === 405 || error.status === 501) {
+          return this.http.patch<Publisher>(url, publisher);
+        }
+
+        return throwError(() => error);
+      })
+    );
+  }
+
+  deletePublisher(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}${id}`);
   }
 }

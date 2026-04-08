@@ -12,6 +12,13 @@ export const publishersRoutes: Routes = [
         component: PublishersComponent,
       },
       {
+        path: ':id/details',
+        loadComponent: () =>
+          import('./components/publisher-details/publisher-details.component').then(
+            (m) => m.PublisherDetailsComponent
+          ),
+      },
+      {
         path: 'authors',
         loadComponent: () =>
           import('../../../shared/components/empty-placeholder/empty-placeholder.component').then(

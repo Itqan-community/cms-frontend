@@ -1,0 +1,95 @@
+<form nz-form [formGroup]="form" [nzLayout]="'vertical'" class="edit-form">
+  <div nz-row [nzGutter]="24">
+    <div nz-col [nzXs]="24" [nzMd]="12">
+      <nz-form-item>
+        <nz-form-label nzRequired>اسم الناشر بالعربي</nz-form-label>
+        <nz-form-control nzErrorTip="اسم الناشر بالعربي مطلوب">
+          <input nz-input formControlName="name_ar" placeholder="كل آية" />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+
+    <div nz-col [nzXs]="24" [nzMd]="12">
+      <nz-form-item>
+        <nz-form-label nzRequired>اسم الناشر بالإنجليزي</nz-form-label>
+        <nz-form-control nzErrorTip="اسم الناشر بالإنجليزي مطلوب">
+          <input nz-input formControlName="name_en" placeholder="Every Ayah" />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+  </div>
+
+  <div nz-row [nzGutter]="24">
+    <div nz-col [nzXs]="24" [nzMd]="12">
+      <nz-form-item>
+        <nz-form-label>الدولة</nz-form-label>
+        <nz-form-control>
+          <input nz-input formControlName="country" placeholder="المملكة العربية السعودية" />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+
+    <div nz-col [nzXs]="24" [nzMd]="12">
+      <nz-form-item>
+        <nz-form-label>سنة التأسيس</nz-form-label>
+        <nz-form-control nzErrorTip="سنة التأسيس غير صحيحة">
+          <input nz-input type="number" formControlName="foundation_year" placeholder="2026" />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+  </div>
+
+  <div nz-row [nzGutter]="24">
+    <div nz-col [nzXs]="24" [nzMd]="12">
+      <nz-form-item>
+        <nz-form-label>الموقع الإلكتروني</nz-form-label>
+        <nz-form-control nzErrorTip="أدخل رابطاً صحيحاً يبدأ بـ http:// أو https://">
+          <input nz-input formControlName="website" placeholder="https://example.com" />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+
+    <div nz-col [nzXs]="24" [nzMd]="12">
+      <nz-form-item>
+        <nz-form-label>البريد الإلكتروني</nz-form-label>
+        <nz-form-control nzErrorTip="صيغة البريد الإلكتروني غير صحيحة">
+          <input nz-input formControlName="contact_email" placeholder="info@example.com" />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+  </div>
+
+  <div nz-row [nzGutter]="24">
+    <div nz-col [nzXs]="24" [nzMd]="12">
+      <nz-form-item>
+        <nz-form-label>العنوان</nz-form-label>
+        <nz-form-control>
+          <input nz-input formControlName="address" placeholder="الرياض، حي المروج" />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+
+    <div nz-col [nzXs]="24" [nzMd]="12">
+      <nz-form-item>
+        <nz-form-label>رابط الأيقونة</nz-form-label>
+        <nz-form-control nzErrorTip="أدخل رابطاً صحيحاً يبدأ بـ http:// أو https://">
+          <input nz-input formControlName="icon_url" placeholder="https://example.com/logo.png" />
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+  </div>
+
+  <nz-form-item>
+    <nz-form-label>الوصف</nz-form-label>
+    <nz-form-control>
+      <textarea nz-input rows="4" formControlName="description" placeholder="وصف مختصر عن الناشر"></textarea>
+    </nz-form-control>
+  </nz-form-item>
+
+  <div class="edit-actions">
+    <button nz-button nzType="default" type="button" (click)="onCancel()">إلغاء</button>
+    <button nz-button nzType="primary" type="button" [nzLoading]="submitting" (click)="onSubmit()">
+      حفظ
+    </button>
+  </div>
+</form>

@@ -1,5 +1,5 @@
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -27,7 +27,10 @@ import { PublisherCardComponent } from '../publisher-card/publisher-card.compone
             [nzMd]="8"
             [nzLg]="8"
           >
-            <app-publisher-card [publisher]="publisher"></app-publisher-card>
+            <app-publisher-card
+              [publisher]="publisher"
+              (details)="onDetails($event)"
+            ></app-publisher-card>
           </div>
         }
       </div>
@@ -79,4 +82,9 @@ export class PublisherListComponent {
   @Input() publishers: Publisher[] = [];
   @Input() loading = false;
   @Input() hasMore = true;
+  @Output() detailsRequested = new EventEmitter<Publisher>();
+
+  onDetails(publisher: Publisher): void {
+    this.detailsRequested.emit(publisher);
+  }
 }

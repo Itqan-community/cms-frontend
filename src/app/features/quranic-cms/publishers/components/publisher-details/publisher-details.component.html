@@ -1,0 +1,79 @@
+<div class="details-page" dir="rtl">
+  @if (loading) {
+    <div class="state-block">
+      <nz-spin nzSize="large"></nz-spin>
+    </div>
+  } @else if (loadError) {
+    <div class="state-block error-state">
+      <h3>تعذر تحميل بيانات الناشر</h3>
+      <button nz-button nzType="primary" (click)="reload()">إعادة المحاولة</button>
+    </div>
+  } @else if (publisher) {
+    <nz-card class="details-card">
+      <div class="details-banner">
+        <div class="publisher-head">
+          <nz-avatar [nzSize]="64" [nzSrc]="publisher.icon_url" nzIcon="user"></nz-avatar>
+          <div>
+            <h1>{{ publisher.name_ar }}</h1>
+            <p>{{ publisher.name_en }}</p>
+          </div>
+        </div>
+
+        <div class="banner-actions">
+          @if (!isEditing) {
+            <button nz-button nzType="default" (click)="startEdit()">تحرير</button>
+          }
+          <button nz-button nzDanger (click)="showDeleteConfirm()">حذف</button>
+        </div>
+      </div>
+
+      @if (isEditing) {
+        <app-publisher-edit
+          [publisher]="publisher"
+          [submitting]="submitting"
+          (save)="confirmUpdate($event)"
+          (cancel)="cancelEdit()"
+        ></app-publisher-edit>
+      } @else {
+        <nz-descriptions nzBordered [nzColumn]="2" class="details-descriptions">
+          <nz-descriptions-item nzTitle="الاسم بالعربية">{{ publisher.name_ar }}</nz-descriptions-item>
+          <nz-descriptions-item nzTitle="الاسم بالإنجليزية">{{ publisher.name_en }}</nz-descriptions-item>
+
+          @if (publisher.country) {
+            <nz-descriptions-item nzTitle="الدولة">{{ publisher.country }}</nz-descriptions-item>
+          }
+
+          @if (publisher.website) {
+            <nz-descriptions-item nzTitle="الموقع الإلكتروني">
+              <a [href]="publisher.website" target="_blank" rel="noreferrer">{{ publisher.website }}</a>
+            </nz-descriptions-item>
+          }
+
+          @if (publisher.foundation_year) {
+            <nz-descriptions-item nzTitle="سنة التأسيس">{{ publisher.foundation_year }}</nz-descriptions-item>
+          }
+
+          @if (publisher.address) {
+            <nz-descriptions-item nzTitle="العنوان">{{ publisher.address }}</nz-descriptions-item>
+          }
+
+          @if (publisher.contact_email) {
+            <nz-descriptions-item nzTitle="البريد الإلكتروني">{{ publisher.contact_email }}</nz-descriptions-item>
+          }
+
+          @if (publisher.description) {
+            <nz-descriptions-item nzTitle="الوصف" [nzSpan]="2">{{ publisher.description }}</nz-descriptions-item>
+          }
+
+          <nz-descriptions-item nzTitle="الحالة">
+            @if (publisher.is_verified) {
+              <nz-tag nzColor="success">موثق</nz-tag>
+            } @else {
+              <nz-tag nzColor="default">غير موثق</nz-tag>
+            }
+          </nz-descriptions-item>
+        </nz-descriptions>
+      }
+    </nz-card>
+  }
+</div>
