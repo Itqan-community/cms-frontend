@@ -1,12 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  EventEmitter,
-  OnInit,
-  Output,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, DestroyRef, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
@@ -31,6 +23,7 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
         <nz-input-group [nzPrefix]="searchIcon" class="tafsir-filters__search">
           <input
             nz-input
+            nzSize="default"
             type="text"
             placeholder="ابحث عن تفسير..."
             [ngModel]="searchValue"
@@ -42,6 +35,7 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
         <button
           nz-button
           nzType="default"
+          nzSize="default"
           class="tafsir-filters__filters-btn"
           (click)="openFiltersModal()"
         >
@@ -62,6 +56,7 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
             <nz-select
               class="tafsir-filters__select"
               nzPlaceHolder="الناشر"
+              nzSize="default"
               nzAllowClear
               nzShowSearch
               nzServerSearch
@@ -78,6 +73,7 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
             <nz-select
               class="tafsir-filters__select"
               nzPlaceHolder="الترخيص"
+              nzSize="default"
               nzAllowClear
               [ngModel]="selectedLicense"
               (ngModelChange)="onLicenseChange($event)"
@@ -90,6 +86,7 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
             <nz-select
               class="tafsir-filters__select"
               nzPlaceHolder="اللغة"
+              nzSize="default"
               nzAllowClear
               [ngModel]="selectedLanguage"
               (ngModelChange)="onLanguageChange($event)"
@@ -101,6 +98,7 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
             <nz-select
               class="tafsir-filters__select"
               nzPlaceHolder="النوع"
+              nzSize="default"
               nzAllowClear
               [ngModel]="selectedExternal"
               (ngModelChange)="onExternalChange($event)"
@@ -112,8 +110,12 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
         </ng-container>
         <ng-container *nzModalFooter>
           <div class="tafsir-filters__modal-footer">
-            <button nz-button nzType="default" (click)="clearAdvancedFilters()">مسح الفلاتر</button>
-            <button nz-button nzType="primary" (click)="closeFiltersModal()">تم</button>
+            <button nz-button nzType="default" nzSize="default" (click)="clearAdvancedFilters()">
+              مسح الفلاتر
+            </button>
+            <button nz-button nzType="primary" nzSize="default" (click)="closeFiltersModal()">
+              تم
+            </button>
           </div>
         </ng-container>
       </nz-modal>

@@ -1,11 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  EventEmitter,
-  OnInit,
-  Output,
-  inject,
-} from '@angular/core';
+import { Component, DestroyRef, EventEmitter, OnInit, Output, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
@@ -25,6 +18,7 @@ import { ReciterListFilters } from '../../models/reciters.models';
         <nz-input-group [nzPrefix]="searchIcon" class="reciter-filters__search">
           <input
             nz-input
+            nzSize="default"
             type="text"
             placeholder="ابحث عن قارئ..."
             [ngModel]="searchValue"
@@ -36,6 +30,7 @@ import { ReciterListFilters } from '../../models/reciters.models';
         <button
           nz-button
           nzType="default"
+          nzSize="default"
           class="reciter-filters__filters-btn"
           (click)="openFiltersModal()"
         >
@@ -56,7 +51,9 @@ import { ReciterListFilters } from '../../models/reciters.models';
         </ng-container>
         <ng-container *nzModalFooter>
           <div class="reciter-filters__modal-footer">
-            <button nz-button nzType="primary" (click)="closeFiltersModal()">تم</button>
+            <button nz-button nzType="primary" nzSize="default" (click)="closeFiltersModal()">
+              تم
+            </button>
           </div>
         </ng-container>
       </nz-modal>

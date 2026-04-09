@@ -39,6 +39,7 @@ import { RecitationsService } from '../../services/recitations.service';
         <nz-input-group [nzPrefix]="searchIcon" class="recitation-filters__search">
           <input
             nz-input
+            nzSize="default"
             type="text"
             placeholder="ابحث عن تلاوة..."
             [ngModel]="searchValue"
@@ -50,6 +51,7 @@ import { RecitationsService } from '../../services/recitations.service';
         <button
           nz-button
           nzType="default"
+          nzSize="default"
           class="recitation-filters__filters-btn"
           (click)="openFiltersModal()"
         >
@@ -70,6 +72,7 @@ import { RecitationsService } from '../../services/recitations.service';
             <nz-select
               class="recitation-filters__select"
               nzPlaceHolder="الناشر"
+              nzSize="default"
               nzAllowClear
               nzShowSearch
               nzServerSearch
@@ -86,6 +89,7 @@ import { RecitationsService } from '../../services/recitations.service';
             <nz-select
               class="recitation-filters__select"
               nzPlaceHolder="القارئ"
+              nzSize="default"
               nzAllowClear
               nzShowSearch
               [ngModel]="selectedReciter"
@@ -99,6 +103,7 @@ import { RecitationsService } from '../../services/recitations.service';
             <nz-select
               class="recitation-filters__select"
               nzPlaceHolder="القراءة"
+              nzSize="default"
               nzAllowClear
               [ngModel]="selectedQiraah"
               (ngModelChange)="onQiraahChange($event)"
@@ -111,6 +116,7 @@ import { RecitationsService } from '../../services/recitations.service';
             <nz-select
               class="recitation-filters__select"
               nzPlaceHolder="الرواية"
+              nzSize="default"
               nzAllowClear
               [nzLoading]="riwayahsLoading()"
               [ngModel]="selectedRiwayah"
@@ -124,6 +130,7 @@ import { RecitationsService } from '../../services/recitations.service';
             <nz-select
               class="recitation-filters__select"
               nzPlaceHolder="مستوى المد"
+              nzSize="default"
               nzAllowClear
               [ngModel]="selectedMadd"
               (ngModelChange)="onMaddChange($event)"
@@ -135,6 +142,7 @@ import { RecitationsService } from '../../services/recitations.service';
             <nz-select
               class="recitation-filters__select"
               nzPlaceHolder="همز الميم"
+              nzSize="default"
               nzAllowClear
               [ngModel]="selectedMeem"
               (ngModelChange)="onMeemChange($event)"
@@ -146,6 +154,7 @@ import { RecitationsService } from '../../services/recitations.service';
             <nz-select
               class="recitation-filters__select"
               nzPlaceHolder="الترخيص"
+              nzSize="default"
               nzAllowClear
               [ngModel]="selectedLicense"
               (ngModelChange)="onLicenseChange($event)"
@@ -158,6 +167,7 @@ import { RecitationsService } from '../../services/recitations.service';
             <nz-date-picker
               nzMode="year"
               nzFormat="yyyy"
+              nzSize="default"
               [nzInputReadOnly]="true"
               [nzDefaultPickerValue]="hijriDefaultPickerDate"
               [nzDisabledDate]="disableNonHijriYears"
@@ -170,8 +180,12 @@ import { RecitationsService } from '../../services/recitations.service';
         </ng-container>
         <ng-container *nzModalFooter>
           <div class="recitation-filters__modal-footer">
-            <button nz-button nzType="default" (click)="clearAdvancedFilters()">مسح الفلاتر</button>
-            <button nz-button nzType="primary" (click)="closeFiltersModal()">تم</button>
+            <button nz-button nzType="default" nzSize="default" (click)="clearAdvancedFilters()">
+              مسح الفلاتر
+            </button>
+            <button nz-button nzType="primary" nzSize="default" (click)="closeFiltersModal()">
+              تم
+            </button>
           </div>
         </ng-container>
       </nz-modal>

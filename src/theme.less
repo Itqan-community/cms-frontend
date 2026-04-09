@@ -194,6 +194,29 @@ a.ant-btn {
   }
 }
 
+// Date picker / year picker inputs aligned with text inputs
+.ant-picker {
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 10px;
+  box-shadow: none;
+  background-color: transparent;
+  height: 32px;
+
+  &:hover {
+    border-color: var(--color-neutral-200);
+  }
+
+  &.ant-picker-focused {
+    box-shadow: none;
+    border-color: var(--color-neutral-200);
+  }
+}
+
+.ant-picker-input > input {
+  font-size: 14px;
+  line-height: 30px;
+}
+
 .ant-checkbox-group {
   display: flex;
   flex-direction: column;
@@ -354,6 +377,67 @@ a.ant-btn {
 // Select dropdown same radius as input (10px)
 .ant-select-selector {
   border-radius: 10px !important;
+}
+
+// Pagination aligned with admin input/button tokens
+.admin-pagination {
+  .ant-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .ant-pagination-item,
+  .ant-pagination-prev .ant-pagination-item-link,
+  .ant-pagination-next .ant-pagination-item-link {
+    border-radius: 10px;
+    border: 1px solid var(--color-neutral-200);
+    background: var(--admin-surface-white);
+    min-width: 36px;
+    height: 36px;
+    line-height: 34px;
+  }
+
+  .ant-pagination-item a {
+    color: var(--admin-text-700);
+    font-weight: 500;
+  }
+
+  .ant-pagination-item:hover,
+  .ant-pagination-prev:hover .ant-pagination-item-link,
+  .ant-pagination-next:hover .ant-pagination-item-link {
+    border-color: var(--color-neutral-200);
+    background: var(--color-neutral-100);
+  }
+
+  .ant-pagination-item-active {
+    border-color: var(--color-primary-700);
+    background: var(--color-primary-700);
+  }
+
+  .ant-pagination-item-active a {
+    color: #fff;
+  }
+
+  .ant-pagination-jump-prev .ant-pagination-item-container .ant-pagination-item-link-icon,
+  .ant-pagination-jump-next .ant-pagination-item-container .ant-pagination-item-link-icon {
+    color: var(--admin-text-500);
+  }
+
+  .ant-pagination-options-quick-jumper input {
+    border: 1px solid var(--color-neutral-200);
+    border-radius: 10px;
+    height: 36px;
+    box-shadow: none;
+  }
+
+  .ant-select-selector {
+    height: 36px !important;
+    border-radius: 10px !important;
+    border-color: var(--color-neutral-200) !important;
+  }
 }
 
 // Popover customizations
