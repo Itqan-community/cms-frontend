@@ -1,12 +1,12 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NgIcon } from '@ng-icons/core';
 import { TranslateService } from '@ngx-translate/core';
-import { firstValueFrom } from 'rxjs';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
-import { NgIcon } from '@ng-icons/core';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
@@ -14,12 +14,12 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
-import {
-  PublisherCreatePayload,
-  PublisherUpdatePayload,
-} from '../../models/publishers-stats.models';
+import { firstValueFrom } from 'rxjs';
 import { NATIONALITY } from '../../../reciters/nationality.enum';
 import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
+import {
+    PublisherUpdatePayload
+} from '../../models/publishers-stats.models';
 import { PublishersService } from '../../services/publishers.service';
 
 @Component({
@@ -44,6 +44,7 @@ import { PublishersService } from '../../services/publishers.service';
 export class PublisherFormComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly fb = inject(FormBuilder);
   private readonly publishersService = inject(PublishersService);
   private readonly modal = inject(NzModalService);
@@ -170,7 +171,10 @@ export class PublisherFormComponent implements OnInit {
   private loadForEdit(): void {
     if (this.editId == null) return;
     this.loadingDetail.set(true);
-    this.publishersService.getDetail(this.editId).subscribe({
+    this.publishersService
+      .getDetail(this.editId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
         next: (data) => {
           this.form.patchValue({
             name_ar: data.name_ar,
