@@ -131,9 +131,7 @@
                 "output": "."
               }
             ],
-            "styles": [
-              "src/styles.less"
-            ]
+            "styles": ["src/styles.less"]
           }
         },
         "lint": {
