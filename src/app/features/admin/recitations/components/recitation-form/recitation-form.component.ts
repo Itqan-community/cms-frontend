@@ -1,15 +1,16 @@
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NgIcon } from '@ng-icons/core';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzInputNumberModule } from 'ng-zorro-antd/input-number';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
@@ -24,14 +25,15 @@ import { RecitationsService } from '../../services/recitations.service';
   selector: 'app-recitation-form',
   standalone: true,
   imports: [
+    FormsModule,
     ReactiveFormsModule,
     RouterLink,
     NzButtonModule,
+    NzDatePickerModule,
     NzFormModule,
     NzGridModule,
     NgIcon,
     NzInputModule,
-    NzInputNumberModule,
     NzSelectModule,
     NzSkeletonModule,
   ],
@@ -58,10 +60,15 @@ export class RecitationFormComponent implements OnInit {
   readonly reciterOptions = signal<ReciterListItem[]>([]);
   readonly qiraahOptions = signal<NamedId[]>([]);
   readonly riwayahOptions = signal<NamedId[]>([]);
+  readonly riwayahsLoading = signal(false);
+  readonly selectedHijriDate = signal<Date | null>(null);
+  readonly hijriDefaultPickerDate = new Date(1446, 0, 1);
+  private readonly minHijriYear = 1300;
+  private readonly maxHijriYear = 1600;
 
   readonly licenseOptions = Object.values(Licenses);
   readonly maddOptions = [
-    { v: MaddLevel.TWASSUT, l: 'توصّط' },
+    { v: MaddLevel.TWASSUT, l: 'توسّط' },
     { v: MaddLevel.QASR, l: 'قصر' },
   ];
   readonly meemOptions = [
@@ -77,14 +84,17 @@ export class RecitationFormComponent implements OnInit {
     publisher_id: [null as number | null, [Validators.required]],
     reciter_id: [null as number | null, [Validators.required]],
     qiraah_id: [null as number | null, [Validators.required]],
-    riwayah_id: [null as number | null, [Validators.required]],
-    madd_level: [MaddLevel.TWASSUT, [Validators.required]],
-    meem_behavior: [MeemBehavior.SILAH, [Validators.required]],
-    year: [2024, [Validators.required, Validators.min(1900), Validators.max(2100)]],
+    riwayah_id: [null as number | null],
+    madd_level: [null as MaddLevel | null, [Validators.required]],
+    meem_behaviour: [null as MeemBehavior | null, [Validators.required]],
+    year: [
+      null as number | null,
+      [Validators.required, Validators.min(this.minHijriYear), Validators.max(this.maxHijriYear)],
+    ],
     license: ['', [Validators.required]],
   });
 
-  private editId: number | null = null;
+  private editSlug: string | null = null;
 
   ngOnInit(): void {
     forkJoin({
@@ -104,10 +114,10 @@ export class RecitationFormComponent implements OnInit {
     this.loadReciters();
     this.loadPublishers();
 
-    const idParam = this.route.snapshot.params['id'];
-    if (idParam) {
+    const slugParam = this.route.snapshot.params['slug'];
+    if (slugParam) {
       this.isEditMode.set(true);
-      this.editId = Number(idParam);
+      this.editSlug = slugParam;
       this.loadForEdit();
     }
   }
@@ -134,17 +144,17 @@ export class RecitationFormComponent implements OnInit {
       publisher_id: v.publisher_id as number,
       reciter_id: v.reciter_id as number,
       qiraah_id: v.qiraah_id as number,
-      riwayah_id: v.riwayah_id as number,
+      riwayah_id: v.riwayah_id ?? null,
       madd_level: v.madd_level as MaddLevel,
-      meem_behavior: v.meem_behavior as MeemBehavior,
+      meem_behaviour: v.meem_behaviour as MeemBehavior,
       year: v.year as number,
       license: v.license ?? '',
     };
 
     this.submitting.set(true);
     const request$ =
-      this.isEditMode() && this.editId != null
-        ? this.recitationsService.patch(this.editId, body)
+      this.isEditMode() && this.editSlug != null
+        ? this.recitationsService.patch(this.editSlug, body)
         : this.recitationsService.create(body);
 
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
@@ -153,20 +163,37 @@ export class RecitationFormComponent implements OnInit {
           this.isEditMode() ? 'تم تحديث التلاوة بنجاح' : 'تم إضافة التلاوة بنجاح'
         );
         this.submitting.set(false);
-        void this.router.navigate(['/admin/recitations', res.id]);
+        void this.router.navigate(['/admin/recitations', res.slug ?? String(res.id)]);
       },
       error: () => {
-        this.message.error('حدث خطأ. يرجى المحاولة مرة أخرى.');
         this.submitting.set(false);
       },
     });
   }
 
+  onYearChange(value: Date | null): void {
+    this.selectedHijriDate.set(value);
+    const year = value?.getFullYear() ?? null;
+    this.form.patchValue({ year: year as number | null });
+    this.form.controls.year.markAsDirty();
+    this.form.controls.year.updateValueAndValidity({ onlySelf: true });
+  }
+
+  disableNonHijriYears = (current: Date): boolean => {
+    const year = current.getFullYear();
+    return year < this.minHijriYear || year > this.maxHijriYear;
+  };
+
+  onQiraahChange(qiraahId: number | null): void {
+    const selectedRiwayahId = this.form.controls.riwayah_id.value;
+    this.loadRiwayahs(qiraahId, selectedRiwayahId);
+  }
+
   private loadForEdit(): void {
-    if (this.editId == null) return;
+    if (this.editSlug == null) return;
     this.loadingDetail.set(true);
     this.recitationsService
-      .getDetail(this.editId)
+      .getDetail(this.editSlug)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
@@ -178,16 +205,19 @@ export class RecitationFormComponent implements OnInit {
             publisher_id: data.publisher.id,
             reciter_id: data.reciter.id,
             qiraah_id: data.qiraah.id,
-            riwayah_id: data.riwayah.id,
+            riwayah_id: data.riwayah?.id ?? null,
             madd_level: data.madd_level,
-            meem_behavior: data.meem_behavior,
+            meem_behaviour: data.meem_behaviour,
             year: data.year,
             license: data.license,
           });
+          this.loadRiwayahs(data.qiraah.id, data.riwayah?.id ?? null);
+          this.selectedHijriDate.set(
+            data.year ? new Date(data.year, 0, 1) : this.hijriDefaultPickerDate
+          );
           this.loadingDetail.set(false);
         },
         error: () => {
-          this.message.error('تعذر تحميل بيانات التلاوة للتعديل.');
           this.loadingDetail.set(false);
         },
       });
@@ -213,6 +243,29 @@ export class RecitationFormComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => this.reciterOptions.set(res.results),
+      });
+  }
+
+  private loadRiwayahs(qiraahId: number | null, keepRiwayahId: number | null): void {
+    this.riwayahsLoading.set(true);
+    this.recitationsService
+      .riwayahOptions(qiraahId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.riwayahOptions.set(res);
+          const shouldKeep =
+            keepRiwayahId != null && res.some((riwayah) => riwayah.id === keepRiwayahId);
+          if (!shouldKeep) {
+            this.form.controls.riwayah_id.patchValue(null);
+          }
+          this.riwayahsLoading.set(false);
+        },
+        error: () => {
+          this.riwayahOptions.set([]);
+          this.form.controls.riwayah_id.patchValue(null);
+          this.riwayahsLoading.set(false);
+        },
       });
   }
 }

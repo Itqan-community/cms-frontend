@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NgIcon } from '@ng-icons/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -9,6 +10,7 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { ReciterDetails } from '../../models/reciters.models';
 import { RecitersAdminService } from '../../services/reciters.service';
+import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
 
 @Component({
   selector: 'app-reciter-detail',
@@ -31,33 +33,33 @@ export class ReciterDetailComponent implements OnInit {
   private readonly recitersService = inject(RecitersAdminService);
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
+  private readonly translate = inject(TranslateService);
 
   readonly reciter = signal<ReciterDetails | null>(null);
   readonly loading = signal(true);
 
-  private id!: number;
+  private slug!: string;
 
   ngOnInit(): void {
-    this.id = Number(this.route.snapshot.params['id']);
+    this.slug = this.route.snapshot.params['slug'];
     this.load();
   }
 
   load(): void {
     this.loading.set(true);
-    this.recitersService.getDetail(this.id).subscribe({
+    this.recitersService.getDetail(this.slug).subscribe({
       next: (data) => {
         this.reciter.set(data);
         this.loading.set(false);
       },
       error: () => {
-        this.message.error('تعذر تحميل بيانات القارئ.');
         this.loading.set(false);
       },
     });
   }
 
   onEdit(): void {
-    void this.router.navigate(['/admin/reciters', this.id, 'edit']);
+    void this.router.navigate(['/admin/reciters', this.slug, 'edit']);
   }
 
   onDelete(): void {
@@ -71,13 +73,17 @@ export class ReciterDetailComponent implements OnInit {
       nzCancelText: 'إلغاء',
       nzDirection: 'rtl',
       nzOnOk: () =>
-        this.recitersService.delete(this.id).subscribe({
+        this.recitersService.delete(this.slug).subscribe({
           next: () => {
             this.message.success('تم حذف القارئ بنجاح');
             void this.router.navigate(['/admin/reciters']);
           },
-          error: () => this.message.error('حدث خطأ أثناء الحذف'),
+          error: () => {},
         }),
     });
+  }
+
+  countryLabel(country: string | null | undefined): string {
+    return localizeCountryCodeOrName(country, this.translate.currentLang);
   }
 }

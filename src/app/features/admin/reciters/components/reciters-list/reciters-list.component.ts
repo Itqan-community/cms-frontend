@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
@@ -15,6 +16,7 @@ import {
   ReciterSorting,
 } from '../../models/reciters.models';
 import { RecitersAdminService } from '../../services/reciters.service';
+import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
 import { ReciterFiltersComponent } from '../reciter-filters/reciter-filters.component';
 
 @Component({
@@ -40,6 +42,7 @@ export class RecitersListComponent implements OnInit {
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   readonly reciters = signal<ReciterListItem[]>([]);
   readonly total = signal(0);
@@ -70,7 +73,6 @@ export class RecitersListComponent implements OnInit {
           this.loading.set(false);
         },
         error: () => {
-          this.message.error('تعذر تحميل القرّاء. يرجى المحاولة لاحقاً.');
           this.loading.set(false);
         },
       });
@@ -107,12 +109,12 @@ export class RecitersListComponent implements OnInit {
     this.load();
   }
 
-  onView(id: number): void {
-    void this.router.navigate(['/admin/reciters', id]);
+  onView(slug: string): void {
+    void this.router.navigate(['/admin/reciters', slug]);
   }
 
-  onEdit(id: number): void {
-    void this.router.navigate(['/admin/reciters', id, 'edit']);
+  onEdit(slug: string): void {
+    void this.router.navigate(['/admin/reciters', slug, 'edit']);
   }
 
   onDelete(item: ReciterListItem): void {
@@ -125,17 +127,21 @@ export class RecitersListComponent implements OnInit {
       nzCancelText: 'إلغاء',
       nzDirection: 'rtl',
       nzOnOk: () =>
-        this.recitersService.delete(item.id).subscribe({
+        this.recitersService.delete(item.slug).subscribe({
           next: () => {
             this.message.success('تم حذف القارئ بنجاح');
             this.load();
           },
-          error: () => this.message.error('حدث خطأ أثناء الحذف'),
+          error: () => {},
         }),
     });
   }
 
   truncate(text: string, max = 80): string {
     return text.length > max ? text.slice(0, max) + '…' : text;
+  }
+
+  countryLabel(country: string | null | undefined): string {
+    return localizeCountryCodeOrName(country, this.translate.currentLang);
   }
 }

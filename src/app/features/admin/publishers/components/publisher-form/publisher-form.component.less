@@ -70,6 +70,25 @@
       font-weight: 500;
     }
   }
+
+  &__icon-upload {
+    display: flex;
+    align-items: center;
+  }
+
+  &__icon-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    img {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+    }
+  }
 }
 
 :host ::ng-deep {
@@ -84,8 +103,14 @@
     border-color: #e5e7eb;
     font-size: 0.9rem;
 
-    &:hover { border-color: #16a34a; }
-    &:focus, &-focused { border-color: #16a34a; box-shadow: none; }
+    &:hover {
+      border-color: #16a34a;
+    }
+    &:focus,
+    &-focused {
+      border-color: #16a34a;
+      box-shadow: none;
+    }
   }
 
   textarea.ant-input {
@@ -97,7 +122,12 @@
     background: #16a34a;
     border-color: #16a34a;
 
-    &:hover { background: #15803d; border-color: #15803d; }
-    &[disabled] { opacity: 0.5; }
+    &:hover {
+      background: #15803d;
+      border-color: #15803d;
+    }
+    &[disabled] {
+      opacity: 0.5;
+    }
   }
 }

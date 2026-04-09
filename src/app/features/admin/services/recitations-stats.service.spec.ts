@@ -52,11 +52,14 @@ describe('RecitationsStatsService (Quranic CMS)', () => {
     expect(messageServiceSpy.error).not.toHaveBeenCalled();
   });
 
-  it('should fall back to MOCK stats and show toaster on error', () => {
-    let resultStats: RecitationsStats | undefined;
+  it('should error and show toaster when API fails', () => {
+    let capturedError: unknown;
 
-    service.getStats().subscribe((stats) => {
-      resultStats = stats;
+    service.getStats().subscribe({
+      next: () => fail('expected stream to error'),
+      error: (err) => {
+        capturedError = err;
+      },
     });
 
     // We catch all 3 parallel requests
@@ -64,16 +67,11 @@ describe('RecitationsStatsService (Quranic CMS)', () => {
     const req2 = httpMock.expectOne((req) => req.url.includes('/reciters/'));
     const req3 = httpMock.expectOne((req) => req.url.includes('/recitations/'));
 
-    // Failing the first request will cause forkJoin to cancel the other two.
     req1.flush(null, { status: 404, statusText: 'Not Found' });
 
-    // For cancelled requests, we don't need to flush them, but we should assert they are cancelled.
     expect(req2.cancelled).toBeTrue();
     expect(req3.cancelled).toBeTrue();
-
-    expect(resultStats).toBeDefined();
-    expect(resultStats!.isMock).toBeTrue();
-    expect(resultStats!.riwayas).toBeGreaterThan(0);
+    expect(capturedError).toBeTruthy();
     expect(messageServiceSpy.error).toHaveBeenCalled();
   });
 });

@@ -57,8 +57,27 @@
     border-bottom: 1px solid #f3f4f6;
   }
 
-  &__year-input {
+  &__year-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__year-picker {
     width: 100%;
+  }
+
+  &__hijri-indicator {
+    height: 40px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 10px;
+    border-radius: 10px;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
   }
 
   &__footer {
@@ -88,8 +107,14 @@
     border-color: #e5e7eb;
     font-size: 0.9rem;
 
-    &:hover { border-color: #16a34a; }
-    &:focus, &-focused { border-color: #16a34a; box-shadow: none; }
+    &:hover {
+      border-color: #16a34a;
+    }
+    &:focus,
+    &-focused {
+      border-color: #16a34a;
+      box-shadow: none;
+    }
   }
 
   textarea.ant-input {
@@ -101,7 +126,9 @@
     border-radius: 10px !important;
     border-color: #e5e7eb !important;
 
-    &:hover { border-color: #16a34a !important; }
+    &:hover {
+      border-color: #16a34a !important;
+    }
   }
 
   .ant-select-focused .ant-select-selector {
@@ -109,16 +136,29 @@
     box-shadow: none !important;
   }
 
-  .ant-input-number {
+  .ant-picker {
     width: 100%;
     border-radius: 10px;
+    border-color: #e5e7eb;
+    height: 40px;
+
+    &:hover,
+    &.ant-picker-focused {
+      border-color: #16a34a;
+      box-shadow: none;
+    }
   }
 
   .ant-btn-primary {
     background: #16a34a;
     border-color: #16a34a;
 
-    &:hover { background: #15803d; border-color: #15803d; }
-    &[disabled] { opacity: 0.5; }
+    &:hover {
+      background: #15803d;
+      border-color: #15803d;
+    }
+    &[disabled] {
+      opacity: 0.5;
+    }
   }
 }

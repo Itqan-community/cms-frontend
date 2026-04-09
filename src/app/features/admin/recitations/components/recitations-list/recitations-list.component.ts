@@ -75,7 +75,6 @@ export class RecitationsListComponent implements OnInit {
           this.loading.set(false);
         },
         error: () => {
-          this.message.error('تعذر تحميل التلاوات. يرجى المحاولة لاحقاً.');
           this.loading.set(false);
         },
       });
@@ -98,7 +97,7 @@ export class RecitationsListComponent implements OnInit {
     this.load();
   }
 
-  onSortChange(column: 'name' | 'year' | 'license', order: NzTableSortOrder): void {
+  onSortChange(column: 'name' | 'year' | 'license' | 'created_at', order: NzTableSortOrder): void {
     if (!order) {
       this.ordering = undefined;
     } else {
@@ -109,12 +108,12 @@ export class RecitationsListComponent implements OnInit {
     this.load();
   }
 
-  onView(id: number): void {
-    void this.router.navigate(['/admin/recitations', id]);
+  onView(slug: string): void {
+    void this.router.navigate(['/admin/recitations', slug]);
   }
 
-  onEdit(id: number): void {
-    void this.router.navigate(['/admin/recitations', id, 'edit']);
+  onEdit(slug: string): void {
+    void this.router.navigate(['/admin/recitations', slug, 'edit']);
   }
 
   onDelete(item: RecitationListItem): void {
@@ -127,12 +126,12 @@ export class RecitationsListComponent implements OnInit {
       nzCancelText: 'إلغاء',
       nzDirection: 'rtl',
       nzOnOk: () =>
-        this.recitationsService.delete(item.id).subscribe({
+        this.recitationsService.delete(item.slug ?? String(item.id)).subscribe({
           next: () => {
             this.message.success('تم حذف التلاوة بنجاح');
             this.load();
           },
-          error: () => this.message.error('حدث خطأ أثناء الحذف'),
+          error: () => {},
         }),
     });
   }

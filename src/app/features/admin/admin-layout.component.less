@@ -35,6 +35,7 @@
   height: 100%;
   border-inline-start: none; /* zorro defaults borders */
   background: transparent;
+  padding-block: 8px;
 
   .ant-menu-item a.admin-sidenav-link,
   .ant-menu-item .admin-sidenav-link {
@@ -141,5 +142,113 @@
     &:hover {
       color: var(--color-primary-600);
     }
+  }
+
+  .admin-mobile-toggle {
+    display: none;
+    font-size: 24px;
+    color: var(--color-neutral-600);
+    transition: color 0.3s;
+
+    &:hover {
+      color: var(--color-primary-600);
+    }
+  }
+}
+
+.admin-mobile-backdrop {
+  display: none;
+}
+
+.admin-mobile-sider-head {
+  display: none;
+}
+
+@media (max-width: 991px) {
+  .admin-mobile-sider-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 10px 4px;
+  }
+
+  .admin-mobile-sider-logo {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+
+    img {
+      display: block;
+      width: auto;
+      height: 28px;
+    }
+  }
+
+  .admin-mobile-sider-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-neutral-700);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--color-neutral-100);
+      color: var(--color-neutral-900);
+    }
+  }
+
+  .admin-sidenav-menu {
+    height: calc(100% - 50px);
+  }
+
+  .admin-header-shell .app-header__brand {
+    .admin-desktop-toggle {
+      display: none;
+    }
+
+    .admin-mobile-toggle {
+      display: inline-flex;
+    }
+  }
+
+  .admin-sider {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: 120;
+    transition: transform 0.2s ease;
+    box-shadow: var(--shadow-card);
+  }
+
+  .admin-layout[dir='ltr'] .admin-sider {
+    transform: translateX(-100%);
+  }
+
+  .admin-layout[dir='rtl'] .admin-sider {
+    transform: translateX(100%);
+  }
+
+  .admin-sider.admin-sider--mobile-open {
+    transform: translateX(0) !important;
+  }
+
+  .admin-content-area {
+    padding: 12px;
+  }
+
+  .admin-mobile-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    border: 0;
+    padding: 0;
+    margin: 0;
+    z-index: 110;
   }
 }

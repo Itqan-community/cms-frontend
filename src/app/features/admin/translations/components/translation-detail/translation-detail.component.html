@@ -28,7 +28,12 @@
         </div>
 
         <div class="admin-hero-meta">
-          <nz-tag [nzColor]="getLicenseColor(translation()!.license)">{{ translation()!.license }}</nz-tag>
+          <nz-tag [nzColor]="getLicenseColor(translation()!.license)">{{
+            translation()!.license
+          }}</nz-tag>
+          @if (translation()!.language) {
+            <nz-tag>{{ languageLabel(translation()!.language) }}</nz-tag>
+          }
           @if (translation()!.is_external) {
             <nz-tag nzColor="orange">خارجي</nz-tag>
           }
@@ -46,7 +51,9 @@
         @if (translation()!.external_url) {
           <div class="admin-external-url">
             <ng-icon name="lucideLink" />
-            <a [href]="translation()!.external_url!" target="_blank" rel="noopener">{{ translation()!.external_url }}</a>
+            <a [href]="translation()!.external_url!" target="_blank" rel="noopener">{{
+              translation()!.external_url
+            }}</a>
           </div>
         }
       </div>
@@ -65,13 +72,9 @@
 
     <div class="admin-descriptions">
       <div class="admin-desc-col">
-        <h3 class="admin-desc-title">
-          <ng-icon name="lucideFileText" /> الوصف (عربي)
-        </h3>
+        <h3 class="admin-desc-title"><ng-icon name="lucideFileText" /> الوصف (عربي)</h3>
         <p class="admin-desc-text">{{ translation()!.description_ar }}</p>
-        <h3 class="admin-desc-title">
-          <ng-icon name="lucideAlignRight" /> الوصف المطوّل (عربي)
-        </h3>
+        <h3 class="admin-desc-title"><ng-icon name="lucideAlignRight" /> الوصف المطوّل (عربي)</h3>
         <p class="admin-desc-text">{{ translation()!.long_description_ar }}</p>
       </div>
       <div class="admin-desc-col">
@@ -88,9 +91,7 @@
 
     @if (translation()!.versions.length > 0) {
       <div class="admin-versions">
-        <h3 class="admin-versions__title">
-          <ng-icon name="lucideRotateCw" /> الإصدارات
-        </h3>
+        <h3 class="admin-versions__title"><ng-icon name="lucideRotateCw" /> الإصدارات</h3>
         <div class="admin-versions__table-wrap">
           <nz-table
             #versionsTable

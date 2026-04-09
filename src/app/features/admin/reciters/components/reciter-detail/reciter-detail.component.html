@@ -29,7 +29,7 @@
 
         <div class="admin-hero-meta">
           @if (reciter()!.nationality) {
-            <nz-tag nzColor="blue">{{ reciter()!.nationality }}</nz-tag>
+            <nz-tag nzColor="blue">{{ countryLabel(reciter()!.nationality) }}</nz-tag>
           }
           <nz-tag nzColor="green">{{ reciter()!.recitations_count }} تلاوة</nz-tag>
           <span class="admin-hero-meta__date">
@@ -60,15 +60,11 @@
 
     <div class="admin-descriptions">
       <div class="admin-desc-col">
-        <h3 class="admin-desc-title">
-          <ng-icon name="lucideFileText" /> السيرة (عربي)
-        </h3>
+        <h3 class="admin-desc-title"><ng-icon name="lucideFileText" /> السيرة (عربي)</h3>
         <p class="admin-desc-text">{{ reciter()!.bio_ar }}</p>
       </div>
       <div class="admin-desc-col">
-        <h3 class="admin-desc-title" dir="ltr">
-          <ng-icon name="lucideFileText" /> Bio (EN)
-        </h3>
+        <h3 class="admin-desc-title" dir="ltr"><ng-icon name="lucideFileText" /> Bio (EN)</h3>
         <p class="admin-desc-text" dir="ltr">{{ reciter()!.bio_en }}</p>
       </div>
     </div>

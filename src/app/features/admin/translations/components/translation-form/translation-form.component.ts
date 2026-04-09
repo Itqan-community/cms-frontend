@@ -2,6 +2,7 @@ import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -17,6 +18,7 @@ import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { PublisherFilterItem, TranslationFormValue } from '../../models/translations.models';
 import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
 import { TranslationsService } from '../../services/translations.service';
+import { localizeLanguageCode } from '../../../utils/display-localization.util';
 
 @Component({
   selector: 'app-translation-form',
@@ -46,6 +48,7 @@ export class TranslationFormComponent implements OnInit {
   private readonly publishersFilterService = inject(PublishersFilterService);
   private readonly message = inject(NzMessageService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   readonly isEditMode = signal(false);
   readonly loadingDetail = signal(false);
@@ -131,10 +134,9 @@ export class TranslationFormComponent implements OnInit {
           this.isEditMode() ? 'تم تحديث الترجمة بنجاح' : 'تم إضافة الترجمة بنجاح'
         );
         this.submitting.set(false);
-        void this.router.navigate(['/admin/translations', res.id]);
+        void this.router.navigate(['/admin/translations', res.slug ?? String(res.id)]);
       },
       error: () => {
-        this.message.error('حدث خطأ. يرجى المحاولة مرة أخرى.');
         this.submitting.set(false);
       },
     });
@@ -173,6 +175,7 @@ export class TranslationFormComponent implements OnInit {
             long_description_ar: data.long_description_ar,
             long_description_en: data.long_description_en,
             license: data.license,
+            language: data.language ?? '',
             publisher_id: data.publisher.id,
             is_external: data.is_external,
             external_url: data.external_url ?? '',
@@ -185,7 +188,6 @@ export class TranslationFormComponent implements OnInit {
           this.loadingDetail.set(false);
         },
         error: () => {
-          this.message.error('تعذر تحميل بيانات الترجمة للتعديل.');
           this.loadingDetail.set(false);
         },
       });
@@ -205,5 +207,9 @@ export class TranslationFormComponent implements OnInit {
           this.publishersLoading.set(false);
         },
       });
+  }
+
+  languageLabel(code: string): string {
+    return localizeLanguageCode(code, this.translate.currentLang);
   }
 }

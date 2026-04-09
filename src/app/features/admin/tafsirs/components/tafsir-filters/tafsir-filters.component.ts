@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { TranslateService } from '@ngx-translate/core';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { NzInputModule } from 'ng-zorro-antd/input';
@@ -16,6 +17,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NgIcon } from '@ng-icons/core';
 import { PublishersFilterService } from '../../services/publishers-filter.service';
 import { PublisherFilterItem, TafsirFilters } from '../../models/tafsirs.models';
+import { localizeLanguageCode } from '../../../utils/display-localization.util';
 
 @Component({
   selector: 'app-tafsir-filters',
@@ -73,8 +75,8 @@ import { PublisherFilterItem, TafsirFilters } from '../../models/tafsirs.models'
         [ngModel]="selectedLanguage"
         (ngModelChange)="onLanguageChange($event)"
       >
-        <nz-option nzValue="ar" nzLabel="عربي"></nz-option>
-        <nz-option nzValue="en" nzLabel="English"></nz-option>
+        <nz-option nzValue="ar" [nzLabel]="languageLabel('ar')"></nz-option>
+        <nz-option nzValue="en" [nzLabel]="languageLabel('en')"></nz-option>
       </nz-select>
 
       <!-- Is External filter -->
@@ -96,6 +98,7 @@ export class TafsirFiltersComponent implements OnInit {
   @Output() filtersChange = new EventEmitter<Partial<TafsirFilters>>();
 
   private readonly publishersFilterService = inject(PublishersFilterService);
+  private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly searchSubject = new Subject<string>();
 
@@ -173,5 +176,9 @@ export class TafsirFiltersComponent implements OnInit {
 
   private emit(): void {
     this.filtersChange.emit(this.currentFilters);
+  }
+
+  languageLabel(code: string): string {
+    return localizeLanguageCode(code, this.translate.currentLang);
   }
 }

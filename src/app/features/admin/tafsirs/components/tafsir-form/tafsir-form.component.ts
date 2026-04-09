@@ -2,6 +2,7 @@ import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -16,6 +17,7 @@ import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { PublisherFilterItem, TafsirFormValue } from '../../models/tafsirs.models';
 import { PublishersFilterService } from '../../services/publishers-filter.service';
 import { TafsirsService } from '../../services/tafsirs.service';
+import { localizeLanguageCode } from '../../../utils/display-localization.util';
 
 @Component({
   selector: 'app-tafsir-form',
@@ -44,6 +46,7 @@ export class TafsirFormComponent implements OnInit {
   private readonly publishersFilterService = inject(PublishersFilterService);
   private readonly message = inject(NzMessageService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   readonly isEditMode = signal(false);
   readonly loadingDetail = signal(false);
@@ -129,10 +132,9 @@ export class TafsirFormComponent implements OnInit {
           this.isEditMode() ? 'تم تحديث التفسير بنجاح' : 'تم إضافة التفسير بنجاح'
         );
         this.submitting.set(false);
-        void this.router.navigate(['/admin/tafsirs', res.id]);
+        void this.router.navigate(['/admin/tafsirs', res.slug]);
       },
       error: () => {
-        this.message.error('حدث خطأ. يرجى المحاولة مرة أخرى.');
         this.submitting.set(false);
       },
     });
@@ -152,6 +154,7 @@ export class TafsirFormComponent implements OnInit {
       publisher_id: v.publisher_id!,
       is_external: v.is_external ?? false,
       external_url: v.external_url || null,
+      thumbnail: this.thumbnailFile() ?? undefined,
     };
   }
 
@@ -171,6 +174,7 @@ export class TafsirFormComponent implements OnInit {
             long_description_ar: data.long_description_ar,
             long_description_en: data.long_description_en,
             license: data.license,
+            language: data.language ?? '',
             publisher_id: data.publisher.id,
             is_external: data.is_external,
             external_url: data.external_url ?? '',
@@ -183,7 +187,6 @@ export class TafsirFormComponent implements OnInit {
           this.loadingDetail.set(false);
         },
         error: () => {
-          this.message.error('تعذر تحميل بيانات التفسير للتعديل.');
           this.loadingDetail.set(false);
         },
       });
@@ -203,5 +206,9 @@ export class TafsirFormComponent implements OnInit {
           this.publishersLoading.set(false);
         },
       });
+  }
+
+  languageLabel(code: string): string {
+    return localizeLanguageCode(code, this.translate.currentLang);
   }
 }

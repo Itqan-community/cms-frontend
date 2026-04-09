@@ -1,5 +1,3 @@
-import { NATIONALITY } from '../nationality.enum';
-
 export type ReciterSorting =
   | 'name'
   | '-name'
@@ -16,15 +14,15 @@ export interface ReciterListItem {
   name: string;
   bio: string;
   recitations_count: number;
-  nationality: string;
+  nationality: string | null;
   slug: string;
-  image_url: string;
+  image_url: string | null;
   created_at: string;
   updated_at: string;
-  date_of_death: string;
+  date_of_death: string | null;
 }
 
-/** GET /portal/reciters/:id/ */
+/** GET /portal/reciters/{reciter_slug}/ */
 export interface ReciterDetails {
   id: number;
   name_ar: string;
@@ -33,11 +31,11 @@ export interface ReciterDetails {
   bio_en: string;
   recitations_count: number;
   slug: string;
-  image_url: string;
-  nationality?: string;
+  image_url: string | null;
+  nationality?: string | null;
   created_at: string;
   updated_at: string;
-  date_of_death: string;
+  date_of_death: string | null;
 }
 
 export interface ReciterFormValue {
@@ -45,9 +43,8 @@ export interface ReciterFormValue {
   name_en: string;
   bio_ar: string;
   bio_en: string;
-  nationality: string;
-  image_url: string;
-  date_of_death: string;
+  nationality?: string | null;
+  date_of_death?: string | null;
 }
 
 export interface RecitersListResponse {
@@ -59,6 +56,9 @@ export interface ReciterListFilters {
   page: number;
   page_size: number;
   search?: string;
-  nationality?: NATIONALITY;
+  name_ar?: string;
+  name_en?: string;
+  bio_ar?: string;
+  bio_en?: string;
   ordering?: ReciterSorting;
 }

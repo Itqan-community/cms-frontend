@@ -38,7 +38,7 @@ export class RecitationsStatsCardsComponent implements OnInit {
             riwayas: 0,
             reciters: 0,
             recitations: 0,
-            isMock: true,
+            isMock: false,
           });
           this.loading.set(false);
         },

@@ -10,15 +10,18 @@
   </nz-input-group>
   <ng-template #searchIcon><ng-icon name="lucideSearch" /></ng-template>
 
-  <nz-input-group class="publisher-filters__country">
-    <input
-      nz-input
-      type="text"
-      placeholder="الدولة"
-      [ngModel]="countryValue"
-      (ngModelChange)="onCountryChange($event)"
-    />
-  </nz-input-group>
+  <nz-select
+    class="publisher-filters__country"
+    nzPlaceHolder="الدولة"
+    nzAllowClear
+    nzShowSearch
+    [ngModel]="selectedCountry"
+    (ngModelChange)="onCountryChange($event)"
+  >
+    @for (country of countryOptions; track country) {
+      <nz-option [nzValue]="country" [nzLabel]="countryLabel(country)"></nz-option>
+    }
+  </nz-select>
 
   <nz-select
     class="publisher-filters__select"

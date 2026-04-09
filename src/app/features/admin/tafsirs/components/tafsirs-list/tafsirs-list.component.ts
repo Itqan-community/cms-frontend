@@ -71,7 +71,6 @@ export class TafsirsListComponent implements OnInit {
           this.loading.set(false);
         },
         error: () => {
-          this.message.error('تعذر تحميل التفاسير. يرجى المحاولة لاحقاً.');
           this.loading.set(false);
         },
       });
@@ -94,7 +93,7 @@ export class TafsirsListComponent implements OnInit {
     this.load();
   }
 
-  onSortChange(column: 'name' | 'publisher_id', order: NzTableSortOrder): void {
+  onSortChange(column: 'name' | 'created_at', order: NzTableSortOrder): void {
     if (!order) {
       this.ordering = undefined;
     } else {
@@ -105,12 +104,12 @@ export class TafsirsListComponent implements OnInit {
     this.load();
   }
 
-  onView(id: number): void {
-    void this.router.navigate(['/admin/tafsirs', id]);
+  onView(slug: string): void {
+    void this.router.navigate(['/admin/tafsirs', slug]);
   }
 
-  onEdit(id: number): void {
-    void this.router.navigate(['/admin/tafsirs', id, 'edit']);
+  onEdit(slug: string): void {
+    void this.router.navigate(['/admin/tafsirs', slug, 'edit']);
   }
 
   onDelete(item: TafsirItem): void {
@@ -123,12 +122,12 @@ export class TafsirsListComponent implements OnInit {
       nzCancelText: 'إلغاء',
       nzDirection: 'rtl',
       nzOnOk: () =>
-        this.tafsirsService.delete(String(item.id)).subscribe({
+        this.tafsirsService.delete(item.slug).subscribe({
           next: () => {
             this.message.success('تم حذف التفسير بنجاح');
             this.load();
           },
-          error: () => this.message.error('حدث خطأ أثناء الحذف'),
+          error: () => {},
         }),
     });
   }

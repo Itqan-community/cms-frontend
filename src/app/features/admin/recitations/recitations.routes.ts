@@ -21,14 +21,14 @@ export const recitationRoutes: Routes = [
           ),
       },
       {
-        path: ':id/edit',
+        path: ':slug/edit',
         loadComponent: () =>
           import('./components/recitation-form/recitation-form.component').then(
             (m) => m.RecitationFormComponent
           ),
       },
       {
-        path: ':id',
+        path: ':slug',
         loadComponent: () =>
           import('./components/recitation-detail/recitation-detail.component').then(
             (m) => m.RecitationDetailComponent

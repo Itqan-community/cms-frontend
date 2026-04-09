@@ -8,10 +8,13 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { TranslateService } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { NATIONALITY } from '../../../reciters/nationality.enum';
+import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
 import { PublisherUiFilters } from '../../models/publishers-stats.models';
 
 @Component({
@@ -25,11 +28,12 @@ export class PublisherFiltersComponent implements OnInit {
   @Output() filtersChange = new EventEmitter<PublisherUiFilters>();
 
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
   private readonly searchSubject = new Subject<string>();
-  private readonly countrySubject = new Subject<string>();
+  readonly countryOptions = Object.values(NATIONALITY);
 
   searchValue = '';
-  countryValue = '';
+  selectedCountry: string | null = null;
   selectedVerified: boolean | null = null;
 
   private current: PublisherUiFilters = {};
@@ -42,12 +46,6 @@ export class PublisherFiltersComponent implements OnInit {
         this.emit();
       });
 
-    this.countrySubject
-      .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
-      .subscribe((c) => {
-        this.current = { ...this.current, country: c || undefined };
-        this.emit();
-      });
   }
 
   onSearchChange(value: string): void {
@@ -55,9 +53,10 @@ export class PublisherFiltersComponent implements OnInit {
     this.searchSubject.next(value);
   }
 
-  onCountryChange(value: string): void {
-    this.countryValue = value;
-    this.countrySubject.next(value);
+  onCountryChange(value: string | null): void {
+    this.selectedCountry = value;
+    this.current = { ...this.current, country: value ?? undefined };
+    this.emit();
   }
 
   onVerifiedChange(value: boolean | null): void {
@@ -74,5 +73,9 @@ export class PublisherFiltersComponent implements OnInit {
 
   private emit(): void {
     this.filtersChange.emit(this.current);
+  }
+
+  countryLabel(countryCode: string): string {
+    return localizeCountryCodeOrName(countryCode, this.translate.currentLang);
   }
 }

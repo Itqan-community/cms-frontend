@@ -1,23 +1,16 @@
-import {
-  Component,
-  DestroyRef,
-  EventEmitter,
-  OnInit,
-  Output,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, DestroyRef, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { Subject, debounceTime, distinctUntilChanged, forkJoin } from 'rxjs';
-import { Licenses } from '../../../../../core/enums/licenses.enum';
+import { NgIcon } from '@ng-icons/core';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NgIcon } from '@ng-icons/core';
-import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
-import { PublisherFilterItem } from '../../../tafsirs/models/tafsirs.models';
-import { RecitersAdminService } from '../../../reciters/services/reciters.service';
+import { Subject, debounceTime, distinctUntilChanged, forkJoin } from 'rxjs';
+import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { ReciterListItem } from '../../../reciters/models/reciters.models';
+import { RecitersAdminService } from '../../../reciters/services/reciters.service';
+import { PublisherFilterItem } from '../../../tafsirs/models/tafsirs.models';
+import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
 import {
   MaddLevel,
   MeemBehavior,
@@ -29,7 +22,7 @@ import { RecitationsService } from '../../services/recitations.service';
 @Component({
   selector: 'app-recitation-filters',
   standalone: true,
-  imports: [FormsModule, NzInputModule, NzSelectModule, NgIcon],
+  imports: [FormsModule, NzInputModule, NzSelectModule, NzDatePickerModule, NgIcon],
   template: `
     <div class="recitation-filters" dir="rtl">
       <nz-input-group [nzPrefix]="searchIcon" class="recitation-filters__search">
@@ -88,6 +81,7 @@ import { RecitationsService } from '../../services/recitations.service';
         class="recitation-filters__select"
         nzPlaceHolder="الرواية"
         nzAllowClear
+        [nzLoading]="riwayahsLoading()"
         [ngModel]="selectedRiwayah"
         (ngModelChange)="onRiwayahChange($event)"
       >
@@ -103,7 +97,7 @@ import { RecitationsService } from '../../services/recitations.service';
         [ngModel]="selectedMadd"
         (ngModelChange)="onMaddChange($event)"
       >
-        <nz-option [nzValue]="maddEnum.TWASSUT" nzLabel="توصّط"></nz-option>
+        <nz-option [nzValue]="maddEnum.TWASSUT" nzLabel="توسّط"></nz-option>
         <nz-option [nzValue]="maddEnum.QASR" nzLabel="قصر"></nz-option>
       </nz-select>
 
@@ -130,14 +124,18 @@ import { RecitationsService } from '../../services/recitations.service';
         }
       </nz-select>
 
-      <input
-        nz-input
-        type="number"
+      <nz-date-picker
+        nzMode="year"
+        nzFormat="yyyy"
+        [nzInputReadOnly]="true"
+        [nzDefaultPickerValue]="hijriDefaultPickerDate"
+        [nzDisabledDate]="disableNonHijriYears"
         class="recitation-filters__year"
-        placeholder="السنة"
-        [ngModel]="yearValue"
+        nzPlaceHolder="السنة (هجري)"
+        [ngModel]="selectedHijriDate"
         (ngModelChange)="onYearChange($event)"
-      />
+      ></nz-date-picker>
+      <!-- <span class="recitation-filters__hijri-indicator">هجري</span> -->
     </div>
   `,
   styleUrl: './recitation-filters.component.less',
@@ -161,6 +159,7 @@ export class RecitationFiltersComponent implements OnInit {
 
   readonly qiraahOptions = signal<NamedId[]>([]);
   readonly riwayahOptions = signal<NamedId[]>([]);
+  readonly riwayahsLoading = signal(false);
 
   searchValue = '';
   selectedPublisher: number | null = null;
@@ -170,7 +169,10 @@ export class RecitationFiltersComponent implements OnInit {
   selectedMadd: MaddLevel | null = null;
   selectedMeem: MeemBehavior | null = null;
   selectedLicense: string | null = null;
-  yearValue: number | null = null;
+  selectedHijriDate: Date | null = null;
+  readonly hijriDefaultPickerDate = new Date(1446, 0, 1);
+  private readonly minHijriYear = 1300;
+  private readonly maxHijriYear = 1600;
 
   private currentFilters: Partial<RecitationListFilters> = {};
 
@@ -220,6 +222,7 @@ export class RecitationFiltersComponent implements OnInit {
 
   onQiraahChange(id: number | null): void {
     this.selectedQiraah = id;
+    this.loadRiwayahs(id, this.selectedRiwayah);
     this.currentFilters = { ...this.currentFilters, qiraah_id: id ?? undefined };
     this.emit();
   }
@@ -238,25 +241,30 @@ export class RecitationFiltersComponent implements OnInit {
 
   onMeemChange(v: MeemBehavior | null): void {
     this.selectedMeem = v;
-    this.currentFilters = { ...this.currentFilters, meem_behavior: v ?? undefined };
+    this.currentFilters = { ...this.currentFilters, meem_behaviour: v ?? undefined };
     this.emit();
   }
 
   onLicenseChange(v: string | null): void {
     this.selectedLicense = v;
-    this.currentFilters = { ...this.currentFilters, license: v ?? undefined };
+    this.currentFilters = { ...this.currentFilters, license_code: v ?? undefined };
     this.emit();
   }
 
-  onYearChange(v: string | number | null): void {
-    const n = v === '' || v == null ? null : Number(v);
-    this.yearValue = n;
+  onYearChange(v: Date | null): void {
+    this.selectedHijriDate = v;
+    const n = v ? v.getFullYear() : null;
     this.currentFilters = {
       ...this.currentFilters,
       year: n != null && !Number.isNaN(n) && n > 0 ? n : undefined,
     };
     this.emit();
   }
+
+  disableNonHijriYears = (current: Date): boolean => {
+    const year = current.getFullYear();
+    return year < this.minHijriYear || year > this.maxHijriYear;
+  };
 
   private loadPublishers(query = ''): void {
     this.publishersLoading.set(true);
@@ -278,6 +286,35 @@ export class RecitationFiltersComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => this.reciterOptions.set(res.results),
+      });
+  }
+
+  private loadRiwayahs(qiraahId: number | null, keepRiwayahId: number | null): void {
+    this.riwayahsLoading.set(true);
+    this.recitationsService
+      .riwayahOptions(qiraahId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.riwayahOptions.set(res);
+          const shouldKeep =
+            keepRiwayahId != null && res.some((riwayah) => riwayah.id === keepRiwayahId);
+          if (!shouldKeep && this.selectedRiwayah != null) {
+            this.selectedRiwayah = null;
+            this.currentFilters = { ...this.currentFilters, riwayah_id: undefined };
+            this.emit();
+          }
+          this.riwayahsLoading.set(false);
+        },
+        error: () => {
+          this.riwayahOptions.set([]);
+          if (this.selectedRiwayah != null) {
+            this.selectedRiwayah = null;
+            this.currentFilters = { ...this.currentFilters, riwayah_id: undefined };
+            this.emit();
+          }
+          this.riwayahsLoading.set(false);
+        },
       });
   }
 

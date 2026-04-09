@@ -75,7 +75,6 @@ export class TranslationsListComponent implements OnInit {
           this.loading.set(false);
         },
         error: () => {
-          this.message.error('تعذر تحميل الترجمات. يرجى المحاولة لاحقاً.');
           this.loading.set(false);
         },
       });
@@ -98,7 +97,7 @@ export class TranslationsListComponent implements OnInit {
     this.load();
   }
 
-  onSortChange(column: 'name' | 'publisher_id', order: NzTableSortOrder): void {
+  onSortChange(column: 'name' | 'created_at', order: NzTableSortOrder): void {
     if (!order) {
       this.ordering = undefined;
     } else {
@@ -109,12 +108,12 @@ export class TranslationsListComponent implements OnInit {
     this.load();
   }
 
-  onView(id: number): void {
-    void this.router.navigate(['/admin/translations', id]);
+  onView(slug: string): void {
+    void this.router.navigate(['/admin/translations', slug]);
   }
 
-  onEdit(id: number): void {
-    void this.router.navigate(['/admin/translations', id, 'edit']);
+  onEdit(slug: string): void {
+    void this.router.navigate(['/admin/translations', slug, 'edit']);
   }
 
   onDelete(item: TranslationItem): void {
@@ -127,12 +126,12 @@ export class TranslationsListComponent implements OnInit {
       nzCancelText: 'إلغاء',
       nzDirection: 'rtl',
       nzOnOk: () =>
-        this.translationsService.delete(String(item.id)).subscribe({
+        this.translationsService.delete(item.slug ?? String(item.id)).subscribe({
           next: () => {
             this.message.success('تم حذف الترجمة بنجاح');
             this.load();
           },
-          error: () => this.message.error('حدث خطأ أثناء الحذف'),
+          error: () => {},
         }),
     });
   }

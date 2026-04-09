@@ -25,11 +25,13 @@ export interface MinimalRiwayah {
   id: number;
   name: string;
   bio: string;
+  qiraah_id?: number;
 }
 
 /** GET /portal/recitations/ row */
 export interface RecitationListItem {
   id: number;
+  slug?: string;
   name: string;
   description: string;
   publisher: PublisherRef;
@@ -37,14 +39,15 @@ export interface RecitationListItem {
   created_at: string;
   reciter: MinimalReciter;
   qiraah: MinimalQiraah;
-  riwayah: MinimalRiwayah;
+  riwayah: MinimalRiwayah | null;
   madd_level: MaddLevel;
-  meem_behavior: MeemBehavior;
+  meem_behaviour: MeemBehavior;
   year: number;
 }
 
 export interface RecitationDetails {
   id: number;
+  slug?: string;
   name_ar: string;
   name_en: string;
   description_ar: string;
@@ -52,9 +55,9 @@ export interface RecitationDetails {
   publisher: PublisherRef & { description?: string };
   reciter: MinimalReciter;
   qiraah: MinimalQiraah;
-  riwayah: MinimalRiwayah;
+  riwayah: MinimalRiwayah | null;
   madd_level: MaddLevel;
-  meem_behavior: MeemBehavior;
+  meem_behaviour: MeemBehavior;
   year: number;
   license: string;
   created_at: string;
@@ -69,9 +72,9 @@ export interface RecitationFormValue {
   publisher_id: number;
   reciter_id: number;
   qiraah_id: number;
-  riwayah_id: number;
+  riwayah_id: number | null;
   madd_level: MaddLevel;
-  meem_behavior: MeemBehavior;
+  meem_behaviour: MeemBehavior;
   year: number;
   license: string;
 }
@@ -92,8 +95,8 @@ export type RecitationSorting =
   | '-riwayah_name'
   | 'madd_level'
   | '-madd_level'
-  | 'meem_behavior'
-  | '-meem_behavior'
+  | 'meem_behaviour'
+  | '-meem_behaviour'
   | 'year'
   | '-year'
   | 'license'
@@ -112,9 +115,9 @@ export interface RecitationListFilters {
   qiraah_id?: number;
   riwayah_id?: number;
   madd_level?: MaddLevel;
-  meem_behavior?: MeemBehavior;
+  meem_behaviour?: MeemBehavior;
   year?: number;
-  license?: string;
+  license_code?: string;
   ordering?: RecitationSorting;
 }
 

@@ -64,12 +64,7 @@ const TAB_RECITERS: CmsTab = {
   label: 'ADMIN.MENU.RECITERS',
   icon: 'lucideMic',
 };
-const CORE_TABS: CmsTab[] = [
-  TAB_TAFSIRS,
-  TAB_TRANSLATIONS,
-  TAB_RECITATIONS,
-  TAB_RECITERS,
-];
+const CORE_TABS: CmsTab[] = [TAB_TAFSIRS, TAB_TRANSLATIONS, TAB_RECITATIONS, TAB_RECITERS];
 
 @Component({
   selector: 'app-admin-layout',
@@ -96,6 +91,7 @@ export class AdminLayoutComponent {
   readonly isPublisherHost = isPublisherHost();
 
   isCollapsed = signal(false);
+  readonly isMobileMenuOpen = signal(false);
 
   readonly layoutDir = signal<'rtl' | 'ltr'>(
     this.translate.getCurrentLang() === 'ar' ? 'rtl' : 'ltr'
@@ -106,7 +102,7 @@ export class AdminLayoutComponent {
     //   return [TAB_MUSHAFS, TAB_TAFSIRS, TAB_TRANSLATIONS, TAB_PUBLISHERS, TAB_AUDIO];
     // }
     // if (this.adminAuth.isPublisherAdmin()) {
-    return [TAB_PROFILE, TAB_MUSHAFS, ...CORE_TABS, TAB_PUBLISHERS];
+    return [TAB_PUBLISHERS, TAB_MUSHAFS, ...CORE_TABS];
     // }
     // return CORE_TABS;
   });
@@ -121,6 +117,31 @@ export class AdminLayoutComponent {
     });
   }
 
+  onMobileMenuToggle(): void {
+    if (!this.isMobileViewport()) return;
+    const open = !this.isMobileMenuOpen();
+    this.isMobileMenuOpen.set(open);
+    this.isCollapsed.set(!open);
+  }
+
+  closeMobileMenu(): void {
+    if (this.isMobileViewport()) {
+      this.isMobileMenuOpen.set(false);
+      this.isCollapsed.set(true);
+    }
+  }
+
+  onSiderCollapsedChange(collapsed: boolean): void {
+    this.isCollapsed.set(collapsed);
+    if (this.isMobileViewport()) {
+      this.isMobileMenuOpen.set(!collapsed);
+    }
+  }
+
+  onMenuItemClick(): void {
+    this.closeMobileMenu();
+  }
+
   onRefresh(): void {
     this.modal.confirm({
       nzTitle: this.translate.instant('ADMIN.REFRESH_PROMPT.TITLE'),
@@ -132,5 +153,9 @@ export class AdminLayoutComponent {
         // Refresh logic here
       },
     });
+  }
+
+  private isMobileViewport(): boolean {
+    return window.innerWidth < 992;
   }
 }

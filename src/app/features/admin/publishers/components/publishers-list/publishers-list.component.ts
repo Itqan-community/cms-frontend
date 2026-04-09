@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
@@ -12,6 +13,7 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NgIcon } from '@ng-icons/core';
 import { Publisher, PublisherUiFilters } from '../../models/publishers-stats.models';
 import { PublishersService } from '../../services/publishers.service';
+import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
 import { PublisherFiltersComponent } from '../publisher-filters/publisher-filters.component';
 
 @Component({
@@ -38,6 +40,7 @@ export class PublishersListComponent implements OnInit {
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
   private readonly router = inject(Router);
+  private readonly translate = inject(TranslateService);
 
   readonly publishers = signal<Publisher[]>([]);
   readonly total = signal(0);
@@ -68,7 +71,6 @@ export class PublishersListComponent implements OnInit {
           this.loading.set(false);
         },
         error: () => {
-          this.message.error('تعذر تحميل الناشرين. يرجى المحاولة لاحقاً.');
           this.loading.set(false);
         },
       });
@@ -91,7 +93,7 @@ export class PublishersListComponent implements OnInit {
     this.load();
   }
 
-  onSortChange(column: 'name', order: NzTableSortOrder): void {
+  onSortChange(column: 'name' | 'created_at', order: NzTableSortOrder): void {
     if (!order) {
       this.ordering = undefined;
     } else {
@@ -126,7 +128,7 @@ export class PublishersListComponent implements OnInit {
             this.message.success('تم حذف الناشر بنجاح');
             this.load();
           },
-          error: () => this.message.error('حدث خطأ أثناء الحذف'),
+          error: () => {},
         }),
     });
   }
@@ -134,5 +136,9 @@ export class PublishersListComponent implements OnInit {
   truncate(text: string | undefined, max = 80): string {
     if (!text) return '—';
     return text.length > max ? text.slice(0, max) + '…' : text;
+  }
+
+  countryLabel(country: string | null | undefined): string {
+    return localizeCountryCodeOrName(country, this.translate.currentLang);
   }
 }

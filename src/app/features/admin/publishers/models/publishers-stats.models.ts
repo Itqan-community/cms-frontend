@@ -2,18 +2,18 @@ export interface Publisher {
   id: number;
   name: string;
   slug: string;
-  name_ar: string;
-  name_en: string;
+  name_ar?: string | null;
+  name_en?: string | null;
   description?: string;
-  description_ar?: string;
-  description_en?: string;
+  description_ar?: string | null;
+  description_en?: string | null;
   address?: string;
   website?: string;
   contact_email?: string;
   is_verified?: boolean;
   foundation_year?: number;
   country?: string;
-  icon_url?: string;
+  icon?: string | File;
   created_at?: string;
   updated_at?: string;
 }
@@ -44,10 +44,14 @@ export type PublisherUpdatePayload = Pick<
   | 'name_en'
   | 'country'
   | 'website'
-  | 'icon_url'
   | 'foundation_year'
   | 'address'
   | 'is_verified'
   | 'contact_email'
-  | 'description'
->;
+  | 'description_ar'
+  | 'description_en'
+> & {
+  icon?: File;
+};
+
+export type PublisherCreatePayload = PublisherUpdatePayload;

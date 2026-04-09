@@ -21,14 +21,14 @@ export const reciterRoutes: Routes = [
           ),
       },
       {
-        path: ':id/edit',
+        path: ':slug/edit',
         loadComponent: () =>
           import('./components/reciter-form/reciter-form.component').then(
             (m) => m.ReciterFormComponent
           ),
       },
       {
-        path: ':id',
+        path: ':slug',
         loadComponent: () =>
           import('./components/reciter-detail/reciter-detail.component').then(
             (m) => m.ReciterDetailComponent

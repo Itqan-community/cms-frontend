@@ -39,29 +39,28 @@ export class RecitationDetailComponent implements OnInit {
   readonly maddLevel = MaddLevel;
   readonly meemBehavior = MeemBehavior;
 
-  private id!: number;
+  private slug!: string;
 
   ngOnInit(): void {
-    this.id = Number(this.route.snapshot.params['id']);
+    this.slug = this.route.snapshot.params['slug'];
     this.load();
   }
 
   load(): void {
     this.loading.set(true);
-    this.recitationsService.getDetail(this.id).subscribe({
+    this.recitationsService.getDetail(this.slug).subscribe({
       next: (data) => {
         this.recitation.set(data);
         this.loading.set(false);
       },
       error: () => {
-        this.message.error('تعذر تحميل بيانات التلاوة.');
         this.loading.set(false);
       },
     });
   }
 
   onEdit(): void {
-    void this.router.navigate(['/admin/recitations', this.id, 'edit']);
+    void this.router.navigate(['/admin/recitations', this.slug, 'edit']);
   }
 
   onDelete(): void {
@@ -75,12 +74,12 @@ export class RecitationDetailComponent implements OnInit {
       nzCancelText: 'إلغاء',
       nzDirection: 'rtl',
       nzOnOk: () =>
-        this.recitationsService.delete(this.id).subscribe({
+        this.recitationsService.delete(this.slug).subscribe({
           next: () => {
             this.message.success('تم حذف التلاوة بنجاح');
             void this.router.navigate(['/admin/recitations']);
           },
-          error: () => this.message.error('حدث خطأ أثناء الحذف'),
+          error: () => {},
         }),
     });
   }
@@ -90,7 +89,7 @@ export class RecitationDetailComponent implements OnInit {
   }
 
   maddLabel(level: MaddLevel): string {
-    return level === MaddLevel.TWASSUT ? 'توصّط' : 'قصر';
+    return level === MaddLevel.TWASSUT ? 'توسّط' : 'قصر';
   }
 
   meemLabel(b: MeemBehavior): string {

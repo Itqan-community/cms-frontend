@@ -51,9 +51,7 @@
 
       <!-- Bilingual short descriptions -->
       <div class="tafsir-form__card">
-        <h3 class="tafsir-form__card-title">
-          <ng-icon name="lucideFileText" /> الوصف المختصر
-        </h3>
+        <h3 class="tafsir-form__card-title"><ng-icon name="lucideFileText" /> الوصف المختصر</h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
@@ -87,9 +85,7 @@
 
       <!-- Bilingual long descriptions -->
       <div class="tafsir-form__card">
-        <h3 class="tafsir-form__card-title">
-          <ng-icon name="lucideAlignRight" /> الوصف المطوّل
-        </h3>
+        <h3 class="tafsir-form__card-title"><ng-icon name="lucideAlignRight" /> الوصف المطوّل</h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
@@ -147,8 +143,8 @@
               <nz-form-label nzRequired>لغة التفسير</nz-form-label>
               <nz-form-control nzErrorTip="اللغة مطلوبة">
                 <nz-select formControlName="language" nzPlaceHolder="اختر اللغة" nzAllowClear>
-                  <nz-option nzValue="ar" nzLabel="عربي"></nz-option>
-                  <nz-option nzValue="en" nzLabel="English"></nz-option>
+                  <nz-option nzValue="ar" [nzLabel]="languageLabel('ar')"></nz-option>
+                  <nz-option nzValue="en" [nzLabel]="languageLabel('en')"></nz-option>
                 </nz-select>
               </nz-form-control>
             </nz-form-item>

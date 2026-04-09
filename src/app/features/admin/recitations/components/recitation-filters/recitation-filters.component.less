@@ -15,9 +15,19 @@
   }
 
   &__year {
-    width: 120px;
+    min-width: 140px;
+  }
+
+  &__hijri-indicator {
     height: 40px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 10px;
     border-radius: 10px;
+    background: #fef3c7;
+    color: #92400e;
+    font-size: 0.8rem;
+    font-weight: 600;
   }
 }
 
@@ -52,5 +62,17 @@
   .ant-select-focused .ant-select-selector {
     border-color: #16a34a !important;
     box-shadow: none !important;
+  }
+
+  .ant-picker {
+    border-radius: 10px;
+    border-color: #e5e7eb;
+    height: 40px;
+
+    &:hover,
+    &.ant-picker-focused {
+      border-color: #16a34a;
+      box-shadow: none;
+    }
   }
 }

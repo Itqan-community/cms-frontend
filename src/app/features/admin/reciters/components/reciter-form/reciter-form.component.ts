@@ -2,6 +2,7 @@ import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -11,7 +12,9 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NATIONALITY } from '../../nationality.enum';
+import { ReciterDetails, ReciterListItem } from '../../models/reciters.models';
 import { RecitersAdminService } from '../../services/reciters.service';
+import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
 
 @Component({
   selector: 'app-reciter-form',
@@ -37,6 +40,7 @@ export class ReciterFormComponent implements OnInit {
   private readonly recitersService = inject(RecitersAdminService);
   private readonly message = inject(NzMessageService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly translate = inject(TranslateService);
 
   readonly isEditMode = signal(false);
   readonly loadingDetail = signal(false);
@@ -49,17 +53,16 @@ export class ReciterFormComponent implements OnInit {
     bio_ar: [''],
     bio_en: [''],
     nationality: ['', [Validators.required]],
-    image_url: [''],
     date_of_death: [''],
   });
 
-  private editId: number | null = null;
+  private editSlug: string | null = null;
 
   ngOnInit(): void {
-    const idParam = this.route.snapshot.params['id'];
-    if (idParam) {
+    const slugParam = this.route.snapshot.params['slug'];
+    if (slugParam) {
       this.isEditMode.set(true);
-      this.editId = Number(idParam);
+      this.editSlug = slugParam;
       this.loadForEdit();
     }
   }
@@ -80,37 +83,48 @@ export class ReciterFormComponent implements OnInit {
       bio_ar: v.bio_ar ?? '',
       bio_en: v.bio_en ?? '',
       nationality: v.nationality ?? '',
-      image_url: v.image_url ?? '',
-      date_of_death: v.date_of_death ?? '',
+      date_of_death: v.date_of_death || null,
     };
 
     this.submitting.set(true);
 
-    const request$ =
-      this.isEditMode() && this.editId != null
-        ? this.recitersService.patch(this.editId, body)
-        : this.recitersService.create(body);
+    if (this.isEditMode() && this.editSlug != null) {
+      this.recitersService
+        .patch(this.editSlug, body)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (res: ReciterDetails) => {
+            this.message.success('تم تحديث القارئ بنجاح');
+            this.submitting.set(false);
+            void this.router.navigate(['/admin/reciters', res.slug]);
+          },
+          error: () => {
+            this.submitting.set(false);
+          },
+        });
+      return;
+    }
 
-    request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: (res) => {
-        this.message.success(
-          this.isEditMode() ? 'تم تحديث القارئ بنجاح' : 'تم إضافة القارئ بنجاح'
-        );
-        this.submitting.set(false);
-        void this.router.navigate(['/admin/reciters', res.id]);
-      },
-      error: () => {
-        this.message.error('حدث خطأ. يرجى المحاولة مرة أخرى.');
-        this.submitting.set(false);
-      },
-    });
+    this.recitersService
+      .create(body)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res: ReciterListItem) => {
+          this.message.success('تم إضافة القارئ بنجاح');
+          this.submitting.set(false);
+          void this.router.navigate(['/admin/reciters', res.slug]);
+        },
+        error: () => {
+          this.submitting.set(false);
+        },
+      });
   }
 
   private loadForEdit(): void {
-    if (this.editId == null) return;
+    if (this.editSlug == null) return;
     this.loadingDetail.set(true);
     this.recitersService
-      .getDetail(this.editId)
+      .getDetail(this.editSlug)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
@@ -120,15 +134,17 @@ export class ReciterFormComponent implements OnInit {
             bio_ar: data.bio_ar,
             bio_en: data.bio_en,
             nationality: data.nationality ?? '',
-            image_url: data.image_url ?? '',
             date_of_death: data.date_of_death ?? '',
           });
           this.loadingDetail.set(false);
         },
         error: () => {
-          this.message.error('تعذر تحميل بيانات القارئ للتعديل.');
           this.loadingDetail.set(false);
         },
       });
+  }
+
+  countryLabel(countryCode: string): string {
+    return localizeCountryCodeOrName(countryCode, this.translate.currentLang);
   }
 }

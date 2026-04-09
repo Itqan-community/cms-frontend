@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { forkJoin, map, Observable, of } from 'rxjs';
+import { forkJoin, map, Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
 import { RecitationsStats } from '../models/recitations-stats.model';
@@ -10,13 +10,6 @@ interface PaginatedResponse {
   count: number;
   results: unknown[];
 }
-
-const MOCK_STATS: RecitationsStats = {
-  riwayas: 2,
-  reciters: 6,
-  recitations: 2,
-  isMock: true,
-};
 
 @Injectable({
   providedIn: 'root',
@@ -34,13 +27,9 @@ export class RecitationsStatsService {
    *   - /riwayas/
    *   - /reciters/
    *   - /recitations/
-   * - If any request fails (for example, endpoints are not ready yet),
-   *   it falls back to a clearly labelled MOCK response and shows
-   *   a global toaster message.
+   * - If any request fails, the stream errors and a global toaster is shown.
    */
   getStats(): Observable<RecitationsStats> {
-    return of(MOCK_STATS);
-    /*
     const riwayas$ = this.http
       .get<PaginatedResponse>(`${this.BASE_URL}/riwayas/`, {
         params: { page_size: '1' },
@@ -60,12 +49,16 @@ export class RecitationsStatsService {
       .pipe(map((r) => r.count));
 
     return forkJoin([riwayas$, reciters$, recitations$]).pipe(
-      map(([riwayas, reciters, recitations]) => ({ riwayas, reciters, recitations })),
+      map(([riwayas, reciters, recitations]) => ({
+        riwayas,
+        reciters,
+        recitations,
+        isMock: false,
+      })),
       catchError(() => {
-        this.messages.error('تعذر تحميل إحصائيات التلاوات، يتم عرض بيانات تجريبية (MOCK) مؤقتًا.');
-        return of(MOCK_STATS);
+        this.messages.error('تعذر تحميل إحصائيات التلاوات من الخادم.');
+        return throwError(() => new Error('Failed to load recitation stats'));
       })
     );
-    */
   }
 }

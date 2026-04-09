@@ -140,8 +140,8 @@
               <nz-form-label nzRequired>لغة الترجمة</nz-form-label>
               <nz-form-control nzErrorTip="اللغة مطلوبة">
                 <nz-select formControlName="language" nzPlaceHolder="اختر اللغة" nzAllowClear>
-                  <nz-option nzValue="ar" nzLabel="عربي"></nz-option>
-                  <nz-option nzValue="en" nzLabel="English"></nz-option>
+                  <nz-option nzValue="ar" [nzLabel]="languageLabel('ar')"></nz-option>
+                  <nz-option nzValue="en" [nzLabel]="languageLabel('en')"></nz-option>
                 </nz-select>
               </nz-form-control>
             </nz-form-item>

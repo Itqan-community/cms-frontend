@@ -30,10 +30,12 @@ export interface AssetVersion {
 /** GET /portal/translations/ */
 export interface TranslationItem {
   id: number;
+  slug?: string;
   name: string;
   description: string;
   publisher: PublisherRef;
   license: string;
+  language?: string | null;
   is_external: boolean;
   created_at: string;
 }
@@ -41,6 +43,7 @@ export interface TranslationItem {
 /** GET /portal/translations/{translation_slug}/ */
 export interface TranslationDetails {
   id: number;
+  slug?: string;
   name_ar: string;
   name_en: string;
   description_ar: string;
@@ -50,6 +53,7 @@ export interface TranslationDetails {
   thumbnail_url: string | null;
   publisher: PublisherRef;
   license: string;
+  language?: string | null;
   is_external: boolean;
   external_url: string | null;
   versions: AssetVersion[];

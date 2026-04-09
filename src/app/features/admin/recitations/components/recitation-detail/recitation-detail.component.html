@@ -20,9 +20,11 @@
         </div>
 
         <div class="admin-hero-meta">
-          <nz-tag [nzColor]="getLicenseColor(recitation()!.license)">{{ recitation()!.license }}</nz-tag>
+          <nz-tag [nzColor]="getLicenseColor(recitation()!.license)">{{
+            recitation()!.license
+          }}</nz-tag>
           <nz-tag nzColor="cyan">{{ maddLabel(recitation()!.madd_level) }}</nz-tag>
-          <nz-tag nzColor="purple">{{ meemLabel(recitation()!.meem_behavior) }}</nz-tag>
+          <nz-tag nzColor="purple">{{ meemLabel(recitation()!.meem_behaviour) }}</nz-tag>
           <nz-tag nzColor="default">{{ recitation()!.year }}</nz-tag>
           <span class="admin-hero-meta__date">
             <ng-icon name="lucideCalendar" />
@@ -41,7 +43,7 @@
           </p>
           <p>
             <ng-icon name="lucideBookOpen" />
-            <strong>الرواية:</strong> {{ recitation()!.riwayah.name }}
+            <strong>الرواية:</strong> {{ recitation()!.riwayah?.name ?? '—' }}
           </p>
           <p>
             <ng-icon name="lucideStore" />
@@ -64,9 +66,7 @@
 
     <div class="admin-descriptions">
       <div class="admin-desc-col">
-        <h3 class="admin-desc-title">
-          <ng-icon name="lucideFileText" /> الوصف (عربي)
-        </h3>
+        <h3 class="admin-desc-title"><ng-icon name="lucideFileText" /> الوصف (عربي)</h3>
         <p class="admin-desc-text">{{ recitation()!.description_ar }}</p>
       </div>
       <div class="admin-desc-col">

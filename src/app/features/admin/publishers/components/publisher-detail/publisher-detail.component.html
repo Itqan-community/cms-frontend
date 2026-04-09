@@ -13,8 +13,8 @@
     <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 8 }"></nz-skeleton>
   } @else if (publisher(); as p) {
     <div class="admin-hero">
-      @if (p.icon_url) {
-        <nz-avatar [nzSrc]="p.icon_url" [nzSize]="100" class="publisher-detail__avatar"></nz-avatar>
+      @if (iconSrc(p.icon); as iconUrl) {
+        <nz-avatar [nzSrc]="iconUrl" [nzSize]="100" class="publisher-detail__avatar"></nz-avatar>
       } @else {
         <div class="admin-hero-placeholder">
           <ng-icon name="lucideLibrary" />
@@ -59,25 +59,40 @@
         البيانات التفصيلية
       </h3>
       <nz-descriptions nzBordered [nzColumn]="{ xxl: 2, xl: 2, lg: 2, md: 1, sm: 1, xs: 1 }">
-        <nz-descriptions-item nzTitle="الدولة">{{ p.country ?? '—' }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="سنة التأسيس">{{ p.foundation_year != null ? p.foundation_year : '—' }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="العنوان" [nzSpan]="2">{{ p.address ?? '—' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="الدولة">{{ countryLabel(p.country) }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="سنة التأسيس">{{
+          p.foundation_year != null ? p.foundation_year : '—'
+        }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="العنوان" [nzSpan]="2">{{
+          p.address ?? '—'
+        }}</nz-descriptions-item>
         <nz-descriptions-item nzTitle="البريد الإلكتروني">
           @if (p.contact_email) {
             <a [href]="'mailto:' + p.contact_email">{{ p.contact_email }}</a>
-          } @else { — }
+          } @else {
+            —
+          }
         </nz-descriptions-item>
         <nz-descriptions-item nzTitle="الموقع الإلكتروني">
           @if (p.website) {
             <a [href]="p.website" target="_blank" rel="noopener noreferrer">{{ p.website }}</a>
-          } @else { — }
+          } @else {
+            —
+          }
         </nz-descriptions-item>
         <nz-descriptions-item nzTitle="رابط الأيقونة" [nzSpan]="2">
-          @if (p.icon_url) {
-            <span class="admin-mono">{{ p.icon_url }}</span>
-          } @else { — }
+          @if (iconSrc(p.icon); as iconUrl) {
+            <span class="admin-mono">{{ iconUrl }}</span>
+          } @else {
+            —
+          }
         </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="الوصف" [nzSpan]="2">{{ p.description ?? '—' }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="الوصف بالعربية" [nzSpan]="2">
+          {{ p.description_ar ?? p.description ?? '—' }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Description (EN)" [nzSpan]="2">
+          {{ p.description_en ?? '—' }}
+        </nz-descriptions-item>
       </nz-descriptions>
     </div>
 

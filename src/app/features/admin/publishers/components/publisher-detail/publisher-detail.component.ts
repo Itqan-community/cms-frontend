@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { NzAvatarModule } from 'ng-zorro-antd/avatar';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzDescriptionsModule } from 'ng-zorro-antd/descriptions';
@@ -11,6 +12,7 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { Publisher } from '../../models/publishers-stats.models';
 import { PublishersService } from '../../services/publishers.service';
+import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
 
 @Component({
   selector: 'app-publisher-detail',
@@ -35,6 +37,7 @@ export class PublisherDetailComponent implements OnInit {
   private readonly publishersService = inject(PublishersService);
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
+  private readonly translate = inject(TranslateService);
 
   readonly publisher = signal<Publisher | null>(null);
   readonly loading = signal(true);
@@ -54,7 +57,6 @@ export class PublisherDetailComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.message.error('تعذر تحميل بيانات الناشر.');
         this.loading.set(false);
       },
     });
@@ -80,8 +82,16 @@ export class PublisherDetailComponent implements OnInit {
             this.message.success('تم حذف الناشر بنجاح');
             void this.router.navigate(['/admin/publishers']);
           },
-          error: () => this.message.error('حدث خطأ أثناء الحذف'),
+          error: () => {},
         }),
     });
+  }
+
+  countryLabel(country: string | null | undefined): string {
+    return localizeCountryCodeOrName(country, this.translate.currentLang);
+  }
+
+  iconSrc(icon: string | File | null | undefined): string | undefined {
+    return typeof icon === 'string' && icon.trim() ? icon : undefined;
   }
 }

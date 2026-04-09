@@ -88,7 +88,6 @@ export enum NATIONALITY {
   IR = 'IR', // Iran
   IQ = 'IQ', // Iraq
   IE = 'IE', // Ireland
-  IL = 'IL', // Israel
   IT = 'IT', // Italy
 
   JM = 'JM', // Jamaica

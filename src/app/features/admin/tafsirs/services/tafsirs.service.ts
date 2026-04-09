@@ -38,18 +38,45 @@ export class TafsirsService {
   }
 
   create(body: TafsirFormValue): Observable<TafsirDetails> {
-    return this.http.post<TafsirDetails>(this.apiUrl, body);
+    return this.http.post<TafsirDetails>(this.apiUrl, this.toFormData(body));
   }
 
   update(slug: string, body: TafsirFormValue): Observable<TafsirDetails> {
-    return this.http.put<TafsirDetails>(`${this.apiUrl}${slug}/`, body);
+    return this.http.put<TafsirDetails>(`${this.apiUrl}${slug}/`, this.toFormData(body));
   }
 
   patch(slug: string, body: Partial<TafsirFormValue>): Observable<TafsirDetails> {
-    return this.http.patch<TafsirDetails>(`${this.apiUrl}${slug}/`, body);
+    return this.http.patch<TafsirDetails>(`${this.apiUrl}${slug}/`, this.toFormData(body));
   }
 
   delete(slug: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}${slug}/`);
+  }
+
+  private toFormData(payload: Partial<TafsirFormValue>): FormData {
+    const data = new FormData();
+    const append = (key: string, value: string | number | boolean | null | undefined): void => {
+      if (value === null || value === undefined || value === '') return;
+      data.append(key, String(value));
+    };
+
+    append('name_ar', payload.name_ar);
+    append('name_en', payload.name_en);
+    append('description_ar', payload.description_ar);
+    append('description_en', payload.description_en);
+    append('long_description_ar', payload.long_description_ar);
+    append('long_description_en', payload.long_description_en);
+    append('license', payload.license);
+    append('language', payload.language);
+    append('publisher_id', payload.publisher_id);
+    if (payload.is_external !== undefined) {
+      data.append('is_external', String(payload.is_external));
+    }
+    append('external_url', payload.external_url);
+    if (payload.thumbnail) {
+      data.append('thumbnail', payload.thumbnail);
+    }
+
+    return data;
   }
 }

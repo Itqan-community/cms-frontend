@@ -1,5 +1,4 @@
 <div class="reciter-form" dir="rtl">
-
   <div class="reciter-form__header">
     <div class="reciter-form__header-text">
       <h2 class="reciter-form__title">
@@ -21,11 +20,8 @@
     <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 8 }"></nz-skeleton>
   } @else {
     <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="onSubmit()">
-
       <div class="reciter-form__card">
-        <h3 class="reciter-form__card-title">
-          <ng-icon name="lucideSquarePen" /> الاسم
-        </h3>
+        <h3 class="reciter-form__card-title"><ng-icon name="lucideSquarePen" /> الاسم</h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
@@ -47,9 +43,7 @@
       </div>
 
       <div class="reciter-form__card">
-        <h3 class="reciter-form__card-title">
-          <ng-icon name="lucideFileText" /> السيرة
-        </h3>
+        <h3 class="reciter-form__card-title"><ng-icon name="lucideFileText" /> السيرة</h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
@@ -82,9 +76,7 @@
       </div>
 
       <div class="reciter-form__card">
-        <h3 class="reciter-form__card-title">
-          <ng-icon name="lucideGlobe" /> البيانات الإضافية
-        </h3>
+        <h3 class="reciter-form__card-title"><ng-icon name="lucideGlobe" /> البيانات الإضافية</h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
@@ -97,7 +89,7 @@
                   nzPlaceHolder="مثال: EG"
                 >
                   @for (c of nationalityOptions; track c) {
-                    <nz-option [nzValue]="c" [nzLabel]="c"></nz-option>
+                    <nz-option [nzValue]="c" [nzLabel]="countryLabel(c)"></nz-option>
                   }
                 </nz-select>
               </nz-form-control>
@@ -105,17 +97,14 @@
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label>رابط صورة القارئ (URL)</nz-form-label>
-              <nz-form-control>
-                <input nz-input formControlName="image_url" placeholder="https://..." dir="ltr" />
-              </nz-form-control>
-            </nz-form-item>
-          </div>
-          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
-            <nz-form-item>
               <nz-form-label>تاريخ الوفاة (اختياري)</nz-form-label>
               <nz-form-control>
-                <input nz-input formControlName="date_of_death" placeholder="YYYY-MM-DD أو فارغ" dir="ltr" />
+                <input
+                  nz-input
+                  formControlName="date_of_death"
+                  placeholder="YYYY-MM-DD أو فارغ"
+                  dir="ltr"
+                />
               </nz-form-control>
             </nz-form-item>
           </div>
@@ -132,5 +121,4 @@
       </div>
     </form>
   }
-
 </div>

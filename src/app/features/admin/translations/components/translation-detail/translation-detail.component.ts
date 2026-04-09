@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NgIcon } from '@ng-icons/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -12,6 +13,7 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
 import { TranslationDetails } from '../../models/translations.models';
 import { TranslationsService } from '../../services/translations.service';
+import { localizeLanguageCode } from '../../../utils/display-localization.util';
 
 @Component({
   selector: 'app-translation-detail',
@@ -36,6 +38,7 @@ export class TranslationDetailComponent implements OnInit {
   private readonly translationsService = inject(TranslationsService);
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
+  private readonly translate = inject(TranslateService);
 
   readonly translation = signal<TranslationDetails | null>(null);
   readonly loading = signal(true);
@@ -56,7 +59,6 @@ export class TranslationDetailComponent implements OnInit {
         this.loading.set(false);
       },
       error: () => {
-        this.message.error('تعذر تحميل بيانات الترجمة.');
         this.loading.set(false);
       },
     });
@@ -82,7 +84,7 @@ export class TranslationDetailComponent implements OnInit {
             this.message.success('تم حذف الترجمة بنجاح');
             void this.router.navigate(['/admin/translations']);
           },
-          error: () => this.message.error('حدث خطأ أثناء الحذف'),
+          error: () => {},
         }),
     });
   }
@@ -95,5 +97,9 @@ export class TranslationDetailComponent implements OnInit {
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  }
+
+  languageLabel(code: string | null | undefined): string {
+    return localizeLanguageCode(code, this.translate.currentLang);
   }
 }

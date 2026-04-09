@@ -1,5 +1,4 @@
 <div class="recitation-form" dir="rtl">
-
   <div class="recitation-form__header">
     <div class="recitation-form__header-text">
       <h2 class="recitation-form__title">
@@ -21,11 +20,8 @@
     <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 10 }"></nz-skeleton>
   } @else {
     <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="onSubmit()">
-
       <div class="recitation-form__card">
-        <h3 class="recitation-form__card-title">
-          <ng-icon name="lucideSquarePen" /> الاسم
-        </h3>
+        <h3 class="recitation-form__card-title"><ng-icon name="lucideSquarePen" /> الاسم</h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
@@ -39,7 +35,12 @@
             <nz-form-item>
               <nz-form-label nzRequired>Name in English</nz-form-label>
               <nz-form-control nzErrorTip="Name in English is required">
-                <input nz-input formControlName="name_en" placeholder="e.g. Murattal Mushaf" dir="ltr" />
+                <input
+                  nz-input
+                  formControlName="name_en"
+                  placeholder="e.g. Murattal Mushaf"
+                  dir="ltr"
+                />
               </nz-form-control>
             </nz-form-item>
           </div>
@@ -47,9 +48,7 @@
       </div>
 
       <div class="recitation-form__card">
-        <h3 class="recitation-form__card-title">
-          <ng-icon name="lucideFileText" /> الوصف
-        </h3>
+        <h3 class="recitation-form__card-title"><ng-icon name="lucideFileText" /> الوصف</h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
@@ -80,9 +79,7 @@
       </div>
 
       <div class="recitation-form__card">
-        <h3 class="recitation-form__card-title">
-          <ng-icon name="lucideLink" /> الربط والخصائص
-        </h3>
+        <h3 class="recitation-form__card-title"><ng-icon name="lucideLink" /> الربط والخصائص</h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
@@ -119,7 +116,11 @@
             <nz-form-item>
               <nz-form-label nzRequired>القراءة</nz-form-label>
               <nz-form-control nzErrorTip="اختر القراءة">
-                <nz-select formControlName="qiraah_id" nzAllowClear>
+                <nz-select
+                  formControlName="qiraah_id"
+                  nzAllowClear
+                  (ngModelChange)="onQiraahChange($event)"
+                >
                   @for (q of qiraahOptions(); track q.id) {
                     <nz-option [nzValue]="q.id" [nzLabel]="q.name"></nz-option>
                   }
@@ -129,9 +130,13 @@
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>الرواية</nz-form-label>
-              <nz-form-control nzErrorTip="اختر الرواية">
-                <nz-select formControlName="riwayah_id" nzAllowClear>
+              <nz-form-label>الرواية</nz-form-label>
+              <nz-form-control>
+                <nz-select
+                  formControlName="riwayah_id"
+                  nzAllowClear
+                  [nzLoading]="riwayahsLoading()"
+                >
                   @for (rw of riwayahOptions(); track rw.id) {
                     <nz-option [nzValue]="rw.id" [nzLabel]="rw.name"></nz-option>
                   }
@@ -155,7 +160,7 @@
             <nz-form-item>
               <nz-form-label nzRequired>همز الميم</nz-form-label>
               <nz-form-control>
-                <nz-select formControlName="meem_behavior">
+                <nz-select formControlName="meem_behaviour">
                   @for (m of meemOptions; track m.v) {
                     <nz-option [nzValue]="m.v" [nzLabel]="m.l"></nz-option>
                   }
@@ -167,13 +172,21 @@
             <nz-form-item>
               <nz-form-label nzRequired>السنة</nz-form-label>
               <nz-form-control nzErrorTip="أدخل سنة صحيحة">
-                <nz-input-number
-                  formControlName="year"
-                  [nzMin]="1900"
-                  [nzMax]="2100"
-                  [nzStep]="1"
-                  class="recitation-form__year-input"
-                ></nz-input-number>
+                <div class="recitation-form__year-wrap">
+                  <nz-date-picker
+                    nzMode="year"
+                    nzFormat="yyyy"
+                    [nzInputReadOnly]="true"
+                    [nzDefaultPickerValue]="hijriDefaultPickerDate"
+                    [nzDisabledDate]="disableNonHijriYears"
+                    class="recitation-form__year-picker"
+                    nzPlaceHolder="السنة (هجري)"
+                    [ngModel]="selectedHijriDate()"
+                    [ngModelOptions]="{ standalone: true }"
+                    (ngModelChange)="onYearChange($event)"
+                  ></nz-date-picker>
+                  <!-- <span class="recitation-form__hijri-indicator">هجري</span> -->
+                </div>
               </nz-form-control>
             </nz-form-item>
           </div>
@@ -202,5 +215,4 @@
       </div>
     </form>
   }
-
 </div>
