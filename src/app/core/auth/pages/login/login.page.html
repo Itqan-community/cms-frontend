@@ -7,7 +7,7 @@
         class="login__back"
         [title]="'AUTH.LOGIN.RETURN_TO_WEBSITE' | translate"
       >
-        <i class="bx bx-reply-big login__back-icon"></i>
+        <ng-icon name="lucideUndo2" class="login__back-icon" aria-hidden="true" />
         {{ 'AUTH.LOGIN.RETURN_TO_WEBSITE' | translate }}
       </a>
 
@@ -50,7 +50,7 @@
                 loginForm.get('email')?.invalid && loginForm.get('email')?.touched
               "
             />
-            <i class="bx bx-envelope login__input-icon"></i>
+            <ng-icon name="lucideMail" class="login__input-icon" aria-hidden="true" />
           </div>
           @if (loginForm.get('email')?.invalid && loginForm.get('email')?.touched) {
             <p class="login__error">{{ 'AUTH.LOGIN.ERRORS.EMAIL_REQUIRED' | translate }}</p>
@@ -86,7 +86,7 @@
                   | translate
               "
             >
-              <i class="bx" [ngClass]="passwordVisible() ? 'bx-eye-closed' : 'bx-eye'"></i>
+              <ng-icon [name]="passwordVisible() ? 'lucideEyeOff' : 'lucideEye'" aria-hidden="true" />
             </button>
           </div>
           @if (loginForm.get('password')?.invalid && loginForm.get('password')?.touched) {

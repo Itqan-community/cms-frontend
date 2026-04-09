@@ -9,6 +9,10 @@ export const NAV_LINKS = [
     label: 'NAV.GALLERY_FULL',
     link: '/gallery',
   },
+  {
+    label: 'NAV.ADMIN_PORTAL',
+    link: '/admin',
+  },
   // {
   //   label: 'NAV.PUBLISHERS',
   //   link: '/publishers',
@@ -24,18 +28,19 @@ export const NAV_LINKS = [
     link: '/content-standards',
     hidden: isPublisher, // Hide content standards for publisher hosts
   },
+
   {
     label: 'NAV.API_DOCS',
     link: `${environment.API_DOCS_URL}`,
     isExternal: true,
-    icon: 'bx bx-arrow-out-up-left-stroke-square',
+    icon: 'lucideExternalLink',
     hidden: isPublisher, // Hide API docs for publisher hosts
   },
   {
     label: 'NAV.ASSET_REQUEST_FORM',
     link: `https://forms.gle/23eA86Jr56grUSes5`,
     isExternal: true,
-    icon: 'bx bx-arrow-out-up-left-stroke-square',
+    icon: 'lucideExternalLink',
     hidden: isPublisher, // Hide API docs for publisher hosts
   },
   {

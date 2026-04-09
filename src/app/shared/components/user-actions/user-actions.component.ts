@@ -1,6 +1,7 @@
 import { Component, inject, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { NgIcon } from '@ng-icons/core';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { UserAvatarComponent } from '../../components/user-avatar/user-avatar.component';
@@ -8,7 +9,7 @@ import { UserAvatarComponent } from '../../components/user-avatar/user-avatar.co
 @Component({
   selector: 'app-user-actions',
   standalone: true,
-  imports: [RouterLink, TranslatePipe, UserAvatarComponent, NzButtonComponent],
+  imports: [RouterLink, TranslatePipe, UserAvatarComponent, NzButtonComponent, NgIcon],
   styleUrls: ['./user-actions.component.less'],
   template: `
     @if (authService.isAuthenticated()) {
@@ -21,7 +22,7 @@ import { UserAvatarComponent } from '../../components/user-avatar/user-avatar.co
           [title]="'NAVIGATION.LOGOUT' | translate"
           class="btn__icon ant-btn-floating"
         >
-          <i class="bx bx-arrow-out-left-square-half ltr-flip"></i>
+          <ng-icon name="lucideLogOut" class="ltr-flip" aria-hidden="true" />
           <span class="sr-only">{{ 'NAVIGATION.LOGOUT' | translate }}</span>
         </button>
       </div>

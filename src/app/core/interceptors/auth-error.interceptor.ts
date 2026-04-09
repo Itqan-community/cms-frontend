@@ -2,6 +2,7 @@ import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpRequest } from '@angul
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, catchError, filter, Observable, switchMap, take, throwError } from 'rxjs';
+import * as Sentry from '@sentry/angular';
 import { AuthService } from '../auth/services/auth.service';
 
 /**
@@ -51,7 +52,16 @@ export function authErrorInterceptor(
         return handle401Or403Error(req, next, authService, router);
       }
 
-      // For other errors, pass them through
+      // Report unexpected HTTP errors to Sentry
+      Sentry.captureException(error, {
+        extra: {
+          url: req.url,
+          method: req.method,
+          status: error.status,
+          statusText: error.statusText,
+        },
+      });
+
       return throwError(() => error);
     })
   );

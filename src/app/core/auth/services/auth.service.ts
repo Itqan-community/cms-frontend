@@ -112,7 +112,9 @@ export class AuthService {
     this.isAuthenticated.set(false);
     this.currentUser.set(null);
     this.authStateSubject.next(false);
-    window.location.reload();
+    
+    // Navigate to login instead of full page reload to prevent infinite loops on unguarded routes
+    this.router.navigate(['/login']);
   }
 
   refreshToken(): Observable<RefreshTokenResponse> {
@@ -161,7 +163,7 @@ export class AuthService {
           if (currentUser && response.is_profile_completed) {
             const updatedUser = {
               ...currentUser,
-              profile_completed: response.is_profile_completed,
+              is_profile_completed: response.is_profile_completed,
               ...profileData,
             };
             this.currentUser.set(updatedUser);

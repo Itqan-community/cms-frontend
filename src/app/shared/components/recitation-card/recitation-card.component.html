@@ -1,0 +1,45 @@
+<nz-card class="recitation-card">
+  <ng-icon name="lucideTrash2" class="delete-btn" (click)="delete.emit(recitation())" role="button" tabindex="0" />
+
+  <div class="card-header">
+    <h3>{{ recitation().name }}</h3>
+    <p>{{ recitation().reciter.name }}</p>
+  </div>
+
+  <div class="card-info-row">
+    <span>{{ 'RECITATIONS.QIRAAH' | translate }}</span>
+    <strong>{{ recitation().qiraah.name || '---' }}</strong>
+  </div>
+
+  <div class="card-info-row">
+    <span>{{ 'RECITATIONS.RIWAYAH' | translate }}</span>
+    <strong>{{ recitation().riwayah?.name || '---' }}</strong>
+  </div>
+
+  <div class="card-info-row" *ngIf="recitation().performance">
+    <span>{{ 'RECITATIONS.PERFORMANCE' | translate }}</span>
+    <strong>{{ recitation().performance }}</strong>
+  </div>
+
+  <div class="card-info-row" *ngIf="recitation().style">
+    <span>{{ 'RECITATIONS.STYLE' | translate }}</span>
+    <strong>{{ recitation().style }}</strong>
+  </div>
+
+  <div class="card-meta">
+    <div class="meta-item">
+      <span>{{ 'RECITATIONS.SURAHS_COUNT' | translate }}</span>
+      <strong>{{ recitation().surahs_count }}</strong>
+    </div>
+    <div class="meta-item">
+      <span>{{ 'RECITATIONS.PUBLISHER' | translate }}</span>
+      <strong>{{ recitation().publisher?.name }}</strong>
+    </div>
+  </div>
+
+  <div class="action-btns">
+    <button nz-button class="play-btn" (click)="playClick.emit(recitation())">
+      <ng-icon name="lucideCirclePlay" /> {{ 'RECITATIONS.PLAY_AUDIO' | translate }}
+    </button>
+  </div>
+</nz-card>

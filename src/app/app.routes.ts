@@ -15,6 +15,61 @@ export const routes: Routes = [
       import('./features/gallery/pages/gallery/gallery.page').then((m) => m.GalleryPage),
   },
   {
+    path: 'admin',
+    loadComponent: () =>
+      import('./features/admin/admin-layout.component').then((m) => m.AdminLayoutComponent),
+    // canActivate: [authGuard, adminGuard],
+    data: { hideHeader: true, fullWidth: true },
+    children: [
+      // Resolve /admin before the lazy '' adminRoutes (avoids ** catch-all flashing Coming Soon on redirect)
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'publishers',
+      },
+      {
+        path: 'publishers',
+        // canActivate: [itqanAdminGuard],
+        loadChildren: () =>
+          import('./features/admin/publishers/publishers.routes').then((m) => m.publishersRoutes),
+      },
+      {
+        path: 'profile',
+        redirectTo: 'publishers',
+        pathMatch: 'full',
+      },
+      {
+        path: 'tafsirs',
+        loadChildren: () =>
+          import('./features/admin/tafsirs/tafsirs.routes').then((m) => m.tafsirRoutes),
+      },
+      {
+        path: 'translations',
+        loadChildren: () =>
+          import('./features/admin/translations/translations.routes').then(
+            (m) => m.translationRoutes
+          ),
+      },
+      {
+        path: 'recitations',
+        loadChildren: () =>
+          import('./features/admin/recitations/recitations.routes').then(
+            (m) => m.recitationRoutes
+          ),
+      },
+      {
+        path: 'reciters',
+        loadChildren: () =>
+          import('./features/admin/reciters/reciters.routes').then((m) => m.reciterRoutes),
+      },
+      {
+        path: '',
+        loadChildren: () => import('./features/admin/admin.routes').then((m) => m.adminRoutes),
+      },
+    ],
+  },
+
+  {
     path: 'gallery/asset/:id',
     loadComponent: () =>
       import('./features/gallery/pages/asset-details/asset-details.page').then(
@@ -61,27 +116,12 @@ export const routes: Routes = [
     canActivate: [publisherHostGuard], // Restrict access for publisher hosts
   },
   {
-    path: 'publishers',
-    loadComponent: () =>
-      import('./features/publishers/pages/publishers/publishers.page').then(
-        (m) => m.PublishersPage
-      ),
-    canActivate: [publisherHostGuard], // Restrict access for publisher hosts
-  },
-  {
-    path: 'publisher/:id',
-    loadComponent: () =>
-      import('./features/publishers/pages/publisher-details/publisher-details.page').then(
-        (m) => m.PublisherDetailsPage
-      ),
-    canActivate: [publisherHostGuard], // Restrict access for publisher hosts
-  },
-  {
     path: 'license/:id',
     loadComponent: () =>
       import('./features/license/pages/license-details/license-details.page').then(
         (m) => m.LicenseDetailsPage
       ),
   },
+
   { path: '**', redirectTo: 'gallery' },
 ];

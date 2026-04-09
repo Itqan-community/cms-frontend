@@ -22,7 +22,7 @@
                 >
                   {{ link.label | translate }}
                   @if (link.icon) {
-                    <i class="mobile-menu__link-icon {{ link.icon }}"></i>
+                    <ng-icon [name]="link.icon" class="mobile-menu__link-icon" />
                   }
                 </a>
               } @else {
@@ -35,7 +35,7 @@
                 >
                   {{ link.label | translate }}
                   @if (link.icon) {
-                    <i class="mobile-menu__link-icon {{ link.icon }}"></i>
+                    <ng-icon [name]="link.icon" class="mobile-menu__link-icon" />
                   }
                 </a>
               }

@@ -1,0 +1,95 @@
+<div class="recitation-detail admin-list-page" dir="rtl">
+  <div class="admin-breadcrumb">
+    <a routerLink="/admin/recitations" class="admin-breadcrumb__link">التلاوات</a>
+    <ng-icon name="lucideChevronLeft" class="admin-breadcrumb__sep" />
+    @if (loading()) {
+      <span class="admin-breadcrumb__current">جاري التحميل...</span>
+    } @else {
+      <span class="admin-breadcrumb__current">{{ recitation()?.name_ar }}</span>
+    }
+  </div>
+
+  @if (loading()) {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 8 }"></nz-skeleton>
+  } @else if (recitation()) {
+    <div class="admin-hero recitation-detail__hero">
+      <div class="admin-hero-info recitation-detail__hero-info">
+        <div class="admin-hero-names">
+          <h1 class="admin-hero-name-ar">{{ recitation()!.name_ar }}</h1>
+          <p class="admin-hero-name-en">{{ recitation()!.name_en }}</p>
+        </div>
+
+        <div class="admin-hero-meta">
+          <nz-tag [nzColor]="getLicenseColor(recitation()!.license)">{{
+            recitation()!.license
+          }}</nz-tag>
+          <nz-tag nzColor="cyan">{{ maddLabel(recitation()!.madd_level) }}</nz-tag>
+          <nz-tag nzColor="purple">{{ meemLabel(recitation()!.meem_behaviour) }}</nz-tag>
+          <nz-tag nzColor="default">{{ recitation()!.year }}</nz-tag>
+          <span class="admin-hero-meta__date">
+            <ng-icon name="lucideCalendar" />
+            {{ recitation()!.created_at | date: 'dd/MM/yyyy' }}
+          </span>
+        </div>
+
+        <div class="admin-relations">
+          <p>
+            <ng-icon name="lucideUser" />
+            <strong>القارئ:</strong> {{ recitation()!.reciter.name }}
+          </p>
+          <p>
+            <ng-icon name="lucideVolume2" />
+            <strong>القراءة:</strong> {{ recitation()!.qiraah.name }}
+          </p>
+          <p>
+            <ng-icon name="lucideBookOpen" />
+            <strong>الرواية:</strong> {{ recitation()!.riwayah?.name ?? '—' }}
+          </p>
+          <p>
+            <ng-icon name="lucideStore" />
+            <strong>الناشر:</strong> {{ recitation()!.publisher.name }}
+          </p>
+        </div>
+      </div>
+
+      <div class="admin-hero-actions">
+        <button nz-button nzType="primary" (click)="onEdit()">
+          <ng-icon name="lucideSquarePen" />
+          تعديل
+        </button>
+        <button nz-button nzDanger (click)="onDelete()">
+          <ng-icon name="lucideTrash2" />
+          حذف
+        </button>
+      </div>
+    </div>
+
+    <div class="admin-descriptions">
+      <div class="admin-desc-col">
+        <h3 class="admin-desc-title"><ng-icon name="lucideFileText" /> الوصف (عربي)</h3>
+        <p class="admin-desc-text">{{ recitation()!.description_ar }}</p>
+      </div>
+      <div class="admin-desc-col">
+        <h3 class="admin-desc-title" dir="ltr">
+          <ng-icon name="lucideFileText" /> Description (EN)
+        </h3>
+        <p class="admin-desc-text" dir="ltr">{{ recitation()!.description_en }}</p>
+      </div>
+    </div>
+
+    <div class="admin-back">
+      <a routerLink="/admin/recitations">
+        <button nz-button nzType="default">
+          <ng-icon name="lucideArrowRight" />
+          العودة للقائمة
+        </button>
+      </a>
+    </div>
+  } @else {
+    <div class="admin-not-found">
+      <ng-icon name="lucideAlertTriangle" class="admin-not-found__icon" />
+      <p>لم يتم العثور على التلاوة المطلوبة.</p>
+      <a routerLink="/admin/recitations">العودة للقائمة</a>
+    </div>
+  }
+</div>

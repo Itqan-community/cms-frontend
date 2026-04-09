@@ -1,0 +1,26 @@
+<div class="admin-section-layout">
+  <div class="admin-section-layout__header">
+    <h2 class="admin-section-layout__title">{{ title() }}</h2>
+    <p class="admin-section-layout__description">{{ description() }}</p>
+  </div>
+
+  <div class="admin-section-layout__sub-tabs">
+    @for (tab of tabs(); track tab.id) {
+      <a
+        [routerLink]="[basePath(), tab.path]"
+        routerLinkActive="admin-section-layout__sub-tab--active"
+        [routerLinkActiveOptions]="{ exact: exactActiveMatch() }"
+        class="admin-section-layout__sub-tab"
+      >
+        @if (tab.icon) {
+          <ng-icon [name]="tab.icon!" class="admin-section-layout__sub-tab-icon" />
+        }
+        <span>{{ tab.label }}</span>
+      </a>
+    }
+  </div>
+
+  <div class="admin-section-layout__outlet">
+    <router-outlet />
+  </div>
+</div>

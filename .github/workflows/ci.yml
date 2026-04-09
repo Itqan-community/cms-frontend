@@ -91,3 +91,11 @@ jobs:
 
       - name: Build ${{ matrix.environment }}
         run: npm run build -- --configuration=${{ matrix.environment }}
+
+      - name: Upload source maps to Sentry
+        if: github.event_name == 'push'
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: itqan-3o
+          SENTRY_PROJECT: cms-frontend
+        run: npx @sentry/cli sourcemaps upload --release="${{ github.sha }}-${{ matrix.environment }}" dist/browser

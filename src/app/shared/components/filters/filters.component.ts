@@ -5,11 +5,11 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCheckboxComponent, NzCheckboxGroupComponent } from 'ng-zorro-antd/checkbox';
 import { NzDrawerModule } from 'ng-zorro-antd/drawer';
-import { NzIconModule } from 'ng-zorro-antd/icon';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
 import { Categories } from '../../../core/enums/categories.enum';
 import { Licenses } from '../../../core/enums/licenses.enum';
+import { NgIcon } from '@ng-icons/core';
 import { LicenseTagComponent } from '../license-tag/license-tag.component';
 
 import { ViewportService } from '../../../core/services/viewport.service';
@@ -19,7 +19,6 @@ import { ViewportService } from '../../../core/services/viewport.service';
   imports: [
     NzInputModule,
     NzButtonModule,
-    NzIconModule,
     NzDrawerModule,
     TranslatePipe,
     NgTemplateOutlet,
@@ -27,6 +26,7 @@ import { ViewportService } from '../../../core/services/viewport.service';
     NzCheckboxComponent,
     FormsModule,
     LicenseTagComponent,
+    NgIcon,
   ],
   templateUrl: './filters.component.html',
   styleUrl: './filters.component.less',

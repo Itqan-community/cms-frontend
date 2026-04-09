@@ -6,7 +6,7 @@
         class="register__back"
         [title]="'AUTH.REGISTER.RETURN_TO_WEBSITE' | translate"
       >
-        <i class="bx bx-reply-big register__back-icon"></i>
+        <ng-icon name="lucideUndo2" class="register__back-icon" aria-hidden="true" />
         {{ 'AUTH.REGISTER.RETURN_TO_WEBSITE' | translate }}
       </a>
       <app-lang-switch></app-lang-switch>
@@ -103,7 +103,7 @@
                 registerForm.get('email')?.invalid && registerForm.get('email')?.touched
               "
             />
-            <i class="bx bx-envelope register__input-icon"></i>
+            <ng-icon name="lucideMail" class="register__input-icon" aria-hidden="true" />
           </div>
           @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
             <p class="register__error">{{ 'AUTH.REGISTER.ERRORS.EMAIL_REQUIRED' | translate }}</p>
@@ -139,12 +139,70 @@
                   | translate
               "
             >
-              <i class="bx" [ngClass]="passwordVisible() ? 'bx-eye-closed' : 'bx-eye'"></i>
+              <ng-icon [name]="passwordVisible() ? 'lucideEyeOff' : 'lucideEye'" aria-hidden="true" />
             </button>
           </div>
           @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
             <p class="register__error">
               {{ 'AUTH.REGISTER.ERRORS.PASSWORD_REQUIRED' | translate }}
+            </p>
+          }
+        </div>
+        <div class="register__field">
+          <label for="confirmPassword" class="register__label">{{
+            'AUTH.REGISTER.CONFIRM_PASSWORD_LABEL' | translate
+          }}</label>
+          <div class="register__input-wrapper">
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              [type]="confirmPasswordVisible() ? 'text' : 'password'"
+              autocomplete="new-password"
+              formControlName="confirmPassword"
+              [placeholder]="'FORMS.PLACEHOLDERS.CONFIRM_PASSWORD' | translate"
+              class="register__input"
+              [class.register__input--invalid]="
+                (registerForm.get('confirmPassword')?.invalid &&
+                  registerForm.get('confirmPassword')?.touched) ||
+                (registerForm.errors?.['passwordMismatch'] &&
+                  registerForm.get('confirmPassword')?.touched)
+              "
+              [attr.aria-invalid]="
+                (registerForm.get('confirmPassword')?.invalid &&
+                  registerForm.get('confirmPassword')?.touched) ||
+                (registerForm.errors?.['passwordMismatch'] &&
+                  registerForm.get('confirmPassword')?.touched)
+              "
+            />
+            <button
+              type="button"
+              class="register__password-toggle"
+              (click)="toggleConfirmPasswordVisibility()"
+              [attr.aria-label]="
+                (confirmPasswordVisible()
+                  ? 'AUTH.REGISTER.HIDE_PASSWORD'
+                  : 'AUTH.REGISTER.SHOW_PASSWORD'
+                ) | translate
+              "
+            >
+              <ng-icon [name]="confirmPasswordVisible() ? 'lucideEyeOff' : 'lucideEye'" aria-hidden="true" />
+            </button>
+          </div>
+          @if (
+            registerForm.get('confirmPassword')?.hasError('required') &&
+            registerForm.get('confirmPassword')?.touched
+          ) {
+            <p class="register__error">
+              {{ 'AUTH.REGISTER.ERRORS.PASSWORD_REQUIRED' | translate }}
+            </p>
+          }
+          @if (
+            registerForm.hasError('passwordMismatch') &&
+            registerForm.get('confirmPassword')?.touched &&
+            !registerForm.get('confirmPassword')?.hasError('required')
+          ) {
+            <p class="register__error">
+              {{ 'AUTH.REGISTER.ERRORS.PASSWORD_MISMATCH' | translate }}
             </p>
           }
         </div>

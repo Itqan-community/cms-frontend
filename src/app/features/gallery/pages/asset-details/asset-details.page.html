@@ -1,8 +1,30 @@
 <div class="asset-details-container">
   <app-breadcrumb />
 
-  <!-- <nz-spin [nzSpinning]="loading()" nzSize="large"> -->
-  @if (asset()) {
+  @if (loading()) {
+    <app-asset-detail-skeleton />
+  } @else if (notFound()) {
+    <app-state-message
+      icon="lucideSearch"
+      iconVariant="default"
+      [title]="'UI.ASSET_NOT_FOUND' | translate"
+      [message]="'ERRORS.NOT_FOUND' | translate"
+      [secondaryActionLabel]="'UI.BACK_TO_GALLERY' | translate"
+      secondaryRouterLink="/gallery"
+    />
+  } @else if (errorState()) {
+    <app-state-message
+      icon="lucideAlertCircle"
+      iconVariant="error"
+      [title]="'UI.SOMETHING_WENT_WRONG' | translate"
+      [message]="'ERRORS.SERVER_ERROR' | translate"
+      [actionLabel]="'UI.TRY_AGAIN' | translate"
+      actionIcon="lucideRotateCw"
+      actionType="primary"
+      [actionLoading]="loading()"
+      (actionClick)="retryLoad()"
+    />
+  } @else if (asset()) {
     <div class="asset-details-content">
       <!-- Main Content -->
       <div class="main-content">
@@ -11,7 +33,7 @@
           <div class="title-row">
             <h1 class="asset-title">{{ asset()!.name }}</h1>
             <nz-tag class="category-badge">
-              <i class="bx bx-{{ getCategoryIcon(asset()!.category) }}"></i>
+              <ng-icon [name]="getCategoryIcon(asset()!.category)" />
               <span>{{ 'CATEGORIES.' + asset()!.category | translate }}</span>
             </nz-tag>
           </div>
@@ -21,7 +43,7 @@
         <!-- Content Preview Card -->
         <div class="preview-card">
           <div class="preview-card-header">
-            <i class="bx bx-eye-alt"></i>
+            <ng-icon name="lucideEye" />
             <span>{{ 'UI.CONTENT_PREVIEW' | translate }}</span>
           </div>
           <div class="carousel-wrapper">
@@ -35,7 +57,7 @@
         <!-- Actions Card -->
         <div class="card actions-card">
           <div class="card-header">
-            <i class="bx bx-cursor"></i>
+            <ng-icon name="lucideMousePointer2" />
             <h3 class="card-title">{{ 'UI.RESOURCE_ACTIONS' | translate }}</h3>
           </div>
 
@@ -43,34 +65,27 @@
             <div class="actions-list">
               <a routerLink="/content-standards">
                 <button nz-button nzBlock class="action-button">
-                  <i class="bx bx-file-detail"></i>
+                  <ng-icon name="lucideFileText" />
                   {{ 'UI.USAGE_STANDARDS' | translate }}
                 </button>
               </a>
               <a [routerLink]="['/license', asset()!.license]">
                 <button nz-button nzBlock class="action-button">
-                  <i class="bx bx-file-detail"></i>
+                  <ng-icon name="lucideFileText" />
                   {{ 'GALLERY.VIEW_LICENSE' | translate }}
                 </button>
               </a>
-              <!-- <button
-                nz-button
-                nzBlock
-                class="download-button-secondary"
-                (click)="downloadOriginalResource()"
-              >
-                {{ 'UI.DOWNLOAD_ORIGINAL_RESOURCE' | translate }}
-                <i class="bx bx-cloud-download"></i>
-              </button> -->
               <button
                 nz-button
                 nzType="primary"
                 nzBlock
                 class="download-button-primary"
                 (click)="downloadResource()"
+                [nzLoading]="isDownloading()"
+                [disabled]="isDownloading()"
               >
-                {{ 'UI.DOWNLOAD_RESOURCE' | translate }}
-                <i class="bx bx-cloud-download"></i>
+                {{ (isDownloading() ? 'UI.DOWNLOADING' : 'UI.DOWNLOAD_RESOURCE') | translate }}
+                <ng-icon name="lucideDownloadCloud" />
               </button>
             </div>
           </div>
@@ -79,7 +94,7 @@
         <!-- Publisher Card -->
         <div class="card publisher-card">
           <div class="card-header">
-            <i class="bx bx-book-open"></i>
+            <ng-icon name="lucideBookOpen" />
             <h3 class="card-title">{{ 'UI.PUBLISHER_LABEL' | translate }}</h3>
           </div>
 
@@ -94,7 +109,7 @@
         <!-- License Card -->
         <div class="card license-card">
           <div class="card-header">
-            <i class="bx bx-file-detail"></i>
+            <ng-icon name="lucideFileText" />
             <h3 class="card-title">{{ 'UI.LICENSE_INFO' | translate }}</h3>
           </div>
 
@@ -106,7 +121,6 @@
       </div>
     </div>
   }
-  <!-- </nz-spin> -->
 
   <!-- Access Request Modal -->
   <nz-modal
@@ -114,6 +128,8 @@
     [nzTitle]="'ACCESS_REQUEST.TITLE' | translate"
     [nzOkText]="'ACCESS_REQUEST.PROCEED' | translate"
     [nzCancelText]="'COMMON.CANCEL' | translate"
+    [nzOkLoading]="isSubmittingRequest()"
+    [nzOkDisabled]="isSubmittingRequest()"
     (nzOnCancel)="handleModalCancel()"
     (nzOnOk)="handleModalOk()"
   >

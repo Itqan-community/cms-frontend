@@ -1,38 +1,41 @@
-import { HttpClient } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NgIcon } from '@ng-icons/core';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { Licenses } from '../../../../core/enums/licenses.enum';
+import { AssetDetailSkeletonComponent } from '../../../../shared/components/asset-detail-skeleton/asset-detail-skeleton.component';
 import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/breadcrumb.component';
 import { ImageCarouselComponent } from '../../../../shared/components/image-carousel/image-carousel.component';
 import { LicenseTagComponent } from '../../../../shared/components/license-tag/license-tag.component';
+import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
 import { AssetDetails } from '../../models/assets.model';
 import { AssetsService } from '../../services/assets.service';
 
 @Component({
   selector: 'app-asset-details-page',
-  standalone: true,
   imports: [
     RouterModule,
     ImageCarouselComponent,
     BreadcrumbComponent,
     LicenseTagComponent,
+    StateMessageComponent,
+    AssetDetailSkeletonComponent,
     TranslateModule,
     NzButtonModule,
     NzTagModule,
-    NzIconModule,
-    NzSpinModule,
+    NgIcon,
     NzModalModule,
     NzFormModule,
     NzInputModule,
@@ -49,14 +52,21 @@ export class AssetDetailsPage implements OnInit {
   private readonly router = inject(Router);
   private readonly http = inject(HttpClient);
   private readonly fb = inject(FormBuilder);
+  private readonly message = inject(NzMessageService);
+  private readonly translate = inject(TranslateService);
+  private readonly destroyRef = inject(DestroyRef);
 
   readonly id = this.route.snapshot.params['id'];
   asset = signal<AssetDetails | null>(null);
   images = signal<string[]>([]);
   loading = signal<boolean>(true);
+  errorState = signal<boolean>(false);
+  notFound = signal<boolean>(false);
   isModalVisible = signal<boolean>(false);
   isLicenseModalVisible = signal<boolean>(false);
   canConfirmLicense = signal<boolean>(false);
+  isSubmittingRequest = signal<boolean>(false);
+  isDownloading = signal<boolean>(false);
 
   accessRequestForm: FormGroup;
 
@@ -75,29 +85,42 @@ export class AssetDetailsPage implements OnInit {
 
   getAssetDetails(id: string) {
     this.loading.set(true);
-    this.assetsService.getAssetDetails(id).subscribe({
-      next: (asset) => {
-        this.asset.set(asset);
-        this.images.set(asset.snapshots.map((snapshot) => snapshot.image_url));
-        this.loading.set(false);
-      },
-      error: () => {
-        this.loading.set(false);
-      },
-    });
+    this.errorState.set(false);
+    this.notFound.set(false);
+    this.assetsService
+      .getAssetDetails(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (asset) => {
+          this.asset.set(asset);
+          this.images.set(asset.snapshots.map((snapshot) => snapshot.image_url));
+          this.loading.set(false);
+        },
+        error: (err) => {
+          this.loading.set(false);
+          if (err instanceof HttpErrorResponse && err.status === 404) {
+            this.notFound.set(true);
+          } else {
+            this.errorState.set(true);
+          }
+        },
+      });
+  }
+
+  retryLoad() {
+    this.getAssetDetails(this.id);
   }
 
   getCategoryIcon(category: string): string {
-    // TODO: move this function to a shared utility
     switch (category) {
       case 'mushaf':
-        return 'book-bookmark';
+        return 'lucideBookmark';
       case 'tafsir':
-        return 'file-detail';
+        return 'lucideFileText';
       case 'recitation':
-        return 'microphone';
+        return 'lucideMic';
       default:
-        return 'file';
+        return 'lucideFile';
     }
   }
 
@@ -141,15 +164,24 @@ export class AssetDetailsPage implements OnInit {
         purpose: this.accessRequestForm.value.purpose,
       };
 
+      this.isSubmittingRequest.set(true);
+
       this.http
         .post(`${environment.API_BASE_URL}/assets/${asset.id}/request-access/`, formData)
+        .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
+            this.isSubmittingRequest.set(false);
             this.closeAccessRequestModal();
             this.openLicenseModal();
           },
           error: (error) => {
-            console.error('Access request failed:', error);
+            this.isSubmittingRequest.set(false);
+            const errorKey =
+              error.status === 0
+                ? 'ERRORS.NETWORK_ERROR'
+                : 'ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED';
+            this.message.error(this.translate.instant(errorKey));
           },
         });
     } else {
@@ -211,11 +243,14 @@ export class AssetDetailsPage implements OnInit {
   }
 
   private downloadAsset(assetId: number): void {
+    this.isDownloading.set(true);
     // Step 1: Get the download_url from backend
     this.http
       .get<{ download_url: string }>(`${environment.API_BASE_URL}/assets/${assetId}/download/`)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
+          this.isDownloading.set(false);
           const downloadUrl = response.download_url;
           // Extract filename from URL path
           const filename = this.extractFilenameFromPath(downloadUrl);
@@ -223,19 +258,26 @@ export class AssetDetailsPage implements OnInit {
           this.downloadFileFromUrl(downloadUrl, filename);
         },
         error: (error) => {
-          console.error('Failed to get download URL:', error);
+          this.isDownloading.set(false);
+          const defaultErrorKey =
+            error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR';
+          const errorMessage = error.error?.message || this.translate.instant(defaultErrorKey);
+          this.message.error(errorMessage);
         },
       });
   }
 
   private performResourceDownload(resourceId: number): void {
+    this.isDownloading.set(true);
     // Step 1: Get the download_url from backend
     this.http
       .get<{
         download_url: string;
       }>(`${environment.API_BASE_URL}/resources/${resourceId}/download/`)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
+          this.isDownloading.set(false);
           const downloadUrl = response.download_url;
           // Extract filename from URL path
           const filename = this.extractFilenameFromPath(downloadUrl);
@@ -243,7 +285,11 @@ export class AssetDetailsPage implements OnInit {
           this.downloadFileFromUrl(downloadUrl, filename);
         },
         error: (error) => {
-          console.error('Failed to get download URL:', error);
+          this.isDownloading.set(false);
+          const defaultErrorKey =
+            error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR';
+          const errorMessage = error.error?.message || this.translate.instant(defaultErrorKey);
+          this.message.error(errorMessage);
         },
       });
   }

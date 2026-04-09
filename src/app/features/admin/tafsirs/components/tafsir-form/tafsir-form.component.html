@@ -1,0 +1,257 @@
+<div class="tafsir-form" dir="rtl">
+  <!-- Header -->
+  <div class="tafsir-form__header">
+    <div class="tafsir-form__header-text">
+      <h2 class="tafsir-form__title">
+        {{ isEditMode() ? 'تعديل التفسير' : 'إضافة تفسير جديد' }}
+      </h2>
+      <p class="tafsir-form__subtitle">
+        {{ isEditMode() ? 'قم بتحديث بيانات التفسير' : 'أدخل بيانات التفسير الجديد' }}
+      </p>
+    </div>
+    <a routerLink="/admin/tafsirs">
+      <button nz-button nzType="default" class="tafsir-form__back-btn">
+        <ng-icon name="lucideArrowRight" />
+        العودة للقائمة
+      </button>
+    </a>
+  </div>
+
+  @if (loadingDetail()) {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 10 }"></nz-skeleton>
+  } @else {
+    <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="onSubmit()">
+      <!-- Bilingual names -->
+      <div class="tafsir-form__card">
+        <h3 class="tafsir-form__card-title"><ng-icon name="lucideSquarePen" /> الاسم</h3>
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>الاسم بالعربية</nz-form-label>
+              <nz-form-control nzErrorTip="الاسم بالعربية مطلوب">
+                <input nz-input formControlName="name_ar" placeholder="مثال: تفسير ابن كثير" />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Name in English</nz-form-label>
+              <nz-form-control nzErrorTip="Name in English is required">
+                <input
+                  nz-input
+                  formControlName="name_en"
+                  placeholder="e.g. Tafsir Ibn Kathir"
+                  dir="ltr"
+                />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bilingual short descriptions -->
+      <div class="tafsir-form__card">
+        <h3 class="tafsir-form__card-title"><ng-icon name="lucideFileText" /> الوصف المختصر</h3>
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>الوصف بالعربية</nz-form-label>
+              <nz-form-control nzErrorTip="الوصف بالعربية مطلوب">
+                <textarea
+                  nz-input
+                  formControlName="description_ar"
+                  placeholder="وصف مختصر للتفسير..."
+                  [nzAutosize]="{ minRows: 3, maxRows: 5 }"
+                ></textarea>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Description in English</nz-form-label>
+              <nz-form-control nzErrorTip="Description in English is required">
+                <textarea
+                  nz-input
+                  formControlName="description_en"
+                  placeholder="Brief description of the tafsir..."
+                  dir="ltr"
+                  [nzAutosize]="{ minRows: 3, maxRows: 5 }"
+                ></textarea>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bilingual long descriptions -->
+      <div class="tafsir-form__card">
+        <h3 class="tafsir-form__card-title"><ng-icon name="lucideAlignRight" /> الوصف المطوّل</h3>
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>الوصف المطوّل بالعربية</nz-form-label>
+              <nz-form-control nzErrorTip="الوصف المطوّل بالعربية مطلوب">
+                <textarea
+                  nz-input
+                  formControlName="long_description_ar"
+                  placeholder="وصف تفصيلي..."
+                  [nzAutosize]="{ minRows: 5, maxRows: 10 }"
+                ></textarea>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>Long Description in English</nz-form-label>
+              <nz-form-control nzErrorTip="Long description in English is required">
+                <textarea
+                  nz-input
+                  formControlName="long_description_en"
+                  placeholder="Detailed description..."
+                  dir="ltr"
+                  [nzAutosize]="{ minRows: 5, maxRows: 10 }"
+                ></textarea>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </div>
+
+      <!-- Metadata: license, language, publisher + thumbnail -->
+      <div class="tafsir-form__card">
+        <h3 class="tafsir-form__card-title">
+          <ng-icon name="lucideSettings" /> البيانات التعريفية
+        </h3>
+        <div nz-row [nzGutter]="20">
+          <!-- License -->
+          <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+            <nz-form-item>
+              <nz-form-label nzRequired>الترخيص</nz-form-label>
+              <nz-form-control nzErrorTip="الترخيص مطلوب">
+                <nz-select formControlName="license" nzPlaceHolder="اختر الترخيص" nzAllowClear>
+                  @for (l of licenseOptions; track l) {
+                    <nz-option [nzValue]="l" [nzLabel]="l"></nz-option>
+                  }
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <!-- Language -->
+          <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+            <nz-form-item>
+              <nz-form-label nzRequired>لغة التفسير</nz-form-label>
+              <nz-form-control nzErrorTip="اللغة مطلوبة">
+                <nz-select formControlName="language" nzPlaceHolder="اختر اللغة" nzAllowClear>
+                  <nz-option nzValue="ar" [nzLabel]="languageLabel('ar')"></nz-option>
+                  <nz-option nzValue="en" [nzLabel]="languageLabel('en')"></nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <!-- Publisher -->
+          <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+            <nz-form-item>
+              <nz-form-label nzRequired>الناشر</nz-form-label>
+              <nz-form-control nzErrorTip="الناشر مطلوب">
+                <nz-select
+                  formControlName="publisher_id"
+                  nzPlaceHolder="ابحث عن ناشر..."
+                  nzAllowClear
+                  nzShowSearch
+                  nzServerSearch
+                  [nzLoading]="publishersLoading()"
+                  (nzOnSearch)="onPublisherSearch($event)"
+                >
+                  @for (pub of publisherOptions(); track pub.id) {
+                    <nz-option [nzValue]="pub.id" [nzLabel]="pub.name"></nz-option>
+                  }
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <!-- Is External + External URL -->
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+            <nz-form-item>
+              <nz-form-label>تفسير خارجي؟</nz-form-label>
+              <nz-form-control>
+                <nz-switch formControlName="is_external"></nz-switch>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="16" [nzXs]="24" [nzSm]="16">
+            <nz-form-item>
+              <nz-form-label>رابط خارجي</nz-form-label>
+              <nz-form-control>
+                <input
+                  nz-input
+                  formControlName="external_url"
+                  placeholder="https://example.com/tafsir"
+                  dir="ltr"
+                />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <!-- Thumbnail upload -->
+        <nz-form-item>
+          <nz-form-label>الصورة المصغّرة (Thumbnail)</nz-form-label>
+          <nz-form-control>
+            <div class="tafsir-form__thumbnail-area">
+              @if (thumbnailPreview()) {
+                <div class="tafsir-form__thumbnail-preview">
+                  <img [src]="thumbnailPreview()!" alt="thumbnail preview" />
+                  <button
+                    type="button"
+                    class="tafsir-form__thumbnail-remove"
+                    (click)="removeThumbnail()"
+                    nz-tooltip
+                    nzTooltipTitle="إزالة الصورة"
+                  >
+                    <ng-icon name="lucideCircleX" />
+                  </button>
+                </div>
+              } @else {
+                <nz-upload
+                  nzType="drag"
+                  [nzFileList]="fileList()"
+                  [nzBeforeUpload]="beforeUpload"
+                  nzAccept="image/*"
+                  [nzMultiple]="false"
+                  [nzShowUploadList]="false"
+                >
+                  <p class="ant-upload-drag-icon">
+                    <ng-icon name="lucideInbox" />
+                  </p>
+                  <p class="ant-upload-text">انقر أو اسحب الصورة هنا</p>
+                  <p class="ant-upload-hint">PNG, JPG, WEBP — بحد أقصى 5MB</p>
+                </nz-upload>
+              }
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <!-- Form actions -->
+      <div class="tafsir-form__footer">
+        <a routerLink="/admin/tafsirs">
+          <button type="button" nz-button nzType="default">إلغاء</button>
+        </a>
+        <button
+          nz-button
+          nzType="primary"
+          [nzLoading]="submitting()"
+          [disabled]="form.invalid"
+          type="submit"
+        >
+          {{ isEditMode() ? 'حفظ التعديلات' : 'إضافة التفسير' }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

@@ -32,7 +32,7 @@
             "styles": [
               "src/theme.less",
               "src/styles.less",
-              "public/assets/icons/boxicons.min.css"
+              "src/app/features/admin/styles/admin-global.less"
             ]
           },
           "configurations": {
@@ -50,6 +50,10 @@
                 }
               ],
               "outputHashing": "all",
+              "sourceMap": {
+                "scripts": true,
+                "hidden": true
+              },
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -71,6 +75,10 @@
                 }
               ],
               "outputHashing": "all",
+              "sourceMap": {
+                "scripts": true,
+                "hidden": true
+              },
               "fileReplacements": [
                 {
                   "replace": "src/environments/environment.ts",
@@ -123,10 +131,7 @@
                 "output": "."
               }
             ],
-            "styles": [
-              "src/styles.less",
-              "public/assets/icons/boxicons.min.css"
-            ]
+            "styles": ["src/styles.less"]
           }
         },
         "lint": {

@@ -1,6 +1,7 @@
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
+import { NgIcon } from '@ng-icons/core';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { Categories } from '../../../../core/enums/categories.enum';
 import { LicenseTagComponent } from '../../../../shared/components/license-tag/license-tag.component';
@@ -8,12 +9,12 @@ import { Asset } from '../../models/assets.model';
 
 @Component({
   selector: 'app-asset-card',
-  imports: [LicenseTagComponent, TranslatePipe, RouterLink, NzButtonComponent],
+  imports: [LicenseTagComponent, TranslatePipe, RouterLink, NzButtonComponent, NgIcon],
   styleUrl: './asset-card.component.less',
   template: `
     <div class="asset-card">
       <div class="asset-card__header">
-        <i [class]="icon"></i>
+        <ng-icon [name]="categoryIconName" />
         <app-license-tag [license]="asset().license" [muted]="true" />
       </div>
       <div class="asset-card__content">
@@ -34,7 +35,7 @@ import { Asset } from '../../models/assets.model';
           </div>
           <div class="button-container">
             <a nz-button nzSize="large" routerLink="/gallery/asset/{{ asset().id }}" class="w-full">
-              <i class="bx bx-eye"></i>
+              <ng-icon name="lucideEye" />
               {{ 'GALLERY.VIEW_DETAILS' | translate }}
             </a>
           </div>
@@ -46,16 +47,16 @@ import { Asset } from '../../models/assets.model';
 export class AssetCardComponent {
   asset = input.required<Asset>();
 
-  get icon() {
+  get categoryIconName(): string {
     switch (this.asset().category) {
       case Categories.MUSHAF:
-        return 'bx bx-book-bookmark';
+        return 'lucideBookmark';
       case Categories.TAFSIR:
-        return 'bx bx-file-detail';
+        return 'lucideFileText';
       case Categories.RECITATION:
-        return 'bx bx-microphone';
+        return 'lucideMic';
       default:
-        return 'bx bx-file';
+        return 'lucideFile';
     }
   }
 }

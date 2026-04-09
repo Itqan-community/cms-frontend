@@ -1,10 +1,9 @@
-import { CommonModule } from '@angular/common';
 import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NgIcon } from '@ng-icons/core';
 import { filter } from 'rxjs/operators';
 
 interface Breadcrumb {
@@ -16,7 +15,7 @@ interface Breadcrumb {
 @Component({
   selector: 'app-breadcrumb',
   standalone: true,
-  imports: [CommonModule, RouterModule, TranslateModule, NzBreadCrumbModule, NzIconModule],
+  imports: [RouterModule, TranslateModule, NzBreadCrumbModule, NgIcon],
   templateUrl: './breadcrumb.component.html',
   styleUrl: './breadcrumb.component.less',
 })

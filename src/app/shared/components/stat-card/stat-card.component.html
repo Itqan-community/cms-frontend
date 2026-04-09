@@ -1,0 +1,11 @@
+<nz-card class="stat-card">
+  <div class="stat-content">
+    <div class="stat-icon" [ngClass]="colorTheme()">
+      <ng-icon [name]="icon()" />
+    </div>
+    <div class="stat-info">
+      <span class="stat-value">{{ value() }}</span>
+      <span class="stat-label">{{ label() | translate }}</span>
+    </div>
+  </div>
+</nz-card>

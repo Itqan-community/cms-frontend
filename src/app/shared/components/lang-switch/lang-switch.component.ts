@@ -1,5 +1,6 @@
 import { Component, inject, input } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
+import { NgIcon } from '@ng-icons/core';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 
 @Component({
@@ -15,14 +16,14 @@ import { NzButtonComponent } from 'ng-zorro-antd/button';
       [class.--icon-only]="!showLabel()"
       [class.w-full]="fullWidth()"
     >
-      <i class="lang-switch__icon bx bx-translate"></i>
+      <ng-icon name="lucideLanguages" class="lang-switch__icon" aria-hidden="true" />
       <span class="sr-only">{{ langTooltip }}</span>
       @if (showLabel()) {
         <span>{{ label }}</span>
       }
     </button>
   `,
-  imports: [NzButtonComponent],
+  imports: [NzButtonComponent, NgIcon],
 })
 export class LangSwitchComponent {
   private translate = inject(TranslateService);

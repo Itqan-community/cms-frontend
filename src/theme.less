@@ -55,13 +55,50 @@
   // Radius and shadows to mimic Tailwind-like tokens
   --radius-md: 6px;
   --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-2xl: 16px;
   --shadow-sm: 0 10px 15px -3px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 1px 8px rgba(0, 0, 0, 0.06);
 
   // Layout constraint used in header
   --container-max-width: 1200px;
 
   // Custom colors
   --color-bg: #f8f8f8;
+
+  // Admin text grays (Tailwind gray scale)
+  --admin-text-900: #1f2937;
+  --admin-text-800: #1a1a1a;
+  --admin-text-700: #374151;
+  --admin-text-600: #4b5563;
+  --admin-text-500: #6b7280;
+  --admin-text-400: #9ca3af;
+  --admin-text-300: #aaa;
+  --admin-text-200: #bbb;
+  --admin-text-muted: #888;
+
+  // Admin border grays
+  --admin-border-100: #f3f4f6;
+  --admin-border-200: #e5e7eb;
+  --admin-border-300: #d1d5db;
+
+  // Admin surface colors
+  --admin-surface-50: #f9fafb;
+  --admin-surface-100: #f3f4f6;
+  --admin-surface-white: #fff;
+
+  // Admin accent (green for active/hover states)
+  --admin-accent-50: #f0fdf4;
+  --admin-accent-600: #16a34a;
+  --admin-accent-700: #15803d;
+
+  // Action semantic colors
+  --color-action-view: #1890ff;
+  --color-action-view-bg: #e6f7ff;
+  --color-action-edit: #faad14;
+  --color-action-edit-bg: #fffbe6;
+  --color-action-delete: #ff4d4f;
+  --color-action-delete-bg: #fff1f0;
 }
 
 // Global styles
@@ -155,6 +192,29 @@ a.ant-btn {
     box-shadow: 0 0 0 2px var(--color-primary-200);
     border-color: var(--color-neutral-200);
   }
+}
+
+// Date picker / year picker inputs aligned with text inputs
+.ant-picker {
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 10px;
+  box-shadow: none;
+  background-color: transparent;
+  height: 32px;
+
+  &:hover {
+    border-color: var(--color-neutral-200);
+  }
+
+  &.ant-picker-focused {
+    box-shadow: none;
+    border-color: var(--color-neutral-200);
+  }
+}
+
+.ant-picker-input > input {
+  font-size: 14px;
+  line-height: 30px;
 }
 
 .ant-checkbox-group {
@@ -317,6 +377,67 @@ a.ant-btn {
 // Select dropdown same radius as input (10px)
 .ant-select-selector {
   border-radius: 10px !important;
+}
+
+// Pagination aligned with admin input/button tokens
+.admin-pagination {
+  .ant-pagination {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+  }
+
+  .ant-pagination-item,
+  .ant-pagination-prev .ant-pagination-item-link,
+  .ant-pagination-next .ant-pagination-item-link {
+    border-radius: 10px;
+    border: 1px solid var(--color-neutral-200);
+    background: var(--admin-surface-white);
+    min-width: 36px;
+    height: 36px;
+    line-height: 34px;
+  }
+
+  .ant-pagination-item a {
+    color: var(--admin-text-700);
+    font-weight: 500;
+  }
+
+  .ant-pagination-item:hover,
+  .ant-pagination-prev:hover .ant-pagination-item-link,
+  .ant-pagination-next:hover .ant-pagination-item-link {
+    border-color: var(--color-neutral-200);
+    background: var(--color-neutral-100);
+  }
+
+  .ant-pagination-item-active {
+    border-color: var(--color-primary-700);
+    background: var(--color-primary-700);
+  }
+
+  .ant-pagination-item-active a {
+    color: #fff;
+  }
+
+  .ant-pagination-jump-prev .ant-pagination-item-container .ant-pagination-item-link-icon,
+  .ant-pagination-jump-next .ant-pagination-item-container .ant-pagination-item-link-icon {
+    color: var(--admin-text-500);
+  }
+
+  .ant-pagination-options-quick-jumper input {
+    border: 1px solid var(--color-neutral-200);
+    border-radius: 10px;
+    height: 36px;
+    box-shadow: none;
+  }
+
+  .ant-select-selector {
+    height: 36px !important;
+    border-radius: 10px !important;
+    border-color: var(--color-neutral-200) !important;
+  }
 }
 
 // Popover customizations

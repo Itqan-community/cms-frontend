@@ -1,0 +1,127 @@
+<div class="publishers-list admin-list-page" dir="rtl">
+  <div class="admin-list-header">
+    <div class="admin-list-header__text">
+      <h2 class="admin-list-header__title">الناشرون</h2>
+      <p class="admin-list-header__subtitle">إدارة الجهات والمؤسسات الناشرة للمحتوى القرآني</p>
+    </div>
+    <a routerLink="/admin/publishers/create">
+      <button nz-button nzType="primary" class="admin-add-btn">
+        <ng-icon name="lucidePlus" aria-hidden="true" />
+        إضافة ناشر
+      </button>
+    </a>
+  </div>
+
+  <app-publisher-filters (filtersChange)="onFiltersChange($event)"></app-publisher-filters>
+
+  <div class="admin-table-wrap">
+    <nz-spin [nzSpinning]="loading()">
+      <nz-table
+        #pubTable
+        [nzData]="publishers()"
+        [nzFrontPagination]="false"
+        [nzShowPagination]="false"
+        nzSize="middle"
+        [nzNoResult]="emptyTpl"
+      >
+        <thead>
+          <tr>
+            <th
+              nzWidth="220px"
+              [nzSortFn]="true"
+              (nzSortOrderChange)="onSortChange('name', $event)"
+            >
+              الاسم
+            </th>
+            <th nzWidth="120px">الدولة</th>
+            <th nzWidth="100px">موثق</th>
+            <th
+              nzWidth="130px"
+              [nzSortFn]="true"
+              (nzSortOrderChange)="onSortChange('created_at', $event)"
+            >
+              تاريخ الإضافة
+            </th>
+            <th nzWidth="120px">الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of pubTable.data; track p.id) {
+            <tr class="admin-list-row">
+              <td class="admin-list-name">{{ p.name || p.name_ar || p.name_en || '—' }}</td>
+              <td>{{ countryLabel(p.country) }}</td>
+              <td>
+                @if (p.is_verified) {
+                  <nz-tag nzColor="success">موثق</nz-tag>
+                } @else {
+                  <nz-tag>غير موثق</nz-tag>
+                }
+              </td>
+              <td>{{ p.created_at | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                <div class="admin-list-actions">
+                  <button
+                    type="button"
+                    nz-button
+                    nzType="text"
+                    class="action-icon action-icon--view"
+                    nz-tooltip
+                    nzTooltipTitle="عرض"
+                    (click)="onView(p.id)"
+                  >
+                    <ng-icon name="lucideEye" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    nz-button
+                    nzType="text"
+                    class="action-icon action-icon--edit"
+                    nz-tooltip
+                    nzTooltipTitle="تعديل"
+                    (click)="onEdit(p.id)"
+                  >
+                    <ng-icon name="lucideSquarePen" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    nz-button
+                    nzType="text"
+                    class="action-icon action-icon--delete"
+                    nz-tooltip
+                    nzTooltipTitle="حذف"
+                    (click)="onDelete(p)"
+                  >
+                    <ng-icon name="lucideTrash2" aria-hidden="true" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-spin>
+  </div>
+
+  <ng-template #emptyTpl>
+    <div class="admin-empty-state">
+      <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
+      <p class="admin-empty-state__title">لا يوجد ناشرون</p>
+      <p class="admin-empty-state__subtitle">لم يتم العثور على نتائج. حاول تعديل معايير البحث.</p>
+    </div>
+  </ng-template>
+
+  @if (!loading() && total() > 0) {
+    <div class="admin-pagination">
+      <nz-pagination
+        [nzPageIndex]="page()"
+        [nzTotal]="total()"
+        [nzPageSize]="pageSize()"
+        [nzShowSizeChanger]="true"
+        [nzPageSizeOptions]="[10, 25, 50]"
+        nzShowQuickJumper
+        (nzPageIndexChange)="onPageChange($event)"
+        (nzPageSizeChange)="onPageSizeChange($event)"
+      ></nz-pagination>
+    </div>
+  }
+</div>

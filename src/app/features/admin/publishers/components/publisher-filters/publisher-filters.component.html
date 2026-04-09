@@ -1,0 +1,74 @@
+<div class="publisher-filters" dir="rtl">
+  <div class="publisher-filters__actions">
+    <nz-input-group [nzPrefix]="searchIcon" class="publisher-filters__search">
+      <input
+        nz-input
+        nzSize="default"
+        type="text"
+        placeholder="ابحث عن ناشر..."
+        [ngModel]="searchValue"
+        (ngModelChange)="onSearchChange($event)"
+      />
+    </nz-input-group>
+    <ng-template #searchIcon><ng-icon name="lucideSearch" /></ng-template>
+
+    <button
+      nz-button
+      nzType="default"
+      nzSize="default"
+      class="publisher-filters__filters-btn"
+      (click)="openFiltersModal()"
+    >
+      <ng-icon name="lucideFilter" />
+      <span>الفلاتر</span>
+    </button>
+  </div>
+
+  <nz-modal
+    [(nzVisible)]="isFiltersModalOpen"
+    (nzOnCancel)="closeFiltersModal()"
+    nzTitle="الفلاتر"
+    [nzWidth]="'min(560px, 92vw)'"
+    nzCentered
+  >
+    <ng-container *nzModalContent>
+      <div class="publisher-filters__modal-grid">
+        <nz-select
+          class="publisher-filters__country"
+          nzPlaceHolder="الدولة"
+          nzSize="default"
+          nzAllowClear
+          nzShowSearch
+          [ngModel]="selectedCountry"
+          (ngModelChange)="onCountryChange($event)"
+        >
+          @for (country of countryOptions; track country) {
+            <nz-option [nzValue]="country" [nzLabel]="countryLabel(country)"></nz-option>
+          }
+        </nz-select>
+
+        <nz-select
+          class="publisher-filters__select"
+          nzPlaceHolder="حالة التوثيق"
+          nzSize="default"
+          nzAllowClear
+          [ngModel]="selectedVerified"
+          (ngModelChange)="onVerifiedChange($event)"
+        >
+          <nz-option nzLabel="موثق" [nzValue]="true"></nz-option>
+          <nz-option nzLabel="غير موثق" [nzValue]="false"></nz-option>
+        </nz-select>
+      </div>
+    </ng-container>
+    <ng-container *nzModalFooter>
+      <div class="publisher-filters__modal-footer">
+        <button nz-button nzType="default" nzSize="default" (click)="clearAdvancedFilters()">
+          مسح الفلاتر
+        </button>
+        <button nz-button nzType="primary" nzSize="default" (click)="closeFiltersModal()">
+          تم
+        </button>
+      </div>
+    </ng-container>
+  </nz-modal>
+</div>
