@@ -2,8 +2,10 @@ import { Component, DestroyRef, EventEmitter, OnInit, Output, inject, signal } f
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { NgIcon } from '@ng-icons/core';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { Subject, debounceTime, distinctUntilChanged, forkJoin } from 'rxjs';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
@@ -22,120 +24,157 @@ import { RecitationsService } from '../../services/recitations.service';
 @Component({
   selector: 'app-recitation-filters',
   standalone: true,
-  imports: [FormsModule, NzInputModule, NzSelectModule, NzDatePickerModule, NgIcon],
+  imports: [
+    FormsModule,
+    NzInputModule,
+    NzSelectModule,
+    NzDatePickerModule,
+    NzButtonModule,
+    NzModalModule,
+    NgIcon,
+  ],
   template: `
     <div class="recitation-filters" dir="rtl">
-      <nz-input-group [nzPrefix]="searchIcon" class="recitation-filters__search">
-        <input
-          nz-input
-          type="text"
-          placeholder="ابحث عن تلاوة..."
-          [ngModel]="searchValue"
-          (ngModelChange)="onSearchChange($event)"
-        />
-      </nz-input-group>
-      <ng-template #searchIcon><ng-icon name="lucideSearch" /></ng-template>
+      <div class="recitation-filters__actions">
+        <nz-input-group [nzPrefix]="searchIcon" class="recitation-filters__search">
+          <input
+            nz-input
+            type="text"
+            placeholder="ابحث عن تلاوة..."
+            [ngModel]="searchValue"
+            (ngModelChange)="onSearchChange($event)"
+          />
+        </nz-input-group>
+        <ng-template #searchIcon><ng-icon name="lucideSearch" /></ng-template>
 
-      <nz-select
-        class="recitation-filters__select"
-        nzPlaceHolder="الناشر"
-        nzAllowClear
-        nzShowSearch
-        nzServerSearch
-        [nzLoading]="publishersLoading()"
-        [ngModel]="selectedPublisher"
-        (ngModelChange)="onPublisherChange($event)"
-        (nzOnSearch)="onPublisherSearch($event)"
+        <button
+          nz-button
+          nzType="default"
+          class="recitation-filters__filters-btn"
+          (click)="openFiltersModal()"
+        >
+          <ng-icon name="lucideFilter" />
+          <span>الفلاتر</span>
+        </button>
+      </div>
+
+      <nz-modal
+        [(nzVisible)]="isFiltersModalOpen"
+        (nzOnCancel)="closeFiltersModal()"
+        nzTitle="فلاتر التلاوات"
+        [nzWidth]="'min(760px, 94vw)'"
+        nzCentered
       >
-        @for (pub of publisherOptions(); track pub.id) {
-          <nz-option [nzValue]="pub.id" [nzLabel]="pub.name"></nz-option>
-        }
-      </nz-select>
+        <ng-container *nzModalContent>
+          <div class="recitation-filters__modal-grid">
+            <nz-select
+              class="recitation-filters__select"
+              nzPlaceHolder="الناشر"
+              nzAllowClear
+              nzShowSearch
+              nzServerSearch
+              [nzLoading]="publishersLoading()"
+              [ngModel]="selectedPublisher"
+              (ngModelChange)="onPublisherChange($event)"
+              (nzOnSearch)="onPublisherSearch($event)"
+            >
+              @for (pub of publisherOptions(); track pub.id) {
+                <nz-option [nzValue]="pub.id" [nzLabel]="pub.name"></nz-option>
+              }
+            </nz-select>
 
-      <nz-select
-        class="recitation-filters__select"
-        nzPlaceHolder="القارئ"
-        nzAllowClear
-        nzShowSearch
-        [ngModel]="selectedReciter"
-        (ngModelChange)="onReciterChange($event)"
-      >
-        @for (r of reciterOptions(); track r.id) {
-          <nz-option [nzValue]="r.id" [nzLabel]="r.name"></nz-option>
-        }
-      </nz-select>
+            <nz-select
+              class="recitation-filters__select"
+              nzPlaceHolder="القارئ"
+              nzAllowClear
+              nzShowSearch
+              [ngModel]="selectedReciter"
+              (ngModelChange)="onReciterChange($event)"
+            >
+              @for (r of reciterOptions(); track r.id) {
+                <nz-option [nzValue]="r.id" [nzLabel]="r.name"></nz-option>
+              }
+            </nz-select>
 
-      <nz-select
-        class="recitation-filters__select"
-        nzPlaceHolder="القراءة"
-        nzAllowClear
-        [ngModel]="selectedQiraah"
-        (ngModelChange)="onQiraahChange($event)"
-      >
-        @for (q of qiraahOptions(); track q.id) {
-          <nz-option [nzValue]="q.id" [nzLabel]="q.name"></nz-option>
-        }
-      </nz-select>
+            <nz-select
+              class="recitation-filters__select"
+              nzPlaceHolder="القراءة"
+              nzAllowClear
+              [ngModel]="selectedQiraah"
+              (ngModelChange)="onQiraahChange($event)"
+            >
+              @for (q of qiraahOptions(); track q.id) {
+                <nz-option [nzValue]="q.id" [nzLabel]="q.name"></nz-option>
+              }
+            </nz-select>
 
-      <nz-select
-        class="recitation-filters__select"
-        nzPlaceHolder="الرواية"
-        nzAllowClear
-        [nzLoading]="riwayahsLoading()"
-        [ngModel]="selectedRiwayah"
-        (ngModelChange)="onRiwayahChange($event)"
-      >
-        @for (rw of riwayahOptions(); track rw.id) {
-          <nz-option [nzValue]="rw.id" [nzLabel]="rw.name"></nz-option>
-        }
-      </nz-select>
+            <nz-select
+              class="recitation-filters__select"
+              nzPlaceHolder="الرواية"
+              nzAllowClear
+              [nzLoading]="riwayahsLoading()"
+              [ngModel]="selectedRiwayah"
+              (ngModelChange)="onRiwayahChange($event)"
+            >
+              @for (rw of riwayahOptions(); track rw.id) {
+                <nz-option [nzValue]="rw.id" [nzLabel]="rw.name"></nz-option>
+              }
+            </nz-select>
 
-      <nz-select
-        class="recitation-filters__select"
-        nzPlaceHolder="مستوى المد"
-        nzAllowClear
-        [ngModel]="selectedMadd"
-        (ngModelChange)="onMaddChange($event)"
-      >
-        <nz-option [nzValue]="maddEnum.TWASSUT" nzLabel="توسّط"></nz-option>
-        <nz-option [nzValue]="maddEnum.QASR" nzLabel="قصر"></nz-option>
-      </nz-select>
+            <nz-select
+              class="recitation-filters__select"
+              nzPlaceHolder="مستوى المد"
+              nzAllowClear
+              [ngModel]="selectedMadd"
+              (ngModelChange)="onMaddChange($event)"
+            >
+              <nz-option [nzValue]="maddEnum.TWASSUT" nzLabel="توسّط"></nz-option>
+              <nz-option [nzValue]="maddEnum.QASR" nzLabel="قصر"></nz-option>
+            </nz-select>
 
-      <nz-select
-        class="recitation-filters__select"
-        nzPlaceHolder="همز الميم"
-        nzAllowClear
-        [ngModel]="selectedMeem"
-        (ngModelChange)="onMeemChange($event)"
-      >
-        <nz-option [nzValue]="meemEnum.SILAH" nzLabel="وصل"></nz-option>
-        <nz-option [nzValue]="meemEnum.SKOUN" nzLabel="سكون"></nz-option>
-      </nz-select>
+            <nz-select
+              class="recitation-filters__select"
+              nzPlaceHolder="همز الميم"
+              nzAllowClear
+              [ngModel]="selectedMeem"
+              (ngModelChange)="onMeemChange($event)"
+            >
+              <nz-option [nzValue]="meemEnum.SILAH" nzLabel="وصل"></nz-option>
+              <nz-option [nzValue]="meemEnum.SKOUN" nzLabel="سكون"></nz-option>
+            </nz-select>
 
-      <nz-select
-        class="recitation-filters__select"
-        nzPlaceHolder="الترخيص"
-        nzAllowClear
-        [ngModel]="selectedLicense"
-        (ngModelChange)="onLicenseChange($event)"
-      >
-        @for (l of licenseOptions; track l) {
-          <nz-option [nzValue]="l" [nzLabel]="l"></nz-option>
-        }
-      </nz-select>
+            <nz-select
+              class="recitation-filters__select"
+              nzPlaceHolder="الترخيص"
+              nzAllowClear
+              [ngModel]="selectedLicense"
+              (ngModelChange)="onLicenseChange($event)"
+            >
+              @for (l of licenseOptions; track l) {
+                <nz-option [nzValue]="l" [nzLabel]="l"></nz-option>
+              }
+            </nz-select>
 
-      <nz-date-picker
-        nzMode="year"
-        nzFormat="yyyy"
-        [nzInputReadOnly]="true"
-        [nzDefaultPickerValue]="hijriDefaultPickerDate"
-        [nzDisabledDate]="disableNonHijriYears"
-        class="recitation-filters__year"
-        nzPlaceHolder="السنة (هجري)"
-        [ngModel]="selectedHijriDate"
-        (ngModelChange)="onYearChange($event)"
-      ></nz-date-picker>
-      <!-- <span class="recitation-filters__hijri-indicator">هجري</span> -->
+            <nz-date-picker
+              nzMode="year"
+              nzFormat="yyyy"
+              [nzInputReadOnly]="true"
+              [nzDefaultPickerValue]="hijriDefaultPickerDate"
+              [nzDisabledDate]="disableNonHijriYears"
+              class="recitation-filters__year"
+              nzPlaceHolder="السنة (هجري)"
+              [ngModel]="selectedHijriDate"
+              (ngModelChange)="onYearChange($event)"
+            ></nz-date-picker>
+          </div>
+        </ng-container>
+        <ng-container *nzModalFooter>
+          <div class="recitation-filters__modal-footer">
+            <button nz-button nzType="default" (click)="clearAdvancedFilters()">مسح الفلاتر</button>
+            <button nz-button nzType="primary" (click)="closeFiltersModal()">تم</button>
+          </div>
+        </ng-container>
+      </nz-modal>
     </div>
   `,
   styleUrl: './recitation-filters.component.less',
@@ -170,6 +209,7 @@ export class RecitationFiltersComponent implements OnInit {
   selectedMeem: MeemBehavior | null = null;
   selectedLicense: string | null = null;
   selectedHijriDate: Date | null = null;
+  isFiltersModalOpen = false;
   readonly hijriDefaultPickerDate = new Date(1446, 0, 1);
   private readonly minHijriYear = 1300;
   private readonly maxHijriYear = 1600;
@@ -202,6 +242,14 @@ export class RecitationFiltersComponent implements OnInit {
   onSearchChange(value: string): void {
     this.searchValue = value;
     this.searchSubject.next(value);
+  }
+
+  openFiltersModal(): void {
+    this.isFiltersModalOpen = true;
+  }
+
+  closeFiltersModal(): void {
+    this.isFiltersModalOpen = false;
   }
 
   onPublisherSearch(query: string): void {
@@ -257,6 +305,29 @@ export class RecitationFiltersComponent implements OnInit {
     this.currentFilters = {
       ...this.currentFilters,
       year: n != null && !Number.isNaN(n) && n > 0 ? n : undefined,
+    };
+    this.emit();
+  }
+
+  clearAdvancedFilters(): void {
+    this.selectedPublisher = null;
+    this.selectedReciter = null;
+    this.selectedQiraah = null;
+    this.selectedRiwayah = null;
+    this.selectedMadd = null;
+    this.selectedMeem = null;
+    this.selectedLicense = null;
+    this.selectedHijriDate = null;
+    this.currentFilters = {
+      ...this.currentFilters,
+      publisher_id: undefined,
+      reciter_id: undefined,
+      qiraah_id: undefined,
+      riwayah_id: undefined,
+      madd_level: undefined,
+      meem_behaviour: undefined,
+      license_code: undefined,
+      year: undefined,
     };
     this.emit();
   }

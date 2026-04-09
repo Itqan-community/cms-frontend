@@ -9,26 +9,57 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NgIcon } from '@ng-icons/core';
 import { ReciterListFilters } from '../../models/reciters.models';
 
 @Component({
   selector: 'app-reciter-filters',
   standalone: true,
-  imports: [FormsModule, NzInputModule, NgIcon],
+  imports: [FormsModule, NzInputModule, NzButtonModule, NzModalModule, NgIcon],
   template: `
     <div class="reciter-filters" dir="rtl">
-      <nz-input-group [nzPrefix]="searchIcon" class="reciter-filters__search">
-        <input
-          nz-input
-          type="text"
-          placeholder="ابحث عن قارئ..."
-          [ngModel]="searchValue"
-          (ngModelChange)="onSearchChange($event)"
-        />
-      </nz-input-group>
-      <ng-template #searchIcon><ng-icon name="lucideSearch" /></ng-template>
+      <div class="reciter-filters__actions">
+        <nz-input-group [nzPrefix]="searchIcon" class="reciter-filters__search">
+          <input
+            nz-input
+            type="text"
+            placeholder="ابحث عن قارئ..."
+            [ngModel]="searchValue"
+            (ngModelChange)="onSearchChange($event)"
+          />
+        </nz-input-group>
+        <ng-template #searchIcon><ng-icon name="lucideSearch" /></ng-template>
+
+        <button
+          nz-button
+          nzType="default"
+          class="reciter-filters__filters-btn"
+          (click)="openFiltersModal()"
+        >
+          <ng-icon name="lucideFilter" />
+          <span>الفلاتر</span>
+        </button>
+      </div>
+
+      <nz-modal
+        [(nzVisible)]="isFiltersModalOpen"
+        (nzOnCancel)="closeFiltersModal()"
+        nzTitle="فلاتر القرّاء"
+        [nzWidth]="'min(460px, 92vw)'"
+        nzCentered
+      >
+        <ng-container *nzModalContent>
+          <div class="reciter-filters__empty">لا توجد فلاتر إضافية حالياً.</div>
+        </ng-container>
+        <ng-container *nzModalFooter>
+          <div class="reciter-filters__modal-footer">
+            <button nz-button nzType="primary" (click)="closeFiltersModal()">تم</button>
+          </div>
+        </ng-container>
+      </nz-modal>
     </div>
   `,
   styleUrl: './reciter-filters.component.less',
@@ -40,6 +71,7 @@ export class ReciterFiltersComponent implements OnInit {
   private readonly searchSubject = new Subject<string>();
 
   searchValue = '';
+  isFiltersModalOpen = false;
 
   private currentFilters: Partial<ReciterListFilters> = {};
 
@@ -55,6 +87,14 @@ export class ReciterFiltersComponent implements OnInit {
   onSearchChange(value: string): void {
     this.searchValue = value;
     this.searchSubject.next(value);
+  }
+
+  openFiltersModal(): void {
+    this.isFiltersModalOpen = true;
+  }
+
+  closeFiltersModal(): void {
+    this.isFiltersModalOpen = false;
   }
 
   private emit(): void {

@@ -10,7 +10,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { NATIONALITY } from '../../../reciters/nationality.enum';
@@ -20,7 +22,7 @@ import { PublisherUiFilters } from '../../models/publishers-stats.models';
 @Component({
   selector: 'app-publisher-filters',
   standalone: true,
-  imports: [FormsModule, NzInputModule, NzSelectModule, NgIcon],
+  imports: [FormsModule, NzInputModule, NzSelectModule, NzButtonModule, NzModalModule, NgIcon],
   templateUrl: './publisher-filters.component.html',
   styleUrl: './publisher-filters.component.less',
 })
@@ -35,6 +37,7 @@ export class PublisherFiltersComponent implements OnInit {
   searchValue = '';
   selectedCountry: string | null = null;
   selectedVerified: boolean | null = null;
+  isFiltersModalOpen = false;
 
   private current: PublisherUiFilters = {};
 
@@ -51,6 +54,25 @@ export class PublisherFiltersComponent implements OnInit {
   onSearchChange(value: string): void {
     this.searchValue = value;
     this.searchSubject.next(value);
+  }
+
+  openFiltersModal(): void {
+    this.isFiltersModalOpen = true;
+  }
+
+  closeFiltersModal(): void {
+    this.isFiltersModalOpen = false;
+  }
+
+  clearAdvancedFilters(): void {
+    this.selectedCountry = null;
+    this.selectedVerified = null;
+    this.current = {
+      ...this.current,
+      country: undefined,
+      is_verified: undefined,
+    };
+    this.emit();
   }
 
   onCountryChange(value: string | null): void {

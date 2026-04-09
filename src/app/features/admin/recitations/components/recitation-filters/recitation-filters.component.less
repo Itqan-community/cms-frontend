@@ -1,21 +1,42 @@
 .recitation-filters {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  flex-wrap: wrap;
   margin-bottom: 20px;
+
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
 
   &__search {
     flex: 1;
     min-width: 200px;
   }
 
-  &__select {
-    min-width: 140px;
+  &__filters-btn {
+    height: 40px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
   }
 
+  &__modal-grid {
+    display: grid;
+    gap: 12px;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  &__modal-footer {
+    margin-top: 16px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  &__select,
   &__year {
-    min-width: 140px;
+    width: 100%;
   }
 
   &__hijri-indicator {
@@ -28,6 +49,34 @@
     color: #92400e;
     font-size: 0.8rem;
     font-weight: 600;
+  }
+}
+
+@media (max-width: 900px) {
+  .recitation-filters {
+    &__modal-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+}
+
+@media (max-width: 767px) {
+  .recitation-filters {
+    &__actions {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 10px;
+    }
+
+    &__search {
+      min-width: 0;
+      width: 100%;
+    }
+
+    &__filters-btn {
+      width: 100%;
+      justify-content: center;
+    }
   }
 }
 
@@ -74,5 +123,14 @@
       border-color: #16a34a;
       box-shadow: none;
     }
+  }
+
+  .ant-modal .ant-modal-content {
+    border-radius: 12px;
+  }
+
+  .ant-modal .ant-modal-header,
+  .ant-modal .ant-modal-body {
+    direction: rtl;
   }
 }
