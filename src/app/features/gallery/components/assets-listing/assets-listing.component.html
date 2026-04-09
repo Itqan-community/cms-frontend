@@ -9,12 +9,12 @@
   @if (errorState()) {
     <app-state-message
       class="assets-listing__state-wrapper"
-      icon="bx-error-circle"
+      icon="lucideAlertCircle"
       iconVariant="error"
       [title]="'UI.SOMETHING_WENT_WRONG' | translate"
       [message]="'ERRORS.SERVER_ERROR' | translate"
       [actionLabel]="'UI.TRY_AGAIN' | translate"
-      actionIcon="bx-refresh"
+      actionIcon="lucideRotateCw"
       actionType="primary"
       [actionLoading]="loading()"
       (actionClick)="getAssets()"
@@ -28,7 +28,7 @@
       } @else if (!loading() && assets().length === 0) {
         <app-state-message
           class="assets-listing__state--in-grid"
-          [icon]="hasActiveFilters() ? 'bx-search-alt' : 'bx-folder-open'"
+          [icon]="hasActiveFilters() ? 'lucideSearch' : 'lucideFolderOpen'"
           iconVariant="default"
           [title]="
             hasActiveFilters()

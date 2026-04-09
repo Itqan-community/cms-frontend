@@ -1,0 +1,157 @@
+<nz-layout class="admin-layout" [attr.dir]="layoutDir()">
+  <!-- Top Header Component styled like main CMS header -->
+  <nz-header class="admin-header-shell">
+    <div class="app-header">
+      <div class="app-header__container">
+        <div class="app-header__row">
+          <!-- Logo -->
+          <div class="app-header__brand">
+            <button
+              class="app-header__menu-btn admin-desktop-toggle"
+              (click)="isCollapsed.set(!isCollapsed())"
+            >
+              <ng-icon name="lucideMenu" aria-hidden="true" />
+            </button>
+            <button class="app-header__menu-btn admin-mobile-toggle" (click)="onMobileMenuToggle()">
+              <ng-icon name="lucideMenu" aria-hidden="true" />
+            </button>
+            <a
+              class="app-header__logo"
+              [routerLink]="['/']"
+              [attr.aria-label]="'ADMIN.HOME' | translate"
+            >
+              @if (isPublisherHost) {
+                <div class="publisher-logo">
+                  <svg
+                    width="120"
+                    height="40"
+                    viewBox="0 0 120 40"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <rect width="120" height="40" rx="4" fill="#4F46E5" />
+                    <text
+                      x="60"
+                      y="24"
+                      font-family="Arial"
+                      font-size="16"
+                      font-weight="bold"
+                      fill="white"
+                      text-anchor="middle"
+                    >
+                      Publisher
+                    </text>
+                  </svg>
+                </div>
+              } @else {
+                <img
+                  alt="Itqan CMS"
+                  loading="lazy"
+                  width="120"
+                  height="40"
+                  decoding="async"
+                  class="app-header__logo-img"
+                  src="assets/images/logo.svg"
+                />
+              }
+            </a>
+          </div>
+
+          <!-- Actions -->
+          <div class="app-header__actions">
+            <!-- Ensure actions display flex properly always -->
+            <div class="admin-header-actions">
+              <app-lang-switch></app-lang-switch>
+              <app-user-actions (logoutClicked)="authService.logout()"></app-user-actions>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nz-header>
+
+  <nz-layout class="admin-body">
+    <!-- Sidebar Navigation -->
+    <nz-sider
+      class="admin-sider"
+      [class.admin-sider--mobile-open]="isMobileMenuOpen()"
+      nzCollapsible
+      [nzCollapsed]="isCollapsed()"
+      (nzCollapsedChange)="onSiderCollapsedChange($event)"
+      [nzWidth]="260"
+      [nzCollapsedWidth]="0"
+      [nzTrigger]="null"
+      nzBreakpoint="lg"
+      [nzReverseArrow]="true"
+      nzTheme="light"
+    >
+      <div class="admin-mobile-sider-head">
+        <div class="admin-mobile-sider-logo" aria-hidden="true">
+          <img
+            alt="Itqan CMS"
+            loading="lazy"
+            width="98"
+            height="32"
+            decoding="async"
+            src="assets/images/logo.svg"
+          />
+        </div>
+        <button
+          type="button"
+          class="admin-mobile-sider-close"
+          aria-label="Close menu"
+          (click)="closeMobileMenu()"
+        >
+          <ng-icon name="lucideX" aria-hidden="true" />
+        </button>
+      </div>
+      <ul nz-menu nzMode="inline" class="admin-sidenav-menu" nzTheme="light">
+        @for (tab of tabs(); track tab.id) {
+          <li nz-menu-item [nzDisabled]="!!tab.disabled" [nzMatchRouter]="!tab.disabled">
+            @if (tab.disabled) {
+              <span
+                class="admin-sidenav-link"
+                role="presentation"
+                tabindex="-1"
+                aria-disabled="true"
+              >
+                <ng-icon [name]="tab.icon" class="admin-sidenav-icon" />
+                <span>{{ tab.label | translate }}</span>
+              </span>
+            } @else {
+              <a
+                [routerLink]="['/admin', tab.path]"
+                class="admin-sidenav-link"
+                (click)="onMenuItemClick()"
+              >
+                <ng-icon [name]="tab.icon" class="admin-sidenav-icon" />
+                <span>{{ tab.label | translate }}</span>
+              </a>
+            }
+          </li>
+        }
+        <li nz-menu-item>
+          <a [routerLink]="['/gallery']" class="admin-sidenav-link" (click)="onMenuItemClick()">
+            <ng-icon name="lucideHouse" class="admin-sidenav-icon" />
+            <span>{{ 'ADMIN.MENU.BACK_TO_GALLERY' | translate }}</span>
+          </a>
+        </li>
+      </ul>
+    </nz-sider>
+
+    @if (isMobileMenuOpen()) {
+      <button
+        type="button"
+        class="admin-mobile-backdrop"
+        aria-label="Close menu"
+        (click)="closeMobileMenu()"
+      ></button>
+    }
+
+    <!-- Main Content Panel -->
+    <nz-content class="admin-content-area">
+      <div class="admin-content-inner">
+        <router-outlet></router-outlet>
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>

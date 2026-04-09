@@ -1,5 +1,5 @@
 <nz-card class="recitation-card">
-  <i class="bx bx-trash delete-btn" (click)="delete.emit(recitation())"></i>
+  <ng-icon name="lucideTrash2" class="delete-btn" (click)="delete.emit(recitation())" role="button" tabindex="0" />
 
   <div class="card-header">
     <h3>{{ recitation().name }}</h3>
@@ -39,7 +39,7 @@
 
   <div class="action-btns">
     <button nz-button class="play-btn" (click)="playClick.emit(recitation())">
-      <i class="bx bx-play-circle"></i> {{ 'RECITATIONS.PLAY_AUDIO' | translate }}
+      <ng-icon name="lucideCirclePlay" /> {{ 'RECITATIONS.PLAY_AUDIO' | translate }}
     </button>
   </div>
 </nz-card>

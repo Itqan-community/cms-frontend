@@ -11,14 +11,14 @@
   (click)="handleTagClick()"
 >
   <span class="tag-label">
-    <i class="bx bx-info-circle tag-icon" aria-hidden="true"></i>
+    <ng-icon name="lucideInfo" class="tag-icon" aria-hidden="true" />
     <span>{{ licenseTitle }}</span>
     @if (mode() === 'inline') {
-      <i
-        class="bx toggle-icon"
-        [ngClass]="expanded() ? 'bx-chevron-up' : 'bx-chevron-down'"
+      <ng-icon
+        [name]="expanded() ? 'lucideChevronUp' : 'lucideChevronDown'"
+        class="toggle-icon"
         aria-hidden="true"
-      ></i>
+      />
     }
   </span>
 </nz-tag>
@@ -56,7 +56,7 @@
       role="link"
       aria-label="Learn more about {{ licenseTitle }}"
     >
-      <i class="bx bx-arrow-out-up-left-stroke-square" aria-hidden="true"></i>
+      <ng-icon name="lucideExternalLink" aria-hidden="true" />
       <span>{{ LearnMoreText }}</span>
     </a>
   </div>

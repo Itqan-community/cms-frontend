@@ -3,6 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgIcon } from '@ng-icons/core';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
 import { RegisterRequest } from '../../models/auth.model';
@@ -11,7 +12,7 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-register-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, LangSwitchComponent],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, LangSwitchComponent, NgIcon],
   templateUrl: './register.page.html',
   styleUrls: ['./register.page.less'],
 })

@@ -6,7 +6,7 @@
         class="register__back"
         [title]="'AUTH.REGISTER.RETURN_TO_WEBSITE' | translate"
       >
-        <i class="bx bx-reply-big register__back-icon"></i>
+        <ng-icon name="lucideUndo2" class="register__back-icon" aria-hidden="true" />
         {{ 'AUTH.REGISTER.RETURN_TO_WEBSITE' | translate }}
       </a>
       <app-lang-switch></app-lang-switch>
@@ -103,7 +103,7 @@
                 registerForm.get('email')?.invalid && registerForm.get('email')?.touched
               "
             />
-            <i class="bx bx-envelope register__input-icon"></i>
+            <ng-icon name="lucideMail" class="register__input-icon" aria-hidden="true" />
           </div>
           @if (registerForm.get('email')?.invalid && registerForm.get('email')?.touched) {
             <p class="register__error">{{ 'AUTH.REGISTER.ERRORS.EMAIL_REQUIRED' | translate }}</p>
@@ -139,7 +139,7 @@
                   | translate
               "
             >
-              <i class="bx" [ngClass]="passwordVisible() ? 'bx-eye-closed' : 'bx-eye'"></i>
+              <ng-icon [name]="passwordVisible() ? 'lucideEyeOff' : 'lucideEye'" aria-hidden="true" />
             </button>
           </div>
           @if (registerForm.get('password')?.invalid && registerForm.get('password')?.touched) {
@@ -185,7 +185,7 @@
                 ) | translate
               "
             >
-              <i class="bx" [ngClass]="confirmPasswordVisible() ? 'bx-eye-closed' : 'bx-eye'"></i>
+              <ng-icon [name]="confirmPasswordVisible() ? 'lucideEyeOff' : 'lucideEye'" aria-hidden="true" />
             </button>
           </div>
           @if (

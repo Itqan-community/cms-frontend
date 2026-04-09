@@ -12,6 +12,7 @@ import { environment } from '../environments/environment';
 
 import { routes } from './app.routes';
 import { ar_EG, provideNzI18n } from 'ng-zorro-antd/i18n';
+import { appLucideIconsProvider } from './icons/provide-app-lucide-icons';
 import { registerLocaleData } from '@angular/common';
 import ar from '@angular/common/locales/ar';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
@@ -45,6 +46,7 @@ export const appConfig: ApplicationConfig = {
         ]
       : []),
     provideNzI18n(ar_EG),
+    appLucideIconsProvider,
     provideAnimationsAsync(),
     provideHttpClient(
       withInterceptors([headersInterceptor, authErrorInterceptor, errorInterceptor])

@@ -1,0 +1,104 @@
+<div class="ayahs-page" dir="rtl">
+
+  <div class="ayahs-banner">
+    <div class="ayahs-banner__content">
+      <h2 class="ayahs-banner__title">الآيات القرآنية</h2>
+      <p class="ayahs-banner__desc">تصفّح جميع آيات القرآن الكريم مع إمكانية البحث والتصفية حسب السورة</p>
+    </div>
+    <span class="ayahs-banner__count">{{ totalFiltered() | number }} آية</span>
+  </div>
+
+  <div class="ayahs-toolbar">
+    <nz-input-group [nzPrefix]="searchPrefixTpl" class="ayahs-toolbar__search">
+      <input
+        nz-input
+        type="text"
+        placeholder="ابحث في نص الآيات..."
+        (input)="onSearchInput($event)"
+      />
+    </nz-input-group>
+    <ng-template #searchPrefixTpl>
+      <ng-icon name="lucideSearch" class="ayahs-toolbar__search-icon" />
+    </ng-template>
+    <nz-select
+      class="ayahs-toolbar__filter"
+      nzPlaceHolder="جميع السور"
+      nzAllowClear
+      nzShowSearch
+      [ngModel]="selectedSurah()"
+      (ngModelChange)="onSurahChange($event)"
+      nzSize="default"
+    >
+      @for (surah of surahs; track surah.id) {
+        <nz-option [nzValue]="surah.id" [nzLabel]="surah.id + ' - ' + surah.name_ar"></nz-option>
+      }
+    </nz-select>
+  </div>
+
+  @if (loading()) {
+    <div class="ayahs-table-wrapper">
+      <div class="ayahs-skel">
+        @for (i of [0, 1, 2, 3, 4, 5, 6, 7]; track i) {
+          <div class="ayahs-skel__row">
+            <div class="ayahs-skel__cell ayahs-skel__cell--sm"></div>
+            <div class="ayahs-skel__cell ayahs-skel__cell--sm"></div>
+            <div class="ayahs-skel__cell ayahs-skel__cell--md"></div>
+            <div class="ayahs-skel__cell ayahs-skel__cell--lg"></div>
+            <div class="ayahs-skel__cell ayahs-skel__cell--sm"></div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else if (paginatedAyahs().length === 0) {
+    <div class="admin-empty-state ayahs-empty-wrap">
+      <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
+      <p class="admin-empty-state__title">لا توجد آيات</p>
+      <p class="admin-empty-state__subtitle">لم يتم العثور على نتائج. حاول تغيير كلمة البحث أو السورة.</p>
+    </div>
+  } @else {
+    <div class="ayahs-table-wrapper">
+      <nz-table
+        #ayahsTable
+        [nzData]="paginatedAyahs()"
+        [nzFrontPagination]="false"
+        [nzShowPagination]="false"
+        nzSize="middle"
+        [nzScroll]="{ x: '800px' }"
+      >
+        <thead>
+          <tr>
+            <th nzWidth="90px">رقم الآية</th>
+            <th nzWidth="90px">رقم السورة</th>
+            <th nzWidth="120px">اسم السورة</th>
+            <th>نص الآية</th>
+            <th nzWidth="90px">الصفحة</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ayah of ayahsTable.data; track ayah.id) {
+            <tr>
+              <td><nz-tag nzColor="green">{{ ayah.number }}</nz-tag></td>
+              <td>{{ ayah.chapter }}</td>
+              <td>{{ ayah.surah_name }}</td>
+              <td class="ayahs-table__ayah-text">{{ ayah.text }}</td>
+              <td>{{ ayah.page_number }}</td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </div>
+  }
+
+  @if (!loading() && totalFiltered() > pageSize) {
+    <div class="admin-pagination">
+      <nz-pagination
+        [nzPageIndex]="currentPage()"
+        [nzTotal]="totalFiltered()"
+        [nzPageSize]="pageSize"
+        (nzPageIndexChange)="onPageChange($event)"
+        nzSimple
+      ></nz-pagination>
+    </div>
+  }
+
+</div>

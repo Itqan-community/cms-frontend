@@ -1,0 +1,254 @@
+@import '../../shared/components/header/header.component.less';
+
+.admin-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-header-shell {
+  padding: 0;
+  height: auto;
+  line-height: inherit;
+  background: transparent;
+  z-index: 50; // Ensure header sits above everything
+
+  // Expand standard app-header to full width in admin mode
+  .app-header__container {
+    max-width: 100% !important;
+    padding-inline: 24px;
+  }
+}
+
+.admin-body {
+  flex: 1;
+  display: flex;
+  background-color: var(--color-bg); // Use global theme bg
+}
+
+.admin-sider {
+  background: var(--admin-surface-white);
+  border-inline-start: 1px solid var(--color-neutral-200);
+}
+
+.admin-sidenav-menu {
+  height: 100%;
+  border-inline-start: none; /* zorro defaults borders */
+  background: transparent;
+  padding-block: 8px;
+
+  .ant-menu-item a.admin-sidenav-link,
+  .ant-menu-item .admin-sidenav-link {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    height: 100%;
+    flex: 1;
+    min-width: 0;
+    box-sizing: border-box;
+    color: inherit;
+    text-decoration: none;
+    line-height: 1.35;
+  }
+
+  .ant-menu-item .admin-sidenav-link[aria-disabled='true'] {
+    cursor: not-allowed;
+    user-select: none;
+  }
+}
+
+// Override Ng-Zorro Menu Default Themes using global project tokens
+.ant-menu-light.ant-menu-inline {
+  border-inline-end: none;
+
+  .ant-menu-item {
+    border-radius: var(--radius-md);
+    margin-block: 4px;
+    margin-inline: 12px;
+    width: ~'calc(100% - 24px)';
+    transition: all 0.2s ease-in-out;
+    color: var(--color-neutral-600);
+
+    &:hover,
+    &:active {
+      color: var(--color-primary-700);
+      background-color: var(--color-primary-50);
+    }
+
+    &-selected {
+      color: var(--color-primary-800);
+      background-color: var(--color-primary-100);
+      font-weight: 600;
+
+      &::after {
+        display: none !important; // Remove Zorro active indicator line
+      }
+    }
+  }
+}
+
+.admin-sidenav-icon {
+  flex-shrink: 0;
+  font-size: 1.15rem;
+  line-height: 1;
+  /* ng-icon hosts an svg; keep optical vertical center with label */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-content-area {
+  padding: 24px;
+  background: transparent;
+}
+
+.admin-content-inner {
+  background: var(--admin-surface-white);
+  padding: 16px;
+  min-height: 380px;
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-card);
+  border: 1px solid var(--color-neutral-100);
+}
+
+.admin-header-actions {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+// Specific override for Zorro layout alignment (RTL)
+[dir='rtl'] .ant-menu-inline.ant-menu-root .ant-menu-item,
+[dir='ltr'] .ant-menu-inline.ant-menu-root .ant-menu-item {
+  padding-inline: 12px 16px !important;
+  display: flex;
+  align-items: stretch;
+
+  /* Inner control fills row so icon + label flex layout is consistent */
+  & > a.admin-sidenav-link,
+  & > .admin-sidenav-link {
+    min-height: 40px;
+  }
+}
+
+// Adjust brand gap and toggle button for admin panel
+.admin-header-shell .app-header__brand {
+  column-gap: 16px;
+
+  .admin-desktop-toggle {
+    font-size: 24px;
+    color: var(--color-neutral-600);
+    transition: color 0.3s;
+    &:hover {
+      color: var(--color-primary-600);
+    }
+  }
+
+  .admin-mobile-toggle {
+    display: none;
+    font-size: 24px;
+    color: var(--color-neutral-600);
+    transition: color 0.3s;
+
+    &:hover {
+      color: var(--color-primary-600);
+    }
+  }
+}
+
+.admin-mobile-backdrop {
+  display: none;
+}
+
+.admin-mobile-sider-head {
+  display: none;
+}
+
+@media (max-width: 991px) {
+  .admin-mobile-sider-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 10px 4px;
+  }
+
+  .admin-mobile-sider-logo {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none;
+
+    img {
+      display: block;
+      width: auto;
+      height: 28px;
+    }
+  }
+
+  .admin-mobile-sider-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-neutral-700);
+    cursor: pointer;
+
+    &:hover {
+      background: var(--color-neutral-100);
+      color: var(--color-neutral-900);
+    }
+  }
+
+  .admin-sidenav-menu {
+    height: calc(100% - 50px);
+  }
+
+  .admin-header-shell .app-header__brand {
+    .admin-desktop-toggle {
+      display: none;
+    }
+
+    .admin-mobile-toggle {
+      display: inline-flex;
+    }
+  }
+
+  .admin-sider {
+    position: fixed;
+    inset-block: 0;
+    inset-inline-start: 0;
+    z-index: 120;
+    transition: transform 0.2s ease;
+    box-shadow: var(--shadow-card);
+  }
+
+  .admin-layout[dir='ltr'] .admin-sider {
+    transform: translateX(-100%);
+  }
+
+  .admin-layout[dir='rtl'] .admin-sider {
+    transform: translateX(100%);
+  }
+
+  .admin-sider.admin-sider--mobile-open {
+    transform: translateX(0) !important;
+  }
+
+  .admin-content-area {
+    padding: 12px;
+  }
+
+  .admin-mobile-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    border: 0;
+    padding: 0;
+    margin: 0;
+    z-index: 110;
+  }
+}

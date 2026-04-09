@@ -1,0 +1,114 @@
+<div class="publisher-detail admin-list-page" dir="rtl">
+  <div class="admin-breadcrumb">
+    <a routerLink="/admin/publishers" class="admin-breadcrumb__link">الناشرون</a>
+    <ng-icon name="lucideChevronLeft" class="admin-breadcrumb__sep" />
+    @if (loading()) {
+      <span class="admin-breadcrumb__current">جاري التحميل...</span>
+    } @else {
+      <span class="admin-breadcrumb__current">{{ publisher()?.name_ar }}</span>
+    }
+  </div>
+
+  @if (loading()) {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 8 }"></nz-skeleton>
+  } @else if (publisher(); as p) {
+    <div class="admin-hero">
+      @if (iconSrc(p.icon); as iconUrl) {
+        <nz-avatar [nzSrc]="iconUrl" [nzSize]="100" class="publisher-detail__avatar"></nz-avatar>
+      } @else {
+        <div class="admin-hero-placeholder">
+          <ng-icon name="lucideLibrary" />
+        </div>
+      }
+
+      <div class="admin-hero-info">
+        <div class="admin-hero-names">
+          <h1 class="admin-hero-name-ar">{{ p.name_ar }}</h1>
+          <p class="admin-hero-name-en" dir="ltr">{{ p.name_en }}</p>
+        </div>
+        <div class="admin-hero-meta">
+          @if (p.is_verified) {
+            <nz-tag nzColor="success">موثق</nz-tag>
+          } @else {
+            <nz-tag>غير موثق</nz-tag>
+          }
+          @if (p.created_at) {
+            <span class="admin-hero-meta__date">
+              <ng-icon name="lucideCalendar" />
+              {{ p.created_at | date: 'dd/MM/yyyy' }}
+            </span>
+          }
+        </div>
+      </div>
+
+      <div class="admin-hero-actions">
+        <button nz-button nzType="primary" (click)="onEdit()">
+          <ng-icon name="lucideSquarePen" />
+          تعديل
+        </button>
+        <button nz-button nzDanger (click)="onDelete()">
+          <ng-icon name="lucideTrash2" />
+          حذف
+        </button>
+      </div>
+    </div>
+
+    <div class="admin-panel">
+      <h3 class="admin-panel__title">
+        <ng-icon name="lucideCircleUser" />
+        البيانات التفصيلية
+      </h3>
+      <nz-descriptions nzBordered [nzColumn]="{ xxl: 2, xl: 2, lg: 2, md: 1, sm: 1, xs: 1 }">
+        <nz-descriptions-item nzTitle="الدولة">{{ countryLabel(p.country) }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="سنة التأسيس">{{
+          p.foundation_year != null ? p.foundation_year : '—'
+        }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="العنوان" [nzSpan]="2">{{
+          p.address ?? '—'
+        }}</nz-descriptions-item>
+        <nz-descriptions-item nzTitle="البريد الإلكتروني">
+          @if (p.contact_email) {
+            <a [href]="'mailto:' + p.contact_email">{{ p.contact_email }}</a>
+          } @else {
+            —
+          }
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="الموقع الإلكتروني">
+          @if (p.website) {
+            <a [href]="p.website" target="_blank" rel="noopener noreferrer">{{ p.website }}</a>
+          } @else {
+            —
+          }
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="رابط الأيقونة" [nzSpan]="2">
+          @if (iconSrc(p.icon); as iconUrl) {
+            <span class="admin-mono">{{ iconUrl }}</span>
+          } @else {
+            —
+          }
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="الوصف بالعربية" [nzSpan]="2">
+          {{ p.description_ar ?? p.description ?? '—' }}
+        </nz-descriptions-item>
+        <nz-descriptions-item nzTitle="Description (EN)" [nzSpan]="2">
+          {{ p.description_en ?? '—' }}
+        </nz-descriptions-item>
+      </nz-descriptions>
+    </div>
+
+    <div class="admin-back">
+      <a routerLink="/admin/publishers">
+        <button nz-button nzType="default">
+          <ng-icon name="lucideArrowRight" />
+          العودة للقائمة
+        </button>
+      </a>
+    </div>
+  } @else {
+    <div class="admin-not-found">
+      <ng-icon name="lucideAlertTriangle" class="admin-not-found__icon" />
+      <p>لم يتم العثور على الناشر المطلوب.</p>
+      <a routerLink="/admin/publishers">العودة للقائمة</a>
+    </div>
+  }
+</div>
