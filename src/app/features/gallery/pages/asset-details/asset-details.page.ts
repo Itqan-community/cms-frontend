@@ -6,7 +6,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzIconModule } from 'ng-zorro-antd/icon';
+import { NgIcon } from '@ng-icons/core';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule } from 'ng-zorro-antd/modal';
@@ -35,7 +35,7 @@ import { AssetsService } from '../../services/assets.service';
     TranslateModule,
     NzButtonModule,
     NzTagModule,
-    NzIconModule,
+    NgIcon,
     NzModalModule,
     NzFormModule,
     NzInputModule,
@@ -112,16 +112,15 @@ export class AssetDetailsPage implements OnInit {
   }
 
   getCategoryIcon(category: string): string {
-    // TODO: move this function to a shared utility
     switch (category) {
       case 'mushaf':
-        return 'book-bookmark';
+        return 'lucideBookmark';
       case 'tafsir':
-        return 'file-detail';
+        return 'lucideFileText';
       case 'recitation':
-        return 'microphone';
+        return 'lucideMic';
       default:
-        return 'file';
+        return 'lucideFile';
     }
   }
 

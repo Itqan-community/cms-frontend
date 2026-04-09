@@ -1,0 +1,87 @@
+<div class="reciter-detail admin-list-page" dir="rtl">
+  <div class="admin-breadcrumb">
+    <a routerLink="/admin/reciters" class="admin-breadcrumb__link">القرّاء</a>
+    <ng-icon name="lucideChevronLeft" class="admin-breadcrumb__sep" />
+    @if (loading()) {
+      <span class="admin-breadcrumb__current">جاري التحميل...</span>
+    } @else {
+      <span class="admin-breadcrumb__current">{{ reciter()?.name_ar }}</span>
+    }
+  </div>
+
+  @if (loading()) {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 8 }"></nz-skeleton>
+  } @else if (reciter()) {
+    <div class="admin-hero">
+      @if (reciter()!.image_url) {
+        <img [src]="reciter()!.image_url!" alt="" class="admin-hero-thumbnail" />
+      } @else {
+        <div class="admin-hero-placeholder">
+          <ng-icon name="lucideVolume2" />
+        </div>
+      }
+
+      <div class="admin-hero-info">
+        <div class="admin-hero-names">
+          <h1 class="admin-hero-name-ar">{{ reciter()!.name_ar }}</h1>
+          <p class="admin-hero-name-en">{{ reciter()!.name_en }}</p>
+        </div>
+
+        <div class="admin-hero-meta">
+          @if (reciter()!.nationality) {
+            <nz-tag nzColor="blue">{{ countryLabel(reciter()!.nationality) }}</nz-tag>
+          }
+          <nz-tag nzColor="green">{{ reciter()!.recitations_count }} تلاوة</nz-tag>
+          <span class="admin-hero-meta__date">
+            <ng-icon name="lucideCalendar" />
+            {{ reciter()!.created_at | date: 'dd/MM/yyyy' }}
+          </span>
+        </div>
+
+        @if (reciter()!.date_of_death) {
+          <p class="admin-death-info">
+            <ng-icon name="lucideInfo" />
+            تاريخ الوفاة: {{ reciter()!.date_of_death }}
+          </p>
+        }
+      </div>
+
+      <div class="admin-hero-actions">
+        <button nz-button nzType="primary" (click)="onEdit()">
+          <ng-icon name="lucideSquarePen" />
+          تعديل
+        </button>
+        <button nz-button nzDanger (click)="onDelete()">
+          <ng-icon name="lucideTrash2" />
+          حذف
+        </button>
+      </div>
+    </div>
+
+    <div class="admin-descriptions">
+      <div class="admin-desc-col">
+        <h3 class="admin-desc-title"><ng-icon name="lucideFileText" /> السيرة (عربي)</h3>
+        <p class="admin-desc-text">{{ reciter()!.bio_ar }}</p>
+      </div>
+      <div class="admin-desc-col">
+        <h3 class="admin-desc-title" dir="ltr"><ng-icon name="lucideFileText" /> Bio (EN)</h3>
+        <p class="admin-desc-text" dir="ltr">{{ reciter()!.bio_en }}</p>
+      </div>
+    </div>
+
+    <div class="admin-back">
+      <a routerLink="/admin/reciters">
+        <button nz-button nzType="default">
+          <ng-icon name="lucideArrowRight" />
+          العودة للقائمة
+        </button>
+      </a>
+    </div>
+  } @else {
+    <div class="admin-not-found">
+      <ng-icon name="lucideAlertTriangle" class="admin-not-found__icon" />
+      <p>لم يتم العثور على القارئ المطلوب.</p>
+      <a routerLink="/admin/reciters">العودة للقائمة</a>
+    </div>
+  }
+</div>

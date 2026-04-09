@@ -67,7 +67,8 @@
     "ABOUT_PROJECT": "حول المشروع",
     "LICENSES": "التراخيص",
     "LOGIN": "تسجيل الدخول",
-    "LOGOUT": "تسجيل الخروج"
+    "LOGOUT": "تسجيل الخروج",
+    "ADMIN_PORTAL": "لوحة الإدارة"
   },
   "SETTINGS": "الإعدادات",
   "REGISTER": "إنشاء حساب",
@@ -135,7 +136,8 @@
     "CONTENT_STANDARDS": "معايير المحتوى والتقنية",
     "API_DOCS": "وثائق الواجهات البرمجية (API)",
     "PUBLISHER_DASHBOARD": "لوحة التحكم للناشر",
-    "ASSET_REQUEST_FORM": "أضف محتوى قرآني في إتقان"
+    "ASSET_REQUEST_FORM": "أضف محتوى قرآني في إتقان",
+    "ADMIN_PORTAL": "لوحة الإدارة"
   },
   "HOME": {
     "WELCOME": "مرحبًا بك في إتقان CMS",
@@ -350,6 +352,162 @@
       "SPECIFICATIONS": "موا مواصفات الصيغ",
       "SCHEMA_DOCS": "توثيق المخطط",
       "EXAMPLE_FILE": "ملف مثال"
+    }
+  },
+  "ADMIN": {
+    "HOME": "الرئيسية",
+    "REFRESH_PROMPT": {
+      "TITLE": "هل تريد إعادة تهيئة البيانات؟",
+      "CONTENT": "سيتم تحديث جميع المشاريع والبيانات التجريبية.",
+      "OK": "تأكيد",
+      "CANCEL": "إلغاء"
+    },
+    "MENU": {
+      "MUSHAFS": "المصاحف",
+      "TAFSIRS": "التفاسير",
+      "TRANSLATIONS": "الترجمات",
+      "RECITATIONS": "التلاوات",
+      "RECITERS": "القرّاء",
+      "PUBLISHERS": "الناشرون",
+      "AUDIO": "الصوتيات",
+      "MANAGE_PROFILE": "إدارة الملف",
+      "BACK_TO_GALLERY": "العودة إلى المعرض"
+    },
+    "PROFILE": {
+      "TITLE": "ملف الناشر",
+      "HINT": "حدّث بيانات حسابك وتفضيلاتك.",
+      "EDIT_ACCOUNT": "تعديل الحساب"
+    },
+    "PUBLISHER_ADD": {
+      "TITLE": "إضافة ناشر جديد",
+      "NAME_EN_LABEL": "اسم الناشر بالإنجليزي (name_en) *",
+      "NAME_AR_LABEL": "اسم الناشر بالعربي (name_ar) *",
+      "COUNTRY": "الدولة",
+      "FOUNDATION_YEAR": "سنة التأسيس",
+      "WEBSITE": "الموقع الإلكتروني",
+      "EMAIL": "البريد الإلكتروني",
+      "ADDRESS": "العنوان",
+      "ICON_URL": "رابط الأيقونة (URL)",
+      "DESCRIPTION": "الوصف",
+      "CANCEL": "إلغاء",
+      "SAVE": "حفظ الناشر",
+      "SUCCESS": "تمت إضافة الناشر بنجاح",
+      "ERROR": "عذراً، حدث خطأ أثناء إضافة الناشر"
+    },
+    "PUBLISHER_BANNER": {
+      "TITLE": "الناشرون والمصادر",
+      "DESCRIPTION": "إدارة الجهات والمؤسسات التي نحصل منها على المحتوى القرآني"
+    },
+    "PUBLISHER_STATS": {
+      "TOTAL_PUBLISHERS": "إجمالي الناشرين",
+      "ACTIVE_PUBLISHERS": "ناشرون نشطون",
+      "TOTAL_COUNTRIES": "إجمالي الدول"
+    },
+    "TAFSIRS": {
+      "TITLE": "التفاسير",
+      "ADD_BUTTON": "إضافة تفسير",
+      "SEARCH_PLACEHOLDER": "ابحث عن تفسير...",
+      "COLUMNS": {
+        "NAME": "الاسم",
+        "DESCRIPTION": "الوصف",
+        "PUBLISHER": "الناشر",
+        "LICENSE": "الترخيص",
+        "CREATED_AT": "تاريخ الإضافة",
+        "ACTIONS": "الإجراءات"
+      },
+      "FILTERS": {
+        "PUBLISHER": "الناشر",
+        "LICENSE": "الترخيص",
+        "LANGUAGE": "اللغة",
+        "IS_EXTERNAL": "النوع"
+      },
+      "FORM": {
+        "CREATE_TITLE": "إضافة تفسير جديد",
+        "EDIT_TITLE": "تعديل التفسير",
+        "SUBMIT_CREATE": "إضافة التفسير",
+        "SUBMIT_EDIT": "حفظ التعديلات",
+        "CANCEL": "إلغاء",
+        "NAME_AR": "الاسم بالعربية",
+        "NAME_EN": "الاسم بالإنجليزية",
+        "DESCRIPTION_AR": "الوصف بالعربية",
+        "DESCRIPTION_EN": "الوصف بالإنجليزية",
+        "LONG_DESCRIPTION_AR": "الوصف المطوّل بالعربية",
+        "LONG_DESCRIPTION_EN": "الوصف المطوّل بالإنجليزية",
+        "THUMBNAIL": "الصورة المصغّرة",
+        "LICENSE": "الترخيص",
+        "LANGUAGE": "لغة التفسير",
+        "PUBLISHER": "الناشر"
+      },
+      "DELETE": {
+        "CONFIRM_TITLE": "هل أنت متأكد من حذف هذا التفسير؟",
+        "CONFIRM_CONTENT": "هذا الإجراء لا يمكن التراجع عنه.",
+        "OK": "نعم، احذف",
+        "CANCEL": "إلغاء"
+      },
+      "DETAIL": {
+        "VERSIONS_TITLE": "الإصدارات",
+        "EDIT": "تعديل",
+        "DELETE": "حذف"
+      },
+      "MESSAGES": {
+        "CREATE_SUCCESS": "تم إضافة التفسير بنجاح",
+        "UPDATE_SUCCESS": "تم تحديث التفسير بنجاح",
+        "DELETE_SUCCESS": "تم حذف التفسير بنجاح",
+        "ERROR": "حدث خطأ. يرجى المحاولة مرة أخرى."
+      }
+    },
+    "TRANSLATIONS": {
+      "TITLE": "الترجمات",
+      "ADD_BUTTON": "إضافة ترجمة",
+      "SEARCH_PLACEHOLDER": "ابحث عن ترجمة...",
+      "COLUMNS": {
+        "NAME": "الاسم",
+        "DESCRIPTION": "الوصف",
+        "PUBLISHER": "الناشر",
+        "LICENSE": "الترخيص",
+        "CREATED_AT": "تاريخ الإضافة",
+        "ACTIONS": "الإجراءات"
+      },
+      "FILTERS": {
+        "PUBLISHER": "الناشر",
+        "LICENSE": "الترخيص",
+        "LANGUAGE": "اللغة",
+        "IS_EXTERNAL": "النوع"
+      },
+      "FORM": {
+        "CREATE_TITLE": "إضافة ترجمة جديدة",
+        "EDIT_TITLE": "تعديل الترجمة",
+        "SUBMIT_CREATE": "إضافة الترجمة",
+        "SUBMIT_EDIT": "حفظ التعديلات",
+        "CANCEL": "إلغاء",
+        "NAME_AR": "الاسم بالعربية",
+        "NAME_EN": "الاسم بالإنجليزية",
+        "DESCRIPTION_AR": "الوصف بالعربية",
+        "DESCRIPTION_EN": "الوصف بالإنجليزية",
+        "LONG_DESCRIPTION_AR": "الوصف المطوّل بالعربية",
+        "LONG_DESCRIPTION_EN": "الوصف المطوّل بالإنجليزية",
+        "THUMBNAIL": "الصورة المصغّرة",
+        "LICENSE": "الترخيص",
+        "LANGUAGE": "لغة الترجمة",
+        "PUBLISHER": "الناشر"
+      },
+      "DELETE": {
+        "CONFIRM_TITLE": "هل أنت متأكد من حذف هذه الترجمة؟",
+        "CONFIRM_CONTENT": "هذا الإجراء لا يمكن التراجع عنه.",
+        "OK": "نعم، احذف",
+        "CANCEL": "إلغاء"
+      },
+      "DETAIL": {
+        "VERSIONS_TITLE": "الإصدارات",
+        "EDIT": "تعديل",
+        "DELETE": "حذف"
+      },
+      "MESSAGES": {
+        "CREATE_SUCCESS": "تم إضافة الترجمة بنجاح",
+        "UPDATE_SUCCESS": "تم تحديث الترجمة بنجاح",
+        "DELETE_SUCCESS": "تم حذف الترجمة بنجاح",
+        "ERROR": "حدث خطأ. يرجى المحاولة مرة أخرى."
+      }
     }
   }
 }

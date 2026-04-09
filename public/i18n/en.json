@@ -67,7 +67,8 @@
     "ABOUT_PROJECT": "About the Project",
     "LICENSES": "Licenses",
     "LOGIN": "Login",
-    "LOGOUT": "Logout"
+    "LOGOUT": "Logout",
+    "ADMIN_PORTAL": "Admin portal"
   },
   "SETTINGS": "Settings",
   "REGISTER": "Register",
@@ -135,7 +136,8 @@
     "CONTENT_STANDARDS": "Content Standards",
     "API_DOCS": "API Docs",
     "PUBLISHER_DASHBOARD": "Publisher Dashboard",
-    "ASSET_REQUEST_FORM": "Add Quranic Content to ITQAN"
+    "ASSET_REQUEST_FORM": "Add Quranic Content to ITQAN",
+    "ADMIN_PORTAL": "Admin Portal"
   },
   "HOME": {
     "WELCOME": "Welcome to Itqan CMS",
@@ -350,6 +352,162 @@
       "SPECIFICATIONS": "Format Specifications",
       "SCHEMA_DOCS": "Schema Documentation",
       "EXAMPLE_FILE": "Example File"
+    }
+  },
+  "ADMIN": {
+    "HOME": "Home",
+    "REFRESH_PROMPT": {
+      "TITLE": "Do you want to reset data?",
+      "CONTENT": "All projects and experimental data will be updated.",
+      "OK": "Confirm",
+      "CANCEL": "Cancel"
+    },
+    "MENU": {
+      "MUSHAFS": "Mushafs",
+      "TAFSIRS": "Tafsirs",
+      "TRANSLATIONS": "Translations",
+      "RECITATIONS": "Recitations",
+      "RECITERS": "Reciters",
+      "PUBLISHERS": "Publishers",
+      "AUDIO": "Audio",
+      "MANAGE_PROFILE": "Manage profile",
+      "BACK_TO_GALLERY": "Back to gallery"
+    },
+    "PROFILE": {
+      "TITLE": "Publisher profile",
+      "HINT": "Update your account details and preferences.",
+      "EDIT_ACCOUNT": "Edit account"
+    },
+    "PUBLISHER_ADD": {
+      "TITLE": "Add New Publisher",
+      "NAME_EN_LABEL": "Publisher Name (English) *",
+      "NAME_AR_LABEL": "Publisher Name (Arabic) *",
+      "COUNTRY": "Country",
+      "FOUNDATION_YEAR": "Foundation Year",
+      "WEBSITE": "Website",
+      "EMAIL": "Email",
+      "ADDRESS": "Address",
+      "ICON_URL": "Icon URL",
+      "DESCRIPTION": "Description",
+      "CANCEL": "Cancel",
+      "SAVE": "Save Publisher",
+      "SUCCESS": "Publisher added successfully",
+      "ERROR": "Error occurred while adding publisher"
+    },
+    "PUBLISHER_BANNER": {
+      "TITLE": "Publishers & Sources",
+      "DESCRIPTION": "Manage entities and organizations providing Quranic content"
+    },
+    "PUBLISHER_STATS": {
+      "TOTAL_PUBLISHERS": "Total Publishers",
+      "ACTIVE_PUBLISHERS": "Active Publishers",
+      "TOTAL_COUNTRIES": "Total Countries"
+    },
+    "TAFSIRS": {
+      "TITLE": "Tafsirs",
+      "ADD_BUTTON": "Add Tafsir",
+      "SEARCH_PLACEHOLDER": "Search tafsirs...",
+      "COLUMNS": {
+        "NAME": "Name",
+        "DESCRIPTION": "Description",
+        "PUBLISHER": "Publisher",
+        "LICENSE": "License",
+        "CREATED_AT": "Date Added",
+        "ACTIONS": "Actions"
+      },
+      "FILTERS": {
+        "PUBLISHER": "Publisher",
+        "LICENSE": "License",
+        "LANGUAGE": "Language",
+        "IS_EXTERNAL": "Type"
+      },
+      "FORM": {
+        "CREATE_TITLE": "Add New Tafsir",
+        "EDIT_TITLE": "Edit Tafsir",
+        "SUBMIT_CREATE": "Add Tafsir",
+        "SUBMIT_EDIT": "Save Changes",
+        "CANCEL": "Cancel",
+        "NAME_AR": "Name (Arabic)",
+        "NAME_EN": "Name (English)",
+        "DESCRIPTION_AR": "Description (Arabic)",
+        "DESCRIPTION_EN": "Description (English)",
+        "LONG_DESCRIPTION_AR": "Long Description (Arabic)",
+        "LONG_DESCRIPTION_EN": "Long Description (English)",
+        "THUMBNAIL": "Thumbnail",
+        "LICENSE": "License",
+        "LANGUAGE": "Language",
+        "PUBLISHER": "Publisher"
+      },
+      "DELETE": {
+        "CONFIRM_TITLE": "Delete this tafsir?",
+        "CONFIRM_CONTENT": "This action cannot be undone.",
+        "OK": "Yes, Delete",
+        "CANCEL": "Cancel"
+      },
+      "DETAIL": {
+        "VERSIONS_TITLE": "Versions",
+        "EDIT": "Edit",
+        "DELETE": "Delete"
+      },
+      "MESSAGES": {
+        "CREATE_SUCCESS": "Tafsir added successfully",
+        "UPDATE_SUCCESS": "Tafsir updated successfully",
+        "DELETE_SUCCESS": "Tafsir deleted successfully",
+        "ERROR": "An error occurred. Please try again."
+      }
+    },
+    "TRANSLATIONS": {
+      "TITLE": "Translations",
+      "ADD_BUTTON": "Add translation",
+      "SEARCH_PLACEHOLDER": "Search translations...",
+      "COLUMNS": {
+        "NAME": "Name",
+        "DESCRIPTION": "Description",
+        "PUBLISHER": "Publisher",
+        "LICENSE": "License",
+        "CREATED_AT": "Date Added",
+        "ACTIONS": "Actions"
+      },
+      "FILTERS": {
+        "PUBLISHER": "Publisher",
+        "LICENSE": "License",
+        "LANGUAGE": "Language",
+        "IS_EXTERNAL": "Type"
+      },
+      "FORM": {
+        "CREATE_TITLE": "Add New Translation",
+        "EDIT_TITLE": "Edit Translation",
+        "SUBMIT_CREATE": "Add Translation",
+        "SUBMIT_EDIT": "Save Changes",
+        "CANCEL": "Cancel",
+        "NAME_AR": "Name (Arabic)",
+        "NAME_EN": "Name (English)",
+        "DESCRIPTION_AR": "Description (Arabic)",
+        "DESCRIPTION_EN": "Description (English)",
+        "LONG_DESCRIPTION_AR": "Long Description (Arabic)",
+        "LONG_DESCRIPTION_EN": "Long Description (English)",
+        "THUMBNAIL": "Thumbnail",
+        "LICENSE": "License",
+        "LANGUAGE": "Language",
+        "PUBLISHER": "Publisher"
+      },
+      "DELETE": {
+        "CONFIRM_TITLE": "Delete this translation?",
+        "CONFIRM_CONTENT": "This action cannot be undone.",
+        "OK": "Yes, Delete",
+        "CANCEL": "Cancel"
+      },
+      "DETAIL": {
+        "VERSIONS_TITLE": "Versions",
+        "EDIT": "Edit",
+        "DELETE": "Delete"
+      },
+      "MESSAGES": {
+        "CREATE_SUCCESS": "Translation added successfully",
+        "UPDATE_SUCCESS": "Translation updated successfully",
+        "DELETE_SUCCESS": "Translation deleted successfully",
+        "ERROR": "An error occurred. Please try again."
+      }
     }
   }
 }

@@ -1,0 +1,82 @@
+@import '../../styles/admin-shared.less';
+
+.mushaf-pages {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .admin-table-overrides();
+}
+
+.mushaf-pages__spinner {
+  display: flex;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.mushaf-filter-card {
+  background: var(--admin-surface-white);
+  border-radius: var(--radius-xl);
+  padding: 24px 28px;
+  box-shadow: var(--shadow-card);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--admin-border-100);
+  }
+
+  &__header-icon {
+    font-size: 1.2rem;
+    color: var(--admin-text-500);
+  }
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--admin-text-800);
+    margin: 0;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  &__label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--admin-text-600);
+  }
+
+  &__select {
+    width: 100%;
+  }
+
+  &__hint {
+    font-size: 0.82rem;
+    color: var(--admin-text-400);
+    margin: 0;
+  }
+}
+
+.mushaf-table-card__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row-reverse;
+  padding: 16px 24px;
+  gap: 8px;
+}
+
+.mushaf-table-card__title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--admin-text-700);
+  margin: 0;
+}

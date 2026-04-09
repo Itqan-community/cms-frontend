@@ -1,0 +1,93 @@
+@import '../../styles/admin-shared.less';
+
+.mushaf-words {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+
+  .admin-table-overrides();
+}
+
+.mushaf-words__spinner {
+  display: flex;
+  justify-content: center;
+  padding: 60px 20px;
+}
+
+.mushaf-filter-card {
+  background: var(--admin-surface-white);
+  border-radius: var(--radius-xl);
+  padding: 20px 24px;
+  box-shadow: var(--shadow-card);
+
+  &__header {
+    margin-bottom: 4px;
+  }
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--admin-text-800);
+    margin: 0;
+  }
+
+  &__hint {
+    font-size: 0.82rem;
+    color: var(--admin-text-400);
+    margin: 4px 0 0;
+  }
+
+  &__label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--admin-text-600);
+  }
+
+  &__search-icon {
+    color: var(--admin-text-400);
+  }
+
+  &__actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--admin-border-100);
+    font-size: 0.9rem;
+  }
+}
+
+.words-filter-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 16px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.results-count {
+  color: var(--admin-text-600);
+
+  strong {
+    font-weight: 700;
+    color: var(--color-action-view);
+  }
+}
+
+.uthmani-text {
+  font-family: 'Uthmani', 'Amiri', 'Traditional Arabic', serif;
+  font-size: 1.8rem;
+  font-weight: bold;
+  line-height: 2;
+  color: var(--admin-text-800);
+}

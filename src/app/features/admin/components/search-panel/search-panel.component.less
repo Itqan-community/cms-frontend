@@ -1,0 +1,79 @@
+.admin-search-panel {
+  background: var(--admin-surface-white);
+  border-radius: var(--radius-xl);
+  padding: 28px 32px;
+  box-shadow: var(--shadow-card);
+
+  &__title {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--admin-text-800);
+    margin: 0 0 6px;
+  }
+
+  &__subtitle {
+    font-size: 0.88rem;
+    color: var(--admin-text-muted);
+    margin: 0 0 20px;
+  }
+
+  &__label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--admin-text-700);
+    margin-bottom: 10px;
+  }
+
+  &__input-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__input-group {
+    flex: 1;
+  }
+
+  &__prefix-icon {
+    color: var(--admin-text-300);
+  }
+
+  &__btn {
+    flex-shrink: 0;
+    height: 40px;
+    border-radius: var(--radius-lg);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    gap: 10px;
+  }
+
+  &__empty-icon {
+    font-size: 3rem;
+    opacity: 0.25;
+    color: var(--admin-text-500);
+  }
+
+  &__empty-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--admin-text-600);
+    margin: 0;
+  }
+
+  &__empty-subtitle {
+    font-size: 0.85rem;
+    color: var(--admin-text-300);
+    margin: 0;
+  }
+}

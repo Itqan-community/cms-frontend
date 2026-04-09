@@ -15,24 +15,56 @@ export const routes: Routes = [
       import('./features/gallery/pages/gallery/gallery.page').then((m) => m.GalleryPage),
   },
   {
-    path: 'quranic-cms',
+    path: 'admin',
     loadComponent: () =>
-      import('./features/quranic-cms/quranic-cms.page').then((m) => m.QuranicCmsPage),
-    canActivate: [authGuard],
+      import('./features/admin/admin-layout.component').then((m) => m.AdminLayoutComponent),
+    // canActivate: [authGuard, adminGuard],
     data: { hideHeader: true, fullWidth: true },
     children: [
+      // Resolve /admin before the lazy '' adminRoutes (avoids ** catch-all flashing Coming Soon on redirect)
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'publishers',
+      },
       {
         path: 'publishers',
+        // canActivate: [itqanAdminGuard],
         loadChildren: () =>
-          import('./features/quranic-cms/publishers/publishers.routes').then(
-            (m) => m.publishersRoutes
+          import('./features/admin/publishers/publishers.routes').then((m) => m.publishersRoutes),
+      },
+      {
+        path: 'profile',
+        redirectTo: 'publishers',
+        pathMatch: 'full',
+      },
+      {
+        path: 'tafsirs',
+        loadChildren: () =>
+          import('./features/admin/tafsirs/tafsirs.routes').then((m) => m.tafsirRoutes),
+      },
+      {
+        path: 'translations',
+        loadChildren: () =>
+          import('./features/admin/translations/translations.routes').then(
+            (m) => m.translationRoutes
           ),
-        canActivate: [publisherHostGuard],
+      },
+      {
+        path: 'recitations',
+        loadChildren: () =>
+          import('./features/admin/recitations/recitations.routes').then(
+            (m) => m.recitationRoutes
+          ),
+      },
+      {
+        path: 'reciters',
+        loadChildren: () =>
+          import('./features/admin/reciters/reciters.routes').then((m) => m.reciterRoutes),
       },
       {
         path: '',
-        loadChildren: () =>
-          import('./features/quranic-cms/quranic-cms.routes').then((m) => m.quranicCmsRoutes),
+        loadChildren: () => import('./features/admin/admin.routes').then((m) => m.adminRoutes),
       },
     ],
   },

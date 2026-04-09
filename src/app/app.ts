@@ -1,6 +1,12 @@
+import { Location } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import {
+  ActivatedRouteSnapshot,
+  NavigationEnd,
+  Router,
+  RouterOutlet,
+} from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { filter } from 'rxjs';
 import { GoogleAnalyticsService } from './core/services/google-analytics.service';
@@ -16,6 +22,7 @@ import { HeaderComponent } from './shared/components/header/header.component';
 export class App {
   private translate = inject(TranslateService);
   private titleService = inject(Title);
+  private location = inject(Location);
   protected router = inject(Router);
   private readonly webVitalsService = inject(WebVitalsService);
   private readonly googleAnalyticsService = inject(GoogleAnalyticsService);
@@ -28,11 +35,25 @@ export class App {
     void this.webVitalsService;
     this.googleAnalyticsService.init();
 
-    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(() => {
-      const data = this.router.routerState.snapshot.root.firstChild?.data ?? {};
-      this.hideHeader.set(!!data['hideHeader']);
-      this.fullWidth.set(!!data['fullWidth']);
-    });
+    const syncShellFromRoute = (): void => {
+      let merged: Record<string, unknown> = {};
+      let node: ActivatedRouteSnapshot | null = this.router.routerState.snapshot.root;
+      while (node) {
+        merged = { ...merged, ...node.data };
+        node = node.firstChild;
+      }
+
+      // On hard reload, the snapshot can be incomplete before the first NavigationEnd; URL is synchronous.
+      const pathname = this.location.path(false).split('?')[0]?.split('#')[0] ?? '';
+      if (pathname === '/admin' || pathname.startsWith('/admin/')) {
+        merged = { ...merged, hideHeader: true, fullWidth: true };
+      }
+
+      this.hideHeader.set(!!merged['hideHeader']);
+      this.fullWidth.set(!!merged['fullWidth']);
+    };
+    syncShellFromRoute();
+    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(syncShellFromRoute);
 
     const currentLang = localStorage.getItem('lang') || 'ar';
     this.translate.addLangs(['ar', 'en']);

@@ -1,0 +1,139 @@
+<div class="recitations-list admin-list-page" dir="rtl">
+  <div class="admin-list-header">
+    <div class="admin-list-header__text">
+      <h2 class="admin-list-header__title">التلاوات</h2>
+      <p class="admin-list-header__subtitle">إدارة المصاحف الصوتية والتلاوات</p>
+    </div>
+    <a routerLink="/admin/recitations/create">
+      <button nz-button nzType="primary" class="admin-add-btn">
+        <ng-icon name="lucidePlus" aria-hidden="true" />
+        إضافة تلاوة
+      </button>
+    </a>
+  </div>
+
+  <app-recitation-filters (filtersChange)="onFiltersChange($event)"></app-recitation-filters>
+
+  <div class="admin-table-wrap">
+    <nz-spin [nzSpinning]="loading()">
+      <nz-table
+        #recTable
+        [nzData]="recitations()"
+        [nzFrontPagination]="false"
+        [nzShowPagination]="false"
+        nzSize="middle"
+        [nzNoResult]="emptyTpl"
+      >
+        <thead>
+          <tr>
+            <th
+              nzWidth="200px"
+              [nzSortFn]="true"
+              (nzSortOrderChange)="onSortChange('name', $event)"
+            >
+              الاسم
+            </th>
+            <th>الوصف</th>
+            <th nzWidth="160px">الناشر</th>
+            <th nzWidth="130px">القارئ</th>
+            <th nzWidth="120px">القراءة</th>
+            <th nzWidth="90px" [nzSortFn]="true" (nzSortOrderChange)="onSortChange('year', $event)">
+              السنة
+            </th>
+            <th
+              nzWidth="120px"
+              [nzSortFn]="true"
+              (nzSortOrderChange)="onSortChange('license', $event)"
+            >
+              الترخيص
+            </th>
+            <th
+              nzWidth="130px"
+              [nzSortFn]="true"
+              (nzSortOrderChange)="onSortChange('created_at', $event)"
+            >
+              تاريخ الإضافة
+            </th>
+            <th nzWidth="120px">الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (item of recTable.data; track item.id) {
+            <tr class="admin-list-row">
+              <td class="admin-list-name">{{ item.name }}</td>
+              <td class="admin-list-desc">{{ truncate(item.description) }}</td>
+              <td>{{ item.publisher.name }}</td>
+              <td>{{ item.reciter.name }}</td>
+              <td>{{ item.qiraah.name }}</td>
+              <td>{{ item.year }}</td>
+              <td>
+                <nz-tag [nzColor]="getLicenseColor(item.license)">{{ item.license }}</nz-tag>
+              </td>
+              <td>{{ item.created_at | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                <div class="admin-list-actions">
+                  <button
+                    type="button"
+                    nz-button
+                    nzType="text"
+                    class="action-icon action-icon--view"
+                    nz-tooltip
+                    nzTooltipTitle="عرض"
+                    (click)="onView(item.slug ?? item.id + '')"
+                  >
+                    <ng-icon name="lucideEye" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    nz-button
+                    nzType="text"
+                    class="action-icon action-icon--edit"
+                    nz-tooltip
+                    nzTooltipTitle="تعديل"
+                    (click)="onEdit(item.slug ?? item.id + '')"
+                  >
+                    <ng-icon name="lucideSquarePen" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    nz-button
+                    nzType="text"
+                    class="action-icon action-icon--delete"
+                    nz-tooltip
+                    nzTooltipTitle="حذف"
+                    (click)="onDelete(item)"
+                  >
+                    <ng-icon name="lucideTrash2" aria-hidden="true" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-spin>
+  </div>
+
+  <ng-template #emptyTpl>
+    <div class="admin-empty-state">
+      <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
+      <p class="admin-empty-state__title">لا توجد تلاوات</p>
+      <p class="admin-empty-state__subtitle">لم يتم العثور على نتائج. حاول تعديل معايير البحث.</p>
+    </div>
+  </ng-template>
+
+  @if (!loading() && total() > 0) {
+    <div class="admin-pagination">
+      <nz-pagination
+        [nzPageIndex]="page()"
+        [nzTotal]="total()"
+        [nzPageSize]="pageSize()"
+        [nzShowSizeChanger]="true"
+        [nzPageSizeOptions]="[10, 25, 50]"
+        nzShowQuickJumper
+        (nzPageIndexChange)="onPageChange($event)"
+        (nzPageSizeChange)="onPageSizeChange($event)"
+      ></nz-pagination>
+    </div>
+  }
+</div>

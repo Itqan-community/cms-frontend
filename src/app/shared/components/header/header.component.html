@@ -34,7 +34,7 @@
             />
           }
         </a>
-        <app-navigation-menu [links]="NAV_LINKS"></app-navigation-menu>
+        <app-navigation-menu [links]="navLinks()"></app-navigation-menu>
       </div>
 
       <!-- Actions -->
@@ -48,7 +48,7 @@
         <!-- Mobile Menu Button -->
         <div class="app-header__actions-mobile">
           <button (click)="onMobileMenuToggle()" class="app-header__menu-btn" aria-label="فتح القائمة">
-            <i class="bx bx-menu"></i>
+            <ng-icon name="lucideMenu" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -58,6 +58,6 @@
 
 <app-mobile-menu
   [(isOpen)]="isMobileMenuOpen"
-  [links]="NAV_LINKS"
+  [links]="navLinks()"
   (logout)="authService.logout()"
 ></app-mobile-menu>

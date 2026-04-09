@@ -1,7 +1,7 @@
 <nz-card class="stat-card">
   <div class="stat-content">
     <div class="stat-icon" [ngClass]="colorTheme()">
-      <i [class]="'bx ' + icon()"></i>
+      <ng-icon [name]="icon()" />
     </div>
     <div class="stat-info">
       <span class="stat-value">{{ value() }}</span>

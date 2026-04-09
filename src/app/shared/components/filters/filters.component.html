@@ -8,7 +8,7 @@
     (click)="toggleFiltersDrawer()"
     [attr.aria-label]="'UI.FILTERS' | translate"
   >
-    <i class="bx bx-filter"></i>
+    <ng-icon name="lucideFilter" aria-hidden="true" />
     {{ 'UI.FILTERS' | translate }}
   </button>
 
@@ -34,7 +34,7 @@
   <!-- Search Filter -->
   <div class="card filters__card">
     <div class="filters__card-header">
-      <i class="bx bx-scan-search"></i>
+      <ng-icon name="lucideQrCode" aria-hidden="true" />
       <h3 class="filters__card-title">{{ 'UI.SEARCH_IN_RESOURCES' | translate }}</h3>
     </div>
 
@@ -55,7 +55,7 @@
     <!-- Category Filter -->
     <div class="card filters__card">
       <div class="filters__card-header">
-        <i class="bx bx-categories"></i>
+        <ng-icon name="lucideLayoutGrid" aria-hidden="true" />
         <h3 class="filters__card-title">{{ 'UI.CATEGORY_FILTERS' | translate }}</h3>
       </div>
 
@@ -71,7 +71,7 @@
     <!-- License Filter -->
     <div class="card filters__card">
       <div class="filters__card-header">
-        <i class="bx bx-receipt"></i>
+        <ng-icon name="lucideReceipt" aria-hidden="true" />
         <h3 class="filters__card-title">{{ 'UI.LICENSE_FILTERS' | translate }}</h3>
       </div>
 

@@ -1,13 +1,14 @@
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { NgIcon } from '@ng-icons/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/breadcrumb.component';
 
 @Component({
   selector: 'app-license-details-page',
   standalone: true,
-  imports: [RouterModule, TranslateModule, BreadcrumbComponent, NzButtonModule],
+  imports: [RouterModule, TranslateModule, BreadcrumbComponent, NzButtonModule, NgIcon],
   templateUrl: './license-details.page.html',
   styleUrls: ['./license-details.page.less'],
 })
