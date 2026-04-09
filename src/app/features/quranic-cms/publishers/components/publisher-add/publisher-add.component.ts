@@ -1,4 +1,5 @@
-import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
+import { Component, DestroyRef, EventEmitter, Input, Output, inject } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -267,6 +268,7 @@ export class PublisherAddComponent {
   @Output() publisherAdded = new EventEmitter<void>();
 
   private fb = inject(FormBuilder);
+  private destroyRef = inject(DestroyRef);
   private publishersService = inject(PublishersService);
   private message = inject(NzMessageService);
 
@@ -293,20 +295,23 @@ export class PublisherAddComponent {
   handleOk(): void {
     if (this.publisherForm.valid) {
       this.isConfirmLoading = true;
-      this.publishersService.createPublisher(this.publisherForm.value).subscribe({
-        next: () => {
-          this.message.success('تمت إضافة الناشر بنجاح');
-          this.isConfirmLoading = false;
-          this.publisherForm.reset();
-          this.isAdding = false;
-          this.isAddingChange.emit(false);
-          this.publisherAdded.emit();
-        },
-        error: () => {
-          this.message.error('عذراً، حدث خطأ أثناء إضافة الناشر');
-          this.isConfirmLoading = false;
-        },
-      });
+      this.publishersService
+        .createPublisher(this.publisherForm.value)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.message.success('تمت إضافة الناشر بنجاح');
+            this.isConfirmLoading = false;
+            this.publisherForm.reset();
+            this.isAdding = false;
+            this.isAddingChange.emit(false);
+            this.publisherAdded.emit();
+          },
+          error: () => {
+            this.message.error('عذراً، حدث خطأ أثناء إضافة الناشر');
+            this.isConfirmLoading = false;
+          },
+        });
     }
   }
 
