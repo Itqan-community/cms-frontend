@@ -201,6 +201,8 @@
     "PUBLISHER_LABEL": "الناشر:",
     "LOADING_ASSET_DETAILS": "جاري تحميل تفاصيل الأصل...",
     "ASSET_NOT_FOUND": "الأصل غير موجود",
+    "PUBLISHER_INFO_UNAVAILABLE_TITLE": "تعذّر تحميل معلومات الناشر",
+    "PUBLISHER_INFO_UNAVAILABLE_DESC": "لم نتمكن من عرض ملف الناشر، ويمكنك الاستمرار في تصفّح الموارد أدناه.",
     "TRY_AGAIN": "إعادة المحاولة",
     "CONTENT_PREVIEW": "نظرة على المحتوى",
     "NO_PREVIEW_AVAILABLE": "لا توجد نظرة مُسبقة متاحة",

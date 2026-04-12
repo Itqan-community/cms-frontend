@@ -114,6 +114,22 @@ export const routes: Routes = [
     canActivate: [publisherHostGuard], // Restrict access for publisher hosts
   },
   {
+    path: 'publishers',
+    loadComponent: () =>
+      import('./features/publishers/pages/publishers/publishers.page').then(
+        (m) => m.PublishersPage
+      ),
+    canActivate: [publisherHostGuard], // Restrict access for publisher hosts
+  },
+  {
+    path: 'publisher/:id',
+    loadComponent: () =>
+      import('./features/publishers/pages/publisher-details/publisher-details.page').then(
+        (m) => m.PublisherDetailsPage
+      ),
+    canActivate: [publisherHostGuard], // Restrict access for publisher hosts
+  },
+  {
     path: 'license/:id',
     loadComponent: () =>
       import('./features/license/pages/license-details/license-details.page').then(

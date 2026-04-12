@@ -1,0 +1,252 @@
+.publisher-details-container {
+  max-width: var(--container-max-width);
+  margin: 0 auto;
+  padding: 24px;
+  padding-top: 2rem;
+}
+
+.publisher-details-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-top: 2rem;
+
+  @media (min-width: 1024px) {
+    grid-template-columns: 1fr 3fr;
+    gap: 1.25rem;
+  }
+}
+
+.filters-sidebar {
+  width: 100%;
+
+  @media (min-width: 1024px) {
+    max-width: max-content;
+  }
+}
+
+.main-content-area {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+// Publisher info failed to load (assets may still show) — very light surface + small info icon
+.publisher-info-unavailable {
+  gap: 0;
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--color-neutral-100);
+  background-color: color-mix(in srgb, var(--color-neutral-50) 35%, #fff);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+}
+
+.publisher-info-unavailable__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+}
+
+.publisher-info-unavailable__icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 34px;
+  font-size: 1rem;
+  color: var(--color-action-edit);
+}
+
+.publisher-info-unavailable__copy {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.publisher-info-unavailable__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  line-height: 1.35;
+  margin: 0;
+  color: var(--color-neutral-600);
+}
+
+.publisher-info-unavailable__desc {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+  margin: 0;
+  color: var(--color-neutral-500);
+  max-width: 42em;
+}
+
+// Publisher Info Card
+.publisher-info-card {
+  padding: 1rem;
+  padding-top: 1.5rem;
+}
+
+.publisher-info-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+
+  @media (min-width: 768px) {
+    flex-direction: row;
+    gap: 1.5rem;
+  }
+}
+
+.publisher-avatar {
+  flex-shrink: 0;
+
+  img {
+    width: 96px;
+    height: 96px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+}
+
+.publisher-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.publisher-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.publisher-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+  color: var(--color-neutral-600);
+}
+
+.publisher-description {
+  color: var(--color-neutral-400);
+  line-height: 1.75;
+  margin: 0;
+}
+
+.publisher-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  font-size: 0.875rem;
+  color: var(--color-neutral-400);
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  i {
+    font-size: 1rem;
+  }
+}
+
+.meta-item-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: center;
+}
+
+.website-link {
+  color: var(--color-primary-700);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.email-link {
+  color: var(--color-primary-700);
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.verified-badge {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-success-600);
+  font-size: 1.25rem;
+  margin-left: 0.5rem;
+}
+
+// Assets Section
+.assets-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.assets-title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  margin: 0;
+  color: var(--color-neutral-600);
+}
+
+.assets-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+
+  @media (min-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1280px) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+// skeleton
+.skeleton-container {
+  display: block;
+}
+
+.skeleton-element {
+  background: #e2e2e2;
+  border-radius: 8px;
+  height: 100px;
+  width: 100%;
+  padding: 1rem;
+  animation: pulse 1.5s infinite ease-in-out;
+
+  @media (min-width: 768px) {
+    height: 150px;
+  }
+}
+
+/* Correct reduced-motion behavior */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-element {
+    animation: none;
+    opacity: 0.6;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}

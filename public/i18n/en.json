@@ -201,6 +201,8 @@
     "PUBLISHER_LABEL": "Publisher:",
     "LOADING_ASSET_DETAILS": "Loading asset details...",
     "ASSET_NOT_FOUND": "Asset not found",
+    "PUBLISHER_INFO_UNAVAILABLE_TITLE": "Couldn't load publisher information",
+    "PUBLISHER_INFO_UNAVAILABLE_DESC": "The publisher profile couldn't be loaded. You can still browse the assets below.",
     "TRY_AGAIN": "Try Again",
     "CONTENT_PREVIEW": "Content Preview",
     "NO_PREVIEW_AVAILABLE": "No preview available",

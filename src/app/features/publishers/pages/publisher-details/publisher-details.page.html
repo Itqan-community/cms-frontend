@@ -1,0 +1,115 @@
+<div class="publisher-details-container">
+  <app-breadcrumb />
+
+  <div class="publisher-details-grid">
+    <!-- Filters Sidebar -->
+    <div class="filters-sidebar">
+      <app-filters
+        (searchQueryChange)="searchQueryChange($event)"
+        (categoriesSelectionChange)="categoriesSelectionChange($event)"
+        (licensesSelectionChange)="licensesSelectionChange($event)"
+      />
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content-area">
+      <!-- Publisher Info Card -->
+      @if (publisher()) {
+        <div class="card publisher-info-card">
+          <div class="publisher-info-content">
+            <div class="publisher-avatar">
+              @if (getPublisherIconUrl()) {
+                <img [src]="getPublisherIconUrl()" [alt]="publisher()!.name" />
+              }
+            </div>
+            <div class="publisher-details">
+              <div class="publisher-header">
+                <h1 class="publisher-name">{{ publisher()!.name }}</h1>
+                <!-- @if (publisher()!.is_verified) {
+                  <span class="verified-badge" [title]="'UI.VERIFIED_PUBLISHER' | translate">
+                    <i class="bx bx-check-circle"></i>
+                  </span>
+                } -->
+              </div>
+              <p class="publisher-description">{{ publisher()!.description }}</p>
+              <div class="publisher-meta">
+                <div class="meta-item-group">
+                  @if (publisher()!.address) {
+                    <div class="meta-item">
+                      <i class="bx bx-map"></i>
+                      <span>{{ publisher()!.address }}</span>
+                    </div>
+                  }
+                  @if (publisher()!.website) {
+                    <div class="meta-item">
+                      <i class="bx bx-globe"></i>
+                      <a
+                        [href]="publisher()!.website"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="website-link"
+                      >
+                        {{ 'UI.WEBSITE' | translate }}
+                      </a>
+                    </div>
+                  }
+                  <!-- @if (publisher()!.contact_email) {
+                    <div class="meta-item">
+                      <i class="bx bx-envelope"></i>
+                      <a [href]="'mailto:' + publisher()!.contact_email" class="email-link">
+                        {{ publisher()!.contact_email }}
+                      </a>
+                    </div>
+                  } -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      } @else if (publisherLoading()) {
+        <div class="skeleton-container" aria-hidden="true">
+          <div class="skeleton-element"></div>
+        </div>
+      } @else {
+        <div class="card publisher-info-unavailable" role="status" aria-live="polite">
+          <div class="publisher-info-unavailable__row">
+            <ng-icon
+              name="lucideInfo"
+              class="publisher-info-unavailable__icon"
+              aria-hidden="true"
+            />
+            <div class="publisher-info-unavailable__copy">
+              <h2 class="publisher-info-unavailable__title">
+                {{ 'UI.PUBLISHER_INFO_UNAVAILABLE_TITLE' | translate }}
+              </h2>
+              <p class="publisher-info-unavailable__desc">
+                {{ 'UI.PUBLISHER_INFO_UNAVAILABLE_DESC' | translate }}
+              </p>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Assets Listing -->
+      <div class="assets-section">
+        <h2 class="assets-title">
+          {{ 'UI.PUBLISHER_ASSETS' | translate }}
+          @if (!assetsLoading()) {
+            ({{ assets().length }})
+          }
+        </h2>
+        <div class="assets-grid" [attr.aria-busy]="assetsLoading()">
+          @if (!isServer && assetsLoading()) {
+            @for (item of getSkeletonArray(); track item) {
+              <app-asset-card-skeleton />
+            }
+          } @else {
+            @for (asset of assets(); track asset.id) {
+              <app-asset-card [asset]="asset" />
+            }
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
