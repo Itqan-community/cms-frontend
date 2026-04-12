@@ -1,5 +1,11 @@
 <nz-card class="recitation-card">
-  <ng-icon name="lucideTrash2" class="delete-btn" (click)="delete.emit(recitation())" role="button" tabindex="0" />
+  <ng-icon
+    name="lucideTrash2"
+    class="delete-btn"
+    (click)="delete.emit(recitation())"
+    role="button"
+    tabindex="0"
+  />
 
   <div class="card-header">
     <h3>{{ recitation().name }}</h3>

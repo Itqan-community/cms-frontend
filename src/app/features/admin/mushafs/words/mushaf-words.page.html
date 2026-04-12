@@ -2,7 +2,9 @@
   <div class="mushaf-filter-card">
     <div class="mushaf-filter-card__header">
       <h3 class="mushaf-filter-card__title">جدول الكلمات</h3>
-      <p class="mushaf-filter-card__hint">انقر على أي كلمة لعرض الإعراب والمعاني والمشاريع المرتبطة بها</p>
+      <p class="mushaf-filter-card__hint">
+        انقر على أي كلمة لعرض الإعراب والمعاني والمشاريع المرتبطة بها
+      </p>
     </div>
 
     <div class="words-filter-grid">
@@ -17,7 +19,10 @@
           style="width: 100%"
         >
           @for (s of surahs(); track s.surah_number) {
-            <nz-option [nzValue]="s.surah_number" [nzLabel]="s.surah_number + '. ' + s.name_ar"></nz-option>
+            <nz-option
+              [nzValue]="s.surah_number"
+              [nzLabel]="s.surah_number + '. ' + s.name_ar"
+            ></nz-option>
           }
         </nz-select>
       </div>
@@ -39,7 +44,9 @@
     </div>
 
     <div class="mushaf-filter-card__actions">
-      <span class="results-count">عدد النتائج: <strong>{{ totalResults() }}</strong> كلمة</span>
+      <span class="results-count"
+        >عدد النتائج: <strong>{{ totalResults() }}</strong> كلمة</span
+      >
       <button nz-button nzType="default" nzSize="small" (click)="clearFilters()">
         <ng-icon name="lucideX" />
         مسح جميع الفلاتر
@@ -77,13 +84,17 @@
         <tbody>
           @for (word of wordsTable.data; track word.id) {
             <tr>
-              <td><nz-tag nzColor="blue">{{ word.id }}</nz-tag></td>
+              <td>
+                <nz-tag nzColor="blue">{{ word.id }}</nz-tag>
+              </td>
               <td class="uthmani-text">{{ word.text_uthmani }}</td>
               <td>{{ word.text_spelling }}</td>
               <td>{{ word.surah_name }}</td>
               <td>{{ word.surah_id }}</td>
               <td>{{ word.ayah_id }}</td>
-              <td><nz-tag nzColor="green">{{ word.position }}</nz-tag></td>
+              <td>
+                <nz-tag nzColor="green">{{ word.position }}</nz-tag>
+              </td>
             </tr>
           }
         </tbody>

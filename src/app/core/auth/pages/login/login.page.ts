@@ -12,7 +12,14 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-login-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, LangSwitchComponent, NgIcon],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    TranslateModule,
+    LangSwitchComponent,
+    NgIcon,
+  ],
   styleUrls: ['./login.page.less'],
   templateUrl: './login.page.html',
 })

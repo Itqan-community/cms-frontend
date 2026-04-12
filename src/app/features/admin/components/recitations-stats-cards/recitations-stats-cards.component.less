@@ -108,7 +108,12 @@
   &__value-skeleton,
   &__label-skeleton {
     border-radius: 8px;
-    background: linear-gradient(90deg, var(--admin-surface-100) 25%, var(--admin-border-200) 50%, var(--admin-surface-100) 75%);
+    background: linear-gradient(
+      90deg,
+      var(--admin-surface-100) 25%,
+      var(--admin-border-200) 50%,
+      var(--admin-surface-100) 75%
+    );
     background-size: 800px 100%;
     animation: admin-skeleton-shimmer 1.4s infinite;
   }
@@ -132,6 +137,10 @@
 }
 
 @keyframes admin-skeleton-shimmer {
-  0% { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
 }

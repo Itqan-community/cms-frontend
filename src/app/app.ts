@@ -1,12 +1,7 @@
 import { Location } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import {
-  ActivatedRouteSnapshot,
-  NavigationEnd,
-  Router,
-  RouterOutlet,
-} from '@angular/router';
+import { ActivatedRouteSnapshot, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { filter } from 'rxjs';
 import { GoogleAnalyticsService } from './core/services/google-analytics.service';
@@ -53,7 +48,9 @@ export class App {
       this.fullWidth.set(!!merged['fullWidth']);
     };
     syncShellFromRoute();
-    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe(syncShellFromRoute);
+    this.router.events
+      .pipe(filter((e) => e instanceof NavigationEnd))
+      .subscribe(syncShellFromRoute);
 
     const currentLang = localStorage.getItem('lang') || 'ar';
     this.translate.addLangs(['ar', 'en']);

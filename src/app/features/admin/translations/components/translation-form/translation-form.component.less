@@ -87,7 +87,9 @@
     padding: 0;
     line-height: 1;
 
-    &:hover { color: #cf1322; }
+    &:hover {
+      color: #cf1322;
+    }
   }
 
   &__footer {
@@ -117,8 +119,14 @@
     border-color: #e5e7eb;
     font-size: 0.9rem;
 
-    &:hover { border-color: #16a34a; }
-    &:focus, &-focused { border-color: #16a34a; box-shadow: none; }
+    &:hover {
+      border-color: #16a34a;
+    }
+    &:focus,
+    &-focused {
+      border-color: #16a34a;
+      box-shadow: none;
+    }
   }
 
   textarea.ant-input {
@@ -130,7 +138,9 @@
     border-radius: 10px !important;
     border-color: #e5e7eb !important;
 
-    &:hover { border-color: #16a34a !important; }
+    &:hover {
+      border-color: #16a34a !important;
+    }
   }
 
   .ant-select-focused .ant-select-selector {
@@ -143,18 +153,35 @@
     border-color: #d1d5db;
     background: #fafafa;
 
-    &:hover { border-color: #16a34a; }
+    &:hover {
+      border-color: #16a34a;
+    }
   }
 
-  .ant-upload-text { font-size: 0.9rem; color: #374151; }
-  .ant-upload-hint { font-size: 0.8rem; color: #9ca3af; }
-  .ant-upload-drag-icon { font-size: 2rem; color: #16a34a; margin-bottom: 8px; }
+  .ant-upload-text {
+    font-size: 0.9rem;
+    color: #374151;
+  }
+  .ant-upload-hint {
+    font-size: 0.8rem;
+    color: #9ca3af;
+  }
+  .ant-upload-drag-icon {
+    font-size: 2rem;
+    color: #16a34a;
+    margin-bottom: 8px;
+  }
 
   .ant-btn-primary {
     background: #16a34a;
     border-color: #16a34a;
 
-    &:hover { background: #15803d; border-color: #15803d; }
-    &[disabled] { opacity: 0.5; }
+    &:hover {
+      background: #15803d;
+      border-color: #15803d;
+    }
+    &[disabled] {
+      opacity: 0.5;
+    }
   }
 }

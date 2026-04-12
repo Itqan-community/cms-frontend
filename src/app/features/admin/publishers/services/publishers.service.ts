@@ -35,14 +35,12 @@ export class PublishersService {
       httpParams = httpParams.set('ordering', params.ordering);
     }
 
-    return this.http
-      .get<PublishersListResponse>(this.apiUrl, { params: httpParams })
-      .pipe(
-        map((res) => ({
-          ...res,
-          results: res.results.map((publisher) => this.normalizePublisher(publisher)),
-        }))
-      );
+    return this.http.get<PublishersListResponse>(this.apiUrl, { params: httpParams }).pipe(
+      map((res) => ({
+        ...res,
+        results: res.results.map((publisher) => this.normalizePublisher(publisher)),
+      }))
+    );
   }
 
   getDetail(id: number): Observable<Publisher> {
@@ -74,7 +72,10 @@ export class PublishersService {
 
   private toFormData(payload: PublisherCreatePayload | PublisherUpdatePayload): FormData {
     const data = new FormData();
-    const appendString = (key: string, value: string | number | boolean | null | undefined): void => {
+    const appendString = (
+      key: string,
+      value: string | number | boolean | null | undefined
+    ): void => {
       if (value === null || value === undefined || value === '') return;
       data.append(key, String(value));
     };

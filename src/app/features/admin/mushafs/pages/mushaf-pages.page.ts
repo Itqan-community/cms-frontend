@@ -28,7 +28,15 @@ const MUSHAF_OPTIONS: MushafOption[] = [{ id: 'medina', name: 'مصحف المد
 @Component({
   selector: 'app-mushaf-pages',
   standalone: true,
-  imports: [FormsModule, NzButtonModule, NgIcon, NzSelectModule, NzSpinModule, NzTableModule, NzTagModule],
+  imports: [
+    FormsModule,
+    NzButtonModule,
+    NgIcon,
+    NzSelectModule,
+    NzSpinModule,
+    NzTableModule,
+    NzTagModule,
+  ],
   templateUrl: './mushaf-pages.page.html',
   styleUrls: ['./mushaf-pages.page.less'],
 })

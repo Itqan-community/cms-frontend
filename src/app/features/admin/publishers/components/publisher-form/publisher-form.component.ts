@@ -135,9 +135,7 @@ export class PublisherFormComponent implements OnInit {
     const payload = this.buildPayload();
     this.submitting.set(true);
     try {
-      const created = await firstValueFrom(
-        this.publishersService.createPublisher(payload)
-      );
+      const created = await firstValueFrom(this.publishersService.createPublisher(payload));
       this.message.success('تم إضافة الناشر بنجاح');
       void this.router.navigate(['/admin/publishers', created.id]);
     } catch {
@@ -171,28 +169,28 @@ export class PublisherFormComponent implements OnInit {
     if (this.editId == null) return;
     this.loadingDetail.set(true);
     this.publishersService.getDetail(this.editId).subscribe({
-        next: (data) => {
-          this.form.patchValue({
-            name_ar: data.name_ar,
-            name_en: data.name_en,
-            country: data.country ?? '',
-            website: data.website ?? '',
-            foundation_year: data.foundation_year ?? null,
-            address: data.address ?? '',
-            contact_email: data.contact_email ?? '',
-            description_ar: data.description_ar ?? '',
-            description_en: data.description_en ?? '',
-            is_verified: !!data.is_verified,
-          });
-          if (typeof data.icon === 'string' && data.icon) {
-            this.iconPreview.set(data.icon);
-          }
-          this.loadingDetail.set(false);
-        },
-        error: () => {
-          this.loadingDetail.set(false);
-        },
-      });
+      next: (data) => {
+        this.form.patchValue({
+          name_ar: data.name_ar,
+          name_en: data.name_en,
+          country: data.country ?? '',
+          website: data.website ?? '',
+          foundation_year: data.foundation_year ?? null,
+          address: data.address ?? '',
+          contact_email: data.contact_email ?? '',
+          description_ar: data.description_ar ?? '',
+          description_en: data.description_en ?? '',
+          is_verified: !!data.is_verified,
+        });
+        if (typeof data.icon === 'string' && data.icon) {
+          this.iconPreview.set(data.icon);
+        }
+        this.loadingDetail.set(false);
+      },
+      error: () => {
+        this.loadingDetail.set(false);
+      },
+    });
   }
 
   beforeIconUpload = (file: NzUploadFile): boolean => {

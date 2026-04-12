@@ -13,16 +13,12 @@ export const mushafsRoutes: Routes = [
       },
       {
         path: 'words',
-        loadComponent: () =>
-          import('./words/mushaf-words.page').then(
-            (m) => m.MushafWordsPage
-          ),
+        loadComponent: () => import('./words/mushaf-words.page').then((m) => m.MushafWordsPage),
         data: { icon: 'lucideBookmark' },
       },
       {
         path: 'ayahs',
-        loadComponent: () =>
-          import('./ayahs/ayahs.page').then((m) => m.AyahsPage),
+        loadComponent: () => import('./ayahs/ayahs.page').then((m) => m.AyahsPage),
       },
       {
         path: 'surahs',

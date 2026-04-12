@@ -9,6 +9,6 @@ export const itqanAdminGuard: CanActivateFn = () => {
   if (adminAuth.isItqanAdmin()) {
     return true;
   }
-  
+
   return router.createUrlTree(['/unauthorized']);
 };

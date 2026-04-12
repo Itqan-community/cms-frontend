@@ -8,7 +8,10 @@
   cursor: pointer;
   padding: 4px 8px;
   border-radius: var(--radius-md);
-  transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    transform 0.1s ease;
   min-width: 32px;
   min-height: 32px;
   line-height: 1;
@@ -33,17 +36,23 @@
 
   &--view {
     color: var(--color-action-view);
-    &:hover { background: var(--color-action-view-bg); }
+    &:hover {
+      background: var(--color-action-view-bg);
+    }
   }
 
   &--edit {
     color: var(--color-action-edit);
-    &:hover { background: var(--color-action-edit-bg); }
+    &:hover {
+      background: var(--color-action-edit-bg);
+    }
   }
 
   &--delete {
     color: var(--color-action-delete);
-    &:hover { background: var(--color-action-delete-bg); }
+    &:hover {
+      background: var(--color-action-delete-bg);
+    }
   }
 }
 
@@ -87,7 +96,9 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
 
   &:focus-visible {
     outline: 2px solid var(--color-primary-400);
@@ -182,7 +193,9 @@
     font-weight: 500;
     transition: color 0.15s ease;
 
-    &:hover { text-decoration: underline; }
+    &:hover {
+      text-decoration: underline;
+    }
 
     &:focus-visible {
       outline: 2px solid var(--color-primary-400);
@@ -294,7 +307,9 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    transition: background-color 0.15s ease, box-shadow 0.15s ease;
+    transition:
+      background-color 0.15s ease,
+      box-shadow 0.15s ease;
 
     &:focus-visible {
       outline: 2px solid var(--color-primary-400);
@@ -334,7 +349,9 @@
   align-items: center;
   gap: 6px;
 
-  &:first-child { margin-top: 0; }
+  &:first-child {
+    margin-top: 0;
+  }
 }
 
 .admin-desc-text {
@@ -457,7 +474,9 @@
   a {
     color: var(--admin-accent-600);
     transition: color 0.15s ease;
-    &:hover { text-decoration: underline; }
+    &:hover {
+      text-decoration: underline;
+    }
   }
 }
 

@@ -1,8 +1,12 @@
 @import '../../styles/admin-shared.less';
 
 @keyframes ayahs-shimmer {
-  0% { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
+  0% {
+    background-position: -400px 0;
+  }
+  100% {
+    background-position: 400px 0;
+  }
 }
 
 .ayahs-page {
@@ -96,18 +100,31 @@
     padding: 14px 0;
     border-bottom: 1px solid var(--admin-border-100);
 
-    &:last-child { border-bottom: none; }
+    &:last-child {
+      border-bottom: none;
+    }
   }
 
   &__cell {
     border-radius: 8px;
-    background: linear-gradient(90deg, var(--admin-surface-100) 25%, var(--admin-border-200) 50%, var(--admin-surface-100) 75%);
+    background: linear-gradient(
+      90deg,
+      var(--admin-surface-100) 25%,
+      var(--admin-border-200) 50%,
+      var(--admin-surface-100) 75%
+    );
     background-size: 800px 100%;
     animation: ayahs-shimmer 1.4s infinite;
     height: 20px;
 
-    &--sm { width: 60px; }
-    &--md { width: 100px; }
-    &--lg { flex: 1; }
+    &--sm {
+      width: 60px;
+    }
+    &--md {
+      width: 100px;
+    }
+    &--lg {
+      flex: 1;
+    }
   }
 }

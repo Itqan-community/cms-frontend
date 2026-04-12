@@ -12,7 +12,14 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-register-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, LangSwitchComponent, NgIcon],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    TranslateModule,
+    LangSwitchComponent,
+    NgIcon,
+  ],
   templateUrl: './register.page.html',
   styleUrls: ['./register.page.less'],
 })
