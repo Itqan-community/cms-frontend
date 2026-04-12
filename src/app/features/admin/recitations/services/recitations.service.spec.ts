@@ -26,22 +26,23 @@ describe('RecitationsService', () => {
   it('should expose qiraah and riwayah options from API list', (done) => {
     service.qiraahOptions().subscribe((q) => {
       expect(q).toEqual([{ id: 1, name: 'حفص' }]);
+
       service.riwayahOptions().subscribe((r) => {
         expect(r).toEqual([{ id: 11, name: 'عن عاصم' }]);
         done();
       });
 
-      const req2 = httpMock.expectOne((req) => req.url.includes('/portal/recitations/'));
+      const req2 = httpMock.expectOne((req) => req.url.includes('/portal/filters/riwayahs/'));
       req2.flush({
         count: 1,
-        results: [{ qiraah: { id: 1, name: 'حفص' }, riwayah: { id: 11, name: 'عن عاصم' } }],
+        results: [{ id: 11, name: 'عن عاصم' }],
       });
     });
 
-    const req1 = httpMock.expectOne((req) => req.url.includes('/portal/recitations/'));
+    const req1 = httpMock.expectOne((req) => req.url.includes('/portal/filters/qiraahs/'));
     req1.flush({
       count: 1,
-      results: [{ qiraah: { id: 1, name: 'حفص' }, riwayah: { id: 11, name: 'عن عاصم' } }],
+      results: [{ id: 1, name: 'حفص' }],
     });
   });
 
