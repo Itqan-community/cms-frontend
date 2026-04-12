@@ -53,9 +53,7 @@ export const routes: Routes = [
       {
         path: 'recitations',
         loadChildren: () =>
-          import('./features/admin/recitations/recitations.routes').then(
-            (m) => m.recitationRoutes
-          ),
+          import('./features/admin/recitations/recitations.routes').then((m) => m.recitationRoutes),
       },
       {
         path: 'reciters',

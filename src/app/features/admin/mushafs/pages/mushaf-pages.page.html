@@ -12,10 +12,15 @@
         (ngModelChange)="selectMushaf(mushafs[0])"
       >
         @for (m of mushafs; track m.id) {
-          <nz-option [nzValue]="m.id" [nzLabel]="m.name + ' — ' + m.pageCount + ' صفحة'"></nz-option>
+          <nz-option
+            [nzValue]="m.id"
+            [nzLabel]="m.name + ' — ' + m.pageCount + ' صفحة'"
+          ></nz-option>
         }
       </nz-select>
-      <p class="mushaf-filter-card__hint">{{ selectedMushaf().name }} - {{ selectedMushaf().pageCount }} صفحة</p>
+      <p class="mushaf-filter-card__hint">
+        {{ selectedMushaf().name }} - {{ selectedMushaf().pageCount }} صفحة
+      </p>
     </div>
   </div>
 
@@ -30,7 +35,9 @@
     } @else {
       <div class="mushaf-table-card__top">
         <nz-tag nzColor="green">المصحف: {{ selectedMushaf().name }}</nz-tag>
-        <h4 class="mushaf-table-card__title">صفحات {{ selectedMushaf().name }} ({{ pages().length }} صفحة)</h4>
+        <h4 class="mushaf-table-card__title">
+          صفحات {{ selectedMushaf().name }} ({{ pages().length }} صفحة)
+        </h4>
       </div>
       <nz-table
         #pagesTable
@@ -52,8 +59,12 @@
         <tbody>
           @for (page of pagesTable.data; track page.page_number) {
             <tr>
-              <td><nz-tag>{{ page.page_number }}</nz-tag></td>
-              <td><nz-tag nzColor="blue">الجزء {{ page.juz_number }}</nz-tag></td>
+              <td>
+                <nz-tag>{{ page.page_number }}</nz-tag>
+              </td>
+              <td>
+                <nz-tag nzColor="blue">الجزء {{ page.juz_number }}</nz-tag>
+              </td>
               <td>{{ page.surahs.join('، ') }}</td>
               <td>
                 <button nz-button nzType="default" nzSize="small">

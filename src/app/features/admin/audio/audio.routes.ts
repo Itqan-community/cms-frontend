@@ -5,9 +5,7 @@ export const audioRoutes: Routes = [
   {
     path: '',
     loadComponent: () =>
-      import('../components/coming-soon/coming-soon.component').then(
-        (m) => m.ComingSoonComponent
-      ),
+      import('../components/coming-soon/coming-soon.component').then((m) => m.ComingSoonComponent),
     data: { icon: 'lucideVolume2' },
   },
 ];

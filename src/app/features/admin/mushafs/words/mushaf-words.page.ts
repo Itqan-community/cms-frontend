@@ -14,7 +14,17 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 @Component({
   selector: 'app-mushaf-words',
   standalone: true,
-  imports: [FormsModule, NzButtonModule, NgIcon, NzInputModule, NzPaginationModule, NzSelectModule, NzSpinModule, NzTableModule, NzTagModule],
+  imports: [
+    FormsModule,
+    NzButtonModule,
+    NgIcon,
+    NzInputModule,
+    NzPaginationModule,
+    NzSelectModule,
+    NzSpinModule,
+    NzTableModule,
+    NzTagModule,
+  ],
   templateUrl: './mushaf-words.page.html',
   styleUrls: ['./mushaf-words.page.less'],
 })

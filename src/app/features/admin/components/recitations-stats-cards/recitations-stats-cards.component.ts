@@ -26,7 +26,8 @@ export class RecitationsStatsCardsComponent implements OnInit {
 
   private loadStats(): void {
     this.loading.set(true);
-    this.statsService.getStats()
+    this.statsService
+      .getStats()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {

@@ -18,14 +18,16 @@ export class RecitationsService {
   private readonly riwayahsFilterApiUrl = `${environment.ADMIN_API_BASE_URL}/filters/riwayahs/`;
 
   qiraahOptions(search?: string, page = 1, page_size = 200): Observable<NamedId[]> {
-    let params = new HttpParams().set('page', page.toString()).set('page_size', page_size.toString());
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('page_size', page_size.toString());
     if (search) params = params.set('search', search);
 
     return this.http
-      .get<{ results: Array<{ id: number; name: string; bio?: string }>; count: number }>(
-        this.qiraahsFilterApiUrl,
-        { params }
-      )
+      .get<{
+        results: Array<{ id: number; name: string; bio?: string }>;
+        count: number;
+      }>(this.qiraahsFilterApiUrl, { params })
       .pipe(map((res) => res.results.map((item) => ({ id: item.id, name: item.name }))));
   }
 
@@ -35,15 +37,17 @@ export class RecitationsService {
     page = 1,
     page_size = 200
   ): Observable<NamedId[]> {
-    let params = new HttpParams().set('page', page.toString()).set('page_size', page_size.toString());
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('page_size', page_size.toString());
     if (qiraah_id != null) params = params.set('qiraah_id', qiraah_id.toString());
     if (search) params = params.set('search', search);
 
     return this.http
-      .get<{ results: Array<{ id: number; name: string; bio?: string; qiraah_id?: number }>; count: number }>(
-        this.riwayahsFilterApiUrl,
-        { params }
-      )
+      .get<{
+        results: Array<{ id: number; name: string; bio?: string; qiraah_id?: number }>;
+        count: number;
+      }>(this.riwayahsFilterApiUrl, { params })
       .pipe(map((res) => res.results.map((item) => ({ id: item.id, name: item.name }))));
   }
 
@@ -57,8 +61,7 @@ export class RecitationsService {
       params = params.set('publisher_id', filters.publisher_id.toString());
     if (filters.reciter_id != null)
       params = params.set('reciter_id', filters.reciter_id.toString());
-    if (filters.qiraah_id != null)
-      params = params.set('qiraah_id', filters.qiraah_id.toString());
+    if (filters.qiraah_id != null) params = params.set('qiraah_id', filters.qiraah_id.toString());
     if (filters.riwayah_id != null)
       params = params.set('riwayah_id', filters.riwayah_id.toString());
     if (filters.madd_level != null) params = params.set('madd_level', filters.madd_level);

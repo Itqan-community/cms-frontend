@@ -1,11 +1,4 @@
-import {
-  Component,
-  DestroyRef,
-  EventEmitter,
-  OnInit,
-  Output,
-  inject,
-} from '@angular/core';
+import { Component, DestroyRef, EventEmitter, OnInit, Output, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslateService } from '@ngx-translate/core';
@@ -48,7 +41,6 @@ export class PublisherFiltersComponent implements OnInit {
         this.current = { ...this.current, search: term || undefined };
         this.emit();
       });
-
   }
 
   onSearchChange(value: string): void {

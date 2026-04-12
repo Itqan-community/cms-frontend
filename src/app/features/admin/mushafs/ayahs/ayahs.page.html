@@ -1,9 +1,10 @@
 <div class="ayahs-page" dir="rtl">
-
   <div class="ayahs-banner">
     <div class="ayahs-banner__content">
       <h2 class="ayahs-banner__title">الآيات القرآنية</h2>
-      <p class="ayahs-banner__desc">تصفّح جميع آيات القرآن الكريم مع إمكانية البحث والتصفية حسب السورة</p>
+      <p class="ayahs-banner__desc">
+        تصفّح جميع آيات القرآن الكريم مع إمكانية البحث والتصفية حسب السورة
+      </p>
     </div>
     <span class="ayahs-banner__count">{{ totalFiltered() | number }} آية</span>
   </div>
@@ -53,7 +54,9 @@
     <div class="admin-empty-state ayahs-empty-wrap">
       <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
       <p class="admin-empty-state__title">لا توجد آيات</p>
-      <p class="admin-empty-state__subtitle">لم يتم العثور على نتائج. حاول تغيير كلمة البحث أو السورة.</p>
+      <p class="admin-empty-state__subtitle">
+        لم يتم العثور على نتائج. حاول تغيير كلمة البحث أو السورة.
+      </p>
     </div>
   } @else {
     <div class="ayahs-table-wrapper">
@@ -77,7 +80,9 @@
         <tbody>
           @for (ayah of ayahsTable.data; track ayah.id) {
             <tr>
-              <td><nz-tag nzColor="green">{{ ayah.number }}</nz-tag></td>
+              <td>
+                <nz-tag nzColor="green">{{ ayah.number }}</nz-tag>
+              </td>
               <td>{{ ayah.chapter }}</td>
               <td>{{ ayah.surah_name }}</td>
               <td class="ayahs-table__ayah-text">{{ ayah.text }}</td>
@@ -100,5 +105,4 @@
       ></nz-pagination>
     </div>
   }
-
 </div>

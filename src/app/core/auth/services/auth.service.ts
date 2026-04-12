@@ -112,7 +112,7 @@ export class AuthService {
     this.isAuthenticated.set(false);
     this.currentUser.set(null);
     this.authStateSubject.next(false);
-    
+
     // Navigate to login instead of full page reload to prevent infinite loops on unguarded routes
     this.router.navigate(['/login']);
   }
