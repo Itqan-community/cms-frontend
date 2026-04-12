@@ -3,8 +3,6 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule, NzTableSortOrder } from 'ng-zorro-antd/table';
@@ -13,6 +11,10 @@ import { NgIcon } from '@ng-icons/core';
 import { ReciterListFilters, ReciterListItem, ReciterSorting } from '../../models/reciters.models';
 import { RecitersAdminService } from '../../services/reciters.service';
 import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
+import {
+  AdminColumnPickerComponent,
+  AdminTableColumnOption,
+} from '../../../components/admin-column-picker/admin-column-picker.component';
 import { ReciterFiltersComponent } from '../reciter-filters/reciter-filters.component';
 
 @Component({
@@ -21,7 +23,6 @@ import { ReciterFiltersComponent } from '../reciter-filters/reciter-filters.comp
   imports: [
     DatePipe,
     RouterLink,
-    NzModalModule,
     NzButtonModule,
     NzPaginationModule,
     NzSpinModule,
@@ -29,14 +30,13 @@ import { ReciterFiltersComponent } from '../reciter-filters/reciter-filters.comp
     NzToolTipModule,
     NgIcon,
     ReciterFiltersComponent,
+    AdminColumnPickerComponent,
   ],
   templateUrl: './reciters-list.component.html',
   styleUrl: './reciters-list.component.less',
 })
 export class RecitersListComponent implements OnInit {
   private readonly recitersService = inject(RecitersAdminService);
-  private readonly modal = inject(NzModalService);
-  private readonly message = inject(NzMessageService);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
 
@@ -45,6 +45,16 @@ export class RecitersListComponent implements OnInit {
   readonly page = signal(1);
   readonly pageSize = signal(10);
   readonly loading = signal(false);
+
+  readonly reciterTableStorageKey = 'admin-list-reciters';
+  readonly reciterTableColumns: AdminTableColumnOption[] = [
+    { key: 'name', label: 'الاسم' },
+    { key: 'bio', label: 'النبذة' },
+    { key: 'nationality', label: 'الجنسية' },
+    { key: 'recitations_count', label: 'التلاوات' },
+    { key: 'created', label: 'تاريخ الإضافة' },
+  ];
+  private readonly columnVisibility = signal<Record<string, boolean>>({});
 
   private activeFilters: Partial<ReciterListFilters> = {};
   private ordering: ReciterSorting | undefined;
@@ -113,31 +123,26 @@ export class RecitersListComponent implements OnInit {
     void this.router.navigate(['/admin/reciters', slug, 'edit']);
   }
 
-  onDelete(item: ReciterListItem): void {
-    this.modal.confirm({
-      nzTitle: 'هل أنت متأكد من حذف هذا القارئ؟',
-      nzContent: `<b>${item.name}</b> — هذا الإجراء لا يمكن التراجع عنه.`,
-      nzOkText: 'نعم، احذف',
-      nzOkType: 'primary',
-      nzOkDanger: true,
-      nzCancelText: 'إلغاء',
-      nzDirection: 'rtl',
-      nzOnOk: () =>
-        this.recitersService.delete(item.slug).subscribe({
-          next: () => {
-            this.message.success('تم حذف القارئ بنجاح');
-            this.load();
-          },
-          error: () => {},
-        }),
-    });
+  onReciterColumnVisibility(v: Record<string, boolean>): void {
+    this.columnVisibility.set(v);
   }
 
-  truncate(text: string, max = 80): string {
-    return text.length > max ? text.slice(0, max) + '…' : text;
+  showReciterCol(key: string): boolean {
+    return this.columnVisibility()[key] !== false;
   }
 
   countryLabel(country: string | null | undefined): string {
     return localizeCountryCodeOrName(country, this.translate.currentLang);
+  }
+
+  truncate(text: string | null | undefined, max = 120): string {
+    if (text == null || text === '') {
+      return '—';
+    }
+    const t = text.trim();
+    if (t.length <= max) {
+      return t;
+    }
+    return `${t.slice(0, max)}…`;
   }
 }

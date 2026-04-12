@@ -2,8 +2,6 @@ import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule, NzTableSortOrder } from 'ng-zorro-antd/table';
@@ -17,6 +15,10 @@ import {
   TranslationItem,
 } from '../../models/translations.models';
 import { TranslationsService } from '../../services/translations.service';
+import {
+  AdminColumnPickerComponent,
+  AdminTableColumnOption,
+} from '../../../components/admin-column-picker/admin-column-picker.component';
 import { TranslationFiltersComponent } from '../translation-filters/translation-filters.component';
 
 @Component({
@@ -25,7 +27,6 @@ import { TranslationFiltersComponent } from '../translation-filters/translation-
   imports: [
     DatePipe,
     RouterLink,
-    NzModalModule,
     NzButtonModule,
     NzPaginationModule,
     NzSpinModule,
@@ -34,14 +35,13 @@ import { TranslationFiltersComponent } from '../translation-filters/translation-
     NzToolTipModule,
     NgIcon,
     TranslationFiltersComponent,
+    AdminColumnPickerComponent,
   ],
   templateUrl: './translations-list.component.html',
   styleUrl: './translations-list.component.less',
 })
 export class TranslationsListComponent implements OnInit {
   private readonly translationsService = inject(TranslationsService);
-  private readonly modal = inject(NzModalService);
-  private readonly message = inject(NzMessageService);
   private readonly router = inject(Router);
 
   readonly translations = signal<TranslationItem[]>([]);
@@ -49,6 +49,16 @@ export class TranslationsListComponent implements OnInit {
   readonly page = signal(1);
   readonly pageSize = signal(10);
   readonly loading = signal(false);
+
+  readonly translationTableStorageKey = 'admin-list-translations';
+  readonly translationTableColumns: AdminTableColumnOption[] = [
+    { key: 'name', label: 'الاسم' },
+    { key: 'description', label: 'الوصف' },
+    { key: 'publisher', label: 'الناشر' },
+    { key: 'license', label: 'الترخيص' },
+    { key: 'created', label: 'تاريخ الإضافة' },
+  ];
+  private readonly columnVisibility = signal<Record<string, boolean>>({});
 
   private activeFilters: Partial<TranslationFilters> = {};
   private ordering: AssetSortingQuery | undefined;
@@ -116,32 +126,26 @@ export class TranslationsListComponent implements OnInit {
     void this.router.navigate(['/admin/translations', slug, 'edit']);
   }
 
-  onDelete(item: TranslationItem): void {
-    this.modal.confirm({
-      nzTitle: 'هل أنت متأكد من حذف هذه الترجمة؟',
-      nzContent: `<b>${item.name}</b> — هذا الإجراء لا يمكن التراجع عنه.`,
-      nzOkText: 'نعم، احذف',
-      nzOkType: 'primary',
-      nzOkDanger: true,
-      nzCancelText: 'إلغاء',
-      nzDirection: 'rtl',
-      nzOnOk: () =>
-        this.translationsService.delete(item.slug ?? String(item.id)).subscribe({
-          next: () => {
-            this.message.success('تم حذف الترجمة بنجاح');
-            this.load();
-          },
-          error: () => {},
-        }),
-    });
+  onTranslationColumnVisibility(v: Record<string, boolean>): void {
+    this.columnVisibility.set(v);
+  }
+
+  showTranslationCol(key: string): boolean {
+    return this.columnVisibility()[key] !== false;
   }
 
   getLicenseColor(license: string): string {
     return this.licensesColors[license as keyof typeof LicensesColors] ?? '#8c8c8c';
   }
 
-  truncate(text: string | null | undefined, max = 80): string {
-    const s = text ?? '';
-    return s.length > max ? s.slice(0, max) + '…' : s;
+  truncate(text: string | null | undefined, max = 120): string {
+    if (text == null || text === '') {
+      return '—';
+    }
+    const t = text.trim();
+    if (t.length <= max) {
+      return t;
+    }
+    return `${t.slice(0, max)}…`;
   }
 }

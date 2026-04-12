@@ -112,6 +112,15 @@
   }
 }
 
+.admin-table-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
 .admin-table-wrap {
   background: var(--admin-surface-white);
   border-radius: var(--radius-xl);
@@ -127,6 +136,10 @@
 .admin-list-row {
   cursor: pointer;
   transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--admin-surface-50);
+  }
 }
 
 .admin-list-name {

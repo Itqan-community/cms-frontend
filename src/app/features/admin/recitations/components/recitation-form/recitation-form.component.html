@@ -33,8 +33,8 @@
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>Name in English</nz-form-label>
-              <nz-form-control nzErrorTip="Name in English is required">
+              <nz-form-label>Name in English</nz-form-label>
+              <nz-form-control>
                 <input
                   nz-input
                   formControlName="name_en"
@@ -146,7 +146,7 @@
           </div>
           <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
             <nz-form-item>
-              <nz-form-label nzRequired>مستوى المد</nz-form-label>
+              <nz-form-label>مستوى المد</nz-form-label>
               <nz-form-control>
                 <nz-select formControlName="madd_level">
                   @for (m of maddOptions; track m.v) {
@@ -158,7 +158,7 @@
           </div>
           <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
             <nz-form-item>
-              <nz-form-label nzRequired>همز الميم</nz-form-label>
+              <nz-form-label>ميم الجمع</nz-form-label>
               <nz-form-control>
                 <nz-select formControlName="meem_behaviour">
                   @for (m of meemOptions; track m.v) {
@@ -170,7 +170,7 @@
           </div>
           <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
             <nz-form-item>
-              <nz-form-label nzRequired>السنة</nz-form-label>
+              <nz-form-label>السنة</nz-form-label>
               <nz-form-control nzErrorTip="أدخل سنة صحيحة">
                 <div class="recitation-form__year-wrap">
                   <nz-date-picker

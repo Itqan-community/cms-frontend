@@ -14,6 +14,14 @@
 
   <app-translation-filters (filtersChange)="onFiltersChange($event)"></app-translation-filters>
 
+  <div class="admin-table-toolbar">
+    <app-admin-column-picker
+      [storageKey]="translationTableStorageKey"
+      [columns]="translationTableColumns"
+      (visibilityChange)="onTranslationColumnVisibility($event)"
+    />
+  </div>
+
   <div class="admin-table-wrap">
     <nz-spin [nzSpinning]="loading()">
       <nz-table
@@ -26,37 +34,57 @@
       >
         <thead>
           <tr>
-            <th
-              nzWidth="200px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('name', $event)"
-            >
-              الاسم
-            </th>
-            <th>الوصف</th>
-            <th nzWidth="160px">الناشر</th>
-            <th nzWidth="120px">الترخيص</th>
-            <th
-              nzWidth="130px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('created_at', $event)"
-            >
-              تاريخ الإضافة
-            </th>
+            @if (showTranslationCol('name')) {
+              <th
+                nzWidth="200px"
+                [nzSortFn]="true"
+                (nzSortOrderChange)="onSortChange('name', $event)"
+              >
+                الاسم
+              </th>
+            }
+            @if (showTranslationCol('description')) {
+              <th nzWidth="240px">الوصف</th>
+            }
+            @if (showTranslationCol('publisher')) {
+              <th nzWidth="160px">الناشر</th>
+            }
+            @if (showTranslationCol('license')) {
+              <th nzWidth="120px">الترخيص</th>
+            }
+            @if (showTranslationCol('created')) {
+              <th
+                nzWidth="130px"
+                [nzSortFn]="true"
+                (nzSortOrderChange)="onSortChange('created_at', $event)"
+              >
+                تاريخ الإضافة
+              </th>
+            }
             <th nzWidth="120px">الإجراءات</th>
           </tr>
         </thead>
         <tbody>
           @for (tr of translationTable.data; track tr.id) {
-            <tr class="admin-list-row">
-              <td class="admin-list-name">{{ tr.name }}</td>
-              <td class="admin-list-desc">{{ truncate(tr.description) }}</td>
-              <td>{{ tr.publisher.name }}</td>
-              <td>
-                <nz-tag [nzColor]="getLicenseColor(tr.license)">{{ tr.license }}</nz-tag>
-              </td>
-              <td>{{ tr.created_at | date: 'dd/MM/yyyy' }}</td>
-              <td>
+            <tr class="admin-list-row" (click)="onView(tr.slug ?? tr.id + '')">
+              @if (showTranslationCol('name')) {
+                <td class="admin-list-name">{{ tr.name }}</td>
+              }
+              @if (showTranslationCol('description')) {
+                <td class="admin-list-desc">{{ truncate(tr.description) }}</td>
+              }
+              @if (showTranslationCol('publisher')) {
+                <td>{{ tr.publisher.name }}</td>
+              }
+              @if (showTranslationCol('license')) {
+                <td>
+                  <nz-tag [nzColor]="getLicenseColor(tr.license)">{{ tr.license }}</nz-tag>
+                </td>
+              }
+              @if (showTranslationCol('created')) {
+                <td>{{ tr.created_at | date: 'dd/MM/yyyy' }}</td>
+              }
+              <td (click)="$event.stopPropagation()">
                 <div class="admin-list-actions">
                   <button
                     type="button"
@@ -79,17 +107,6 @@
                     (click)="onEdit(tr.slug ?? tr.id + '')"
                   >
                     <ng-icon name="lucideSquarePen" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    nz-button
-                    nzType="text"
-                    class="action-icon action-icon--delete"
-                    nz-tooltip
-                    nzTooltipTitle="حذف"
-                    (click)="onDelete(tr)"
-                  >
-                    <ng-icon name="lucideTrash2" aria-hidden="true" />
                   </button>
                 </div>
               </td>

@@ -61,7 +61,7 @@ export class TafsirFormComponent implements OnInit {
 
   readonly form = this.fb.group({
     name_ar: ['', [Validators.required, Validators.minLength(2)]],
-    name_en: ['', [Validators.required, Validators.minLength(2)]],
+    name_en: [''],
     description_ar: ['', [Validators.required]],
     description_en: ['', [Validators.required]],
     long_description_ar: ['', [Validators.required]],

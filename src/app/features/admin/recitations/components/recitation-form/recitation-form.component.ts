@@ -1,7 +1,13 @@
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
@@ -20,6 +26,18 @@ import { ReciterListItem } from '../../../reciters/models/reciters.models';
 import { RecitersAdminService } from '../../../reciters/services/reciters.service';
 import { MaddLevel, MeemBehavior, NamedId } from '../../models/recitations.models';
 import { RecitationsService } from '../../services/recitations.service';
+
+/** Hijri year optional: empty is valid; if set, must be within range */
+function optionalHijriYearRange(minY: number, maxY: number) {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const raw = control.value;
+    if (raw === null || raw === undefined || raw === '') return null;
+    const n = Number(raw);
+    if (!Number.isFinite(n)) return { yearInvalid: true };
+    if (n < minY || n > maxY) return { yearRange: true };
+    return null;
+  };
+}
 
 @Component({
   selector: 'app-recitation-form',
@@ -78,19 +96,16 @@ export class RecitationFormComponent implements OnInit {
 
   readonly form = this.fb.group({
     name_ar: ['', [Validators.required, Validators.minLength(2)]],
-    name_en: ['', [Validators.required, Validators.minLength(2)]],
+    name_en: [''],
     description_ar: ['', [Validators.required]],
     description_en: ['', [Validators.required]],
     publisher_id: [null as number | null, [Validators.required]],
     reciter_id: [null as number | null, [Validators.required]],
     qiraah_id: [null as number | null, [Validators.required]],
     riwayah_id: [null as number | null],
-    madd_level: [null as MaddLevel | null, [Validators.required]],
-    meem_behaviour: [null as MeemBehavior | null, [Validators.required]],
-    year: [
-      null as number | null,
-      [Validators.required, Validators.min(this.minHijriYear), Validators.max(this.maxHijriYear)],
-    ],
+    madd_level: [null as MaddLevel | null],
+    meem_behaviour: [null as MeemBehavior | null],
+    year: [null as number | null, [optionalHijriYearRange(1300, 1600)]],
     license: ['', [Validators.required]],
   });
 
@@ -145,9 +160,9 @@ export class RecitationFormComponent implements OnInit {
       reciter_id: v.reciter_id as number,
       qiraah_id: v.qiraah_id as number,
       riwayah_id: v.riwayah_id ?? null,
-      madd_level: v.madd_level as MaddLevel,
-      meem_behaviour: v.meem_behaviour as MeemBehavior,
-      year: v.year as number,
+      madd_level: v.madd_level ?? null,
+      meem_behaviour: v.meem_behaviour ?? null,
+      year: v.year ?? null,
       license: v.license ?? '',
     };
 

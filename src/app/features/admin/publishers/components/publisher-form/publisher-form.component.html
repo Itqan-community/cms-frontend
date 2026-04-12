@@ -40,8 +40,8 @@
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>Name in English</nz-form-label>
-              <nz-form-control nzErrorTip="English name is required">
+              <nz-form-label>Name in English</nz-form-label>
+              <nz-form-control>
                 <input
                   nz-input
                   formControlName="name_en"
@@ -189,12 +189,14 @@
             </nz-form-item>
           </div>
         </div>
+        <!-- is_verified (commented out — do not delete)
         <nz-form-item>
           <nz-form-label>ناشر موثق</nz-form-label>
           <nz-form-control>
             <nz-switch formControlName="is_verified"></nz-switch>
           </nz-form-control>
         </nz-form-item>
+        -->
       </div>
 
       <div class="publisher-form__footer">

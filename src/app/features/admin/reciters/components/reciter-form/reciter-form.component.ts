@@ -49,10 +49,10 @@ export class ReciterFormComponent implements OnInit {
 
   readonly form = this.fb.group({
     name_ar: ['', [Validators.required, Validators.minLength(2)]],
-    name_en: ['', [Validators.required, Validators.minLength(2)]],
+    name_en: [''],
     bio_ar: [''],
     bio_en: [''],
-    nationality: ['', [Validators.required]],
+    nationality: [''],
     date_of_death: [''],
   });
 

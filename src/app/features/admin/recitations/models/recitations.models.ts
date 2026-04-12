@@ -73,9 +73,9 @@ export interface RecitationFormValue {
   reciter_id: number;
   qiraah_id: number;
   riwayah_id: number | null;
-  madd_level: MaddLevel;
-  meem_behaviour: MeemBehavior;
-  year: number;
+  madd_level: MaddLevel | null;
+  meem_behaviour: MeemBehavior | null;
+  year: number | null;
   license: string;
 }
 

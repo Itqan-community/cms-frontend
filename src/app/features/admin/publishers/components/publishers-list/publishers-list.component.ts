@@ -3,17 +3,18 @@ import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule, NzTableSortOrder } from 'ng-zorro-antd/table';
-import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NgIcon } from '@ng-icons/core';
 import { Publisher, PublisherUiFilters } from '../../models/publishers-stats.models';
 import { PublishersService } from '../../services/publishers.service';
 import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
+import {
+  AdminColumnPickerComponent,
+  AdminTableColumnOption,
+} from '../../../components/admin-column-picker/admin-column-picker.component';
 import { PublisherFiltersComponent } from '../publisher-filters/publisher-filters.component';
 
 @Component({
@@ -22,23 +23,20 @@ import { PublisherFiltersComponent } from '../publisher-filters/publisher-filter
   imports: [
     DatePipe,
     RouterLink,
-    NzModalModule,
     NzButtonModule,
     NzPaginationModule,
     NzSpinModule,
     NzTableModule,
-    NzTagModule,
     NzToolTipModule,
     NgIcon,
     PublisherFiltersComponent,
+    AdminColumnPickerComponent,
   ],
   templateUrl: './publishers-list.component.html',
   styleUrl: './publishers-list.component.less',
 })
 export class PublishersListComponent implements OnInit {
   private readonly publishersService = inject(PublishersService);
-  private readonly modal = inject(NzModalService);
-  private readonly message = inject(NzMessageService);
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
 
@@ -47,6 +45,15 @@ export class PublishersListComponent implements OnInit {
   readonly page = signal(1);
   readonly pageSize = signal(10);
   readonly loading = signal(false);
+
+  readonly publisherTableStorageKey = 'admin-list-publishers';
+  readonly publisherTableColumns: AdminTableColumnOption[] = [
+    { key: 'name', label: 'الاسم' },
+    { key: 'country', label: 'الدولة' },
+    { key: 'description', label: 'الوصف' },
+    { key: 'created', label: 'تاريخ الإضافة' },
+  ];
+  private readonly columnVisibility = signal<Record<string, boolean>>({});
 
   private activeFilters: PublisherUiFilters = {};
   private ordering: string | undefined;
@@ -112,33 +119,31 @@ export class PublishersListComponent implements OnInit {
     void this.router.navigate(['/admin/publishers', id, 'edit']);
   }
 
-  onDelete(item: Publisher): void {
-    const name = item.name ?? item.name_ar ?? item.name_en ?? 'هذا الناشر';
-    this.modal.confirm({
-      nzTitle: 'تأكيد الحذف (Confirm Deletion)',
-      nzContent: `<b>${name}</b> — هذا الإجراء لا يمكن التراجع عنه.`,
-      nzOkText: 'نعم، احذف',
-      nzOkType: 'primary',
-      nzOkDanger: true,
-      nzCancelText: 'إلغاء',
-      nzDirection: 'rtl',
-      nzOnOk: () =>
-        this.publishersService.deletePublisher(item.id).subscribe({
-          next: () => {
-            this.message.success('تم حذف الناشر بنجاح');
-            this.load();
-          },
-          error: () => {},
-        }),
-    });
+  onPublisherColumnVisibility(v: Record<string, boolean>): void {
+    this.columnVisibility.set(v);
   }
 
-  truncate(text: string | undefined, max = 80): string {
-    if (!text) return '—';
-    return text.length > max ? text.slice(0, max) + '…' : text;
+  showPublisherCol(key: string): boolean {
+    return this.columnVisibility()[key] !== false;
   }
 
   countryLabel(country: string | null | undefined): string {
     return localizeCountryCodeOrName(country, this.translate.currentLang);
+  }
+
+  publisherDescriptionPreview(p: Publisher): string {
+    const raw = p.description_ar ?? p.description_en ?? p.description ?? '';
+    return this.truncate(raw);
+  }
+
+  private truncate(text: string | null | undefined, max = 120): string {
+    if (text == null || text === '') {
+      return '—';
+    }
+    const t = text.trim();
+    if (t.length <= max) {
+      return t;
+    }
+    return `${t.slice(0, max)}…`;
   }
 }

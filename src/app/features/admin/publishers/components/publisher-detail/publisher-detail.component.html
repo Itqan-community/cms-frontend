@@ -27,11 +27,13 @@
           <p class="admin-hero-name-en" dir="ltr">{{ p.name_en }}</p>
         </div>
         <div class="admin-hero-meta">
+          <!-- is_verified (commented out — do not delete)
           @if (p.is_verified) {
             <nz-tag nzColor="success">موثق</nz-tag>
           } @else {
             <nz-tag>غير موثق</nz-tag>
           }
+          -->
           @if (p.created_at) {
             <span class="admin-hero-meta__date">
               <ng-icon name="lucideCalendar" />

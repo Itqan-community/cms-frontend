@@ -29,7 +29,7 @@ export class PublisherFiltersComponent implements OnInit {
 
   searchValue = '';
   selectedCountry: string | null = null;
-  selectedVerified: boolean | null = null;
+  // selectedVerified: boolean | null = null; // is_verified (commented out — do not delete)
   isFiltersModalOpen = false;
 
   private current: PublisherUiFilters = {};
@@ -58,11 +58,11 @@ export class PublisherFiltersComponent implements OnInit {
 
   clearAdvancedFilters(): void {
     this.selectedCountry = null;
-    this.selectedVerified = null;
+    // this.selectedVerified = null;
     this.current = {
       ...this.current,
       country: undefined,
-      is_verified: undefined,
+      // is_verified: undefined,
     };
     this.emit();
   }
@@ -73,6 +73,7 @@ export class PublisherFiltersComponent implements OnInit {
     this.emit();
   }
 
+  /* is_verified (commented out — do not delete)
   onVerifiedChange(value: boolean | null): void {
     this.selectedVerified = value;
     const next = { ...this.current };
@@ -84,6 +85,7 @@ export class PublisherFiltersComponent implements OnInit {
     this.current = next;
     this.emit();
   }
+  */
 
   private emit(): void {
     this.filtersChange.emit(this.current);

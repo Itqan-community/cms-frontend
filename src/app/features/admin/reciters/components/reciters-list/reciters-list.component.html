@@ -14,6 +14,14 @@
 
   <app-reciter-filters (filtersChange)="onFiltersChange($event)"></app-reciter-filters>
 
+  <div class="admin-table-toolbar">
+    <app-admin-column-picker
+      [storageKey]="reciterTableStorageKey"
+      [columns]="reciterTableColumns"
+      (visibilityChange)="onReciterColumnVisibility($event)"
+    />
+  </div>
+
   <div class="admin-table-wrap">
     <nz-spin [nzSpinning]="loading()">
       <nz-table
@@ -26,41 +34,61 @@
       >
         <thead>
           <tr>
-            <th
-              nzWidth="200px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('name', $event)"
-            >
-              الاسم
-            </th>
-            <th>النبذة</th>
-            <th nzWidth="100px">الجنسية</th>
-            <th
-              nzWidth="110px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('recitations_count', $event)"
-            >
-              التلاوات
-            </th>
-            <th
-              nzWidth="130px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('created_at', $event)"
-            >
-              تاريخ الإضافة
-            </th>
+            @if (showReciterCol('name')) {
+              <th
+                nzWidth="200px"
+                [nzSortFn]="true"
+                (nzSortOrderChange)="onSortChange('name', $event)"
+              >
+                الاسم
+              </th>
+            }
+            @if (showReciterCol('bio')) {
+              <th nzWidth="240px">النبذة</th>
+            }
+            @if (showReciterCol('nationality')) {
+              <th nzWidth="100px">الجنسية</th>
+            }
+            @if (showReciterCol('recitations_count')) {
+              <th
+                nzWidth="110px"
+                [nzSortFn]="true"
+                (nzSortOrderChange)="onSortChange('recitations_count', $event)"
+              >
+                التلاوات
+              </th>
+            }
+            @if (showReciterCol('created')) {
+              <th
+                nzWidth="130px"
+                [nzSortFn]="true"
+                (nzSortOrderChange)="onSortChange('created_at', $event)"
+              >
+                تاريخ الإضافة
+              </th>
+            }
             <th nzWidth="120px">الإجراءات</th>
           </tr>
         </thead>
         <tbody>
           @for (reciter of reciterTable.data; track reciter.id) {
-            <tr class="admin-list-row">
-              <td class="admin-list-name">{{ reciter.name }}</td>
-              <td class="admin-list-desc">{{ truncate(reciter.bio) }}</td>
-              <td>{{ countryLabel(reciter.nationality) }}</td>
-              <td>{{ reciter.recitations_count }}</td>
-              <td>{{ reciter.created_at | date: 'dd/MM/yyyy' }}</td>
-              <td>
+            <tr class="admin-list-row" (click)="onView(reciter.slug)">
+              @if (showReciterCol('name')) {
+                <td class="admin-list-name">{{ reciter.name }}</td>
+              }
+              @if (showReciterCol('bio')) {
+                <td class="admin-list-desc">{{ truncate(reciter.bio) }}</td>
+              }
+              @if (showReciterCol('nationality')) {
+                <td>{{ countryLabel(reciter.nationality) }}</td>
+              }
+              @if (showReciterCol('recitations_count')) {
+                <td>{{ reciter.recitations_count }}</td>
+              }
+              @if (showReciterCol('created')) {
+                <td>{{ reciter.created_at | date: 'dd/MM/yyyy' }}</td>
+              }
+              <td (click)="$event.stopPropagation()">
                 <div class="admin-list-actions">
                   <button
                     type="button"
@@ -83,17 +111,6 @@
                     (click)="onEdit(reciter.slug)"
                   >
                     <ng-icon name="lucideSquarePen" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    nz-button
-                    nzType="text"
-                    class="action-icon action-icon--delete"
-                    nz-tooltip
-                    nzTooltipTitle="حذف"
-                    (click)="onDelete(reciter)"
-                  >
-                    <ng-icon name="lucideTrash2" aria-hidden="true" />
                   </button>
                 </div>
               </td>

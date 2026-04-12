@@ -14,6 +14,14 @@
 
   <app-publisher-filters (filtersChange)="onFiltersChange($event)"></app-publisher-filters>
 
+  <div class="admin-table-toolbar">
+    <app-admin-column-picker
+      [storageKey]="publisherTableStorageKey"
+      [columns]="publisherTableColumns"
+      (visibilityChange)="onPublisherColumnVisibility($event)"
+    />
+  </div>
+
   <div class="admin-table-wrap">
     <nz-spin [nzSpinning]="loading()">
       <nz-table
@@ -26,30 +34,49 @@
       >
         <thead>
           <tr>
-            <th
-              nzWidth="220px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('name', $event)"
-            >
-              الاسم
-            </th>
-            <th nzWidth="120px">الدولة</th>
+            @if (showPublisherCol('name')) {
+              <th
+                nzWidth="220px"
+                [nzSortFn]="true"
+                (nzSortOrderChange)="onSortChange('name', $event)"
+              >
+                الاسم
+              </th>
+            }
+            @if (showPublisherCol('country')) {
+              <th nzWidth="120px">الدولة</th>
+            }
+            @if (showPublisherCol('description')) {
+              <th nzWidth="240px">الوصف</th>
+            }
+            <!-- is_verified column (commented out — do not delete)
             <th nzWidth="100px">موثق</th>
-            <th
-              nzWidth="130px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('created_at', $event)"
-            >
-              تاريخ الإضافة
-            </th>
+            -->
+            @if (showPublisherCol('created')) {
+              <th
+                nzWidth="130px"
+                [nzSortFn]="true"
+                (nzSortOrderChange)="onSortChange('created_at', $event)"
+              >
+                تاريخ الإضافة
+              </th>
+            }
             <th nzWidth="120px">الإجراءات</th>
           </tr>
         </thead>
         <tbody>
           @for (p of pubTable.data; track p.id) {
-            <tr class="admin-list-row">
-              <td class="admin-list-name">{{ p.name || p.name_ar || p.name_en || '—' }}</td>
-              <td>{{ countryLabel(p.country) }}</td>
+            <tr class="admin-list-row" (click)="onView(p.id)">
+              @if (showPublisherCol('name')) {
+                <td class="admin-list-name">{{ p.name || p.name_ar || p.name_en || '—' }}</td>
+              }
+              @if (showPublisherCol('country')) {
+                <td>{{ countryLabel(p.country) }}</td>
+              }
+              @if (showPublisherCol('description')) {
+                <td class="admin-list-desc">{{ publisherDescriptionPreview(p) }}</td>
+              }
+              <!-- is_verified cell (commented out — do not delete)
               <td>
                 @if (p.is_verified) {
                   <nz-tag nzColor="success">موثق</nz-tag>
@@ -57,8 +84,11 @@
                   <nz-tag>غير موثق</nz-tag>
                 }
               </td>
-              <td>{{ p.created_at | date: 'dd/MM/yyyy' }}</td>
-              <td>
+              -->
+              @if (showPublisherCol('created')) {
+                <td>{{ p.created_at | date: 'dd/MM/yyyy' }}</td>
+              }
+              <td (click)="$event.stopPropagation()">
                 <div class="admin-list-actions">
                   <button
                     type="button"
@@ -81,17 +111,6 @@
                     (click)="onEdit(p.id)"
                   >
                     <ng-icon name="lucideSquarePen" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    nz-button
-                    nzType="text"
-                    class="action-icon action-icon--delete"
-                    nz-tooltip
-                    nzTooltipTitle="حذف"
-                    (click)="onDelete(p)"
-                  >
-                    <ng-icon name="lucideTrash2" aria-hidden="true" />
                   </button>
                 </div>
               </td>

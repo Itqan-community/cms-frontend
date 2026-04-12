@@ -12,12 +12,8 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
-import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
-import {
-  PublisherCreatePayload,
-  PublisherUpdatePayload,
-} from '../../models/publishers-stats.models';
+import { PublisherUpdatePayload } from '../../models/publishers-stats.models';
 import { NATIONALITY } from '../../../reciters/nationality.enum';
 import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
 import { PublishersService } from '../../services/publishers.service';
@@ -35,7 +31,6 @@ import { PublishersService } from '../../services/publishers.service';
     NzInputModule,
     NzSelectModule,
     NzSkeletonModule,
-    NzSwitchModule,
     NzUploadModule,
   ],
   templateUrl: './publisher-form.component.html',
@@ -60,7 +55,7 @@ export class PublisherFormComponent implements OnInit {
 
   readonly form = this.fb.group({
     name_ar: ['', [Validators.required, Validators.minLength(2)]],
-    name_en: ['', [Validators.required, Validators.minLength(2)]],
+    name_en: [''],
     country: [''],
     website: [''],
     foundation_year: [null as number | null],
@@ -68,7 +63,7 @@ export class PublisherFormComponent implements OnInit {
     contact_email: ['', [Validators.email]],
     description_ar: [''],
     description_en: [''],
-    is_verified: [false],
+    // is_verified: [false],
   });
 
   private editId: number | null = null;
@@ -139,6 +134,7 @@ export class PublisherFormComponent implements OnInit {
       this.message.success('تم إضافة الناشر بنجاح');
       void this.router.navigate(['/admin/publishers', created.id]);
     } catch {
+      return Promise.reject(new Error('save failed'));
     } finally {
       this.submitting.set(false);
     }
@@ -161,8 +157,8 @@ export class PublisherFormComponent implements OnInit {
       contact_email: v.contact_email?.trim() || undefined,
       description_ar: v.description_ar?.trim() || undefined,
       description_en: v.description_en?.trim() || undefined,
-      is_verified: !!v.is_verified,
-    };
+      // is_verified: !!v.is_verified,
+    } as PublisherUpdatePayload;
   }
 
   private loadForEdit(): void {
@@ -180,7 +176,7 @@ export class PublisherFormComponent implements OnInit {
           contact_email: data.contact_email ?? '',
           description_ar: data.description_ar ?? '',
           description_en: data.description_en ?? '',
-          is_verified: !!data.is_verified,
+          // is_verified: !!data.is_verified,
         });
         if (typeof data.icon === 'string' && data.icon) {
           this.iconPreview.set(data.icon);

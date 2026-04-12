@@ -141,7 +141,7 @@ import { RecitationsService } from '../../services/recitations.service';
 
             <nz-select
               class="recitation-filters__select"
-              nzPlaceHolder="همز الميم"
+              nzPlaceHolder="ميم الجمع"
               nzSize="default"
               nzAllowClear
               [ngModel]="selectedMeem"
