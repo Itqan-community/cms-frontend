@@ -1,17 +1,19 @@
-<div class="mushaf-words" dir="rtl">
+<div class="mushaf-words">
   <div class="mushaf-filter-card">
     <div class="mushaf-filter-card__header">
-      <h3 class="mushaf-filter-card__title">جدول الكلمات</h3>
+      <h3 class="mushaf-filter-card__title">{{ 'ADMIN.MUSHAFS.WORDS_TABLE_TITLE' | translate }}</h3>
       <p class="mushaf-filter-card__hint">
-        انقر على أي كلمة لعرض الإعراب والمعاني والمشاريع المرتبطة بها
+        {{ 'ADMIN.MUSHAFS.WORDS_HINT' | translate }}
       </p>
     </div>
 
     <div class="words-filter-grid">
       <div class="filter-group">
-        <label class="mushaf-filter-card__label">فلترة حسب السورة</label>
+        <label class="mushaf-filter-card__label">{{
+          'ADMIN.MUSHAFS.FILTER_BY_SURAH' | translate
+        }}</label>
         <nz-select
-          nzPlaceHolder="جميع السور"
+          [nzPlaceHolder]="'ADMIN.MUSHAFS.ALL_SURAHS' | translate"
           nzAllowClear
           nzShowSearch
           [ngModel]="selectedSurahId()"
@@ -27,14 +29,16 @@
         </nz-select>
       </div>
       <div class="filter-group">
-        <label class="mushaf-filter-card__label">بحث عن كلمة</label>
+        <label class="mushaf-filter-card__label">{{
+          'ADMIN.MUSHAFS.SEARCH_WORD_LABEL' | translate
+        }}</label>
         <nz-input-group [nzSuffix]="searchSuffix">
           <input
             nz-input
             type="text"
             [ngModel]="searchTerm()"
             (ngModelChange)="onSearchChange($event)"
-            placeholder="ابحث عن كلمة..."
+            [placeholder]="'ADMIN.MUSHAFS.SEARCH_WORD_PLACEHOLDER' | translate"
           />
         </nz-input-group>
         <ng-template #searchSuffix>
@@ -45,11 +49,12 @@
 
     <div class="mushaf-filter-card__actions">
       <span class="results-count"
-        >عدد النتائج: <strong>{{ totalResults() }}</strong> كلمة</span
+        >{{ 'ADMIN.MUSHAFS.RESULTS_LABEL' | translate }} <strong>{{ totalResults() }}</strong>
+        {{ 'ADMIN.MUSHAFS.WORDS_UNIT' | translate }}</span
       >
       <button nz-button nzType="default" nzSize="small" (click)="clearFilters()">
         <ng-icon name="lucideX" />
-        مسح جميع الفلاتر
+        {{ 'ADMIN.MUSHAFS.CLEAR_ALL_FILTERS' | translate }}
       </button>
     </div>
   </div>
@@ -60,7 +65,7 @@
     } @else if (filteredWords().length === 0) {
       <div class="admin-empty-state">
         <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
-        <p class="admin-empty-state__title">لا توجد كلمات مطابقة للبحث</p>
+        <p class="admin-empty-state__title">{{ 'ADMIN.MUSHAFS.WORDS_EMPTY' | translate }}</p>
       </div>
     } @else {
       <nz-table
@@ -72,13 +77,13 @@
       >
         <thead>
           <tr>
-            <th nzWidth="140px">رقم الكلمة</th>
-            <th nzWidth="180px">الرسم العثماني</th>
-            <th nzWidth="160px">الرسم الإملائي</th>
-            <th nzWidth="130px">اسم السورة</th>
-            <th nzWidth="90px">رقم السورة</th>
-            <th nzWidth="90px">رقم الآية</th>
-            <th nzWidth="120px">رقم الكلمة في الآية</th>
+            <th nzWidth="140px">{{ 'ADMIN.MUSHAFS.COL_WORD_ID' | translate }}</th>
+            <th nzWidth="180px">{{ 'ADMIN.MUSHAFS.COL_UTHMANI' | translate }}</th>
+            <th nzWidth="160px">{{ 'ADMIN.MUSHAFS.COL_SPELLING' | translate }}</th>
+            <th nzWidth="130px">{{ 'ADMIN.MUSHAFS.COL_WORD_SURAH_NAME' | translate }}</th>
+            <th nzWidth="90px">{{ 'ADMIN.MUSHAFS.COL_WORD_SURAH_ID' | translate }}</th>
+            <th nzWidth="90px">{{ 'ADMIN.MUSHAFS.COL_WORD_AYAH_ID' | translate }}</th>
+            <th nzWidth="120px">{{ 'ADMIN.MUSHAFS.COL_WORD_POSITION' | translate }}</th>
           </tr>
         </thead>
         <tbody>

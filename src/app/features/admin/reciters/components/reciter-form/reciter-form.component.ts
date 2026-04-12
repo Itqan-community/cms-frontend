@@ -2,7 +2,7 @@ import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -29,6 +29,7 @@ import { localizeCountryCodeOrName } from '../../../utils/display-localization.u
     NzInputModule,
     NzSelectModule,
     NzSkeletonModule,
+    TranslateModule,
   ],
   templateUrl: './reciter-form.component.html',
   styleUrl: './reciter-form.component.less',
@@ -94,7 +95,7 @@ export class ReciterFormComponent implements OnInit {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (res: ReciterDetails) => {
-            this.message.success('تم تحديث القارئ بنجاح');
+            this.message.success(this.translate.instant('ADMIN.RECITERS.MESSAGES.UPDATE_SUCCESS'));
             this.submitting.set(false);
             void this.router.navigate(['/admin/reciters', res.slug]);
           },
@@ -110,7 +111,7 @@ export class ReciterFormComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res: ReciterListItem) => {
-          this.message.success('تم إضافة القارئ بنجاح');
+          this.message.success(this.translate.instant('ADMIN.RECITERS.MESSAGES.CREATE_SUCCESS'));
           this.submitting.set(false);
           void this.router.navigate(['/admin/reciters', res.slug]);
         },

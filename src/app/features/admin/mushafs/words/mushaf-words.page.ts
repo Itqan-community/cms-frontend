@@ -10,6 +10,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-mushaf-words',
@@ -24,6 +25,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
     NzSpinModule,
     NzTableModule,
     NzTagModule,
+    TranslateModule,
   ],
   templateUrl: './mushaf-words.page.html',
   styleUrls: ['./mushaf-words.page.less'],
@@ -96,8 +98,9 @@ export class MushafWordsPage implements OnInit {
     this.currentPage.set(1);
   }
 
-  onSurahChange(surahId: any) {
-    const sid = surahId === 'null' || surahId === null ? null : Number(surahId);
+  onSurahChange(surahId: number | string | null | undefined): void {
+    const sid =
+      surahId === 'null' || surahId === null || surahId === undefined ? null : Number(surahId);
     this.selectedSurahId.set(sid);
     this.currentPage.set(1);
   }

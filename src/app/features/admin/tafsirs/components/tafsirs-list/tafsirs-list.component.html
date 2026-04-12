@@ -1,13 +1,13 @@
-<div class="tafsirs-list admin-list-page" dir="rtl">
+<div class="tafsirs-list admin-list-page">
   <div class="admin-list-header">
     <div class="admin-list-header__text">
-      <h2 class="admin-list-header__title">التفاسير</h2>
-      <p class="admin-list-header__subtitle">إدارة تفاسير القرآن الكريم</p>
+      <h2 class="admin-list-header__title">{{ 'ADMIN.TAFSIRS.TITLE' | translate }}</h2>
+      <p class="admin-list-header__subtitle">{{ 'ADMIN.TAFSIRS.SUBTITLE' | translate }}</p>
     </div>
     <a routerLink="/admin/tafsirs/create">
       <button nz-button nzType="primary" class="admin-add-btn">
         <ng-icon name="lucidePlus" aria-hidden="true" />
-        إضافة تفسير
+        {{ 'ADMIN.TAFSIRS.ADD_BUTTON' | translate }}
       </button>
     </a>
   </div>
@@ -40,17 +40,17 @@
                 [nzSortFn]="true"
                 (nzSortOrderChange)="onSortChange('name', $event)"
               >
-                الاسم
+                {{ 'ADMIN.TAFSIRS.COLUMNS.NAME' | translate }}
               </th>
             }
             @if (showTafsirCol('description')) {
-              <th nzWidth="240px">الوصف</th>
+              <th nzWidth="240px">{{ 'ADMIN.TAFSIRS.COLUMNS.DESCRIPTION' | translate }}</th>
             }
             @if (showTafsirCol('publisher')) {
-              <th nzWidth="160px">الناشر</th>
+              <th nzWidth="160px">{{ 'ADMIN.TAFSIRS.COLUMNS.PUBLISHER' | translate }}</th>
             }
             @if (showTafsirCol('license')) {
-              <th nzWidth="120px">الترخيص</th>
+              <th nzWidth="120px">{{ 'ADMIN.TAFSIRS.COLUMNS.LICENSE' | translate }}</th>
             }
             @if (showTafsirCol('created')) {
               <th
@@ -58,10 +58,10 @@
                 [nzSortFn]="true"
                 (nzSortOrderChange)="onSortChange('created_at', $event)"
               >
-                تاريخ الإضافة
+                {{ 'ADMIN.TAFSIRS.COLUMNS.CREATED_AT' | translate }}
               </th>
             }
-            <th nzWidth="120px">الإجراءات</th>
+            <th nzWidth="120px">{{ 'ADMIN.TAFSIRS.COLUMNS.ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -92,7 +92,7 @@
                     nzType="text"
                     class="action-icon action-icon--view"
                     nz-tooltip
-                    nzTooltipTitle="عرض"
+                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_VIEW' | translate"
                     (click)="onView(tafsir.slug)"
                   >
                     <ng-icon name="lucideEye" aria-hidden="true" />
@@ -103,7 +103,7 @@
                     nzType="text"
                     class="action-icon action-icon--edit"
                     nz-tooltip
-                    nzTooltipTitle="تعديل"
+                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_EDIT' | translate"
                     (click)="onEdit(tafsir.slug)"
                   >
                     <ng-icon name="lucideSquarePen" aria-hidden="true" />
@@ -120,8 +120,8 @@
   <ng-template #emptyTpl>
     <div class="admin-empty-state">
       <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
-      <p class="admin-empty-state__title">لا توجد تفاسير</p>
-      <p class="admin-empty-state__subtitle">لم يتم العثور على نتائج. حاول تعديل معايير البحث.</p>
+      <p class="admin-empty-state__title">{{ 'ADMIN.TAFSIRS.EMPTY_TITLE' | translate }}</p>
+      <p class="admin-empty-state__subtitle">{{ 'ADMIN.COMMON.EMPTY_SUBTITLE' | translate }}</p>
     </div>
   </ng-template>
 

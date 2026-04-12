@@ -1,7 +1,7 @@
 <div class="admin-section-layout">
   <div class="admin-section-layout__header">
-    <h2 class="admin-section-layout__title">{{ title() }}</h2>
-    <p class="admin-section-layout__description">{{ description() }}</p>
+    <h2 class="admin-section-layout__title">{{ title() | translate }}</h2>
+    <p class="admin-section-layout__description">{{ description() | translate }}</p>
   </div>
 
   <div class="admin-section-layout__sub-tabs">
@@ -15,7 +15,7 @@
         @if (tab.icon) {
           <ng-icon [name]="tab.icon!" class="admin-section-layout__sub-tab-icon" />
         }
-        <span>{{ tab.label }}</span>
+        <span>{{ tab.label | translate }}</span>
       </a>
     }
   </div>

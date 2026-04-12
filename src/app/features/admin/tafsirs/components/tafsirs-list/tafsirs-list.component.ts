@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -32,6 +33,7 @@ import { TafsirFiltersComponent } from '../tafsir-filters/tafsir-filters.compone
     NgIcon,
     TafsirFiltersComponent,
     AdminColumnPickerComponent,
+    TranslateModule,
   ],
   templateUrl: './tafsirs-list.component.html',
   styleUrl: './tafsirs-list.component.less',
@@ -48,11 +50,11 @@ export class TafsirsListComponent implements OnInit {
 
   readonly tafsirTableStorageKey = 'admin-list-tafsirs';
   readonly tafsirTableColumns: AdminTableColumnOption[] = [
-    { key: 'name', label: 'الاسم' },
-    { key: 'description', label: 'الوصف' },
-    { key: 'publisher', label: 'الناشر' },
-    { key: 'license', label: 'الترخيص' },
-    { key: 'created', label: 'تاريخ الإضافة' },
+    { key: 'name', label: 'ADMIN.TAFSIRS.COLUMNS.NAME' },
+    { key: 'description', label: 'ADMIN.TAFSIRS.COLUMNS.DESCRIPTION' },
+    { key: 'publisher', label: 'ADMIN.TAFSIRS.COLUMNS.PUBLISHER' },
+    { key: 'license', label: 'ADMIN.TAFSIRS.COLUMNS.LICENSE' },
+    { key: 'created', label: 'ADMIN.TAFSIRS.COLUMNS.CREATED_AT' },
   ];
   private readonly columnVisibility = signal<Record<string, boolean>>({});
 

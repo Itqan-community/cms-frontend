@@ -1,13 +1,13 @@
-<div class="reciters-list admin-list-page" dir="rtl">
+<div class="reciters-list admin-list-page">
   <div class="admin-list-header">
     <div class="admin-list-header__text">
-      <h2 class="admin-list-header__title">القرّاء</h2>
-      <p class="admin-list-header__subtitle">إدارة القرّاء والمقرئين</p>
+      <h2 class="admin-list-header__title">{{ 'ADMIN.RECITERS.TITLE' | translate }}</h2>
+      <p class="admin-list-header__subtitle">{{ 'ADMIN.RECITERS.SUBTITLE' | translate }}</p>
     </div>
     <a routerLink="/admin/reciters/create">
       <button nz-button nzType="primary" class="admin-add-btn">
         <ng-icon name="lucidePlus" aria-hidden="true" />
-        إضافة قارئ
+        {{ 'ADMIN.RECITERS.ADD_BUTTON' | translate }}
       </button>
     </a>
   </div>
@@ -40,14 +40,14 @@
                 [nzSortFn]="true"
                 (nzSortOrderChange)="onSortChange('name', $event)"
               >
-                الاسم
+                {{ 'ADMIN.RECITERS.COLUMNS.NAME' | translate }}
               </th>
             }
             @if (showReciterCol('bio')) {
-              <th nzWidth="240px">النبذة</th>
+              <th nzWidth="240px">{{ 'ADMIN.RECITERS.COLUMNS.BIO' | translate }}</th>
             }
             @if (showReciterCol('nationality')) {
-              <th nzWidth="100px">الجنسية</th>
+              <th nzWidth="100px">{{ 'ADMIN.RECITERS.COLUMNS.NATIONALITY' | translate }}</th>
             }
             @if (showReciterCol('recitations_count')) {
               <th
@@ -55,7 +55,7 @@
                 [nzSortFn]="true"
                 (nzSortOrderChange)="onSortChange('recitations_count', $event)"
               >
-                التلاوات
+                {{ 'ADMIN.RECITERS.COLUMNS.RECITATIONS_COUNT' | translate }}
               </th>
             }
             @if (showReciterCol('created')) {
@@ -64,10 +64,10 @@
                 [nzSortFn]="true"
                 (nzSortOrderChange)="onSortChange('created_at', $event)"
               >
-                تاريخ الإضافة
+                {{ 'ADMIN.RECITERS.COLUMNS.CREATED_AT' | translate }}
               </th>
             }
-            <th nzWidth="120px">الإجراءات</th>
+            <th nzWidth="120px">{{ 'ADMIN.RECITERS.COLUMNS.ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -96,7 +96,7 @@
                     nzType="text"
                     class="action-icon action-icon--view"
                     nz-tooltip
-                    nzTooltipTitle="عرض"
+                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_VIEW' | translate"
                     (click)="onView(reciter.slug)"
                   >
                     <ng-icon name="lucideEye" aria-hidden="true" />
@@ -107,7 +107,7 @@
                     nzType="text"
                     class="action-icon action-icon--edit"
                     nz-tooltip
-                    nzTooltipTitle="تعديل"
+                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_EDIT' | translate"
                     (click)="onEdit(reciter.slug)"
                   >
                     <ng-icon name="lucideSquarePen" aria-hidden="true" />
@@ -124,8 +124,8 @@
   <ng-template #emptyTpl>
     <div class="admin-empty-state">
       <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
-      <p class="admin-empty-state__title">لا يوجد قرّاء</p>
-      <p class="admin-empty-state__subtitle">لم يتم العثور على نتائج. حاول تعديل معايير البحث.</p>
+      <p class="admin-empty-state__title">{{ 'ADMIN.RECITERS.EMPTY_TITLE' | translate }}</p>
+      <p class="admin-empty-state__subtitle">{{ 'ADMIN.COMMON.EMPTY_SUBTITLE' | translate }}</p>
     </div>
   </ng-template>
 

@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -32,6 +32,7 @@ import { PublishersService } from '../../services/publishers.service';
     NzSelectModule,
     NzSkeletonModule,
     NzUploadModule,
+    TranslateModule,
   ],
   templateUrl: './publisher-form.component.html',
   styleUrl: './publisher-form.component.less',
@@ -95,12 +96,13 @@ export class PublisherFormComponent implements OnInit {
     }
 
     if (this.isEditMode() && this.editId != null) {
+      const dir = this.translate.currentLang === 'ar' ? 'rtl' : 'ltr';
       this.modal.confirm({
-        nzTitle: 'تأكيد تعديل الناشر',
-        nzContent: 'هل تؤكد حفظ التغييرات؟ سيتم تحديث بيانات الناشر على مستوى النظام.',
-        nzOkText: 'نعم، احفظ',
-        nzCancelText: 'إلغاء',
-        nzDirection: 'rtl',
+        nzTitle: this.translate.instant('ADMIN.PUBLISHERS.FORM.CONFIRM_EDIT_TITLE'),
+        nzContent: this.translate.instant('ADMIN.PUBLISHERS.FORM.CONFIRM_EDIT_CONTENT'),
+        nzOkText: this.translate.instant('ADMIN.PUBLISHERS.FORM.CONFIRM_OK'),
+        nzCancelText: this.translate.instant('COMMON.CANCEL'),
+        nzDirection: dir,
         nzOnOk: () => this.persistEdit(),
       });
       return;
@@ -117,7 +119,7 @@ export class PublisherFormComponent implements OnInit {
     this.submitting.set(true);
     try {
       await firstValueFrom(this.publishersService.updatePublisher(id, payload));
-      this.message.success('تم تحديث الناشر بنجاح');
+      this.message.success(this.translate.instant('ADMIN.PUBLISHERS.FORM.MSG_UPDATE_OK'));
       void this.router.navigate(['/admin/publishers', id]);
     } catch {
       return Promise.reject(new Error('save failed'));
@@ -131,7 +133,7 @@ export class PublisherFormComponent implements OnInit {
     this.submitting.set(true);
     try {
       const created = await firstValueFrom(this.publishersService.createPublisher(payload));
-      this.message.success('تم إضافة الناشر بنجاح');
+      this.message.success(this.translate.instant('ADMIN.PUBLISHERS.FORM.MSG_CREATE_OK'));
       void this.router.navigate(['/admin/publishers', created.id]);
     } catch {
       return Promise.reject(new Error('save failed'));
@@ -193,11 +195,11 @@ export class PublisherFormComponent implements OnInit {
     const raw = file as unknown as File;
     const maxBytes = 10 * 1024 * 1024;
     if (!raw.type.startsWith('image/')) {
-      this.message.error('يسمح فقط برفع ملفات الصور.');
+      this.message.error(this.translate.instant('ADMIN.PUBLISHERS.FORM.MSG_IMAGE_TYPE'));
       return false;
     }
     if (raw.size > maxBytes) {
-      this.message.error('حجم الصورة يجب ألا يتجاوز 10MB.');
+      this.message.error(this.translate.instant('ADMIN.PUBLISHERS.FORM.MSG_IMAGE_SIZE'));
       return false;
     }
 

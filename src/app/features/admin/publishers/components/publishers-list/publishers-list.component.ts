@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -31,6 +31,7 @@ import { PublisherFiltersComponent } from '../publisher-filters/publisher-filter
     NgIcon,
     PublisherFiltersComponent,
     AdminColumnPickerComponent,
+    TranslateModule,
   ],
   templateUrl: './publishers-list.component.html',
   styleUrl: './publishers-list.component.less',
@@ -48,10 +49,10 @@ export class PublishersListComponent implements OnInit {
 
   readonly publisherTableStorageKey = 'admin-list-publishers';
   readonly publisherTableColumns: AdminTableColumnOption[] = [
-    { key: 'name', label: 'الاسم' },
-    { key: 'country', label: 'الدولة' },
-    { key: 'description', label: 'الوصف' },
-    { key: 'created', label: 'تاريخ الإضافة' },
+    { key: 'name', label: 'ADMIN.PUBLISHERS.COLUMNS.NAME' },
+    { key: 'country', label: 'ADMIN.PUBLISHERS.COLUMNS.COUNTRY' },
+    { key: 'description', label: 'ADMIN.PUBLISHERS.COLUMNS.DESCRIPTION' },
+    { key: 'created', label: 'ADMIN.PUBLISHERS.COLUMNS.CREATED_AT' },
   ];
   private readonly columnVisibility = signal<Record<string, boolean>>({});
 

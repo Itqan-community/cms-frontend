@@ -1,18 +1,23 @@
-<div class="tafsir-form" dir="rtl">
-  <!-- Header -->
+<div class="tafsir-form">
   <div class="tafsir-form__header">
     <div class="tafsir-form__header-text">
       <h2 class="tafsir-form__title">
-        {{ isEditMode() ? 'تعديل التفسير' : 'إضافة تفسير جديد' }}
+        {{
+          (isEditMode() ? 'ADMIN.TAFSIRS.FORM.EDIT_TITLE' : 'ADMIN.TAFSIRS.FORM.CREATE_TITLE')
+            | translate
+        }}
       </h2>
       <p class="tafsir-form__subtitle">
-        {{ isEditMode() ? 'قم بتحديث بيانات التفسير' : 'أدخل بيانات التفسير الجديد' }}
+        {{
+          (isEditMode() ? 'ADMIN.TAFSIRS.FORM.SUBTITLE_EDIT' : 'ADMIN.TAFSIRS.FORM.SUBTITLE_CREATE')
+            | translate
+        }}
       </p>
     </div>
     <a routerLink="/admin/tafsirs">
       <button nz-button nzType="default" class="tafsir-form__back-btn">
         <ng-icon name="lucideArrowRight" />
-        العودة للقائمة
+        {{ 'ADMIN.TAFSIRS.FORM.BACK_LIST' | translate }}
       </button>
     </a>
   </div>
@@ -21,26 +26,33 @@
     <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 10 }"></nz-skeleton>
   } @else {
     <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="onSubmit()">
-      <!-- Bilingual names -->
       <div class="tafsir-form__card">
-        <h3 class="tafsir-form__card-title"><ng-icon name="lucideSquarePen" /> الاسم</h3>
+        <h3 class="tafsir-form__card-title">
+          <ng-icon name="lucideSquarePen" /> {{ 'ADMIN.TAFSIRS.FORM.SECTION_NAME' | translate }}
+        </h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>الاسم بالعربية</nz-form-label>
-              <nz-form-control nzErrorTip="الاسم بالعربية مطلوب">
-                <input nz-input formControlName="name_ar" placeholder="مثال: تفسير ابن كثير" />
+              <nz-form-label nzRequired>{{
+                'ADMIN.TAFSIRS.FORM.NAME_AR' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.TAFSIRS.FORM.ERR_NAME_AR' | translate">
+                <input
+                  nz-input
+                  formControlName="name_ar"
+                  [placeholder]="'ADMIN.TAFSIRS.FORM.PLACEHOLDER_NAME_AR' | translate"
+                />
               </nz-form-control>
             </nz-form-item>
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label>Name in English</nz-form-label>
+              <nz-form-label>{{ 'ADMIN.TAFSIRS.FORM.NAME_EN' | translate }}</nz-form-label>
               <nz-form-control>
                 <input
                   nz-input
                   formControlName="name_en"
-                  placeholder="e.g. Tafsir Ibn Kathir"
+                  [placeholder]="'ADMIN.TAFSIRS.FORM.PLACEHOLDER_NAME_EN' | translate"
                   dir="ltr"
                 />
               </nz-form-control>
@@ -49,18 +61,22 @@
         </div>
       </div>
 
-      <!-- Bilingual short descriptions -->
       <div class="tafsir-form__card">
-        <h3 class="tafsir-form__card-title"><ng-icon name="lucideFileText" /> الوصف المختصر</h3>
+        <h3 class="tafsir-form__card-title">
+          <ng-icon name="lucideFileText" />
+          {{ 'ADMIN.TAFSIRS.FORM.SECTION_SHORT_DESC' | translate }}
+        </h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>الوصف بالعربية</nz-form-label>
-              <nz-form-control nzErrorTip="الوصف بالعربية مطلوب">
+              <nz-form-label nzRequired>{{
+                'ADMIN.TAFSIRS.FORM.DESCRIPTION_AR' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.TAFSIRS.FORM.ERR_DESC_AR' | translate">
                 <textarea
                   nz-input
                   formControlName="description_ar"
-                  placeholder="وصف مختصر للتفسير..."
+                  [placeholder]="'ADMIN.TAFSIRS.FORM.PLACEHOLDER_DESC_AR' | translate"
                   [nzAutosize]="{ minRows: 3, maxRows: 5 }"
                 ></textarea>
               </nz-form-control>
@@ -68,12 +84,14 @@
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>Description in English</nz-form-label>
-              <nz-form-control nzErrorTip="Description in English is required">
+              <nz-form-label nzRequired>{{
+                'ADMIN.TAFSIRS.FORM.DESCRIPTION_EN' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.TAFSIRS.FORM.ERR_DESC_EN' | translate">
                 <textarea
                   nz-input
                   formControlName="description_en"
-                  placeholder="Brief description of the tafsir..."
+                  [placeholder]="'ADMIN.TAFSIRS.FORM.PLACEHOLDER_DESC_EN_SHORT' | translate"
                   dir="ltr"
                   [nzAutosize]="{ minRows: 3, maxRows: 5 }"
                 ></textarea>
@@ -83,18 +101,22 @@
         </div>
       </div>
 
-      <!-- Bilingual long descriptions -->
       <div class="tafsir-form__card">
-        <h3 class="tafsir-form__card-title"><ng-icon name="lucideAlignRight" /> الوصف المطوّل</h3>
+        <h3 class="tafsir-form__card-title">
+          <ng-icon name="lucideAlignRight" />
+          {{ 'ADMIN.TAFSIRS.FORM.SECTION_LONG_DESC' | translate }}
+        </h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>الوصف المطوّل بالعربية</nz-form-label>
-              <nz-form-control nzErrorTip="الوصف المطوّل بالعربية مطلوب">
+              <nz-form-label nzRequired>{{
+                'ADMIN.TAFSIRS.FORM.LONG_DESCRIPTION_AR' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.TAFSIRS.FORM.ERR_LONG_AR' | translate">
                 <textarea
                   nz-input
                   formControlName="long_description_ar"
-                  placeholder="وصف تفصيلي..."
+                  [placeholder]="'ADMIN.TAFSIRS.FORM.PLACEHOLDER_LONG_AR' | translate"
                   [nzAutosize]="{ minRows: 5, maxRows: 10 }"
                 ></textarea>
               </nz-form-control>
@@ -102,12 +124,14 @@
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>Long Description in English</nz-form-label>
-              <nz-form-control nzErrorTip="Long description in English is required">
+              <nz-form-label nzRequired>{{
+                'ADMIN.TAFSIRS.FORM.LONG_DESCRIPTION_EN' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.TAFSIRS.FORM.ERR_LONG_EN' | translate">
                 <textarea
                   nz-input
                   formControlName="long_description_en"
-                  placeholder="Detailed description..."
+                  [placeholder]="'ADMIN.TAFSIRS.FORM.PLACEHOLDER_LONG_EN' | translate"
                   dir="ltr"
                   [nzAutosize]="{ minRows: 5, maxRows: 10 }"
                 ></textarea>
@@ -117,18 +141,22 @@
         </div>
       </div>
 
-      <!-- Metadata: license, language, publisher + thumbnail -->
       <div class="tafsir-form__card">
         <h3 class="tafsir-form__card-title">
-          <ng-icon name="lucideSettings" /> البيانات التعريفية
+          <ng-icon name="lucideSettings" /> {{ 'ADMIN.TAFSIRS.FORM.SECTION_META' | translate }}
         </h3>
         <div nz-row [nzGutter]="20">
-          <!-- License -->
           <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
             <nz-form-item>
-              <nz-form-label nzRequired>الترخيص</nz-form-label>
-              <nz-form-control nzErrorTip="الترخيص مطلوب">
-                <nz-select formControlName="license" nzPlaceHolder="اختر الترخيص" nzAllowClear>
+              <nz-form-label nzRequired>{{
+                'ADMIN.TAFSIRS.FORM.LICENSE' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.TAFSIRS.FORM.ERR_LICENSE' | translate">
+                <nz-select
+                  formControlName="license"
+                  [nzPlaceHolder]="'ADMIN.TAFSIRS.FORM.PLACEHOLDER_LICENSE' | translate"
+                  nzAllowClear
+                >
                   @for (l of licenseOptions; track l) {
                     <nz-option [nzValue]="l" [nzLabel]="l"></nz-option>
                   }
@@ -137,12 +165,17 @@
             </nz-form-item>
           </div>
 
-          <!-- Language -->
           <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
             <nz-form-item>
-              <nz-form-label nzRequired>لغة التفسير</nz-form-label>
-              <nz-form-control nzErrorTip="اللغة مطلوبة">
-                <nz-select formControlName="language" nzPlaceHolder="اختر اللغة" nzAllowClear>
+              <nz-form-label nzRequired>{{
+                'ADMIN.TAFSIRS.FORM.LANGUAGE' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.TAFSIRS.FORM.ERR_LANGUAGE' | translate">
+                <nz-select
+                  formControlName="language"
+                  [nzPlaceHolder]="'ADMIN.TAFSIRS.FORM.PLACEHOLDER_LANGUAGE' | translate"
+                  nzAllowClear
+                >
                   <nz-option nzValue="ar" [nzLabel]="languageLabel('ar')"></nz-option>
                   <nz-option nzValue="en" [nzLabel]="languageLabel('en')"></nz-option>
                 </nz-select>
@@ -150,14 +183,15 @@
             </nz-form-item>
           </div>
 
-          <!-- Publisher -->
           <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
             <nz-form-item>
-              <nz-form-label nzRequired>الناشر</nz-form-label>
-              <nz-form-control nzErrorTip="الناشر مطلوب">
+              <nz-form-label nzRequired>{{
+                'ADMIN.TAFSIRS.FORM.PUBLISHER' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.TAFSIRS.FORM.ERR_PUBLISHER' | translate">
                 <nz-select
                   formControlName="publisher_id"
-                  nzPlaceHolder="ابحث عن ناشر..."
+                  [nzPlaceHolder]="'ADMIN.TAFSIRS.FORM.PLACEHOLDER_PUBLISHER' | translate"
                   nzAllowClear
                   nzShowSearch
                   nzServerSearch
@@ -173,11 +207,10 @@
           </div>
         </div>
 
-        <!-- Is External + External URL -->
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
             <nz-form-item>
-              <nz-form-label>تفسير خارجي؟</nz-form-label>
+              <nz-form-label>{{ 'ADMIN.TAFSIRS.FORM.LABEL_EXTERNAL' | translate }}</nz-form-label>
               <nz-form-control>
                 <nz-switch formControlName="is_external"></nz-switch>
               </nz-form-control>
@@ -185,7 +218,9 @@
           </div>
           <div nz-col [nzSpan]="16" [nzXs]="24" [nzSm]="16">
             <nz-form-item>
-              <nz-form-label>رابط خارجي</nz-form-label>
+              <nz-form-label>{{
+                'ADMIN.TAFSIRS.FORM.LABEL_EXTERNAL_URL' | translate
+              }}</nz-form-label>
               <nz-form-control>
                 <input
                   nz-input
@@ -198,20 +233,19 @@
           </div>
         </div>
 
-        <!-- Thumbnail upload -->
         <nz-form-item>
-          <nz-form-label>الصورة المصغّرة (Thumbnail)</nz-form-label>
+          <nz-form-label>{{ 'ADMIN.TAFSIRS.FORM.UPLOAD_TITLE' | translate }}</nz-form-label>
           <nz-form-control>
             <div class="tafsir-form__thumbnail-area">
               @if (thumbnailPreview()) {
                 <div class="tafsir-form__thumbnail-preview">
-                  <img [src]="thumbnailPreview()!" alt="thumbnail preview" />
+                  <img [src]="thumbnailPreview()!" alt="" />
                   <button
                     type="button"
                     class="tafsir-form__thumbnail-remove"
                     (click)="removeThumbnail()"
                     nz-tooltip
-                    nzTooltipTitle="إزالة الصورة"
+                    [nzTooltipTitle]="'ADMIN.TAFSIRS.FORM.REMOVE_IMAGE' | translate"
                   >
                     <ng-icon name="lucideCircleX" />
                   </button>
@@ -228,8 +262,8 @@
                   <p class="ant-upload-drag-icon">
                     <ng-icon name="lucideInbox" />
                   </p>
-                  <p class="ant-upload-text">انقر أو اسحب الصورة هنا</p>
-                  <p class="ant-upload-hint">PNG, JPG, WEBP — بحد أقصى 5MB</p>
+                  <p class="ant-upload-text">{{ 'ADMIN.TAFSIRS.FORM.UPLOAD_DRAG' | translate }}</p>
+                  <p class="ant-upload-hint">{{ 'ADMIN.TAFSIRS.FORM.UPLOAD_HINT' | translate }}</p>
                 </nz-upload>
               }
             </div>
@@ -237,10 +271,11 @@
         </nz-form-item>
       </div>
 
-      <!-- Form actions -->
       <div class="tafsir-form__footer">
         <a routerLink="/admin/tafsirs">
-          <button type="button" nz-button nzType="default">إلغاء</button>
+          <button type="button" nz-button nzType="default">
+            {{ 'ADMIN.TAFSIRS.FORM.CANCEL' | translate }}
+          </button>
         </a>
         <button
           nz-button
@@ -249,7 +284,10 @@
           [disabled]="form.invalid"
           type="submit"
         >
-          {{ isEditMode() ? 'حفظ التعديلات' : 'إضافة التفسير' }}
+          {{
+            (isEditMode() ? 'ADMIN.TAFSIRS.FORM.SUBMIT_EDIT' : 'ADMIN.TAFSIRS.FORM.SUBMIT_CREATE')
+              | translate
+          }}
         </button>
       </div>
     </form>

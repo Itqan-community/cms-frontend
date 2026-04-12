@@ -3,6 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRouteSnapshot, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { ar_EG, en_US, NzI18nService } from 'ng-zorro-antd/i18n';
 import { filter } from 'rxjs';
 import { GoogleAnalyticsService } from './core/services/google-analytics.service';
 import { WebVitalsService } from './core/services/web-vitals.service';
@@ -16,6 +17,7 @@ import { HeaderComponent } from './shared/components/header/header.component';
 })
 export class App {
   private translate = inject(TranslateService);
+  private readonly nzI18n = inject(NzI18nService);
   private titleService = inject(Title);
   private location = inject(Location);
   protected router = inject(Router);
@@ -56,14 +58,22 @@ export class App {
     this.translate.addLangs(['ar', 'en']);
     this.translate.setFallbackLang('ar');
     this.translate.use(currentLang);
-    document.documentElement.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+
+    const applyLanguageShell = (lang: string): void => {
+      const isAr = lang === 'ar';
+      document.documentElement.setAttribute('lang', lang);
+      document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+      this.nzI18n.setLocale(isAr ? ar_EG : en_US);
+    };
+    applyLanguageShell(currentLang);
 
     // Set initial document title by language
     this.setAppTitle(currentLang);
 
-    // Update title on language changes triggered anywhere
+    // Keep shell + ng-zorro i18n aligned when language changes (e.g. future non-reload switches)
     this.translate.onLangChange.subscribe((e) => {
       this.setAppTitle(e.lang);
+      applyLanguageShell(e.lang);
     });
   }
 

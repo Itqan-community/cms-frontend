@@ -1,13 +1,13 @@
-<div class="recitations-list admin-list-page" dir="rtl">
+<div class="recitations-list admin-list-page">
   <div class="admin-list-header">
     <div class="admin-list-header__text">
-      <h2 class="admin-list-header__title">التلاوات</h2>
-      <p class="admin-list-header__subtitle">إدارة المصاحف الصوتية والتلاوات</p>
+      <h2 class="admin-list-header__title">{{ 'ADMIN.RECITATIONS.TITLE' | translate }}</h2>
+      <p class="admin-list-header__subtitle">{{ 'ADMIN.RECITATIONS.SUBTITLE' | translate }}</p>
     </div>
     <a routerLink="/admin/recitations/create">
       <button nz-button nzType="primary" class="admin-add-btn">
         <ng-icon name="lucidePlus" aria-hidden="true" />
-        إضافة تلاوة
+        {{ 'ADMIN.RECITATIONS.ADD_BUTTON' | translate }}
       </button>
     </a>
   </div>
@@ -40,20 +40,20 @@
                 [nzSortFn]="true"
                 (nzSortOrderChange)="onSortChange('name', $event)"
               >
-                الاسم
+                {{ 'ADMIN.RECITATIONS.COLUMNS.NAME' | translate }}
               </th>
             }
             @if (showRecitationCol('description')) {
-              <th nzWidth="240px">الوصف</th>
+              <th nzWidth="240px">{{ 'ADMIN.RECITATIONS.COLUMNS.DESCRIPTION' | translate }}</th>
             }
             @if (showRecitationCol('publisher')) {
-              <th nzWidth="160px">الناشر</th>
+              <th nzWidth="160px">{{ 'ADMIN.RECITATIONS.COLUMNS.PUBLISHER' | translate }}</th>
             }
             @if (showRecitationCol('reciter')) {
-              <th nzWidth="130px">القارئ</th>
+              <th nzWidth="130px">{{ 'ADMIN.RECITATIONS.COLUMNS.RECITER' | translate }}</th>
             }
             @if (showRecitationCol('qiraah')) {
-              <th nzWidth="120px">القراءة</th>
+              <th nzWidth="120px">{{ 'ADMIN.RECITATIONS.COLUMNS.QIRAAH' | translate }}</th>
             }
             @if (showRecitationCol('year')) {
               <th
@@ -61,7 +61,7 @@
                 [nzSortFn]="true"
                 (nzSortOrderChange)="onSortChange('year', $event)"
               >
-                السنة
+                {{ 'ADMIN.RECITATIONS.COLUMNS.YEAR' | translate }}
               </th>
             }
             @if (showRecitationCol('license')) {
@@ -70,7 +70,7 @@
                 [nzSortFn]="true"
                 (nzSortOrderChange)="onSortChange('license', $event)"
               >
-                الترخيص
+                {{ 'ADMIN.RECITATIONS.COLUMNS.LICENSE' | translate }}
               </th>
             }
             @if (showRecitationCol('created')) {
@@ -79,10 +79,10 @@
                 [nzSortFn]="true"
                 (nzSortOrderChange)="onSortChange('created_at', $event)"
               >
-                تاريخ الإضافة
+                {{ 'ADMIN.RECITATIONS.COLUMNS.CREATED_AT' | translate }}
               </th>
             }
-            <th nzWidth="120px">الإجراءات</th>
+            <th nzWidth="120px">{{ 'ADMIN.RECITATIONS.COLUMNS.ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -122,7 +122,7 @@
                     nzType="text"
                     class="action-icon action-icon--view"
                     nz-tooltip
-                    nzTooltipTitle="عرض"
+                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_VIEW' | translate"
                     (click)="onView(item.slug ?? item.id + '')"
                   >
                     <ng-icon name="lucideEye" aria-hidden="true" />
@@ -133,7 +133,7 @@
                     nzType="text"
                     class="action-icon action-icon--edit"
                     nz-tooltip
-                    nzTooltipTitle="تعديل"
+                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_EDIT' | translate"
                     (click)="onEdit(item.slug ?? item.id + '')"
                   >
                     <ng-icon name="lucideSquarePen" aria-hidden="true" />
@@ -150,8 +150,8 @@
   <ng-template #emptyTpl>
     <div class="admin-empty-state">
       <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
-      <p class="admin-empty-state__title">لا توجد تلاوات</p>
-      <p class="admin-empty-state__subtitle">لم يتم العثور على نتائج. حاول تعديل معايير البحث.</p>
+      <p class="admin-empty-state__title">{{ 'ADMIN.RECITATIONS.EMPTY_TITLE' | translate }}</p>
+      <p class="admin-empty-state__subtitle">{{ 'ADMIN.COMMON.EMPTY_SUBTITLE' | translate }}</p>
     </div>
   </ng-template>
 

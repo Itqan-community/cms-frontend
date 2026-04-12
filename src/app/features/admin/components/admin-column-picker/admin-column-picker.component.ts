@@ -1,10 +1,12 @@
 import { Component, OnInit, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzPopoverModule } from 'ng-zorro-antd/popover';
 import { NgIcon } from '@ng-icons/core';
 import { AdminTableColumnPrefsService } from '../../services/admin-table-column-prefs.service';
 
+/** `label` is an ngx-translate key (e.g. ADMIN.TAFSIRS.COLUMNS.NAME). */
 export interface AdminTableColumnOption {
   key: string;
   label: string;
@@ -13,7 +15,7 @@ export interface AdminTableColumnOption {
 @Component({
   selector: 'app-admin-column-picker',
   standalone: true,
-  imports: [FormsModule, NzButtonModule, NzPopoverModule, NgIcon],
+  imports: [FormsModule, TranslateModule, NzButtonModule, NzPopoverModule, NgIcon],
   templateUrl: './admin-column-picker.component.html',
   styleUrl: './admin-column-picker.component.less',
 })

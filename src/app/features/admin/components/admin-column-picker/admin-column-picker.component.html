@@ -10,11 +10,13 @@
     class="admin-column-picker__trigger"
   >
     <ng-icon name="lucideLayoutGrid" aria-hidden="true" />
-    الأعمدة
+    {{ 'ADMIN.COMMON.COLUMN_PICKER_BUTTON' | translate }}
   </button>
   <ng-template #columnPopover>
-    <div class="admin-column-picker__panel" dir="rtl">
-      <div class="admin-column-picker__hint">اختر الأعمدة الظاهرة في الجدول</div>
+    <div class="admin-column-picker__panel">
+      <div class="admin-column-picker__hint">
+        {{ 'ADMIN.COMMON.COLUMN_PICKER_HINT' | translate }}
+      </div>
       @for (c of columns(); track c.key) {
         <label class="admin-column-picker__row">
           <input
@@ -23,7 +25,7 @@
             [checked]="isChecked(c.key)"
             (change)="onToggle(c.key, $any($event.target).checked)"
           />
-          <span class="admin-column-picker__label">{{ c.label }}</span>
+          <span class="admin-column-picker__label">{{ c.label | translate }}</span>
         </label>
       }
     </div>

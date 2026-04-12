@@ -98,7 +98,7 @@
         <button
           type="button"
           class="admin-mobile-sider-close"
-          aria-label="Close menu"
+          [attr.aria-label]="'ADMIN.COMMON.CLOSE_MENU' | translate"
           (click)="closeMobileMenu()"
         >
           <ng-icon name="lucideX" aria-hidden="true" />
@@ -142,7 +142,7 @@
       <button
         type="button"
         class="admin-mobile-backdrop"
-        aria-label="Close menu"
+        [attr.aria-label]="'ADMIN.COMMON.CLOSE_MENU' | translate"
         (click)="closeMobileMenu()"
       ></button>
     }

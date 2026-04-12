@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -36,6 +37,7 @@ import { TranslationFiltersComponent } from '../translation-filters/translation-
     NgIcon,
     TranslationFiltersComponent,
     AdminColumnPickerComponent,
+    TranslateModule,
   ],
   templateUrl: './translations-list.component.html',
   styleUrl: './translations-list.component.less',
@@ -52,11 +54,11 @@ export class TranslationsListComponent implements OnInit {
 
   readonly translationTableStorageKey = 'admin-list-translations';
   readonly translationTableColumns: AdminTableColumnOption[] = [
-    { key: 'name', label: 'الاسم' },
-    { key: 'description', label: 'الوصف' },
-    { key: 'publisher', label: 'الناشر' },
-    { key: 'license', label: 'الترخيص' },
-    { key: 'created', label: 'تاريخ الإضافة' },
+    { key: 'name', label: 'ADMIN.TRANSLATIONS.COLUMNS.NAME' },
+    { key: 'description', label: 'ADMIN.TRANSLATIONS.COLUMNS.DESCRIPTION' },
+    { key: 'publisher', label: 'ADMIN.TRANSLATIONS.COLUMNS.PUBLISHER' },
+    { key: 'license', label: 'ADMIN.TRANSLATIONS.COLUMNS.LICENSE' },
+    { key: 'created', label: 'ADMIN.TRANSLATIONS.COLUMNS.CREATED_AT' },
   ];
   private readonly columnVisibility = signal<Record<string, boolean>>({});
 

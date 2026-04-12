@@ -1,7 +1,7 @@
 import { Component, DestroyRef, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -16,16 +16,24 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
 @Component({
   selector: 'app-translation-filters',
   standalone: true,
-  imports: [FormsModule, NzInputModule, NzSelectModule, NzButtonModule, NzModalModule, NgIcon],
+  imports: [
+    FormsModule,
+    NzInputModule,
+    NzSelectModule,
+    NzButtonModule,
+    NzModalModule,
+    NgIcon,
+    TranslateModule,
+  ],
   template: `
-    <div class="translation-filters" dir="rtl">
+    <div class="translation-filters">
       <div class="translation-filters__actions">
         <nz-input-group [nzPrefix]="searchIcon" class="translation-filters__search">
           <input
             nz-input
             nzSize="default"
             type="text"
-            placeholder="ابحث عن ترجمة..."
+            [placeholder]="'ADMIN.TRANSLATIONS.SEARCH_PLACEHOLDER' | translate"
             [ngModel]="searchValue"
             (ngModelChange)="onSearchChange($event)"
           />
@@ -40,14 +48,14 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
           (click)="openFiltersModal()"
         >
           <ng-icon name="lucideFilter" />
-          <span>الفلاتر</span>
+          <span>{{ 'ADMIN.TRANSLATIONS.FILTERS.BUTTON' | translate }}</span>
         </button>
       </div>
 
       <nz-modal
         [(nzVisible)]="isFiltersModalOpen"
         (nzOnCancel)="closeFiltersModal()"
-        nzTitle="فلاتر الترجمات"
+        [nzTitle]="'ADMIN.TRANSLATIONS.FILTERS.MODAL_TITLE' | translate"
         [nzWidth]="'min(560px, 92vw)'"
         nzCentered
       >
@@ -55,7 +63,7 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
           <div class="translation-filters__modal-grid">
             <nz-select
               class="translation-filters__select"
-              nzPlaceHolder="الناشر"
+              [nzPlaceHolder]="'ADMIN.TRANSLATIONS.FILTERS.PUBLISHER' | translate"
               nzSize="default"
               nzAllowClear
               nzShowSearch
@@ -72,7 +80,7 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
 
             <nz-select
               class="translation-filters__select"
-              nzPlaceHolder="الترخيص"
+              [nzPlaceHolder]="'ADMIN.TRANSLATIONS.FILTERS.LICENSE' | translate"
               nzSize="default"
               nzAllowClear
               [ngModel]="selectedLicense"
@@ -85,7 +93,7 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
 
             <nz-select
               class="translation-filters__select"
-              nzPlaceHolder="اللغة"
+              [nzPlaceHolder]="'ADMIN.TRANSLATIONS.FILTERS.LANGUAGE' | translate"
               nzSize="default"
               nzAllowClear
               [ngModel]="selectedLanguage"
@@ -97,24 +105,30 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
 
             <nz-select
               class="translation-filters__select"
-              nzPlaceHolder="النوع"
+              [nzPlaceHolder]="'ADMIN.TRANSLATIONS.FILTERS.IS_EXTERNAL' | translate"
               nzSize="default"
               nzAllowClear
               [ngModel]="selectedExternal"
               (ngModelChange)="onExternalChange($event)"
             >
-              <nz-option [nzValue]="true" nzLabel="خارجي"></nz-option>
-              <nz-option [nzValue]="false" nzLabel="داخلي"></nz-option>
+              <nz-option
+                [nzValue]="true"
+                [nzLabel]="'ADMIN.TRANSLATIONS.FILTERS.TYPE_EXTERNAL' | translate"
+              ></nz-option>
+              <nz-option
+                [nzValue]="false"
+                [nzLabel]="'ADMIN.TRANSLATIONS.FILTERS.TYPE_INTERNAL' | translate"
+              ></nz-option>
             </nz-select>
           </div>
         </ng-container>
         <ng-container *nzModalFooter>
           <div class="translation-filters__modal-footer">
             <button nz-button nzType="default" nzSize="default" (click)="clearAdvancedFilters()">
-              مسح الفلاتر
+              {{ 'ADMIN.TRANSLATIONS.FILTERS.CLEAR' | translate }}
             </button>
             <button nz-button nzType="primary" nzSize="default" (click)="closeFiltersModal()">
-              تم
+              {{ 'ADMIN.TRANSLATIONS.FILTERS.DONE' | translate }}
             </button>
           </div>
         </ng-container>

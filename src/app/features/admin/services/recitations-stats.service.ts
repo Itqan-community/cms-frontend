@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { forkJoin, map, Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -17,6 +18,7 @@ interface PaginatedResponse {
 export class RecitationsStatsService {
   private readonly http = inject(HttpClient);
   private readonly messages = inject(NzMessageService);
+  private readonly translate = inject(TranslateService);
 
   private readonly BASE_URL = environment.API_BASE_URL;
 
@@ -56,7 +58,7 @@ export class RecitationsStatsService {
         isMock: false,
       })),
       catchError(() => {
-        this.messages.error('تعذر تحميل إحصائيات التلاوات من الخادم.');
+        this.messages.error(this.translate.instant('ADMIN.RECITATIONS.STATS_LOAD_ERROR'));
         return throwError(() => new Error('Failed to load recitation stats'));
       })
     );

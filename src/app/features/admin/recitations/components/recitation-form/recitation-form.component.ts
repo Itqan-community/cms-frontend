@@ -9,6 +9,7 @@ import {
   Validators,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { forkJoin } from 'rxjs';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -54,6 +55,7 @@ function optionalHijriYearRange(minY: number, maxY: number) {
     NzInputModule,
     NzSelectModule,
     NzSkeletonModule,
+    TranslateModule,
   ],
   templateUrl: './recitation-form.component.html',
   styleUrl: './recitation-form.component.less',
@@ -66,6 +68,7 @@ export class RecitationFormComponent implements OnInit {
   private readonly publishersFilterService = inject(PublishersFilterService);
   private readonly recitersService = inject(RecitersAdminService);
   private readonly message = inject(NzMessageService);
+  private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly isEditMode = signal(false);
@@ -86,12 +89,12 @@ export class RecitationFormComponent implements OnInit {
 
   readonly licenseOptions = Object.values(Licenses);
   readonly maddOptions = [
-    { v: MaddLevel.TWASSUT, l: 'توسّط' },
-    { v: MaddLevel.QASR, l: 'قصر' },
+    { v: MaddLevel.TWASSUT, labelKey: 'ADMIN.RECITATIONS.FILTERS.MADD_TWASSUT' },
+    { v: MaddLevel.QASR, labelKey: 'ADMIN.RECITATIONS.FILTERS.MADD_QASR' },
   ];
   readonly meemOptions = [
-    { v: MeemBehavior.SILAH, l: 'وصل (صلّة)' },
-    { v: MeemBehavior.SKOUN, l: 'سكون' },
+    { v: MeemBehavior.SILAH, labelKey: 'ADMIN.RECITATIONS.FORM.MEEM_WASL_LONG' },
+    { v: MeemBehavior.SKOUN, labelKey: 'ADMIN.RECITATIONS.FILTERS.MEEM_SKOUN' },
   ];
 
   readonly form = this.fb.group({
@@ -175,7 +178,11 @@ export class RecitationFormComponent implements OnInit {
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.message.success(
-          this.isEditMode() ? 'تم تحديث التلاوة بنجاح' : 'تم إضافة التلاوة بنجاح'
+          this.translate.instant(
+            this.isEditMode()
+              ? 'ADMIN.RECITATIONS.MESSAGES.UPDATE_SUCCESS'
+              : 'ADMIN.RECITATIONS.MESSAGES.CREATE_SUCCESS'
+          )
         );
         this.submitting.set(false);
         void this.router.navigate(['/admin/recitations', res.slug ?? String(res.id)]);

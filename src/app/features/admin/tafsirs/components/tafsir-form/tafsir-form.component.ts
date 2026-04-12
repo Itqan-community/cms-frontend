@@ -2,7 +2,7 @@ import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -12,6 +12,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { PublisherFilterItem, TafsirFormValue } from '../../models/tafsirs.models';
@@ -34,6 +35,8 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
     NzSkeletonModule,
     NzSwitchModule,
     NzUploadModule,
+    NzToolTipModule,
+    TranslateModule,
   ],
   templateUrl: './tafsir-form.component.html',
   styleUrl: './tafsir-form.component.less',
@@ -129,7 +132,11 @@ export class TafsirFormComponent implements OnInit {
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.message.success(
-          this.isEditMode() ? 'تم تحديث التفسير بنجاح' : 'تم إضافة التفسير بنجاح'
+          this.translate.instant(
+            this.isEditMode()
+              ? 'ADMIN.TAFSIRS.MESSAGES.UPDATE_SUCCESS'
+              : 'ADMIN.TAFSIRS.MESSAGES.CREATE_SUCCESS'
+          )
         );
         this.submitting.set(false);
         void this.router.navigate(['/admin/tafsirs', res.slug]);

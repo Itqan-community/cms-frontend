@@ -1,9 +1,9 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
-import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NgIcon } from '@ng-icons/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
@@ -11,9 +11,9 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
+import { localizeLanguageCode } from '../../../utils/display-localization.util';
 import { TafsirDetails } from '../../models/tafsirs.models';
 import { TafsirsService } from '../../services/tafsirs.service';
-import { localizeLanguageCode } from '../../../utils/display-localization.util';
 
 @Component({
   selector: 'app-tafsir-detail',
@@ -28,6 +28,7 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
     NzTableModule,
     NzTagModule,
     NzToolTipModule,
+    TranslateModule,
   ],
   templateUrl: './tafsir-detail.component.html',
   styleUrl: './tafsir-detail.component.less',
@@ -69,22 +70,22 @@ export class TafsirDetailComponent implements OnInit {
   }
 
   onDelete(): void {
-    const name = this.tafsir()?.name_ar ?? 'هذا التفسير';
+    const name = this.tafsir()?.name_ar ?? this.translate.instant('ADMIN.TAFSIRS.TITLE');
+    const dir = this.translate.currentLang === 'ar' ? 'rtl' : 'ltr';
     this.modal.confirm({
-      nzTitle: 'هل أنت متأكد من الحذف؟',
-      nzContent: `<b>${name}</b> — هذا الإجراء لا يمكن التراجع عنه.`,
-      nzOkText: 'نعم، احذف',
+      nzTitle: this.translate.instant('ADMIN.TAFSIRS.DELETE.CONFIRM_TITLE'),
+      nzContent: this.translate.instant('ADMIN.TAFSIRS.DELETE.CONFIRM_BODY', { name }),
+      nzOkText: this.translate.instant('ADMIN.TAFSIRS.DELETE.OK'),
       nzOkType: 'primary',
       nzOkDanger: true,
-      nzCancelText: 'إلغاء',
-      nzDirection: 'rtl',
+      nzCancelText: this.translate.instant('ADMIN.TAFSIRS.DELETE.CANCEL'),
+      nzDirection: dir,
       nzOnOk: () =>
         this.tafsirsService.delete(this.slug).subscribe({
           next: () => {
-            this.message.success('تم حذف التفسير بنجاح');
+            this.message.success(this.translate.instant('ADMIN.TAFSIRS.MESSAGES.DELETE_SUCCESS'));
             void this.router.navigate(['/admin/tafsirs']);
           },
-          error: () => {},
         }),
     });
   }

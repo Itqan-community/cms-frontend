@@ -1,12 +1,14 @@
-<div class="ayahs-page" dir="rtl">
+<div class="ayahs-page">
   <div class="ayahs-banner">
     <div class="ayahs-banner__content">
-      <h2 class="ayahs-banner__title">الآيات القرآنية</h2>
+      <h2 class="ayahs-banner__title">{{ 'ADMIN.MUSHAFS.AYAHS_BANNER_TITLE' | translate }}</h2>
       <p class="ayahs-banner__desc">
-        تصفّح جميع آيات القرآن الكريم مع إمكانية البحث والتصفية حسب السورة
+        {{ 'ADMIN.MUSHAFS.AYAHS_BANNER_DESC' | translate }}
       </p>
     </div>
-    <span class="ayahs-banner__count">{{ totalFiltered() | number }} آية</span>
+    <span class="ayahs-banner__count">{{
+      'ADMIN.MUSHAFS.AYAH_COUNT' | translate: { count: totalFiltered() }
+    }}</span>
   </div>
 
   <div class="ayahs-toolbar">
@@ -14,7 +16,7 @@
       <input
         nz-input
         type="text"
-        placeholder="ابحث في نص الآيات..."
+        [placeholder]="'ADMIN.MUSHAFS.AYAHS_SEARCH_PLACEHOLDER' | translate"
         (input)="onSearchInput($event)"
       />
     </nz-input-group>
@@ -23,7 +25,7 @@
     </ng-template>
     <nz-select
       class="ayahs-toolbar__filter"
-      nzPlaceHolder="جميع السور"
+      [nzPlaceHolder]="'ADMIN.MUSHAFS.ALL_SURAHS' | translate"
       nzAllowClear
       nzShowSearch
       [ngModel]="selectedSurah()"
@@ -53,9 +55,9 @@
   } @else if (paginatedAyahs().length === 0) {
     <div class="admin-empty-state ayahs-empty-wrap">
       <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
-      <p class="admin-empty-state__title">لا توجد آيات</p>
+      <p class="admin-empty-state__title">{{ 'ADMIN.MUSHAFS.AYAHS_EMPTY_TITLE' | translate }}</p>
       <p class="admin-empty-state__subtitle">
-        لم يتم العثور على نتائج. حاول تغيير كلمة البحث أو السورة.
+        {{ 'ADMIN.MUSHAFS.AYAHS_EMPTY_SUBTITLE' | translate }}
       </p>
     </div>
   } @else {
@@ -70,11 +72,11 @@
       >
         <thead>
           <tr>
-            <th nzWidth="90px">رقم الآية</th>
-            <th nzWidth="90px">رقم السورة</th>
-            <th nzWidth="120px">اسم السورة</th>
-            <th>نص الآية</th>
-            <th nzWidth="90px">الصفحة</th>
+            <th nzWidth="90px">{{ 'ADMIN.MUSHAFS.COL_AYAH_NUMBER' | translate }}</th>
+            <th nzWidth="90px">{{ 'ADMIN.MUSHAFS.COL_SURAH_NUMBER' | translate }}</th>
+            <th nzWidth="120px">{{ 'ADMIN.MUSHAFS.COL_SURAH_NAME' | translate }}</th>
+            <th>{{ 'ADMIN.MUSHAFS.COL_AYAH_TEXT' | translate }}</th>
+            <th nzWidth="90px">{{ 'ADMIN.MUSHAFS.COL_PAGE' | translate }}</th>
           </tr>
         </thead>
         <tbody>

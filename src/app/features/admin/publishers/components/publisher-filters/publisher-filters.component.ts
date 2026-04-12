@@ -1,7 +1,7 @@
 import { Component, DestroyRef, EventEmitter, OnInit, Output, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
@@ -15,7 +15,15 @@ import { PublisherUiFilters } from '../../models/publishers-stats.models';
 @Component({
   selector: 'app-publisher-filters',
   standalone: true,
-  imports: [FormsModule, NzInputModule, NzSelectModule, NzButtonModule, NzModalModule, NgIcon],
+  imports: [
+    FormsModule,
+    NzInputModule,
+    NzSelectModule,
+    NzButtonModule,
+    NzModalModule,
+    NgIcon,
+    TranslateModule,
+  ],
   templateUrl: './publisher-filters.component.html',
   styleUrl: './publisher-filters.component.less',
 })

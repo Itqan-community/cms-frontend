@@ -1,4 +1,3 @@
-import { DecimalPipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NzInputModule } from 'ng-zorro-antd/input';
@@ -7,6 +6,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NgIcon } from '@ng-icons/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { take } from 'rxjs';
 import { EnrichedAyah, QuranDataService } from '../../services/quran-data.service';
 import { SURAHS_METADATA, SurahMetadata } from '../../models/quran-metadata';
@@ -17,7 +17,6 @@ const PAGE_SIZE = 20;
   selector: 'app-ayahs-page',
   standalone: true,
   imports: [
-    DecimalPipe,
     FormsModule,
     NgIcon,
     NzInputModule,
@@ -25,6 +24,7 @@ const PAGE_SIZE = 20;
     NzSelectModule,
     NzTableModule,
     NzTagModule,
+    TranslateModule,
   ],
   templateUrl: './ayahs.page.html',
   styleUrls: ['./ayahs.page.less'],

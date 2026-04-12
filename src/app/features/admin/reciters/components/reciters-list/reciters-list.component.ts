@@ -1,7 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -31,6 +31,7 @@ import { ReciterFiltersComponent } from '../reciter-filters/reciter-filters.comp
     NgIcon,
     ReciterFiltersComponent,
     AdminColumnPickerComponent,
+    TranslateModule,
   ],
   templateUrl: './reciters-list.component.html',
   styleUrl: './reciters-list.component.less',
@@ -48,11 +49,11 @@ export class RecitersListComponent implements OnInit {
 
   readonly reciterTableStorageKey = 'admin-list-reciters';
   readonly reciterTableColumns: AdminTableColumnOption[] = [
-    { key: 'name', label: 'الاسم' },
-    { key: 'bio', label: 'النبذة' },
-    { key: 'nationality', label: 'الجنسية' },
-    { key: 'recitations_count', label: 'التلاوات' },
-    { key: 'created', label: 'تاريخ الإضافة' },
+    { key: 'name', label: 'ADMIN.RECITERS.COLUMNS.NAME' },
+    { key: 'bio', label: 'ADMIN.RECITERS.COLUMNS.BIO' },
+    { key: 'nationality', label: 'ADMIN.RECITERS.COLUMNS.NATIONALITY' },
+    { key: 'recitations_count', label: 'ADMIN.RECITERS.COLUMNS.RECITATIONS_COUNT' },
+    { key: 'created', label: 'ADMIN.RECITERS.COLUMNS.CREATED_AT' },
   ];
   private readonly columnVisibility = signal<Record<string, boolean>>({});
 

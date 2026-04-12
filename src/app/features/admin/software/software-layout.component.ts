@@ -8,8 +8,8 @@ import type { SectionTab } from '../components/section-layout/section-layout.com
   imports: [SectionLayoutComponent],
   template: `
     <app-section-layout
-      title="البرمجيات"
-      description="موارد المطورين والواجهات البرمجية"
+      title="ADMIN.SOFTWARE.TITLE"
+      description="ADMIN.SOFTWARE.DESCRIPTION"
       basePath="/admin/software"
       [tabs]="subTabs"
     />
@@ -17,8 +17,18 @@ import type { SectionTab } from '../components/section-layout/section-layout.com
 })
 export class SoftwareLayoutComponent {
   readonly subTabs: SectionTab[] = [
-    { id: 'resources', path: 'resources', label: 'موارد المطورين', icon: 'lucideWrench' },
-    { id: 'backend', path: 'backend', label: 'Backend', icon: 'lucideSettings' },
-    { id: 'import', path: 'import', label: 'إستيراد البيانات', icon: 'lucideDownloadCloud' },
+    {
+      id: 'resources',
+      path: 'resources',
+      label: 'ADMIN.SOFTWARE.TAB_RESOURCES',
+      icon: 'lucideWrench',
+    },
+    { id: 'backend', path: 'backend', label: 'ADMIN.SOFTWARE.TAB_BACKEND', icon: 'lucideSettings' },
+    {
+      id: 'import',
+      path: 'import',
+      label: 'ADMIN.SOFTWARE.TAB_IMPORT',
+      icon: 'lucideDownloadCloud',
+    },
   ];
 }

@@ -1,13 +1,13 @@
-<div class="publishers-list admin-list-page" dir="rtl">
+<div class="publishers-list admin-list-page">
   <div class="admin-list-header">
     <div class="admin-list-header__text">
-      <h2 class="admin-list-header__title">الناشرون</h2>
-      <p class="admin-list-header__subtitle">إدارة الجهات والمؤسسات الناشرة للمحتوى القرآني</p>
+      <h2 class="admin-list-header__title">{{ 'ADMIN.PUBLISHERS.TITLE' | translate }}</h2>
+      <p class="admin-list-header__subtitle">{{ 'ADMIN.PUBLISHERS.SUBTITLE' | translate }}</p>
     </div>
     <a routerLink="/admin/publishers/create">
       <button nz-button nzType="primary" class="admin-add-btn">
         <ng-icon name="lucidePlus" aria-hidden="true" />
-        إضافة ناشر
+        {{ 'ADMIN.PUBLISHERS.ADD_BUTTON' | translate }}
       </button>
     </a>
   </div>
@@ -40,17 +40,17 @@
                 [nzSortFn]="true"
                 (nzSortOrderChange)="onSortChange('name', $event)"
               >
-                الاسم
+                {{ 'ADMIN.PUBLISHERS.COLUMNS.NAME' | translate }}
               </th>
             }
             @if (showPublisherCol('country')) {
-              <th nzWidth="120px">الدولة</th>
+              <th nzWidth="120px">{{ 'ADMIN.PUBLISHERS.COLUMNS.COUNTRY' | translate }}</th>
             }
             @if (showPublisherCol('description')) {
-              <th nzWidth="240px">الوصف</th>
+              <th nzWidth="240px">{{ 'ADMIN.PUBLISHERS.COLUMNS.DESCRIPTION' | translate }}</th>
             }
-            <!-- is_verified column (commented out — do not delete)
-            <th nzWidth="100px">موثق</th>
+            <!-- is_verified column (commented out — do not delete; use ADMIN.PUBLISHERS.COLUMNS.VERIFIED)
+            <th nzWidth="100px">{{ 'ADMIN.PUBLISHERS.COLUMNS.VERIFIED' | translate }}</th>
             -->
             @if (showPublisherCol('created')) {
               <th
@@ -58,10 +58,10 @@
                 [nzSortFn]="true"
                 (nzSortOrderChange)="onSortChange('created_at', $event)"
               >
-                تاريخ الإضافة
+                {{ 'ADMIN.PUBLISHERS.COLUMNS.CREATED_AT' | translate }}
               </th>
             }
-            <th nzWidth="120px">الإجراءات</th>
+            <th nzWidth="120px">{{ 'ADMIN.PUBLISHERS.COLUMNS.ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -76,12 +76,12 @@
               @if (showPublisherCol('description')) {
                 <td class="admin-list-desc">{{ publisherDescriptionPreview(p) }}</td>
               }
-              <!-- is_verified cell (commented out — do not delete)
+              <!-- is_verified cell (commented out — do not delete; use ADMIN.PUBLISHERS.VERIFIED_TAG / NOT_VERIFIED_TAG)
               <td>
                 @if (p.is_verified) {
-                  <nz-tag nzColor="success">موثق</nz-tag>
+                  <nz-tag nzColor="success">{{ 'ADMIN.PUBLISHERS.VERIFIED_TAG' | translate }}</nz-tag>
                 } @else {
-                  <nz-tag>غير موثق</nz-tag>
+                  <nz-tag>{{ 'ADMIN.PUBLISHERS.NOT_VERIFIED_TAG' | translate }}</nz-tag>
                 }
               </td>
               -->
@@ -96,7 +96,7 @@
                     nzType="text"
                     class="action-icon action-icon--view"
                     nz-tooltip
-                    nzTooltipTitle="عرض"
+                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_VIEW' | translate"
                     (click)="onView(p.id)"
                   >
                     <ng-icon name="lucideEye" aria-hidden="true" />
@@ -107,7 +107,7 @@
                     nzType="text"
                     class="action-icon action-icon--edit"
                     nz-tooltip
-                    nzTooltipTitle="تعديل"
+                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_EDIT' | translate"
                     (click)="onEdit(p.id)"
                   >
                     <ng-icon name="lucideSquarePen" aria-hidden="true" />
@@ -124,8 +124,8 @@
   <ng-template #emptyTpl>
     <div class="admin-empty-state">
       <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
-      <p class="admin-empty-state__title">لا يوجد ناشرون</p>
-      <p class="admin-empty-state__subtitle">لم يتم العثور على نتائج. حاول تعديل معايير البحث.</p>
+      <p class="admin-empty-state__title">{{ 'ADMIN.PUBLISHERS.EMPTY_TITLE' | translate }}</p>
+      <p class="admin-empty-state__subtitle">{{ 'ADMIN.COMMON.EMPTY_SUBTITLE' | translate }}</p>
     </div>
   </ng-template>
 

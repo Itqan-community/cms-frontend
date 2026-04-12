@@ -1,9 +1,11 @@
-<div class="recitation-detail admin-list-page" dir="rtl">
+<div class="recitation-detail admin-list-page">
   <div class="admin-breadcrumb">
-    <a routerLink="/admin/recitations" class="admin-breadcrumb__link">التلاوات</a>
+    <a routerLink="/admin/recitations" class="admin-breadcrumb__link">{{
+      'ADMIN.RECITATIONS.DETAIL.BREADCRUMB' | translate
+    }}</a>
     <ng-icon name="lucideChevronLeft" class="admin-breadcrumb__sep" />
     @if (loading()) {
-      <span class="admin-breadcrumb__current">جاري التحميل...</span>
+      <span class="admin-breadcrumb__current">{{ 'ADMIN.COMMON.LOADING' | translate }}</span>
     } @else {
       <span class="admin-breadcrumb__current">{{ recitation()?.name_ar }}</span>
     }
@@ -35,19 +37,23 @@
         <div class="admin-relations">
           <p>
             <ng-icon name="lucideUser" />
-            <strong>القارئ:</strong> {{ recitation()!.reciter.name }}
+            <strong>{{ 'ADMIN.RECITATIONS.DETAIL.LABEL_RECITER' | translate }}:</strong>
+            {{ recitation()!.reciter.name }}
           </p>
           <p>
             <ng-icon name="lucideVolume2" />
-            <strong>القراءة:</strong> {{ recitation()!.qiraah.name }}
+            <strong>{{ 'ADMIN.RECITATIONS.DETAIL.LABEL_QIRAAH' | translate }}:</strong>
+            {{ recitation()!.qiraah.name }}
           </p>
           <p>
             <ng-icon name="lucideBookOpen" />
-            <strong>الرواية:</strong> {{ recitation()!.riwayah?.name ?? '—' }}
+            <strong>{{ 'ADMIN.RECITATIONS.DETAIL.LABEL_RIWAYAH' | translate }}:</strong>
+            {{ recitation()!.riwayah?.name ?? ('ADMIN.COMMON.EM_DASH' | translate) }}
           </p>
           <p>
             <ng-icon name="lucideStore" />
-            <strong>الناشر:</strong> {{ recitation()!.publisher.name }}
+            <strong>{{ 'ADMIN.RECITATIONS.DETAIL.LABEL_PUBLISHER' | translate }}:</strong>
+            {{ recitation()!.publisher.name }}
           </p>
         </div>
       </div>
@@ -55,23 +61,25 @@
       <div class="admin-hero-actions">
         <button nz-button nzType="primary" (click)="onEdit()">
           <ng-icon name="lucideSquarePen" />
-          تعديل
+          {{ 'ADMIN.COMMON.EDIT' | translate }}
         </button>
         <button nz-button nzDanger (click)="onDelete()">
           <ng-icon name="lucideTrash2" />
-          حذف
+          {{ 'ADMIN.COMMON.DELETE' | translate }}
         </button>
       </div>
     </div>
 
     <div class="admin-descriptions">
       <div class="admin-desc-col">
-        <h3 class="admin-desc-title"><ng-icon name="lucideFileText" /> الوصف (عربي)</h3>
+        <h3 class="admin-desc-title">
+          <ng-icon name="lucideFileText" /> {{ 'ADMIN.RECITATIONS.DETAIL.DESC_AR' | translate }}
+        </h3>
         <p class="admin-desc-text">{{ recitation()!.description_ar }}</p>
       </div>
       <div class="admin-desc-col">
         <h3 class="admin-desc-title" dir="ltr">
-          <ng-icon name="lucideFileText" /> Description (EN)
+          <ng-icon name="lucideFileText" /> {{ 'ADMIN.RECITATIONS.DETAIL.DESC_EN' | translate }}
         </h3>
         <p class="admin-desc-text" dir="ltr">{{ recitation()!.description_en }}</p>
       </div>
@@ -81,15 +89,15 @@
       <a routerLink="/admin/recitations">
         <button nz-button nzType="default">
           <ng-icon name="lucideArrowRight" />
-          العودة للقائمة
+          {{ 'ADMIN.COMMON.BACK_TO_LIST' | translate }}
         </button>
       </a>
     </div>
   } @else {
     <div class="admin-not-found">
       <ng-icon name="lucideAlertTriangle" class="admin-not-found__icon" />
-      <p>لم يتم العثور على التلاوة المطلوبة.</p>
-      <a routerLink="/admin/recitations">العودة للقائمة</a>
+      <p>{{ 'ADMIN.COMMON.NOT_FOUND' | translate }}</p>
+      <a routerLink="/admin/recitations">{{ 'ADMIN.COMMON.BACK_TO_LIST' | translate }}</a>
     </div>
   }
 </div>

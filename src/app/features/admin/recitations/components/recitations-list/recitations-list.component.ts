@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -36,6 +37,7 @@ import { RecitationFiltersComponent } from '../recitation-filters/recitation-fil
     NgIcon,
     RecitationFiltersComponent,
     AdminColumnPickerComponent,
+    TranslateModule,
   ],
   templateUrl: './recitations-list.component.html',
   styleUrl: './recitations-list.component.less',
@@ -52,14 +54,14 @@ export class RecitationsListComponent implements OnInit {
 
   readonly recitationTableStorageKey = 'admin-list-recitations';
   readonly recitationTableColumns: AdminTableColumnOption[] = [
-    { key: 'name', label: 'الاسم' },
-    { key: 'description', label: 'الوصف' },
-    { key: 'publisher', label: 'الناشر' },
-    { key: 'reciter', label: 'القارئ' },
-    { key: 'qiraah', label: 'القراءة' },
-    { key: 'year', label: 'السنة' },
-    { key: 'license', label: 'الترخيص' },
-    { key: 'created', label: 'تاريخ الإضافة' },
+    { key: 'name', label: 'ADMIN.RECITATIONS.COLUMNS.NAME' },
+    { key: 'description', label: 'ADMIN.RECITATIONS.COLUMNS.DESCRIPTION' },
+    { key: 'publisher', label: 'ADMIN.RECITATIONS.COLUMNS.PUBLISHER' },
+    { key: 'reciter', label: 'ADMIN.RECITATIONS.COLUMNS.RECITER' },
+    { key: 'qiraah', label: 'ADMIN.RECITATIONS.COLUMNS.QIRAAH' },
+    { key: 'year', label: 'ADMIN.RECITATIONS.COLUMNS.YEAR' },
+    { key: 'license', label: 'ADMIN.RECITATIONS.COLUMNS.LICENSE' },
+    { key: 'created', label: 'ADMIN.RECITATIONS.COLUMNS.CREATED_AT' },
   ];
   private readonly columnVisibility = signal<Record<string, boolean>>({});
 
