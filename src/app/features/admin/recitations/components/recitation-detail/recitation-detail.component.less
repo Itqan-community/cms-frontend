@@ -10,4 +10,105 @@
   &__hero-info {
     min-width: 240px;
   }
+
+  &__tracks {
+    margin-top: 8px;
+  }
+
+  &__tracks-alert {
+    margin-bottom: 16px;
+  }
+
+  &__tracks-upload {
+    margin-bottom: 20px;
+  }
+
+  &__file-input {
+    position: absolute;
+    width: 0;
+    height: 0;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__tracks-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+
+  &__tracks-hint {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--admin-text-500);
+    line-height: 1.6;
+  }
+
+  &__global-progress {
+    margin-bottom: 16px;
+
+    &-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--admin-text-700);
+      margin-bottom: 8px;
+    }
+  }
+
+  &__upload-table-wrap {
+    margin-bottom: 24px;
+  }
+
+  &__surah-badge {
+    display: inline-block;
+    margin-inline-start: 8px;
+    font-size: 0.75rem;
+    color: var(--admin-text-500);
+  }
+
+  &__error-text {
+    font-size: 0.8rem;
+    color: var(--color-action-delete);
+  }
+
+  &__tracks-list-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  &__tracks-list-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--admin-text-900);
+  }
+
+  &__tracks-search {
+    min-width: 240px;
+    max-width: 360px;
+    flex: 1;
+  }
+
+  &__tracks-search-icon {
+    font-size: 1rem;
+    color: var(--admin-text-400);
+  }
+
+  &__audio {
+    width: 100%;
+    max-width: 320px;
+    height: 36px;
+    vertical-align: middle;
+  }
+}
+
+.admin-empty-state--compact {
+  padding: 32px 16px;
 }

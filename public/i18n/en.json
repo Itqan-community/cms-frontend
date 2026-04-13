@@ -717,6 +717,55 @@
         "DESC_AR": "Description (Arabic)",
         "DESC_EN": "Description (EN)"
       },
+      "TRACKS": {
+        "SECTION_TITLE": "Recitation tracks",
+        "CHOOSE_FILES": "Choose MP3 files",
+        "UPLOAD": "Upload",
+        "CLEAR": "Clear",
+        "HINT_FILENAMES": "Use one file per surah, named like 001.mp3 … 114.mp3 (extension .mp3).",
+        "OVERALL_PROGRESS": "Overall upload progress",
+        "COL_FILE": "File",
+        "COL_STATUS": "Status",
+        "COL_PROGRESS": "Progress",
+        "COL_ACTIONS": "Actions",
+        "COL_SURAH": "Surah",
+        "COL_SURAH_NAME": "Surah name",
+        "COL_DURATION": "Duration",
+        "COL_SIZE": "Size",
+        "COL_PREVIEW": "Preview",
+        "SURAH": "Surah",
+        "RETRY": "Retry",
+        "LIST_TITLE": "Uploaded tracks",
+        "SEARCH_PLACEHOLDER": "Search by surah number or name…",
+        "NO_AUDIO_URL": "No playback URL",
+        "DELETE_TRACK": "Delete track",
+        "EMPTY_TITLE": "No tracks yet",
+        "EMPTY_SUBTITLE": "Upload MP3 files above or wait for the list API in production.",
+        "STATUS": {
+          "VALIDATING": "Validating…",
+          "INVALID": "Invalid filename or duplicate in the selection.",
+          "SKIPPED": "Already uploaded — skipped",
+          "READY": "Ready to upload",
+          "QUEUED": "Queued",
+          "UPLOADING": "Uploading…",
+          "DONE": "Done",
+          "FAILED": "Failed"
+        },
+        "DELETE": {
+          "CONFIRM_TITLE": "Delete this track?",
+          "CONFIRM_BODY": "Surah {{surah}} — this removes the audio file from storage.",
+          "OK": "Delete",
+          "CANCEL": "Cancel"
+        },
+        "MESSAGES": {
+          "MAX_FILES": "You can select at most {{max}} files.",
+          "VALIDATE_ERROR": "Could not validate files. Try again.",
+          "UPLOAD_ALL_OK": "{{count}} file(s) uploaded successfully.",
+          "UPLOAD_PARTIAL": "{{ok}} uploaded, {{failed}} failed. You can retry failed rows.",
+          "DELETE_OK": "Track deleted.",
+          "DELETE_ERROR": "Could not delete the track."
+        }
+      },
       "DELETE": {
         "CONFIRM_TITLE": "Delete this recitation?",
         "CONFIRM_BODY": "<b>{{name}}</b> — This action cannot be undone.",

@@ -85,6 +85,256 @@
       </div>
     </div>
 
+    <section class="admin-panel recitation-detail__tracks">
+      <h2 class="admin-panel__title">
+        <ng-icon name="lucideMic" />
+        {{ 'ADMIN.RECITATIONS.TRACKS.SECTION_TITLE' | translate }}
+      </h2>
+
+      <div class="recitation-detail__tracks-upload">
+        <input
+          #mp3Input
+          type="file"
+          accept=".mp3,audio/mpeg"
+          multiple
+          class="recitation-detail__file-input"
+          (change)="onPickMp3Files($event)"
+        />
+        <div class="recitation-detail__tracks-actions">
+          <button nz-button nzType="default" type="button" (click)="mp3Input.click()">
+            <ng-icon name="lucideFolderOpen" />
+            {{ 'ADMIN.RECITATIONS.TRACKS.CHOOSE_FILES' | translate }}
+          </button>
+          <button
+            nz-button
+            nzType="primary"
+            type="button"
+            [disabled]="
+              validateTopStatus() !== 'valid' ||
+              uploadRunning() ||
+              validateLoading() ||
+              !uploadRows().length
+            "
+            (click)="startUpload()"
+          >
+            <ng-icon name="lucideUpload" />
+            {{ 'ADMIN.RECITATIONS.TRACKS.UPLOAD' | translate }}
+          </button>
+          @if (uploadRows().length) {
+            <button
+              nz-button
+              nzType="default"
+              nzDanger
+              type="button"
+              (click)="clearUploadSelection()"
+            >
+              <ng-icon name="lucideX" />
+              {{ 'ADMIN.RECITATIONS.TRACKS.CLEAR' | translate }}
+            </button>
+          }
+        </div>
+        <p class="recitation-detail__tracks-hint">
+          {{ 'ADMIN.RECITATIONS.TRACKS.HINT_FILENAMES' | translate }}
+        </p>
+      </div>
+
+      @if (validateMessage()) {
+        <nz-alert
+          [nzType]="validateTopStatus() === 'valid' ? 'success' : 'error'"
+          [nzMessage]="validateMessage()"
+          nzShowIcon
+          class="recitation-detail__tracks-alert"
+        />
+      }
+
+      @if (uploadRunning() && uploadGlobalProgress() >= 0) {
+        <div class="recitation-detail__global-progress">
+          <span class="recitation-detail__global-progress-label">{{
+            'ADMIN.RECITATIONS.TRACKS.OVERALL_PROGRESS' | translate
+          }}</span>
+          <nz-progress [nzPercent]="uploadGlobalProgress() * 100" [nzShowInfo]="true"></nz-progress>
+        </div>
+      }
+
+      @if (uploadRows().length) {
+        <div class="admin-table-wrap recitation-detail__upload-table-wrap">
+          <nz-table
+            [nzData]="uploadRows()"
+            [nzFrontPagination]="false"
+            nzTableLayout="fixed"
+            [nzShowPagination]="false"
+            [nzLoading]="validateLoading()"
+          >
+            <thead>
+              <tr>
+                <th>{{ 'ADMIN.RECITATIONS.TRACKS.COL_FILE' | translate }}</th>
+                <th nzWidth="140px">{{ 'ADMIN.RECITATIONS.TRACKS.COL_STATUS' | translate }}</th>
+                <th>{{ 'ADMIN.RECITATIONS.TRACKS.COL_PROGRESS' | translate }}</th>
+                <th nzWidth="100px">{{ 'ADMIN.RECITATIONS.TRACKS.COL_ACTIONS' | translate }}</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of uploadRows(); track row.filename) {
+                <tr>
+                  <td>
+                    <span class="admin-mono">{{ row.filename }}</span>
+                    @if (row.surahNumber !== undefined && row.surahNumber !== null) {
+                      <span class="recitation-detail__surah-badge"
+                        >{{ 'ADMIN.RECITATIONS.TRACKS.SURAH' | translate }}
+                        {{ row.surahNumber }}</span
+                      >
+                    }
+                  </td>
+                  <td>
+                    <nz-tag
+                      [nzColor]="
+                        row.phase === 'invalid_validation'
+                          ? 'error'
+                          : row.phase === 'skipped_validation'
+                            ? 'warning'
+                            : row.phase === 'success'
+                              ? 'success'
+                              : row.phase === 'failed'
+                                ? 'error'
+                                : 'default'
+                      "
+                    >
+                      {{ rowStatusLabel(row) }}
+                    </nz-tag>
+                  </td>
+                  <td>
+                    @if (
+                      row.validateStatus === 'valid' &&
+                      (row.phase === 'uploading' ||
+                        row.phase === 'queued' ||
+                        row.phase === 'success')
+                    ) {
+                      <nz-progress
+                        [nzPercent]="row.progress * 100"
+                        [nzShowInfo]="true"
+                        [nzStatus]="row.phase === 'success' ? 'success' : 'active'"
+                      ></nz-progress>
+                    } @else if (row.phase === 'failed' && row.errorMessage) {
+                      <span class="recitation-detail__error-text">{{ row.errorMessage }}</span>
+                    } @else {
+                      <span class="admin-list-desc">—</span>
+                    }
+                  </td>
+                  <td>
+                    @if (row.phase === 'failed' && row.validateStatus === 'valid') {
+                      <button
+                        nz-button
+                        nzType="link"
+                        nzSize="small"
+                        type="button"
+                        [disabled]="uploadRunning()"
+                        (click)="retryUploadRow(row)"
+                      >
+                        {{ 'ADMIN.RECITATIONS.TRACKS.RETRY' | translate }}
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </nz-table>
+        </div>
+      }
+
+      <div class="recitation-detail__tracks-list-head">
+        <h3 class="recitation-detail__tracks-list-title">
+          {{ 'ADMIN.RECITATIONS.TRACKS.LIST_TITLE' | translate }}
+        </h3>
+        <nz-input-group [nzPrefix]="tracksSearchPrefixTpl" class="recitation-detail__tracks-search">
+          <input
+            type="text"
+            nz-input
+            [placeholder]="'ADMIN.RECITATIONS.TRACKS.SEARCH_PLACEHOLDER' | translate"
+            (input)="onTracksSearchInput($event)"
+          />
+        </nz-input-group>
+        <ng-template #tracksSearchPrefixTpl>
+          <ng-icon name="lucideSearch" class="recitation-detail__tracks-search-icon" />
+        </ng-template>
+      </div>
+
+      <div class="admin-table-wrap">
+        <nz-table
+          [nzData]="tracksList()"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          [nzLoading]="tracksLoading()"
+          [nzNoResult]="tracksEmptyTpl"
+        >
+          <thead>
+            <tr>
+              <th nzWidth="72px">{{ 'ADMIN.RECITATIONS.TRACKS.COL_SURAH' | translate }}</th>
+              <th>{{ 'ADMIN.RECITATIONS.TRACKS.COL_SURAH_NAME' | translate }}</th>
+              <th nzWidth="100px">{{ 'ADMIN.RECITATIONS.TRACKS.COL_DURATION' | translate }}</th>
+              <th nzWidth="100px">{{ 'ADMIN.RECITATIONS.TRACKS.COL_SIZE' | translate }}</th>
+              <th>{{ 'ADMIN.RECITATIONS.TRACKS.COL_PREVIEW' | translate }}</th>
+              <th nzWidth="88px">{{ 'ADMIN.RECITATIONS.TRACKS.COL_ACTIONS' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (track of tracksList(); track track.id) {
+              <tr>
+                <td>{{ track.surah_number }}</td>
+                <td>{{ track.surah_name ?? '—' }}</td>
+                <td>{{ formatDurationMs(track.duration_ms) }}</td>
+                <td>{{ formatBytes(track.size_bytes) }}</td>
+                <td>
+                  @if (track.audio_url) {
+                    <audio controls preload="none" class="recitation-detail__audio">
+                      <source [src]="track.audio_url" type="audio/mpeg" />
+                    </audio>
+                  } @else {
+                    <span class="admin-list-desc">{{
+                      'ADMIN.RECITATIONS.TRACKS.NO_AUDIO_URL' | translate
+                    }}</span>
+                  }
+                </td>
+                <td>
+                  <button
+                    nz-button
+                    nzType="text"
+                    nzDanger
+                    type="button"
+                    class="action-icon action-icon--delete"
+                    [attr.aria-label]="'ADMIN.RECITATIONS.TRACKS.DELETE_TRACK' | translate"
+                    (click)="deleteTrack(track)"
+                  >
+                    <ng-icon name="lucideTrash2" />
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+        <ng-template #tracksEmptyTpl>
+          <div class="admin-empty-state admin-empty-state--compact">
+            <ng-icon name="lucideMusic" class="admin-empty-state__icon" />
+            <p class="admin-empty-state__title">
+              {{ 'ADMIN.RECITATIONS.TRACKS.EMPTY_TITLE' | translate }}
+            </p>
+            <p class="admin-empty-state__subtitle">
+              {{ 'ADMIN.RECITATIONS.TRACKS.EMPTY_SUBTITLE' | translate }}
+            </p>
+          </div>
+        </ng-template>
+      </div>
+
+      <div class="admin-pagination">
+        <nz-pagination
+          [nzPageIndex]="tracksPage()"
+          [nzTotal]="tracksTotal()"
+          [nzPageSize]="tracksPageSize"
+          [nzShowSizeChanger]="false"
+          (nzPageIndexChange)="onTracksPageChange($event)"
+        ></nz-pagination>
+      </div>
+    </section>
+
     <div class="admin-back">
       <a routerLink="/admin/recitations">
         <button nz-button nzType="default">

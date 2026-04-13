@@ -729,7 +729,56 @@
         "UPDATE_SUCCESS": "تم تحديث التلاوة بنجاح",
         "DELETE_SUCCESS": "تم حذف التلاوة بنجاح"
       },
-      "STATS_LOAD_ERROR": "تعذر تحميل إحصائيات التلاوات من الخادم."
+      "STATS_LOAD_ERROR": "تعذر تحميل إحصائيات التلاوات من الخادم.",
+      "TRACKS": {
+        "SECTION_TITLE": "مسارات التلاوة",
+        "CHOOSE_FILES": "اختر ملفات MP3",
+        "UPLOAD": "رفع",
+        "CLEAR": "مسح",
+        "HINT_FILENAMES": "ملف لكل سورة بالتسمية 001.mp3 … 114.mp3 (الامتداد .mp3).",
+        "OVERALL_PROGRESS": "تقدم الرفع الإجمالي",
+        "COL_FILE": "الملف",
+        "COL_STATUS": "الحالة",
+        "COL_PROGRESS": "التقدم",
+        "COL_ACTIONS": "إجراءات",
+        "COL_SURAH": "السورة",
+        "COL_SURAH_NAME": "اسم السورة",
+        "COL_DURATION": "المدة",
+        "COL_SIZE": "الحجم",
+        "COL_PREVIEW": "معاينة",
+        "SURAH": "سورة",
+        "RETRY": "إعادة المحاولة",
+        "LIST_TITLE": "المسارات المرفوعة",
+        "SEARCH_PLACEHOLDER": "بحث برقم أو اسم السورة…",
+        "NO_AUDIO_URL": "لا يوجد رابط تشغيل",
+        "DELETE_TRACK": "حذف المسار",
+        "EMPTY_TITLE": "لا توجد مسارات بعد",
+        "EMPTY_SUBTITLE": "ارفع ملفات MP3 أعلاه أو انتظر واجهة القائمة في الإنتاج.",
+        "STATUS": {
+          "VALIDATING": "جاري التحقق…",
+          "INVALID": "اسم ملف غير صالح أو مكرر في الاختيار.",
+          "SKIPPED": "مرفوع مسبقاً — تم التخطي",
+          "READY": "جاهز للرفع",
+          "QUEUED": "في الانتظار",
+          "UPLOADING": "جاري الرفع…",
+          "DONE": "تم",
+          "FAILED": "فشل"
+        },
+        "DELETE": {
+          "CONFIRM_TITLE": "حذف هذا المسار؟",
+          "CONFIRM_BODY": "سورة {{surah}} — سيتم حذف الملف الصوتي من التخزين.",
+          "OK": "حذف",
+          "CANCEL": "إلغاء"
+        },
+        "MESSAGES": {
+          "MAX_FILES": "يمكنك اختيار {{max}} ملفاً كحد أقصى.",
+          "VALIDATE_ERROR": "تعذر التحقق من الملفات. حاول مرة أخرى.",
+          "UPLOAD_ALL_OK": "تم رفع {{count}} ملف(ات) بنجاح.",
+          "UPLOAD_PARTIAL": "تم رفع {{ok}}، فشل {{failed}}. يمكنك إعادة المحاولة للصفوف الفاشلة.",
+          "DELETE_OK": "تم حذف المسار.",
+          "DELETE_ERROR": "تعذر حذف المسار."
+        }
+      }
     },
     "RECITERS": {
       "TITLE": "القرّاء",

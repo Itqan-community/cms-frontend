@@ -2,6 +2,22 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import type {
+  RecitationSurahTrackListItem,
+  RecitationTrackDeleteTracksIn,
+  RecitationTrackPortalListApiRow,
+  RecitationTracksListApiResponse,
+  RecitationTrackUploadAbortIn,
+  RecitationTrackUploadAbortOut,
+  RecitationTrackUploadFinishIn,
+  RecitationTrackUploadFinishOut,
+  RecitationTrackUploadSignPartIn,
+  RecitationTrackUploadSignPartOut,
+  RecitationTrackUploadStartIn,
+  RecitationTrackUploadStartOut,
+  RecitationTrackValidateUploadIn,
+  RecitationTrackValidateUploadOut,
+} from '../models/recitation-tracks.models';
 import {
   NamedId,
   RecitationDetails,
@@ -16,6 +32,7 @@ export class RecitationsService {
   private readonly apiUrl = `${environment.ADMIN_API_BASE_URL}/recitations/`;
   private readonly qiraahsFilterApiUrl = `${environment.ADMIN_API_BASE_URL}/filters/qiraahs/`;
   private readonly riwayahsFilterApiUrl = `${environment.ADMIN_API_BASE_URL}/filters/riwayahs/`;
+  private readonly recitationTracksBaseUrl = `${environment.ADMIN_API_BASE_URL}/recitation-tracks`;
 
   qiraahOptions(search?: string, page = 1, page_size = 200): Observable<NamedId[]> {
     let params = new HttpParams()
@@ -25,7 +42,7 @@ export class RecitationsService {
 
     return this.http
       .get<{
-        results: Array<{ id: number; name: string; bio?: string }>;
+        results: { id: number; name: string; bio?: string }[];
         count: number;
       }>(this.qiraahsFilterApiUrl, { params })
       .pipe(map((res) => res.results.map((item) => ({ id: item.id, name: item.name }))));
@@ -45,7 +62,7 @@ export class RecitationsService {
 
     return this.http
       .get<{
-        results: Array<{ id: number; name: string; bio?: string; qiraah_id?: number }>;
+        results: { id: number; name: string; bio?: string; qiraah_id?: number }[];
         count: number;
       }>(this.riwayahsFilterApiUrl, { params })
       .pipe(map((res) => res.results.map((item) => ({ id: item.id, name: item.name }))));
@@ -88,5 +105,114 @@ export class RecitationsService {
 
   delete(slug: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}${slug}/`);
+  }
+
+  // --- Recitation surah tracks (portal) ---
+
+  recitationTracksValidateUpload(
+    body: RecitationTrackValidateUploadIn
+  ): Observable<RecitationTrackValidateUploadOut> {
+    return this.http.post<RecitationTrackValidateUploadOut>(
+      `${this.recitationTracksBaseUrl}/validate-upload/`,
+      body
+    );
+  }
+
+  recitationTracksDelete(body: RecitationTrackDeleteTracksIn): Observable<void> {
+    return this.http.request<void>('DELETE', `${this.recitationTracksBaseUrl}/`, { body });
+  }
+
+  recitationTracksUploadStart(
+    body: RecitationTrackUploadStartIn
+  ): Observable<RecitationTrackUploadStartOut> {
+    return this.http.post<RecitationTrackUploadStartOut>(
+      `${this.recitationTracksBaseUrl}/uploads/start/`,
+      body
+    );
+  }
+
+  recitationTracksUploadSignPart(
+    body: RecitationTrackUploadSignPartIn
+  ): Observable<RecitationTrackUploadSignPartOut> {
+    return this.http.post<RecitationTrackUploadSignPartOut>(
+      `${this.recitationTracksBaseUrl}/uploads/sign-part/`,
+      body
+    );
+  }
+
+  recitationTracksUploadFinish(
+    body: RecitationTrackUploadFinishIn
+  ): Observable<RecitationTrackUploadFinishOut> {
+    return this.http.post<RecitationTrackUploadFinishOut>(
+      `${this.recitationTracksBaseUrl}/uploads/finish/`,
+      body
+    );
+  }
+
+  recitationTracksUploadAbort(
+    body: RecitationTrackUploadAbortIn
+  ): Observable<RecitationTrackUploadAbortOut> {
+    return this.http.post<RecitationTrackUploadAbortOut>(
+      `${this.recitationTracksBaseUrl}/uploads/abort/`,
+      body
+    );
+  }
+
+  /**
+   * GET /portal/recitation-tracks/?asset_id=&search=&page=&page_size=
+   */
+  recitationTracksList(params: {
+    asset_id: number;
+    search?: string;
+    page?: number;
+    page_size?: number;
+  }): Observable<{ results: RecitationSurahTrackListItem[]; count: number }> {
+    let httpParams = new HttpParams()
+      .set('asset_id', params.asset_id.toString())
+      .set('page', (params.page ?? 1).toString())
+      .set('page_size', (params.page_size ?? 10).toString());
+    if (params.search?.trim()) {
+      httpParams = httpParams.set('search', params.search.trim());
+    }
+
+    return this.http
+      .get<RecitationTracksListApiResponse>(`${this.recitationTracksBaseUrl}/`, {
+        params: httpParams,
+      })
+      .pipe(
+        map((res) => ({
+          results: res.results.map((row) => this.mapPortalTrackRow(row, params.asset_id)),
+          count: res.count,
+        }))
+      );
+  }
+
+  private mapPortalTrackRow(
+    row: RecitationTrackPortalListApiRow,
+    assetId: number
+  ): RecitationSurahTrackListItem {
+    const extra = row as unknown as Record<string, unknown>;
+    const pickStr = (key: string): string | null => {
+      const v = extra[key];
+      return typeof v === 'string' ? v : null;
+    };
+    const audio =
+      row.audio_url ??
+      pickStr('playback_url') ??
+      pickStr('signed_url') ??
+      pickStr('file_url') ??
+      pickStr('url') ??
+      '';
+
+    return {
+      id: row.id,
+      asset_id: row.asset_id ?? assetId,
+      surah_number: row.surah_number,
+      surah_name: row.surah_name ?? undefined,
+      duration_ms: row.duration_ms,
+      size_bytes: row.size_bytes,
+      audio_url: audio,
+      finished_at: row.finished_at ?? undefined,
+    };
   }
 }
