@@ -777,8 +777,7 @@
         "CREATE_SUCCESS": "Recitation added successfully",
         "UPDATE_SUCCESS": "Recitation updated successfully",
         "DELETE_SUCCESS": "Recitation deleted successfully"
-      },
-      "STATS_LOAD_ERROR": "Could not load recitation statistics from the server."
+      }
     },
     "RECITERS": {
       "TITLE": "Reciters",
@@ -976,14 +975,6 @@
       "SEARCH": "Search",
       "EMPTY_TITLE": "Start by typing a word in the search field above",
       "EMPTY_SUBTITLE": "All verses containing the term will be shown"
-    },
-    "AUDIO_STATS": {
-      "TITLE": "Audio mushafs",
-      "SUBTITLE": "A quick look at riwayahs, reciters, and recordings in the audio library.",
-      "MOCK_BADGE": "Mock data",
-      "LABEL_RIWAYAS": "Riwayahs",
-      "LABEL_RECITATIONS": "Recitations",
-      "LABEL_RECITERS": "Reciters"
     },
     "SOFTWARE": {
       "TITLE": "Software",
