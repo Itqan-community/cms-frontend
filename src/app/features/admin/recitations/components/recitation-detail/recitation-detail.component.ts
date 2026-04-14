@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -17,6 +18,7 @@ import type {
   RecitationSurahTrackListItem,
   RecitationTrackUploadRowState,
   RecitationTrackValidateFileStatus,
+  RecitationTrackValidateUploadOut,
 } from '../../models/recitation-tracks.models';
 import { MaddLevel, MeemBehavior, RecitationDetails } from '../../models/recitations.models';
 import { RecitationTracksUploadOrchestratorService } from '../../services/recitation-tracks-upload.orchestrator';
@@ -70,7 +72,21 @@ export class RecitationDetailComponent implements OnInit {
   readonly validateMessage = signal<string | null>(null);
   readonly validateTopStatus = signal<'idle' | 'valid' | 'invalid'>('idle');
   readonly validateLoading = signal(false);
-  readonly uploadRunning = signal(false);
+
+  /** Any row currently queued or uploading (may include parallel single-file runs). */
+  readonly hasInFlightUploadRows = computed(() =>
+    this.uploadRows().some((r) => r.phase === 'queued' || r.phase === 'uploading')
+  );
+
+  /** Valid rows that can be included in the next batch (ready, or retry after cancel/fail). */
+  readonly uploadableValidCount = computed(
+    () =>
+      this.uploadRows().filter(
+        (r) =>
+          r.validateStatus === 'valid' &&
+          ['ready', 'cancelled', 'failed'].includes(r.phase)
+      ).length
+  );
 
   readonly uploadGlobalProgress = computed(() => {
     const rows = this.uploadRows().filter(
@@ -82,11 +98,6 @@ export class RecitationDetailComponent implements OnInit {
     const sum = rows.reduce((acc, r) => acc + (r.phase === 'failed' ? 0 : r.progress), 0);
     return sum / rows.length;
   });
-
-  /** Rows ready to upload (validated valid, not yet queued). */
-  readonly validReadyUploadCount = computed(
-    () => this.uploadRows().filter((r) => r.validateStatus === 'valid' && r.phase === 'ready').length
-  );
 
   /** Invalid or skipped rows — excluded when uploading a mixed selection. */
   readonly ignoredUploadCount = computed(
@@ -107,7 +118,7 @@ export class RecitationDetailComponent implements OnInit {
   };
 
   private slug!: string;
-  private activeUploadTask: Promise<void> | null = null;
+  private readonly pendingUploadTasks = new Set<Promise<void>>();
 
   ngOnInit(): void {
     this.slug = this.route.snapshot.params['slug'];
@@ -122,8 +133,7 @@ export class RecitationDetailComponent implements OnInit {
   }
 
   private hasInFlightUploads(): boolean {
-    if (this.uploadRunning()) return true;
-    return this.uploadRows().some((r) => r.phase === 'queued' || r.phase === 'uploading');
+    return this.hasInFlightUploadRows();
   }
 
   private markInFlightAsCancelled(): void {
@@ -134,6 +144,53 @@ export class RecitationDetailComponent implements OnInit {
           : r
       )
     );
+  }
+
+  /**
+   * When a batch promise settles, clear rows still **queued** for that batch only.
+   * Do not touch **uploading** — another concurrent run may own that transfer (e.g. per-file restart).
+   */
+  private markBatchQueuedAsCancelled(filenames: ReadonlySet<string>): void {
+    this.uploadRows.update((rows) =>
+      rows.map((r) =>
+        filenames.has(r.filename) && r.phase === 'queued'
+          ? { ...r, phase: 'cancelled', errorMessage: undefined, progress: 0, uploadedBytes: 0 }
+          : r
+      )
+    );
+  }
+
+  private applyValidateResponseForFilenames(
+    res: RecitationTrackValidateUploadOut,
+    filenames: ReadonlySet<string>
+  ): void {
+    this.validateMessage.set(res.message);
+    this.validateTopStatus.set(res.status);
+    const byName = new Map(res.files.map((f) => [f.filename, f.status]));
+    this.uploadRows.update((prev) =>
+      prev.map((row) => {
+        if (!filenames.has(row.filename)) return row;
+        const st = byName.get(row.filename) as RecitationTrackValidateFileStatus | undefined;
+        if (!st) return row;
+        if (st === 'invalid') {
+          return { ...row, validateStatus: st, phase: 'invalid_validation' };
+        }
+        if (st === 'skip') {
+          return { ...row, validateStatus: st, phase: 'skipped_validation' };
+        }
+        return { ...row, validateStatus: st, phase: 'ready' };
+      })
+    );
+  }
+
+  private trackUploadTask(task: Promise<void>): void {
+    this.pendingUploadTasks.add(task);
+    void task.finally(() => this.pendingUploadTasks.delete(task));
+  }
+
+  /** True while this row is already part of an active transfer (disable duplicate restart). */
+  isRowUploadActive(row: RecitationTrackUploadRowState): boolean {
+    return row.phase === 'queued' || row.phase === 'uploading';
   }
 
   canDeactivate(): Promise<boolean> | boolean {
@@ -149,20 +206,18 @@ export class RecitationDetailComponent implements OnInit {
         nzOnOk: () =>
           new Promise<void>((okResolve) => {
             this.uploadOrchestrator.abortCurrentUploadRun();
-            void this.activeUploadTask
-              ?.catch(() => undefined)
-              .finally(() => {
-                this.markInFlightAsCancelled();
-                this.uploadRunning.set(false);
-                okResolve();
-                resolve(true);
-              });
-            if (!this.activeUploadTask) {
+            const pending = [...this.pendingUploadTasks];
+            if (pending.length === 0) {
               this.markInFlightAsCancelled();
-              this.uploadRunning.set(false);
               okResolve();
               resolve(true);
+              return;
             }
+            void Promise.all(pending.map((p) => p.catch(() => undefined))).finally(() => {
+              this.markInFlightAsCancelled();
+              okResolve();
+              resolve(true);
+            });
           }),
         nzOnCancel: () => resolve(false),
       });
@@ -243,7 +298,6 @@ export class RecitationDetailComponent implements OnInit {
     this.uploadRows.set([]);
     this.validateMessage.set(null);
     this.validateTopStatus.set('idle');
-    this.uploadRunning.set(false);
   }
 
   private runValidate(): void {
@@ -252,6 +306,7 @@ export class RecitationDetailComponent implements OnInit {
     const rows = this.uploadRows();
     if (!rows.length) return;
 
+    const allNames = new Set(rows.map((r) => r.filename));
     this.validateLoading.set(true);
     this.recitationsService
       .recitationTracksValidateUpload({
@@ -260,23 +315,7 @@ export class RecitationDetailComponent implements OnInit {
       })
       .subscribe({
         next: (res) => {
-          this.validateMessage.set(res.message);
-          this.validateTopStatus.set(res.status);
-
-          const byName = new Map(res.files.map((f) => [f.filename, f.status]));
-          this.uploadRows.update((prev) =>
-            prev.map((row) => {
-              const st = byName.get(row.filename) as RecitationTrackValidateFileStatus | undefined;
-              if (!st) return row;
-              if (st === 'invalid') {
-                return { ...row, validateStatus: st, phase: 'invalid_validation' };
-              }
-              if (st === 'skip') {
-                return { ...row, validateStatus: st, phase: 'skipped_validation' };
-              }
-              return { ...row, validateStatus: st, phase: 'ready' };
-            })
-          );
+          this.applyValidateResponseForFilenames(res, allNames);
           this.validateLoading.set(false);
         },
         error: () => {
@@ -289,15 +328,11 @@ export class RecitationDetailComponent implements OnInit {
   }
 
   onUploadClick(): void {
-    if (
-      this.uploadRunning() ||
-      this.validateLoading() ||
-      this.validReadyUploadCount() === 0
-    ) {
+    if (this.validateLoading() || this.uploadableValidCount() === 0) {
       return;
     }
     const ignored = this.ignoredUploadCount();
-    const willUpload = this.validReadyUploadCount();
+    const willUpload = this.uploadableValidCount();
     if (ignored > 0) {
       this.modal.confirm({
         nzTitle: this.translate.instant('ADMIN.RECITATIONS.TRACKS.UPLOAD_MIXED_CONFIRM_TITLE'),
@@ -324,7 +359,7 @@ export class RecitationDetailComponent implements OnInit {
   }
 
   canRemoveUploadRow(row: RecitationTrackUploadRowState): boolean {
-    if (this.uploadRunning() || this.validateLoading()) return false;
+    if (this.hasInFlightUploadRows() || this.validateLoading()) return false;
     return ['pending_validation', 'invalid_validation', 'skipped_validation', 'ready'].includes(
       row.phase
     );
@@ -357,29 +392,65 @@ export class RecitationDetailComponent implements OnInit {
 
   async startUpload(): Promise<void> {
     const rec = this.recitation();
-    if (!rec || this.uploadRunning()) return;
+    if (!rec) return;
+
+    const candidates = this.uploadRows().filter(
+      (r) =>
+        r.validateStatus === 'valid' &&
+        ['ready', 'cancelled', 'failed'].includes(r.phase)
+    );
+    if (!candidates.length) return;
+
+    const candidateSet = new Set(candidates.map((r) => r.filename));
+
+    this.validateLoading.set(true);
+    try {
+      const res = await firstValueFrom(
+        this.recitationsService.recitationTracksValidateUpload({
+          asset_id: rec.id,
+          filenames: candidates.map((r) => r.filename),
+        })
+      );
+      this.applyValidateResponseForFilenames(res, candidateSet);
+    } catch {
+      this.message.error(
+        this.translate.instant('ADMIN.RECITATIONS.TRACKS.MESSAGES.VALIDATE_ERROR')
+      );
+      return;
+    } finally {
+      this.validateLoading.set(false);
+    }
 
     const toUpload = this.uploadRows().filter(
-      (r) => r.validateStatus === 'valid' && r.phase === 'ready'
+      (r) =>
+        candidateSet.has(r.filename) &&
+        r.validateStatus === 'valid' &&
+        r.phase === 'ready'
     );
     if (!toUpload.length) return;
 
-    this.uploadRunning.set(true);
+    const batchFilenames = new Set(toUpload.map((r) => r.filename));
     toUpload.forEach((r) => {
-      this.patchUploadRow(r.filename, { phase: 'queued', progress: 0 });
+      this.patchUploadRow(r.filename, {
+        phase: 'queued',
+        progress: 0,
+        uploadedBytes: 0,
+        errorMessage: undefined,
+      });
     });
 
+    const task = this.uploadOrchestrator.uploadAllFiles(
+      rec.id,
+      toUpload.map((r) => ({ filename: r.filename, blob: r.file })),
+      {
+        onRowPatch: (filename, patch) => {
+          this.patchUploadRow(filename, patch);
+        },
+      }
+    );
+    this.trackUploadTask(task);
+
     try {
-      const task = this.uploadOrchestrator.uploadAllFiles(
-        rec.id,
-        toUpload.map((r) => ({ filename: r.filename, blob: r.file })),
-        {
-          onRowPatch: (filename, patch) => {
-            this.patchUploadRow(filename, patch);
-          },
-        }
-      );
-      this.activeUploadTask = task;
       await task;
 
       const rowsAfter = this.uploadRows();
@@ -402,32 +473,89 @@ export class RecitationDetailComponent implements OnInit {
       }
       this.loadTracksPage();
     } finally {
-      this.activeUploadTask = null;
-      this.uploadRunning.set(false);
+      this.markBatchQueuedAsCancelled(batchFilenames);
     }
   }
 
-  retryUploadRow(row: RecitationTrackUploadRowState): void {
+  /** Prompts, then stops every in-flight / queued upload. */
+  confirmAbortAllUploads(): void {
+    if (!this.hasInFlightUploadRows()) return;
+    this.modal.confirm({
+      nzTitle: this.translate.instant('ADMIN.RECITATIONS.TRACKS.ABORT_ALL_CONFIRM_TITLE'),
+      nzContent: this.translate.instant('ADMIN.RECITATIONS.TRACKS.ABORT_ALL_CONFIRM_CONTENT'),
+      nzOkText: this.translate.instant('ADMIN.RECITATIONS.TRACKS.ABORT_ALL_CONFIRM_OK'),
+      nzOkType: 'primary',
+      nzOkDanger: true,
+      nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
+      nzDirection: this.translate.currentLang === 'ar' ? 'rtl' : 'ltr',
+      nzOnOk: () => {
+        this.abortAllUploads();
+        return Promise.resolve();
+      },
+    });
+  }
+
+  /** Stops every in-flight / queued upload (after confirm). */
+  private abortAllUploads(): void {
+    if (!this.hasInFlightUploadRows()) return;
+    this.uploadOrchestrator.abortCurrentUploadRun();
+  }
+
+  /** Cancels only this file’s multipart + PUTs; other files (in this or other runs) continue. */
+  abortSingleUploadingRow(row: RecitationTrackUploadRowState): void {
+    if (row.phase !== 'uploading') return;
+    this.uploadOrchestrator.abortSingleFileUpload(row.filename);
+  }
+
+  async retryUploadRow(row: RecitationTrackUploadRowState): Promise<void> {
     const rec = this.recitation();
-    if (!rec || this.uploadRunning() || row.validateStatus !== 'valid') return;
-    this.uploadRunning.set(true);
-    this.patchUploadRow(row.filename, { phase: 'queued', progress: 0, errorMessage: undefined });
+    if (!rec) return;
+    if (row.phase !== 'failed' && row.phase !== 'cancelled') return;
+    if (this.isRowUploadActive(row)) return;
+
+    const fn = row.filename;
+    const one = new Set([fn]);
+
+    this.validateLoading.set(true);
+    try {
+      const res = await firstValueFrom(
+        this.recitationsService.recitationTracksValidateUpload({
+          asset_id: rec.id,
+          filenames: [fn],
+        })
+      );
+      this.applyValidateResponseForFilenames(res, one);
+    } catch {
+      this.message.error(
+        this.translate.instant('ADMIN.RECITATIONS.TRACKS.MESSAGES.VALIDATE_ERROR')
+      );
+      return;
+    } finally {
+      this.validateLoading.set(false);
+    }
+
+    const updated = this.uploadRows().find((r) => r.filename === fn);
+    if (!updated || updated.validateStatus !== 'valid' || updated.phase !== 'ready') {
+      return;
+    }
+
+    this.patchUploadRow(fn, {
+      phase: 'queued',
+      progress: 0,
+      uploadedBytes: 0,
+      errorMessage: undefined,
+    });
     const task = this.uploadOrchestrator.uploadAllFiles(
       rec.id,
-      [{ filename: row.filename, blob: row.file }],
+      [{ filename: fn, blob: updated.file }],
       {
         onRowPatch: (filename, patch) => {
           this.patchUploadRow(filename, patch);
         },
       }
     );
-    this.activeUploadTask = task;
-    void task
-      .then(() => this.loadTracksPage())
-      .finally(() => {
-        this.activeUploadTask = null;
-        this.uploadRunning.set(false);
-      });
+    this.trackUploadTask(task);
+    void task.then(() => this.loadTracksPage());
   }
 
   deleteTrack(track: RecitationSurahTrackListItem): void {

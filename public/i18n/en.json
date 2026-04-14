@@ -718,7 +718,7 @@
         "DESC_EN": "Description (EN)"
       },
       "TRACKS": {
-        "SECTION_TITLE": "Recitation tracks",
+        "SECTION_TITLE": "Surah audio tracks",
         "CHOOSE_FILES": "Choose MP3 files",
         "UPLOAD": "Upload",
         "CLEAR": "Clear",
@@ -726,6 +726,12 @@
         "HINT_FILENAMES_EXAMPLE": "Example for Surah Al-Fatiha: \"001.mp3\"",
 
         "OVERALL_PROGRESS": "Overall upload progress",
+        "ABORT_ALL": "Abort all uploads",
+        "ABORT_ALL_CONFIRM_TITLE": "Abort all uploads?",
+        "ABORT_ALL_CONFIRM_CONTENT": "Queued and in-progress uploads will be stopped. Continue?",
+        "ABORT_ALL_CONFIRM_OK": "Abort all",
+        "ABORT_ONE": "Stop this file only",
+        "RESTART_UPLOAD": "Upload this file again",
         "COL_FILE": "File",
         "COL_STATUS": "Status",
         "COL_PROGRESS": "Progress",
@@ -741,11 +747,11 @@
         "UPLOAD_MIXED_CONFIRM_TITLE": "Upload selected files?",
         "UPLOAD_MIXED_CONFIRM_CONTENT": "{{ignored}} file(s) will be ignored (invalid or skipped). {{valid}} file(s) will be uploaded. Continue?",
         "UPLOAD_MIXED_CONFIRM_OK": "Upload",
-        "LIST_TITLE": "Uploaded tracks",
+        "LIST_TITLE": "Uploaded surah audio files",
         "NO_AUDIO_URL": "No playback URL",
-        "DELETE_TRACK": "Delete track",
-        "EMPTY_TITLE": "No tracks yet",
-        "EMPTY_SUBTITLE": "Upload MP3 files above to add tracks. Use pagination to browse all surahs.",
+        "DELETE_TRACK": "Delete audio file",
+        "EMPTY_TITLE": "No audio files yet",
+        "EMPTY_SUBTITLE": "Upload MP3 files above to add surah audio. Use pagination to browse all surahs.",
         "STATUS": {
           "VALIDATING": "Validating…",
           "INVALID": "Invalid filename or duplicate in the selection.",
@@ -758,11 +764,11 @@
           "CANCELLED": "Cancelled"
         },
         "NAV_LEAVE_TITLE": "Uploads in progress",
-        "NAV_LEAVE_CONTENT": "If you leave this page, any in-progress uploads will stop and their temporary multipart data will be cleaned up. Finished tracks will remain.",
+        "NAV_LEAVE_CONTENT": "If you leave this page, any in-progress uploads will stop and their temporary multipart data will be cleaned up. Successfully uploaded audio will remain.",
         "NAV_LEAVE_OK": "Leave and stop uploads",
         "NAV_LEAVE_CANCEL": "Stay",
         "DELETE": {
-          "CONFIRM_TITLE": "Delete this track?",
+          "CONFIRM_TITLE": "Delete this audio file?",
           "CONFIRM_BODY": "Surah {{surah}} — this removes the audio file from storage.",
           "OK": "Delete",
           "CANCEL": "Cancel"
@@ -772,8 +778,8 @@
           "VALIDATE_ERROR": "Could not validate files. Try again.",
           "UPLOAD_ALL_OK": "{{count}} file(s) uploaded successfully.",
           "UPLOAD_PARTIAL": "{{ok}} uploaded, {{failed}} failed. You can retry failed rows.",
-          "DELETE_OK": "Track deleted.",
-          "DELETE_ERROR": "Could not delete the track."
+          "DELETE_OK": "Audio file deleted.",
+          "DELETE_ERROR": "Could not delete the audio file."
         }
       },
       "DELETE": {

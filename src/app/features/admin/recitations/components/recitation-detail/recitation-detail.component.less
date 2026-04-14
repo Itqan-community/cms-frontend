@@ -49,13 +49,26 @@
   &__global-progress {
     margin-bottom: 16px;
 
+    &-head {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+
     &-label {
       display: block;
+      margin: 0;
       font-size: 0.875rem;
       font-weight: 600;
       color: var(--admin-text-700);
-      margin-bottom: 8px;
     }
+  }
+
+  &__abort-all-btn {
+    flex-shrink: 0;
   }
 
   &__upload-table-wrap {
@@ -79,6 +92,16 @@
   &__error-text {
     font-size: 0.8rem;
     color: var(--color-action-delete);
+  }
+
+  /** Cancelled row: no progress bar — keep cell height aligned with nz-progress rows */
+  &__upload-no-progress {
+    display: block;
+    min-height: 22px;
+  }
+
+  &__restart-upload-btn {
+    color: var(--color-primary);
   }
 
   &__tracks-list-head {
@@ -112,6 +135,9 @@
 /* Upload queue table: readable status + no hover/overflow clipping */
 :host ::ng-deep {
   .recitation-detail__upload-table-wrap {
+    max-height: 500px;
+    overflow: auto;
+
     .ant-table-tbody > tr > td {
       overflow: visible;
     }

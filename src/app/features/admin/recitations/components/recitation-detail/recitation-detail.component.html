@@ -109,15 +109,13 @@
             nz-button
             nzType="primary"
             type="button"
-            [disabled]="
-              validReadyUploadCount() === 0 || uploadRunning() || validateLoading()
-            "
+            [disabled]="uploadableValidCount() === 0 || validateLoading()"
             (click)="onUploadClick()"
           >
             <ng-icon name="lucideUpload" />
             {{ 'ADMIN.RECITATIONS.TRACKS.UPLOAD' | translate }}
           </button>
-          @if (uploadRows().length) {
+          @if (uploadRows().length && !hasInFlightUploadRows()) {
             <button
               nz-button
               nzType="default"
@@ -148,11 +146,24 @@
         />
       }
 
-      @if (uploadRunning() && uploadGlobalProgress() >= 0) {
+      @if (hasInFlightUploadRows()) {
         <div class="recitation-detail__global-progress">
-          <span class="recitation-detail__global-progress-label">{{
-            'ADMIN.RECITATIONS.TRACKS.OVERALL_PROGRESS' | translate
-          }}</span>
+          <div class="recitation-detail__global-progress-head">
+            <span class="recitation-detail__global-progress-label">{{
+              'ADMIN.RECITATIONS.TRACKS.OVERALL_PROGRESS' | translate
+            }}</span>
+            <button
+              nz-button
+              nzType="default"
+              nzDanger
+              type="button"
+              class="recitation-detail__abort-all-btn"
+              (click)="confirmAbortAllUploads()"
+            >
+              <ng-icon name="lucideCircleStop" />
+              {{ 'ADMIN.RECITATIONS.TRACKS.ABORT_ALL' | translate }}
+            </button>
+          </div>
           <nz-progress
             [nzPercent]="uploadGlobalPercentInt()"
             [nzShowInfo]="true"
@@ -175,7 +186,7 @@
                 <th>{{ 'ADMIN.RECITATIONS.TRACKS.COL_FILE' | translate }}</th>
                 <th nzWidth="240px">{{ 'ADMIN.RECITATIONS.TRACKS.COL_STATUS' | translate }}</th>
                 <th>{{ 'ADMIN.RECITATIONS.TRACKS.COL_PROGRESS' | translate }}</th>
-                <th nzWidth="132px">{{ 'ADMIN.RECITATIONS.TRACKS.COL_ACTIONS' | translate }}</th>
+                <th nzWidth="168px">{{ 'ADMIN.RECITATIONS.TRACKS.COL_ACTIONS' | translate }}</th>
               </tr>
             </thead>
             <tbody>
@@ -223,6 +234,8 @@
                         [nzStatus]="row.phase === 'success' ? 'success' : 'active'"
                         [nzFormat]="formatNzProgressPercent"
                       ></nz-progress>
+                    } @else if (row.phase === 'cancelled' && row.validateStatus === 'valid') {
+                      <span class="recitation-detail__upload-no-progress" aria-hidden="true"></span>
                     } @else if (row.phase === 'cancelled') {
                       <span class="admin-list-desc">—</span>
                     } @else if (row.phase === 'failed' && row.errorMessage) {
@@ -246,13 +259,41 @@
                           <ng-icon name="lucideTrash2" />
                         </button>
                       }
+                      @if (row.phase === 'uploading') {
+                        <button
+                          nz-button
+                          nzType="text"
+                          nzDanger
+                          type="button"
+                          class="action-icon"
+                          [attr.aria-label]="'ADMIN.RECITATIONS.TRACKS.ABORT_ONE' | translate"
+                          [attr.title]="'ADMIN.RECITATIONS.TRACKS.ABORT_ONE' | translate"
+                          (click)="abortSingleUploadingRow(row)"
+                        >
+                          <ng-icon name="lucideCircleStop" />
+                        </button>
+                      }
+                      @if (row.phase === 'cancelled' && row.validateStatus === 'valid') {
+                        <button
+                          nz-button
+                          nzType="text"
+                          type="button"
+                          class="action-icon recitation-detail__restart-upload-btn"
+                          [attr.aria-label]="'ADMIN.RECITATIONS.TRACKS.RESTART_UPLOAD' | translate"
+                          [attr.title]="'ADMIN.RECITATIONS.TRACKS.RESTART_UPLOAD' | translate"
+                          [disabled]="isRowUploadActive(row)"
+                          (click)="retryUploadRow(row)"
+                        >
+                          <ng-icon name="lucideRotateCw" />
+                        </button>
+                      }
                       @if (row.phase === 'failed' && row.validateStatus === 'valid') {
                         <button
                           nz-button
                           nzType="link"
                           nzSize="small"
                           type="button"
-                          [disabled]="uploadRunning()"
+                          [disabled]="isRowUploadActive(row)"
                           (click)="retryUploadRow(row)"
                         >
                           {{ 'ADMIN.RECITATIONS.TRACKS.RETRY' | translate }}
