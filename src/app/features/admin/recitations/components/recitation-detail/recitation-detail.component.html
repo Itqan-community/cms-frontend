@@ -253,7 +253,9 @@
                           nzDanger
                           type="button"
                           class="action-icon action-icon--delete"
-                          [attr.aria-label]="'ADMIN.RECITATIONS.TRACKS.REMOVE_FROM_LIST' | translate"
+                          [attr.aria-label]="
+                            'ADMIN.RECITATIONS.TRACKS.REMOVE_FROM_LIST' | translate
+                          "
                           (click)="removeUploadRow(row)"
                         >
                           <ng-icon name="lucideTrash2" />

@@ -82,9 +82,7 @@ export class RecitationDetailComponent implements OnInit {
   readonly uploadableValidCount = computed(
     () =>
       this.uploadRows().filter(
-        (r) =>
-          r.validateStatus === 'valid' &&
-          ['ready', 'cancelled', 'failed'].includes(r.phase)
+        (r) => r.validateStatus === 'valid' && ['ready', 'cancelled', 'failed'].includes(r.phase)
       ).length
   );
 
@@ -102,9 +100,8 @@ export class RecitationDetailComponent implements OnInit {
   /** Invalid or skipped rows — excluded when uploading a mixed selection. */
   readonly ignoredUploadCount = computed(
     () =>
-      this.uploadRows().filter(
-        (r) => r.validateStatus === 'invalid' || r.validateStatus === 'skip'
-      ).length
+      this.uploadRows().filter((r) => r.validateStatus === 'invalid' || r.validateStatus === 'skip')
+        .length
   );
 
   readonly uploadGlobalPercentInt = computed(() =>
@@ -395,9 +392,7 @@ export class RecitationDetailComponent implements OnInit {
     if (!rec) return;
 
     const candidates = this.uploadRows().filter(
-      (r) =>
-        r.validateStatus === 'valid' &&
-        ['ready', 'cancelled', 'failed'].includes(r.phase)
+      (r) => r.validateStatus === 'valid' && ['ready', 'cancelled', 'failed'].includes(r.phase)
     );
     if (!candidates.length) return;
 
@@ -422,10 +417,7 @@ export class RecitationDetailComponent implements OnInit {
     }
 
     const toUpload = this.uploadRows().filter(
-      (r) =>
-        candidateSet.has(r.filename) &&
-        r.validateStatus === 'valid' &&
-        r.phase === 'ready'
+      (r) => candidateSet.has(r.filename) && r.validateStatus === 'valid' && r.phase === 'ready'
     );
     if (!toUpload.length) return;
 
