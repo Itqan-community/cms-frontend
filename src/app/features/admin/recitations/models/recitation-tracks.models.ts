@@ -106,7 +106,8 @@ export type RecitationTrackRowPhase =
   | 'queued'
   | 'uploading'
   | 'success'
-  | 'failed';
+  | 'failed'
+  | 'cancelled';
 
 export interface RecitationTrackUploadRowState {
   file: File;

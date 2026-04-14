@@ -722,7 +722,9 @@
         "CHOOSE_FILES": "Choose MP3 files",
         "UPLOAD": "Upload",
         "CLEAR": "Clear",
-        "HINT_FILENAMES": "Use one file per surah, named like 001.mp3 … 114.mp3 (extension .mp3).",
+        "HINT_FILENAMES": "One file per surah, named 001 to 114 with .mp3 extension",
+        "HINT_FILENAMES_EXAMPLE": "Example for Surah Al-Fatiha: \"001.mp3\"",
+
         "OVERALL_PROGRESS": "Overall upload progress",
         "COL_FILE": "File",
         "COL_STATUS": "Status",
@@ -735,6 +737,10 @@
         "COL_PREVIEW": "Preview",
         "SURAH": "Surah",
         "RETRY": "Retry",
+        "REMOVE_FROM_LIST": "Remove from list",
+        "UPLOAD_MIXED_CONFIRM_TITLE": "Upload selected files?",
+        "UPLOAD_MIXED_CONFIRM_CONTENT": "{{ignored}} file(s) will be ignored (invalid or skipped). {{valid}} file(s) will be uploaded. Continue?",
+        "UPLOAD_MIXED_CONFIRM_OK": "Upload",
         "LIST_TITLE": "Uploaded tracks",
         "NO_AUDIO_URL": "No playback URL",
         "DELETE_TRACK": "Delete track",
@@ -748,8 +754,13 @@
           "QUEUED": "Queued",
           "UPLOADING": "Uploading…",
           "DONE": "Done",
-          "FAILED": "Failed"
+          "FAILED": "Failed",
+          "CANCELLED": "Cancelled"
         },
+        "NAV_LEAVE_TITLE": "Uploads in progress",
+        "NAV_LEAVE_CONTENT": "If you leave this page, any in-progress uploads will stop and their temporary multipart data will be cleaned up. Finished tracks will remain.",
+        "NAV_LEAVE_OK": "Leave and stop uploads",
+        "NAV_LEAVE_CANCEL": "Stay",
         "DELETE": {
           "CONFIRM_TITLE": "Delete this track?",
           "CONFIRM_BODY": "Surah {{surah}} — this removes the audio file from storage.",

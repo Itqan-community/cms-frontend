@@ -110,12 +110,9 @@
             nzType="primary"
             type="button"
             [disabled]="
-              validateTopStatus() !== 'valid' ||
-              uploadRunning() ||
-              validateLoading() ||
-              !uploadRows().length
+              validReadyUploadCount() === 0 || uploadRunning() || validateLoading()
             "
-            (click)="startUpload()"
+            (click)="onUploadClick()"
           >
             <ng-icon name="lucideUpload" />
             {{ 'ADMIN.RECITATIONS.TRACKS.UPLOAD' | translate }}
@@ -135,6 +132,10 @@
         </div>
         <p class="recitation-detail__tracks-hint">
           {{ 'ADMIN.RECITATIONS.TRACKS.HINT_FILENAMES' | translate }}
+          <br />
+          <span class="recitation-detail__tracks-hint-example">
+            {{ 'ADMIN.RECITATIONS.TRACKS.HINT_FILENAMES_EXAMPLE' | translate }}
+          </span>
         </p>
       </div>
 
@@ -152,7 +153,11 @@
           <span class="recitation-detail__global-progress-label">{{
             'ADMIN.RECITATIONS.TRACKS.OVERALL_PROGRESS' | translate
           }}</span>
-          <nz-progress [nzPercent]="uploadGlobalProgress() * 100" [nzShowInfo]="true"></nz-progress>
+          <nz-progress
+            [nzPercent]="uploadGlobalPercentInt()"
+            [nzShowInfo]="true"
+            [nzFormat]="formatNzProgressPercent"
+          ></nz-progress>
         </div>
       }
 
@@ -168,9 +173,9 @@
             <thead>
               <tr>
                 <th>{{ 'ADMIN.RECITATIONS.TRACKS.COL_FILE' | translate }}</th>
-                <th nzWidth="140px">{{ 'ADMIN.RECITATIONS.TRACKS.COL_STATUS' | translate }}</th>
+                <th nzWidth="240px">{{ 'ADMIN.RECITATIONS.TRACKS.COL_STATUS' | translate }}</th>
                 <th>{{ 'ADMIN.RECITATIONS.TRACKS.COL_PROGRESS' | translate }}</th>
-                <th nzWidth="100px">{{ 'ADMIN.RECITATIONS.TRACKS.COL_ACTIONS' | translate }}</th>
+                <th nzWidth="132px">{{ 'ADMIN.RECITATIONS.TRACKS.COL_ACTIONS' | translate }}</th>
               </tr>
             </thead>
             <tbody>
@@ -185,8 +190,9 @@
                       >
                     }
                   </td>
-                  <td>
+                  <td class="recitation-detail__upload-status-cell">
                     <nz-tag
+                      class="recitation-detail__upload-status-tag"
                       [nzColor]="
                         row.phase === 'invalid_validation'
                           ? 'error'
@@ -196,7 +202,9 @@
                               ? 'success'
                               : row.phase === 'failed'
                                 ? 'error'
-                                : 'default'
+                                : row.phase === 'cancelled'
+                                  ? 'default'
+                                  : 'default'
                       "
                     >
                       {{ rowStatusLabel(row) }}
@@ -210,29 +218,47 @@
                         row.phase === 'success')
                     ) {
                       <nz-progress
-                        [nzPercent]="row.progress * 100"
+                        [nzPercent]="uploadProgressPercent(row.progress)"
                         [nzShowInfo]="true"
                         [nzStatus]="row.phase === 'success' ? 'success' : 'active'"
+                        [nzFormat]="formatNzProgressPercent"
                       ></nz-progress>
+                    } @else if (row.phase === 'cancelled') {
+                      <span class="admin-list-desc">—</span>
                     } @else if (row.phase === 'failed' && row.errorMessage) {
                       <span class="recitation-detail__error-text">{{ row.errorMessage }}</span>
                     } @else {
                       <span class="admin-list-desc">—</span>
                     }
                   </td>
-                  <td>
-                    @if (row.phase === 'failed' && row.validateStatus === 'valid') {
-                      <button
-                        nz-button
-                        nzType="link"
-                        nzSize="small"
-                        type="button"
-                        [disabled]="uploadRunning()"
-                        (click)="retryUploadRow(row)"
-                      >
-                        {{ 'ADMIN.RECITATIONS.TRACKS.RETRY' | translate }}
-                      </button>
-                    }
+                  <td class="recitation-detail__upload-actions-cell">
+                    <div class="recitation-detail__upload-actions-inner">
+                      @if (canRemoveUploadRow(row)) {
+                        <button
+                          nz-button
+                          nzType="text"
+                          nzDanger
+                          type="button"
+                          class="action-icon action-icon--delete"
+                          [attr.aria-label]="'ADMIN.RECITATIONS.TRACKS.REMOVE_FROM_LIST' | translate"
+                          (click)="removeUploadRow(row)"
+                        >
+                          <ng-icon name="lucideTrash2" />
+                        </button>
+                      }
+                      @if (row.phase === 'failed' && row.validateStatus === 'valid') {
+                        <button
+                          nz-button
+                          nzType="link"
+                          nzSize="small"
+                          type="button"
+                          [disabled]="uploadRunning()"
+                          (click)="retryUploadRow(row)"
+                        >
+                          {{ 'ADMIN.RECITATIONS.TRACKS.RETRY' | translate }}
+                        </button>
+                      }
+                    </div>
                   </td>
                 </tr>
               }
