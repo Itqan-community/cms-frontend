@@ -245,17 +245,6 @@
         <h3 class="recitation-detail__tracks-list-title">
           {{ 'ADMIN.RECITATIONS.TRACKS.LIST_TITLE' | translate }}
         </h3>
-        <nz-input-group [nzPrefix]="tracksSearchPrefixTpl" class="recitation-detail__tracks-search">
-          <input
-            type="text"
-            nz-input
-            [placeholder]="'ADMIN.RECITATIONS.TRACKS.SEARCH_PLACEHOLDER' | translate"
-            (input)="onTracksSearchInput($event)"
-          />
-        </nz-input-group>
-        <ng-template #tracksSearchPrefixTpl>
-          <ng-icon name="lucideSearch" class="recitation-detail__tracks-search-icon" />
-        </ng-template>
       </div>
 
       <div class="admin-table-wrap">
@@ -269,7 +258,7 @@
           <thead>
             <tr>
               <th nzWidth="72px">{{ 'ADMIN.RECITATIONS.TRACKS.COL_SURAH' | translate }}</th>
-              <th>{{ 'ADMIN.RECITATIONS.TRACKS.COL_SURAH_NAME' | translate }}</th>
+              <th>{{ 'ADMIN.RECITATIONS.TRACKS.COL_FILENAME' | translate }}</th>
               <th nzWidth="100px">{{ 'ADMIN.RECITATIONS.TRACKS.COL_DURATION' | translate }}</th>
               <th nzWidth="100px">{{ 'ADMIN.RECITATIONS.TRACKS.COL_SIZE' | translate }}</th>
               <th>{{ 'ADMIN.RECITATIONS.TRACKS.COL_PREVIEW' | translate }}</th>
@@ -280,7 +269,9 @@
             @for (track of tracksList(); track track.id) {
               <tr>
                 <td>{{ track.surah_number }}</td>
-                <td>{{ track.surah_name ?? '—' }}</td>
+                <td>
+                  <span class="admin-mono">{{ track.filename ?? '—' }}</span>
+                </td>
                 <td>{{ formatDurationMs(track.duration_ms) }}</td>
                 <td>{{ formatBytes(track.size_bytes) }}</td>
                 <td>

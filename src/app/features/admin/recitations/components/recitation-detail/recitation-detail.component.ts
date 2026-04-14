@@ -5,7 +5,6 @@ import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
@@ -40,7 +39,6 @@ const MAX_MP3_FILES = 114;
     TranslateModule,
     NzTableModule,
     NzPaginationModule,
-    NzInputModule,
     NzProgressModule,
     NzAlertModule,
   ],
@@ -65,7 +63,6 @@ export class RecitationDetailComponent implements OnInit {
   readonly tracksList = signal<RecitationSurahTrackListItem[]>([]);
   readonly tracksTotal = signal(0);
   readonly tracksLoading = signal(false);
-  readonly tracksSearchInput = signal('');
   readonly tracksPage = signal(1);
   readonly tracksPageSize = TRACKS_PAGE_SIZE;
 
@@ -87,7 +84,6 @@ export class RecitationDetailComponent implements OnInit {
   });
 
   private slug!: string;
-  private tracksSearchDebounce: ReturnType<typeof setTimeout> | null = null;
 
   ngOnInit(): void {
     this.slug = this.route.snapshot.params['slug'];
@@ -115,7 +111,6 @@ export class RecitationDetailComponent implements OnInit {
     this.recitationsService
       .recitationTracksList({
         asset_id: rec.id,
-        search: this.tracksSearchInput(),
         page: this.tracksPage(),
         page_size: this.tracksPageSize,
       })
@@ -127,16 +122,6 @@ export class RecitationDetailComponent implements OnInit {
         },
         error: () => this.tracksLoading.set(false),
       });
-  }
-
-  onTracksSearchInput(event: Event): void {
-    const value = (event.target as HTMLInputElement).value;
-    if (this.tracksSearchDebounce) clearTimeout(this.tracksSearchDebounce);
-    this.tracksSearchDebounce = setTimeout(() => {
-      this.tracksSearchInput.set(value);
-      this.tracksPage.set(1);
-      this.loadTracksPage();
-    }, 400);
   }
 
   onTracksPageChange(page: number): void {

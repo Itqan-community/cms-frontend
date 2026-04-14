@@ -122,20 +122,21 @@ export interface RecitationTrackUploadRowState {
   trackId?: number;
 }
 
-/** GET /portal/recitation-tracks/ — single row (portal list). */
-export interface RecitationTrackPortalListApiRow {
+/**
+ * GET /portal/assets/{asset_id}/recitation-tracks/ — single row (OpenAPI RecitationTrackOut).
+ */
+export interface RecitationTrackOut {
   id: number;
-  asset_id?: number;
   surah_number: number;
-  surah_name?: string | null;
-  duration_ms?: number | null;
-  size_bytes?: number | null;
-  finished_at?: string | null;
-  audio_url?: string | null;
+  audio_url: string | null;
+  duration_ms: number;
+  size_bytes: number;
+  filename: string | null;
 }
 
-export interface RecitationTracksListApiResponse {
-  results: RecitationTrackPortalListApiRow[];
+/** Paginated list response for asset-scoped tracks. */
+export interface PagedRecitationTrackOut {
+  results: RecitationTrackOut[];
   count: number;
 }
 
@@ -144,9 +145,8 @@ export interface RecitationSurahTrackListItem {
   id: number;
   asset_id: number;
   surah_number: number;
-  surah_name?: string;
-  duration_ms?: number | null;
-  size_bytes?: number | null;
+  filename: string | null;
+  duration_ms: number | null;
+  size_bytes: number | null;
   audio_url: string;
-  finished_at?: string;
 }

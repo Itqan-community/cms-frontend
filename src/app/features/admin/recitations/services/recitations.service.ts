@@ -5,8 +5,7 @@ import { environment } from '../../../../../environments/environment';
 import type {
   RecitationSurahTrackListItem,
   RecitationTrackDeleteTracksIn,
-  RecitationTrackPortalListApiRow,
-  RecitationTracksListApiResponse,
+  RecitationTrackOut,
   RecitationTrackUploadAbortIn,
   RecitationTrackUploadAbortOut,
   RecitationTrackUploadFinishIn,
@@ -33,6 +32,7 @@ export class RecitationsService {
   private readonly qiraahsFilterApiUrl = `${environment.ADMIN_API_BASE_URL}/filters/qiraahs/`;
   private readonly riwayahsFilterApiUrl = `${environment.ADMIN_API_BASE_URL}/filters/riwayahs/`;
   private readonly recitationTracksBaseUrl = `${environment.ADMIN_API_BASE_URL}/recitation-tracks`;
+  private readonly portalBaseUrl = environment.ADMIN_API_BASE_URL;
 
   qiraahOptions(search?: string, page = 1, page_size = 200): Observable<NamedId[]> {
     let params = new HttpParams()
@@ -159,60 +159,38 @@ export class RecitationsService {
   }
 
   /**
-   * GET /portal/recitation-tracks/?asset_id=&search=&page=&page_size=
+   * GET /portal/assets/{asset_id}/recitation-tracks/?page=&page_size=
    */
   recitationTracksList(params: {
     asset_id: number;
-    search?: string;
     page?: number;
     page_size?: number;
   }): Observable<{ results: RecitationSurahTrackListItem[]; count: number }> {
-    let httpParams = new HttpParams()
-      .set('asset_id', params.asset_id.toString())
+    const httpParams = new HttpParams()
       .set('page', (params.page ?? 1).toString())
       .set('page_size', (params.page_size ?? 10).toString());
-    if (params.search?.trim()) {
-      httpParams = httpParams.set('search', params.search.trim());
-    }
+
+    const url = `${this.portalBaseUrl}/assets/${params.asset_id}/recitation-tracks/`;
 
     return this.http
-      .get<RecitationTracksListApiResponse>(`${this.recitationTracksBaseUrl}/`, {
-        params: httpParams,
-      })
+      .get<{ results: RecitationTrackOut[]; count: number }>(url, { params: httpParams })
       .pipe(
         map((res) => ({
-          results: res.results.map((row) => this.mapPortalTrackRow(row, params.asset_id)),
+          results: res.results.map((row) => this.mapAssetTrackRow(row, params.asset_id)),
           count: res.count,
         }))
       );
   }
 
-  private mapPortalTrackRow(
-    row: RecitationTrackPortalListApiRow,
-    assetId: number
-  ): RecitationSurahTrackListItem {
-    const extra = row as unknown as Record<string, unknown>;
-    const pickStr = (key: string): string | null => {
-      const v = extra[key];
-      return typeof v === 'string' ? v : null;
-    };
-    const audio =
-      row.audio_url ??
-      pickStr('playback_url') ??
-      pickStr('signed_url') ??
-      pickStr('file_url') ??
-      pickStr('url') ??
-      '';
-
+  private mapAssetTrackRow(row: RecitationTrackOut, assetId: number): RecitationSurahTrackListItem {
     return {
       id: row.id,
-      asset_id: row.asset_id ?? assetId,
+      asset_id: assetId,
       surah_number: row.surah_number,
-      surah_name: row.surah_name ?? undefined,
+      filename: row.filename,
       duration_ms: row.duration_ms,
       size_bytes: row.size_bytes,
-      audio_url: audio,
-      finished_at: row.finished_at ?? undefined,
+      audio_url: row.audio_url ?? '',
     };
   }
 }
