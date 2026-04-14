@@ -668,10 +668,12 @@ export class RecitationDetailComponent implements OnInit {
 
   formatDurationMs(ms: number | null | undefined): string {
     if (ms == null || ms <= 0) return '—';
-    const s = Math.round(ms / 1000);
-    const m = Math.floor(s / 60);
-    const r = s % 60;
-    return `${m}:${r.toString().padStart(2, '0')}`;
+    const totalSec = Math.round(ms / 1000);
+    const h = Math.floor(totalSec / 3600);
+    const m = Math.floor((totalSec % 3600) / 60);
+    const s = totalSec % 60;
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    return `${pad(h)}:${pad(m)}:${pad(s)}`;
   }
 
   formatBytes(n: number | null | undefined): string {
