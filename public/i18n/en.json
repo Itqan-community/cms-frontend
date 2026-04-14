@@ -717,6 +717,71 @@
         "DESC_AR": "Description (Arabic)",
         "DESC_EN": "Description (EN)"
       },
+      "TRACKS": {
+        "SECTION_TITLE": "Surah audio tracks",
+        "CHOOSE_FILES": "Choose MP3 files",
+        "UPLOAD": "Upload",
+        "CLEAR": "Clear",
+        "HINT_FILENAMES": "One file per surah, named 001 to 114 with .mp3 extension",
+        "HINT_FILENAMES_EXAMPLE": "Example for Surah Al-Fatiha: \"001.mp3\"",
+
+        "OVERALL_PROGRESS": "Overall upload progress",
+        "ABORT_ALL": "Abort all uploads",
+        "ABORT_ALL_CONFIRM_TITLE": "Abort all uploads?",
+        "ABORT_ALL_CONFIRM_CONTENT": "Queued and in-progress uploads will be stopped. Continue?",
+        "ABORT_ALL_CONFIRM_OK": "Abort all",
+        "ABORT_ONE": "Stop this file only",
+        "RESTART_UPLOAD": "Upload this file again",
+        "COL_FILE": "File",
+        "COL_STATUS": "Status",
+        "COL_PROGRESS": "Progress",
+        "COL_ACTIONS": "Actions",
+        "COL_SURAH": "Surah",
+        "COL_FILENAME": "Filename",
+        "COL_DURATION": "Duration",
+        "COL_SIZE": "Size",
+        "COL_PREVIEW": "Preview",
+        "SURAH": "Surah",
+        "RETRY": "Retry",
+        "REMOVE_FROM_LIST": "Remove from list",
+        "UPLOAD_MIXED_CONFIRM_TITLE": "Upload selected files?",
+        "UPLOAD_MIXED_CONFIRM_CONTENT": "{{ignored}} file(s) will be ignored (invalid or skipped). {{valid}} file(s) will be uploaded. Continue?",
+        "UPLOAD_MIXED_CONFIRM_OK": "Upload",
+        "LIST_TITLE": "Uploaded surah audio files",
+        "NO_AUDIO_URL": "No playback URL",
+        "DELETE_TRACK": "Delete audio file",
+        "EMPTY_TITLE": "No audio files yet",
+        "EMPTY_SUBTITLE": "Upload MP3 files above to add surah audio. Use pagination to browse all surahs.",
+        "STATUS": {
+          "VALIDATING": "Validating…",
+          "INVALID": "Invalid filename or duplicate in the selection.",
+          "SKIPPED": "Already uploaded — skipped",
+          "READY": "Ready to upload",
+          "QUEUED": "Queued",
+          "UPLOADING": "Uploading…",
+          "DONE": "Done",
+          "FAILED": "Failed",
+          "CANCELLED": "Cancelled"
+        },
+        "NAV_LEAVE_TITLE": "Uploads in progress",
+        "NAV_LEAVE_CONTENT": "If you leave this page, any in-progress uploads will stop and their temporary multipart data will be cleaned up. Successfully uploaded audio will remain.",
+        "NAV_LEAVE_OK": "Leave and stop uploads",
+        "NAV_LEAVE_CANCEL": "Stay",
+        "DELETE": {
+          "CONFIRM_TITLE": "Delete this audio file?",
+          "CONFIRM_BODY": "Surah {{surah}} — this removes the audio file from storage.",
+          "OK": "Delete",
+          "CANCEL": "Cancel"
+        },
+        "MESSAGES": {
+          "MAX_FILES": "You can select at most {{max}} files.",
+          "VALIDATE_ERROR": "Could not validate files. Try again.",
+          "UPLOAD_ALL_OK": "{{count}} file(s) uploaded successfully.",
+          "UPLOAD_PARTIAL": "{{ok}} uploaded, {{failed}} failed. You can retry failed rows.",
+          "DELETE_OK": "Audio file deleted.",
+          "DELETE_ERROR": "Could not delete the audio file."
+        }
+      },
       "DELETE": {
         "CONFIRM_TITLE": "Delete this recitation?",
         "CONFIRM_BODY": "<b>{{name}}</b> — This action cannot be undone.",
@@ -728,8 +793,7 @@
         "CREATE_SUCCESS": "Recitation added successfully",
         "UPDATE_SUCCESS": "Recitation updated successfully",
         "DELETE_SUCCESS": "Recitation deleted successfully"
-      },
-      "STATS_LOAD_ERROR": "Could not load recitation statistics from the server."
+      }
     },
     "RECITERS": {
       "TITLE": "Reciters",
@@ -927,14 +991,6 @@
       "SEARCH": "Search",
       "EMPTY_TITLE": "Start by typing a word in the search field above",
       "EMPTY_SUBTITLE": "All verses containing the term will be shown"
-    },
-    "AUDIO_STATS": {
-      "TITLE": "Audio mushafs",
-      "SUBTITLE": "A quick look at riwayahs, reciters, and recordings in the audio library.",
-      "MOCK_BADGE": "Mock data",
-      "LABEL_RIWAYAS": "Riwayahs",
-      "LABEL_RECITATIONS": "Recitations",
-      "LABEL_RECITERS": "Reciters"
     },
     "SOFTWARE": {
       "TITLE": "Software",
