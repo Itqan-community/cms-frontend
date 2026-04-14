@@ -769,7 +769,7 @@
         "NAV_LEAVE_CANCEL": "Stay",
         "DELETE": {
           "CONFIRM_TITLE": "Delete this audio file?",
-          "CONFIRM_BODY": "Surah {{surah}} — this removes the audio file from storage.",
+          "CONFIRM_BODY": "Surah {{surah}} — this removes the audio file from the system.",
           "OK": "Delete",
           "CANCEL": "Cancel"
         },
