@@ -45,7 +45,11 @@
         <nz-form-item>
           <nz-form-label nzRequired>{{ t('FORM_NAME') | translate }}</nz-form-label>
           <nz-form-control [nzErrorTip]="t('ERR_NAME') | translate">
-            <input nz-input formControlName="name" [placeholder]="t('PLACEHOLDER_NAME') | translate" />
+            <input
+              nz-input
+              formControlName="name"
+              [placeholder]="t('PLACEHOLDER_NAME') | translate"
+            />
           </nz-form-control>
         </nz-form-item>
         <nz-form-item>

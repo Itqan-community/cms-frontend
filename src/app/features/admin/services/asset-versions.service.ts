@@ -60,11 +60,7 @@ export class AssetVersionsService {
     return `${this.base}/${segment}/${encodeURIComponent(slug)}/versions/`;
   }
 
-  private versionItemUrl(
-    kind: AssetVersionParentKind,
-    slug: string,
-    versionId: number
-  ): string {
+  private versionItemUrl(kind: AssetVersionParentKind, slug: string, versionId: number): string {
     const segment = kind === 'tafsir' ? 'tafsirs' : 'translations';
     return `${this.base}/${segment}/${encodeURIComponent(slug)}/versions/${versionId}/`;
   }
