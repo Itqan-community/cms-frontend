@@ -1,0 +1,206 @@
+<section class="admin-panel asset-versions-manager">
+  <div class="asset-versions-manager__header">
+    <h2 class="admin-panel__title asset-versions-manager__title">
+      <ng-icon name="lucideRotateCw" />
+      {{ sectionTitleKey | translate }}
+    </h2>
+    <div class="asset-versions-manager__header-actions">
+      <button nz-button nzType="primary" type="button" (click)="openCreateModal()">
+        <ng-icon name="lucidePlus" />
+        {{ t('ADD_BUTTON') | translate }}
+      </button>
+      <nz-input-group [nzPrefix]="searchIconTpl" class="asset-versions-manager__search">
+        <input
+          nz-input
+          type="text"
+          [placeholder]="t('SEARCH_PLACEHOLDER') | translate"
+          (input)="onSearchInput($any($event.target).value)"
+        />
+      </nz-input-group>
+      <ng-template #searchIconTpl>
+        <ng-icon name="lucideSearch" />
+      </ng-template>
+    </div>
+  </div>
+
+  <nz-modal
+    [nzVisible]="versionModalOpen()"
+    (nzVisibleChange)="onVersionModalVisibleChange($event)"
+    (nzOnCancel)="closeVersionModal()"
+    [nzTitle]="versionModalTitleKey() | translate"
+    [nzWidth]="'min(560px, 92vw)'"
+    nzCentered
+    [nzMaskClosable]="true"
+    [nzClosable]="true"
+  >
+    <ng-container *nzModalContent>
+      <form
+        nz-form
+        [formGroup]="form"
+        nzLayout="vertical"
+        class="asset-versions-manager__modal-form"
+        [attr.dir]="modalDirection()"
+        (ngSubmit)="$event.preventDefault(); submit()"
+      >
+        <nz-form-item>
+          <nz-form-label nzRequired>{{ t('FORM_NAME') | translate }}</nz-form-label>
+          <nz-form-control [nzErrorTip]="t('ERR_NAME') | translate">
+            <input nz-input formControlName="name" [placeholder]="t('PLACEHOLDER_NAME') | translate" />
+          </nz-form-control>
+        </nz-form-item>
+        <nz-form-item>
+          <nz-form-label nzRequired>{{ t('FORM_SUMMARY') | translate }}</nz-form-label>
+          <nz-form-control [nzErrorTip]="t('ERR_SUMMARY') | translate">
+            <textarea
+              nz-input
+              formControlName="summary"
+              [placeholder]="t('PLACEHOLDER_SUMMARY') | translate"
+              [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+            ></textarea>
+          </nz-form-control>
+        </nz-form-item>
+        <div class="asset-versions-manager__upload">
+          <input
+            #modalFileInput
+            type="file"
+            class="asset-versions-manager__file-input"
+            (change)="onPickFile($event)"
+          />
+          <div class="asset-versions-manager__upload-actions">
+            <button nz-button nzType="default" type="button" (click)="modalFileInput.click()">
+              <ng-icon name="lucideFolderOpen" />
+              {{ t('CHOOSE_FILE') | translate }}
+            </button>
+            @if (selectedFileName()) {
+              <button nz-button nzType="default" nzDanger type="button" (click)="clearFile()">
+                <ng-icon name="lucideX" />
+                {{ t('CLEAR_FILE') | translate }}
+              </button>
+            }
+          </div>
+          @if (selectedFileName()) {
+            <p class="asset-versions-manager__file-preview">
+              <span class="admin-mono">{{ selectedFileName() }}</span>
+            </p>
+          } @else if (modalMode() === 'edit') {
+            <p class="asset-versions-manager__hint">{{ t('EDIT_FILE_HINT') | translate }}</p>
+          } @else {
+            <p class="asset-versions-manager__hint">{{ t('FILE_REQUIRED_HINT') | translate }}</p>
+          }
+        </div>
+      </form>
+    </ng-container>
+    <ng-container *nzModalFooter>
+      <div class="asset-versions-manager__modal-footer" [attr.dir]="modalDirection()">
+        <button nz-button nzType="default" type="button" (click)="closeVersionModal()">
+          {{ 'ADMIN.COMMON.CANCEL' | translate }}
+        </button>
+        <button
+          nz-button
+          nzType="primary"
+          type="button"
+          [nzLoading]="saving()"
+          [disabled]="form.invalid"
+          (click)="submit()"
+        >
+          @if (modalMode() === 'create') {
+            {{ t('SUBMIT_CREATE') | translate }}
+          } @else {
+            {{ t('SUBMIT_UPDATE') | translate }}
+          }
+        </button>
+      </div>
+    </ng-container>
+  </nz-modal>
+
+  <div class="admin-table-wrap">
+    <nz-spin [nzSpinning]="loading()">
+      <nz-table
+        #versionsTable
+        [nzData]="list()"
+        [nzFrontPagination]="false"
+        [nzShowPagination]="false"
+        nzSize="middle"
+        [nzNoResult]="emptyTpl"
+      >
+        <thead>
+          <tr>
+            <th>{{ t('COL_NAME') | translate }}</th>
+            <th>{{ t('COL_SUMMARY') | translate }}</th>
+            <th nzWidth="100px">{{ t('COL_SIZE') | translate }}</th>
+            <th nzWidth="120px">{{ t('COL_DATE') | translate }}</th>
+            <th>{{ t('COL_FILE') | translate }}</th>
+            <th nzWidth="120px">{{ t('COL_ACTIONS') | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (ver of versionsTable.data; track ver.id) {
+            <tr>
+              <td>{{ ver.name }}</td>
+              <td class="asset-versions-manager__summary-cell">{{ truncate(ver.summary) }}</td>
+              <td>{{ formatBytes(ver.size_bytes) }}</td>
+              <td>{{ ver.created_at | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                @if (ver.file_url) {
+                  <a [href]="ver.file_url" target="_blank" rel="noopener">
+                    <ng-icon name="lucideDownload" /> {{ 'ADMIN.COMMON.DOWNLOAD' | translate }}
+                  </a>
+                } @else {
+                  <span class="admin-list-desc">—</span>
+                }
+              </td>
+              <td>
+                <div class="admin-list-actions">
+                  <button
+                    type="button"
+                    nz-button
+                    nzType="text"
+                    class="action-icon action-icon--edit"
+                    nz-tooltip
+                    [nzTooltipTitle]="t('TOOLTIP_EDIT') | translate"
+                    (click)="openEditModal(ver)"
+                  >
+                    <ng-icon name="lucideSquarePen" aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    nz-button
+                    nzType="text"
+                    class="action-icon action-icon--delete"
+                    nz-tooltip
+                    [nzTooltipTitle]="t('TOOLTIP_DELETE') | translate"
+                    (click)="deleteRow(ver)"
+                  >
+                    <ng-icon name="lucideTrash2" aria-hidden="true" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-spin>
+    <ng-template #emptyTpl>
+      <div class="admin-empty-state admin-empty-state--compact">
+        <ng-icon name="lucideFile" class="admin-empty-state__icon" />
+        <p class="admin-empty-state__title">{{ t('EMPTY_TITLE') | translate }}</p>
+        <p class="admin-empty-state__subtitle">{{ t('EMPTY_SUBTITLE') | translate }}</p>
+      </div>
+    </ng-template>
+  </div>
+
+  @if (!loading() && total() > 0) {
+    <div class="admin-pagination">
+      <nz-pagination
+        [nzPageIndex]="page()"
+        [nzTotal]="total()"
+        [nzPageSize]="pageSize()"
+        [nzShowSizeChanger]="true"
+        [nzPageSizeOptions]="[10, 25, 50]"
+        nzShowQuickJumper
+        (nzPageIndexChange)="onPageChange($event)"
+        (nzPageSizeChange)="onPageSizeChange($event)"
+      ></nz-pagination>
+    </div>
+  }
+</section>

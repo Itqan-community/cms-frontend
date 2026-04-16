@@ -65,6 +65,43 @@
 
       <div class="reciter-form__card">
         <h3 class="reciter-form__card-title">
+          <ng-icon name="lucideImage" /> {{ 'ADMIN.RECITERS.FORM.SECTION_IMAGE' | translate }}
+        </h3>
+        <nz-form-item>
+          <nz-form-label>{{ 'ADMIN.RECITERS.FORM.IMAGE_HINT' | translate }}</nz-form-label>
+          <nz-form-control>
+            <div class="reciter-form__image-upload">
+              @if (imagePreview()) {
+                <div class="reciter-form__image-preview">
+                  <img
+                    [src]="imagePreview()!"
+                    [attr.alt]="'ADMIN.RECITERS.FORM.SECTION_IMAGE' | translate"
+                  />
+                  <button type="button" nz-button nzType="default" (click)="removeImage()">
+                    {{ 'ADMIN.RECITERS.FORM.REMOVE_IMAGE' | translate }}
+                  </button>
+                </div>
+              } @else {
+                <nz-upload
+                  [nzFileList]="imageFileList()"
+                  [nzBeforeUpload]="beforeImageUpload"
+                  nzAccept="image/*"
+                  [nzMultiple]="false"
+                  [nzShowUploadList]="false"
+                >
+                  <button nz-button nzType="default" type="button">
+                    <ng-icon name="lucideUpload" />
+                    {{ 'ADMIN.RECITERS.FORM.UPLOAD_IMAGE' | translate }}
+                  </button>
+                </nz-upload>
+              }
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="reciter-form__card">
+        <h3 class="reciter-form__card-title">
           <ng-icon name="lucideFileText" /> {{ 'ADMIN.RECITERS.FORM.SECTION_BIO' | translate }}
         </h3>
         <div nz-row [nzGutter]="20">

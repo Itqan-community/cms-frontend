@@ -21,7 +21,9 @@ export interface PublisherRef {
 
 export interface AssetVersion {
   id: number;
+  asset_id?: number;
   name: string;
+  summary?: string;
   file_url: string;
   size_bytes: number;
   created_at: string;

@@ -159,9 +159,11 @@ export class RecitationsService {
   }
 
   /**
-   * GET /portal/assets/{asset_id}/recitation-tracks/?page=&page_size=
+   * GET /portal/recitations/{recitation_slug}/recitation-tracks/?page=&page_size=
    */
   recitationTracksList(params: {
+    recitation_slug: string;
+    /** Recitation id — upload/delete APIs still use this as `asset_id`; list rows keep it for UI. */
     asset_id: number;
     page?: number;
     page_size?: number;
@@ -170,7 +172,7 @@ export class RecitationsService {
       .set('page', (params.page ?? 1).toString())
       .set('page_size', (params.page_size ?? 10).toString());
 
-    const url = `${this.portalBaseUrl}/assets/${params.asset_id}/recitation-tracks/`;
+    const url = `${this.portalBaseUrl}/recitations/${encodeURIComponent(params.recitation_slug)}/recitation-tracks/`;
 
     return this.http
       .get<{ results: RecitationTrackOut[]; count: number }>(url, { params: httpParams })

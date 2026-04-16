@@ -39,8 +39,8 @@ export class RecitersAdminService {
     return this.http.post<ReciterListItem>(this.apiUrl, formData);
   }
 
-  patch(slug: string, body: Partial<ReciterFormValue>): Observable<ReciterDetails> {
-    return this.http.patch<ReciterDetails>(`${this.apiUrl}${slug}/`, body);
+  patch(slug: string, body: ReciterFormValue): Observable<ReciterDetails> {
+    return this.http.patch<ReciterDetails>(`${this.apiUrl}${slug}/`, this.toFormData(body));
   }
 
   delete(slug: string): Observable<void> {
@@ -55,6 +55,7 @@ export class RecitersAdminService {
     data.append('bio_en', payload.bio_en ?? '');
     if (payload.nationality) data.append('nationality', payload.nationality);
     if (payload.date_of_death) data.append('date_of_death', payload.date_of_death);
+    if (payload.image) data.append('image', payload.image);
     return data;
   }
 }

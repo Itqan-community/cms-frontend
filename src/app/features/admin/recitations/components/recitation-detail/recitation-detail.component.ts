@@ -241,6 +241,7 @@ export class RecitationDetailComponent implements OnInit {
     this.tracksLoading.set(true);
     this.recitationsService
       .recitationTracksList({
+        recitation_slug: this.slug,
         asset_id: rec.id,
         page: this.tracksPage(),
         page_size: this.tracksPageSize,
