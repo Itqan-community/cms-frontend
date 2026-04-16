@@ -7,10 +7,10 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
-import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
+import { AssetVersionsManagerComponent } from '../../../components/asset-versions-manager/asset-versions-manager.component';
 import { localizeLanguageCode } from '../../../utils/display-localization.util';
 import { TranslationDetails } from '../../models/translations.models';
 import { TranslationsService } from '../../services/translations.service';
@@ -25,10 +25,10 @@ import { TranslationsService } from '../../services/translations.service';
     NzButtonModule,
     NgIcon,
     NzSkeletonModule,
-    NzTableModule,
     NzTagModule,
     NzToolTipModule,
     TranslateModule,
+    AssetVersionsManagerComponent,
   ],
   templateUrl: './translation-detail.component.html',
   styleUrl: './translation-detail.component.less',
@@ -45,16 +45,17 @@ export class TranslationDetailComponent implements OnInit {
   readonly loading = signal(true);
   readonly licensesColors = LicensesColors;
 
-  private slug!: string;
+  /** Route `:slug` segment (used when API omits `slug` on detail). */
+  routeSlug!: string;
 
   ngOnInit(): void {
-    this.slug = this.route.snapshot.params['slug'];
+    this.routeSlug = this.route.snapshot.params['slug'];
     this.load();
   }
 
   load(): void {
     this.loading.set(true);
-    this.translationsService.getDetail(this.slug).subscribe({
+    this.translationsService.getDetail(this.routeSlug).subscribe({
       next: (data) => {
         this.translation.set(data);
         this.loading.set(false);
@@ -66,7 +67,7 @@ export class TranslationDetailComponent implements OnInit {
   }
 
   onEdit(): void {
-    void this.router.navigate(['/admin/translations', this.slug, 'edit']);
+    void this.router.navigate(['/admin/translations', this.routeSlug, 'edit']);
   }
 
   onDelete(): void {
@@ -81,7 +82,7 @@ export class TranslationDetailComponent implements OnInit {
       nzCancelText: this.translate.instant('ADMIN.TRANSLATIONS.DELETE.CANCEL'),
       nzDirection: dir,
       nzOnOk: () =>
-        this.translationsService.delete(this.slug).subscribe({
+        this.translationsService.delete(this.routeSlug).subscribe({
           next: () => {
             this.message.success(
               this.translate.instant('ADMIN.TRANSLATIONS.MESSAGES.DELETE_SUCCESS')
@@ -94,12 +95,6 @@ export class TranslationDetailComponent implements OnInit {
 
   getLicenseColor(license: string): string {
     return this.licensesColors[license as keyof typeof LicensesColors] ?? '#8c8c8c';
-  }
-
-  formatBytes(bytes: number): string {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   languageLabel(code: string | null | undefined): string {

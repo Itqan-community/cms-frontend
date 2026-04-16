@@ -93,45 +93,13 @@
       </div>
     </div>
 
-    @if (tafsir()!.versions.length > 0) {
-      <div class="admin-versions">
-        <h3 class="admin-versions__title">
-          <ng-icon name="lucideRotateCw" /> {{ 'ADMIN.TAFSIRS.DETAIL.VERSIONS_TITLE' | translate }}
-        </h3>
-        <div class="admin-versions__table-wrap">
-          <nz-table
-            #versionsTable
-            [nzData]="tafsir()!.versions"
-            [nzFrontPagination]="false"
-            [nzShowPagination]="false"
-            nzSize="small"
-          >
-            <thead>
-              <tr>
-                <th>{{ 'ADMIN.TAFSIRS.DETAIL.VERSION_COL_NAME' | translate }}</th>
-                <th>{{ 'ADMIN.TAFSIRS.DETAIL.VERSION_COL_SIZE' | translate }}</th>
-                <th>{{ 'ADMIN.TAFSIRS.DETAIL.VERSION_COL_DATE' | translate }}</th>
-                <th>{{ 'ADMIN.TAFSIRS.DETAIL.VERSION_COL_FILE' | translate }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (ver of versionsTable.data; track ver.id) {
-                <tr>
-                  <td>{{ ver.name }}</td>
-                  <td>{{ formatBytes(ver.size_bytes) }}</td>
-                  <td>{{ ver.created_at | date: 'dd/MM/yyyy' }}</td>
-                  <td>
-                    <a [href]="ver.file_url" target="_blank" rel="noopener">
-                      <ng-icon name="lucideDownload" /> {{ 'ADMIN.COMMON.DOWNLOAD' | translate }}
-                    </a>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </nz-table>
-        </div>
-      </div>
-    }
+    <app-asset-versions-manager
+      kind="tafsir"
+      [slug]="tafsir()!.slug"
+      [assetId]="tafsir()!.id"
+      i18nPrefix="ADMIN.TAFSIRS.DETAIL.VERSIONS"
+      sectionTitleKey="ADMIN.TAFSIRS.DETAIL.VERSIONS_TITLE"
+    />
 
     <div class="admin-back">
       <a routerLink="/admin/tafsirs">

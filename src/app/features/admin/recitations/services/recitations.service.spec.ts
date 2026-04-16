@@ -82,20 +82,28 @@ describe('RecitationsService', () => {
     req.flush(null);
   });
 
-  it('recitationTracksList should GET asset-scoped tracks with page params', (done) => {
-    service.recitationTracksList({ asset_id: 42, page: 2, page_size: 10 }).subscribe((res) => {
-      expect(res.count).toBe(1);
-      expect(res.results.length).toBe(1);
-      expect(res.results[0].id).toBe(7);
-      expect(res.results[0].asset_id).toBe(42);
-      expect(res.results[0].surah_number).toBe(1);
-      expect(res.results[0].filename).toBe('001.mp3');
-      expect(res.results[0].audio_url).toBe('https://example.com/a.mp3');
-      done();
-    });
+  it('recitationTracksList should GET recitation-scoped tracks with page params', (done) => {
+    service
+      .recitationTracksList({
+        recitation_slug: 'my-recitation',
+        asset_id: 42,
+        page: 2,
+        page_size: 10,
+      })
+      .subscribe((res) => {
+        expect(res.count).toBe(1);
+        expect(res.results.length).toBe(1);
+        expect(res.results[0].id).toBe(7);
+        expect(res.results[0].asset_id).toBe(42);
+        expect(res.results[0].surah_number).toBe(1);
+        expect(res.results[0].filename).toBe('001.mp3');
+        expect(res.results[0].audio_url).toBe('https://example.com/a.mp3');
+        done();
+      });
 
     const req = httpMock.expectOne(
-      (r) => r.url.includes('/portal/assets/42/recitation-tracks/') && r.method === 'GET'
+      (r) =>
+        r.url.includes('/portal/recitations/my-recitation/recitation-tracks/') && r.method === 'GET'
     );
     expect(req.request.params.get('page')).toBe('2');
     expect(req.request.params.get('page_size')).toBe('10');

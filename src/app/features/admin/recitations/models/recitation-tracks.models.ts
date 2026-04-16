@@ -124,7 +124,7 @@ export interface RecitationTrackUploadRowState {
 }
 
 /**
- * GET /portal/assets/{asset_id}/recitation-tracks/ — single row (OpenAPI RecitationTrackOut).
+ * GET /portal/recitations/{recitation_slug}/recitation-tracks/ — single row (OpenAPI RecitationTrackOut).
  */
 export interface RecitationTrackOut {
   id: number;
@@ -135,7 +135,7 @@ export interface RecitationTrackOut {
   filename: string | null;
 }
 
-/** Paginated list response for asset-scoped tracks. */
+/** Paginated list response for recitation-scoped tracks. */
 export interface PagedRecitationTrackOut {
   results: RecitationTrackOut[];
   count: number;
