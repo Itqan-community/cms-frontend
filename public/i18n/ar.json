@@ -885,6 +885,16 @@
         "UPLOAD": "رفع التزمين",
         "CLEAR": "مسح",
         "HINT": "ملف JSON لكل سورة. تُرسل كل الملفات في طلب رفع واحد.",
+        "BANNER": {
+          "TITLE": "اكتمل رفع التزمين"
+        },
+        "ERRORS": {
+          "EXTRA_CREATED": "تم الإنشاء: {{n}}",
+          "EXTRA_UPDATED": "تم التحديث: {{n}}",
+          "EXTRA_SKIPPED": "تم التخطي: {{n}}",
+          "EXTRA_MISSING_TRACKS": "لا يوجد ملف صوتي لأرقام السور: {{surahs}}",
+          "EXTRA_FILE_ISSUES": "مشاكل في الملفات:"
+        },
         "MESSAGES": {
           "UPLOAD_OK": "تم رفع ملفات التزمين بنجاح.",
           "UPLOAD_ERROR": "تعذر رفع ملفات التزمين. حاول مرة أخرى."

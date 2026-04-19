@@ -159,6 +159,33 @@
           <p class="recitation-detail__tracks-hint">
             {{ 'ADMIN.RECITATIONS.TIMINGS.HINT' | translate }}
           </p>
+
+          @if (timingsUploadResult(); as tr) {
+            <nz-alert
+              nzType="success"
+              [nzBanner]="true"
+              nzShowIcon
+              nzCloseable
+              (nzOnClose)="clearTimingsUploadBanner()"
+              [nzMessage]="'ADMIN.RECITATIONS.TIMINGS.BANNER.TITLE' | translate"
+              [nzDescription]="timingsSuccessBannerDescription(tr)"
+              class="recitation-detail__timings-result-banner"
+            />
+            @if (tr.synced_file_url) {
+              <p class="recitation-detail__timings-sync-file">
+                <a
+                  [href]="tr.synced_file_url"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  download
+                  class="recitation-detail__timings-sync-link"
+                >
+                  <ng-icon name="lucideDownload" />
+                  {{ tr.synced_filename }}
+                </a>
+              </p>
+            }
+          }
         </div>
       </div>
     </section>

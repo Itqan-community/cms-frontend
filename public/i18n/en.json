@@ -874,6 +874,16 @@
         "UPLOAD": "Upload timings",
         "CLEAR": "Clear",
         "HINT": "One JSON file per surah. All files are sent in a single upload.",
+        "BANNER": {
+          "TITLE": "Timing upload complete"
+        },
+        "ERRORS": {
+          "EXTRA_CREATED": "Created: {{n}}",
+          "EXTRA_UPDATED": "Updated: {{n}}",
+          "EXTRA_SKIPPED": "Skipped: {{n}}",
+          "EXTRA_MISSING_TRACKS": "Missing tracks for surah numbers: {{surahs}}",
+          "EXTRA_FILE_ISSUES": "File issues:"
+        },
         "MESSAGES": {
           "UPLOAD_OK": "Ayah timings uploaded successfully.",
           "UPLOAD_ERROR": "Could not upload timing files. Try again."

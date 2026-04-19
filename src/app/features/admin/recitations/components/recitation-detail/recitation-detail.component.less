@@ -51,6 +51,22 @@
     margin: 0;
   }
 
+  &__timings-result-banner {
+    margin-top: 12px;
+  }
+
+  &__timings-sync-file {
+    margin: 8px 0 0;
+    font-size: 0.875rem;
+  }
+
+  &__timings-sync-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--color-primary);
+  }
+
   &__file-input {
     position: absolute;
     width: 0;
@@ -155,6 +171,10 @@
     height: 36px;
     vertical-align: middle;
   }
+}
+
+:host ::ng-deep .recitation-detail__timings-result-banner .ant-alert-description {
+  white-space: pre-line;
 }
 
 .admin-empty-state--compact {
