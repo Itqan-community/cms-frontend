@@ -85,6 +85,84 @@
       </div>
     </div>
 
+    <section class="admin-panel recitation-detail__timings-section">
+      <h2 class="admin-panel__title">
+        <ng-icon name="lucideClock" />
+        {{ 'ADMIN.RECITATIONS.TIMINGS.SECTION_TITLE' | translate }}
+      </h2>
+
+      <div class="recitation-detail__timings-panel">
+        @if (recitation()!.ayah_timings_url) {
+          <div class="recitation-detail__timings-row">
+            <a
+              nz-button
+              nzType="default"
+              [href]="recitation()!.ayah_timings_url!"
+              target="_blank"
+              rel="noopener noreferrer"
+              download
+            >
+              <ng-icon name="lucideDownload" />
+              {{ 'ADMIN.RECITATIONS.DETAIL.DOWNLOAD_AYAH_TIMING' | translate }}
+            </a>
+          </div>
+        } @else {
+          <p class="recitation-detail__timings-empty">
+            {{ 'ADMIN.RECITATIONS.TIMINGS.NO_FILE_YET' | translate }}
+          </p>
+        }
+
+        <div class="recitation-detail__timings-upload">
+          <input
+            #timingsFileInput
+            type="file"
+            accept=".json,application/json"
+            multiple
+            class="recitation-detail__file-input"
+            (change)="onPickTimingsFiles($event)"
+          />
+          <div class="recitation-detail__tracks-actions">
+            <button
+              nz-button
+              nzType="default"
+              type="button"
+              [disabled]="timingsUploadLoading()"
+              (click)="timingsFileInput.click()"
+            >
+              <ng-icon name="lucideFolderOpen" />
+              {{ 'ADMIN.RECITATIONS.TIMINGS.CHOOSE_FILES' | translate }}
+            </button>
+            <button
+              nz-button
+              nzType="primary"
+              type="button"
+              [disabled]="timingsFiles().length === 0 || timingsUploadLoading()"
+              [nzLoading]="timingsUploadLoading()"
+              (click)="onUploadTimings()"
+            >
+              <ng-icon name="lucideUpload" />
+              {{ 'ADMIN.RECITATIONS.TIMINGS.UPLOAD' | translate }}
+            </button>
+            @if (timingsFiles().length && !timingsUploadLoading()) {
+              <button
+                nz-button
+                nzType="default"
+                nzDanger
+                type="button"
+                (click)="clearTimingsSelection()"
+              >
+                <ng-icon name="lucideX" />
+                {{ 'ADMIN.RECITATIONS.TIMINGS.CLEAR' | translate }}
+              </button>
+            }
+          </div>
+          <p class="recitation-detail__tracks-hint">
+            {{ 'ADMIN.RECITATIONS.TIMINGS.HINT' | translate }}
+          </p>
+        </div>
+      </div>
+    </section>
+
     <section class="admin-panel recitation-detail__tracks">
       <h2 class="admin-panel__title">
         <ng-icon name="lucideMic" />

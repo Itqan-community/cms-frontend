@@ -11,6 +11,30 @@
     min-width: 240px;
   }
 
+  &__timings-section {
+    margin-top: 8px;
+  }
+
+  &__timings-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  &__timings-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  &__timings-empty {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.6;
+    color: var(--admin-text-500);
+  }
+
   &__tracks {
     margin-top: 8px;
   }
@@ -21,6 +45,10 @@
 
   &__tracks-upload {
     margin-bottom: 20px;
+  }
+
+  &__timings-upload {
+    margin: 0;
   }
 
   &__file-input {

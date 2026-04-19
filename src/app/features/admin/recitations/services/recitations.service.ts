@@ -17,6 +17,7 @@ import type {
   RecitationTrackValidateUploadIn,
   RecitationTrackValidateUploadOut,
 } from '../models/recitation-tracks.models';
+import type { RecitationTimingUploadOut } from '../models/recitation-timings.models';
 import {
   NamedId,
   RecitationDetails,
@@ -105,6 +106,19 @@ export class RecitationsService {
 
   delete(slug: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}${slug}/`);
+  }
+
+  /** POST /portal/timing/upload/ — multipart: asset_id, files[] */
+  recitationTimingUpload(assetId: number, files: File[]): Observable<RecitationTimingUploadOut> {
+    const formData = new FormData();
+    formData.append('asset_id', String(assetId));
+    for (const file of files) {
+      formData.append('files', file, file.name);
+    }
+    return this.http.post<RecitationTimingUploadOut>(
+      `${this.portalBaseUrl}/timing/upload/`,
+      formData
+    );
   }
 
   // --- Recitation surah tracks (portal) ---

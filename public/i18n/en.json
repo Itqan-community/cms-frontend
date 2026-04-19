@@ -798,6 +798,7 @@
         "LABEL_QIRAAH": "Qiraah",
         "LABEL_RIWAYAH": "Riwayah",
         "LABEL_PUBLISHER": "Publisher",
+        "DOWNLOAD_AYAH_TIMING": "Download timing file",
         "DESC_AR": "Description (Arabic)",
         "DESC_EN": "Description (EN)"
       },
@@ -864,6 +865,18 @@
           "UPLOAD_PARTIAL": "{{ok}} uploaded, {{failed}} failed. You can retry failed rows.",
           "DELETE_OK": "Audio file deleted.",
           "DELETE_ERROR": "Could not delete the audio file."
+        }
+      },
+      "TIMINGS": {
+        "SECTION_TITLE": "Ayah timings",
+        "NO_FILE_YET": "No ayah timing file has been uploaded yet.",
+        "CHOOSE_FILES": "Choose JSON files",
+        "UPLOAD": "Upload timings",
+        "CLEAR": "Clear",
+        "HINT": "One JSON file per surah. All files are sent in a single upload.",
+        "MESSAGES": {
+          "UPLOAD_OK": "Ayah timings uploaded successfully.",
+          "UPLOAD_ERROR": "Could not upload timing files. Try again."
         }
       },
       "DELETE": {

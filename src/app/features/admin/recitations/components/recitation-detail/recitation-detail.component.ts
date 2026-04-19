@@ -1,5 +1,14 @@
 import { DatePipe } from '@angular/common';
-import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
@@ -72,6 +81,10 @@ export class RecitationDetailComponent implements OnInit {
   readonly validateMessage = signal<string | null>(null);
   readonly validateTopStatus = signal<'idle' | 'valid' | 'invalid'>('idle');
   readonly validateLoading = signal(false);
+
+  readonly timingsFileInput = viewChild<ElementRef<HTMLInputElement>>('timingsFileInput');
+  readonly timingsFiles = signal<File[]>([]);
+  readonly timingsUploadLoading = signal(false);
 
   /** Any row currently queued or uploading (may include parallel single-file runs). */
   readonly hasInFlightUploadRows = computed(() =>
@@ -259,6 +272,47 @@ export class RecitationDetailComponent implements OnInit {
   onTracksPageChange(page: number): void {
     this.tracksPage.set(page);
     this.loadTracksPage();
+  }
+
+  onPickTimingsFiles(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const list = input.files;
+    if (!list?.length) {
+      this.timingsFiles.set([]);
+      return;
+    }
+    this.timingsFiles.set(Array.from(list));
+  }
+
+  clearTimingsSelection(): void {
+    this.timingsFiles.set([]);
+    const el = this.timingsFileInput()?.nativeElement;
+    if (el) el.value = '';
+  }
+
+  onUploadTimings(): void {
+    const rec = this.recitation();
+    const files = this.timingsFiles();
+    if (!rec || files.length === 0 || this.timingsUploadLoading()) return;
+
+    this.timingsUploadLoading.set(true);
+    this.recitationsService.recitationTimingUpload(rec.id, files).subscribe({
+      next: () => {
+        this.message.success(
+          this.translate.instant('ADMIN.RECITATIONS.TIMINGS.MESSAGES.UPLOAD_OK')
+        );
+        this.timingsFiles.set([]);
+        const el = this.timingsFileInput()?.nativeElement;
+        if (el) el.value = '';
+        this.load();
+      },
+      error: () => {
+        this.message.error(
+          this.translate.instant('ADMIN.RECITATIONS.TIMINGS.MESSAGES.UPLOAD_ERROR')
+        );
+      },
+      complete: () => this.timingsUploadLoading.set(false),
+    });
   }
 
   onPickMp3Files(event: Event): void {
