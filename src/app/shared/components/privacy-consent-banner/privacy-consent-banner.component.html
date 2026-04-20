@@ -1,0 +1,64 @@
+@if (showBanner) {
+  <div class="privacy-consent-banner">
+    <div class="privacy-consent-banner__content">
+      <div class="privacy-consent-banner__text">
+        <h3 class="privacy-consent-banner__title">{{ 'PRIVACY_CONSENT.TITLE' | translate }}</h3>
+        <p class="privacy-consent-banner__description">
+          {{ 'PRIVACY_CONSENT.DESCRIPTION' | translate }}
+          <a
+            (click)="navigateToPrivacy()"
+            (keyup.enter)="navigateToPrivacy()"
+            (keyup.space)="navigateToPrivacy()"
+            href="javascript:void(0)"
+            class="privacy-consent-banner__link"
+            tabindex="0"
+            role="button"
+          >
+            {{ 'PRIVACY_CONSENT.LEARN_MORE' | translate }}
+          </a>
+        </p>
+      </div>
+      <div class="privacy-consent-banner__actions">
+        <button nz-button nzType="default" (click)="openCustomizeModal()">
+          {{ 'PRIVACY_CONSENT.CUSTOMIZE' | translate }}
+        </button>
+        <button nz-button nzType="default" (click)="rejectAll()">
+          {{ 'PRIVACY_CONSENT.REJECT_ALL' | translate }}
+        </button>
+        <button nz-button nzType="primary" (click)="acceptAll()">
+          {{ 'PRIVACY_CONSENT.ACCEPT_ALL' | translate }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<nz-modal
+  [(nzVisible)]="showCustomizeModal"
+  [nzTitle]="'PRIVACY_CONSENT.CUSTOMIZE_TITLE' | translate"
+  [nzOkText]="'PRIVACY_CONSENT.SAVE_PREFERENCES' | translate"
+  [nzCancelText]="'COMMON.CANCEL' | translate"
+  (nzOnOk)="saveCustomConsent()"
+  (nzOnCancel)="closeCustomizeModal()"
+  nzWidth="500px"
+>
+  <ng-container *nzModalContent>
+    <div class="customize-consent">
+      <nz-checkbox-group [nzOptions]="consentOptions" [(ngModel)]="selectedConsents">
+        @for (opt of consentOptions; track opt.value) {
+          <div class="customize-consent__option">
+            <label
+              nz-checkbox
+              [nzValue]="opt.value"
+              [htmlFor]="opt.value"
+              class="customize-consent__label"
+            >
+              <strong>{{ opt.label | translate }}</strong>
+              <p>{{ opt.description | translate }}</p>
+            </label>
+          </div>
+        }
+      </nz-checkbox-group>
+    </div>
+  </ng-container>
+</nz-modal>

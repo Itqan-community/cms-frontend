@@ -136,6 +136,11 @@ export const routes: Routes = [
         (m) => m.LicenseDetailsPage
       ),
   },
+  {
+    path: 'privacy',
+    loadComponent: () =>
+      import('./features/privacy/pages/privacy/privacy.page').then((m) => m.PrivacyPage),
+  },
 
   { path: '**', redirectTo: 'gallery' },
 ];

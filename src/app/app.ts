@@ -6,12 +6,14 @@ import { TranslateService } from '@ngx-translate/core';
 import { ar_EG, en_US, NzI18nService } from 'ng-zorro-antd/i18n';
 import { filter } from 'rxjs';
 import { GoogleAnalyticsService } from './core/services/google-analytics.service';
+import { SentryService } from './core/services/sentry.service';
 import { WebVitalsService } from './core/services/web-vitals.service';
 import { HeaderComponent } from './shared/components/header/header.component';
+import { PrivacyConsentBannerComponent } from './shared/components/privacy-consent-banner/privacy-consent-banner.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent],
+  imports: [RouterOutlet, HeaderComponent, PrivacyConsentBannerComponent],
   templateUrl: './app.html',
   styleUrl: './app.less',
 })
@@ -23,7 +25,7 @@ export class App {
   protected router = inject(Router);
   private readonly webVitalsService = inject(WebVitalsService);
   private readonly googleAnalyticsService = inject(GoogleAnalyticsService);
-
+  private readonly sentryService = inject(SentryService);
   protected readonly title = signal('ITQAN | إتقان');
   protected hideHeader = signal(false);
   protected fullWidth = signal(false);
@@ -31,6 +33,7 @@ export class App {
   constructor() {
     void this.webVitalsService;
     this.googleAnalyticsService.init();
+    this.sentryService.init();
 
     const syncShellFromRoute = (): void => {
       let merged: Record<string, unknown> = {};

@@ -1,6 +1,7 @@
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { inject, Injectable, PLATFORM_ID } from '@angular/core';
 import { environment } from '../../../environments/environment';
+import { PrivacyConsentService } from './privacy-consent.service';
 
 @Injectable({
   providedIn: 'root',
@@ -8,12 +9,15 @@ import { environment } from '../../../environments/environment';
 export class GoogleAnalyticsService {
   private readonly platformId = inject(PLATFORM_ID);
   private readonly document = inject(DOCUMENT);
+  private readonly privacyConsentService = inject(PrivacyConsentService);
   private initialized = false;
 
   init(): void {
     if (this.initialized) return;
     if (!environment.production) return;
     if (!isPlatformBrowser(this.platformId)) return;
+    if (!this.privacyConsentService.isAnalyticsAllowed()) return;
+    console.debug('[GoogleAnalyticsService] Initializing Google Analytics...');
     this.initialized = true;
 
     const scheduleIdle = (this.document.defaultView as Window)?.requestIdleCallback
