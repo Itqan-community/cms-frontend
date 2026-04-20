@@ -1,0 +1,72 @@
+<div class="usage-page">
+  <div class="usage-page__header">
+    <h2 class="usage-page__title">{{ 'USAGE.TITLE' | translate }}</h2>
+    <p class="usage-page__subtitle">{{ 'USAGE.SUBTITLE' | translate }}</p>
+  </div>
+
+  <!-- Controls -->
+  <div class="usage-page__controls">
+    <nz-range-picker
+      [ngModel]="dateRange()"
+      (ngModelChange)="onDateChange($event)"
+      nzFormat="yyyy-MM-dd"
+    ></nz-range-picker>
+
+    @if (isItqanAdmin()) {
+      <nz-select
+        class="usage-page__publisher-select"
+        [ngModel]="selectedPublisherId()"
+        (ngModelChange)="onPublisherChange($event)"
+        nzAllowClear
+        nzShowSearch
+        nzServerSearch
+        [nzLoading]="publishersLoading()"
+        [nzPlaceHolder]="'USAGE.ALL_PUBLISHERS' | translate"
+        (nzOnSearch)="onPublisherSearch($event)"
+      >
+        @for (p of publishers(); track p.id) {
+          <nz-option [nzValue]="p.id" [nzLabel]="p.name"></nz-option>
+        }
+      </nz-select>
+    }
+  </div>
+
+  @if (hasError()) {
+    <nz-alert
+      nzType="warning"
+      [nzMessage]="'USAGE.ERROR_UNAVAILABLE' | translate"
+      nzShowIcon
+    ></nz-alert>
+  }
+
+  <nz-spin [nzSpinning]="loading()">
+    <div class="usage-page__charts">
+      <!-- Timeseries -->
+      <nz-card [nzTitle]="'USAGE.REQUESTS_OVER_TIME' | translate" class="usage-page__card">
+        @if (timeseriesOption()) {
+          <div echarts class="usage-chart" [options]="timeseriesOption()!"></div>
+        } @else if (!loading()) {
+          <nz-empty [nzNotFoundContent]="'USAGE.NO_DATA' | translate"></nz-empty>
+        }
+      </nz-card>
+
+      <!-- Top Endpoints -->
+      <nz-card [nzTitle]="'USAGE.TOP_ENDPOINTS' | translate" class="usage-page__card">
+        @if (topEndpointsOption()) {
+          <div echarts class="usage-chart" [options]="topEndpointsOption()!"></div>
+        } @else if (!loading()) {
+          <nz-empty [nzNotFoundContent]="'USAGE.NO_DATA' | translate"></nz-empty>
+        }
+      </nz-card>
+
+      <!-- Top Entities -->
+      <nz-card [nzTitle]="'USAGE.TOP_ENTITIES' | translate" class="usage-page__card">
+        @if (topEntitiesOption()) {
+          <div echarts class="usage-chart usage-chart--tall" [options]="topEntitiesOption()!"></div>
+        } @else if (!loading()) {
+          <nz-empty [nzNotFoundContent]="'USAGE.NO_DATA' | translate"></nz-empty>
+        }
+      </nz-card>
+    </div>
+  </nz-spin>
+</div>

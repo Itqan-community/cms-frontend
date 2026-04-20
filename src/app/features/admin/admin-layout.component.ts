@@ -64,6 +64,12 @@ const TAB_RECITERS: CmsTab = {
   label: 'ADMIN.MENU.RECITERS',
   icon: 'lucideMic',
 };
+const TAB_USAGE: CmsTab = {
+  id: 'usage',
+  path: 'usage',
+  label: 'ADMIN.MENU.USAGE',
+  icon: 'lucideBarChart2',
+};
 const CORE_TABS: CmsTab[] = [TAB_TAFSIRS, TAB_TRANSLATIONS, TAB_RECITATIONS, TAB_RECITERS];
 
 @Component({
@@ -98,13 +104,7 @@ export class AdminLayoutComponent {
   );
 
   readonly tabs = computed(() => {
-    // if (this.adminAuth.isItqanAdmin()) {
-    //   return [TAB_MUSHAFS, TAB_TAFSIRS, TAB_TRANSLATIONS, TAB_PUBLISHERS, TAB_AUDIO];
-    // }
-    // if (this.adminAuth.isPublisherAdmin()) {
-    return [TAB_PUBLISHERS, TAB_MUSHAFS, ...CORE_TABS];
-    // }
-    // return CORE_TABS;
+    return [TAB_PUBLISHERS, TAB_MUSHAFS, ...CORE_TABS, TAB_USAGE];
   });
 
   constructor() {
