@@ -1,4 +1,15 @@
-import { Component, DestroyRef, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  EventEmitter,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  Input,
+  Output,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
@@ -207,8 +218,9 @@ import { RecitationsService } from '../../services/recitations.service';
   `,
   styleUrl: './recitation-filters.component.less',
 })
-export class RecitationFiltersComponent implements OnInit {
+export class RecitationFiltersComponent implements OnInit, OnChanges {
   @Output() filtersChange = new EventEmitter<Partial<RecitationListFilters>>();
+  @Input() initialFilters: Partial<RecitationListFilters> = {};
 
   private readonly publishersFilterService = inject(PublishersFilterService);
   private readonly recitersService = inject(RecitersAdminService);
@@ -244,7 +256,28 @@ export class RecitationFiltersComponent implements OnInit {
 
   private currentFilters: Partial<RecitationListFilters> = {};
 
+  private hydrateFromFilters(f: Partial<RecitationListFilters>): void {
+    this.currentFilters = { ...f };
+    this.searchValue = f.search || '';
+    this.selectedPublisher = f.publisher_id != null ? Number(f.publisher_id) : null;
+    this.selectedReciter = f.reciter_id != null ? Number(f.reciter_id) : null;
+    this.selectedQiraah = f.qiraah_id != null ? Number(f.qiraah_id) : null;
+    this.selectedRiwayah = f.riwayah_id != null ? Number(f.riwayah_id) : null;
+    this.selectedMadd = (f.madd_level as MaddLevel) ?? null;
+    this.selectedMeem = (f.meem_behaviour as MeemBehavior) ?? null;
+    this.selectedLicense = f.license_code ?? null;
+    this.selectedHijriDate = f.year ? new Date(Number(f.year), 0, 1) : null;
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['initialFilters'] && !changes['initialFilters'].firstChange) {
+      this.hydrateFromFilters(this.initialFilters || {});
+    }
+  }
+
   ngOnInit(): void {
+    this.hydrateFromFilters(this.initialFilters || {});
+
     this.loadPublishers();
     this.loadReciters();
     forkJoin({

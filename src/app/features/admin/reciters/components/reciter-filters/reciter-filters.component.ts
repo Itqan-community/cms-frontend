@@ -1,4 +1,14 @@
-import { Component, DestroyRef, EventEmitter, OnInit, Output, inject } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  EventEmitter,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  Input,
+  Output,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
@@ -64,16 +74,22 @@ import { ReciterListFilters } from '../../models/reciters.models';
   `,
   styleUrl: './reciter-filters.component.less',
 })
-export class ReciterFiltersComponent implements OnInit {
+export class ReciterFiltersComponent implements OnInit, OnChanges {
   @Output() filtersChange = new EventEmitter<Partial<ReciterListFilters>>();
+  @Input() searchValue = '';
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly searchSubject = new Subject<string>();
 
-  searchValue = '';
   isFiltersModalOpen = false;
 
   private currentFilters: Partial<ReciterListFilters> = {};
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['searchValue'] && !changes['searchValue'].firstChange) {
+      this.currentFilters = { ...this.currentFilters, search: this.searchValue || undefined };
+    }
+  }
 
   ngOnInit(): void {
     this.searchSubject

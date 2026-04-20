@@ -12,7 +12,10 @@
     </a>
   </div>
 
-  <app-tafsir-filters (filtersChange)="onFiltersChange($event)"></app-tafsir-filters>
+  <app-tafsir-filters
+    [initialFilters]="activeFilters"
+    (filtersChange)="onFiltersChange($event)"
+  ></app-tafsir-filters>
 
   <div class="admin-table-toolbar">
     <app-admin-column-picker
@@ -38,6 +41,7 @@
               <th
                 nzWidth="200px"
                 [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('name')"
                 (nzSortOrderChange)="onSortChange('name', $event)"
               >
                 {{ 'ADMIN.TAFSIRS.COLUMNS.NAME' | translate }}
@@ -56,6 +60,7 @@
               <th
                 nzWidth="130px"
                 [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('created_at')"
                 (nzSortOrderChange)="onSortChange('created_at', $event)"
               >
                 {{ 'ADMIN.TAFSIRS.COLUMNS.CREATED_AT' | translate }}

@@ -12,7 +12,10 @@
     </a>
   </div>
 
-  <app-recitation-filters (filtersChange)="onFiltersChange($event)"></app-recitation-filters>
+  <app-recitation-filters
+    [initialFilters]="activeFilters"
+    (filtersChange)="onFiltersChange($event)"
+  ></app-recitation-filters>
 
   <div class="admin-table-toolbar">
     <app-admin-column-picker
@@ -36,8 +39,9 @@
           <tr>
             @if (showRecitationCol('name')) {
               <th
-                nzWidth="200px"
+                nzWidth="220px"
                 [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('name')"
                 (nzSortOrderChange)="onSortChange('name', $event)"
               >
                 {{ 'ADMIN.RECITATIONS.COLUMNS.NAME' | translate }}
@@ -57,8 +61,9 @@
             }
             @if (showRecitationCol('year')) {
               <th
-                nzWidth="90px"
+                nzWidth="100px"
                 [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('year')"
                 (nzSortOrderChange)="onSortChange('year', $event)"
               >
                 {{ 'ADMIN.RECITATIONS.COLUMNS.YEAR' | translate }}
@@ -66,8 +71,9 @@
             }
             @if (showRecitationCol('license')) {
               <th
-                nzWidth="120px"
+                nzWidth="140px"
                 [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('license')"
                 (nzSortOrderChange)="onSortChange('license', $event)"
               >
                 {{ 'ADMIN.RECITATIONS.COLUMNS.LICENSE' | translate }}
@@ -77,6 +83,7 @@
               <th
                 nzWidth="130px"
                 [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('created_at')"
                 (nzSortOrderChange)="onSortChange('created_at', $event)"
               >
                 {{ 'ADMIN.RECITATIONS.COLUMNS.CREATED_AT' | translate }}

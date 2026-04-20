@@ -1,4 +1,14 @@
-import { Component, DestroyRef, EventEmitter, OnInit, Output, inject } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  EventEmitter,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  Input,
+  Output,
+  inject,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -27,8 +37,9 @@ import { PublisherUiFilters } from '../../models/publishers-stats.models';
   templateUrl: './publisher-filters.component.html',
   styleUrl: './publisher-filters.component.less',
 })
-export class PublisherFiltersComponent implements OnInit {
+export class PublisherFiltersComponent implements OnInit, OnChanges {
   @Output() filtersChange = new EventEmitter<PublisherUiFilters>();
+  @Input() initialFilters: PublisherUiFilters = {};
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
@@ -42,7 +53,23 @@ export class PublisherFiltersComponent implements OnInit {
 
   private current: PublisherUiFilters = {};
 
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['initialFilters'] && !changes['initialFilters'].firstChange) {
+      const f = this.initialFilters || {};
+      this.current = { ...f };
+      this.searchValue = f.search || '';
+      this.selectedCountry = f.country ?? null;
+      // if (f.is_verified !== undefined) this.selectedVerified = f.is_verified;
+    }
+  }
+
   ngOnInit(): void {
+    const f = this.initialFilters || {};
+    this.current = { ...f };
+    this.searchValue = f.search || '';
+    this.selectedCountry = f.country ?? null;
+    // if (f.is_verified !== undefined) this.selectedVerified = f.is_verified;
+
     this.searchSubject
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe((term) => {

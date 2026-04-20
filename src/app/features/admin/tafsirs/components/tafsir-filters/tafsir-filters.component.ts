@@ -1,4 +1,15 @@
-import { Component, DestroyRef, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  EventEmitter,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  Input,
+  Output,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -137,8 +148,9 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
   `,
   styleUrl: './tafsir-filters.component.less',
 })
-export class TafsirFiltersComponent implements OnInit {
+export class TafsirFiltersComponent implements OnInit, OnChanges {
   @Output() filtersChange = new EventEmitter<Partial<TafsirFilters>>();
+  @Input() initialFilters: Partial<TafsirFilters> = {};
 
   private readonly publishersFilterService = inject(PublishersFilterService);
   private readonly translate = inject(TranslateService);
@@ -158,7 +170,26 @@ export class TafsirFiltersComponent implements OnInit {
 
   private currentFilters: Partial<TafsirFilters> = {};
 
+  private hydrateFromFilters(f: Partial<TafsirFilters>): void {
+    this.currentFilters = { ...f };
+    this.searchValue = f.search || '';
+    this.selectedPublisher = f.publisher_id != null ? Number(f.publisher_id) : null;
+    this.selectedLicense = f.license_code ?? null;
+    this.selectedLanguage = f.language ?? null;
+    if (String(f.is_external) === 'true') this.selectedExternal = true;
+    else if (String(f.is_external) === 'false') this.selectedExternal = false;
+    else this.selectedExternal = null;
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['initialFilters'] && !changes['initialFilters'].firstChange) {
+      this.hydrateFromFilters(this.initialFilters || {});
+    }
+  }
+
   ngOnInit(): void {
+    this.hydrateFromFilters(this.initialFilters || {});
+
     this.loadPublishers();
 
     this.searchSubject

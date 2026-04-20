@@ -12,7 +12,10 @@
     </a>
   </div>
 
-  <app-reciter-filters (filtersChange)="onFiltersChange($event)"></app-reciter-filters>
+  <app-reciter-filters
+    [searchValue]="activeFilters.search || ''"
+    (filtersChange)="onFiltersChange($event)"
+  ></app-reciter-filters>
 
   <div class="admin-table-toolbar">
     <app-admin-column-picker
@@ -38,6 +41,7 @@
               <th
                 nzWidth="200px"
                 [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('name')"
                 (nzSortOrderChange)="onSortChange('name', $event)"
               >
                 {{ 'ADMIN.RECITERS.COLUMNS.NAME' | translate }}
@@ -53,6 +57,7 @@
               <th
                 nzWidth="110px"
                 [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('recitations_count')"
                 (nzSortOrderChange)="onSortChange('recitations_count', $event)"
               >
                 {{ 'ADMIN.RECITERS.COLUMNS.RECITATIONS_COUNT' | translate }}
@@ -62,6 +67,7 @@
               <th
                 nzWidth="130px"
                 [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('created_at')"
                 (nzSortOrderChange)="onSortChange('created_at', $event)"
               >
                 {{ 'ADMIN.RECITERS.COLUMNS.CREATED_AT' | translate }}

@@ -12,7 +12,10 @@
     </a>
   </div>
 
-  <app-publisher-filters (filtersChange)="onFiltersChange($event)"></app-publisher-filters>
+  <app-publisher-filters
+    [initialFilters]="activeFilters"
+    (filtersChange)="onFiltersChange($event)"
+  ></app-publisher-filters>
 
   <div class="admin-table-toolbar">
     <app-admin-column-picker
@@ -36,8 +39,9 @@
           <tr>
             @if (showPublisherCol('name')) {
               <th
-                nzWidth="220px"
+                nzWidth="200px"
                 [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('name')"
                 (nzSortOrderChange)="onSortChange('name', $event)"
               >
                 {{ 'ADMIN.PUBLISHERS.COLUMNS.NAME' | translate }}
@@ -56,6 +60,7 @@
               <th
                 nzWidth="130px"
                 [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('created_at')"
                 (nzSortOrderChange)="onSortChange('created_at', $event)"
               >
                 {{ 'ADMIN.PUBLISHERS.COLUMNS.CREATED_AT' | translate }}
