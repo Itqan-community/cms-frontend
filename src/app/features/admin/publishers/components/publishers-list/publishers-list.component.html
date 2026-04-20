@@ -66,9 +66,13 @@
         </thead>
         <tbody>
           @for (p of pubTable.data; track p.id) {
-            <tr class="admin-list-row" (click)="onView(p.id)">
+            <tr class="admin-list-row">
               @if (showPublisherCol('name')) {
-                <td class="admin-list-name">{{ p.name || p.name_ar || p.name_en || '—' }}</td>
+                <td class="admin-list-name">
+                  <a class="hoverable-link" [routerLink]="['/admin/publishers', p.id]">
+                    {{ p.name || p.name_ar || p.name_en || '—' }}
+                  </a>
+                </td>
               }
               @if (showPublisherCol('country')) {
                 <td>{{ countryLabel(p.country) }}</td>
@@ -90,28 +94,26 @@
               }
               <td (click)="$event.stopPropagation()">
                 <div class="admin-list-actions">
-                  <button
-                    type="button"
+                  <a
                     nz-button
                     nzType="text"
                     class="action-icon action-icon--view"
                     nz-tooltip
                     [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_VIEW' | translate"
-                    (click)="onView(p.id)"
+                    [routerLink]="['/admin/publishers', p.id]"
                   >
                     <ng-icon name="lucideEye" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
+                  </a>
+                  <a
                     nz-button
                     nzType="text"
                     class="action-icon action-icon--edit"
                     nz-tooltip
                     [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_EDIT' | translate"
-                    (click)="onEdit(p.id)"
+                    [routerLink]="['/admin/publishers', p.id, 'edit']"
                   >
                     <ng-icon name="lucideSquarePen" aria-hidden="true" />
-                  </button>
+                  </a>
                 </div>
               </td>
             </tr>

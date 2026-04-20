@@ -87,10 +87,18 @@
         </thead>
         <tbody>
           @for (item of recTable.data; track item.id) {
-            <tr class="admin-list-row" (click)="onView(item.slug ?? item.id + '')">
+            <tr class="admin-list-row">
               @if (showRecitationCol('name')) {
-                <td class="admin-list-name">{{ item.name }}</td>
+                <td class="admin-list-name">
+                  <a
+                    class="hoverable-link"
+                    [routerLink]="['/admin/recitations', item.slug ?? item.id]"
+                  >
+                    {{ item.name }}
+                  </a>
+                </td>
               }
+
               @if (showRecitationCol('description')) {
                 <td class="admin-list-desc">{{ truncate(item.description) }}</td>
               }
@@ -116,28 +124,26 @@
               }
               <td (click)="$event.stopPropagation()">
                 <div class="admin-list-actions">
-                  <button
-                    type="button"
+                  <a
                     nz-button
                     nzType="text"
                     class="action-icon action-icon--view"
                     nz-tooltip
                     [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_VIEW' | translate"
-                    (click)="onView(item.slug ?? item.id + '')"
+                    [routerLink]="['/admin/recitations', item.slug ?? item.id]"
                   >
                     <ng-icon name="lucideEye" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
+                  </a>
+                  <a
                     nz-button
                     nzType="text"
                     class="action-icon action-icon--edit"
                     nz-tooltip
                     [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_EDIT' | translate"
-                    (click)="onEdit(item.slug ?? item.id + '')"
+                    [routerLink]="['/admin/recitations', item.slug ?? item.id, 'edit']"
                   >
                     <ng-icon name="lucideSquarePen" aria-hidden="true" />
-                  </button>
+                  </a>
                 </div>
               </td>
             </tr>

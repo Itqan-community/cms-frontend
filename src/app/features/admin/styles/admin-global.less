@@ -18,6 +18,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  color: var(--admin-text-500); // Neutral color
+
+  &:link,
+  &:visited,
+  &:active {
+    color: var(--admin-text-500);
+    text-decoration: none;
+  }
 
   &:focus-visible {
     outline: 2px solid var(--color-primary-400);
@@ -29,29 +37,28 @@
   }
 
   ng-icon {
-    // font-size: 1.25rem;
     width: 1.25rem;
     height: 1.25rem;
   }
 
   &--view {
-    color: var(--color-action-view);
     &:hover {
       background: var(--color-action-view-bg);
+      color: var(--color-action-view);
     }
   }
 
   &--edit {
-    color: var(--color-action-edit);
     &:hover {
       background: var(--color-action-edit-bg);
+      color: var(--color-action-edit);
     }
   }
 
   &--delete {
-    color: var(--color-action-delete);
     &:hover {
       background: var(--color-action-delete-bg);
+      color: var(--color-action-delete);
     }
   }
 }
@@ -134,7 +141,6 @@
 }
 
 .admin-list-row {
-  cursor: pointer;
   transition: background 0.15s ease;
 
   &:hover {
