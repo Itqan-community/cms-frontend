@@ -1112,5 +1112,46 @@
       "TAB_BACKEND": "Backend",
       "TAB_IMPORT": "Data import"
     }
+  },
+  "PRIVACY_CONSENT": {
+    "TITLE": "We Respect Your Privacy",
+    "DESCRIPTION": "We use cookies and tracking tools to improve your experience. You can control your preferences below.",
+    "LEARN_MORE": "Learn more",
+    "CUSTOMIZE": "Customize",
+    "REJECT_ALL": "Reject all",
+    "ACCEPT_ALL": "Accept all",
+    "CUSTOMIZE_TITLE": "Customize Privacy Preferences",
+    "SAVE_PREFERENCES": "Save Preferences",
+    "ANALYTICS_TITLE": "Analytics & Performance",
+    "ANALYTICS_DESCRIPTION": "Helps us understand how the site is used to improve performance and content.",
+    "ERROR_TRACKING_TITLE": "Error Tracking",
+    "ERROR_TRACKING_DESCRIPTION": "Helps us detect and fix technical issues in the application."
+  },
+  "PRIVACY": {
+    "TITLE": "Privacy Policy",
+    "DATA_COLLECTION": {
+      "TITLE": "Data Collection",
+      "DESCRIPTION": "We collect limited information to improve our services while respecting your privacy.",
+      "ANALYTICS": {
+        "TITLE": "Analytics (Google Analytics)",
+        "DESCRIPTION": "We use Google Analytics to understand how users interact with our site. This helps us improve content and performance."
+      },
+      "ERROR_TRACKING": {
+        "TITLE": "Error Tracking (Sentry)",
+        "DESCRIPTION": "We use Sentry to track errors and technical issues in the application, helping us provide a more stable experience."
+      }
+    },
+    "YOUR_RIGHTS": {
+      "TITLE": "Your Rights",
+      "DESCRIPTION": "You have the right to control your personal data:",
+      "RIGHT_1": "Right to access your personal data",
+      "RIGHT_2": "Right to correct or delete your data",
+      "RIGHT_3": "Right to restrict processing of your data",
+      "RIGHT_4": "Right to object to processing of your data"
+    },
+    "CONTACT": {
+      "TITLE": "Contact Us",
+      "DESCRIPTION": "If you have any questions about our privacy policy or how we handle your data, please contact us."
+    }
   }
 }
