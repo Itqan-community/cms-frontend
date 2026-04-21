@@ -21,7 +21,7 @@
     <app-admin-column-picker
       [storageKey]="publisherTableStorageKey"
       [columns]="publisherTableColumns"
-      (visibilityChange)="onPublisherColumnVisibility($event)"
+      (visibilityChange)="onColumnVisibilityChange($event)"
     />
   </div>
 
@@ -29,7 +29,7 @@
     <nz-spin [nzSpinning]="loading()">
       <nz-table
         #pubTable
-        [nzData]="publishers()"
+        [nzData]="items()"
         [nzFrontPagination]="false"
         [nzShowPagination]="false"
         nzSize="middle"
@@ -37,31 +37,31 @@
       >
         <thead>
           <tr>
-            @if (showPublisherCol('name')) {
+            @if (showCol('name')) {
               <th
                 nzWidth="200px"
                 [nzSortFn]="true"
                 [nzSortOrder]="getSortOrder('name')"
-                (nzSortOrderChange)="onSortChange('name', $event)"
+                (nzSortOrderChange)="onSortChange(publisherTableStorageKey, 'name', $event)"
               >
                 {{ 'ADMIN.PUBLISHERS.COLUMNS.NAME' | translate }}
               </th>
             }
-            @if (showPublisherCol('country')) {
+            @if (showCol('country')) {
               <th nzWidth="120px">{{ 'ADMIN.PUBLISHERS.COLUMNS.COUNTRY' | translate }}</th>
             }
-            @if (showPublisherCol('description')) {
-              <th nzWidth="240px">{{ 'ADMIN.PUBLISHERS.COLUMNS.DESCRIPTION' | translate }}</th>
+            @if (showCol('foundation_year')) {
+              <th nzWidth="110px">{{ 'ADMIN.PUBLISHERS.COLUMNS.FOUNDATION_YEAR' | translate }}</th>
             }
             <!-- is_verified column (commented out — do not delete; use ADMIN.PUBLISHERS.COLUMNS.VERIFIED)
             <th nzWidth="100px">{{ 'ADMIN.PUBLISHERS.COLUMNS.VERIFIED' | translate }}</th>
             -->
-            @if (showPublisherCol('created')) {
+            @if (showCol('created')) {
               <th
                 nzWidth="130px"
                 [nzSortFn]="true"
                 [nzSortOrder]="getSortOrder('created_at')"
-                (nzSortOrderChange)="onSortChange('created_at', $event)"
+                (nzSortOrderChange)="onSortChange(publisherTableStorageKey, 'created_at', $event)"
               >
                 {{ 'ADMIN.PUBLISHERS.COLUMNS.CREATED_AT' | translate }}
               </th>
@@ -72,18 +72,18 @@
         <tbody>
           @for (p of pubTable.data; track p.id) {
             <tr class="admin-list-row">
-              @if (showPublisherCol('name')) {
+              @if (showCol('name')) {
                 <td class="admin-list-name">
                   <a class="hoverable-link" [routerLink]="['/admin/publishers', p.id]">
                     {{ p.name || p.name_ar || p.name_en || '—' }}
                   </a>
                 </td>
               }
-              @if (showPublisherCol('country')) {
+              @if (showCol('country')) {
                 <td>{{ countryLabel(p.country) }}</td>
               }
-              @if (showPublisherCol('description')) {
-                <td class="admin-list-desc">{{ publisherDescriptionPreview(p) }}</td>
+              @if (showCol('foundation_year')) {
+                <td>{{ foundationYearDisplay(p.foundation_year) }}</td>
               }
               <!-- is_verified cell (commented out — do not delete; use ADMIN.PUBLISHERS.VERIFIED_TAG / NOT_VERIFIED_TAG)
               <td>
@@ -94,7 +94,7 @@
                 }
               </td>
               -->
-              @if (showPublisherCol('created')) {
+              @if (showCol('created')) {
                 <td>{{ p.created_at | date: 'dd/MM/yyyy' }}</td>
               }
               <td (click)="$event.stopPropagation()">

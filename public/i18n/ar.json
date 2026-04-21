@@ -387,7 +387,8 @@
       "DESCRIPTION_EN": "الوصف بالإنجليزية",
       "DESCRIPTION_AR": "الوصف بالعربية",
       "PLACEHOLDER_EG": "مثال:",
-      "EM_DASH": "—"
+      "EM_DASH": "—",
+      "HIJRI_YEAR_SUFFIX": "هـ"
     },
     "REFRESH_PROMPT": {
       "TITLE": "هل تريد إعادة تهيئة البيانات؟",
@@ -986,7 +987,7 @@
       "COLUMNS": {
         "NAME": "الاسم",
         "COUNTRY": "الدولة",
-        "DESCRIPTION": "الوصف",
+        "FOUNDATION_YEAR": "سنة التأسيس",
         "VERIFIED": "موثق",
         "CREATED_AT": "تاريخ الإضافة",
         "ACTIONS": "الإجراءات"
@@ -1014,6 +1015,8 @@
         "UPLOAD_IMAGE": "رفع صورة",
         "ERR_NAME_AR": "الاسم بالعربية مطلوب",
         "ERR_EMAIL": "البريد غير صالح",
+        "ERR_FOUNDATION_YEAR": "أدخل سنة صحيحة",
+        "PLACEHOLDER_FOUNDATION_YEAR_HIJRI": "السنة (هجري)",
         "SAVE_EDIT": "حفظ التعديلات",
         "SAVE_CREATE": "إضافة الناشر",
         "CONFIRM_EDIT_TITLE": "تأكيد تعديل الناشر",

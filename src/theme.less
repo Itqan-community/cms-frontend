@@ -53,12 +53,17 @@
   --color-red-700: darken(@error-color, 6%);
 
   // Radius and shadows to mimic Tailwind-like tokens
+  --radius-sm: 4px;
   --radius-md: 6px;
-  --radius-lg: 10px;
-  --radius-xl: 14px;
-  --radius-2xl: 16px;
-  --shadow-sm: 0 10px 15px -3px rgba(0, 0, 0, 0.06);
-  --shadow-card: 0 1px 8px rgba(0, 0, 0, 0.06);
+  --radius-lg: 8px;
+  --radius-xl: 10px;
+  --radius-2xl: 12px;
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.08);
+
+  // Admin specific sizing tokens
+  --admin-input-height: 32px;
+  --admin-btn-height-cta: 36px;
+  --admin-form-radius: var(--radius-lg); // 8px
 
   // Layout constraint used in header
   --container-max-width: 1200px;
@@ -130,16 +135,17 @@ a.ant-btn {
 }
 
 .ant-btn {
-  border-radius: 10px;
+  border-radius: var(--radius-lg); // 8px
   background-color: @white;
   cursor: default;
-  font-size: 14px; // text-sm
-  font-weight: 500; // font-medium
+  font-size: 13px;
+  font-weight: 500;
   border: 1px solid var(--color-neutral-200);
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+  min-height: var(--admin-input-height); // 32px default
 
   &-dangerous {
     border-color: @red-2;
@@ -193,40 +199,41 @@ a.ant-btn {
 
 .ant-input {
   border: 1px solid var(--color-neutral-200);
-  border-radius: 10px;
-  box-shadow: var(--shadow-xs, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+  border-radius: var(--admin-form-radius); // 8px
+  box-shadow: none;
   background-color: transparent;
+  font-size: 13px;
 
   &:hover {
-    border-color: var(--color-neutral-200);
+    border-color: var(--color-primary-600);
   }
   &:focus {
     box-shadow: 0 0 0 2px var(--color-primary-200);
-    border-color: var(--color-neutral-200);
+    border-color: var(--color-primary-600);
   }
 }
 
 // Date picker / year picker inputs aligned with text inputs
 .ant-picker {
   border: 1px solid var(--color-neutral-200);
-  border-radius: 10px;
+  border-radius: var(--admin-form-radius); // 8px
   box-shadow: none;
   background-color: transparent;
-  height: 32px;
+  height: var(--admin-input-height); // 32px
 
   &:hover {
-    border-color: var(--color-neutral-200);
+    border-color: var(--color-primary-600);
   }
 
   &.ant-picker-focused {
-    box-shadow: none;
-    border-color: var(--color-neutral-200);
+    box-shadow: 0 0 0 2px var(--color-primary-200);
+    border-color: var(--color-primary-600);
   }
 }
 
 .ant-picker-input > input {
-  font-size: 14px;
-  line-height: 30px;
+  font-size: 13px;
+  line-height: calc(var(--admin-input-height) - 2px);
 }
 
 .ant-checkbox-group {
@@ -261,10 +268,11 @@ a.ant-btn {
 }
 
 .ant-tag {
-  border-radius: 8px;
+  border-radius: var(--radius-sm); // 4px
   font-weight: 500;
-  font-size: 12px;
-  padding: 2px 8px;
+  font-size: 11px;
+  padding: 1px 6px;
+  line-height: 18px;
 
   &.muted {
     background-color: @white !important;
@@ -359,25 +367,27 @@ a.ant-btn {
   vertical-align: top;
 }
 
-// Modal customizations for access request modal
+// Modal customizations
 .ant-modal {
   .ant-modal-content {
-    border-radius: 20px !important;
+    border-radius: var(--radius-2xl) !important; // 12px
     overflow: hidden;
   }
 
   .ant-modal-header {
-    border-radius: 20px 20px 0 0 !important;
+    border-radius: var(--radius-2xl) var(--radius-2xl) 0 0 !important;
     border-bottom: 1px solid var(--color-neutral-200);
+    padding: 14px 20px !important;
   }
 
   .ant-modal-body {
-    padding: 24px;
+    padding: 20px;
   }
 
   .ant-modal-footer {
-    border-radius: 0 0 20px 20px !important;
+    border-radius: 0 0 var(--radius-2xl) var(--radius-2xl) !important;
     border-top: 1px solid var(--color-neutral-200);
+    padding: 12px 20px !important;
     display: flex;
     flex-direction: row;
     justify-content: flex-end;
@@ -386,9 +396,21 @@ a.ant-btn {
   }
 }
 
-// Select dropdown same radius as input (10px)
+// Select dropdown same radius as input
 .ant-select-selector {
-  border-radius: 10px !important;
+  border-radius: var(--admin-form-radius) !important; // 8px
+  height: var(--admin-input-height) !important; // 32px
+  align-items: center !important;
+  font-size: 13px !important;
+
+  &:hover {
+    border-color: var(--color-primary-600) !important;
+  }
+}
+
+.ant-select-focused .ant-select-selector {
+  border-color: var(--color-primary-600) !important;
+  box-shadow: 0 0 0 2px var(--color-primary-200) !important;
 }
 
 // Pagination aligned with admin input/button tokens
@@ -404,23 +426,25 @@ a.ant-btn {
   .ant-pagination-item,
   .ant-pagination-prev .ant-pagination-item-link,
   .ant-pagination-next .ant-pagination-item-link {
-    border-radius: 10px;
+    border-radius: var(--admin-form-radius); // 8px
     border: 1px solid var(--color-neutral-200);
     background: var(--admin-surface-white);
-    min-width: 36px;
-    height: 36px;
-    line-height: 34px;
+    min-width: 32px;
+    height: 32px;
+    line-height: 30px;
+    font-size: 13px;
   }
 
   .ant-pagination-item a {
     color: var(--admin-text-700);
     font-weight: 500;
+    font-size: 13px;
   }
 
   .ant-pagination-item:hover,
   .ant-pagination-prev:hover .ant-pagination-item-link,
   .ant-pagination-next:hover .ant-pagination-item-link {
-    border-color: var(--color-neutral-200);
+    border-color: var(--color-primary-600);
     background: var(--color-neutral-100);
   }
 
@@ -440,32 +464,37 @@ a.ant-btn {
 
   .ant-pagination-options-quick-jumper input {
     border: 1px solid var(--color-neutral-200);
-    border-radius: 10px;
-    height: 36px;
+    border-radius: var(--admin-form-radius);
+    height: 32px;
     box-shadow: none;
+    font-size: 13px;
   }
 
   .ant-select-selector {
-    height: 36px !important;
-    border-radius: 10px !important;
+    height: 32px !important;
+    border-radius: var(--admin-form-radius) !important;
     border-color: var(--color-neutral-200) !important;
+    font-size: 13px !important;
   }
 }
 
 // Popover customizations
 .ant-popover {
   .ant-popover-inner {
-    border-radius: 20px !important;
+    border-radius: var(--radius-xl) !important; // 10px
     overflow: hidden;
   }
 
   .ant-popover-title {
     border-bottom: 1px solid var(--color-neutral-200) !important;
-    padding: 12px 16px !important;
+    padding: 10px 14px !important;
+    font-size: 13px;
+    font-weight: 600;
   }
 
   .ant-popover-inner-content {
-    padding: 12px 16px !important;
+    padding: 10px 14px !important;
+    font-size: 13px;
     color: var(--color-neutral-600);
   }
 }
@@ -473,22 +502,22 @@ a.ant-btn {
 // Drawer customizations
 .ant-drawer {
   .ant-drawer-content {
-    border-top-right-radius: 20px !important;
-    border-top-left-radius: 20px !important;
+    border-top-right-radius: var(--radius-2xl) !important; // 12px
+    border-top-left-radius: var(--radius-2xl) !important;
     overflow: hidden;
   }
 
   .ant-drawer-header {
     border-bottom: 1px solid var(--color-neutral-200) !important;
-    padding: 16px 24px !important;
+    padding: 14px 20px !important;
   }
 
   .ant-drawer-body {
-    padding: 24px !important;
+    padding: 20px !important;
   }
 
   .ant-drawer-footer {
     border-top: 1px solid var(--color-neutral-200) !important;
-    padding: 16px 24px !important;
+    padding: 12px 20px !important;
   }
 }

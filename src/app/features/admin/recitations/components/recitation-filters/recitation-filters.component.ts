@@ -3,12 +3,12 @@ import {
   DestroyRef,
   EventEmitter,
   OnInit,
-  OnChanges,
-  SimpleChanges,
-  Input,
   Output,
   inject,
   signal,
+  input,
+  effect,
+  untracked,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -48,11 +48,10 @@ import { RecitationsService } from '../../services/recitations.service';
   ],
   template: `
     <div class="recitation-filters">
-      <div class="recitation-filters__actions">
-        <nz-input-group [nzPrefix]="searchIcon" class="recitation-filters__search">
+      <div class="admin-filters-bar">
+        <nz-input-group [nzPrefix]="searchIcon">
           <input
             nz-input
-            nzSize="default"
             type="text"
             [placeholder]="'ADMIN.RECITATIONS.SEARCH_PLACEHOLDER' | translate"
             [ngModel]="searchValue"
@@ -64,8 +63,7 @@ import { RecitationsService } from '../../services/recitations.service';
         <button
           nz-button
           nzType="default"
-          nzSize="default"
-          class="recitation-filters__filters-btn"
+          class="admin-filters-bar__filter-btn"
           (click)="openFiltersModal()"
         >
           <ng-icon name="lucideFilter" />
@@ -218,9 +216,9 @@ import { RecitationsService } from '../../services/recitations.service';
   `,
   styleUrl: './recitation-filters.component.less',
 })
-export class RecitationFiltersComponent implements OnInit, OnChanges {
+export class RecitationFiltersComponent implements OnInit {
   @Output() filtersChange = new EventEmitter<Partial<RecitationListFilters>>();
-  @Input() initialFilters: Partial<RecitationListFilters> = {};
+  initialFilters = input<Partial<RecitationListFilters>>({});
 
   private readonly publishersFilterService = inject(PublishersFilterService);
   private readonly recitersService = inject(RecitersAdminService);
@@ -256,6 +254,15 @@ export class RecitationFiltersComponent implements OnInit, OnChanges {
 
   private currentFilters: Partial<RecitationListFilters> = {};
 
+  constructor() {
+    effect(() => {
+      const f = this.initialFilters();
+      untracked(() => {
+        this.hydrateFromFilters(f || {});
+      });
+    });
+  }
+
   private hydrateFromFilters(f: Partial<RecitationListFilters>): void {
     this.currentFilters = { ...f };
     this.searchValue = f.search || '';
@@ -269,15 +276,7 @@ export class RecitationFiltersComponent implements OnInit, OnChanges {
     this.selectedHijriDate = f.year ? new Date(Number(f.year), 0, 1) : null;
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['initialFilters'] && !changes['initialFilters'].firstChange) {
-      this.hydrateFromFilters(this.initialFilters || {});
-    }
-  }
-
   ngOnInit(): void {
-    this.hydrateFromFilters(this.initialFilters || {});
-
     this.loadPublishers();
     this.loadReciters();
     forkJoin({

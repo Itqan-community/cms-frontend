@@ -47,3 +47,14 @@ export function localizeCountryCodeOrName(
     return code;
   }
 }
+
+/** Hijri year in admin tables, e.g. `1444 هـ` / `1444 AH`. */
+export function formatHijriYearForAdminListing(
+  year: number | null | undefined,
+  opts: { suffix: string; empty: string }
+): string {
+  if (year == null || year === 0 || !Number.isFinite(Number(year))) {
+    return opts.empty;
+  }
+  return `${year} ${opts.suffix}`;
+}

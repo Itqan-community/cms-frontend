@@ -3,11 +3,11 @@ import {
   DestroyRef,
   EventEmitter,
   OnInit,
-  OnChanges,
-  SimpleChanges,
-  Input,
   Output,
   inject,
+  input,
+  effect,
+  untracked,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -19,8 +19,8 @@ import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 import { NATIONALITY } from '../../../reciters/nationality.enum';
-import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
 import { PublisherUiFilters } from '../../models/publishers-stats.models';
+import { AdminCountryLabelPipe } from '../../../pipes/admin-country-label.pipe';
 
 @Component({
   selector: 'app-publisher-filters',
@@ -33,13 +33,14 @@ import { PublisherUiFilters } from '../../models/publishers-stats.models';
     NzModalModule,
     NgIcon,
     TranslateModule,
+    AdminCountryLabelPipe,
   ],
   templateUrl: './publisher-filters.component.html',
   styleUrl: './publisher-filters.component.less',
 })
-export class PublisherFiltersComponent implements OnInit, OnChanges {
+export class PublisherFiltersComponent implements OnInit {
   @Output() filtersChange = new EventEmitter<PublisherUiFilters>();
-  @Input() initialFilters: PublisherUiFilters = {};
+  initialFilters = input<PublisherUiFilters>({});
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
@@ -53,23 +54,19 @@ export class PublisherFiltersComponent implements OnInit, OnChanges {
 
   private current: PublisherUiFilters = {};
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['initialFilters'] && !changes['initialFilters'].firstChange) {
-      const f = this.initialFilters || {};
-      this.current = { ...f };
-      this.searchValue = f.search || '';
-      this.selectedCountry = f.country ?? null;
-      // if (f.is_verified !== undefined) this.selectedVerified = f.is_verified;
-    }
+  constructor() {
+    effect(() => {
+      const f = this.initialFilters();
+      untracked(() => {
+        this.current = { ...f };
+        this.searchValue = f.search || '';
+        this.selectedCountry = f.country ?? null;
+        // if (f.is_verified !== undefined) this.selectedVerified = f.is_verified;
+      });
+    });
   }
 
   ngOnInit(): void {
-    const f = this.initialFilters || {};
-    this.current = { ...f };
-    this.searchValue = f.search || '';
-    this.selectedCountry = f.country ?? null;
-    // if (f.is_verified !== undefined) this.selectedVerified = f.is_verified;
-
     this.searchSubject
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe((term) => {
@@ -124,9 +121,5 @@ export class PublisherFiltersComponent implements OnInit, OnChanges {
 
   private emit(): void {
     this.filtersChange.emit(this.current);
-  }
-
-  countryLabel(countryCode: string): string {
-    return localizeCountryCodeOrName(countryCode, this.translate.currentLang);
   }
 }

@@ -1,13 +1,13 @@
 <div class="reciter-form">
-  <div class="reciter-form__header">
-    <div class="reciter-form__header-text">
-      <h2 class="reciter-form__title">
+  <div class="admin-page-header">
+    <div class="admin-page-header__text">
+      <h2 class="admin-page-header__title">
         {{
           (isEditMode() ? 'ADMIN.RECITERS.FORM.TITLE_EDIT' : 'ADMIN.RECITERS.FORM.TITLE_CREATE')
             | translate
         }}
       </h2>
-      <p class="reciter-form__subtitle">
+      <p class="admin-page-header__subtitle">
         {{
           (isEditMode()
             ? 'ADMIN.RECITERS.FORM.SUBTITLE_EDIT'
@@ -17,7 +17,7 @@
       </p>
     </div>
     <a routerLink="/admin/reciters">
-      <button nz-button nzType="default" class="reciter-form__back-btn">
+      <button nz-button nzType="default">
         <ng-icon name="lucideArrowRight" />
         {{ 'ADMIN.RECITERS.FORM.BACK_LIST' | translate }}
       </button>
@@ -28,8 +28,8 @@
     <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 8 }"></nz-skeleton>
   } @else {
     <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="onSubmit()">
-      <div class="reciter-form__card">
-        <h3 class="reciter-form__card-title">
+      <div class="admin-form-card">
+        <h3 class="admin-form-card__title">
           <ng-icon name="lucideSquarePen" /> {{ 'ADMIN.RECITERS.FORM.SECTION_NAME' | translate }}
         </h3>
         <div nz-row [nzGutter]="20">
@@ -63,8 +63,8 @@
         </div>
       </div>
 
-      <div class="reciter-form__card">
-        <h3 class="reciter-form__card-title">
+      <div class="admin-form-card">
+        <h3 class="admin-form-card__title">
           <ng-icon name="lucideImage" /> {{ 'ADMIN.RECITERS.FORM.SECTION_IMAGE' | translate }}
         </h3>
         <nz-form-item>
@@ -100,8 +100,8 @@
         </nz-form-item>
       </div>
 
-      <div class="reciter-form__card">
-        <h3 class="reciter-form__card-title">
+      <div class="admin-form-card">
+        <h3 class="admin-form-card__title">
           <ng-icon name="lucideFileText" /> {{ 'ADMIN.RECITERS.FORM.SECTION_BIO' | translate }}
         </h3>
         <div nz-row [nzGutter]="20">
@@ -135,8 +135,8 @@
         </div>
       </div>
 
-      <div class="reciter-form__card">
-        <h3 class="reciter-form__card-title">
+      <div class="admin-form-card">
+        <h3 class="admin-form-card__title">
           <ng-icon name="lucideGlobe" /> {{ 'ADMIN.RECITERS.FORM.SECTION_EXTRA' | translate }}
         </h3>
         <div nz-row [nzGutter]="20">
@@ -177,7 +177,7 @@
         </div>
       </div>
 
-      <div class="reciter-form__footer">
+      <div class="admin-form-footer">
         <a routerLink="/admin/reciters">
           <button nz-button type="button">{{ 'ADMIN.RECITERS.FORM.CANCEL' | translate }}</button>
         </a>

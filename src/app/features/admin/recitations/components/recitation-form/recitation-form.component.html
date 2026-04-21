@@ -1,7 +1,7 @@
 <div class="recitation-form">
-  <div class="recitation-form__header">
-    <div class="recitation-form__header-text">
-      <h2 class="recitation-form__title">
+  <div class="admin-page-header">
+    <div class="admin-page-header__text">
+      <h2 class="admin-page-header__title">
         {{
           (isEditMode()
             ? 'ADMIN.RECITATIONS.FORM.TITLE_EDIT'
@@ -9,7 +9,7 @@
           ) | translate
         }}
       </h2>
-      <p class="recitation-form__subtitle">
+      <p class="admin-page-header__subtitle">
         {{
           (isEditMode()
             ? 'ADMIN.RECITATIONS.FORM.SUBTITLE_EDIT'
@@ -19,7 +19,7 @@
       </p>
     </div>
     <a routerLink="/admin/recitations">
-      <button nz-button nzType="default" class="recitation-form__back-btn">
+      <button nz-button nzType="default">
         <ng-icon name="lucideArrowRight" />
         {{ 'ADMIN.RECITATIONS.FORM.BACK_LIST' | translate }}
       </button>
@@ -30,8 +30,8 @@
     <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 10 }"></nz-skeleton>
   } @else {
     <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="onSubmit()">
-      <div class="recitation-form__card">
-        <h3 class="recitation-form__card-title">
+      <div class="admin-form-card">
+        <h3 class="admin-form-card__title">
           <ng-icon name="lucideSquarePen" /> {{ 'ADMIN.RECITATIONS.FORM.SECTION_NAME' | translate }}
         </h3>
         <div nz-row [nzGutter]="20">
@@ -65,8 +65,8 @@
         </div>
       </div>
 
-      <div class="recitation-form__card">
-        <h3 class="recitation-form__card-title">
+      <div class="admin-form-card">
+        <h3 class="admin-form-card__title">
           <ng-icon name="lucideFileText" /> {{ 'ADMIN.RECITATIONS.FORM.SECTION_DESC' | translate }}
         </h3>
         <div nz-row [nzGutter]="20">
@@ -102,8 +102,8 @@
         </div>
       </div>
 
-      <div class="recitation-form__card">
-        <h3 class="recitation-form__card-title">
+      <div class="admin-form-card">
+        <h3 class="admin-form-card__title">
           <ng-icon name="lucideLink" /> {{ 'ADMIN.RECITATIONS.FORM.SECTION_LINKS' | translate }}
         </h3>
         <div nz-row [nzGutter]="20">
@@ -241,7 +241,7 @@
         </div>
       </div>
 
-      <div class="recitation-form__footer">
+      <div class="admin-form-footer">
         <a routerLink="/admin/recitations">
           <button nz-button type="button">{{ 'ADMIN.RECITATIONS.FORM.CANCEL' | translate }}</button>
         </a>

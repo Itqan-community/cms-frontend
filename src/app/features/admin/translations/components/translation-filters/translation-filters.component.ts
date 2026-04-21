@@ -3,12 +3,12 @@ import {
   DestroyRef,
   EventEmitter,
   OnInit,
-  OnChanges,
-  SimpleChanges,
-  Input,
   Output,
   inject,
   signal,
+  input,
+  effect,
+  untracked,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -38,11 +38,10 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
   ],
   template: `
     <div class="translation-filters">
-      <div class="translation-filters__actions">
-        <nz-input-group [nzPrefix]="searchIcon" class="translation-filters__search">
+      <div class="admin-filters-bar">
+        <nz-input-group [nzPrefix]="searchIcon">
           <input
             nz-input
-            nzSize="default"
             type="text"
             [placeholder]="'ADMIN.TRANSLATIONS.SEARCH_PLACEHOLDER' | translate"
             [ngModel]="searchValue"
@@ -54,8 +53,7 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
         <button
           nz-button
           nzType="default"
-          nzSize="default"
-          class="translation-filters__filters-btn"
+          class="admin-filters-bar__filter-btn"
           (click)="openFiltersModal()"
         >
           <ng-icon name="lucideFilter" />
@@ -148,9 +146,9 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
   `,
   styleUrl: './translation-filters.component.less',
 })
-export class TranslationFiltersComponent implements OnInit, OnChanges {
+export class TranslationFiltersComponent implements OnInit {
   @Output() filtersChange = new EventEmitter<Partial<TranslationFilters>>();
-  @Input() initialFilters: Partial<TranslationFilters> = {};
+  initialFilters = input<Partial<TranslationFilters>>({});
 
   private readonly publishersFilterService = inject(PublishersFilterService);
   private readonly translate = inject(TranslateService);
@@ -170,6 +168,15 @@ export class TranslationFiltersComponent implements OnInit, OnChanges {
 
   private currentFilters: Partial<TranslationFilters> = {};
 
+  constructor() {
+    effect(() => {
+      const f = this.initialFilters();
+      untracked(() => {
+        this.hydrateFromFilters(f || {});
+      });
+    });
+  }
+
   private hydrateFromFilters(f: Partial<TranslationFilters>): void {
     this.currentFilters = { ...f };
     this.searchValue = f.search || '';
@@ -181,15 +188,7 @@ export class TranslationFiltersComponent implements OnInit, OnChanges {
     else this.selectedExternal = null;
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['initialFilters'] && !changes['initialFilters'].firstChange) {
-      this.hydrateFromFilters(this.initialFilters || {});
-    }
-  }
-
   ngOnInit(): void {
-    this.hydrateFromFilters(this.initialFilters || {});
-
     this.loadPublishers();
 
     this.searchSubject
