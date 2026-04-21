@@ -405,7 +405,8 @@
       "PUBLISHERS": "Publishers",
       "AUDIO": "Audio",
       "MANAGE_PROFILE": "Manage profile",
-      "BACK_TO_GALLERY": "Back to gallery"
+      "BACK_TO_GALLERY": "Back to gallery",
+      "USAGE": "API Usage"
     },
     "PROFILE": {
       "TITLE": "Publisher profile",
@@ -1115,5 +1116,15 @@
       "TAB_BACKEND": "Backend",
       "TAB_IMPORT": "Data import"
     }
+  },
+  "USAGE": {
+    "TITLE": "API Usage",
+    "SUBTITLE": "API request analytics for your publisher account",
+    "ALL_PUBLISHERS": "All publishers",
+    "REQUESTS_OVER_TIME": "Requests over time",
+    "TOP_ENDPOINTS": "Top endpoints",
+    "TOP_ENTITIES": "Top entities",
+    "NO_DATA": "No data for the selected period",
+    "ERROR_UNAVAILABLE": "Usage stats are temporarily unavailable. Please try again later."
   }
 }

@@ -405,7 +405,8 @@
       "PUBLISHERS": "الناشرون",
       "AUDIO": "الصوتيات",
       "MANAGE_PROFILE": "إدارة الملف",
-      "BACK_TO_GALLERY": "العودة إلى المعرض"
+      "BACK_TO_GALLERY": "العودة إلى المعرض",
+      "USAGE": "إحصائيات API"
     },
     "PROFILE": {
       "TITLE": "ملف الناشر",
@@ -1114,5 +1115,15 @@
       "TAB_BACKEND": "Backend",
       "TAB_IMPORT": "إستيراد البيانات"
     }
+  },
+  "USAGE": {
+    "TITLE": "إحصائيات API",
+    "SUBTITLE": "تحليلات طلبات API لحساب الناشر",
+    "ALL_PUBLISHERS": "جميع الناشرين",
+    "REQUESTS_OVER_TIME": "الطلبات عبر الزمن",
+    "TOP_ENDPOINTS": "أكثر النقاط استخداما",
+    "TOP_ENTITIES": "أكثر الكيانات طلبا",
+    "NO_DATA": "لا توجد بيانات للفترة المحددة",
+    "ERROR_UNAVAILABLE": "إحصائيات الاستخدام غير متاحة مؤقتا. يرجى المحاولة لاحقا."
   }
 }

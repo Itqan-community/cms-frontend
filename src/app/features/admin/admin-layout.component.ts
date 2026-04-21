@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal, DestroyRef } from '@angular/core';
+import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
@@ -58,6 +58,12 @@ const TAB_RECITERS: CmsTab = {
   label: 'ADMIN.MENU.RECITERS',
   icon: 'lucideMic',
 };
+const TAB_USAGE: CmsTab = {
+  id: 'usage',
+  path: 'usage',
+  label: 'ADMIN.MENU.USAGE',
+  icon: 'lucideBarChart2',
+};
 const CORE_TABS: CmsTab[] = [TAB_TAFSIRS, TAB_TRANSLATIONS, TAB_RECITATIONS, TAB_RECITERS];
 
 @Component({
@@ -94,7 +100,7 @@ export class AdminLayoutComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly tabs = computed(() => {
-    return [TAB_PUBLISHERS, TAB_MUSHAFS, ...CORE_TABS];
+    return [TAB_PUBLISHERS, TAB_MUSHAFS, ...CORE_TABS, TAB_USAGE];
   });
 
   constructor() {

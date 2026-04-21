@@ -22,7 +22,6 @@ import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { headersInterceptor } from './core/interceptors/global.interceptor';
 import { authErrorInterceptor } from './core/interceptors/auth-error.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
-
 registerLocaleData(ar);
 
 export const appConfig: ApplicationConfig = {
