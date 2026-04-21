@@ -61,6 +61,11 @@ export const routes: Routes = [
           import('./features/admin/reciters/reciters.routes').then((m) => m.reciterRoutes),
       },
       {
+        path: 'usage',
+        loadChildren: () =>
+          import('./features/admin/usage/usage.routes').then((m) => m.usageRoutes),
+      },
+      {
         path: '',
         loadChildren: () => import('./features/admin/admin.routes').then((m) => m.adminRoutes),
       },

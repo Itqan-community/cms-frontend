@@ -22,6 +22,13 @@ import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { headersInterceptor } from './core/interceptors/global.interceptor';
 import { authErrorInterceptor } from './core/interceptors/auth-error.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
+import { provideEchartsCore } from 'ngx-echarts';
+import * as echarts from 'echarts/core';
+import { LineChart, BarChart } from 'echarts/charts';
+import { GridComponent, TooltipComponent } from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
+
+echarts.use([LineChart, BarChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
 registerLocaleData(ar);
 
@@ -51,6 +58,7 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(
       withInterceptors([headersInterceptor, authErrorInterceptor, errorInterceptor])
     ),
+    provideEchartsCore({ echarts }),
     // ngx-translate setup
     provideTranslateService({
       loader: provideTranslateHttpLoader({
