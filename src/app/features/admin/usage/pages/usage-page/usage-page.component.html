@@ -1,4 +1,19 @@
 <div class="usage-page">
+  @if (isStaff()) {
+    <div class="usage-page__toolbar">
+      <nz-select
+        class="usage-page__publisher-select"
+        [ngModel]="selectedPublisherId()"
+        (ngModelChange)="onPublisherChange($event)"
+        nzPlaceHolder="{{ 'USAGE.ALL_PUBLISHERS' | translate }}"
+        nzAllowClear
+      >
+        @for (pub of publishers(); track pub.id) {
+          <nz-option [nzValue]="pub.id" [nzLabel]="pub.name"></nz-option>
+        }
+      </nz-select>
+    </div>
+  }
   <nz-spin [nzSpinning]="loading()">
     @if (hasError()) {
       <nz-alert
