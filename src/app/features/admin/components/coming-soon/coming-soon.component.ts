@@ -1,11 +1,12 @@
 import { Component, inject, computed } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 
 @Component({
   selector: 'app-coming-soon',
   standalone: true,
-  imports: [NgIcon],
+  imports: [NgIcon, TranslateModule],
   templateUrl: './coming-soon.component.html',
   styleUrls: ['./coming-soon.component.less'],
 })

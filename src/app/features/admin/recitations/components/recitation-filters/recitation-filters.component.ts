@@ -1,6 +1,18 @@
-import { Component, DestroyRef, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  EventEmitter,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  Input,
+  Output,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
@@ -32,16 +44,17 @@ import { RecitationsService } from '../../services/recitations.service';
     NzButtonModule,
     NzModalModule,
     NgIcon,
+    TranslateModule,
   ],
   template: `
-    <div class="recitation-filters" dir="rtl">
+    <div class="recitation-filters">
       <div class="recitation-filters__actions">
         <nz-input-group [nzPrefix]="searchIcon" class="recitation-filters__search">
           <input
             nz-input
             nzSize="default"
             type="text"
-            placeholder="ابحث عن تلاوة..."
+            [placeholder]="'ADMIN.RECITATIONS.SEARCH_PLACEHOLDER' | translate"
             [ngModel]="searchValue"
             (ngModelChange)="onSearchChange($event)"
           />
@@ -56,14 +69,14 @@ import { RecitationsService } from '../../services/recitations.service';
           (click)="openFiltersModal()"
         >
           <ng-icon name="lucideFilter" />
-          <span>الفلاتر</span>
+          <span>{{ 'ADMIN.RECITATIONS.FILTERS.BUTTON' | translate }}</span>
         </button>
       </div>
 
       <nz-modal
         [(nzVisible)]="isFiltersModalOpen"
         (nzOnCancel)="closeFiltersModal()"
-        nzTitle="فلاتر التلاوات"
+        [nzTitle]="'ADMIN.RECITATIONS.FILTERS.MODAL_TITLE' | translate"
         [nzWidth]="'min(760px, 94vw)'"
         nzCentered
       >
@@ -71,7 +84,7 @@ import { RecitationsService } from '../../services/recitations.service';
           <div class="recitation-filters__modal-grid">
             <nz-select
               class="recitation-filters__select"
-              nzPlaceHolder="الناشر"
+              [nzPlaceHolder]="'ADMIN.RECITATIONS.FILTERS.PUBLISHER' | translate"
               nzSize="default"
               nzAllowClear
               nzShowSearch
@@ -88,7 +101,7 @@ import { RecitationsService } from '../../services/recitations.service';
 
             <nz-select
               class="recitation-filters__select"
-              nzPlaceHolder="القارئ"
+              [nzPlaceHolder]="'ADMIN.RECITATIONS.FILTERS.RECITER' | translate"
               nzSize="default"
               nzAllowClear
               nzShowSearch
@@ -102,7 +115,7 @@ import { RecitationsService } from '../../services/recitations.service';
 
             <nz-select
               class="recitation-filters__select"
-              nzPlaceHolder="القراءة"
+              [nzPlaceHolder]="'ADMIN.RECITATIONS.FILTERS.QIRAAH' | translate"
               nzSize="default"
               nzAllowClear
               [ngModel]="selectedQiraah"
@@ -115,7 +128,7 @@ import { RecitationsService } from '../../services/recitations.service';
 
             <nz-select
               class="recitation-filters__select"
-              nzPlaceHolder="الرواية"
+              [nzPlaceHolder]="'ADMIN.RECITATIONS.FILTERS.RIWAYAH' | translate"
               nzSize="default"
               nzAllowClear
               [nzLoading]="riwayahsLoading()"
@@ -129,31 +142,43 @@ import { RecitationsService } from '../../services/recitations.service';
 
             <nz-select
               class="recitation-filters__select"
-              nzPlaceHolder="مستوى المد"
+              [nzPlaceHolder]="'ADMIN.RECITATIONS.FILTERS.MADD_LEVEL' | translate"
               nzSize="default"
               nzAllowClear
               [ngModel]="selectedMadd"
               (ngModelChange)="onMaddChange($event)"
             >
-              <nz-option [nzValue]="maddEnum.TWASSUT" nzLabel="توسّط"></nz-option>
-              <nz-option [nzValue]="maddEnum.QASR" nzLabel="قصر"></nz-option>
+              <nz-option
+                [nzValue]="maddEnum.TWASSUT"
+                [nzLabel]="'ADMIN.RECITATIONS.FILTERS.MADD_TWASSUT' | translate"
+              ></nz-option>
+              <nz-option
+                [nzValue]="maddEnum.QASR"
+                [nzLabel]="'ADMIN.RECITATIONS.FILTERS.MADD_QASR' | translate"
+              ></nz-option>
             </nz-select>
 
             <nz-select
               class="recitation-filters__select"
-              nzPlaceHolder="همز الميم"
+              [nzPlaceHolder]="'ADMIN.RECITATIONS.FILTERS.MEEM_JAM' | translate"
               nzSize="default"
               nzAllowClear
               [ngModel]="selectedMeem"
               (ngModelChange)="onMeemChange($event)"
             >
-              <nz-option [nzValue]="meemEnum.SILAH" nzLabel="وصل"></nz-option>
-              <nz-option [nzValue]="meemEnum.SKOUN" nzLabel="سكون"></nz-option>
+              <nz-option
+                [nzValue]="meemEnum.SILAH"
+                [nzLabel]="'ADMIN.RECITATIONS.FILTERS.MEEM_WASL_SHORT' | translate"
+              ></nz-option>
+              <nz-option
+                [nzValue]="meemEnum.SKOUN"
+                [nzLabel]="'ADMIN.RECITATIONS.FILTERS.MEEM_SKOUN' | translate"
+              ></nz-option>
             </nz-select>
 
             <nz-select
               class="recitation-filters__select"
-              nzPlaceHolder="الترخيص"
+              [nzPlaceHolder]="'ADMIN.RECITATIONS.FILTERS.LICENSE' | translate"
               nzSize="default"
               nzAllowClear
               [ngModel]="selectedLicense"
@@ -172,7 +197,7 @@ import { RecitationsService } from '../../services/recitations.service';
               [nzDefaultPickerValue]="hijriDefaultPickerDate"
               [nzDisabledDate]="disableNonHijriYears"
               class="recitation-filters__year"
-              nzPlaceHolder="السنة (هجري)"
+              [nzPlaceHolder]="'ADMIN.RECITATIONS.FILTERS.YEAR_HIJRI' | translate"
               [ngModel]="selectedHijriDate"
               (ngModelChange)="onYearChange($event)"
             ></nz-date-picker>
@@ -181,10 +206,10 @@ import { RecitationsService } from '../../services/recitations.service';
         <ng-container *nzModalFooter>
           <div class="recitation-filters__modal-footer">
             <button nz-button nzType="default" nzSize="default" (click)="clearAdvancedFilters()">
-              مسح الفلاتر
+              {{ 'ADMIN.RECITATIONS.FILTERS.CLEAR' | translate }}
             </button>
             <button nz-button nzType="primary" nzSize="default" (click)="closeFiltersModal()">
-              تم
+              {{ 'ADMIN.RECITATIONS.FILTERS.DONE' | translate }}
             </button>
           </div>
         </ng-container>
@@ -193,8 +218,9 @@ import { RecitationsService } from '../../services/recitations.service';
   `,
   styleUrl: './recitation-filters.component.less',
 })
-export class RecitationFiltersComponent implements OnInit {
+export class RecitationFiltersComponent implements OnInit, OnChanges {
   @Output() filtersChange = new EventEmitter<Partial<RecitationListFilters>>();
+  @Input() initialFilters: Partial<RecitationListFilters> = {};
 
   private readonly publishersFilterService = inject(PublishersFilterService);
   private readonly recitersService = inject(RecitersAdminService);
@@ -230,7 +256,28 @@ export class RecitationFiltersComponent implements OnInit {
 
   private currentFilters: Partial<RecitationListFilters> = {};
 
+  private hydrateFromFilters(f: Partial<RecitationListFilters>): void {
+    this.currentFilters = { ...f };
+    this.searchValue = f.search || '';
+    this.selectedPublisher = f.publisher_id != null ? Number(f.publisher_id) : null;
+    this.selectedReciter = f.reciter_id != null ? Number(f.reciter_id) : null;
+    this.selectedQiraah = f.qiraah_id != null ? Number(f.qiraah_id) : null;
+    this.selectedRiwayah = f.riwayah_id != null ? Number(f.riwayah_id) : null;
+    this.selectedMadd = (f.madd_level as MaddLevel) ?? null;
+    this.selectedMeem = (f.meem_behaviour as MeemBehavior) ?? null;
+    this.selectedLicense = f.license_code ?? null;
+    this.selectedHijriDate = f.year ? new Date(Number(f.year), 0, 1) : null;
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['initialFilters'] && !changes['initialFilters'].firstChange) {
+      this.hydrateFromFilters(this.initialFilters || {});
+    }
+  }
+
   ngOnInit(): void {
+    this.hydrateFromFilters(this.initialFilters || {});
+
     this.loadPublishers();
     this.loadReciters();
     forkJoin({

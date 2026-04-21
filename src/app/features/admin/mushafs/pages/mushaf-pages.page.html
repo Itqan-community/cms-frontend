@@ -1,25 +1,24 @@
-<div class="mushaf-pages" dir="rtl">
+<div class="mushaf-pages">
   <div class="mushaf-filter-card">
     <div class="mushaf-filter-card__header">
       <ng-icon name="lucideFile" class="mushaf-filter-card__header-icon" />
-      <h3 class="mushaf-filter-card__title">اختر نوع المصحف</h3>
+      <h3 class="mushaf-filter-card__title">{{ 'ADMIN.MUSHAFS.PAGES_CHOOSE_TYPE' | translate }}</h3>
     </div>
     <div class="mushaf-filter-card__body">
-      <label class="mushaf-filter-card__label">نوع المصحف</label>
+      <label class="mushaf-filter-card__label">{{
+        'ADMIN.MUSHAFS.PAGES_MUSHAF_TYPE' | translate
+      }}</label>
       <nz-select
         class="mushaf-filter-card__select"
         [ngModel]="selectedMushaf().id"
         (ngModelChange)="selectMushaf(mushafs[0])"
       >
         @for (m of mushafs; track m.id) {
-          <nz-option
-            [nzValue]="m.id"
-            [nzLabel]="m.name + ' — ' + m.pageCount + ' صفحة'"
-          ></nz-option>
+          <nz-option [nzValue]="m.id" [nzLabel]="mushafOptionLabel(m)"></nz-option>
         }
       </nz-select>
       <p class="mushaf-filter-card__hint">
-        {{ selectedMushaf().name }} - {{ selectedMushaf().pageCount }} صفحة
+        {{ mushafHint(selectedMushaf()) }}
       </p>
     </div>
   </div>
@@ -30,13 +29,13 @@
     } @else if (pages().length === 0) {
       <div class="admin-empty-state">
         <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
-        <p class="admin-empty-state__title">لا توجد صفحات متاحة لهذا المصحف</p>
+        <p class="admin-empty-state__title">{{ 'ADMIN.MUSHAFS.PAGES_EMPTY' | translate }}</p>
       </div>
     } @else {
       <div class="mushaf-table-card__top">
-        <nz-tag nzColor="green">المصحف: {{ selectedMushaf().name }}</nz-tag>
+        <nz-tag nzColor="green">{{ mushafTag(selectedMushaf()) }}</nz-tag>
         <h4 class="mushaf-table-card__title">
-          صفحات {{ selectedMushaf().name }} ({{ pages().length }} صفحة)
+          {{ pagesTableTitle(selectedMushaf(), pages().length) }}
         </h4>
       </div>
       <nz-table
@@ -50,10 +49,10 @@
       >
         <thead>
           <tr>
-            <th nzWidth="120px">رقم الصفحة</th>
-            <th nzWidth="120px">الجزء</th>
-            <th>السور</th>
-            <th nzWidth="120px">الإجراءات</th>
+            <th nzWidth="120px">{{ 'ADMIN.MUSHAFS.COL_PAGE_NUMBER' | translate }}</th>
+            <th nzWidth="120px">{{ 'ADMIN.MUSHAFS.COL_JUZ' | translate }}</th>
+            <th>{{ 'ADMIN.MUSHAFS.COL_SURAHS' | translate }}</th>
+            <th nzWidth="120px">{{ 'ADMIN.MUSHAFS.COL_ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -63,13 +62,13 @@
                 <nz-tag>{{ page.page_number }}</nz-tag>
               </td>
               <td>
-                <nz-tag nzColor="blue">الجزء {{ page.juz_number }}</nz-tag>
+                <nz-tag nzColor="blue">{{ juzTag(page.juz_number) }}</nz-tag>
               </td>
-              <td>{{ page.surahs.join('، ') }}</td>
+              <td>{{ joinSurahNames(page.surahs) }}</td>
               <td>
                 <button nz-button nzType="default" nzSize="small">
                   <ng-icon name="lucideEye" />
-                  عرض التفاصيل
+                  {{ 'ADMIN.MUSHAFS.VIEW_DETAILS' | translate }}
                 </button>
               </td>
             </tr>

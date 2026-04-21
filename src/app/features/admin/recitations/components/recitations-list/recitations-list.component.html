@@ -1,18 +1,29 @@
-<div class="recitations-list admin-list-page" dir="rtl">
+<div class="recitations-list admin-list-page">
   <div class="admin-list-header">
     <div class="admin-list-header__text">
-      <h2 class="admin-list-header__title">التلاوات</h2>
-      <p class="admin-list-header__subtitle">إدارة المصاحف الصوتية والتلاوات</p>
+      <h2 class="admin-list-header__title">{{ 'ADMIN.RECITATIONS.TITLE' | translate }}</h2>
+      <p class="admin-list-header__subtitle">{{ 'ADMIN.RECITATIONS.SUBTITLE' | translate }}</p>
     </div>
     <a routerLink="/admin/recitations/create">
       <button nz-button nzType="primary" class="admin-add-btn">
         <ng-icon name="lucidePlus" aria-hidden="true" />
-        إضافة تلاوة
+        {{ 'ADMIN.RECITATIONS.ADD_BUTTON' | translate }}
       </button>
     </a>
   </div>
 
-  <app-recitation-filters (filtersChange)="onFiltersChange($event)"></app-recitation-filters>
+  <app-recitation-filters
+    [initialFilters]="activeFilters"
+    (filtersChange)="onFiltersChange($event)"
+  ></app-recitation-filters>
+
+  <div class="admin-table-toolbar">
+    <app-admin-column-picker
+      [storageKey]="recitationTableStorageKey"
+      [columns]="recitationTableColumns"
+      (visibilityChange)="onRecitationColumnVisibility($event)"
+    />
+  </div>
 
   <div class="admin-table-wrap">
     <nz-spin [nzSpinning]="loading()">
@@ -26,85 +37,120 @@
       >
         <thead>
           <tr>
-            <th
-              nzWidth="200px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('name', $event)"
-            >
-              الاسم
-            </th>
-            <th>الوصف</th>
-            <th nzWidth="160px">الناشر</th>
-            <th nzWidth="130px">القارئ</th>
-            <th nzWidth="120px">القراءة</th>
-            <th nzWidth="90px" [nzSortFn]="true" (nzSortOrderChange)="onSortChange('year', $event)">
-              السنة
-            </th>
-            <th
-              nzWidth="120px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('license', $event)"
-            >
-              الترخيص
-            </th>
-            <th
-              nzWidth="130px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('created_at', $event)"
-            >
-              تاريخ الإضافة
-            </th>
-            <th nzWidth="120px">الإجراءات</th>
+            @if (showRecitationCol('name')) {
+              <th
+                nzWidth="220px"
+                [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('name')"
+                (nzSortOrderChange)="onSortChange('name', $event)"
+              >
+                {{ 'ADMIN.RECITATIONS.COLUMNS.NAME' | translate }}
+              </th>
+            }
+            @if (showRecitationCol('description')) {
+              <th nzWidth="240px">{{ 'ADMIN.RECITATIONS.COLUMNS.DESCRIPTION' | translate }}</th>
+            }
+            @if (showRecitationCol('publisher')) {
+              <th nzWidth="160px">{{ 'ADMIN.RECITATIONS.COLUMNS.PUBLISHER' | translate }}</th>
+            }
+            @if (showRecitationCol('reciter')) {
+              <th nzWidth="130px">{{ 'ADMIN.RECITATIONS.COLUMNS.RECITER' | translate }}</th>
+            }
+            @if (showRecitationCol('qiraah')) {
+              <th nzWidth="120px">{{ 'ADMIN.RECITATIONS.COLUMNS.QIRAAH' | translate }}</th>
+            }
+            @if (showRecitationCol('year')) {
+              <th
+                nzWidth="100px"
+                [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('year')"
+                (nzSortOrderChange)="onSortChange('year', $event)"
+              >
+                {{ 'ADMIN.RECITATIONS.COLUMNS.YEAR' | translate }}
+              </th>
+            }
+            @if (showRecitationCol('license')) {
+              <th
+                nzWidth="140px"
+                [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('license')"
+                (nzSortOrderChange)="onSortChange('license', $event)"
+              >
+                {{ 'ADMIN.RECITATIONS.COLUMNS.LICENSE' | translate }}
+              </th>
+            }
+            @if (showRecitationCol('created')) {
+              <th
+                nzWidth="130px"
+                [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('created_at')"
+                (nzSortOrderChange)="onSortChange('created_at', $event)"
+              >
+                {{ 'ADMIN.RECITATIONS.COLUMNS.CREATED_AT' | translate }}
+              </th>
+            }
+            <th nzWidth="120px">{{ 'ADMIN.RECITATIONS.COLUMNS.ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
           @for (item of recTable.data; track item.id) {
             <tr class="admin-list-row">
-              <td class="admin-list-name">{{ item.name }}</td>
-              <td class="admin-list-desc">{{ truncate(item.description) }}</td>
-              <td>{{ item.publisher.name }}</td>
-              <td>{{ item.reciter.name }}</td>
-              <td>{{ item.qiraah.name }}</td>
-              <td>{{ item.year }}</td>
-              <td>
-                <nz-tag [nzColor]="getLicenseColor(item.license)">{{ item.license }}</nz-tag>
-              </td>
-              <td>{{ item.created_at | date: 'dd/MM/yyyy' }}</td>
-              <td>
+              @if (showRecitationCol('name')) {
+                <td class="admin-list-name">
+                  <a
+                    class="hoverable-link"
+                    [routerLink]="['/admin/recitations', item.slug ?? item.id]"
+                  >
+                    {{ item.name }}
+                  </a>
+                </td>
+              }
+
+              @if (showRecitationCol('description')) {
+                <td class="admin-list-desc">{{ truncate(item.description) }}</td>
+              }
+              @if (showRecitationCol('publisher')) {
+                <td>{{ item.publisher.name }}</td>
+              }
+              @if (showRecitationCol('reciter')) {
+                <td>{{ item.reciter.name }}</td>
+              }
+              @if (showRecitationCol('qiraah')) {
+                <td>{{ item.qiraah.name }}</td>
+              }
+              @if (showRecitationCol('year')) {
+                <td>{{ item.year }}</td>
+              }
+              @if (showRecitationCol('license')) {
+                <td>
+                  <nz-tag [nzColor]="getLicenseColor(item.license)">{{ item.license }}</nz-tag>
+                </td>
+              }
+              @if (showRecitationCol('created')) {
+                <td>{{ item.created_at | date: 'dd/MM/yyyy' }}</td>
+              }
+              <td (click)="$event.stopPropagation()">
                 <div class="admin-list-actions">
-                  <button
-                    type="button"
+                  <a
                     nz-button
                     nzType="text"
                     class="action-icon action-icon--view"
                     nz-tooltip
-                    nzTooltipTitle="عرض"
-                    (click)="onView(item.slug ?? item.id + '')"
+                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_VIEW' | translate"
+                    [routerLink]="['/admin/recitations', item.slug ?? item.id]"
                   >
                     <ng-icon name="lucideEye" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
+                  </a>
+                  <a
                     nz-button
                     nzType="text"
                     class="action-icon action-icon--edit"
                     nz-tooltip
-                    nzTooltipTitle="تعديل"
-                    (click)="onEdit(item.slug ?? item.id + '')"
+                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_EDIT' | translate"
+                    [routerLink]="['/admin/recitations', item.slug ?? item.id, 'edit']"
                   >
                     <ng-icon name="lucideSquarePen" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    nz-button
-                    nzType="text"
-                    class="action-icon action-icon--delete"
-                    nz-tooltip
-                    nzTooltipTitle="حذف"
-                    (click)="onDelete(item)"
-                  >
-                    <ng-icon name="lucideTrash2" aria-hidden="true" />
-                  </button>
+                  </a>
                 </div>
               </td>
             </tr>
@@ -117,8 +163,8 @@
   <ng-template #emptyTpl>
     <div class="admin-empty-state">
       <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
-      <p class="admin-empty-state__title">لا توجد تلاوات</p>
-      <p class="admin-empty-state__subtitle">لم يتم العثور على نتائج. حاول تعديل معايير البحث.</p>
+      <p class="admin-empty-state__title">{{ 'ADMIN.RECITATIONS.EMPTY_TITLE' | translate }}</p>
+      <p class="admin-empty-state__subtitle">{{ 'ADMIN.COMMON.EMPTY_SUBTITLE' | translate }}</p>
     </div>
   </ng-template>
 

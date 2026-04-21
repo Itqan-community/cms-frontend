@@ -60,6 +60,7 @@ export interface RecitationDetails {
   meem_behaviour: MeemBehavior;
   year: number;
   license: string;
+  ayah_timings_url?: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -73,9 +74,9 @@ export interface RecitationFormValue {
   reciter_id: number;
   qiraah_id: number;
   riwayah_id: number | null;
-  madd_level: MaddLevel;
-  meem_behaviour: MeemBehavior;
-  year: number;
+  madd_level: MaddLevel | null;
+  meem_behaviour: MeemBehavior | null;
+  year: number | null;
   license: string;
 }
 

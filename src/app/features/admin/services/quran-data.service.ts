@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, Observable, catchError, map, of, shareReplay, tap } from 'rxjs';
 import { SURAHS_METADATA, JUZ_PAGE_MAPPING, SurahMetadata } from '../models/quran-metadata';
 
@@ -65,6 +66,7 @@ export interface SurahStats {
 })
 export class QuranDataService {
   private http = inject(HttpClient);
+  private readonly translate = inject(TranslateService);
 
   // Using assets path relative to the app root.
   // We use HttpClient even for local files in Angular because assets are served by the web server
@@ -78,6 +80,10 @@ export class QuranDataService {
 
   constructor() {
     this.loadData();
+  }
+
+  private surahFallbackLabel(n: number): string {
+    return this.translate.instant('ADMIN.MUSHAFS.SURAH_FALLBACK', { n });
   }
 
   private loadData(): void {
@@ -109,7 +115,8 @@ export class QuranDataService {
           const surahIds = [...new Set(ayahs.map((a: AyahData) => a.chapter))];
           const surahNames = surahIds.map(
             (id: number) =>
-              SURAHS_METADATA.find((s: SurahMetadata) => s.id === id)?.name_ar || `سورة ${id}`
+              SURAHS_METADATA.find((s: SurahMetadata) => s.id === id)?.name_ar ||
+              this.surahFallbackLabel(id)
           );
 
           // Find Juz number for this page
@@ -172,7 +179,7 @@ export class QuranDataService {
             page_number: parseInt(pageNum, 10),
             surah_name:
               SURAHS_METADATA.find((s: SurahMetadata) => s.id === a.chapter)?.name_ar ||
-              `سورة ${a.chapter}`,
+              this.surahFallbackLabel(a.chapter),
           }));
           allAyahs = allAyahs.concat(pageAyahs);
         });

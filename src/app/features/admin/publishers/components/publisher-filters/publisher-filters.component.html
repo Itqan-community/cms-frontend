@@ -1,11 +1,11 @@
-<div class="publisher-filters" dir="rtl">
+<div class="publisher-filters">
   <div class="publisher-filters__actions">
     <nz-input-group [nzPrefix]="searchIcon" class="publisher-filters__search">
       <input
         nz-input
         nzSize="default"
         type="text"
-        placeholder="ابحث عن ناشر..."
+        [placeholder]="'ADMIN.PUBLISHERS.SEARCH_PLACEHOLDER' | translate"
         [ngModel]="searchValue"
         (ngModelChange)="onSearchChange($event)"
       />
@@ -20,14 +20,14 @@
       (click)="openFiltersModal()"
     >
       <ng-icon name="lucideFilter" />
-      <span>الفلاتر</span>
+      <span>{{ 'ADMIN.COMMON.FILTERS' | translate }}</span>
     </button>
   </div>
 
   <nz-modal
     [(nzVisible)]="isFiltersModalOpen"
     (nzOnCancel)="closeFiltersModal()"
-    nzTitle="الفلاتر"
+    [nzTitle]="'ADMIN.COMMON.FILTERS' | translate"
     [nzWidth]="'min(560px, 92vw)'"
     nzCentered
   >
@@ -35,7 +35,7 @@
       <div class="publisher-filters__modal-grid">
         <nz-select
           class="publisher-filters__country"
-          nzPlaceHolder="الدولة"
+          [nzPlaceHolder]="'ADMIN.PUBLISHERS.FILTERS.COUNTRY' | translate"
           nzSize="default"
           nzAllowClear
           nzShowSearch
@@ -47,26 +47,28 @@
           }
         </nz-select>
 
+        <!-- is_verified filter (commented out — do not delete; use ADMIN.PUBLISHERS.FILTERS.VERIFICATION_STATUS, VERIFIED, NOT_VERIFIED)
         <nz-select
           class="publisher-filters__select"
-          nzPlaceHolder="حالة التوثيق"
+          [nzPlaceHolder]="'ADMIN.PUBLISHERS.FILTERS.VERIFICATION_STATUS' | translate"
           nzSize="default"
           nzAllowClear
           [ngModel]="selectedVerified"
           (ngModelChange)="onVerifiedChange($event)"
         >
-          <nz-option nzLabel="موثق" [nzValue]="true"></nz-option>
-          <nz-option nzLabel="غير موثق" [nzValue]="false"></nz-option>
+          <nz-option [nzLabel]="'ADMIN.PUBLISHERS.FILTERS.VERIFIED' | translate" [nzValue]="true"></nz-option>
+          <nz-option [nzLabel]="'ADMIN.PUBLISHERS.FILTERS.NOT_VERIFIED' | translate" [nzValue]="false"></nz-option>
         </nz-select>
+        -->
       </div>
     </ng-container>
     <ng-container *nzModalFooter>
       <div class="publisher-filters__modal-footer">
         <button nz-button nzType="default" nzSize="default" (click)="clearAdvancedFilters()">
-          مسح الفلاتر
+          {{ 'ADMIN.COMMON.FILTER_CLEAR' | translate }}
         </button>
         <button nz-button nzType="primary" nzSize="default" (click)="closeFiltersModal()">
-          تم
+          {{ 'ADMIN.COMMON.FILTER_DONE' | translate }}
         </button>
       </div>
     </ng-container>

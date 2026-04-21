@@ -15,15 +15,18 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { QuranDataService, QuranPage } from '../../services/quran-data.service';
 
 export interface MushafOption {
   id: string;
-  name: string;
+  nameKey: string;
   pageCount: number;
 }
 
-const MUSHAF_OPTIONS: MushafOption[] = [{ id: 'medina', name: 'مصحف المدينة', pageCount: 604 }];
+const MUSHAF_OPTIONS: MushafOption[] = [
+  { id: 'medina', nameKey: 'ADMIN.MUSHAFS.MUSHAF_MEDINA', pageCount: 604 },
+];
 
 @Component({
   selector: 'app-mushaf-pages',
@@ -36,6 +39,7 @@ const MUSHAF_OPTIONS: MushafOption[] = [{ id: 'medina', name: 'مصحف المد
     NzSpinModule,
     NzTableModule,
     NzTagModule,
+    TranslateModule,
   ],
   templateUrl: './mushaf-pages.page.html',
   styleUrls: ['./mushaf-pages.page.less'],
@@ -44,6 +48,7 @@ export class MushafPagesPage implements OnInit {
   private readonly quranData = inject(QuranDataService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly el = inject(ElementRef);
+  private readonly translate = inject(TranslateService);
 
   readonly mushafs: MushafOption[] = MUSHAF_OPTIONS;
   readonly selectedMushaf = signal<MushafOption>(MUSHAF_OPTIONS[0]);
@@ -82,5 +87,41 @@ export class MushafPagesPage implements OnInit {
   selectMushaf(m: MushafOption): void {
     this.selectedMushaf.set(m);
     this.selectOpen.set(false);
+  }
+
+  mushafOptionLabel(m: MushafOption): string {
+    return this.translate.instant('ADMIN.MUSHAFS.SELECT_OPTION_LABEL', {
+      name: this.translate.instant(m.nameKey),
+      count: m.pageCount,
+    });
+  }
+
+  mushafHint(m: MushafOption): string {
+    return this.translate.instant('ADMIN.MUSHAFS.PAGES_HINT', {
+      name: this.translate.instant(m.nameKey),
+      count: m.pageCount,
+    });
+  }
+
+  pagesTableTitle(m: MushafOption, count: number): string {
+    return this.translate.instant('ADMIN.MUSHAFS.PAGES_TABLE_TITLE', {
+      name: this.translate.instant(m.nameKey),
+      count,
+    });
+  }
+
+  mushafTag(m: MushafOption): string {
+    return this.translate.instant('ADMIN.MUSHAFS.PAGES_TAG', {
+      name: this.translate.instant(m.nameKey),
+    });
+  }
+
+  juzTag(n: number): string {
+    return this.translate.instant('ADMIN.MUSHAFS.JUZ_TAG', { n });
+  }
+
+  joinSurahNames(surahs: string[]): string {
+    const sep = this.translate.instant('ADMIN.MUSHAFS.SURAH_LIST_JOINER');
+    return surahs.join(sep);
   }
 }

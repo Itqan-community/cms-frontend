@@ -1,9 +1,11 @@
-<div class="publisher-detail admin-list-page" dir="rtl">
+<div class="publisher-detail admin-list-page">
   <div class="admin-breadcrumb">
-    <a routerLink="/admin/publishers" class="admin-breadcrumb__link">الناشرون</a>
+    <a routerLink="/admin/publishers" class="admin-breadcrumb__link">{{
+      'ADMIN.PUBLISHERS.DETAIL.BREADCRUMB' | translate
+    }}</a>
     <ng-icon name="lucideChevronLeft" class="admin-breadcrumb__sep" />
     @if (loading()) {
-      <span class="admin-breadcrumb__current">جاري التحميل...</span>
+      <span class="admin-breadcrumb__current">{{ 'ADMIN.COMMON.LOADING' | translate }}</span>
     } @else {
       <span class="admin-breadcrumb__current">{{ publisher()?.name_ar }}</span>
     }
@@ -27,11 +29,6 @@
           <p class="admin-hero-name-en" dir="ltr">{{ p.name_en }}</p>
         </div>
         <div class="admin-hero-meta">
-          @if (p.is_verified) {
-            <nz-tag nzColor="success">موثق</nz-tag>
-          } @else {
-            <nz-tag>غير موثق</nz-tag>
-          }
           @if (p.created_at) {
             <span class="admin-hero-meta__date">
               <ng-icon name="lucideCalendar" />
@@ -44,11 +41,11 @@
       <div class="admin-hero-actions">
         <button nz-button nzType="primary" (click)="onEdit()">
           <ng-icon name="lucideSquarePen" />
-          تعديل
+          {{ 'ADMIN.COMMON.EDIT' | translate }}
         </button>
         <button nz-button nzDanger (click)="onDelete()">
           <ng-icon name="lucideTrash2" />
-          حذف
+          {{ 'ADMIN.COMMON.DELETE' | translate }}
         </button>
       </div>
     </div>
@@ -56,42 +53,55 @@
     <div class="admin-panel">
       <h3 class="admin-panel__title">
         <ng-icon name="lucideCircleUser" />
-        البيانات التفصيلية
+        {{ 'ADMIN.PUBLISHERS.DETAIL.PANEL_TITLE' | translate }}
       </h3>
       <nz-descriptions nzBordered [nzColumn]="{ xxl: 2, xl: 2, lg: 2, md: 1, sm: 1, xs: 1 }">
-        <nz-descriptions-item nzTitle="الدولة">{{ countryLabel(p.country) }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="سنة التأسيس">{{
-          p.foundation_year != null ? p.foundation_year : '—'
+        <nz-descriptions-item [nzTitle]="'ADMIN.PUBLISHERS.DETAIL.COUNTRY' | translate">{{
+          countryLabel(p.country)
         }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="العنوان" [nzSpan]="2">{{
-          p.address ?? '—'
+        <nz-descriptions-item [nzTitle]="'ADMIN.PUBLISHERS.DETAIL.FOUNDATION_YEAR' | translate">{{
+          p.foundation_year != null ? p.foundation_year : ('ADMIN.COMMON.EM_DASH' | translate)
         }}</nz-descriptions-item>
-        <nz-descriptions-item nzTitle="البريد الإلكتروني">
+        <nz-descriptions-item
+          [nzTitle]="'ADMIN.PUBLISHERS.DETAIL.ADDRESS' | translate"
+          [nzSpan]="2"
+          >{{ p.address ?? ('ADMIN.COMMON.EM_DASH' | translate) }}</nz-descriptions-item
+        >
+        <nz-descriptions-item [nzTitle]="'ADMIN.PUBLISHERS.DETAIL.EMAIL' | translate">
           @if (p.contact_email) {
             <a [href]="'mailto:' + p.contact_email">{{ p.contact_email }}</a>
           } @else {
-            —
+            {{ 'ADMIN.COMMON.EM_DASH' | translate }}
           }
         </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="الموقع الإلكتروني">
+        <nz-descriptions-item [nzTitle]="'ADMIN.PUBLISHERS.DETAIL.WEBSITE' | translate">
           @if (p.website) {
             <a [href]="p.website" target="_blank" rel="noopener noreferrer">{{ p.website }}</a>
           } @else {
-            —
+            {{ 'ADMIN.COMMON.EM_DASH' | translate }}
           }
         </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="رابط الأيقونة" [nzSpan]="2">
+        <nz-descriptions-item
+          [nzTitle]="'ADMIN.PUBLISHERS.DETAIL.ICON_URL' | translate"
+          [nzSpan]="2"
+        >
           @if (iconSrc(p.icon); as iconUrl) {
             <span class="admin-mono">{{ iconUrl }}</span>
           } @else {
-            —
+            {{ 'ADMIN.COMMON.EM_DASH' | translate }}
           }
         </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="الوصف بالعربية" [nzSpan]="2">
-          {{ p.description_ar ?? p.description ?? '—' }}
+        <nz-descriptions-item
+          [nzTitle]="'ADMIN.PUBLISHERS.DETAIL.DESC_AR' | translate"
+          [nzSpan]="2"
+        >
+          {{ p.description_ar ?? p.description ?? ('ADMIN.COMMON.EM_DASH' | translate) }}
         </nz-descriptions-item>
-        <nz-descriptions-item nzTitle="Description (EN)" [nzSpan]="2">
-          {{ p.description_en ?? '—' }}
+        <nz-descriptions-item
+          [nzTitle]="'ADMIN.PUBLISHERS.DETAIL.DESC_EN' | translate"
+          [nzSpan]="2"
+        >
+          {{ p.description_en ?? ('ADMIN.COMMON.EM_DASH' | translate) }}
         </nz-descriptions-item>
       </nz-descriptions>
     </div>
@@ -100,15 +110,15 @@
       <a routerLink="/admin/publishers">
         <button nz-button nzType="default">
           <ng-icon name="lucideArrowRight" />
-          العودة للقائمة
+          {{ 'ADMIN.COMMON.BACK_TO_LIST' | translate }}
         </button>
       </a>
     </div>
   } @else {
     <div class="admin-not-found">
       <ng-icon name="lucideAlertTriangle" class="admin-not-found__icon" />
-      <p>لم يتم العثور على الناشر المطلوب.</p>
-      <a routerLink="/admin/publishers">العودة للقائمة</a>
+      <p>{{ 'ADMIN.PUBLISHERS.DETAIL.NOT_FOUND' | translate }}</p>
+      <a routerLink="/admin/publishers">{{ 'ADMIN.COMMON.GO_BACK_LIST' | translate }}</a>
     </div>
   }
 </div>

@@ -1,18 +1,29 @@
-<div class="translations-list admin-list-page" dir="rtl">
+<div class="translations-list admin-list-page">
   <div class="admin-list-header">
     <div class="admin-list-header__text">
-      <h2 class="admin-list-header__title">الترجمات</h2>
-      <p class="admin-list-header__subtitle">إدارة ترجمات معاني القرآن الكريم</p>
+      <h2 class="admin-list-header__title">{{ 'ADMIN.TRANSLATIONS.TITLE' | translate }}</h2>
+      <p class="admin-list-header__subtitle">{{ 'ADMIN.TRANSLATIONS.SUBTITLE' | translate }}</p>
     </div>
     <a routerLink="/admin/translations/create">
       <button nz-button nzType="primary" class="admin-add-btn">
         <ng-icon name="lucidePlus" aria-hidden="true" />
-        إضافة ترجمة
+        {{ 'ADMIN.TRANSLATIONS.ADD_BUTTON' | translate }}
       </button>
     </a>
   </div>
 
-  <app-translation-filters (filtersChange)="onFiltersChange($event)"></app-translation-filters>
+  <app-translation-filters
+    [initialFilters]="activeFilters"
+    (filtersChange)="onFiltersChange($event)"
+  ></app-translation-filters>
+
+  <div class="admin-table-toolbar">
+    <app-admin-column-picker
+      [storageKey]="translationTableStorageKey"
+      [columns]="translationTableColumns"
+      (visibilityChange)="onTranslationColumnVisibility($event)"
+    />
+  </div>
 
   <div class="admin-table-wrap">
     <nz-spin [nzSpinning]="loading()">
@@ -26,71 +37,88 @@
       >
         <thead>
           <tr>
-            <th
-              nzWidth="200px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('name', $event)"
-            >
-              الاسم
-            </th>
-            <th>الوصف</th>
-            <th nzWidth="160px">الناشر</th>
-            <th nzWidth="120px">الترخيص</th>
-            <th
-              nzWidth="130px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('created_at', $event)"
-            >
-              تاريخ الإضافة
-            </th>
-            <th nzWidth="120px">الإجراءات</th>
+            @if (showTranslationCol('name')) {
+              <th
+                nzWidth="200px"
+                [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('name')"
+                (nzSortOrderChange)="onSortChange('name', $event)"
+              >
+                {{ 'ADMIN.TRANSLATIONS.COLUMNS.NAME' | translate }}
+              </th>
+            }
+            @if (showTranslationCol('description')) {
+              <th nzWidth="240px">{{ 'ADMIN.TRANSLATIONS.COLUMNS.DESCRIPTION' | translate }}</th>
+            }
+            @if (showTranslationCol('publisher')) {
+              <th nzWidth="160px">{{ 'ADMIN.TRANSLATIONS.COLUMNS.PUBLISHER' | translate }}</th>
+            }
+            @if (showTranslationCol('license')) {
+              <th nzWidth="120px">{{ 'ADMIN.TRANSLATIONS.COLUMNS.LICENSE' | translate }}</th>
+            }
+            @if (showTranslationCol('created')) {
+              <th
+                nzWidth="130px"
+                [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('created_at')"
+                (nzSortOrderChange)="onSortChange('created_at', $event)"
+              >
+                {{ 'ADMIN.TRANSLATIONS.COLUMNS.CREATED_AT' | translate }}
+              </th>
+            }
+            <th nzWidth="120px">{{ 'ADMIN.TRANSLATIONS.COLUMNS.ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
           @for (tr of translationTable.data; track tr.id) {
             <tr class="admin-list-row">
-              <td class="admin-list-name">{{ tr.name }}</td>
-              <td class="admin-list-desc">{{ truncate(tr.description) }}</td>
-              <td>{{ tr.publisher.name }}</td>
-              <td>
-                <nz-tag [nzColor]="getLicenseColor(tr.license)">{{ tr.license }}</nz-tag>
-              </td>
-              <td>{{ tr.created_at | date: 'dd/MM/yyyy' }}</td>
-              <td>
+              @if (showTranslationCol('name')) {
+                <td class="admin-list-name">
+                  <a
+                    class="hoverable-link"
+                    [routerLink]="['/admin/translations', tr.slug ?? tr.id]"
+                  >
+                    {{ tr.name }}
+                  </a>
+                </td>
+              }
+
+              @if (showTranslationCol('description')) {
+                <td class="admin-list-desc">{{ truncate(tr.description) }}</td>
+              }
+              @if (showTranslationCol('publisher')) {
+                <td>{{ tr.publisher.name }}</td>
+              }
+              @if (showTranslationCol('license')) {
+                <td>
+                  <nz-tag [nzColor]="getLicenseColor(tr.license)">{{ tr.license }}</nz-tag>
+                </td>
+              }
+              @if (showTranslationCol('created')) {
+                <td>{{ tr.created_at | date: 'dd/MM/yyyy' }}</td>
+              }
+              <td (click)="$event.stopPropagation()">
                 <div class="admin-list-actions">
-                  <button
-                    type="button"
+                  <a
                     nz-button
                     nzType="text"
                     class="action-icon action-icon--view"
                     nz-tooltip
-                    nzTooltipTitle="عرض"
-                    (click)="onView(tr.slug ?? tr.id + '')"
+                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_VIEW' | translate"
+                    [routerLink]="['/admin/translations', tr.slug ?? tr.id]"
                   >
                     <ng-icon name="lucideEye" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
+                  </a>
+                  <a
                     nz-button
                     nzType="text"
                     class="action-icon action-icon--edit"
                     nz-tooltip
-                    nzTooltipTitle="تعديل"
-                    (click)="onEdit(tr.slug ?? tr.id + '')"
+                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_EDIT' | translate"
+                    [routerLink]="['/admin/translations', tr.slug ?? tr.id, 'edit']"
                   >
                     <ng-icon name="lucideSquarePen" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    nz-button
-                    nzType="text"
-                    class="action-icon action-icon--delete"
-                    nz-tooltip
-                    nzTooltipTitle="حذف"
-                    (click)="onDelete(tr)"
-                  >
-                    <ng-icon name="lucideTrash2" aria-hidden="true" />
-                  </button>
+                  </a>
                 </div>
               </td>
             </tr>
@@ -103,8 +131,8 @@
   <ng-template #emptyTpl>
     <div class="admin-empty-state">
       <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
-      <p class="admin-empty-state__title">لا توجد ترجمات</p>
-      <p class="admin-empty-state__subtitle">لم يتم العثور على نتائج. حاول تعديل معايير البحث.</p>
+      <p class="admin-empty-state__title">{{ 'ADMIN.TRANSLATIONS.EMPTY_TITLE' | translate }}</p>
+      <p class="admin-empty-state__subtitle">{{ 'ADMIN.COMMON.EMPTY_SUBTITLE' | translate }}</p>
     </div>
   </ng-template>
 

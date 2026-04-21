@@ -1,8 +1,15 @@
 import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { forkJoin } from 'rxjs';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -21,6 +28,18 @@ import { RecitersAdminService } from '../../../reciters/services/reciters.servic
 import { MaddLevel, MeemBehavior, NamedId } from '../../models/recitations.models';
 import { RecitationsService } from '../../services/recitations.service';
 
+/** Hijri year optional: empty is valid; if set, must be within range */
+function optionalHijriYearRange(minY: number, maxY: number) {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const raw = control.value;
+    if (raw === null || raw === undefined || raw === '') return null;
+    const n = Number(raw);
+    if (!Number.isFinite(n)) return { yearInvalid: true };
+    if (n < minY || n > maxY) return { yearRange: true };
+    return null;
+  };
+}
+
 @Component({
   selector: 'app-recitation-form',
   standalone: true,
@@ -36,6 +55,7 @@ import { RecitationsService } from '../../services/recitations.service';
     NzInputModule,
     NzSelectModule,
     NzSkeletonModule,
+    TranslateModule,
   ],
   templateUrl: './recitation-form.component.html',
   styleUrl: './recitation-form.component.less',
@@ -48,6 +68,7 @@ export class RecitationFormComponent implements OnInit {
   private readonly publishersFilterService = inject(PublishersFilterService);
   private readonly recitersService = inject(RecitersAdminService);
   private readonly message = inject(NzMessageService);
+  private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly isEditMode = signal(false);
@@ -68,29 +89,26 @@ export class RecitationFormComponent implements OnInit {
 
   readonly licenseOptions = Object.values(Licenses);
   readonly maddOptions = [
-    { v: MaddLevel.TWASSUT, l: 'توسّط' },
-    { v: MaddLevel.QASR, l: 'قصر' },
+    { v: MaddLevel.TWASSUT, labelKey: 'ADMIN.RECITATIONS.FILTERS.MADD_TWASSUT' },
+    { v: MaddLevel.QASR, labelKey: 'ADMIN.RECITATIONS.FILTERS.MADD_QASR' },
   ];
   readonly meemOptions = [
-    { v: MeemBehavior.SILAH, l: 'وصل (صلّة)' },
-    { v: MeemBehavior.SKOUN, l: 'سكون' },
+    { v: MeemBehavior.SILAH, labelKey: 'ADMIN.RECITATIONS.FORM.MEEM_WASL_LONG' },
+    { v: MeemBehavior.SKOUN, labelKey: 'ADMIN.RECITATIONS.FILTERS.MEEM_SKOUN' },
   ];
 
   readonly form = this.fb.group({
     name_ar: ['', [Validators.required, Validators.minLength(2)]],
-    name_en: ['', [Validators.required, Validators.minLength(2)]],
+    name_en: [''],
     description_ar: ['', [Validators.required]],
     description_en: ['', [Validators.required]],
     publisher_id: [null as number | null, [Validators.required]],
     reciter_id: [null as number | null, [Validators.required]],
     qiraah_id: [null as number | null, [Validators.required]],
     riwayah_id: [null as number | null],
-    madd_level: [null as MaddLevel | null, [Validators.required]],
-    meem_behaviour: [null as MeemBehavior | null, [Validators.required]],
-    year: [
-      null as number | null,
-      [Validators.required, Validators.min(this.minHijriYear), Validators.max(this.maxHijriYear)],
-    ],
+    madd_level: [null as MaddLevel | null],
+    meem_behaviour: [null as MeemBehavior | null],
+    year: [null as number | null, [optionalHijriYearRange(1300, 1600)]],
     license: ['', [Validators.required]],
   });
 
@@ -145,9 +163,9 @@ export class RecitationFormComponent implements OnInit {
       reciter_id: v.reciter_id as number,
       qiraah_id: v.qiraah_id as number,
       riwayah_id: v.riwayah_id ?? null,
-      madd_level: v.madd_level as MaddLevel,
-      meem_behaviour: v.meem_behaviour as MeemBehavior,
-      year: v.year as number,
+      madd_level: v.madd_level ?? null,
+      meem_behaviour: v.meem_behaviour ?? null,
+      year: v.year ?? null,
       license: v.license ?? '',
     };
 
@@ -160,7 +178,11 @@ export class RecitationFormComponent implements OnInit {
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.message.success(
-          this.isEditMode() ? 'تم تحديث التلاوة بنجاح' : 'تم إضافة التلاوة بنجاح'
+          this.translate.instant(
+            this.isEditMode()
+              ? 'ADMIN.RECITATIONS.MESSAGES.UPDATE_SUCCESS'
+              : 'ADMIN.RECITATIONS.MESSAGES.CREATE_SUCCESS'
+          )
         );
         this.submitting.set(false);
         void this.router.navigate(['/admin/recitations', res.slug ?? String(res.id)]);

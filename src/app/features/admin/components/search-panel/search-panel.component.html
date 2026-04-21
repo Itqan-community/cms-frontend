@@ -1,9 +1,11 @@
 <div class="admin-search-panel">
-  <h2 class="admin-search-panel__title">البحث في القرآن الكريم</h2>
+  <h2 class="admin-search-panel__title">{{ 'ADMIN.SEARCH_PANEL.TITLE' | translate }}</h2>
   <p class="admin-search-panel__subtitle">
-    ابحث عن كلمة أو عبارة لعرض جميع الآيات التي تحتوي عليها
+    {{ 'ADMIN.SEARCH_PANEL.SUBTITLE' | translate }}
   </p>
-  <label class="admin-search-panel__label" for="quran-search-input">أدخل كلمة أو عبارة للبحث</label>
+  <label class="admin-search-panel__label" for="quran-search-input">{{
+    'ADMIN.SEARCH_PANEL.INPUT_LABEL' | translate
+  }}</label>
   <div class="admin-search-panel__input-row">
     <nz-input-group [nzPrefix]="searchIconTpl" class="admin-search-panel__input-group">
       <input
@@ -11,12 +13,12 @@
         id="quran-search-input"
         class="admin-search-panel__input"
         type="text"
-        placeholder="مثال: الله، الرحمن، الصلاة..."
+        [placeholder]="'ADMIN.SEARCH_PANEL.PLACEHOLDER' | translate"
       />
     </nz-input-group>
     <button nz-button nzType="primary" class="admin-search-panel__btn" (click)="onSearch()">
       <ng-icon name="lucideSearch" />
-      بحث
+      {{ 'ADMIN.SEARCH_PANEL.SEARCH' | translate }}
     </button>
   </div>
   <ng-template #searchIconTpl>
@@ -24,9 +26,11 @@
   </ng-template>
   <div class="admin-search-panel__empty">
     <ng-icon name="lucideSearch" class="admin-search-panel__empty-icon" />
-    <p class="admin-search-panel__empty-title">ابدأ بإدخال كلمة في حقل البحث أعلاه</p>
+    <p class="admin-search-panel__empty-title">
+      {{ 'ADMIN.SEARCH_PANEL.EMPTY_TITLE' | translate }}
+    </p>
     <p class="admin-search-panel__empty-subtitle">
-      سيتم عرض جميع الآيات التي تحتوي على الكلمة المطلوبة
+      {{ 'ADMIN.SEARCH_PANEL.EMPTY_SUBTITLE' | translate }}
     </p>
   </div>
 </div>

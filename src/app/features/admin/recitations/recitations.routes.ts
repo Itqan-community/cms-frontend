@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { RecitationsLayoutComponent } from './recitations-layout.component';
+import { recitationDetailCanDeactivate } from './components/recitation-detail/recitation-detail.can-deactivate';
 
 export const recitationRoutes: Routes = [
   {
@@ -29,6 +30,7 @@ export const recitationRoutes: Routes = [
       },
       {
         path: ':slug',
+        canDeactivate: [recitationDetailCanDeactivate],
         loadComponent: () =>
           import('./components/recitation-detail/recitation-detail.component').then(
             (m) => m.RecitationDetailComponent

@@ -1,18 +1,29 @@
-<div class="reciters-list admin-list-page" dir="rtl">
+<div class="reciters-list admin-list-page">
   <div class="admin-list-header">
     <div class="admin-list-header__text">
-      <h2 class="admin-list-header__title">القرّاء</h2>
-      <p class="admin-list-header__subtitle">إدارة القرّاء والمقرئين</p>
+      <h2 class="admin-list-header__title">{{ 'ADMIN.RECITERS.TITLE' | translate }}</h2>
+      <p class="admin-list-header__subtitle">{{ 'ADMIN.RECITERS.SUBTITLE' | translate }}</p>
     </div>
     <a routerLink="/admin/reciters/create">
       <button nz-button nzType="primary" class="admin-add-btn">
         <ng-icon name="lucidePlus" aria-hidden="true" />
-        إضافة قارئ
+        {{ 'ADMIN.RECITERS.ADD_BUTTON' | translate }}
       </button>
     </a>
   </div>
 
-  <app-reciter-filters (filtersChange)="onFiltersChange($event)"></app-reciter-filters>
+  <app-reciter-filters
+    [searchValue]="activeFilters.search || ''"
+    (filtersChange)="onFiltersChange($event)"
+  ></app-reciter-filters>
+
+  <div class="admin-table-toolbar">
+    <app-admin-column-picker
+      [storageKey]="reciterTableStorageKey"
+      [columns]="reciterTableColumns"
+      (visibilityChange)="onReciterColumnVisibility($event)"
+    />
+  </div>
 
   <div class="admin-table-wrap">
     <nz-spin [nzSpinning]="loading()">
@@ -26,75 +37,90 @@
       >
         <thead>
           <tr>
-            <th
-              nzWidth="200px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('name', $event)"
-            >
-              الاسم
-            </th>
-            <th>النبذة</th>
-            <th nzWidth="100px">الجنسية</th>
-            <th
-              nzWidth="110px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('recitations_count', $event)"
-            >
-              التلاوات
-            </th>
-            <th
-              nzWidth="130px"
-              [nzSortFn]="true"
-              (nzSortOrderChange)="onSortChange('created_at', $event)"
-            >
-              تاريخ الإضافة
-            </th>
-            <th nzWidth="120px">الإجراءات</th>
+            @if (showReciterCol('name')) {
+              <th
+                nzWidth="200px"
+                [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('name')"
+                (nzSortOrderChange)="onSortChange('name', $event)"
+              >
+                {{ 'ADMIN.RECITERS.COLUMNS.NAME' | translate }}
+              </th>
+            }
+            @if (showReciterCol('bio')) {
+              <th nzWidth="240px">{{ 'ADMIN.RECITERS.COLUMNS.BIO' | translate }}</th>
+            }
+            @if (showReciterCol('nationality')) {
+              <th nzWidth="100px">{{ 'ADMIN.RECITERS.COLUMNS.NATIONALITY' | translate }}</th>
+            }
+            @if (showReciterCol('recitations_count')) {
+              <th
+                nzWidth="110px"
+                [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('recitations_count')"
+                (nzSortOrderChange)="onSortChange('recitations_count', $event)"
+              >
+                {{ 'ADMIN.RECITERS.COLUMNS.RECITATIONS_COUNT' | translate }}
+              </th>
+            }
+            @if (showReciterCol('created')) {
+              <th
+                nzWidth="130px"
+                [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('created_at')"
+                (nzSortOrderChange)="onSortChange('created_at', $event)"
+              >
+                {{ 'ADMIN.RECITERS.COLUMNS.CREATED_AT' | translate }}
+              </th>
+            }
+            <th nzWidth="120px">{{ 'ADMIN.RECITERS.COLUMNS.ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
           @for (reciter of reciterTable.data; track reciter.id) {
             <tr class="admin-list-row">
-              <td class="admin-list-name">{{ reciter.name }}</td>
-              <td class="admin-list-desc">{{ truncate(reciter.bio) }}</td>
-              <td>{{ countryLabel(reciter.nationality) }}</td>
-              <td>{{ reciter.recitations_count }}</td>
-              <td>{{ reciter.created_at | date: 'dd/MM/yyyy' }}</td>
-              <td>
+              @if (showReciterCol('name')) {
+                <td class="admin-list-name">
+                  <a class="hoverable-link" [routerLink]="['/admin/reciters', reciter.slug]">
+                    {{ reciter.name }}
+                  </a>
+                </td>
+              }
+
+              @if (showReciterCol('bio')) {
+                <td class="admin-list-desc">{{ truncate(reciter.bio) }}</td>
+              }
+              @if (showReciterCol('nationality')) {
+                <td>{{ countryLabel(reciter.nationality) }}</td>
+              }
+              @if (showReciterCol('recitations_count')) {
+                <td>{{ reciter.recitations_count }}</td>
+              }
+              @if (showReciterCol('created')) {
+                <td>{{ reciter.created_at | date: 'dd/MM/yyyy' }}</td>
+              }
+              <td (click)="$event.stopPropagation()">
                 <div class="admin-list-actions">
-                  <button
-                    type="button"
+                  <a
                     nz-button
                     nzType="text"
                     class="action-icon action-icon--view"
                     nz-tooltip
-                    nzTooltipTitle="عرض"
-                    (click)="onView(reciter.slug)"
+                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_VIEW' | translate"
+                    [routerLink]="['/admin/reciters', reciter.slug]"
                   >
                     <ng-icon name="lucideEye" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
+                  </a>
+                  <a
                     nz-button
                     nzType="text"
                     class="action-icon action-icon--edit"
                     nz-tooltip
-                    nzTooltipTitle="تعديل"
-                    (click)="onEdit(reciter.slug)"
+                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_EDIT' | translate"
+                    [routerLink]="['/admin/reciters', reciter.slug, 'edit']"
                   >
                     <ng-icon name="lucideSquarePen" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    nz-button
-                    nzType="text"
-                    class="action-icon action-icon--delete"
-                    nz-tooltip
-                    nzTooltipTitle="حذف"
-                    (click)="onDelete(reciter)"
-                  >
-                    <ng-icon name="lucideTrash2" aria-hidden="true" />
-                  </button>
+                  </a>
                 </div>
               </td>
             </tr>
@@ -107,8 +133,8 @@
   <ng-template #emptyTpl>
     <div class="admin-empty-state">
       <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
-      <p class="admin-empty-state__title">لا يوجد قرّاء</p>
-      <p class="admin-empty-state__subtitle">لم يتم العثور على نتائج. حاول تعديل معايير البحث.</p>
+      <p class="admin-empty-state__title">{{ 'ADMIN.RECITERS.EMPTY_TITLE' | translate }}</p>
+      <p class="admin-empty-state__subtitle">{{ 'ADMIN.COMMON.EMPTY_SUBTITLE' | translate }}</p>
     </div>
   </ng-template>
 

@@ -70,6 +70,25 @@
       font-weight: 500;
     }
   }
+
+  &__image-upload {
+    display: flex;
+    align-items: center;
+  }
+
+  &__image-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    img {
+      width: 64px;
+      height: 64px;
+      object-fit: cover;
+      border-radius: 10px;
+      border: 1px solid #e5e7eb;
+    }
+  }
 }
 
 :host ::ng-deep {

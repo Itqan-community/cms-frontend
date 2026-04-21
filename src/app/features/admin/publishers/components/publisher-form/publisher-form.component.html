@@ -1,11 +1,19 @@
-<div class="publisher-form" dir="rtl">
+<div class="publisher-form">
   <div class="publisher-form__header">
     <div class="publisher-form__header-text">
       <h2 class="publisher-form__title">
-        {{ isEditMode() ? 'تعديل الناشر' : 'إضافة ناشر جديد' }}
+        {{
+          (isEditMode() ? 'ADMIN.PUBLISHERS.FORM.TITLE_EDIT' : 'ADMIN.PUBLISHERS.FORM.TITLE_CREATE')
+            | translate
+        }}
       </h2>
       <p class="publisher-form__subtitle">
-        {{ isEditMode() ? 'قم بتحديث بيانات الناشر' : 'أدخل بيانات الناشر الجديد' }}
+        {{
+          (isEditMode()
+            ? 'ADMIN.PUBLISHERS.FORM.SUBTITLE_EDIT'
+            : 'ADMIN.PUBLISHERS.FORM.SUBTITLE_CREATE'
+          ) | translate
+        }}
       </p>
     </div>
     <button
@@ -16,7 +24,7 @@
       (click)="onCancel()"
     >
       <ng-icon name="lucideArrowRight" />
-      إلغاء
+      {{ 'ADMIN.PUBLISHERS.FORM.BACK' | translate }}
     </button>
   </div>
 
@@ -27,25 +35,31 @@
       <div class="publisher-form__card">
         <h3 class="publisher-form__card-title">
           <ng-icon name="lucideSquarePen" />
-          الاسم
+          {{ 'ADMIN.PUBLISHERS.FORM.SECTION_NAME' | translate }}
         </h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>الاسم بالعربية</nz-form-label>
-              <nz-form-control nzErrorTip="الاسم بالعربية مطلوب">
-                <input nz-input formControlName="name_ar" placeholder="مثال: مجمع الملك فهد" />
+              <nz-form-label nzRequired>{{
+                'ADMIN.PUBLISHER_ADD.NAME_AR_LABEL' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.PUBLISHERS.FORM.ERR_NAME_AR' | translate">
+                <input
+                  nz-input
+                  formControlName="name_ar"
+                  [placeholder]="'ADMIN.PUBLISHER_ADD.NAME_AR_LABEL' | translate"
+                />
               </nz-form-control>
             </nz-form-item>
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>Name in English</nz-form-label>
-              <nz-form-control nzErrorTip="English name is required">
+              <nz-form-label>{{ 'ADMIN.PUBLISHER_ADD.NAME_EN_LABEL' | translate }}</nz-form-label>
+              <nz-form-control>
                 <input
                   nz-input
                   formControlName="name_en"
-                  placeholder="e.g. King Fahd Complex"
+                  [placeholder]="'ADMIN.PUBLISHER_ADD.NAME_EN_LABEL' | translate"
                   dir="ltr"
                 />
               </nz-form-control>
@@ -57,16 +71,16 @@
       <div class="publisher-form__card">
         <h3 class="publisher-form__card-title">
           <ng-icon name="lucideMapPin" />
-          الموقع والتواصل
+          {{ 'ADMIN.PUBLISHERS.FORM.SECTION_CONTACT' | translate }}
         </h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label>الدولة</nz-form-label>
+              <nz-form-label>{{ 'ADMIN.PUBLISHER_ADD.COUNTRY' | translate }}</nz-form-label>
               <nz-form-control>
                 <nz-select
                   formControlName="country"
-                  nzPlaceHolder="اختر الدولة"
+                  [nzPlaceHolder]="'ADMIN.PUBLISHER_ADD.COUNTRY' | translate"
                   nzAllowClear
                   nzShowSearch
                 >
@@ -79,7 +93,7 @@
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label>سنة التأسيس</nz-form-label>
+              <nz-form-label>{{ 'ADMIN.PUBLISHER_ADD.FOUNDATION_YEAR' | translate }}</nz-form-label>
               <nz-form-control>
                 <input
                   nz-input
@@ -94,7 +108,7 @@
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label>الموقع الإلكتروني</nz-form-label>
+              <nz-form-label>{{ 'ADMIN.PUBLISHER_ADD.WEBSITE' | translate }}</nz-form-label>
               <nz-form-control>
                 <input
                   nz-input
@@ -107,8 +121,8 @@
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label>البريد الإلكتروني</nz-form-label>
-              <nz-form-control nzErrorTip="البريد غير صالح">
+              <nz-form-label>{{ 'ADMIN.PUBLISHER_ADD.EMAIL' | translate }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.PUBLISHERS.FORM.ERR_EMAIL' | translate">
                 <input
                   nz-input
                   formControlName="contact_email"
@@ -120,9 +134,13 @@
           </div>
         </div>
         <nz-form-item>
-          <nz-form-label>العنوان</nz-form-label>
+          <nz-form-label>{{ 'ADMIN.PUBLISHER_ADD.ADDRESS' | translate }}</nz-form-label>
           <nz-form-control>
-            <input nz-input formControlName="address" placeholder="المدينة، الحي، الشارع..." />
+            <input
+              nz-input
+              formControlName="address"
+              [placeholder]="'ADMIN.PUBLISHER_ADD.ADDRESS' | translate"
+            />
           </nz-form-control>
         </nz-form-item>
       </div>
@@ -130,17 +148,20 @@
       <div class="publisher-form__card">
         <h3 class="publisher-form__card-title">
           <ng-icon name="lucideImage" />
-          الأيقونة والوصف
+          {{ 'ADMIN.PUBLISHERS.FORM.SECTION_ICON' | translate }}
         </h3>
         <nz-form-item>
-          <nz-form-label>أيقونة الناشر (صورة واحدة، حتى 10MB)</nz-form-label>
+          <nz-form-label>{{ 'ADMIN.PUBLISHERS.FORM.ICON_HINT' | translate }}</nz-form-label>
           <nz-form-control>
             <div class="publisher-form__icon-upload">
               @if (iconPreview()) {
                 <div class="publisher-form__icon-preview">
-                  <img [src]="iconPreview()!" alt="publisher icon preview" />
+                  <img
+                    [src]="iconPreview()!"
+                    [attr.alt]="'ADMIN.PUBLISHER_ADD.ICON_URL' | translate"
+                  />
                   <button type="button" nz-button nzType="default" (click)="removeIcon()">
-                    إزالة الصورة
+                    {{ 'ADMIN.PUBLISHERS.FORM.REMOVE_IMAGE' | translate }}
                   </button>
                 </div>
               } @else {
@@ -153,7 +174,7 @@
                 >
                   <button nz-button nzType="default" type="button">
                     <ng-icon name="lucideUpload" />
-                    رفع صورة
+                    {{ 'ADMIN.PUBLISHERS.FORM.UPLOAD_IMAGE' | translate }}
                   </button>
                 </nz-upload>
               }
@@ -163,12 +184,12 @@
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label>الوصف بالعربية</nz-form-label>
+              <nz-form-label>{{ 'ADMIN.PUBLISHERS.FORM.DESC_LABEL_AR' | translate }}</nz-form-label>
               <nz-form-control>
                 <textarea
                   nz-input
                   formControlName="description_ar"
-                  placeholder="وصف مختصر عن الناشر..."
+                  [placeholder]="'ADMIN.PUBLISHER_ADD.DESCRIPTION' | translate"
                   [nzAutosize]="{ minRows: 4, maxRows: 8 }"
                 ></textarea>
               </nz-form-control>
@@ -176,12 +197,12 @@
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label>Description in English</nz-form-label>
+              <nz-form-label>{{ 'ADMIN.PUBLISHERS.FORM.DESC_LABEL_EN' | translate }}</nz-form-label>
               <nz-form-control>
                 <textarea
                   nz-input
                   formControlName="description_en"
-                  placeholder="Publisher description..."
+                  [placeholder]="'ADMIN.PUBLISHER_ADD.DESCRIPTION' | translate"
                   dir="ltr"
                   [nzAutosize]="{ minRows: 4, maxRows: 8 }"
                 ></textarea>
@@ -189,16 +210,12 @@
             </nz-form-item>
           </div>
         </div>
-        <nz-form-item>
-          <nz-form-label>ناشر موثق</nz-form-label>
-          <nz-form-control>
-            <nz-switch formControlName="is_verified"></nz-switch>
-          </nz-form-control>
-        </nz-form-item>
       </div>
 
       <div class="publisher-form__footer">
-        <button type="button" nz-button nzType="default" (click)="onCancel()">إلغاء</button>
+        <button type="button" nz-button nzType="default" (click)="onCancel()">
+          {{ 'ADMIN.PUBLISHERS.FORM.BACK' | translate }}
+        </button>
         <button
           nz-button
           nzType="primary"
@@ -206,7 +223,10 @@
           [disabled]="form.invalid"
           type="submit"
         >
-          {{ isEditMode() ? 'حفظ التعديلات' : 'إضافة الناشر' }}
+          {{
+            (isEditMode() ? 'ADMIN.PUBLISHERS.FORM.SAVE_EDIT' : 'ADMIN.PUBLISHERS.FORM.SAVE_CREATE')
+              | translate
+          }}
         </button>
       </div>
     </form>

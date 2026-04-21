@@ -2,7 +2,7 @@ import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -11,8 +11,9 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
+import { NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
 import { NATIONALITY } from '../../nationality.enum';
-import { ReciterDetails, ReciterListItem } from '../../models/reciters.models';
+import { ReciterDetails, ReciterFormValue, ReciterListItem } from '../../models/reciters.models';
 import { RecitersAdminService } from '../../services/reciters.service';
 import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
 
@@ -29,6 +30,8 @@ import { localizeCountryCodeOrName } from '../../../utils/display-localization.u
     NzInputModule,
     NzSelectModule,
     NzSkeletonModule,
+    NzUploadModule,
+    TranslateModule,
   ],
   templateUrl: './reciter-form.component.html',
   styleUrl: './reciter-form.component.less',
@@ -46,13 +49,16 @@ export class ReciterFormComponent implements OnInit {
   readonly loadingDetail = signal(false);
   readonly submitting = signal(false);
   readonly nationalityOptions = Object.values(NATIONALITY);
+  readonly imageFile = signal<File | null>(null);
+  readonly imagePreview = signal<string | null>(null);
+  readonly imageFileList = signal<NzUploadFile[]>([]);
 
   readonly form = this.fb.group({
     name_ar: ['', [Validators.required, Validators.minLength(2)]],
-    name_en: ['', [Validators.required, Validators.minLength(2)]],
+    name_en: [''],
     bio_ar: [''],
     bio_en: [''],
-    nationality: ['', [Validators.required]],
+    nationality: [''],
     date_of_death: [''],
   });
 
@@ -77,13 +83,14 @@ export class ReciterFormComponent implements OnInit {
     }
 
     const v = this.form.value;
-    const body = {
+    const body: ReciterFormValue = {
       name_ar: v.name_ar ?? '',
       name_en: v.name_en ?? '',
       bio_ar: v.bio_ar ?? '',
       bio_en: v.bio_en ?? '',
       nationality: v.nationality ?? '',
       date_of_death: v.date_of_death || null,
+      image: this.imageFile() ?? undefined,
     };
 
     this.submitting.set(true);
@@ -94,7 +101,7 @@ export class ReciterFormComponent implements OnInit {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (res: ReciterDetails) => {
-            this.message.success('تم تحديث القارئ بنجاح');
+            this.message.success(this.translate.instant('ADMIN.RECITERS.MESSAGES.UPDATE_SUCCESS'));
             this.submitting.set(false);
             void this.router.navigate(['/admin/reciters', res.slug]);
           },
@@ -110,7 +117,7 @@ export class ReciterFormComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res: ReciterListItem) => {
-          this.message.success('تم إضافة القارئ بنجاح');
+          this.message.success(this.translate.instant('ADMIN.RECITERS.MESSAGES.CREATE_SUCCESS'));
           this.submitting.set(false);
           void this.router.navigate(['/admin/reciters', res.slug]);
         },
@@ -136,6 +143,9 @@ export class ReciterFormComponent implements OnInit {
             nationality: data.nationality ?? '',
             date_of_death: data.date_of_death ?? '',
           });
+          if (typeof data.image_url === 'string' && data.image_url) {
+            this.imagePreview.set(data.image_url);
+          }
           this.loadingDetail.set(false);
         },
         error: () => {
@@ -146,5 +156,34 @@ export class ReciterFormComponent implements OnInit {
 
   countryLabel(countryCode: string): string {
     return localizeCountryCodeOrName(countryCode, this.translate.currentLang);
+  }
+
+  beforeImageUpload = (file: NzUploadFile): boolean => {
+    const raw = file as unknown as File;
+    const maxBytes = 10 * 1024 * 1024;
+    if (!raw.type.startsWith('image/')) {
+      this.message.error(this.translate.instant('ADMIN.RECITERS.FORM.MSG_IMAGE_TYPE'));
+      return false;
+    }
+    if (raw.size > maxBytes) {
+      this.message.error(this.translate.instant('ADMIN.RECITERS.FORM.MSG_IMAGE_SIZE'));
+      return false;
+    }
+
+    this.imageFile.set(raw);
+    this.imageFileList.set([file]);
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      this.imagePreview.set((e.target?.result as string) ?? null);
+    };
+    reader.readAsDataURL(raw);
+    return false;
+  };
+
+  removeImage(): void {
+    this.imageFile.set(null);
+    this.imagePreview.set(null);
+    this.imageFileList.set([]);
   }
 }

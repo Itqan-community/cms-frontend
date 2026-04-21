@@ -1,17 +1,25 @@
-<div class="reciter-form" dir="rtl">
+<div class="reciter-form">
   <div class="reciter-form__header">
     <div class="reciter-form__header-text">
       <h2 class="reciter-form__title">
-        {{ isEditMode() ? 'تعديل القارئ' : 'إضافة قارئ جديد' }}
+        {{
+          (isEditMode() ? 'ADMIN.RECITERS.FORM.TITLE_EDIT' : 'ADMIN.RECITERS.FORM.TITLE_CREATE')
+            | translate
+        }}
       </h2>
       <p class="reciter-form__subtitle">
-        {{ isEditMode() ? 'قم بتحديث بيانات القارئ' : 'أدخل بيانات القارئ الجديد' }}
+        {{
+          (isEditMode()
+            ? 'ADMIN.RECITERS.FORM.SUBTITLE_EDIT'
+            : 'ADMIN.RECITERS.FORM.SUBTITLE_CREATE'
+          ) | translate
+        }}
       </p>
     </div>
     <a routerLink="/admin/reciters">
       <button nz-button nzType="default" class="reciter-form__back-btn">
         <ng-icon name="lucideArrowRight" />
-        العودة للقائمة
+        {{ 'ADMIN.RECITERS.FORM.BACK_LIST' | translate }}
       </button>
     </a>
   </div>
@@ -21,21 +29,34 @@
   } @else {
     <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="onSubmit()">
       <div class="reciter-form__card">
-        <h3 class="reciter-form__card-title"><ng-icon name="lucideSquarePen" /> الاسم</h3>
+        <h3 class="reciter-form__card-title">
+          <ng-icon name="lucideSquarePen" /> {{ 'ADMIN.RECITERS.FORM.SECTION_NAME' | translate }}
+        </h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>الاسم بالعربية</nz-form-label>
-              <nz-form-control nzErrorTip="الاسم بالعربية مطلوب">
-                <input nz-input formControlName="name_ar" placeholder="اسم القارئ" />
+              <nz-form-label nzRequired>{{
+                'ADMIN.RECITERS.FORM.NAME_AR' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.RECITERS.FORM.ERR_NAME_AR' | translate">
+                <input
+                  nz-input
+                  formControlName="name_ar"
+                  [placeholder]="'ADMIN.RECITERS.FORM.PLACEHOLDER_NAME_AR' | translate"
+                />
               </nz-form-control>
             </nz-form-item>
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>Name in English</nz-form-label>
-              <nz-form-control nzErrorTip="Name in English is required">
-                <input nz-input formControlName="name_en" placeholder="Name" dir="ltr" />
+              <nz-form-label>{{ 'ADMIN.RECITERS.FORM.NAME_EN' | translate }}</nz-form-label>
+              <nz-form-control>
+                <input
+                  nz-input
+                  formControlName="name_en"
+                  [placeholder]="'ADMIN.RECITERS.FORM.PLACEHOLDER_NAME_EN' | translate"
+                  dir="ltr"
+                />
               </nz-form-control>
             </nz-form-item>
           </div>
@@ -43,16 +64,55 @@
       </div>
 
       <div class="reciter-form__card">
-        <h3 class="reciter-form__card-title"><ng-icon name="lucideFileText" /> السيرة</h3>
+        <h3 class="reciter-form__card-title">
+          <ng-icon name="lucideImage" /> {{ 'ADMIN.RECITERS.FORM.SECTION_IMAGE' | translate }}
+        </h3>
+        <nz-form-item>
+          <nz-form-label>{{ 'ADMIN.RECITERS.FORM.IMAGE_HINT' | translate }}</nz-form-label>
+          <nz-form-control>
+            <div class="reciter-form__image-upload">
+              @if (imagePreview()) {
+                <div class="reciter-form__image-preview">
+                  <img
+                    [src]="imagePreview()!"
+                    [attr.alt]="'ADMIN.RECITERS.FORM.SECTION_IMAGE' | translate"
+                  />
+                  <button type="button" nz-button nzType="default" (click)="removeImage()">
+                    {{ 'ADMIN.RECITERS.FORM.REMOVE_IMAGE' | translate }}
+                  </button>
+                </div>
+              } @else {
+                <nz-upload
+                  [nzFileList]="imageFileList()"
+                  [nzBeforeUpload]="beforeImageUpload"
+                  nzAccept="image/*"
+                  [nzMultiple]="false"
+                  [nzShowUploadList]="false"
+                >
+                  <button nz-button nzType="default" type="button">
+                    <ng-icon name="lucideUpload" />
+                    {{ 'ADMIN.RECITERS.FORM.UPLOAD_IMAGE' | translate }}
+                  </button>
+                </nz-upload>
+              }
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="reciter-form__card">
+        <h3 class="reciter-form__card-title">
+          <ng-icon name="lucideFileText" /> {{ 'ADMIN.RECITERS.FORM.SECTION_BIO' | translate }}
+        </h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label>السيرة بالعربية</nz-form-label>
+              <nz-form-label>{{ 'ADMIN.RECITERS.FORM.BIO_AR' | translate }}</nz-form-label>
               <nz-form-control>
                 <textarea
                   nz-input
                   formControlName="bio_ar"
-                  placeholder="نبذة عن القارئ..."
+                  [placeholder]="'ADMIN.RECITERS.FORM.PLACEHOLDER_BIO_AR' | translate"
                   [nzAutosize]="{ minRows: 3, maxRows: 8 }"
                 ></textarea>
               </nz-form-control>
@@ -60,12 +120,12 @@
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label>Biography (EN)</nz-form-label>
+              <nz-form-label>{{ 'ADMIN.RECITERS.FORM.BIO_EN' | translate }}</nz-form-label>
               <nz-form-control>
                 <textarea
                   nz-input
                   formControlName="bio_en"
-                  placeholder="Short bio..."
+                  [placeholder]="'ADMIN.RECITERS.FORM.PLACEHOLDER_BIO_EN' | translate"
                   dir="ltr"
                   [nzAutosize]="{ minRows: 3, maxRows: 8 }"
                 ></textarea>
@@ -76,17 +136,21 @@
       </div>
 
       <div class="reciter-form__card">
-        <h3 class="reciter-form__card-title"><ng-icon name="lucideGlobe" /> البيانات الإضافية</h3>
+        <h3 class="reciter-form__card-title">
+          <ng-icon name="lucideGlobe" /> {{ 'ADMIN.RECITERS.FORM.SECTION_EXTRA' | translate }}
+        </h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>الجنسية (رمز الدولة)</nz-form-label>
-              <nz-form-control nzErrorTip="اختر الجنسية">
+              <nz-form-label>{{
+                'ADMIN.RECITERS.FORM.NATIONALITY_LABEL' | translate
+              }}</nz-form-label>
+              <nz-form-control>
                 <nz-select
                   formControlName="nationality"
                   nzShowSearch
                   nzAllowClear
-                  nzPlaceHolder="مثال: EG"
+                  [nzPlaceHolder]="'ADMIN.RECITERS.FORM.PLACEHOLDER_NATIONALITY' | translate"
                 >
                   @for (c of nationalityOptions; track c) {
                     <nz-option [nzValue]="c" [nzLabel]="countryLabel(c)"></nz-option>
@@ -97,12 +161,14 @@
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label>تاريخ الوفاة (اختياري)</nz-form-label>
+              <nz-form-label>{{
+                'ADMIN.RECITERS.FORM.DATE_DEATH_LABEL' | translate
+              }}</nz-form-label>
               <nz-form-control>
                 <input
                   nz-input
                   formControlName="date_of_death"
-                  placeholder="YYYY-MM-DD أو فارغ"
+                  [placeholder]="'ADMIN.RECITERS.FORM.PLACEHOLDER_DATE_DEATH' | translate"
                   dir="ltr"
                 />
               </nz-form-control>
@@ -113,10 +179,13 @@
 
       <div class="reciter-form__footer">
         <a routerLink="/admin/reciters">
-          <button nz-button type="button">إلغاء</button>
+          <button nz-button type="button">{{ 'ADMIN.RECITERS.FORM.CANCEL' | translate }}</button>
         </a>
         <button nz-button nzType="primary" [nzLoading]="submitting()" [disabled]="submitting()">
-          {{ isEditMode() ? 'حفظ التعديلات' : 'إضافة القارئ' }}
+          {{
+            (isEditMode() ? 'ADMIN.RECITERS.FORM.SUBMIT_EDIT' : 'ADMIN.RECITERS.FORM.SUBMIT_CREATE')
+              | translate
+          }}
         </button>
       </div>
     </form>

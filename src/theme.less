@@ -120,6 +120,11 @@ span {
   margin: 0;
 }
 
+.hoverable-link:hover {
+  color: var(--color-primary-700);
+  text-decoration: underline;
+}
+
 a.ant-btn {
   padding-block: 0;
 }
@@ -177,6 +182,13 @@ a.ant-btn {
   &-floating {
     box-shadow: var(--shadow-sm);
   }
+}
+
+.ant-table-container {
+  overflow: auto;
+}
+.ant-table-container .ant-table-content table {
+  min-width: max-content;
 }
 
 .ant-input {

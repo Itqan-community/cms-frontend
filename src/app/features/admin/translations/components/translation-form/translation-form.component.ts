@@ -2,7 +2,7 @@ import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
@@ -36,6 +36,7 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
     NzSwitchModule,
     NzToolTipModule,
     NzUploadModule,
+    TranslateModule,
   ],
   templateUrl: './translation-form.component.html',
   styleUrl: './translation-form.component.less',
@@ -63,7 +64,7 @@ export class TranslationFormComponent implements OnInit {
 
   readonly form = this.fb.group({
     name_ar: ['', [Validators.required, Validators.minLength(2)]],
-    name_en: ['', [Validators.required, Validators.minLength(2)]],
+    name_en: [''],
     description_ar: ['', [Validators.required]],
     description_en: ['', [Validators.required]],
     long_description_ar: ['', [Validators.required]],
@@ -131,7 +132,11 @@ export class TranslationFormComponent implements OnInit {
     request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (res) => {
         this.message.success(
-          this.isEditMode() ? 'تم تحديث الترجمة بنجاح' : 'تم إضافة الترجمة بنجاح'
+          this.translate.instant(
+            this.isEditMode()
+              ? 'ADMIN.TRANSLATIONS.MESSAGES.UPDATE_SUCCESS'
+              : 'ADMIN.TRANSLATIONS.MESSAGES.CREATE_SUCCESS'
+          )
         );
         this.submitting.set(false);
         void this.router.navigate(['/admin/translations', res.slug ?? String(res.id)]);

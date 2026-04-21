@@ -1,17 +1,27 @@
-<div class="recitation-form" dir="rtl">
+<div class="recitation-form">
   <div class="recitation-form__header">
     <div class="recitation-form__header-text">
       <h2 class="recitation-form__title">
-        {{ isEditMode() ? 'تعديل التلاوة' : 'إضافة تلاوة جديدة' }}
+        {{
+          (isEditMode()
+            ? 'ADMIN.RECITATIONS.FORM.TITLE_EDIT'
+            : 'ADMIN.RECITATIONS.FORM.TITLE_CREATE'
+          ) | translate
+        }}
       </h2>
       <p class="recitation-form__subtitle">
-        {{ isEditMode() ? 'قم بتحديث بيانات التلاوة' : 'أدخل بيانات التلاوة الجديدة' }}
+        {{
+          (isEditMode()
+            ? 'ADMIN.RECITATIONS.FORM.SUBTITLE_EDIT'
+            : 'ADMIN.RECITATIONS.FORM.SUBTITLE_CREATE'
+          ) | translate
+        }}
       </p>
     </div>
     <a routerLink="/admin/recitations">
       <button nz-button nzType="default" class="recitation-form__back-btn">
         <ng-icon name="lucideArrowRight" />
-        العودة للقائمة
+        {{ 'ADMIN.RECITATIONS.FORM.BACK_LIST' | translate }}
       </button>
     </a>
   </div>
@@ -21,24 +31,32 @@
   } @else {
     <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="onSubmit()">
       <div class="recitation-form__card">
-        <h3 class="recitation-form__card-title"><ng-icon name="lucideSquarePen" /> الاسم</h3>
+        <h3 class="recitation-form__card-title">
+          <ng-icon name="lucideSquarePen" /> {{ 'ADMIN.RECITATIONS.FORM.SECTION_NAME' | translate }}
+        </h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>الاسم بالعربية</nz-form-label>
-              <nz-form-control nzErrorTip="الاسم بالعربية مطلوب">
-                <input nz-input formControlName="name_ar" placeholder="مثال: مصحف مرتل — حفص" />
+              <nz-form-label nzRequired>{{
+                'ADMIN.RECITATIONS.FORM.NAME_AR' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.RECITATIONS.FORM.ERR_NAME_AR' | translate">
+                <input
+                  nz-input
+                  formControlName="name_ar"
+                  [placeholder]="'ADMIN.RECITATIONS.FORM.PLACEHOLDER_NAME_AR' | translate"
+                />
               </nz-form-control>
             </nz-form-item>
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>Name in English</nz-form-label>
-              <nz-form-control nzErrorTip="Name in English is required">
+              <nz-form-label>{{ 'ADMIN.RECITATIONS.FORM.NAME_EN' | translate }}</nz-form-label>
+              <nz-form-control>
                 <input
                   nz-input
                   formControlName="name_en"
-                  placeholder="e.g. Murattal Mushaf"
+                  [placeholder]="'ADMIN.RECITATIONS.FORM.PLACEHOLDER_NAME_EN' | translate"
                   dir="ltr"
                 />
               </nz-form-control>
@@ -48,12 +66,16 @@
       </div>
 
       <div class="recitation-form__card">
-        <h3 class="recitation-form__card-title"><ng-icon name="lucideFileText" /> الوصف</h3>
+        <h3 class="recitation-form__card-title">
+          <ng-icon name="lucideFileText" /> {{ 'ADMIN.RECITATIONS.FORM.SECTION_DESC' | translate }}
+        </h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>الوصف بالعربية</nz-form-label>
-              <nz-form-control nzErrorTip="مطلوب">
+              <nz-form-label nzRequired>{{
+                'ADMIN.RECITATIONS.FORM.DESCRIPTION_AR' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'FORMS.VALIDATION.REQUIRED' | translate">
                 <textarea
                   nz-input
                   formControlName="description_ar"
@@ -64,8 +86,10 @@
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>Description (EN)</nz-form-label>
-              <nz-form-control nzErrorTip="Required">
+              <nz-form-label nzRequired>{{
+                'ADMIN.RECITATIONS.FORM.DESCRIPTION_EN' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'FORMS.VALIDATION.REQUIRED' | translate">
                 <textarea
                   nz-input
                   formControlName="description_en"
@@ -79,12 +103,16 @@
       </div>
 
       <div class="recitation-form__card">
-        <h3 class="recitation-form__card-title"><ng-icon name="lucideLink" /> الربط والخصائص</h3>
+        <h3 class="recitation-form__card-title">
+          <ng-icon name="lucideLink" /> {{ 'ADMIN.RECITATIONS.FORM.SECTION_LINKS' | translate }}
+        </h3>
         <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>الناشر</nz-form-label>
-              <nz-form-control nzErrorTip="اختر الناشر">
+              <nz-form-label nzRequired>{{
+                'ADMIN.RECITATIONS.COLUMNS.PUBLISHER' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.RECITATIONS.FORM.ERR_PUBLISHER' | translate">
                 <nz-select
                   formControlName="publisher_id"
                   nzShowSearch
@@ -102,8 +130,10 @@
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>القارئ</nz-form-label>
-              <nz-form-control nzErrorTip="اختر القارئ">
+              <nz-form-label nzRequired>{{
+                'ADMIN.RECITATIONS.COLUMNS.RECITER' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.RECITATIONS.FORM.ERR_RECRITER' | translate">
                 <nz-select formControlName="reciter_id" nzShowSearch nzAllowClear>
                   @for (r of reciterOptions(); track r.id) {
                     <nz-option [nzValue]="r.id" [nzLabel]="r.name"></nz-option>
@@ -114,8 +144,10 @@
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>القراءة</nz-form-label>
-              <nz-form-control nzErrorTip="اختر القراءة">
+              <nz-form-label nzRequired>{{
+                'ADMIN.RECITATIONS.COLUMNS.QIRAAH' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.RECITATIONS.FORM.ERR_QIRAAH' | translate">
                 <nz-select
                   formControlName="qiraah_id"
                   nzAllowClear
@@ -130,7 +162,9 @@
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label>الرواية</nz-form-label>
+              <nz-form-label>{{
+                'ADMIN.RECITATIONS.FORM.LABEL_RIWAYAH' | translate
+              }}</nz-form-label>
               <nz-form-control>
                 <nz-select
                   formControlName="riwayah_id"
@@ -146,11 +180,11 @@
           </div>
           <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
             <nz-form-item>
-              <nz-form-label nzRequired>مستوى المد</nz-form-label>
+              <nz-form-label>{{ 'ADMIN.RECITATIONS.FORM.LABEL_MADD' | translate }}</nz-form-label>
               <nz-form-control>
                 <nz-select formControlName="madd_level">
                   @for (m of maddOptions; track m.v) {
-                    <nz-option [nzValue]="m.v" [nzLabel]="m.l"></nz-option>
+                    <nz-option [nzValue]="m.v" [nzLabel]="m.labelKey | translate"></nz-option>
                   }
                 </nz-select>
               </nz-form-control>
@@ -158,11 +192,11 @@
           </div>
           <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
             <nz-form-item>
-              <nz-form-label nzRequired>همز الميم</nz-form-label>
+              <nz-form-label>{{ 'ADMIN.RECITATIONS.FORM.LABEL_MEEM' | translate }}</nz-form-label>
               <nz-form-control>
                 <nz-select formControlName="meem_behaviour">
                   @for (m of meemOptions; track m.v) {
-                    <nz-option [nzValue]="m.v" [nzLabel]="m.l"></nz-option>
+                    <nz-option [nzValue]="m.v" [nzLabel]="m.labelKey | translate"></nz-option>
                   }
                 </nz-select>
               </nz-form-control>
@@ -170,8 +204,8 @@
           </div>
           <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
             <nz-form-item>
-              <nz-form-label nzRequired>السنة</nz-form-label>
-              <nz-form-control nzErrorTip="أدخل سنة صحيحة">
+              <nz-form-label>{{ 'ADMIN.RECITATIONS.FORM.LABEL_YEAR' | translate }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.RECITATIONS.FORM.ERR_YEAR' | translate">
                 <div class="recitation-form__year-wrap">
                   <nz-date-picker
                     nzMode="year"
@@ -180,20 +214,22 @@
                     [nzDefaultPickerValue]="hijriDefaultPickerDate"
                     [nzDisabledDate]="disableNonHijriYears"
                     class="recitation-form__year-picker"
-                    nzPlaceHolder="السنة (هجري)"
+                    [nzPlaceHolder]="'ADMIN.RECITATIONS.FORM.PLACEHOLDER_YEAR_HIJRI' | translate"
                     [ngModel]="selectedHijriDate()"
                     [ngModelOptions]="{ standalone: true }"
                     (ngModelChange)="onYearChange($event)"
                   ></nz-date-picker>
-                  <!-- <span class="recitation-form__hijri-indicator">هجري</span> -->
+                  <!-- optional Hijri year badge (localized via ADMIN.RECITATIONS.FORM when enabled) -->
                 </div>
               </nz-form-control>
             </nz-form-item>
           </div>
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
-              <nz-form-label nzRequired>الترخيص</nz-form-label>
-              <nz-form-control nzErrorTip="اختر الترخيص">
+              <nz-form-label nzRequired>{{
+                'ADMIN.RECITATIONS.FORM.LABEL_LICENSE' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.RECITATIONS.FORM.ERR_LICENSE' | translate">
                 <nz-select formControlName="license" nzAllowClear>
                   @for (l of licenseOptions; track l) {
                     <nz-option [nzValue]="l" [nzLabel]="l"></nz-option>
@@ -207,10 +243,15 @@
 
       <div class="recitation-form__footer">
         <a routerLink="/admin/recitations">
-          <button nz-button type="button">إلغاء</button>
+          <button nz-button type="button">{{ 'ADMIN.RECITATIONS.FORM.CANCEL' | translate }}</button>
         </a>
         <button nz-button nzType="primary" [nzLoading]="submitting()" [disabled]="submitting()">
-          {{ isEditMode() ? 'حفظ التعديلات' : 'إضافة التلاوة' }}
+          {{
+            (isEditMode()
+              ? 'ADMIN.RECITATIONS.FORM.SUBMIT_EDIT'
+              : 'ADMIN.RECITATIONS.FORM.SUBMIT_CREATE'
+            ) | translate
+          }}
         </button>
       </div>
     </form>

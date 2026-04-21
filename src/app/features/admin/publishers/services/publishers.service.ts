@@ -28,9 +28,9 @@ export class PublishersService {
     if (params.country) {
       httpParams = httpParams.set('country', params.country);
     }
-    if (params.is_verified !== undefined) {
-      httpParams = httpParams.set('is_verified', params.is_verified.toString());
-    }
+    // if (params.is_verified !== undefined) {
+    //   httpParams = httpParams.set('is_verified', params.is_verified.toString());
+    // }
     if (params.ordering) {
       httpParams = httpParams.set('ordering', params.ordering);
     }
@@ -92,9 +92,9 @@ export class PublishersService {
       data.append('icon', payload.icon);
     }
     appendString('foundation_year', payload.foundation_year);
-    if (payload.is_verified !== undefined) {
-      data.append('is_verified', String(payload.is_verified));
-    }
+    // if (payload.is_verified !== undefined) {
+    //   data.append('is_verified', String(payload.is_verified));
+    // }
 
     return data;
   }

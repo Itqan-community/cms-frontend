@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -12,12 +12,8 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
-import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
-import {
-  PublisherCreatePayload,
-  PublisherUpdatePayload,
-} from '../../models/publishers-stats.models';
+import { PublisherUpdatePayload } from '../../models/publishers-stats.models';
 import { NATIONALITY } from '../../../reciters/nationality.enum';
 import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
 import { PublishersService } from '../../services/publishers.service';
@@ -35,8 +31,8 @@ import { PublishersService } from '../../services/publishers.service';
     NzInputModule,
     NzSelectModule,
     NzSkeletonModule,
-    NzSwitchModule,
     NzUploadModule,
+    TranslateModule,
   ],
   templateUrl: './publisher-form.component.html',
   styleUrl: './publisher-form.component.less',
@@ -60,7 +56,7 @@ export class PublisherFormComponent implements OnInit {
 
   readonly form = this.fb.group({
     name_ar: ['', [Validators.required, Validators.minLength(2)]],
-    name_en: ['', [Validators.required, Validators.minLength(2)]],
+    name_en: [''],
     country: [''],
     website: [''],
     foundation_year: [null as number | null],
@@ -68,7 +64,7 @@ export class PublisherFormComponent implements OnInit {
     contact_email: ['', [Validators.email]],
     description_ar: [''],
     description_en: [''],
-    is_verified: [false],
+    // is_verified: [false],
   });
 
   private editId: number | null = null;
@@ -100,12 +96,13 @@ export class PublisherFormComponent implements OnInit {
     }
 
     if (this.isEditMode() && this.editId != null) {
+      const dir = this.translate.currentLang === 'ar' ? 'rtl' : 'ltr';
       this.modal.confirm({
-        nzTitle: 'تأكيد تعديل الناشر',
-        nzContent: 'هل تؤكد حفظ التغييرات؟ سيتم تحديث بيانات الناشر على مستوى النظام.',
-        nzOkText: 'نعم، احفظ',
-        nzCancelText: 'إلغاء',
-        nzDirection: 'rtl',
+        nzTitle: this.translate.instant('ADMIN.PUBLISHERS.FORM.CONFIRM_EDIT_TITLE'),
+        nzContent: this.translate.instant('ADMIN.PUBLISHERS.FORM.CONFIRM_EDIT_CONTENT'),
+        nzOkText: this.translate.instant('ADMIN.PUBLISHERS.FORM.CONFIRM_OK'),
+        nzCancelText: this.translate.instant('COMMON.CANCEL'),
+        nzDirection: dir,
         nzOnOk: () => this.persistEdit(),
       });
       return;
@@ -122,7 +119,7 @@ export class PublisherFormComponent implements OnInit {
     this.submitting.set(true);
     try {
       await firstValueFrom(this.publishersService.updatePublisher(id, payload));
-      this.message.success('تم تحديث الناشر بنجاح');
+      this.message.success(this.translate.instant('ADMIN.PUBLISHERS.FORM.MSG_UPDATE_OK'));
       void this.router.navigate(['/admin/publishers', id]);
     } catch {
       return Promise.reject(new Error('save failed'));
@@ -136,9 +133,10 @@ export class PublisherFormComponent implements OnInit {
     this.submitting.set(true);
     try {
       const created = await firstValueFrom(this.publishersService.createPublisher(payload));
-      this.message.success('تم إضافة الناشر بنجاح');
+      this.message.success(this.translate.instant('ADMIN.PUBLISHERS.FORM.MSG_CREATE_OK'));
       void this.router.navigate(['/admin/publishers', created.id]);
     } catch {
+      return Promise.reject(new Error('save failed'));
     } finally {
       this.submitting.set(false);
     }
@@ -161,8 +159,8 @@ export class PublisherFormComponent implements OnInit {
       contact_email: v.contact_email?.trim() || undefined,
       description_ar: v.description_ar?.trim() || undefined,
       description_en: v.description_en?.trim() || undefined,
-      is_verified: !!v.is_verified,
-    };
+      // is_verified: !!v.is_verified,
+    } as PublisherUpdatePayload;
   }
 
   private loadForEdit(): void {
@@ -180,7 +178,7 @@ export class PublisherFormComponent implements OnInit {
           contact_email: data.contact_email ?? '',
           description_ar: data.description_ar ?? '',
           description_en: data.description_en ?? '',
-          is_verified: !!data.is_verified,
+          // is_verified: !!data.is_verified,
         });
         if (typeof data.icon === 'string' && data.icon) {
           this.iconPreview.set(data.icon);
@@ -197,11 +195,11 @@ export class PublisherFormComponent implements OnInit {
     const raw = file as unknown as File;
     const maxBytes = 10 * 1024 * 1024;
     if (!raw.type.startsWith('image/')) {
-      this.message.error('يسمح فقط برفع ملفات الصور.');
+      this.message.error(this.translate.instant('ADMIN.PUBLISHERS.FORM.MSG_IMAGE_TYPE'));
       return false;
     }
     if (raw.size > maxBytes) {
-      this.message.error('حجم الصورة يجب ألا يتجاوز 10MB.');
+      this.message.error(this.translate.instant('ADMIN.PUBLISHERS.FORM.MSG_IMAGE_SIZE'));
       return false;
     }
 

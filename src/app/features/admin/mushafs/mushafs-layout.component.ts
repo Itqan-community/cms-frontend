@@ -8,8 +8,8 @@ import { SectionLayoutComponent } from '../components/section-layout/section-lay
   imports: [SectionLayoutComponent],
   template: `
     <app-section-layout
-      title="المصاحف"
-      description="إدارة النص القرآني على ثلاثة مستويات: السور الكاملة، الآيات المقطعة، والكلمات المنفردة"
+      title="ADMIN.MUSHAFS.TITLE"
+      description="ADMIN.MUSHAFS.DESCRIPTION"
       basePath="/admin/mushafs"
       [tabs]="subTabs"
     />
@@ -17,9 +17,9 @@ import { SectionLayoutComponent } from '../components/section-layout/section-lay
 })
 export class MushafsLayoutComponent {
   readonly subTabs: SectionTab[] = [
-    { id: 'pages', path: 'pages', label: 'الصفحات', icon: 'lucideLayers' },
-    { id: 'surahs', path: 'surahs', label: 'السور', icon: 'lucideBookOpen' },
-    { id: 'ayahs', path: 'ayahs', label: 'الآيات', icon: 'lucideList' },
-    { id: 'words', path: 'words', label: 'الكلمات', icon: 'lucideBookmark' },
+    { id: 'pages', path: 'pages', label: 'ADMIN.MUSHAFS.TAB_PAGES', icon: 'lucideLayers' },
+    { id: 'surahs', path: 'surahs', label: 'ADMIN.MUSHAFS.TAB_SURAHS', icon: 'lucideBookOpen' },
+    { id: 'ayahs', path: 'ayahs', label: 'ADMIN.MUSHAFS.TAB_AYAHS', icon: 'lucideList' },
+    { id: 'words', path: 'words', label: 'ADMIN.MUSHAFS.TAB_WORDS', icon: 'lucideBookmark' },
   ];
 }
