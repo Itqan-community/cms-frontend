@@ -10,10 +10,7 @@ import { AdminTableSortPrefsService } from '../services/admin-table-sort-prefs.s
  * and syncing state with URL query parameters.
  */
 @Directive()
-export abstract class AdminListBase<
-  T,
-  F extends Record<string, string | number | boolean | null | undefined>,
-> {
+export abstract class AdminListBase<T, F extends object> {
   protected readonly router = inject(Router);
   protected readonly route = inject(ActivatedRoute);
   protected readonly sortPrefs = inject(AdminTableSortPrefsService);
@@ -59,7 +56,7 @@ export abstract class AdminListBase<
       this.page.set(page);
       this.pageSize.set(pageSize);
       this.ordering = ordering;
-      this.activeFilters = activeFilters;
+      this.activeFilters = activeFilters as Partial<F>;
 
       this.load();
     });
@@ -78,9 +75,7 @@ export abstract class AdminListBase<
       page: this.page() > 1 ? this.page() : null,
       page_size: this.pageSize() !== 10 ? this.pageSize() : null,
       ordering: this.ordering || null,
-      search:
-        (this.activeFilters as Record<string, string | number | boolean | null | undefined>)
-          .search || null,
+      search: (this.activeFilters as { search?: string | null })['search'] || null,
       ...updates,
     };
 
