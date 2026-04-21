@@ -387,7 +387,8 @@
       "DESCRIPTION_EN": "Description (English)",
       "DESCRIPTION_AR": "Description (Arabic)",
       "PLACEHOLDER_EG": "e.g.",
-      "EM_DASH": "—"
+      "EM_DASH": "—",
+      "HIJRI_YEAR_SUFFIX": "AH"
     },
     "REFRESH_PROMPT": {
       "TITLE": "Do you want to reset data?",
@@ -986,7 +987,7 @@
       "COLUMNS": {
         "NAME": "Name",
         "COUNTRY": "Country",
-        "DESCRIPTION": "Description",
+        "FOUNDATION_YEAR": "Foundation year",
         "VERIFIED": "Verified",
         "CREATED_AT": "Date Added",
         "ACTIONS": "Actions"
@@ -1014,6 +1015,8 @@
         "UPLOAD_IMAGE": "Upload image",
         "ERR_NAME_AR": "Arabic name is required",
         "ERR_EMAIL": "Invalid email",
+        "ERR_FOUNDATION_YEAR": "Enter a valid year",
+        "PLACEHOLDER_FOUNDATION_YEAR_HIJRI": "Year (Hijri)",
         "SAVE_EDIT": "Save changes",
         "SAVE_CREATE": "Add publisher",
         "CONFIRM_EDIT_TITLE": "Confirm publisher update",

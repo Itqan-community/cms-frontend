@@ -94,13 +94,25 @@
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
               <nz-form-label>{{ 'ADMIN.PUBLISHER_ADD.FOUNDATION_YEAR' | translate }}</nz-form-label>
-              <nz-form-control>
-                <input
-                  nz-input
-                  type="number"
-                  formControlName="foundation_year"
-                  placeholder="2020"
-                />
+              <nz-form-control
+                [nzErrorTip]="'ADMIN.PUBLISHERS.FORM.ERR_FOUNDATION_YEAR' | translate"
+              >
+                <div class="publisher-form__year-wrap">
+                  <nz-date-picker
+                    nzMode="year"
+                    nzFormat="yyyy"
+                    [nzInputReadOnly]="true"
+                    [nzDefaultPickerValue]="hijriDefaultPickerDate"
+                    [nzDisabledDate]="disableNonHijriYears"
+                    class="publisher-form__year-picker"
+                    [nzPlaceHolder]="
+                      'ADMIN.PUBLISHERS.FORM.PLACEHOLDER_FOUNDATION_YEAR_HIJRI' | translate
+                    "
+                    [ngModel]="selectedHijriDate()"
+                    [ngModelOptions]="{ standalone: true }"
+                    (ngModelChange)="onFoundationYearChange($event)"
+                  ></nz-date-picker>
+                </div>
               </nz-form-control>
             </nz-form-item>
           </div>

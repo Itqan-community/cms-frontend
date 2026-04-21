@@ -1,9 +1,17 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormBuilder,
+  FormsModule,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NgIcon } from '@ng-icons/core';
@@ -18,13 +26,27 @@ import { NATIONALITY } from '../../../reciters/nationality.enum';
 import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
 import { PublishersService } from '../../services/publishers.service';
 
+/** Hijri year optional: empty is valid; if set, must be within range */
+function optionalHijriYearRange(minY: number, maxY: number) {
+  return (control: AbstractControl): ValidationErrors | null => {
+    const raw = control.value;
+    if (raw === null || raw === undefined || raw === '') return null;
+    const n = Number(raw);
+    if (!Number.isFinite(n)) return { yearInvalid: true };
+    if (n < minY || n > maxY) return { yearRange: true };
+    return null;
+  };
+}
+
 @Component({
   selector: 'app-publisher-form',
   standalone: true,
   imports: [
+    FormsModule,
     ReactiveFormsModule,
     NzModalModule,
     NzButtonModule,
+    NzDatePickerModule,
     NzFormModule,
     NzGridModule,
     NgIcon,
@@ -54,12 +76,17 @@ export class PublisherFormComponent implements OnInit {
   readonly iconFileList = signal<NzUploadFile[]>([]);
   readonly countryOptions = Object.values(NATIONALITY);
 
+  readonly selectedHijriDate = signal<Date | null>(null);
+  readonly hijriDefaultPickerDate = new Date(1446, 0, 1);
+  private readonly minHijriYear = 1300;
+  private readonly maxHijriYear = 1600;
+
   readonly form = this.fb.group({
     name_ar: ['', [Validators.required, Validators.minLength(2)]],
     name_en: [''],
     country: [''],
     website: [''],
-    foundation_year: [null as number | null],
+    foundation_year: [null as number | null, [optionalHijriYearRange(1300, 1600)]],
     address: [''],
     contact_email: ['', [Validators.email]],
     description_ar: [''],
@@ -180,6 +207,9 @@ export class PublisherFormComponent implements OnInit {
           description_en: data.description_en ?? '',
           // is_verified: !!data.is_verified,
         });
+        this.selectedHijriDate.set(
+          data.foundation_year ? new Date(data.foundation_year, 0, 1) : this.hijriDefaultPickerDate
+        );
         if (typeof data.icon === 'string' && data.icon) {
           this.iconPreview.set(data.icon);
         }
@@ -223,4 +253,17 @@ export class PublisherFormComponent implements OnInit {
   countryLabel(countryCode: string): string {
     return localizeCountryCodeOrName(countryCode, this.translate.currentLang);
   }
+
+  onFoundationYearChange(value: Date | null): void {
+    this.selectedHijriDate.set(value);
+    const year = value?.getFullYear() ?? null;
+    this.form.patchValue({ foundation_year: year as number | null });
+    this.form.controls.foundation_year.markAsDirty();
+    this.form.controls.foundation_year.updateValueAndValidity({ onlySelf: true });
+  }
+
+  disableNonHijriYears = (current: Date): boolean => {
+    const year = current.getFullYear();
+    return year < this.minHijriYear || year > this.maxHijriYear;
+  };
 }

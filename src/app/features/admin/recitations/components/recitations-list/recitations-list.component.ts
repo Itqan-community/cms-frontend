@@ -3,7 +3,7 @@ import { Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -16,6 +16,7 @@ import {
   AdminTableColumnOption,
 } from '../../../components/admin-column-picker/admin-column-picker.component';
 import { AdminTableSortPrefsService } from '../../../services/admin-table-sort-prefs.service';
+import { formatHijriYearForAdminListing } from '../../../utils/display-localization.util';
 import {
   RecitationListFilters,
   RecitationListItem,
@@ -49,6 +50,7 @@ export class RecitationsListComponent {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly sortPrefs = inject(AdminTableSortPrefsService);
+  private readonly translate = inject(TranslateService);
 
   readonly recitations = signal<RecitationListItem[]>([]);
   readonly total = signal(0);
@@ -188,6 +190,13 @@ export class RecitationsListComponent {
 
   getLicenseColor(license: string): string {
     return this.licensesColors[license as keyof typeof LicensesColors] ?? '#8c8c8c';
+  }
+
+  listingHijriYear(year: number | null | undefined): string {
+    return formatHijriYearForAdminListing(year, {
+      suffix: this.translate.instant('ADMIN.COMMON.HIJRI_YEAR_SUFFIX'),
+      empty: this.translate.instant('ADMIN.COMMON.EM_DASH'),
+    });
   }
 
   truncate(text: string | null | undefined, max = 120): string {

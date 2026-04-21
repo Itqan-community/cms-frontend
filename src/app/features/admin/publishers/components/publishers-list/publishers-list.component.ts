@@ -14,7 +14,10 @@ import {
   AdminTableColumnOption,
 } from '../../../components/admin-column-picker/admin-column-picker.component';
 import { AdminTableSortPrefsService } from '../../../services/admin-table-sort-prefs.service';
-import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
+import {
+  formatHijriYearForAdminListing,
+  localizeCountryCodeOrName,
+} from '../../../utils/display-localization.util';
 import { Publisher, PublisherUiFilters } from '../../models/publishers-stats.models';
 import { PublishersService } from '../../services/publishers.service';
 import { PublisherFiltersComponent } from '../publisher-filters/publisher-filters.component';
@@ -55,7 +58,7 @@ export class PublishersListComponent {
   readonly publisherTableColumns: AdminTableColumnOption[] = [
     { key: 'name', label: 'ADMIN.PUBLISHERS.COLUMNS.NAME' },
     { key: 'country', label: 'ADMIN.PUBLISHERS.COLUMNS.COUNTRY' },
-    { key: 'description', label: 'ADMIN.PUBLISHERS.COLUMNS.DESCRIPTION' },
+    { key: 'foundation_year', label: 'ADMIN.PUBLISHERS.COLUMNS.FOUNDATION_YEAR' },
     { key: 'created', label: 'ADMIN.PUBLISHERS.COLUMNS.CREATED_AT' },
   ];
   private readonly columnVisibility = signal<Record<string, boolean>>({});
@@ -183,19 +186,10 @@ export class PublishersListComponent {
     return localizeCountryCodeOrName(country, this.translate.currentLang);
   }
 
-  publisherDescriptionPreview(p: Publisher): string {
-    const raw = p.description_ar ?? p.description_en ?? p.description ?? '';
-    return this.truncate(raw);
-  }
-
-  private truncate(text: string | null | undefined, max = 120): string {
-    if (text == null || text === '') {
-      return '—';
-    }
-    const t = text.trim();
-    if (t.length <= max) {
-      return t;
-    }
-    return `${t.slice(0, max)}…`;
+  foundationYearDisplay(year: number | null | undefined): string {
+    return formatHijriYearForAdminListing(year, {
+      suffix: this.translate.instant('ADMIN.COMMON.HIJRI_YEAR_SUFFIX'),
+      empty: this.translate.instant('ADMIN.COMMON.EM_DASH'),
+    });
   }
 }

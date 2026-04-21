@@ -50,8 +50,8 @@
             @if (showPublisherCol('country')) {
               <th nzWidth="120px">{{ 'ADMIN.PUBLISHERS.COLUMNS.COUNTRY' | translate }}</th>
             }
-            @if (showPublisherCol('description')) {
-              <th nzWidth="240px">{{ 'ADMIN.PUBLISHERS.COLUMNS.DESCRIPTION' | translate }}</th>
+            @if (showPublisherCol('foundation_year')) {
+              <th nzWidth="110px">{{ 'ADMIN.PUBLISHERS.COLUMNS.FOUNDATION_YEAR' | translate }}</th>
             }
             <!-- is_verified column (commented out — do not delete; use ADMIN.PUBLISHERS.COLUMNS.VERIFIED)
             <th nzWidth="100px">{{ 'ADMIN.PUBLISHERS.COLUMNS.VERIFIED' | translate }}</th>
@@ -82,8 +82,8 @@
               @if (showPublisherCol('country')) {
                 <td>{{ countryLabel(p.country) }}</td>
               }
-              @if (showPublisherCol('description')) {
-                <td class="admin-list-desc">{{ publisherDescriptionPreview(p) }}</td>
+              @if (showPublisherCol('foundation_year')) {
+                <td>{{ foundationYearDisplay(p.foundation_year) }}</td>
               }
               <!-- is_verified cell (commented out — do not delete; use ADMIN.PUBLISHERS.VERIFIED_TAG / NOT_VERIFIED_TAG)
               <td>
