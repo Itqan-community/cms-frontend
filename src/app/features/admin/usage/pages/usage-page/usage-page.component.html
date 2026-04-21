@@ -9,7 +9,12 @@
     } @else if (!boardUrl() && !loading()) {
       <nz-empty [nzNotFoundContent]="'USAGE.NO_DATA' | translate"></nz-empty>
     } @else if (boardUrl()) {
-      <iframe class="usage-page__board" [src]="boardUrl()!" frameborder="0" allowfullscreen></iframe>
+      <iframe
+        class="usage-page__board"
+        [src]="boardUrl()!"
+        frameborder="0"
+        allowfullscreen
+      ></iframe>
     }
   </nz-spin>
 </div>
