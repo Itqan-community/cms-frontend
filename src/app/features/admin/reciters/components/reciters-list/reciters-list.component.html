@@ -13,7 +13,7 @@
   </div>
 
   <app-reciter-filters
-    [searchValue]="activeFilters.search || ''"
+    [initialFilters]="activeFilters"
     (filtersChange)="onFiltersChange($event)"
   ></app-reciter-filters>
 
@@ -21,7 +21,7 @@
     <app-admin-column-picker
       [storageKey]="reciterTableStorageKey"
       [columns]="reciterTableColumns"
-      (visibilityChange)="onReciterColumnVisibility($event)"
+      (visibilityChange)="onColumnVisibilityChange($event)"
     />
   </div>
 
@@ -29,7 +29,7 @@
     <nz-spin [nzSpinning]="loading()">
       <nz-table
         #reciterTable
-        [nzData]="reciters()"
+        [nzData]="items()"
         [nzFrontPagination]="false"
         [nzShowPagination]="false"
         nzSize="middle"
@@ -37,38 +37,40 @@
       >
         <thead>
           <tr>
-            @if (showReciterCol('name')) {
+            @if (showCol('name')) {
               <th
                 nzWidth="200px"
                 [nzSortFn]="true"
                 [nzSortOrder]="getSortOrder('name')"
-                (nzSortOrderChange)="onSortChange('name', $event)"
+                (nzSortOrderChange)="onSortChange(reciterTableStorageKey, 'name', $event)"
               >
                 {{ 'ADMIN.RECITERS.COLUMNS.NAME' | translate }}
               </th>
             }
-            @if (showReciterCol('bio')) {
+            @if (showCol('bio')) {
               <th nzWidth="240px">{{ 'ADMIN.RECITERS.COLUMNS.BIO' | translate }}</th>
             }
-            @if (showReciterCol('nationality')) {
+            @if (showCol('nationality')) {
               <th nzWidth="100px">{{ 'ADMIN.RECITERS.COLUMNS.NATIONALITY' | translate }}</th>
             }
-            @if (showReciterCol('recitations_count')) {
+            @if (showCol('recitations_count')) {
               <th
                 nzWidth="110px"
                 [nzSortFn]="true"
                 [nzSortOrder]="getSortOrder('recitations_count')"
-                (nzSortOrderChange)="onSortChange('recitations_count', $event)"
+                (nzSortOrderChange)="
+                  onSortChange(reciterTableStorageKey, 'recitations_count', $event)
+                "
               >
                 {{ 'ADMIN.RECITERS.COLUMNS.RECITATIONS_COUNT' | translate }}
               </th>
             }
-            @if (showReciterCol('created')) {
+            @if (showCol('created')) {
               <th
                 nzWidth="130px"
                 [nzSortFn]="true"
                 [nzSortOrder]="getSortOrder('created_at')"
-                (nzSortOrderChange)="onSortChange('created_at', $event)"
+                (nzSortOrderChange)="onSortChange(reciterTableStorageKey, 'created_at', $event)"
               >
                 {{ 'ADMIN.RECITERS.COLUMNS.CREATED_AT' | translate }}
               </th>
@@ -79,7 +81,7 @@
         <tbody>
           @for (reciter of reciterTable.data; track reciter.id) {
             <tr class="admin-list-row">
-              @if (showReciterCol('name')) {
+              @if (showCol('name')) {
                 <td class="admin-list-name">
                   <a class="hoverable-link" [routerLink]="['/admin/reciters', reciter.slug]">
                     {{ reciter.name }}
@@ -87,16 +89,16 @@
                 </td>
               }
 
-              @if (showReciterCol('bio')) {
+              @if (showCol('bio')) {
                 <td class="admin-list-desc">{{ truncate(reciter.bio) }}</td>
               }
-              @if (showReciterCol('nationality')) {
-                <td>{{ countryLabel(reciter.nationality) }}</td>
+              @if (showCol('nationality')) {
+                <td>{{ reciter.nationality | adminCountryLabel }}</td>
               }
-              @if (showReciterCol('recitations_count')) {
+              @if (showCol('recitations_count')) {
                 <td>{{ reciter.recitations_count }}</td>
               }
-              @if (showReciterCol('created')) {
+              @if (showCol('created')) {
                 <td>{{ reciter.created_at | date: 'dd/MM/yyyy' }}</td>
               }
               <td (click)="$event.stopPropagation()">

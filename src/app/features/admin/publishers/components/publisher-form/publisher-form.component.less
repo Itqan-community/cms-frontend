@@ -1,62 +1,6 @@
 .publisher-form {
   padding: 8px 0;
 
-  &__header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  &__header-text {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  &__title {
-    margin: 0;
-    font-size: 1.35rem;
-    font-weight: 700;
-    color: #1f2937;
-  }
-
-  &__subtitle {
-    margin: 0;
-    font-size: 0.875rem;
-    color: #6b7280;
-  }
-
-  &__back-btn {
-    border-radius: 10px;
-    height: 40px;
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-  }
-
-  &__card {
-    background: #fff;
-    border-radius: 14px;
-    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
-    padding: 24px 28px;
-    margin-bottom: 20px;
-  }
-
-  &__card-title {
-    margin: 0 0 20px;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #374151;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding-bottom: 14px;
-    border-bottom: 1px solid #f3f4f6;
-  }
-
   &__year-wrap {
     display: flex;
     align-items: center;
@@ -65,20 +9,6 @@
 
   &__year-picker {
     width: 100%;
-  }
-
-  &__footer {
-    display: flex;
-    justify-content: flex-end;
-    gap: 12px;
-    margin-top: 8px;
-
-    button {
-      height: 40px;
-      border-radius: 10px;
-      min-width: 120px;
-      font-weight: 500;
-    }
   }
 
   &__icon-upload {
@@ -95,49 +25,8 @@
       width: 64px;
       height: 64px;
       object-fit: cover;
-      border-radius: 10px;
-      border: 1px solid #e5e7eb;
-    }
-  }
-}
-
-:host ::ng-deep {
-  .ant-form-item-label > label {
-    font-weight: 500;
-    color: #374151;
-  }
-
-  .ant-input,
-  .ant-input-affix-wrapper {
-    border-radius: 10px;
-    border-color: #e5e7eb;
-    font-size: 0.9rem;
-
-    &:hover {
-      border-color: #16a34a;
-    }
-    &:focus,
-    &-focused {
-      border-color: #16a34a;
-      box-shadow: none;
-    }
-  }
-
-  textarea.ant-input {
-    border-radius: 10px;
-    resize: vertical;
-  }
-
-  .ant-btn-primary {
-    background: #16a34a;
-    border-color: #16a34a;
-
-    &:hover {
-      background: #15803d;
-      border-color: #15803d;
-    }
-    &[disabled] {
-      opacity: 0.5;
+      border-radius: var(--radius-lg); // 8px
+      border: 1px solid var(--admin-border-200);
     }
   }
 }

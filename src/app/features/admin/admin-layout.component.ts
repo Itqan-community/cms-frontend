@@ -1,4 +1,5 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, DestroyRef } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -20,13 +21,6 @@ interface CmsTab {
   disabled?: boolean;
 }
 
-const TAB_PROFILE: CmsTab = {
-  id: 'profile',
-  path: 'profile',
-  label: 'ADMIN.MENU.MANAGE_PROFILE',
-  icon: 'lucideIdCard',
-  disabled: true,
-};
 const TAB_MUSHAFS: CmsTab = {
   id: 'mushafs',
   path: 'mushafs',
@@ -97,22 +91,14 @@ export class AdminLayoutComponent {
     this.translate.getCurrentLang() === 'ar' ? 'rtl' : 'ltr'
   );
 
+  private readonly destroyRef = inject(DestroyRef);
+
   readonly tabs = computed(() => {
-    // if (this.adminAuth.isItqanAdmin()) {
-    //   return [TAB_MUSHAFS, TAB_TAFSIRS, TAB_TRANSLATIONS, TAB_PUBLISHERS, TAB_AUDIO];
-    // }
-    // if (this.adminAuth.isPublisherAdmin()) {
     return [TAB_PUBLISHERS, TAB_MUSHAFS, ...CORE_TABS];
-    // }
-    // return CORE_TABS;
   });
 
   constructor() {
-    const syncDir = (): void => {
-      this.layoutDir.set(this.translate.getCurrentLang() === 'ar' ? 'rtl' : 'ltr');
-    };
-    syncDir();
-    this.translate.onLangChange.subscribe((e) => {
+    this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
       this.layoutDir.set(e.lang === 'ar' ? 'rtl' : 'ltr');
     });
   }

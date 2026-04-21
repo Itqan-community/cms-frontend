@@ -63,7 +63,7 @@
 
   .ant-menu-item {
     border-radius: var(--radius-md);
-    margin-block: 4px;
+    margin-block: 2px;
     margin-inline: 12px;
     width: ~'calc(100% - 24px)';
     transition: all 0.2s ease-in-out;
@@ -98,15 +98,15 @@
 }
 
 .admin-content-area {
-  padding: 24px;
+  padding: 20px;
   background: transparent;
 }
 
 .admin-content-inner {
   background: var(--admin-surface-white);
-  padding: 16px;
+  padding: 16px 20px;
   min-height: 380px;
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg); // 8px
   box-shadow: var(--shadow-card);
   border: 1px solid var(--color-neutral-100);
 }
@@ -127,7 +127,7 @@
   /* Inner control fills row so icon + label flex layout is consistent */
   & > a.admin-sidenav-link,
   & > .admin-sidenav-link {
-    min-height: 40px;
+    min-height: 38px;
   }
 }
 
@@ -191,7 +191,7 @@
     width: 36px;
     height: 36px;
     border: 0;
-    border-radius: 999px;
+    border-radius: var(--radius-lg);
     background: transparent;
     color: var(--color-neutral-700);
     cursor: pointer;
