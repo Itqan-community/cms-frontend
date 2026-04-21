@@ -1,50 +1,18 @@
 .usage-page {
-  padding: 24px;
-  max-width: 1200px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 
-  &__header {
-    margin-bottom: 24px;
-  }
-
-  &__title {
-    font-size: 22px;
-    font-weight: 600;
-    margin: 0 0 4px;
-  }
-
-  &__subtitle {
-    color: #8c8c8c;
-    margin: 0;
-  }
-
-  &__controls {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin-bottom: 24px;
-  }
-
-  &__publisher-select {
-    min-width: 220px;
-  }
-
-  &__charts {
+  ::ng-deep .ant-spin-container {
+    height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 16px;
   }
 
-  &__card {
+  &__board {
     width: 100%;
-  }
-}
-
-.usage-chart {
-  height: 280px;
-  width: 100%;
-
-  &--tall {
-    height: 360px;
+    flex: 1;
+    min-height: calc(100vh - 64px);
+    border: none;
   }
 }
