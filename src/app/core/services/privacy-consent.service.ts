@@ -45,6 +45,7 @@ export class PrivacyConsentService {
   setConsent(consent: PrivacyConsent): void {
     const updatedConsent = { ...consent, timestamp: Date.now() };
     localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updatedConsent));
+    //NOTE: Guard localStorage access for SSR and avoid side effects in getConsent().
     this.consentSignal.set(updatedConsent);
   }
 

@@ -1,11 +1,12 @@
 import { Location } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRouteSnapshot, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ar_EG, en_US, NzI18nService } from 'ng-zorro-antd/i18n';
 import { filter } from 'rxjs';
 import { GoogleAnalyticsService } from './core/services/google-analytics.service';
+import { PrivacyConsentService } from './core/services/privacy-consent.service';
 import { SentryService } from './core/services/sentry.service';
 import { WebVitalsService } from './core/services/web-vitals.service';
 import { HeaderComponent } from './shared/components/header/header.component';
@@ -26,14 +27,25 @@ export class App {
   private readonly webVitalsService = inject(WebVitalsService);
   private readonly googleAnalyticsService = inject(GoogleAnalyticsService);
   private readonly sentryService = inject(SentryService);
+  private readonly privacyConsentService = inject(PrivacyConsentService);
   protected readonly title = signal('ITQAN | إتقان');
   protected hideHeader = signal(false);
   protected fullWidth = signal(false);
 
   constructor() {
     void this.webVitalsService;
-    this.googleAnalyticsService.init();
-    this.sentryService.init();
+
+    effect(() => {
+      const consent = this.privacyConsentService.getConsentSignal()();
+      if (consent?.analytics) {
+        this.googleAnalyticsService.init();
+        console.debug('Google Analytics initialized.');
+      }
+      if (consent?.errorTracking) {
+        this.sentryService.init();
+        console.debug('Sentry initialized.');
+      }
+    });
 
     const syncShellFromRoute = (): void => {
       let merged: Record<string, unknown> = {};
