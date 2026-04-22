@@ -39,11 +39,9 @@ export class App {
       const consent = this.privacyConsentService.getConsentSignal()();
       if (consent?.analytics) {
         this.googleAnalyticsService.init();
-        console.debug('Google Analytics initialized.');
       }
       if (consent?.errorTracking) {
         this.sentryService.init();
-        console.debug('Sentry initialized.');
       }
     });
 
