@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -6,6 +7,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { LoginRequest } from '../../models/auth.model';
 import { AuthService } from '../../services/auth.service';
 
@@ -46,6 +48,22 @@ export class LoginPage {
     });
   }
 
+  /** Allauth `callback_url` for provider redirect (absolute). */
+  get oauthCallbackUrl(): string {
+    if (typeof window === 'undefined') {
+      return '/auth/oauth/callback';
+    }
+    return `${window.location.origin}/auth/oauth/callback`;
+  }
+
+  onLoginWithGoogle(): void {
+    this.authService.startGoogleOAuth(this.oauthCallbackUrl, 'login');
+  }
+
+  onLoginWithGitHub(): void {
+    this.authService.startGitHubOAuth(this.oauthCallbackUrl, 'login');
+  }
+
   onSubmit(): void {
     if (this.loginForm.valid) {
       this.authService.isLoading.set(true);
@@ -69,8 +87,16 @@ export class LoginPage {
             this.router.navigate(['/gallery']);
           }
         },
-        error: (error) => {
+        error: (error: unknown) => {
           this.authService.isLoading.set(false);
+          if (error instanceof HttpErrorResponse) {
+            if (tryNavigateForAuth401(this.router, error)) {
+              return;
+            }
+            const msg = getErrorMessage(error);
+            this.errorMessage.set(msg || this.translate.instant('AUTH.LOGIN.ERRORS.LOGIN_FAILED'));
+            return;
+          }
           this.errorMessage.set(
             getErrorMessage(error) || this.translate.instant('AUTH.LOGIN.ERRORS.LOGIN_FAILED')
           );

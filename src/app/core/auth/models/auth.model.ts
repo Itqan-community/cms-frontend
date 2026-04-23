@@ -28,10 +28,11 @@ export interface RegisterRequest {
   email: string;
   password: string;
   name: string;
-  phone: string; // +201012345678 +966555555555 format
-  job_title: string;
+  phone?: string; // +201012345678 +966555555555 format
+  job_title?: string;
 }
 
+/** @deprecated Use refresh_token string for /auth/app/v1/tokens/refresh */
 export interface RefreshTokenRequest {
   refresh: string;
 }
@@ -39,6 +40,12 @@ export interface RefreshTokenRequest {
 export interface RefreshTokenResponse {
   access: string;
   refresh: string;
+}
+
+/** Headless app token refresh response (`data` wrapper) */
+export interface AppRefreshTokenData {
+  access_token: string;
+  refresh_token?: string;
 }
 
 export interface UpdateProfileRequest {

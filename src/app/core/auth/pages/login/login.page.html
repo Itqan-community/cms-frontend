@@ -97,6 +97,12 @@
           }
         </div>
 
+        <div class="login__links-row">
+          <a [routerLink]="['/forgot-password']" class="login__inline-link">
+            {{ 'AUTH.LOGIN.FORGOT_PASSWORD' | translate }}
+          </a>
+        </div>
+
         <button
           type="submit"
           [disabled]="loginForm.invalid || authService.isLoading()"
@@ -109,6 +115,29 @@
           }
         </button>
       </form>
+
+      @if (authService.authConfig()?.loginByCodeEnabled) {
+        <div class="login__alt-actions">
+          <a [routerLink]="['/login-by-code']" class="login__inline-link">
+            {{ 'AUTH.LOGIN.LOGIN_WITH_CODE' | translate }}
+          </a>
+        </div>
+      }
+
+      <div class="login__social">
+        <p class="login__social-title">{{ 'AUTH.LOGIN.OR_CONTINUE' | translate }}</p>
+        <div class="login__social-btns">
+          <button type="button" class="login__social-btn" (click)="onLoginWithGoogle()">
+            {{ 'AUTH.LOGIN.LOGIN_WITH_GOOGLE' | translate }}
+          </button>
+          <button type="button" class="login__social-btn" (click)="onLoginWithGitHub()">
+            {{ 'AUTH.LOGIN.LOGIN_WITH_GITHUB' | translate }}
+          </button>
+        </div>
+        <a [routerLink]="['/passkey']" class="login__inline-link login__alt-actions">
+          {{ 'AUTH.LOGIN.SIGN_IN_WITH_PASSKEY' | translate }}
+        </a>
+      </div>
 
       <div class="login__footer">
         <p class="login__footer-text">

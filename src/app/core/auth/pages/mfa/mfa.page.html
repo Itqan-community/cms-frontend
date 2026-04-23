@@ -1,0 +1,32 @@
+<div class="mfa">
+  <header class="mfa__header">
+    <div class="mfa__header-row">
+      <a [routerLink]="['/login']" class="mfa__back">{{ 'AUTH.MFA.BACK' | translate }}</a>
+      <app-lang-switch></app-lang-switch>
+    </div>
+  </header>
+  <div class="mfa__container">
+    <div class="mfa__card">
+      <h1 class="mfa__title">{{ 'AUTH.MFA.TITLE' | translate }}</h1>
+      <p class="mfa__subtitle">{{ 'AUTH.MFA.SUBTITLE' | translate }}</p>
+      @if (errorMessage()) {
+        <div class="mfa__alert">{{ errorMessage() }}</div>
+      }
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mfa__form">
+        <div class="mfa__field">
+          <label for="c" class="mfa__label">{{ 'AUTH.MFA.CODE_LABEL' | translate }}</label>
+          <input
+            id="c"
+            class="mfa__input"
+            formControlName="code"
+            autocomplete="one-time-code"
+            [placeholder]="'AUTH.MFA.CODE_PLACEHOLDER' | translate"
+          />
+        </div>
+        <button type="submit" class="mfa__submit" [disabled]="form.invalid || isLoading()">
+          {{ 'AUTH.MFA.SUBMIT' | translate }}
+        </button>
+      </form>
+    </div>
+  </div>
+</div>

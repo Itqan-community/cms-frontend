@@ -21,7 +21,11 @@
         "EMAIL_REQUIRED": "Please enter a valid email address",
         "PASSWORD_REQUIRED": "Password is required",
         "LOGIN_FAILED": "Login failed. Please try again."
-      }
+      },
+      "FORGOT_PASSWORD": "Forgot password?",
+      "OR_CONTINUE": "Or continue with",
+      "LOGIN_WITH_CODE": "Sign in with email code",
+      "SIGN_IN_WITH_PASSKEY": "Sign in with passkey"
     },
     "REGISTER": {
       "TITLE": "Create your account",
@@ -49,7 +53,75 @@
         "PASSWORD_REQUIRED": "Password must be at least 6 characters",
         "PASSWORD_MISMATCH": "Passwords do not match",
         "REGISTER_FAILED": "Registration failed. Please try again."
-      }
+      },
+      "SIGN_UP_WITH_PASSKEY": "Sign up with passkey"
+    },
+    "VERIFY_EMAIL": {
+      "TITLE": "Verify your email",
+      "SUBTITLE": "Enter the verification code sent to your email.",
+      "CODE_LABEL": "Verification code",
+      "CODE_PLACEHOLDER": "Enter the code",
+      "SUBMIT": "Verify",
+      "RESEND": "Resend code",
+      "RESEND_SENT": "If your email is registered, a new code was sent.",
+      "RESEND_ERROR": "Could not resend the code. Try again later.",
+      "ERROR": "Verification failed. Check the code and try again.",
+      "BACK": "Back",
+      "BACK_TO_LOGIN": "Back to sign in"
+    },
+    "PASSKEY": {
+      "TITLE": "Sign in with passkey",
+      "SUBTITLE": "Use your device passkey or security key to continue.",
+      "BUTTON": "Continue with passkey",
+      "BACK": "Back to sign in",
+      "ERROR": "Passkey sign-in failed. Please try again.",
+      "CANCELLED": "Passkey sign-in was cancelled."
+    },
+    "LOGIN_BY_CODE": {
+      "TITLE": "Sign in with code",
+      "SUBTITLE": "We will email you a one-time sign-in code.",
+      "SEND_CODE": "Send code",
+      "CODE_LABEL": "Code",
+      "CODE_PLACEHOLDER": "Enter the code from your email",
+      "SIGN_IN": "Sign in",
+      "USE_OTHER_EMAIL": "Use a different email",
+      "BACK": "Back to sign in",
+      "REQUEST_ERROR": "Could not send the code. Try again.",
+      "CONFIRM_ERROR": "Invalid code. Please try again."
+    },
+    "FORGOT_PASSWORD": {
+      "TITLE": "Reset your password",
+      "SUBTITLE": "Enter your email and we will send reset instructions.",
+      "SUBMIT": "Send reset link",
+      "SENT": "If an account exists for this email, you will receive instructions shortly.",
+      "ERROR": "Something went wrong. Please try again.",
+      "BACK": "Back to sign in"
+    },
+    "RESET_PASSWORD": {
+      "TITLE": "Choose a new password",
+      "NEW_PASSWORD": "New password",
+      "SUBMIT": "Update password",
+      "ERROR": "Could not reset password. The link may have expired.",
+      "NO_KEY": "Invalid or missing reset link.",
+      "BACK": "Back to sign in"
+    },
+    "MFA": {
+      "TITLE": "Two-factor authentication",
+      "SUBTITLE": "Enter the code from your authenticator app.",
+      "CODE_LABEL": "Authentication code",
+      "CODE_PLACEHOLDER": "6-digit code",
+      "SUBMIT": "Verify",
+      "BACK": "Back to sign in",
+      "ERROR": "Invalid code. Please try again."
+    },
+    "REAUTH": {
+      "TITLE": "Confirm it is you",
+      "SUBTITLE": "For your security, please confirm your password or use your passkey.",
+      "SUBMIT": "Confirm",
+      "USE_PASSKEY": "Use passkey",
+      "CANCEL": "Cancel",
+      "ERROR": "Incorrect password.",
+      "PASSKEY_ERROR": "Passkey verification failed."
     },
     "OAUTH": {
       "PROCESSING": "Processing authentication...",

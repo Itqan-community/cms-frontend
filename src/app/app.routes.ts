@@ -94,6 +94,66 @@ export const routes: Routes = [
     data: { hideHeader: true },
   },
   {
+    path: 'verify-email',
+    loadComponent: () =>
+      import('./core/auth/pages/verify-email/verify-email.page').then((m) => m.VerifyEmailPage),
+    data: { hideHeader: true },
+  },
+  {
+    path: 'auth/oauth/callback',
+    loadComponent: () =>
+      import('./core/auth/pages/oauth-callback/oauth-callback.page').then(
+        (m) => m.OauthCallbackPage
+      ),
+    data: { hideHeader: true },
+  },
+  {
+    path: 'passkey',
+    loadComponent: () =>
+      import('./core/auth/pages/passkey/passkey.page').then((m) => m.PasskeyPage),
+    canActivate: [guestGuard],
+    data: { hideHeader: true },
+  },
+  {
+    path: 'login-by-code',
+    loadComponent: () =>
+      import('./core/auth/pages/login-by-code/login-by-code.page').then((m) => m.LoginByCodePage),
+    canActivate: [guestGuard],
+    data: { hideHeader: true },
+  },
+  {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./core/auth/pages/forgot-password/forgot-password.page').then(
+        (m) => m.ForgotPasswordPage
+      ),
+    canActivate: [guestGuard],
+    data: { hideHeader: true },
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./core/auth/pages/reset-password/reset-password.page').then(
+        (m) => m.ResetPasswordPage
+      ),
+    canActivate: [guestGuard],
+    data: { hideHeader: true },
+  },
+  {
+    path: 'mfa',
+    loadComponent: () => import('./core/auth/pages/mfa/mfa.page').then((m) => m.MfaPage),
+    canActivate: [guestGuard],
+    data: { hideHeader: true },
+  },
+  {
+    path: 'reauthenticate',
+    loadComponent: () =>
+      import('./core/auth/pages/reauthenticate/reauthenticate.page').then(
+        (m) => m.ReauthenticatePage
+      ),
+    data: { hideHeader: true },
+  },
+  {
     path: 'unauthorized',
     loadComponent: () =>
       import('./features/error/pages/unautorized/unauthorized.page').then(

@@ -1,0 +1,92 @@
+.passkey {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  &__header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+  }
+  &__header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+  }
+  &__back {
+    font-size: 14px;
+    color: var(--color-primary-800);
+    font-weight: 500;
+  }
+  &__container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+  }
+  &__card {
+    max-width: 448px;
+    width: 100%;
+  }
+  &__logo {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+  &__title {
+    text-align: center;
+    font-weight: 700;
+    color: #333333;
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  &__subtitle {
+    text-align: center;
+    color: #333333;
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+  &__alert {
+    padding: 12px;
+    border-radius: var(--radius-lg);
+    border: 1px solid #fecaca;
+    background-color: #fef2f2;
+    color: #dc2626;
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  &__submit {
+    width: 100%;
+    height: 48px;
+    background-color: var(--color-primary-700);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+  }
+  &__submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  &__spinner {
+    width: 16px;
+    height: 16px;
+    border-radius: 9999px;
+    border: 2px solid rgba(255, 255, 255, 0.4);
+    border-top-color: #fff;
+    animation: passkey-spin 0.8s linear infinite;
+  }
+}
+@keyframes passkey-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

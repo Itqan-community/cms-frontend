@@ -255,6 +255,21 @@
         </button>
       </form>
 
+      <div class="register__social">
+        <p class="register__social-title">{{ 'AUTH.LOGIN.OR_CONTINUE' | translate }}</p>
+        <div class="register__social-btns">
+          <button type="button" class="register__social-btn" (click)="onSignUpWithGoogle()">
+            {{ 'AUTH.REGISTER.LOGIN_WITH_GOOGLE' | translate }}
+          </button>
+          <button type="button" class="register__social-btn" (click)="onSignUpWithGitHub()">
+            {{ 'AUTH.REGISTER.LOGIN_WITH_GITHUB' | translate }}
+          </button>
+        </div>
+        <a [routerLink]="['/passkey']" class="register__inline-link register__alt-link">
+          {{ 'AUTH.REGISTER.SIGN_UP_WITH_PASSKEY' | translate }}
+        </a>
+      </div>
+
       <div class="register__footer">
         <p class="register__footer-text">
           {{ 'AUTH.REGISTER.ALREADY_HAVE_ACCOUNT' | translate }}

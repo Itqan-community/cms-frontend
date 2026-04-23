@@ -1,0 +1,32 @@
+<div class="passkey">
+  <header class="passkey__header">
+    <div class="passkey__header-row">
+      <a [routerLink]="['/login']" class="passkey__back">{{ 'AUTH.PASSKEY.BACK' | translate }}</a>
+      <app-lang-switch></app-lang-switch>
+    </div>
+  </header>
+  <div class="passkey__container">
+    <div class="passkey__card">
+      <div class="passkey__logo">
+        <img src="/assets/images/logo.svg" alt="Itqan" width="50" height="50" />
+      </div>
+      <h1 class="passkey__title">{{ 'AUTH.PASSKEY.TITLE' | translate }}</h1>
+      <p class="passkey__subtitle">{{ 'AUTH.PASSKEY.SUBTITLE' | translate }}</p>
+      @if (errorMessage()) {
+        <div class="passkey__alert">{{ errorMessage() }}</div>
+      }
+      <button
+        type="button"
+        class="passkey__submit"
+        (click)="signInWithPasskey()"
+        [disabled]="isLoading()"
+      >
+        @if (isLoading()) {
+          <span class="passkey__spinner" aria-hidden="true"></span>
+        } @else {
+          {{ 'AUTH.PASSKEY.BUTTON' | translate }}
+        }
+      </button>
+    </div>
+  </div>
+</div>

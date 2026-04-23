@@ -1,0 +1,45 @@
+<div class="reauth">
+  <header class="reauth__header">
+    <div class="reauth__header-row">
+      <button type="button" class="reauth__back" (click)="goBack()">
+        {{ 'AUTH.REAUTH.CANCEL' | translate }}
+      </button>
+      <app-lang-switch></app-lang-switch>
+    </div>
+  </header>
+  <div class="reauth__container">
+    <div class="reauth__card">
+      <h1 class="reauth__title">{{ 'AUTH.REAUTH.TITLE' | translate }}</h1>
+      <p class="reauth__subtitle">{{ 'AUTH.REAUTH.SUBTITLE' | translate }}</p>
+      @if (errorMessage()) {
+        <div class="reauth__alert">{{ errorMessage() }}</div>
+      }
+      <form [formGroup]="form" (ngSubmit)="onSubmitPassword()" class="reauth__form">
+        <div class="reauth__field">
+          <label for="pw" class="reauth__label">{{
+            'AUTH.LOGIN.PASSWORD_LABEL' | translate
+          }}</label>
+          <input
+            id="pw"
+            class="reauth__input"
+            type="password"
+            formControlName="password"
+            autocomplete="current-password"
+          />
+        </div>
+        <button type="submit" class="reauth__submit" [disabled]="form.invalid || isLoading()">
+          {{ 'AUTH.REAUTH.SUBMIT' | translate }}
+        </button>
+      </form>
+      <div class="reauth__divider">{{ 'AUTH.LOGIN.OR_CONTINUE' | translate }}</div>
+      <button
+        type="button"
+        class="reauth__secondary"
+        (click)="onPasskey()"
+        [disabled]="isLoading()"
+      >
+        {{ 'AUTH.REAUTH.USE_PASSKEY' | translate }}
+      </button>
+    </div>
+  </div>
+</div>

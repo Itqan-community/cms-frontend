@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -6,6 +7,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { RegisterRequest } from '../../models/auth.model';
 import { AuthService } from '../../services/auth.service';
 
@@ -28,6 +30,21 @@ export class RegisterPage {
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
   private readonly translate = inject(TranslateService);
+
+  get oauthCallbackUrl(): string {
+    if (typeof window === 'undefined') {
+      return '/auth/oauth/callback';
+    }
+    return `${window.location.origin}/auth/oauth/callback`;
+  }
+
+  onSignUpWithGoogle(): void {
+    this.authService.startGoogleOAuth(this.oauthCallbackUrl, 'login');
+  }
+
+  onSignUpWithGitHub(): void {
+    this.authService.startGitHubOAuth(this.oauthCallbackUrl, 'login');
+  }
 
   registerForm: FormGroup;
   errorMessage = signal<string>('');
@@ -83,7 +100,16 @@ export class RegisterPage {
         },
         error: (error: unknown) => {
           this.authService.isLoading.set(false);
-
+          if (error instanceof HttpErrorResponse) {
+            if (tryNavigateForAuth401(this.router, error)) {
+              return;
+            }
+            this.errorMessage.set(
+              getErrorMessage(error) ||
+                this.translate.instant('AUTH.REGISTER.ERRORS.REGISTER_FAILED')
+            );
+            return;
+          }
           this.errorMessage.set(
             getErrorMessage(error) || this.translate.instant('AUTH.REGISTER.ERRORS.REGISTER_FAILED')
           );

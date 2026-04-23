@@ -6,6 +6,7 @@ import {
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
 } from '@angular/core';
+import { catchError, firstValueFrom, of } from 'rxjs';
 import { provideRouter, Router } from '@angular/router';
 import * as Sentry from '@sentry/angular';
 import { environment } from '../environments/environment';
@@ -22,6 +23,9 @@ import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { headersInterceptor } from './core/interceptors/global.interceptor';
 import { authErrorInterceptor } from './core/interceptors/auth-error.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
+import { credentialsInterceptor } from './core/interceptors/credentials.interceptor';
+import { csrfResponseInterceptor } from './core/interceptors/csrf-response.interceptor';
+import { HeadlessAuthApiService } from './core/auth/headless/headless-auth-api.service';
 registerLocaleData(ar);
 
 export const appConfig: ApplicationConfig = {
@@ -48,8 +52,19 @@ export const appConfig: ApplicationConfig = {
     appLucideIconsProvider,
     provideAnimationsAsync(),
     provideHttpClient(
-      withInterceptors([headersInterceptor, authErrorInterceptor, errorInterceptor])
+      withInterceptors([
+        credentialsInterceptor,
+        csrfResponseInterceptor,
+        headersInterceptor,
+        authErrorInterceptor,
+        errorInterceptor,
+      ])
     ),
+    provideAppInitializer(() => {
+      const headless = inject(HeadlessAuthApiService);
+      // Prime `csrftoken` on the API host before unsafe methods / OAuth form POST
+      return firstValueFrom(headless.getConfig().pipe(catchError(() => of(undefined))));
+    }),
     // ngx-translate setup
     provideTranslateService({
       loader: provideTranslateHttpLoader({

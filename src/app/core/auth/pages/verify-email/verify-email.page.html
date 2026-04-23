@@ -1,0 +1,55 @@
+<div class="verify">
+  <header class="verify__header">
+    <div class="verify__header-row">
+      <a [routerLink]="['/']" class="verify__back" [title]="'AUTH.VERIFY_EMAIL.BACK' | translate">
+        {{ 'AUTH.VERIFY_EMAIL.BACK' | translate }}
+      </a>
+      <app-lang-switch></app-lang-switch>
+    </div>
+  </header>
+  <div class="verify__container">
+    <div class="verify__card">
+      <div class="verify__logo">
+        <img src="/assets/images/logo.svg" alt="Itqan" width="50" height="50" />
+      </div>
+      <h1 class="verify__title">{{ 'AUTH.VERIFY_EMAIL.TITLE' | translate }}</h1>
+      <p class="verify__subtitle">{{ 'AUTH.VERIFY_EMAIL.SUBTITLE' | translate }}</p>
+
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="verify__form">
+        @if (errorMessage()) {
+          <div class="verify__alert">{{ errorMessage() }}</div>
+        }
+        @if (infoMessage()) {
+          <div class="verify__info">{{ infoMessage() }}</div>
+        }
+        <div class="verify__field">
+          <label for="key" class="verify__label">{{
+            'AUTH.VERIFY_EMAIL.CODE_LABEL' | translate
+          }}</label>
+          <input
+            id="key"
+            class="verify__input"
+            formControlName="key"
+            [placeholder]="'AUTH.VERIFY_EMAIL.CODE_PLACEHOLDER' | translate"
+            autocomplete="one-time-code"
+          />
+        </div>
+        <button type="submit" class="verify__submit" [disabled]="form.invalid || isSubmitting()">
+          @if (isSubmitting()) {
+            <span class="verify__spinner" aria-hidden="true"></span>
+          } @else {
+            {{ 'AUTH.VERIFY_EMAIL.SUBMIT' | translate }}
+          }
+        </button>
+      </form>
+      <button type="button" class="verify__secondary" (click)="onResend()">
+        {{ 'AUTH.VERIFY_EMAIL.RESEND' | translate }}
+      </button>
+      <p class="verify__footer">
+        <a [routerLink]="['/login']" class="verify__link">{{
+          'AUTH.VERIFY_EMAIL.BACK_TO_LOGIN' | translate
+        }}</a>
+      </p>
+    </div>
+  </div>
+</div>
