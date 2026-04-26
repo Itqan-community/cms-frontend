@@ -83,8 +83,8 @@ export class LoginByCodePage implements OnInit {
       const res = await firstValueFrom(
         this.auth.headlessAuth.confirmLoginCode({ code: this.codeForm.value.code })
       );
+      await firstValueFrom(this.auth.applyHeadlessSuccess(res, { fetchProfile: true }));
       this.isLoading.set(false);
-      this.auth.applyHeadlessSuccess(res, { fetchProfile: true });
       const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/gallery';
       void this.router.navigateByUrl(returnUrl.startsWith('/') ? returnUrl : '/gallery');
     } catch (e) {

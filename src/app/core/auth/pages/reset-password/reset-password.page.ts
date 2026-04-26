@@ -58,8 +58,8 @@ export class ResetPasswordPage implements OnInit {
       const res = await firstValueFrom(
         this.auth.headlessAuth.resetPassword({ key, password: this.form.value.password })
       );
+      await firstValueFrom(this.auth.applyHeadlessSuccess(res, { fetchProfile: true }));
       this.isLoading.set(false);
-      this.auth.applyHeadlessSuccess(res, { fetchProfile: true });
       void this.router.navigateByUrl('/gallery');
     } catch (e) {
       this.isLoading.set(false);

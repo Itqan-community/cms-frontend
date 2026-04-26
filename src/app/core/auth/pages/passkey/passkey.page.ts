@@ -44,8 +44,8 @@ export class PasskeyPage {
       }
       const body = publicKeyCredentialToJson(cred);
       const r = await firstValueFrom(this.authService.headlessAuth.postWebauthnLogin(body));
+      await firstValueFrom(this.authService.applyHeadlessSuccess(r, { fetchProfile: true }));
       this.isLoading.set(false);
-      this.authService.applyHeadlessSuccess(r, { fetchProfile: true });
       const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/gallery';
       const safe = returnUrl.startsWith('/') ? returnUrl : '/gallery';
       void this.router.navigateByUrl(safe);

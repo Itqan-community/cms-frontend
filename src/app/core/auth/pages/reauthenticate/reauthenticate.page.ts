@@ -52,8 +52,8 @@ export class ReauthenticatePage {
       const res = await firstValueFrom(
         this.auth.headlessAuth.reauthenticate({ password: this.form.value.password })
       );
+      await firstValueFrom(this.auth.applyHeadlessSuccess(res, { fetchProfile: false }));
       this.isLoading.set(false);
-      this.auth.applyHeadlessSuccess(res, { fetchProfile: false });
       void this.router.navigateByUrl(this.returnUrl);
     } catch (e) {
       this.isLoading.set(false);
@@ -75,8 +75,8 @@ export class ReauthenticatePage {
       }
       const body = publicKeyCredentialToJson(cred);
       const out = await firstValueFrom(this.auth.headlessAuth.postWebauthnReauth(body));
+      await firstValueFrom(this.auth.applyHeadlessSuccess(out, { fetchProfile: false }));
       this.isLoading.set(false);
-      this.auth.applyHeadlessSuccess(out, { fetchProfile: false });
       void this.router.navigateByUrl(this.returnUrl);
     } catch (e) {
       this.isLoading.set(false);

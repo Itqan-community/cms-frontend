@@ -115,9 +115,20 @@ export class AuthService {
       );
   }
 
-  /** Apply successful headless login/signup/WebAuthn response. */
-  applyHeadlessSuccess(res: AuthenticatedResponse, options?: { fetchProfile?: boolean }): void {
-    this.applyAuthenticatedResponse(res, { fetchProfile: options?.fetchProfile !== false });
+  /**
+   * Contract alignment: after successful browser auth flows, re-check session to hydrate
+   * token metadata when login/signup response itself does not include `meta.access_token`.
+   */
+  applyHeadlessSuccess(
+    res: AuthenticatedResponse,
+    options?: { fetchProfile?: boolean }
+  ): Observable<AuthenticatedResponse> {
+    const fetchProfile = options?.fetchProfile !== false;
+    if (res.meta?.is_authenticated && !res.meta?.access_token) {
+      return this.bootstrapSessionFromServer({ fetchProfile });
+    }
+    this.applyAuthenticatedResponse(res, { fetchProfile });
+    return of(res);
   }
 
   private applyAuthenticatedResponse(
@@ -170,9 +181,7 @@ export class AuthService {
   login(credentials: LoginRequest): Observable<AuthenticatedResponse> {
     this.isLoading.set(true);
     return this.headless.login(credentials).pipe(
-      tap((response) => {
-        this.applyAuthenticatedResponse(response, { fetchProfile: true });
-      }),
+      switchMap((response) => this.applyHeadlessSuccess(response, { fetchProfile: true })),
       catchError((error) => {
         this.isLoading.set(false);
         throw error;
@@ -187,9 +196,7 @@ export class AuthService {
       body['phone'] = userData.phone;
     }
     return this.headless.signup(body).pipe(
-      tap((response) => {
-        this.applyAuthenticatedResponse(response, { fetchProfile: true });
-      }),
+      switchMap((response) => this.applyHeadlessSuccess(response, { fetchProfile: true })),
       catchError((error) => {
         this.isLoading.set(false);
         throw error;
@@ -331,7 +338,7 @@ export class AuthService {
   verifyEmailWithKey(key: string): Observable<AuthenticatedResponse> {
     return this.headless
       .verifyEmail({ key })
-      .pipe(tap((r) => this.applyAuthenticatedResponse(r, { fetchProfile: true })));
+      .pipe(switchMap((r) => this.applyHeadlessSuccess(r, { fetchProfile: true })));
   }
 
   resendEmailVerification(): Observable<unknown> {

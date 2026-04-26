@@ -13,15 +13,12 @@ export function headersInterceptor(
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> {
-  const accessToken =
-    localStorage.getItem('headless_access_token') ?? localStorage.getItem('access_token');
-
   const isApi = req.url.startsWith(environment.API_BASE_URL);
   const csrf = isApi && isUnsafeHttpMethod(req.method) ? getDjangoCsrfTokenForRequest() : null;
 
   req = req.clone({
     setHeaders: {
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+      // Browser mode auth: rely on `sessionid` cookie via `withCredentials`, not Bearer.
       ...(csrf ? { 'X-CSRFToken': csrf } : {}),
       'Accept-Language': localStorage.getItem('lang') || 'ar',
     },
