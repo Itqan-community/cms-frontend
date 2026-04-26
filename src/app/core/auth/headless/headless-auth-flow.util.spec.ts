@@ -44,4 +44,24 @@ describe('headless-auth-flow.util', () => {
     expect(done).toBe(true);
     expect(calls[0].path).toBe('/verify-email');
   });
+
+  it('tryNavigateForAuth401 navigates for provider_signup', () => {
+    const calls: { path: string }[] = [];
+    const router = {
+      navigate: (path: string[]) => {
+        calls.push({ path: path[0] ?? '' });
+      },
+    } as unknown as Router;
+    const err = new HttpErrorResponse({
+      status: 401,
+      error: {
+        status: 401,
+        data: { flows: [{ id: 'provider_signup', is_pending: true }] },
+        meta: { is_authenticated: false },
+      },
+    });
+    const done = tryNavigateForAuth401(router, err);
+    expect(done).toBe(true);
+    expect(calls[0].path).toBe('/provider-signup');
+  });
 });

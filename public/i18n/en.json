@@ -128,6 +128,13 @@
       "SUCCESS": "Authentication successful! Redirecting...",
       "ERROR": "Authentication failed. Please try again.",
       "INVALID_STATE": "Invalid authentication state. Please try again."
+    },
+    "PROVIDER_SIGNUP": {
+      "TITLE": "Complete your sign-up",
+      "DESC": "We need a bit more information to finish creating your account after signing in with your provider.",
+      "SUBMIT": "Continue",
+      "ERROR": "Could not complete sign-up. Please try again.",
+      "LOAD_ERROR": "Could not load sign-up information. This step may not be available."
     }
   },
   "NAVIGATION": {

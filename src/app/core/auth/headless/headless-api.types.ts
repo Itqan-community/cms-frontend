@@ -26,7 +26,9 @@ export interface AllauthErrorItem {
 
 export interface AuthenticationMeta {
   is_authenticated: boolean;
+  /** App client (non-browser); not used in browser cookie mode. */
   session_token?: string;
+  /** Optional; pluggable token strategy. Browser mode uses the Django session (`sessionid`) + CSRF. */
   access_token?: string;
 }
 

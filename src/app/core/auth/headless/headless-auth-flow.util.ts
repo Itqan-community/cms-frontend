@@ -13,6 +13,7 @@ export const AUTH_ROUTES = {
   reauthenticate: '/reauthenticate',
   mfa: '/mfa',
   passkey: '/passkey',
+  providerSignup: '/provider-signup',
 } as const;
 
 /**
@@ -41,7 +42,7 @@ export function getRouteForFlowId(flowId: AllauthFlowId | string | undefined): s
     verify_phone: '/verify-phone', // not in main scope; reserved
     login_by_code: AUTH_ROUTES.loginByCode,
     mfa_authenticate: AUTH_ROUTES.mfa,
-    provider_signup: '/provider-signup',
+    provider_signup: AUTH_ROUTES.providerSignup,
   };
   return map[flowId] ?? null;
 }
@@ -49,9 +50,7 @@ export function getRouteForFlowId(flowId: AllauthFlowId | string | undefined): s
 /**
  * True when 401 + meta.is_authenticated + reauth flows (sensitive action blocked).
  */
-export function isReauthenticationBody(
-  body: unknown
-): body is {
+export function isReauthenticationBody(body: unknown): body is {
   status: 401;
   data: { flows?: { id: string }[] };
   meta: { is_authenticated: boolean };

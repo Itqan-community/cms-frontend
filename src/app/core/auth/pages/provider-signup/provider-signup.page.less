@@ -1,0 +1,91 @@
+.auth-page {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+  position: relative;
+}
+
+.lang-switch {
+  position: absolute;
+  top: 16px;
+  inset-inline-end: 16px;
+}
+
+.card {
+  max-width: 448px;
+  width: 100%;
+}
+
+.title {
+  font-weight: 700;
+  color: #333333;
+  font-size: 24px;
+  margin: 0 0 8px;
+}
+
+.desc {
+  font-size: 14px;
+  color: #666666;
+  margin: 0 0 24px;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: #333333;
+}
+
+.input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 12px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: var(--radius-lg);
+  margin-bottom: 16px;
+  font-size: 14px;
+}
+
+.btn {
+  width: 100%;
+  padding: 10px 16px;
+  border-radius: var(--radius-lg);
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+}
+
+.btn.primary {
+  background: var(--color-primary-500);
+  color: #fff;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.err {
+  color: #c0392b;
+  font-size: 13px;
+  margin: 0 0 12px;
+}
+
+.info {
+  font-size: 14px;
+  color: #666666;
+  margin: 0 0 16px;
+}
+
+.link {
+  display: block;
+  margin-top: 16px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--color-primary-800);
+}

@@ -1,24 +1,35 @@
 import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, catchError, filter, Observable, switchMap, take, throwError } from 'rxjs';
+import { Observable, catchError, switchMap, throwError } from 'rxjs';
 import * as Sentry from '@sentry/angular';
-import { isReauthenticationBody } from '../auth/headless/headless-auth-flow.util';
+import {
+  isReauthenticationBody,
+  tryNavigateForAuth401,
+} from '../auth/headless/headless-auth-flow.util';
 import { AuthService } from '../auth/services/auth.service';
+import { environment } from '../../../environments/environment';
 
-let isRefreshing = false;
-const refreshTokenSubject = new BehaviorSubject<string | null>(null);
+/**
+ * Set on a single retry after `GET /auth/session` succeeds, to avoid infinite loops.
+ * Internal only — not an external API contract.
+ */
+export const SESSION_401_RECHECK_HEADER = 'X-Cms-Auth-Session-Recheck';
 
-function isHeadlessOrAppAuthPath(url: string): boolean {
-  return url.includes('/auth/browser/v1/') || url.includes('/auth/app/v1/');
+function isHeadlessBrowserAuthUrl(url: string): boolean {
+  return url.includes('/auth/browser/v1/');
 }
 
+/**
+ * Browser mode: no Bearer refresh. On 401/403 to CMS API, re-check session once; then clear client auth.
+ */
 export function authErrorInterceptor(
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> {
   const authService = inject(AuthService);
   const router = inject(Router);
+  const apiBase = environment.API_BASE_URL;
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
@@ -28,87 +39,50 @@ export function authErrorInterceptor(
         return throwError(() => error);
       }
 
-      if (
-        (error.status === 401 || error.status === 403) &&
-        isHeadlessOrAppAuthPath(req.url) &&
-        !req.url.includes('/tokens/refresh') &&
-        !req.url.includes('/auth/token/refresh')
-      ) {
-        return throwError(() => error);
-      }
-
       if (error.status === 401 || error.status === 403) {
-        return handle401Or403Error(req, next, authService, router);
-      }
+        if (isHeadlessBrowserAuthUrl(req.url)) {
+          if (error.status === 401) {
+            tryNavigateForAuth401(router, error);
+          }
+          return throwError(() => error);
+        }
 
-      Sentry.captureException(error, {
-        extra: {
-          url: req.url,
-          method: req.method,
-          status: error.status,
-          statusText: error.statusText,
-        },
-      });
+        if (
+          apiBase &&
+          req.url.startsWith(apiBase) &&
+          !req.headers.has(SESSION_401_RECHECK_HEADER)
+        ) {
+          return authService.sessionRecheckAfter401().pipe(
+            switchMap((stillAuthenticated) => {
+              if (stillAuthenticated) {
+                return next(
+                  req.clone({
+                    setHeaders: { [SESSION_401_RECHECK_HEADER]: '1' },
+                  })
+                );
+              }
+              authService.invalidateClientAuthAndGoLogin();
+              return throwError(() => error);
+            })
+          );
+        }
+
+        if (apiBase && req.url.startsWith(apiBase) && req.headers.has(SESSION_401_RECHECK_HEADER)) {
+          authService.invalidateClientAuthAndGoLogin();
+          return throwError(() => error);
+        }
+      } else {
+        Sentry.captureException(error, {
+          extra: {
+            url: req.url,
+            method: req.method,
+            status: error.status,
+            statusText: error.statusText,
+          },
+        });
+      }
 
       return throwError(() => error);
     })
   );
-}
-
-function handle401Or403Error(
-  req: HttpRequest<unknown>,
-  next: HttpHandlerFn,
-  authService: AuthService,
-  router: Router
-): Observable<HttpEvent<unknown>> {
-  if (req.url.includes('/auth/app/v1/tokens/refresh') || req.url.includes('/auth/token/refresh')) {
-    isRefreshing = false;
-    authService.logout().subscribe(() => {
-      void router.navigate(['/login']);
-    });
-    return throwError(() => new Error('Token refresh failed'));
-  }
-
-  if (!isRefreshing) {
-    isRefreshing = true;
-    refreshTokenSubject.next(null);
-    const refreshToken = authService.getRefreshToken();
-    if (!refreshToken) {
-      isRefreshing = false;
-      authService.logout().subscribe(() => {
-        void router.navigate(['/login']);
-      });
-      return throwError(() => new Error('No refresh token available'));
-    }
-
-    return authService.refreshToken().pipe(
-      switchMap((tokenResponse) => {
-        isRefreshing = false;
-        const access = tokenResponse.access_token;
-        if (!access) {
-          isRefreshing = false;
-          return throwError(() => new Error('No access token'));
-        }
-        refreshTokenSubject.next(access);
-        return next(addAuthHeader(req, access));
-      }),
-      catchError((err) => {
-        isRefreshing = false;
-        refreshTokenSubject.next(null);
-        authService.logout().subscribe(() => {
-          void router.navigate(['/login']);
-        });
-        return throwError(() => err);
-      })
-    );
-  }
-  return refreshTokenSubject.pipe(
-    filter((token) => token !== null),
-    take(1),
-    switchMap((token) => next(addAuthHeader(req, token!)))
-  );
-}
-
-function addAuthHeader(req: HttpRequest<unknown>, token: string): HttpRequest<unknown> {
-  return req.clone({ setHeaders: { Authorization: `Bearer ${token}` } });
 }

@@ -108,6 +108,14 @@ export const routes: Routes = [
     data: { hideHeader: true },
   },
   {
+    path: 'provider-signup',
+    loadComponent: () =>
+      import('./core/auth/pages/provider-signup/provider-signup.page').then(
+        (m) => m.ProviderSignupPage
+      ),
+    data: { hideHeader: true },
+  },
+  {
     path: 'passkey',
     loadComponent: () =>
       import('./core/auth/pages/passkey/passkey.page').then((m) => m.PasskeyPage),

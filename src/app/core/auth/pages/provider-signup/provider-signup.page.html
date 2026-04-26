@@ -1,0 +1,26 @@
+<div class="auth-page">
+  <app-lang-switch class="lang-switch" />
+  <div class="card">
+    <h1 class="title">{{ 'AUTH.PROVIDER_SIGNUP.TITLE' | translate }}</h1>
+    <p class="desc">{{ 'AUTH.PROVIDER_SIGNUP.DESC' | translate }}</p>
+
+    @if (infoMessage() && !loadError()) {
+      <p class="info">{{ infoMessage() }}</p>
+    }
+    @if (loadError()) {
+      <p class="err">{{ infoMessage() }}</p>
+    }
+
+    <form [formGroup]="form" (ngSubmit)="onSubmit()">
+      <label class="label">{{ 'AUTH.REGISTER.EMAIL_LABEL' | translate }}</label>
+      <input class="input" type="email" formControlName="email" autocomplete="email" />
+      @if (errorMessage()) {
+        <p class="err">{{ errorMessage() }}</p>
+      }
+      <button class="btn primary" type="submit" [disabled]="form.invalid || isLoading()">
+        {{ 'AUTH.PROVIDER_SIGNUP.SUBMIT' | translate }}
+      </button>
+    </form>
+    <a routerLink="/login" class="link">{{ 'AUTH.LOGIN.TITLE' | translate }}</a>
+  </div>
+</div>

@@ -164,20 +164,6 @@ export class HeadlessAuthApiService {
   }
 
   /**
-   * Token refresh (app path per contract) — use when refresh_token is available.
-   */
-  refreshAppTokens(body: { refresh_token: string }): Observable<{
-    status: 200;
-    data: { access_token: string; refresh_token?: string };
-  }> {
-    const url = `${environment.API_BASE_URL}/auth/app/v1/tokens/refresh`;
-    return this.http.post<{
-      status: 200;
-      data: { access_token: string; refresh_token?: string };
-    }>(url, body, { headers: jsonHeaders });
-  }
-
-  /**
    * Synchronous (non-XHR) provider redirect per contract — not used here; use `submitProviderRedirectForm`.
    */
   buildProviderRedirectUrl(): string {
