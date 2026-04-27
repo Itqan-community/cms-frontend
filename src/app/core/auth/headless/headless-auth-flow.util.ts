@@ -17,6 +17,17 @@ export const AUTH_ROUTES = {
 } as const;
 
 /**
+ * Aliases for `settings.HEADLESS_FRONTEND_URLS` paths (BE); same components as `AUTH_ROUTES`.
+ */
+export const AUTH_ROUTES_HEADLESS = {
+  accountConfirmEmail: (key: string) => `/accounts/confirm-email/${key}`,
+  accountPasswordReset: '/account/password/reset',
+  accountPasswordResetKey: (key: string) => `/account/password/reset/key/${key}`,
+  accountSignup: '/account/signup',
+  socialProviderCallback: '/account/provider/callback',
+} as const;
+
+/**
  * Picks the most relevant pending flow for routing, when multiple exist.
  */
 export function getPendingFlow(flows: Flow[] | undefined): Flow | null {

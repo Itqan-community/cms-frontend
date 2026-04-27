@@ -99,6 +99,58 @@ export const routes: Routes = [
       import('./core/auth/pages/verify-email/verify-email.page').then((m) => m.VerifyEmailPage),
     data: { hideHeader: true },
   },
+  /** `HEADLESS_FRONTEND_URLS.account_confirm_email` (django-allauth) */
+  {
+    path: 'accounts',
+    children: [
+      {
+        path: 'confirm-email/:key',
+        loadComponent: () =>
+          import('./core/auth/pages/verify-email/verify-email.page').then((m) => m.VerifyEmailPage),
+        data: { hideHeader: true, beHeadlessPath: 'account_confirm_email' },
+      },
+      {
+        path: 'confirm-email/:key/',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import('./core/auth/pages/verify-email/verify-email.page').then((m) => m.VerifyEmailPage),
+        data: { hideHeader: true, beHeadlessPath: 'account_confirm_email' },
+      },
+    ],
+  },
+  /** `account_reset_password` / `account_reset_password_from_key` / `account_signup` / `socialaccount_login_error` */
+  {
+    path: 'account',
+    children: [
+      {
+        path: 'password/reset',
+        redirectTo: '/forgot-password',
+        pathMatch: 'full',
+      },
+      {
+        path: 'password/reset/key/:key',
+        loadComponent: () =>
+          import('./core/auth/pages/reset-password/reset-password.page').then(
+            (m) => m.ResetPasswordPage
+          ),
+        canActivate: [guestGuard],
+        data: { hideHeader: true, beHeadlessPath: 'account_reset_password_from_key' },
+      },
+      {
+        path: 'signup',
+        redirectTo: '/register',
+        pathMatch: 'full',
+      },
+      {
+        path: 'provider/callback',
+        loadComponent: () =>
+          import('./core/auth/pages/oauth-callback/oauth-callback.page').then(
+            (m) => m.OauthCallbackPage
+          ),
+        data: { hideHeader: true, beHeadlessPath: 'socialaccount_login_error' },
+      },
+    ],
+  },
   {
     path: 'auth/oauth/callback',
     loadComponent: () =>

@@ -15,18 +15,23 @@
       @if (errorMessage()) {
         <div class="passkey__alert">{{ errorMessage() }}</div>
       }
-      <button
-        type="button"
-        class="passkey__submit"
-        (click)="signInWithPasskey()"
-        [disabled]="isLoading()"
-      >
-        @if (isLoading()) {
-          <span class="passkey__spinner" aria-hidden="true"></span>
-        } @else {
-          {{ 'AUTH.PASSKEY.BUTTON' | translate }}
-        }
-      </button>
+      @if (!passkeyAvailable()) {
+        <p class="passkey__info" role="status">{{ 'AUTH.PASSKEY.UNSUPPORTED' | translate }}</p>
+      }
+      @if (passkeyAvailable()) {
+        <button
+          type="button"
+          class="passkey__submit"
+          (click)="signInWithPasskey()"
+          [disabled]="isLoading()"
+        >
+          @if (isLoading()) {
+            <span class="passkey__spinner" aria-hidden="true"></span>
+          } @else {
+            {{ 'AUTH.PASSKEY.BUTTON' | translate }}
+          }
+        </button>
+      }
     </div>
   </div>
 </div>

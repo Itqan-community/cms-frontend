@@ -25,6 +25,7 @@ import { authErrorInterceptor } from './core/interceptors/auth-error.interceptor
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { credentialsInterceptor } from './core/interceptors/credentials.interceptor';
 import { csrfResponseInterceptor } from './core/interceptors/csrf-response.interceptor';
+import { appSessionTokenInterceptor } from './core/interceptors/app-session-token.interceptor';
 import { HeadlessAuthApiService } from './core/auth/headless/headless-auth-api.service';
 registerLocaleData(ar);
 
@@ -55,6 +56,7 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([
         credentialsInterceptor,
         csrfResponseInterceptor,
+        appSessionTokenInterceptor,
         headersInterceptor,
         authErrorInterceptor,
         errorInterceptor,
@@ -62,7 +64,7 @@ export const appConfig: ApplicationConfig = {
     ),
     provideAppInitializer(() => {
       const headless = inject(HeadlessAuthApiService);
-      // Prime `csrftoken` on the API host before unsafe methods / OAuth form POST
+      // Load headless account config (app client; unsafe calls use Bearer or CSRF when no token).
       return firstValueFrom(headless.getConfig().pipe(catchError(() => of(undefined))));
     }),
     // ngx-translate setup

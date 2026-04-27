@@ -1,20 +1,25 @@
-import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { Injectable, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, BehaviorSubject, tap, catchError, of, switchMap, map } from 'rxjs';
+import { BehaviorSubject, Observable, catchError, map, of, switchMap, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import {
-  User,
-  LoginRequest,
-  RegisterRequest,
-  UpdateProfileRequest,
-  UpdateProfileResponse,
-} from '../models/auth.model';
+import type {
+  AuthenticatedResponse,
+  AuthenticationMeta,
+  HeadlessUser,
+} from '../headless/headless-api.types';
+import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
 import {
   HeadlessAuthApiService,
   submitProviderRedirectForm,
 } from '../headless/headless-auth-api.service';
-import type { AuthenticatedResponse, HeadlessUser } from '../headless/headless-api.types';
+import {
+  LoginRequest,
+  RegisterRequest,
+  UpdateProfileRequest,
+  UpdateProfileResponse,
+  User,
+} from '../models/auth.model';
 
 @Injectable({
   providedIn: 'root',
@@ -23,6 +28,7 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly headless = inject(HeadlessAuthApiService);
+  private readonly tokenStore = inject(HeadlessAppTokenService);
 
   private readonly API_BASE_URL = environment.API_BASE_URL;
   private readonly USER_KEY = 'user';
@@ -75,8 +81,8 @@ export class AuthService {
   }
 
   /**
-   * After 401/403 on a protected CMS API call: re-sync session from cookies; used by
-   * `auth-error.interceptor` (browser mode — no Bearer tokens).
+   * After 401/403 on a protected CMS API call: re-sync via `GET .../auth/session` (sends
+   * `X-Session-Token`); updates stored tokens from response `meta`. Used by `auth-error.interceptor`.
    */
   sessionRecheckAfter401(): Observable<boolean> {
     return this.headless.getSession().pipe(
@@ -102,7 +108,14 @@ export class AuthService {
     void this.router.navigate(['/login']);
   }
 
-  /** After OAuth redirect or email link — refresh session from cookies. */
+  /**
+   * Persists `meta.session_token` / `meta.access_token` from headless responses (contract fields as-is).
+   */
+  applyMetaTokens(meta: AuthenticationMeta | undefined): void {
+    this.tokenStore.setFromMeta(meta);
+  }
+
+  /** After OAuth redirect or email link — refresh app session from `GET .../auth/session`. */
   bootstrapSessionFromServer(options?: {
     fetchProfile: boolean;
   }): Observable<AuthenticatedResponse> {
@@ -116,15 +129,16 @@ export class AuthService {
   }
 
   /**
-   * After successful headless step: re-check session when login response has no
-   * `meta.access_token` (tokens/session details come from `GET /auth/session` per contract).
+   * After successful headless step: persist `meta` tokens, then re-check session if user
+   * or `access_token` is missing (contract completion via `GET .../auth/session`).
    */
   applyHeadlessSuccess(
     res: AuthenticatedResponse,
     options?: { fetchProfile?: boolean }
   ): Observable<AuthenticatedResponse> {
+    this.applyMetaTokens(res.meta);
     const fetchProfile = options?.fetchProfile !== false;
-    if (res.meta?.is_authenticated && !res.meta?.access_token) {
+    if (res.meta?.is_authenticated && (!res.data?.user || !res.meta?.access_token)) {
       return this.bootstrapSessionFromServer({ fetchProfile });
     }
     this.applyAuthenticatedResponse(res, { fetchProfile });
@@ -135,6 +149,7 @@ export class AuthService {
     res: AuthenticatedResponse,
     opts: { fetchProfile?: boolean } = {}
   ): void {
+    this.applyMetaTokens(res.meta);
     if (res.meta?.is_authenticated && res.data?.user) {
       const u = this.mapHeadlessToUser(res.data.user);
       this.currentUser.set(u);
@@ -157,6 +172,11 @@ export class AuthService {
         });
       }
     } else {
+      // Keep tokens when `meta` still carries a session (multi-step app flows); otherwise drop.
+      if (!res.meta?.session_token && !res.meta?.access_token) {
+        this.tokenStore.clear();
+      }
+      localStorage.removeItem(this.USER_KEY);
       this.isAuthenticated.set(false);
       this.currentUser.set(null);
       this.authStateSubject.next(false);
@@ -219,7 +239,7 @@ export class AuthService {
     this.isAuthenticated.set(false);
     this.currentUser.set(null);
     this.authStateSubject.next(false);
-    this.router.navigate(['/login']);
+    void this.router.navigate(['/login']);
   }
 
   getProfile(): Observable<User> {
@@ -266,6 +286,7 @@ export class AuthService {
 
   private clearClientAuthData(): void {
     localStorage.removeItem(this.USER_KEY);
+    this.tokenStore.clear();
   }
 
   isLoggedIn(): boolean {

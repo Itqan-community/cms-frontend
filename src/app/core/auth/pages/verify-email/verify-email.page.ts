@@ -34,7 +34,9 @@ export class VerifyEmailPage implements OnInit {
   }
 
   ngOnInit(): void {
-    const k = this.route.snapshot.queryParamMap.get('key');
+    const fromParam = this.route.snapshot.paramMap.get('key');
+    const fromQuery = this.route.snapshot.queryParamMap.get('key');
+    const k = fromParam ?? fromQuery;
     if (k) {
       this.form.patchValue({ key: k });
     }

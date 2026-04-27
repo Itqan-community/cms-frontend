@@ -134,6 +134,10 @@ export class AdminLayoutComponent {
     this.closeMobileMenu();
   }
 
+  onLogout(): void {
+    this.authService.logout().subscribe();
+  }
+
   onRefresh(): void {
     this.modal.confirm({
       nzTitle: this.translate.instant('ADMIN.REFRESH_PROMPT.TITLE'),

@@ -1,45 +1,49 @@
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, tap } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
 import {
-  extractCsrfFromHeadlessConfigResponse,
-  getDjangoCsrfTokenForRequest,
-  getDjangoCsrfTokenFromCookie,
-  setCrossOriginDjangoCsrfToken,
-} from '../../utils/csrf.util';
-import {
+  AppTokenRefreshResponse,
   AuthenticatedResponse,
   ConfigurationResponse,
+  HEADLESS_CLIENT_APP,
   HEADLESS_CLIENT_BROWSER,
   WebAuthnRequestOptionsResponse,
 } from './headless-api.types';
+import { HeadlessAppTokenService } from './headless-app-token.service';
 
 const jsonHeaders = new HttpHeaders({ 'Content-Type': 'application/json' });
 
 @Injectable({ providedIn: 'root' })
 export class HeadlessAuthApiService {
   private readonly http = inject(HttpClient);
+  private readonly tokenStore = inject(HeadlessAppTokenService);
 
   private base(): string {
-    return `${environment.API_BASE_URL}/auth/${HEADLESS_CLIENT_BROWSER}/v1`;
+    return `${environment.API_BASE_URL}/auth/${HEADLESS_CLIENT_APP}/v1`;
+  }
+
+  /**
+   * Contract: `POST /auth/app/v1/tokens/refresh` (no `{client}` in path).
+   */
+  refreshAccessToken(): Observable<AppTokenRefreshResponse> {
+    const refresh = this.tokenStore.getRefreshToken();
+    if (!refresh) {
+      return throwError(
+        () => new Error('HeadlessAuthApiService.refreshAccessToken: no refresh_token in storage')
+      );
+    }
+    return this.http.post<AppTokenRefreshResponse>(
+      `${environment.API_BASE_URL}/auth/${HEADLESS_CLIENT_APP}/v1/tokens/refresh`,
+      { refresh_token: refresh },
+      { headers: jsonHeaders }
+    );
   }
 
   getConfig(): Observable<ConfigurationResponse> {
-    return this.http.get<ConfigurationResponse>(`${this.base()}/config`).pipe(
-      tap((res) => {
-        const fromJson = extractCsrfFromHeadlessConfigResponse(res);
-        if (fromJson) {
-          setCrossOriginDjangoCsrfToken(fromJson);
-        } else {
-          const fromCookie = getDjangoCsrfTokenFromCookie();
-          // Do not set null here — would wipe a value from `csrfResponseInterceptor` on cross-origin.
-          if (fromCookie) {
-            setCrossOriginDjangoCsrfToken(fromCookie);
-          }
-        }
-      })
-    );
+    // App headless: session continuity uses `X-Session-Token`, not cross-origin CSRF / cookies.
+    return this.http.get<ConfigurationResponse>(`${this.base()}/config`);
   }
 
   login(body: { email: string; password: string }): Observable<AuthenticatedResponse> {
@@ -164,10 +168,11 @@ export class HeadlessAuthApiService {
   }
 
   /**
-   * Synchronous (non-XHR) provider redirect per contract — not used here; use `submitProviderRedirectForm`.
+   * Synchronous (non-XHR) provider redirect per OpenAPI — **browser** client only (302 to IdP).
+   * App client uses `provider_token` for non-browser flows.
    */
   buildProviderRedirectUrl(): string {
-    return `${this.base()}/auth/provider/redirect`;
+    return `${environment.API_BASE_URL}/auth/${HEADLESS_CLIENT_BROWSER}/v1/auth/provider/redirect`;
   }
 }
 

@@ -10,7 +10,13 @@
   <div class="reauth__container">
     <div class="reauth__card">
       <h1 class="reauth__title">{{ 'AUTH.REAUTH.TITLE' | translate }}</h1>
-      <p class="reauth__subtitle">{{ 'AUTH.REAUTH.SUBTITLE' | translate }}</p>
+      <p class="reauth__subtitle">
+        @if (passkeyAvailable()) {
+          {{ 'AUTH.REAUTH.SUBTITLE' | translate }}
+        } @else {
+          {{ 'AUTH.REAUTH.SUBTITLE_PASSWORD_ONLY' | translate }}
+        }
+      </p>
       @if (errorMessage()) {
         <div class="reauth__alert">{{ errorMessage() }}</div>
       }
@@ -31,15 +37,17 @@
           {{ 'AUTH.REAUTH.SUBMIT' | translate }}
         </button>
       </form>
-      <div class="reauth__divider">{{ 'AUTH.LOGIN.OR_CONTINUE' | translate }}</div>
-      <button
-        type="button"
-        class="reauth__secondary"
-        (click)="onPasskey()"
-        [disabled]="isLoading()"
-      >
-        {{ 'AUTH.REAUTH.USE_PASSKEY' | translate }}
-      </button>
+      @if (passkeyAvailable()) {
+        <div class="reauth__divider">{{ 'AUTH.LOGIN.OR_CONTINUE' | translate }}</div>
+        <button
+          type="button"
+          class="reauth__secondary"
+          (click)="onPasskey()"
+          [disabled]="isLoading()"
+        >
+          {{ 'AUTH.REAUTH.USE_PASSKEY' | translate }}
+        </button>
+      }
     </div>
   </div>
 </div>

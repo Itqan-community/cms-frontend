@@ -13,7 +13,10 @@
       <h1 class="lbc__title">{{ 'AUTH.LOGIN_BY_CODE.TITLE' | translate }}</h1>
       <p class="lbc__subtitle">{{ 'AUTH.LOGIN_BY_CODE.SUBTITLE' | translate }}</p>
       @if (errorMessage()) {
-        <div class="lbc__alert">{{ errorMessage() }}</div>
+        <div class="lbc__alert" role="alert">{{ errorMessage() }}</div>
+      }
+      @if (infoMessage()) {
+        <div class="lbc__info" role="status">{{ infoMessage() }}</div>
       }
 
       @if (step() === 'email') {
@@ -28,7 +31,18 @@
               autocomplete="email"
             />
           </div>
-          <button type="submit" class="lbc__submit" [disabled]="emailForm.invalid || isLoading()">
+          @if (resendCooldownSeconds() > 0) {
+            <p class="lbc__cooldown">
+              {{
+                'AUTH.LOGIN_BY_CODE.TRY_AGAIN_IN' | translate: { seconds: resendCooldownSeconds() }
+              }}
+            </p>
+          }
+          <button
+            type="submit"
+            class="lbc__submit"
+            [disabled]="emailForm.invalid || isLoading() || resendCooldownSeconds() > 0"
+          >
             {{ 'AUTH.LOGIN_BY_CODE.SEND_CODE' | translate }}
           </button>
         </form>
@@ -41,6 +55,7 @@
             <input
               id="code"
               class="lbc__input"
+              type="text"
               formControlName="code"
               autocomplete="one-time-code"
               [placeholder]="'AUTH.LOGIN_BY_CODE.CODE_PLACEHOLDER' | translate"
@@ -49,6 +64,24 @@
           <button type="submit" class="lbc__submit" [disabled]="codeForm.invalid || isLoading()">
             {{ 'AUTH.LOGIN_BY_CODE.SIGN_IN' | translate }}
           </button>
+          <div class="lbc__resend-row">
+            <button
+              type="button"
+              class="lbc__resend"
+              (click)="resendCode()"
+              [disabled]="isLoading() || resendCooldownSeconds() > 0"
+            >
+              {{ 'AUTH.LOGIN_BY_CODE.RESEND' | translate }}
+            </button>
+            @if (resendCooldownSeconds() > 0) {
+              <span class="lbc__cooldown-inline">
+                {{
+                  'AUTH.LOGIN_BY_CODE.TRY_AGAIN_IN'
+                    | translate: { seconds: resendCooldownSeconds() }
+                }}
+              </span>
+            }
+          </div>
           <button type="button" class="lbc__secondary" (click)="goToEmail()">
             {{ 'AUTH.LOGIN_BY_CODE.USE_OTHER_EMAIL' | translate }}
           </button>

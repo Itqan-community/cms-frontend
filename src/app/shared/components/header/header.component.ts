@@ -46,4 +46,8 @@ export class HeaderComponent {
   onMobileMenuToggle(): void {
     this.isMobileMenuOpen.update((v) => !v);
   }
+
+  onLogout(): void {
+    this.authService.logout().subscribe();
+  }
 }

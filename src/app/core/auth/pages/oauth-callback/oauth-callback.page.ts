@@ -7,6 +7,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
 
+/**
+ * Social / provider return URL handler.
+ * Mounted at:
+ * - `/auth/oauth/callback` (existing FE)
+ * - `/account/provider/callback` (django `HEADLESS_FRONTEND_URLS.socialaccount_login_error`)
+ */
 @Component({
   selector: 'app-oauth-callback-page',
   standalone: true,

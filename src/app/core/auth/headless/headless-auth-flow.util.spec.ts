@@ -25,6 +25,15 @@ describe('headless-auth-flow.util', () => {
     expect(ok).toBe(true);
   });
 
+  it('isReauthenticationBody detects mfa_reauthenticate 401', () => {
+    const ok = isReauthenticationBody({
+      status: 401,
+      meta: { is_authenticated: true },
+      data: { flows: [{ id: 'mfa_reauthenticate' }] },
+    });
+    expect(ok).toBe(true);
+  });
+
   it('tryNavigateForAuth401 navigates for verify_email', () => {
     const calls: { path: string }[] = [];
     const router = {

@@ -61,7 +61,7 @@
             <!-- Ensure actions display flex properly always -->
             <div class="admin-header-actions">
               <app-lang-switch></app-lang-switch>
-              <app-user-actions (logoutClicked)="authService.logout()"></app-user-actions>
+              <app-user-actions (logoutClicked)="onLogout()"></app-user-actions>
             </div>
           </div>
         </div>

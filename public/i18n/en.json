@@ -75,7 +75,8 @@
       "BUTTON": "Continue with passkey",
       "BACK": "Back to sign in",
       "ERROR": "Passkey sign-in failed. Please try again.",
-      "CANCELLED": "Passkey sign-in was cancelled."
+      "CANCELLED": "Passkey sign-in was cancelled.",
+      "UNSUPPORTED": "Passkeys are not available in this browser or environment. Use email and password or another sign-in method."
     },
     "LOGIN_BY_CODE": {
       "TITLE": "Sign in with code",
@@ -86,6 +87,12 @@
       "SIGN_IN": "Sign in",
       "USE_OTHER_EMAIL": "Use a different email",
       "BACK": "Back to sign in",
+      "RESEND": "Resend code",
+      "RESEND_SENT": "A new code was sent to your email.",
+      "TRY_AGAIN_IN": "Try again in {{seconds}}s",
+      "RATE_LIMIT": "Too many requests. Please wait and try again.",
+      "SESSION_GONE": "This sign-in session expired. Return to the sign-in page to start again.",
+      "INCORRECT_CODE": "That code is incorrect or expired. Please try again.",
       "REQUEST_ERROR": "Could not send the code. Try again.",
       "CONFIRM_ERROR": "Invalid code. Please try again."
     },
@@ -117,6 +124,7 @@
     "REAUTH": {
       "TITLE": "Confirm it is you",
       "SUBTITLE": "For your security, please confirm your password or use your passkey.",
+      "SUBTITLE_PASSWORD_ONLY": "For your security, please confirm your password.",
       "SUBMIT": "Confirm",
       "USE_PASSKEY": "Use passkey",
       "CANCEL": "Cancel",

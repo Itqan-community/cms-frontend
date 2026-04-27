@@ -1,9 +1,11 @@
 /**
- * Types aligned with django-allauth headless OpenAPI (browser client).
+ * Types aligned with django-allauth headless OpenAPI.
  * @see .temp/auth api contract.json
  */
 
 export const HEADLESS_CLIENT_BROWSER = 'browser' as const;
+/** App client: `/auth/{client}/v1/...` + `X-Session-Token` for auth, Bearer for other APIs. */
+export const HEADLESS_CLIENT_APP = 'app' as const;
 
 export type AllauthFlowId =
   | 'login'
@@ -30,6 +32,17 @@ export interface AuthenticationMeta {
   session_token?: string;
   /** Optional; pluggable token strategy. Browser mode uses the Django session (`sessionid`) + CSRF. */
   access_token?: string;
+  /** When `HEADLESS_TOKEN_STRATEGY` issues JWT; persist for `/auth/app/v1/tokens/refresh`. */
+  refresh_token?: string;
+}
+
+/** `POST /auth/app/v1/tokens/refresh` success (contract). */
+export interface AppTokenRefreshResponse {
+  status: 200;
+  data: {
+    access_token: string;
+    refresh_token?: string;
+  };
 }
 
 export interface HeadlessUser {
