@@ -136,4 +136,57 @@ describe('AuthService (app / headless)', () => {
       done();
     });
   });
+
+  it('restores authenticated UI state from storage when bootstrap session check fails', () => {
+    TestBed.resetTestingModule();
+    localStorage.clear();
+    localStorage.setItem(
+      'user',
+      JSON.stringify({
+        id: '1',
+        name: 'Persisted User',
+        email: 'persisted@example.com',
+        phone: '',
+        is_active: true,
+        is_profile_completed: true,
+      })
+    );
+    localStorage.setItem(HEADLESS_SESSION_TOKEN_KEY, 'sess-1');
+    localStorage.setItem(HEADLESS_ACCESS_TOKEN_KEY, 'acc-1');
+
+    const localHeadless = jasmine.createSpyObj<HeadlessAuthApiService>('HeadlessAuthApiService', [
+      'getConfig',
+      'getSession',
+      'login',
+      'signup',
+      'deleteSession',
+      'verifyEmail',
+    ]);
+    const localConfig: ConfigurationResponse = {
+      status: 200,
+      data: {
+        account: {
+          authentication_method: 'email',
+          is_open_for_signup: true,
+          email_verification_by_code_enabled: false,
+          login_by_code_enabled: false,
+        },
+      },
+    };
+    localHeadless.getConfig.and.returnValue(of(localConfig));
+    localHeadless.getSession.and.returnValue(throwError(() => new Error('session check failed')));
+
+    TestBed.configureTestingModule({
+      providers: [
+        AuthService,
+        { provide: HttpClient, useValue: { get: () => of({ id: 1 }), put: () => of({}) } },
+        { provide: Router, useValue: { navigate: jasmine.createSpy('navigate') } },
+        { provide: HeadlessAuthApiService, useValue: localHeadless },
+      ],
+    });
+
+    const localService = TestBed.inject(AuthService);
+    expect(localService.isAuthenticated()).toBe(true);
+    expect(localService.currentUser()?.email).toBe('persisted@example.com');
+  });
 });

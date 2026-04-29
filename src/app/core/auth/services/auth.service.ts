@@ -65,19 +65,34 @@ export class AuthService {
   }
 
   private initializeAuth(): void {
+    const restoredFromStorage = this.restoreAuthFromStorage();
     this.headless.getSession().subscribe({
       next: (res) => {
         this.applyAuthenticatedResponse(res, { fetchProfile: true });
       },
       error: () => {
-        const user = this.getStoredUser();
-        if (user) {
-          this.currentUser.set(user);
+        if (!restoredFromStorage) {
+          this.isAuthenticated.set(false);
+          this.authStateSubject.next(false);
         }
-        this.isAuthenticated.set(false);
-        this.authStateSubject.next(false);
       },
     });
+  }
+
+  /**
+   * Restores UI auth state after hard reload from persisted user + token storage.
+   * Server session is still revalidated by `getSession()` immediately after restore.
+   */
+  private restoreAuthFromStorage(): boolean {
+    const user = this.getStoredUser();
+    const hasToken = !!this.tokenStore.getSessionToken() || !!this.tokenStore.getAccessToken();
+    if (!user || !hasToken) {
+      return false;
+    }
+    this.currentUser.set(user);
+    this.isAuthenticated.set(true);
+    this.authStateSubject.next(true);
+    return true;
   }
 
   /**
