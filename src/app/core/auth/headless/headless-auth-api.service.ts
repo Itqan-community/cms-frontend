@@ -18,6 +18,18 @@ import { HeadlessAppTokenService } from './headless-app-token.service';
 
 const jsonHeaders = new HttpHeaders({ 'Content-Type': 'application/json' });
 
+/**
+ * `publicKeyCredentialToJson` / `publicKeyCredentialCreationToJson` return `{ credential: ... }`
+ * for PUT complete-signup. POST helpers must not wrap again or the API sees `credential.credential`
+ * and validation fails (often surfaced as `incorrect_code`).
+ */
+function webauthnCredentialPostBody(payload: unknown): { credential: unknown } {
+  if (payload !== null && typeof payload === 'object' && 'credential' in payload) {
+    return payload as { credential: unknown };
+  }
+  return { credential: payload };
+}
+
 @Injectable({ providedIn: 'root' })
 export class HeadlessAuthApiService {
   private readonly http = inject(HttpClient);
@@ -139,7 +151,7 @@ export class HeadlessAuthApiService {
   postWebauthnLogin(credential: unknown): Observable<AuthenticatedResponse> {
     return this.http.post<AuthenticatedResponse>(
       `${this.base()}/auth/webauthn/login`,
-      { credential },
+      webauthnCredentialPostBody(credential),
       { headers: jsonHeaders }
     );
   }
@@ -177,7 +189,7 @@ export class HeadlessAuthApiService {
     return recoverHeadlessJsonOkOnHttpError(
       this.http.post(
         `${this.base()}/account/authenticators/webauthn`,
-        { credential },
+        webauthnCredentialPostBody(credential),
         { headers: jsonHeaders }
       )
     );
@@ -192,7 +204,7 @@ export class HeadlessAuthApiService {
   postWebauthnReauth(credential: unknown): Observable<AuthenticatedResponse> {
     return this.http.post<AuthenticatedResponse>(
       `${this.base()}/auth/webauthn/reauthenticate`,
-      { credential },
+      webauthnCredentialPostBody(credential),
       { headers: jsonHeaders }
     );
   }
