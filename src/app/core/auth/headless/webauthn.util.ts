@@ -10,21 +10,29 @@ import { assertOrPatchCreationRpId, assertOrPatchRequestRpId } from './webauthn-
  */
 export function publicKeyCredentialToJson(cred: PublicKeyCredential): unknown {
   const response = cred.response as AuthenticatorAssertionResponse;
-  return {
-    credential: {
-      type: cred.type,
-      id: cred.id,
-      rawId: bufferToBase64url(cred.rawId),
-      authenticatorAttachment: (cred as PublicKeyCredential & { authenticatorAttachment?: string })
-        .authenticatorAttachment,
-      response: {
-        clientDataJSON: bufferToBase64url(response.clientDataJSON),
-        authenticatorData: bufferToBase64url(response.authenticatorData),
-        signature: bufferToBase64url(response.signature),
-        userHandle: response.userHandle ? bufferToBase64url(response.userHandle) : null,
-      },
-      clientExtensionResults: cred.getClientExtensionResults(),
+  const attachment = (cred as PublicKeyCredential & { authenticatorAttachment?: string })
+    .authenticatorAttachment;
+  const userHandle =
+    response.userHandle != null && response.userHandle.byteLength > 0
+      ? bufferToBase64url(response.userHandle)
+      : null;
+  const credential: Record<string, unknown> = {
+    type: cred.type,
+    id: cred.id,
+    rawId: bufferToBase64url(cred.rawId),
+    response: {
+      clientDataJSON: bufferToBase64url(response.clientDataJSON),
+      authenticatorData: bufferToBase64url(response.authenticatorData),
+      signature: bufferToBase64url(response.signature),
+      userHandle,
     },
+    clientExtensionResults: cred.getClientExtensionResults(),
+  };
+  if (attachment != null && attachment !== '') {
+    credential['authenticatorAttachment'] = attachment;
+  }
+  return {
+    credential,
   };
 }
 
@@ -33,28 +41,26 @@ export function publicKeyCredentialToJson(cred: PublicKeyCredential): unknown {
  */
 export function publicKeyCredentialCreationToJson(cred: PublicKeyCredential): unknown {
   const response = cred.response as AuthenticatorAttestationResponse;
-  const publicKey =
-    typeof response.getPublicKey === 'function' ? response.getPublicKey.call(response) : null;
-  return {
-    credential: {
-      type: cred.type,
-      id: cred.id,
-      rawId: bufferToBase64url(cred.rawId),
-      authenticatorAttachment: (cred as PublicKeyCredential & { authenticatorAttachment?: string })
-        .authenticatorAttachment,
-      response: {
-        clientDataJSON: bufferToBase64url(response.clientDataJSON),
-        attestationObject: bufferToBase64url(response.attestationObject),
-        transports:
-          typeof response.getTransports === 'function' ? response.getTransports.call(response) : [],
-        publicKeyAlgorithm:
-          typeof response.getPublicKeyAlgorithm === 'function'
-            ? response.getPublicKeyAlgorithm.call(response)
-            : null,
-        publicKey: publicKey ? bufferToBase64url(publicKey) : null,
-      },
-      clientExtensionResults: cred.getClientExtensionResults(),
+  const attachment = (cred as PublicKeyCredential & { authenticatorAttachment?: string })
+    .authenticatorAttachment;
+  const transports =
+    typeof response.getTransports === 'function' ? response.getTransports.call(response) : [];
+  const credential: Record<string, unknown> = {
+    type: cred.type,
+    id: cred.id,
+    rawId: bufferToBase64url(cred.rawId),
+    response: {
+      clientDataJSON: bufferToBase64url(response.clientDataJSON),
+      attestationObject: bufferToBase64url(response.attestationObject),
+      transports,
     },
+    clientExtensionResults: cred.getClientExtensionResults(),
+  };
+  if (attachment != null && attachment !== '') {
+    credential['authenticatorAttachment'] = attachment;
+  }
+  return {
+    credential,
   };
 }
 
