@@ -52,4 +52,77 @@ describe('appSessionTokenInterceptor', () => {
     req.flush({});
     httpMock.verify();
   });
+
+  it('still adds X-Session-Token for GET passkey signup (options after initiate)', () => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    localStorage.setItem('headless_session_token', 'tok-after-init');
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([credentialsInterceptor, appSessionTokenInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
+    const http = TestBed.inject(HttpClient);
+    const httpMock = TestBed.inject(HttpTestingController);
+    const signupGetUrl = `${api}/auth/app/v1/auth/webauthn/signup`;
+    http.get(signupGetUrl).subscribe();
+    const req = httpMock.expectOne(signupGetUrl);
+    expect(req.request.headers.get('X-Session-Token')).toBe('tok-after-init');
+    req.flush({ status: 200, data: { request_options: { publicKey: {} } } });
+    httpMock.verify();
+  });
+
+  it('does not add X-Session-Token for passkey login GET/POST (anonymous identifier flow)', () => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    localStorage.setItem('headless_session_token', 'tok-stale');
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([credentialsInterceptor, appSessionTokenInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
+    const http = TestBed.inject(HttpClient);
+    const httpMock = TestBed.inject(HttpTestingController);
+    const loginUrl = `${api}/auth/app/v1/auth/webauthn/login`;
+    http.post(loginUrl, { credential: { type: 'public-key' } }).subscribe();
+    let req = httpMock.expectOne(loginUrl);
+    expect(req.request.headers.get('X-Session-Token')).toBeNull();
+    req.flush({ status: 200, data: {} });
+    http.get(loginUrl).subscribe();
+    req = httpMock.expectOne(loginUrl);
+    expect(req.request.headers.get('X-Session-Token')).toBeNull();
+    req.flush({ status: 200, data: {} });
+    httpMock.verify();
+  });
+
+  it('does not add X-Session-Token for passkey signup initiate POST', () => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    localStorage.setItem('headless_session_token', 'tok-stale');
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([credentialsInterceptor, appSessionTokenInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
+    const http = TestBed.inject(HttpClient);
+    const httpMock = TestBed.inject(HttpTestingController);
+    const signupUrl = `${api}/auth/app/v1/auth/webauthn/signup`;
+    http.post(signupUrl, { email: 'a@b.co' }).subscribe();
+    const req = httpMock.expectOne(signupUrl);
+    expect(req.request.headers.get('X-Session-Token')).toBeNull();
+    req.flush({ status: 200 });
+    httpMock.verify();
+  });
 });

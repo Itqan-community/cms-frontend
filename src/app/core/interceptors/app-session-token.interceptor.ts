@@ -2,11 +2,17 @@ import { HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { isHeadlessAppAuthUrl } from '../auth/headless/headless-api-path.util';
+import {
+  isHeadlessAppAuthUrl,
+  isHeadlessWebauthnLoginUrl,
+  isHeadlessWebauthnSignupInitiatePost,
+} from '../auth/headless/headless-api-path.util';
 import { HeadlessAppTokenService } from '../auth/headless/headless-app-token.service';
 
 /**
  * App headless: attach `X-Session-Token` from `meta.session_token` store for `/auth/app/v1/*` only.
+ * Skips passkey **login** and passkey signup **initiate** (`POST …/webauthn/signup`); a stale token
+ * there skews server state (often `incorrect_code` on the WebAuthn POST).
  */
 export function appSessionTokenInterceptor(
   req: HttpRequest<unknown>,
@@ -19,6 +25,12 @@ export function appSessionTokenInterceptor(
   }
   const t = store.getSessionToken();
   if (!t) {
+    return next(req);
+  }
+  if (isHeadlessWebauthnLoginUrl(req.url)) {
+    return next(req);
+  }
+  if (isHeadlessWebauthnSignupInitiatePost(req.url, req.method)) {
     return next(req);
   }
   return next(
