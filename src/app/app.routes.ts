@@ -171,8 +171,15 @@ export const routes: Routes = [
     path: 'passkey',
     loadComponent: () =>
       import('./core/auth/pages/passkey/passkey.page').then((m) => m.PasskeyPage),
-    canActivate: [guestGuard],
+    // No guestGuard: signup may continue after email verification while session exists.
     data: { hideHeader: true },
+  },
+  {
+    path: 'passkey/setup',
+    loadComponent: () =>
+      import('./core/auth/pages/passkey/passkey.page').then((m) => m.PasskeyPage),
+    canActivate: [authGuard],
+    data: { hideHeader: true, mode: 'setup' },
   },
   {
     path: 'login-by-code',

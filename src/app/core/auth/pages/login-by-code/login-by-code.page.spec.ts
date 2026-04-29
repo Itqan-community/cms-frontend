@@ -2,7 +2,7 @@ import { HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import { of, throwError } from 'rxjs';
+import { of, throwError, TimeoutError } from 'rxjs';
 import { AuthService } from '../../services/auth.service';
 import { LoginByCodePage } from './login-by-code.page';
 
@@ -72,5 +72,12 @@ describe('LoginByCodePage', () => {
     );
     await page.confirmCode();
     expect(page.errorMessage().toLowerCase()).toContain('code');
+  });
+
+  it('on request timeout when sending code, shows timeout-specific message', async () => {
+    requestLoginCode.and.returnValue(throwError(() => new TimeoutError()));
+    await page.requestCode();
+    expect(page.errorMessage().length).toBeGreaterThan(0);
+    expect(page.errorMessage().toLowerCase()).toContain('tim');
   });
 });

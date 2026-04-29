@@ -73,10 +73,22 @@
       "TITLE": "Sign in with passkey",
       "SUBTITLE": "Use your device passkey or security key to continue.",
       "BUTTON": "Continue with passkey",
+      "SIGNUP_TITLE": "Create account with passkey",
+      "SIGNUP_SUBTITLE": "Enter your email to start. If required, verify your email first, then register your passkey when prompted.",
+      "SIGNUP_EMAIL_LABEL": "Email",
+      "SIGNUP_BUTTON": "Continue with passkey",
+      "SETUP_TITLE": "Set up passkey",
+      "SETUP_SUBTITLE": "Add a passkey to your account so you can sign in faster next time.",
+      "SETUP_BUTTON": "Add passkey",
+      "SETUP_SUCCESS": "Passkey added successfully.",
+      "SETUP_REAUTH_REQUIRED": "For security, confirm your password before adding a passkey.",
+      "SETUP_REAUTH_LINK": "Confirm password to continue",
       "BACK": "Back to sign in",
       "ERROR": "Passkey sign-in failed. Please try again.",
       "CANCELLED": "Passkey sign-in was cancelled.",
-      "UNSUPPORTED": "Passkeys are not available in this browser or environment. Use email and password or another sign-in method."
+      "UNSUPPORTED": "Passkeys are not available in this browser or environment. Use email and password or another sign-in method.",
+      "RP_ID_ORIGIN_MISMATCH": "Passkeys are configured for “{{rpId}}”, but you are on “{{host}}”. Open the app from the real site URL, or run the API with WebAuthn RP ID set to your dev host (see environment.webauthnReplaceRpIdWithHostname).",
+      "RP_ID_BROWSER_REJECT": "Your browser blocked this passkey because the site address does not match the passkey domain. Use the production or staging URL the team uses for the CMS."
     },
     "LOGIN_BY_CODE": {
       "TITLE": "Sign in with code",
@@ -93,23 +105,28 @@
       "RATE_LIMIT": "Too many requests. Please wait and try again.",
       "SESSION_GONE": "This sign-in session expired. Return to the sign-in page to start again.",
       "INCORRECT_CODE": "That code is incorrect or expired. Please try again.",
+      "REQUEST_TIMEOUT": "The code request took too long. Please try again.",
       "REQUEST_ERROR": "Could not send the code. Try again.",
       "CONFIRM_ERROR": "Invalid code. Please try again."
     },
     "FORGOT_PASSWORD": {
       "TITLE": "Reset your password",
-      "SUBTITLE": "Enter your email and we will send reset instructions.",
-      "SUBMIT": "Send reset link",
+      "SUBTITLE": "Enter your email. If an account exists, we will send a link to reset your password.",
+      "SUBTITLE_CODE": "Enter your email. If an account exists, we will send a reset code to use on the next screen.",
+      "SUBMIT_LINK": "Send reset link",
+      "SUBMIT_CODE": "Send reset code",
       "SENT": "If an account exists for this email, you will receive instructions shortly.",
       "ERROR": "Something went wrong. Please try again.",
       "BACK": "Back to sign in"
     },
     "RESET_PASSWORD": {
       "TITLE": "Choose a new password",
+      "CODE_LABEL": "Reset code",
+      "CODE_PLACEHOLDER": "Enter the code from your email",
+      "CODE_SENT_HINT": "If an account exists, we sent a reset code to {{email}}.",
       "NEW_PASSWORD": "New password",
       "SUBMIT": "Update password",
-      "ERROR": "Could not reset password. The link may have expired.",
-      "NO_KEY": "Invalid or missing reset link.",
+      "ERROR": "Could not reset password. The link or code may have expired.",
       "BACK": "Back to sign in"
     },
     "MFA": {
@@ -155,6 +172,7 @@
     "LICENSES": "Licenses",
     "LOGIN": "Login",
     "LOGOUT": "Logout",
+    "PASSKEY_SETUP": "Passkey",
     "ADMIN_PORTAL": "Admin portal"
   },
   "SETTINGS": "Settings",

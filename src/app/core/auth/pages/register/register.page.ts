@@ -8,6 +8,7 @@ import { NgIcon } from '@ng-icons/core';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
+import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
 import { RegisterRequest } from '../../models/auth.model';
 import { AuthService } from '../../services/auth.service';
 
@@ -48,8 +49,10 @@ export class RegisterPage {
 
   registerForm: FormGroup;
   errorMessage = signal<string>('');
+  passkeyAvailable = signal(false);
 
   constructor() {
+    this.passkeyAvailable.set(isPasskeyClientEnvironmentSupported());
     this.registerForm = this.fb.group(
       {
         first_name: ['', [Validators.required]],

@@ -9,6 +9,7 @@ import { LangSwitchComponent } from '../../../../shared/components/lang-switch/l
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
+import { WebAuthnRpIdMismatchError } from '../../headless/webauthn-rp-id.util';
 import { getWebAuthnRequestOptions, publicKeyCredentialToJson } from '../../headless/webauthn.util';
 import type { WebAuthnCredentialRequestData } from '../../headless/headless-api.types';
 import { AuthService } from '../../services/auth.service';
@@ -98,6 +99,23 @@ export class ReauthenticatePage implements OnInit {
       void this.router.navigateByUrl(this.returnUrl);
     } catch (e) {
       this.isLoading.set(false);
+      if (e instanceof WebAuthnRpIdMismatchError) {
+        this.errorMessage.set(
+          this.translate.instant('AUTH.PASSKEY.RP_ID_ORIGIN_MISMATCH', {
+            rpId: e.rpId,
+            host: e.hostname,
+          })
+        );
+        return;
+      }
+      if (
+        e instanceof DOMException &&
+        e.name === 'SecurityError' &&
+        /relying party|webauthn|well-known/i.test(e.message)
+      ) {
+        this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.RP_ID_BROWSER_REJECT'));
+        return;
+      }
       if (e instanceof HttpErrorResponse) {
         if (tryNavigateForAuth401(this.router, e)) {
           return;

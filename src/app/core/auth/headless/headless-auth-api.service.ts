@@ -1,6 +1,7 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
+import { recoverHeadlessJsonOkOnHttpError } from './headless-http-recover.util';
 import { environment } from '../../../../environments/environment';
 import { getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
 import {
@@ -9,6 +10,8 @@ import {
   ConfigurationResponse,
   HEADLESS_CLIENT_APP,
   HEADLESS_CLIENT_BROWSER,
+  PasskeySignup,
+  WebAuthnCreationOptionsResponse,
   WebAuthnRequestOptionsResponse,
 } from './headless-api.types';
 import { HeadlessAppTokenService } from './headless-app-token.service';
@@ -130,9 +133,7 @@ export class HeadlessAuthApiService {
   }
 
   getWebauthnLoginOptions(): Observable<WebAuthnRequestOptionsResponse> {
-    return this.http.get<WebAuthnRequestOptionsResponse>(`${this.base()}/auth/webauthn/login`, {
-      params: new HttpParams().set('passwordless', 'true'),
-    });
+    return this.http.get<WebAuthnRequestOptionsResponse>(`${this.base()}/auth/webauthn/login`);
   }
 
   postWebauthnLogin(credential: unknown): Observable<AuthenticatedResponse> {
@@ -140,6 +141,45 @@ export class HeadlessAuthApiService {
       `${this.base()}/auth/webauthn/login`,
       { credential },
       { headers: jsonHeaders }
+    );
+  }
+
+  /** GET request options for passkey signup (`credentials.get` assertion flow). */
+  getWebauthnSignupOptions(): Observable<WebAuthnRequestOptionsResponse> {
+    return this.http.get<WebAuthnRequestOptionsResponse>(`${this.base()}/auth/webauthn/signup`);
+  }
+
+  /** POST initiate passkey signup with email only. */
+  initiatePasskeySignup(email: string): Observable<HttpResponse<unknown>> {
+    const body: PasskeySignup = { email };
+    return this.http.post<unknown>(`${this.base()}/auth/webauthn/signup`, body, {
+      headers: jsonHeaders,
+      observe: 'response',
+    });
+  }
+
+  /** PUT complete passkey signup with WebAuthn assertion credential. */
+  completePasskeySignup(credentialPayload: unknown): Observable<AuthenticatedResponse> {
+    return this.http.put<AuthenticatedResponse>(
+      `${this.base()}/auth/webauthn/signup`,
+      credentialPayload,
+      { headers: jsonHeaders }
+    );
+  }
+
+  getWebauthnAuthenticatorCreateOptions(): Observable<WebAuthnCreationOptionsResponse> {
+    return this.http.get<WebAuthnCreationOptionsResponse>(
+      `${this.base()}/account/authenticators/webauthn`
+    );
+  }
+
+  addWebauthnAuthenticator(credential: unknown): Observable<unknown> {
+    return recoverHeadlessJsonOkOnHttpError(
+      this.http.post(
+        `${this.base()}/account/authenticators/webauthn`,
+        { credential },
+        { headers: jsonHeaders }
+      )
     );
   }
 

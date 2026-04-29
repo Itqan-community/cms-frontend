@@ -134,9 +134,15 @@
             {{ 'AUTH.LOGIN.LOGIN_WITH_GITHUB' | translate }}
           </button>
         </div>
-        <a [routerLink]="['/passkey']" class="login__inline-link login__alt-actions">
-          {{ 'AUTH.LOGIN.SIGN_IN_WITH_PASSKEY' | translate }}
-        </a>
+        @if (passkeyAvailable()) {
+          <a
+            [routerLink]="['/passkey']"
+            [queryParams]="{ flow: 'login' }"
+            class="login__inline-link login__alt-actions"
+          >
+            {{ 'AUTH.LOGIN.SIGN_IN_WITH_PASSKEY' | translate }}
+          </a>
+        }
       </div>
 
       <div class="login__footer">

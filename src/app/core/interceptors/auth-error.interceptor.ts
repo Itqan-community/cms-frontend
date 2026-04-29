@@ -10,7 +10,10 @@ import {
 import { HeadlessAppTokenService } from '../auth/headless/headless-app-token.service';
 import { HeadlessAuthApiService } from '../auth/headless/headless-auth-api.service';
 import { AuthService } from '../auth/services/auth.service';
-import { isHeadlessAppAuthUrl } from '../auth/headless/headless-api-path.util';
+import {
+  isHeadlessAppAuthUrl,
+  isHeadlessAccountWebAuthnAuthenticatorsUrl,
+} from '../auth/headless/headless-api-path.util';
 import { environment } from '../../../environments/environment';
 
 /**
@@ -82,8 +85,10 @@ export function authErrorInterceptor(
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
       if (error.status === 401 && isReauthenticationBody(error.error)) {
-        const returnUrl = router.url;
-        void router.navigate(['/reauthenticate'], { queryParams: { returnUrl } });
+        if (!isHeadlessAccountWebAuthnAuthenticatorsUrl(req.url)) {
+          const returnUrl = router.url;
+          void router.navigate(['/reauthenticate'], { queryParams: { returnUrl } });
+        }
         return throwError(() => error);
       }
 

@@ -15,6 +15,14 @@ import { UserAvatarComponent } from '../../components/user-avatar/user-avatar.co
     @if (authService.isAuthenticated()) {
       <div class="user-actions">
         <app-user-avatar [user]="authService.currentUser()" size="md"></app-user-avatar>
+        <a
+          [routerLink]="['/passkey/setup']"
+          nz-button
+          [title]="'NAVIGATION.PASSKEY_SETUP' | translate"
+          class="ant-btn-floating"
+        >
+          {{ 'NAVIGATION.PASSKEY_SETUP' | translate }}
+        </a>
         <button
           nz-button
           nzDanger

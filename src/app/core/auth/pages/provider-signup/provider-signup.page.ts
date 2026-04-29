@@ -43,8 +43,13 @@ export class ProviderSignupPage implements OnInit {
     this.auth.headlessAuth.getProviderSignupInfo().subscribe({
       next: (info: unknown) => {
         if (info && typeof info === 'object' && 'data' in (info as object)) {
-          const d = (info as { data?: { email?: string } }).data;
-          if (d?.email) {
+          const d = (info as { data?: { email?: unknown } }).data;
+          if (Array.isArray(d?.email) && d.email.length) {
+            const first = d.email[0] as { email?: string };
+            if (typeof first?.email === 'string') {
+              this.form.patchValue({ email: first.email });
+            }
+          } else if (typeof d?.email === 'string') {
             this.form.patchValue({ email: d.email });
           }
         }

@@ -27,6 +27,7 @@ describe('authErrorInterceptor', () => {
   const api = environment.API_BASE_URL;
   const profileUrl = `${api}/auth/profile/`;
   const appSessionUrl = `${api}/auth/app/v1/auth/session`;
+  const accountWebauthnUrl = `${api}/auth/app/v1/account/authenticators/webauthn`;
 
   beforeEach(() => {
     localStorage.clear();
@@ -120,6 +121,28 @@ describe('authErrorInterceptor', () => {
       (req) => req.url === profileUrl && req.headers.get(CMS_401_REFRESH_HEADER) === '1'
     );
     r2.flush({ ok: true });
+  });
+
+  it('on 401 reauthentication body for account webauthn URL, does not navigate away', (done) => {
+    const router = TestBed.inject(Router) as unknown as { navigate: jasmine.Spy; url: string };
+
+    http.get(accountWebauthnUrl).subscribe({
+      error: (err: HttpErrorResponse) => {
+        expect(err.status).toBe(401);
+        expect(router.navigate).not.toHaveBeenCalled();
+        done();
+      },
+    });
+
+    const r1 = httpMock.expectOne(accountWebauthnUrl);
+    r1.flush(
+      {
+        status: 401,
+        meta: { is_authenticated: true },
+        data: { flows: [{ id: 'reauthenticate' }] },
+      },
+      { status: 401, statusText: 'Unauthorized' }
+    );
   });
 
   it('on 401 with reauthentication body (e.g. mfa_reauthenticate), navigates to /reauthenticate', (done) => {

@@ -15,6 +15,7 @@ describe('PasskeyPage', () => {
         {
           provide: AuthService,
           useValue: {
+            isLoggedIn: () => false,
             headlessAuth: {
               getWebauthnLoginOptions: () => {
                 throw new Error('not used');
@@ -28,7 +29,15 @@ describe('PasskeyPage', () => {
             },
           },
         },
-        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap: { get: () => null } } } },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              data: {},
+              queryParamMap: { get: () => null },
+            },
+          },
+        },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(PasskeyPage);

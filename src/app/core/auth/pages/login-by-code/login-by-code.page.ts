@@ -4,7 +4,7 @@ import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, TimeoutError, timeout } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import {
   getErrorMessage,
@@ -22,6 +22,8 @@ import { AuthService } from '../../services/auth.service';
   templateUrl: './login-by-code.page.html',
 })
 export class LoginByCodePage implements OnInit, OnDestroy {
+  private static readonly CODE_REQUEST_TIMEOUT_MS = 15000;
+
   readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
@@ -95,6 +97,10 @@ export class LoginByCodePage implements OnInit, OnDestroy {
     this.startCooldown(s ?? 30);
   }
 
+  private isRequestTimeoutError(error: unknown): boolean {
+    return error instanceof TimeoutError;
+  }
+
   requestCode(): Promise<void> {
     if (this.emailForm.invalid) {
       return Promise.resolve();
@@ -123,7 +129,9 @@ export class LoginByCodePage implements OnInit, OnDestroy {
     this.isLoading.set(true);
     try {
       await firstValueFrom(
-        this.auth.headlessAuth.requestLoginCode({ email: this.emailForm.value.email })
+        this.auth.headlessAuth
+          .requestLoginCode({ email: this.emailForm.value.email })
+          .pipe(timeout({ first: LoginByCodePage.CODE_REQUEST_TIMEOUT_MS }))
       );
       this.isLoading.set(false);
       this.clearCooldown();
@@ -155,6 +163,10 @@ export class LoginByCodePage implements OnInit, OnDestroy {
         this.errorMessage.set(
           getErrorMessage(e) || this.translate.instant('AUTH.LOGIN_BY_CODE.REQUEST_ERROR')
         );
+        return;
+      }
+      if (this.isRequestTimeoutError(e)) {
+        this.errorMessage.set(this.translate.instant('AUTH.LOGIN_BY_CODE.REQUEST_TIMEOUT'));
         return;
       }
       this.errorMessage.set(

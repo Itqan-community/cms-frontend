@@ -27,6 +27,14 @@ export const AUTH_ROUTES_HEADLESS = {
   socialProviderCallback: '/account/provider/callback',
 } as const;
 
+/** True when password reset-by-code is **actively pending** (`is_pending: true`). */
+export function isPasswordResetByCodePending(flows: Flow[] | undefined): boolean {
+  if (!flows?.length) {
+    return false;
+  }
+  return flows.some((f) => f.id === 'password_reset_by_code' && f.is_pending === true);
+}
+
 /**
  * Picks the most relevant pending flow for routing, when multiple exist.
  */
@@ -112,6 +120,10 @@ export function tryNavigateForAuth401(router: Router, error: HttpErrorResponse):
   }
   if (pending?.id === 'login_by_code') {
     void router.navigate([AUTH_ROUTES.loginByCode], { queryParams: { step: 'confirm' } });
+    return true;
+  }
+  if (pending?.id === 'password_reset_by_code' || isPasswordResetByCodePending(auth.data.flows)) {
+    void router.navigate([AUTH_ROUTES.resetPassword]);
     return true;
   }
   const path = getRouteForFlowId(pending?.id);

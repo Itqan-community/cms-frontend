@@ -8,6 +8,7 @@ import { NgIcon } from '@ng-icons/core';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
+import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
 import { LoginRequest } from '../../models/auth.model';
 import { AuthService } from '../../services/auth.service';
 
@@ -33,6 +34,7 @@ export class LoginPage {
   private readonly translate = inject(TranslateService);
 
   passwordVisible = signal(false);
+  passkeyAvailable = signal(false);
 
   togglePasswordVisibility(): void {
     this.passwordVisible.set(!this.passwordVisible());
@@ -42,6 +44,7 @@ export class LoginPage {
   errorMessage = signal<string>('');
 
   constructor() {
+    this.passkeyAvailable.set(isPasskeyClientEnvironmentSupported());
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],

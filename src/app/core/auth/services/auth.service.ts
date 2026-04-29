@@ -40,6 +40,7 @@ export class AuthService {
     loginByCodeEnabled: boolean;
     openSignup: boolean;
     emailVerifyByCode: boolean;
+    passwordResetByCodeEnabled: boolean;
   } | null>(null);
 
   private authStateSubject = new BehaviorSubject<boolean>(false);
@@ -58,6 +59,7 @@ export class AuthService {
           loginByCodeEnabled: a?.login_by_code_enabled ?? false,
           openSignup: a?.is_open_for_signup ?? true,
           emailVerifyByCode: a?.email_verification_by_code_enabled ?? false,
+          passwordResetByCodeEnabled: a?.password_reset_by_code_enabled ?? false,
         });
       },
       error: () => this.authConfig.set(null),

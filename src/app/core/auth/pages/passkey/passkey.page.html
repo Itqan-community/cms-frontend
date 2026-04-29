@@ -1,7 +1,9 @@
 <div class="passkey">
   <header class="passkey__header">
     <div class="passkey__header-row">
-      <a [routerLink]="['/login']" class="passkey__back">{{ 'AUTH.PASSKEY.BACK' | translate }}</a>
+      <a [routerLink]="[backRoute()]" class="passkey__back">{{
+        'AUTH.PASSKEY.BACK' | translate
+      }}</a>
       <app-lang-switch></app-lang-switch>
     </div>
   </header>
@@ -10,10 +12,47 @@
       <div class="passkey__logo">
         <img src="/assets/images/logo.svg" alt="Itqan" width="50" height="50" />
       </div>
-      <h1 class="passkey__title">{{ 'AUTH.PASSKEY.TITLE' | translate }}</h1>
-      <p class="passkey__subtitle">{{ 'AUTH.PASSKEY.SUBTITLE' | translate }}</p>
+      <h1 class="passkey__title">{{ titleKey | translate }}</h1>
+      <p class="passkey__subtitle">{{ subtitleKey | translate }}</p>
       @if (errorMessage()) {
         <div class="passkey__alert">{{ errorMessage() }}</div>
+      }
+      @if (infoMessage()) {
+        <div class="passkey__info" role="status">{{ infoMessage() }}</div>
+      }
+      @if (mode() === 'setup' && setupNeedsReauthenticate()) {
+        <p class="passkey__reauth-hint">
+          <a
+            [routerLink]="['/reauthenticate']"
+            [queryParams]="{ returnUrl: '/passkey/setup' }"
+            class="passkey__reauth-link"
+          >
+            {{ 'AUTH.PASSKEY.SETUP_REAUTH_LINK' | translate }}
+          </a>
+        </p>
+      }
+      @if (mode() === 'signup' && passkeyAvailable()) {
+        <form [formGroup]="signupForm" class="passkey__signup-form">
+          <label class="passkey__label" for="passkey-signup-email">{{
+            'AUTH.PASSKEY.SIGNUP_EMAIL_LABEL' | translate
+          }}</label>
+          <input
+            id="passkey-signup-email"
+            type="email"
+            class="passkey__input"
+            formControlName="email"
+            autocomplete="email"
+            [placeholder]="'FORMS.PLACEHOLDERS.EMAIL' | translate"
+            [class.passkey__input--invalid]="
+              signupForm.get('email')?.invalid && signupForm.get('email')?.touched
+            "
+          />
+          @if (signupForm.get('email')?.invalid && signupForm.get('email')?.touched) {
+            <p class="passkey__field-error">
+              {{ 'AUTH.REGISTER.ERRORS.EMAIL_REQUIRED' | translate }}
+            </p>
+          }
+        </form>
       }
       @if (!passkeyAvailable()) {
         <p class="passkey__info" role="status">{{ 'AUTH.PASSKEY.UNSUPPORTED' | translate }}</p>
@@ -22,13 +61,13 @@
         <button
           type="button"
           class="passkey__submit"
-          (click)="signInWithPasskey()"
+          (click)="submitPasskey()"
           [disabled]="isLoading()"
         >
           @if (isLoading()) {
             <span class="passkey__spinner" aria-hidden="true"></span>
           } @else {
-            {{ 'AUTH.PASSKEY.BUTTON' | translate }}
+            {{ submitKey | translate }}
           }
         </button>
       }

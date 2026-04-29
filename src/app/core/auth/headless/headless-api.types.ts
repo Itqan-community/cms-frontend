@@ -13,6 +13,7 @@ export type AllauthFlowId =
   | 'login_by_code'
   | 'mfa_authenticate'
   | 'mfa_reauthenticate'
+  | 'password_reset_by_code'
   | 'provider_redirect'
   | 'provider_signup'
   | 'provider_token'
@@ -110,9 +111,30 @@ export interface WebAuthnCredentialRequestData {
   };
 }
 
+/**
+ * Envelope returned for **credential creation** (e.g. `GET .../account/authenticators/webauthn`).
+ * OpenAPI uses `creation_options` for `parseCreationOptionsFromJSON()`; older shapes used `request_options.publicKey`.
+ */
+export interface WebAuthnCredentialCreationData {
+  creation_options?: unknown;
+  request_options?: {
+    publicKey?: unknown;
+  };
+}
+
 export interface WebAuthnRequestOptionsResponse {
   status: 200;
   data: WebAuthnCredentialRequestData;
+}
+
+export interface WebAuthnCreationOptionsResponse {
+  status: 200;
+  data: WebAuthnCredentialCreationData;
+}
+
+/** `POST /auth/.../webauthn/signup` initiate body (OpenAPI `PasskeySignup`). */
+export interface PasskeySignup {
+  email: string;
 }
 
 export type ProviderProcess = 'login' | 'connect';

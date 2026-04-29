@@ -47,6 +47,34 @@
     font-size: 16px;
     margin-bottom: 24px;
   }
+  &__signup-form {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  &__label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333333;
+    margin-bottom: 8px;
+  }
+  &__input {
+    width: 100%;
+    box-sizing: border-box;
+    height: 48px;
+    padding: 0 14px;
+    border: 1px solid #d1d5db;
+    border-radius: var(--radius-lg);
+    font-size: 16px;
+  }
+  &__input--invalid {
+    border-color: #dc2626;
+  }
+  &__field-error {
+    margin: 8px 0 0;
+    font-size: 13px;
+    color: #dc2626;
+  }
   &__alert {
     padding: 12px;
     border-radius: var(--radius-lg);
@@ -66,6 +94,16 @@
     font-size: 14px;
     text-align: center;
     margin-bottom: 16px;
+  }
+  &__reauth-hint {
+    margin: 0 0 16px;
+    font-size: 14px;
+    text-align: center;
+    color: #333333;
+  }
+  &__reauth-link {
+    color: var(--color-primary-800);
+    font-weight: 500;
   }
   &__submit {
     width: 100%;

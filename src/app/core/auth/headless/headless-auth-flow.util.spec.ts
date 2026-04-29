@@ -54,6 +54,48 @@ describe('headless-auth-flow.util', () => {
     expect(calls[0].path).toBe('/verify-email');
   });
 
+  it('tryNavigateForAuth401 navigates for password_reset_by_code', () => {
+    const calls: { path: string }[] = [];
+    const router = {
+      navigate: (path: string[]) => {
+        calls.push({ path: path[0] ?? '' });
+      },
+    } as unknown as Router;
+    const err = new HttpErrorResponse({
+      status: 401,
+      error: {
+        status: 401,
+        data: { flows: [{ id: 'password_reset_by_code', is_pending: true }] },
+        meta: { is_authenticated: false },
+      },
+    });
+    const done = tryNavigateForAuth401(router, err);
+    expect(done).toBe(true);
+    expect(calls[0].path).toBe('/reset-password');
+  });
+
+  it('tryNavigateForAuth401 does not navigate when password_reset_by_code is listed but not pending', () => {
+    const calls: { path: string }[] = [];
+    const router = {
+      navigate: (path: string[]) => {
+        calls.push({ path: path[0] ?? '' });
+      },
+    } as unknown as Router;
+    const err = new HttpErrorResponse({
+      status: 401,
+      error: {
+        status: 401,
+        data: {
+          flows: [{ id: 'reauthenticate' }, { id: 'password_reset_by_code', is_pending: false }],
+        },
+        meta: { is_authenticated: true },
+      },
+    });
+    const done = tryNavigateForAuth401(router, err);
+    expect(done).toBe(false);
+    expect(calls.length).toBe(0);
+  });
+
   it('tryNavigateForAuth401 navigates for provider_signup', () => {
     const calls: { path: string }[] = [];
     const router = {
