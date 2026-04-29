@@ -4,15 +4,13 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   isHeadlessAppAuthUrl,
-  isHeadlessWebauthnLoginUrl,
-  isHeadlessWebauthnSignupInitiatePost,
+  shouldOmitHeadlessSessionTokenForRequest,
 } from '../auth/headless/headless-api-path.util';
 import { HeadlessAppTokenService } from '../auth/headless/headless-app-token.service';
 
 /**
  * App headless: attach `X-Session-Token` from `meta.session_token` store for `/auth/app/v1/*` only.
- * Skips passkey **login** and passkey signup **initiate** (`POST …/webauthn/signup`); a stale token
- * there skews server state (often `incorrect_code` on the WebAuthn POST).
+ * Omits the header on anonymous WebAuthn steps — see `shouldOmitHeadlessSessionTokenForRequest`.
  */
 export function appSessionTokenInterceptor(
   req: HttpRequest<unknown>,
@@ -27,10 +25,7 @@ export function appSessionTokenInterceptor(
   if (!t) {
     return next(req);
   }
-  if (isHeadlessWebauthnLoginUrl(req.url)) {
-    return next(req);
-  }
-  if (isHeadlessWebauthnSignupInitiatePost(req.url, req.method)) {
+  if (shouldOmitHeadlessSessionTokenForRequest(req.url, req.method)) {
     return next(req);
   }
   return next(

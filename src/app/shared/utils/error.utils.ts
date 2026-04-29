@@ -33,6 +33,21 @@ export function isIncorrectCodeError(error: unknown): boolean {
   );
 }
 
+/**
+ * `400` + `incorrect_code` from WebAuthn / MFA validation (django-allauth maps parse/state failures
+ * to this code — not necessarily an OTP “code”).
+ */
+export function isWebAuthnIncorrectCodeError(error: unknown): boolean {
+  if (!(error instanceof HttpErrorResponse) || error.status !== 400) {
+    return false;
+  }
+  const body = error.error as { errors?: AllauthErrorItem[] } | undefined;
+  if (!Array.isArray(body?.errors) || !body!.errors.length) {
+    return false;
+  }
+  return body!.errors.some((e) => e.code === 'incorrect_code');
+}
+
 export function getErrorMessage(error: unknown): string | null {
   if (error instanceof HttpErrorResponse) {
     const m = firstAllauthMessage(error.error);

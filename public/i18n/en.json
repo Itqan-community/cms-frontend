@@ -81,6 +81,8 @@
       "SETUP_SUBTITLE": "Add a passkey to your account so you can sign in faster next time.",
       "SETUP_BUTTON": "Add passkey",
       "SETUP_SUCCESS": "Passkey added successfully.",
+      "SIGNUP_SESSION_MISSING": "Could not start passkey sign-up (no session from server). Close other tabs, refresh, and try again.",
+      "WEBAUTHN_STATE_ERROR": "This passkey step expired or was interrupted. Go back and try again from the start.",
       "SETUP_REAUTH_REQUIRED": "For security, confirm your password before adding a passkey.",
       "SETUP_REAUTH_LINK": "Confirm password to continue",
       "BACK": "Back to sign in",

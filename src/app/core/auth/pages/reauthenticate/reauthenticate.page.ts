@@ -6,7 +6,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import {
+  getErrorMessage,
+  isWebAuthnIncorrectCodeError,
+} from '../../../../shared/utils/error.utils';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
 import { WebAuthnRpIdMismatchError } from '../../headless/webauthn-rp-id.util';
@@ -70,8 +73,14 @@ export class ReauthenticatePage implements OnInit {
       void this.router.navigateByUrl(this.returnUrl);
     } catch (e) {
       this.isLoading.set(false);
-      if (e instanceof HttpErrorResponse && tryNavigateForAuth401(this.router, e)) {
-        return;
+      if (e instanceof HttpErrorResponse) {
+        if (isWebAuthnIncorrectCodeError(e)) {
+          this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.WEBAUTHN_STATE_ERROR'));
+          return;
+        }
+        if (tryNavigateForAuth401(this.router, e)) {
+          return;
+        }
       }
       this.errorMessage.set(getErrorMessage(e) || this.translate.instant('AUTH.REAUTH.ERROR'));
     }
@@ -117,6 +126,10 @@ export class ReauthenticatePage implements OnInit {
         return;
       }
       if (e instanceof HttpErrorResponse) {
+        if (isWebAuthnIncorrectCodeError(e)) {
+          this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.WEBAUTHN_STATE_ERROR'));
+          return;
+        }
         if (tryNavigateForAuth401(this.router, e)) {
           return;
         }

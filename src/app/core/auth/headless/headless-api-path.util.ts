@@ -23,6 +23,17 @@ export function isHeadlessWebauthnSignupInitiatePost(url: string, method: string
   return method === 'POST' && isHeadlessAppAuthUrl(url) && url.includes('/auth/webauthn/signup');
 }
 
+/**
+ * Omit `X-Session-Token` on anonymous WebAuthn steps only:
+ * - `GET`/`POST` …/auth/webauthn/login (identifier-first login)
+ * - `POST` …/auth/webauthn/signup (email initiate)
+ *
+ * All other app headless URLs (signup GET/PUT, setup, reauth, session, …) still attach the token when stored.
+ */
+export function shouldOmitHeadlessSessionTokenForRequest(url: string, method: string): boolean {
+  return isHeadlessWebauthnLoginUrl(url) || isHeadlessWebauthnSignupInitiatePost(url, method);
+}
+
 export function isHeadlessAppAuthUrl(url: string): boolean {
   return url.includes(HEADLESS_APP_AUTH_PATH_FRAGMENT);
 }

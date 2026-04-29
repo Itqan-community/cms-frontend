@@ -15,20 +15,9 @@ import {
   WebAuthnRequestOptionsResponse,
 } from './headless-api.types';
 import { HeadlessAppTokenService } from './headless-app-token.service';
+import { webauthnCredentialRequestBody } from './headless-webauthn-http.util';
 
 const jsonHeaders = new HttpHeaders({ 'Content-Type': 'application/json' });
-
-/**
- * `publicKeyCredentialToJson` / `publicKeyCredentialCreationToJson` return `{ credential: ... }`
- * for PUT complete-signup. POST helpers must not wrap again or the API sees `credential.credential`
- * and validation fails (often surfaced as `incorrect_code`).
- */
-function webauthnCredentialPostBody(payload: unknown): { credential: unknown } {
-  if (payload !== null && typeof payload === 'object' && 'credential' in payload) {
-    return payload as { credential: unknown };
-  }
-  return { credential: payload };
-}
 
 @Injectable({ providedIn: 'root' })
 export class HeadlessAuthApiService {
@@ -151,7 +140,7 @@ export class HeadlessAuthApiService {
   postWebauthnLogin(credential: unknown): Observable<AuthenticatedResponse> {
     return this.http.post<AuthenticatedResponse>(
       `${this.base()}/auth/webauthn/login`,
-      webauthnCredentialPostBody(credential),
+      webauthnCredentialRequestBody(credential),
       { headers: jsonHeaders }
     );
   }
@@ -174,7 +163,7 @@ export class HeadlessAuthApiService {
   completePasskeySignup(credentialPayload: unknown): Observable<AuthenticatedResponse> {
     return this.http.put<AuthenticatedResponse>(
       `${this.base()}/auth/webauthn/signup`,
-      credentialPayload,
+      webauthnCredentialRequestBody(credentialPayload),
       { headers: jsonHeaders }
     );
   }
@@ -189,7 +178,7 @@ export class HeadlessAuthApiService {
     return recoverHeadlessJsonOkOnHttpError(
       this.http.post(
         `${this.base()}/account/authenticators/webauthn`,
-        webauthnCredentialPostBody(credential),
+        webauthnCredentialRequestBody(credential),
         { headers: jsonHeaders }
       )
     );
@@ -204,7 +193,7 @@ export class HeadlessAuthApiService {
   postWebauthnReauth(credential: unknown): Observable<AuthenticatedResponse> {
     return this.http.post<AuthenticatedResponse>(
       `${this.base()}/auth/webauthn/reauthenticate`,
-      webauthnCredentialPostBody(credential),
+      webauthnCredentialRequestBody(credential),
       { headers: jsonHeaders }
     );
   }

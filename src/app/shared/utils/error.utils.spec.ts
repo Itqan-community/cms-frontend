@@ -1,5 +1,9 @@
 import { HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { isIncorrectCodeError, parseRetryAfterSeconds } from './error.utils';
+import {
+  isIncorrectCodeError,
+  isWebAuthnIncorrectCodeError,
+  parseRetryAfterSeconds,
+} from './error.utils';
 
 describe('error.utils', () => {
   describe('parseRetryAfterSeconds', () => {
@@ -35,6 +39,31 @@ describe('error.utils', () => {
           errors: [{ param: 'code', message: 'Bad' }],
         },
       });
+      expect(isIncorrectCodeError(err)).toBe(true);
+    });
+  });
+
+  describe('isWebAuthnIncorrectCodeError', () => {
+    it('detects incorrect_code without requiring param code', () => {
+      const err = new HttpErrorResponse({
+        status: 400,
+        error: {
+          status: 400,
+          errors: [{ code: 'incorrect_code', message: 'كود خاطئ.' }],
+        },
+      });
+      expect(isWebAuthnIncorrectCodeError(err)).toBe(true);
+      expect(isIncorrectCodeError(err)).toBe(true);
+    });
+
+    it('is false when only param code is set', () => {
+      const err = new HttpErrorResponse({
+        status: 400,
+        error: {
+          errors: [{ param: 'code', message: 'Bad' }],
+        },
+      });
+      expect(isWebAuthnIncorrectCodeError(err)).toBe(false);
       expect(isIncorrectCodeError(err)).toBe(true);
     });
   });

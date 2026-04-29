@@ -84,6 +84,28 @@ describe('HeadlessAuthApiService', () => {
     r.flush({ status: 200, data: {} });
   });
 
+  it('completePasskeySignup PUT sends a single credential envelope when payload is already wrapped', (done) => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    const envelope = { credential: { type: 'public-key', id: 'signup-assertion' } };
+    service.completePasskeySignup(envelope).subscribe(() => done());
+    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_APP}/v1/auth/webauthn/signup`);
+    expect(r.request.method).toBe('PUT');
+    expect(r.request.body).toEqual(envelope);
+    const body = r.request.body as { credential: { credential?: unknown } };
+    expect(body.credential.credential).toBeUndefined();
+    r.flush({
+      status: 200,
+      data: {
+        user: { id: 1, display: 'u', email: 'a@b.co', has_usable_password: true },
+        methods: [],
+      },
+      meta: { is_authenticated: true },
+    });
+  });
+
   it('addWebauthnAuthenticator wraps a raw inner credential object', (done) => {
     if (!api) {
       pending('API_BASE_URL');

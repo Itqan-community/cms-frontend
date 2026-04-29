@@ -6,7 +6,10 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import {
+  getErrorMessage,
+  isWebAuthnIncorrectCodeError,
+} from '../../../../shared/utils/error.utils';
 import type {
   AuthenticatedResponse,
   AuthenticationMeta,
@@ -25,6 +28,7 @@ import {
   publicKeyCredentialCreationToJson,
   publicKeyCredentialToJson,
 } from '../../headless/webauthn.util';
+import { HeadlessAppTokenService } from '../../headless/headless-app-token.service';
 import { AuthService } from '../../services/auth.service';
 
 type PasskeyMode = 'login' | 'signup' | 'setup';
@@ -49,6 +53,7 @@ function isAuthenticatedResponseBody(b: unknown): b is AuthenticatedResponse {
 })
 export class PasskeyPage implements OnInit {
   readonly authService = inject(AuthService);
+  private readonly tokenStore = inject(HeadlessAppTokenService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
@@ -165,6 +170,10 @@ export class PasskeyPage implements OnInit {
         return;
       }
       if (e instanceof HttpErrorResponse) {
+        if (isWebAuthnIncorrectCodeError(e)) {
+          this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.WEBAUTHN_STATE_ERROR'));
+          return;
+        }
         if (this.mode() === 'setup' && isReauthenticationBody(e.error)) {
           this.setupNeedsReauthenticate.set(true);
           this.infoMessage.set(this.translate.instant('AUTH.PASSKEY.SETUP_REAUTH_REQUIRED'));
@@ -207,6 +216,11 @@ export class PasskeyPage implements OnInit {
    */
   private async signupWithPasskey(): Promise<void> {
     const email = (this.signupForm.value['email'] as string).trim();
+    /** Anonymous passkey signup: drop stale app session so GET/PUT use the new `meta.session_token` only. */
+    if (!this.authService.isLoggedIn()) {
+      this.tokenStore.clearSessionToken();
+    }
+
     const initResp = await firstValueFrom(
       this.authService.headlessAuth.initiatePasskeySignup(email)
     );
@@ -215,6 +229,14 @@ export class PasskeyPage implements OnInit {
       await firstValueFrom(
         this.authService.applyHeadlessSuccess(initBody, { fetchProfile: false })
       );
+    } else if (initResp.ok && initBody) {
+      this.applyMetaFromHeadlessBody(initBody);
+    }
+
+    if (initResp.ok && !this.tokenStore.getSessionToken()) {
+      this.isLoading.set(false);
+      this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.SIGNUP_SESSION_MISSING'));
+      return;
     }
 
     const res = await firstValueFrom(this.authService.headlessAuth.getWebauthnSignupOptions());
@@ -261,5 +283,16 @@ export class PasskeyPage implements OnInit {
     this.isLoading.set(false);
     this.infoMessage.set(this.translate.instant('AUTH.PASSKEY.SETUP_SUCCESS'));
     this.setupNeedsReauthenticate.set(false);
+  }
+
+  /** Persist tokens from non-`AuthenticatedResponse` initiate bodies (e.g. partial headless envelopes). */
+  private applyMetaFromHeadlessBody(body: unknown): void {
+    if (!body || typeof body !== 'object') {
+      return;
+    }
+    const meta = (body as { meta?: AuthenticationMeta }).meta;
+    if (meta && typeof meta === 'object') {
+      this.authService.applyMetaTokens(meta);
+    }
   }
 }
