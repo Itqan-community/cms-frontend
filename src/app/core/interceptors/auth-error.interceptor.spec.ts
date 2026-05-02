@@ -12,6 +12,7 @@ import { environment } from '../../../environments/environment';
 import { ALLAUTH_REAUTHENTICATE_URL } from '../auth/headless/allauth-auth.hooks';
 import { AuthService } from '../auth/services/auth.service';
 import { authErrorInterceptor, SESSION_401_RECHECK_HEADER } from './auth-error.interceptor';
+import { appSessionTokenInterceptor } from './app-session-token.interceptor';
 import { credentialsInterceptor } from './credentials.interceptor';
 import { csrfResponseInterceptor } from './csrf-response.interceptor';
 import { headersInterceptor } from './global.interceptor';
@@ -37,6 +38,7 @@ describe('authErrorInterceptor', () => {
           withInterceptors([
             credentialsInterceptor,
             csrfResponseInterceptor,
+            appSessionTokenInterceptor,
             headersInterceptor,
             authErrorInterceptor,
           ])

@@ -4,15 +4,12 @@ import { inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { HeadlessAppTokenService } from '../auth/headless/headless-app-token.service';
-import {
-  isHeadlessAppAuthUrl,
-  shouldOmitHeadlessSessionTokenForRequest,
-} from '../auth/headless/headless-api-path.util';
+import { isHeadlessAppAuthUrl } from '../auth/headless/headless-api-path.util';
 import { getDjangoCsrfTokenForRequest, isUnsafeHttpMethod } from '../utils/csrf.util';
 
 /**
- * Attaches `X-Session-Token` for **all** CMS API URLs when stored (official app-mode demo behaviour).
- * Prefers session token over Bearer when both exist.
+ * CMS/product APIs under `API_BASE_URL`: attach `Authorization: Bearer <access_token>` when stored.
+ * Does not attach `X-Session-Token` here — allauth app client uses [`appSessionTokenInterceptor`](./app-session-token.interceptor.ts).
  */
 export function headersInterceptor(
   req: HttpRequest<unknown>,
@@ -22,21 +19,11 @@ export function headersInterceptor(
   const api = environment.API_BASE_URL;
   const isApi = api ? req.url.startsWith(api) : false;
   const isAppAuth = isHeadlessAppAuthUrl(req.url);
-  const session = tokenStore.getSessionToken();
   const access = tokenStore.getAccessToken();
 
-  const omitSession =
-    req.url.includes('/auth/app/v1/config') ||
-    shouldOmitHeadlessSessionTokenForRequest(req.url, req.method);
+  const addBearer = isApi && !isAppAuth && !!access;
 
-  const addBearer = isApi && !isAppAuth && !!access && !session;
-
-  const useCsrf =
-    isApi &&
-    isUnsafeHttpMethod(req.method) &&
-    !isAppAuth &&
-    !addBearer &&
-    !session;
+  const useCsrf = isApi && isUnsafeHttpMethod(req.method) && !isAppAuth && !addBearer;
 
   const csrf = useCsrf ? getDjangoCsrfTokenForRequest() : null;
 
@@ -44,7 +31,6 @@ export function headersInterceptor(
     setHeaders: {
       ...(addBearer ? { Authorization: `Bearer ${access}` } : {}),
       ...(csrf ? { 'X-CSRFToken': csrf } : {}),
-      ...(isApi && session && !omitSession ? { 'X-Session-Token': session } : {}),
       'Accept-Language': localStorage.getItem('lang') || 'ar',
     },
   });

@@ -3,9 +3,7 @@ import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, catchError, switchMap, throwError } from 'rxjs';
 import * as Sentry from '@sentry/angular';
-import {
-  ALLAUTH_REAUTHENTICATE_URL,
-} from '../auth/headless/allauth-auth.hooks';
+import { ALLAUTH_REAUTHENTICATE_URL } from '../auth/headless/allauth-auth.hooks';
 import { AllauthAuthChangeBus } from '../auth/headless/allauth-auth-change.bus';
 import { applyAllauthEnvelopeSideEffects } from '../auth/headless/allauth-envelope.util';
 import {
@@ -28,7 +26,7 @@ export const SESSION_401_RECHECK_HEADER = 'X-Cms-Auth-Session-Recheck';
 
 /**
  * App-mode headless: sync envelope side-effects from JSON bodies.
- * CMS APIs: one session recheck via `X-Session-Token`, then logout.
+ * CMS APIs: one `AuthService.sessionRecheckAfter401()` (allauth session) then logout; CMS calls use Bearer per `headersInterceptor`.
  */
 export function authErrorInterceptor(
   req: HttpRequest<unknown>,
@@ -65,11 +63,7 @@ export function authErrorInterceptor(
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (
-        error.error &&
-        typeof error.error === 'object' &&
-        isHeadlessAppAuthUrl(req.url)
-      ) {
+      if (error.error && typeof error.error === 'object' && isHeadlessAppAuthUrl(req.url)) {
         applyAllauthEnvelopeSideEffects(error.error, tokenStore, authBus);
       }
 

@@ -24,6 +24,7 @@ import { authErrorInterceptor } from './core/interceptors/auth-error.interceptor
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { credentialsInterceptor } from './core/interceptors/credentials.interceptor';
 import { csrfResponseInterceptor } from './core/interceptors/csrf-response.interceptor';
+import { appSessionTokenInterceptor } from './core/interceptors/app-session-token.interceptor';
 import { AuthService } from './core/auth/services/auth.service';
 registerLocaleData(ar);
 
@@ -54,6 +55,7 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([
         credentialsInterceptor,
         csrfResponseInterceptor,
+        appSessionTokenInterceptor,
         headersInterceptor,
         authErrorInterceptor,
         errorInterceptor,
