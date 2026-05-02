@@ -1,18 +1,44 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject, signal } from '@angular/core';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { BehaviorSubject, Observable, catchError, map, of, switchMap, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  catchError,
+  finalize,
+  firstValueFrom,
+  forkJoin,
+  map,
+  of,
+  switchMap,
+  tap,
+  throwError,
+} from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import {
+  ALLAUTH_LOGIN_REDIRECT_URL,
+  ALLAUTH_LOGIN_URL,
+  ALLAUTH_LOGOUT_REDIRECT_URL,
+  AuthChangeEvent,
+  type AuthChangeEventType,
+  authInfo,
+  determineAuthChangeEvent,
+  pathForFlow,
+  pathForPendingFlow,
+} from '../headless/allauth-auth.hooks';
+import { AllauthAuthChangeBus } from '../headless/allauth-auth-change.bus';
 import type {
   AuthenticatedResponse,
   AuthenticationMeta,
+  ConfigurationResponse,
+  Flow,
   HeadlessUser,
 } from '../headless/headless-api.types';
-import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
 import {
+  AuthenticatedOrChallenge,
   HeadlessAuthApiService,
-  submitProviderRedirectForm,
 } from '../headless/headless-auth-api.service';
+import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
 import {
   LoginRequest,
   RegisterRequest,
@@ -29,11 +55,21 @@ export class AuthService {
   private readonly router = inject(Router);
   private readonly headless = inject(HeadlessAuthApiService);
   private readonly tokenStore = inject(HeadlessAppTokenService);
+  private readonly authBus = inject(AllauthAuthChangeBus);
 
   private readonly API_BASE_URL = environment.API_BASE_URL;
   private readonly USER_KEY = 'user';
 
-  public isAuthenticated = signal(false);
+  /** Latest JSON envelope from `GET /auth/session` or auth-change bus (official SPA shape). */
+  readonly authSnapshot = signal<unknown>(undefined);
+
+  readonly bootstrapDone = signal(false);
+  readonly authBootstrapFailed = signal(false);
+  readonly configSnapshot = signal<ConfigurationResponse | undefined>(undefined);
+
+  /** Mirrors official `authInfo(auth).isAuthenticated`. */
+  readonly isAuthenticated = computed(() => authInfo(this.authSnapshot()).isAuthenticated);
+
   public currentUser = signal<User | null>(null);
   public isLoading = signal(false);
   public authConfig = signal<{
@@ -46,159 +82,181 @@ export class AuthService {
   private authStateSubject = new BehaviorSubject<boolean>(false);
   public authState$ = this.authStateSubject.asObservable();
 
+  private redirectPrimed = false;
+  private prevAuthForRedirect: unknown = undefined;
+
   constructor() {
-    this.loadHeadlessConfig();
-    this.initializeAuth();
-  }
-
-  private loadHeadlessConfig(): void {
-    this.headless.getConfig().subscribe({
-      next: (res) => {
-        const a = res.data?.account;
-        this.authConfig.set({
-          loginByCodeEnabled: a?.login_by_code_enabled ?? false,
-          openSignup: a?.is_open_for_signup ?? true,
-          emailVerifyByCode: a?.email_verification_by_code_enabled ?? false,
-          passwordResetByCodeEnabled: a?.password_reset_by_code_enabled ?? false,
-        });
-      },
-      error: () => this.authConfig.set(null),
-    });
-  }
-
-  private initializeAuth(): void {
-    const restoredFromStorage = this.restoreAuthFromStorage();
-    this.headless.getSession().subscribe({
-      next: (res) => {
-        this.applyAuthenticatedResponse(res, { fetchProfile: true });
-      },
-      error: () => {
-        if (!restoredFromStorage) {
-          this.isAuthenticated.set(false);
-          this.authStateSubject.next(false);
+    this.authBus.changes$.subscribe((msg) => {
+      const prev = this.prevAuthForRedirect;
+      this.authSnapshot.set(msg);
+      this.syncUserFromSnapshot(msg);
+      if (this.redirectPrimed && prev !== undefined) {
+        const evt = determineAuthChangeEvent(prev, msg);
+        if (evt) {
+          void this.handleAuthChangeEvent(evt as AuthChangeEventType, msg);
         }
-      },
+      }
+      this.prevAuthForRedirect = msg;
     });
   }
 
   /**
-   * Restores UI auth state after hard reload from persisted user + token storage.
-   * Server session is still revalidated by `getSession()` immediately after restore.
+   * Parallel `GET /auth/session` + `GET /config` — mirrors official `AuthContextProvider` bootstrap.
+   * Called from `APP_INITIALIZER`.
    */
-  private restoreAuthFromStorage(): boolean {
-    const user = this.getStoredUser();
-    const hasToken = !!this.tokenStore.getSessionToken() || !!this.tokenStore.getAccessToken();
-    if (!user || !hasToken) {
-      return false;
-    }
-    this.currentUser.set(user);
-    this.isAuthenticated.set(true);
-    this.authStateSubject.next(true);
-    return true;
+  bootstrapOnce(): Promise<void> {
+    return firstValueFrom(
+      forkJoin({
+        auth: this.headless.getAuth().pipe(
+          catchError(() => {
+            this.authBootstrapFailed.set(true);
+            return of(false as const);
+          })
+        ),
+        config: this.headless.getConfig().pipe(catchError(() => of(undefined))),
+      }).pipe(
+        tap(({ auth, config }) => {
+          if (auth !== false) {
+            this.authSnapshot.set(auth);
+            this.syncUserFromSnapshot(auth);
+            this.prevAuthForRedirect = auth;
+          }
+          if (config?.status === 200) {
+            this.configSnapshot.set(config);
+            const a = config.data?.account;
+            this.authConfig.set({
+              loginByCodeEnabled: a?.login_by_code_enabled ?? false,
+              openSignup: a?.is_open_for_signup ?? true,
+              emailVerifyByCode: a?.email_verification_by_code_enabled ?? false,
+              passwordResetByCodeEnabled: a?.password_reset_by_code_enabled ?? false,
+            });
+          } else {
+            this.authConfig.set(null);
+          }
+          this.bootstrapDone.set(true);
+          this.redirectPrimed = true;
+        }),
+        map(() => void 0)
+      )
+    );
   }
 
-  /**
-   * After 401/403 on a protected CMS API call: re-sync via `GET .../auth/session` (sends
-   * `X-Session-Token`); updates stored tokens from response `meta`. Used by `auth-error.interceptor`.
-   */
+  private syncUserFromSnapshot(msg: unknown): void {
+    const info = authInfo(msg);
+    if (info.isAuthenticated && info.user) {
+      const u = this.mapHeadlessToUser(info.user);
+      this.currentUser.set(u);
+      localStorage.setItem(this.USER_KEY, JSON.stringify(u));
+      this.authStateSubject.next(true);
+      return;
+    }
+    if (
+      msg &&
+      typeof msg === 'object' &&
+      'status' in msg &&
+      (msg as { status: number }).status === 410
+    ) {
+      this.clearLocalAuthUi({ preserveSessionStorageToken: false });
+      return;
+    }
+    if (!info.isAuthenticated) {
+      localStorage.removeItem(this.USER_KEY);
+      this.currentUser.set(null);
+      this.authStateSubject.next(false);
+    }
+  }
+
+  private clearLocalAuthUi(opts?: { preserveSessionStorageToken?: boolean }): void {
+    localStorage.removeItem(this.USER_KEY);
+    if (!opts?.preserveSessionStorageToken) {
+      this.tokenStore.clear();
+    }
+    this.authStateSubject.next(false);
+    this.currentUser.set(null);
+  }
+
+  /** CMS API recovery — mirrors session recheck intent from earlier interceptor behaviour. */
   sessionRecheckAfter401(): Observable<boolean> {
     return this.headless.getSession().pipe(
       map((res) => {
-        if (res.meta?.is_authenticated && res.data?.user) {
-          this.applyAuthenticatedResponse(res, { fetchProfile: false });
-          return true;
+        const info = authInfo(res);
+        if (!info.isAuthenticated || res.status !== 200 || !info.user) {
+          return false;
         }
-        return false;
+        this.authSnapshot.set(res);
+        this.tokenStore.setFromMeta(res.meta);
+        this.syncUserFromSnapshot(res);
+        return true;
       }),
       catchError(() => of(false))
     );
   }
 
-  /**
-   * Clear local auth UI state and go to login without calling the server (session already invalid).
-   */
   invalidateClientAuthAndGoLogin(): void {
-    this.clearClientAuthData();
-    this.isAuthenticated.set(false);
-    this.currentUser.set(null);
-    this.authStateSubject.next(false);
-    void this.router.navigate(['/login']);
+    this.clearLocalAuthUi({ preserveSessionStorageToken: false });
+    this.authSnapshot.set(undefined);
+    this.prevAuthForRedirect = undefined;
+    void this.router.navigate([ALLAUTH_LOGIN_URL]);
   }
 
-  /**
-   * Persists `meta.session_token` / `meta.access_token` from headless responses (contract fields as-is).
-   */
   applyMetaTokens(meta: AuthenticationMeta | undefined): void {
     this.tokenStore.setFromMeta(meta);
   }
 
-  /** After OAuth redirect or email link — refresh app session from `GET .../auth/session`. */
   bootstrapSessionFromServer(options?: {
-    fetchProfile: boolean;
-  }): Observable<AuthenticatedResponse> {
+    fetchProfile?: boolean;
+  }): Observable<AuthenticatedOrChallenge> {
     return this.headless
       .getSession()
-      .pipe(
-        tap((res) =>
-          this.applyAuthenticatedResponse(res, { fetchProfile: options?.fetchProfile !== false })
+      .pipe(switchMap((res) => this.applyHeadlessSuccess(res, options)));
+  }
+
+  applyHeadlessSuccess(
+    res: AuthenticatedOrChallenge,
+    options?: { fetchProfile?: boolean; _depth?: number }
+  ): Observable<AuthenticatedOrChallenge> {
+    const depth = options?._depth ?? 0;
+    if (depth > 5) {
+      return of(res);
+    }
+    this.authSnapshot.set(res);
+    this.tokenStore.setFromMeta(res.meta);
+    this.syncUserFromSnapshot(res);
+
+    const fetchProfile = options?.fetchProfile !== false;
+
+    const payloadUser =
+      res.status === 200 && res.data && 'user' in res.data ? res.data.user : undefined;
+    if (res.meta?.is_authenticated && !payloadUser) {
+      return this.headless.getSession().pipe(
+        switchMap((s) =>
+          this.applyHeadlessSuccess(s, { ...options, fetchProfile, _depth: depth + 1 })
         )
       );
-  }
-
-  /**
-   * After successful headless step: persist `meta` tokens, then re-check session if user
-   * or `access_token` is missing (contract completion via `GET .../auth/session`).
-   */
-  applyHeadlessSuccess(
-    res: AuthenticatedResponse,
-    options?: { fetchProfile?: boolean }
-  ): Observable<AuthenticatedResponse> {
-    this.applyMetaTokens(res.meta);
-    const fetchProfile = options?.fetchProfile !== false;
-    if (res.meta?.is_authenticated && (!res.data?.user || !res.meta?.access_token)) {
-      return this.bootstrapSessionFromServer({ fetchProfile });
     }
-    this.applyAuthenticatedResponse(res, { fetchProfile });
+
+    if (
+      fetchProfile &&
+      authInfo(res).isAuthenticated &&
+      res.status === 200 &&
+      res.data &&
+      'user' in res.data &&
+      res.data.user
+    ) {
+      return this.getProfile().pipe(
+        tap((p) => {
+          const cur = this.currentUser();
+          const base = cur ?? this.mapHeadlessToUser(res.data!.user);
+          const merged = { ...base, ...p, id: String(p.id ?? base.id) };
+          this.currentUser.set(merged);
+          localStorage.setItem(this.USER_KEY, JSON.stringify(merged));
+        }),
+        map(() => res),
+        catchError(() => of(res))
+      );
+    }
+
     return of(res);
-  }
-
-  private applyAuthenticatedResponse(
-    res: AuthenticatedResponse,
-    opts: { fetchProfile?: boolean } = {}
-  ): void {
-    this.applyMetaTokens(res.meta);
-    if (res.meta?.is_authenticated && res.data?.user) {
-      const u = this.mapHeadlessToUser(res.data.user);
-      this.currentUser.set(u);
-      this.setUserStorage(u);
-      this.isAuthenticated.set(true);
-      this.authStateSubject.next(true);
-      if (opts.fetchProfile) {
-        this.getProfile().subscribe({
-          next: (p) => {
-            const cur = this.currentUser();
-            if (cur) {
-              const merged = { ...cur, ...p, id: String(p.id ?? cur.id) };
-              this.currentUser.set(merged);
-              this.setUserStorage(merged);
-            }
-          },
-          error: () => {
-            /* profile endpoint may be unavailable; keep headless user */
-          },
-        });
-      }
-    } else {
-      // Keep tokens when `meta` still carries a session (multi-step app flows); otherwise drop.
-      if (!res.meta?.session_token && !res.meta?.access_token) {
-        this.tokenStore.clear();
-      }
-      localStorage.removeItem(this.USER_KEY);
-      this.isAuthenticated.set(false);
-      this.currentUser.set(null);
-      this.authStateSubject.next(false);
-    }
-    this.isLoading.set(false);
   }
 
   private mapHeadlessToUser(h: HeadlessUser): User {
@@ -212,18 +270,16 @@ export class AuthService {
     };
   }
 
-  login(credentials: LoginRequest): Observable<AuthenticatedResponse> {
+  login(credentials: LoginRequest): Observable<AuthenticatedOrChallenge> {
     this.isLoading.set(true);
     return this.headless.login(credentials).pipe(
       switchMap((response) => this.applyHeadlessSuccess(response, { fetchProfile: true })),
-      catchError((error) => {
-        this.isLoading.set(false);
-        throw error;
-      })
+      finalize(() => this.isLoading.set(false)),
+      catchError((error) => throwError(() => error))
     );
   }
 
-  register(userData: RegisterRequest): Observable<AuthenticatedResponse> {
+  register(userData: RegisterRequest): Observable<AuthenticatedOrChallenge> {
     this.isLoading.set(true);
     const body: Record<string, unknown> = { email: userData.email, password: userData.password };
     if (userData.phone) {
@@ -231,10 +287,8 @@ export class AuthService {
     }
     return this.headless.signup(body).pipe(
       switchMap((response) => this.applyHeadlessSuccess(response, { fetchProfile: true })),
-      catchError((error) => {
-        this.isLoading.set(false);
-        throw error;
-      })
+      finalize(() => this.isLoading.set(false)),
+      catchError((error) => throwError(() => error))
     );
   }
 
@@ -252,11 +306,10 @@ export class AuthService {
   }
 
   private performLogoutAfterServer(): void {
-    this.clearClientAuthData();
-    this.isAuthenticated.set(false);
-    this.currentUser.set(null);
-    this.authStateSubject.next(false);
-    void this.router.navigate(['/login']);
+    this.clearLocalAuthUi({ preserveSessionStorageToken: false });
+    this.authSnapshot.set(undefined);
+    this.prevAuthForRedirect = undefined;
+    void this.router.navigate([ALLAUTH_LOGIN_URL]);
   }
 
   getProfile(): Observable<User> {
@@ -276,20 +329,20 @@ export class AuthService {
               ...profileData,
             };
             this.currentUser.set(updatedUser);
-            this.setUserStorage(updatedUser);
+            localStorage.setItem(this.USER_KEY, JSON.stringify(updatedUser));
           }
         })
       );
   }
 
-  startGoogleOAuth(callbackUrl: string, process: 'login' | 'connect' = 'login'): void {
-    const url = this.headless.buildProviderRedirectUrl();
-    submitProviderRedirectForm(url, { provider: 'google', process, callback_url: callbackUrl });
+  /** Strict app mode: browser OAuth redirect is not supported without backend token exchange. */
+  startGoogleOAuth(_callbackUrl: string, _process: 'login' | 'connect' = 'login'): void {
+    console.warn('[auth] Google OAuth redirect disabled in strict app mode.');
   }
 
-  startGitHubOAuth(callbackUrl: string, process: 'login' | 'connect' = 'login'): void {
-    const url = this.headless.buildProviderRedirectUrl();
-    submitProviderRedirectForm(url, { provider: 'github', process, callback_url: callbackUrl });
+  /** Strict app mode: browser OAuth redirect is not supported without backend token exchange. */
+  startGitHubOAuth(_callbackUrl: string, _process: 'login' | 'connect' = 'login'): void {
+    console.warn('[auth] GitHub OAuth redirect disabled in strict app mode.');
   }
 
   getStoredUser(): User | null {
@@ -297,24 +350,15 @@ export class AuthService {
     return userStr ? (JSON.parse(userStr) as User) : null;
   }
 
-  private setUserStorage(user: User): void {
-    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
-  }
-
-  private clearClientAuthData(): void {
-    localStorage.removeItem(this.USER_KEY);
-    this.tokenStore.clear();
-  }
-
   isLoggedIn(): boolean {
-    return this.isAuthenticated();
+    return authInfo(this.authSnapshot()).isAuthenticated;
   }
 
   getCurrentUser(): User | null {
     return this.currentUser();
   }
 
-  verifyEmailWithKey(key: string): Observable<AuthenticatedResponse> {
+  verifyEmailWithKey(key: string): Observable<AuthenticatedOrChallenge> {
     return this.headless
       .verifyEmail({ key })
       .pipe(switchMap((r) => this.applyHeadlessSuccess(r, { fetchProfile: true })));
@@ -324,6 +368,51 @@ export class AuthService {
     return this.headless.resendEmailVerification();
   }
 
-  /** Expose headless API for auth flows (code, passkey, MFA, password reset, email). */
   readonly headlessAuth = this.headless;
+
+  private readNextQueryParam(): string {
+    const tree = this.router.parseUrl(this.router.url);
+    const next = tree.queryParams['next'];
+    return typeof next === 'string' && next.startsWith('/') ? next : ALLAUTH_LOGIN_REDIRECT_URL;
+  }
+
+  private async handleAuthChangeEvent(evt: AuthChangeEventType, auth: unknown): Promise<void> {
+    switch (evt) {
+      case AuthChangeEvent.LOGGED_OUT:
+        await this.router.navigateByUrl(ALLAUTH_LOGOUT_REDIRECT_URL);
+        break;
+      case AuthChangeEvent.LOGGED_IN:
+        await this.router.navigateByUrl(ALLAUTH_LOGIN_REDIRECT_URL);
+        break;
+      case AuthChangeEvent.REAUTHENTICATED: {
+        const next = this.readNextQueryParam();
+        await this.router.navigateByUrl(next);
+        break;
+      }
+      case AuthChangeEvent.REAUTHENTICATION_REQUIRED: {
+        const flows = (auth as { data?: { flows?: Flow[] } })?.data?.flows;
+        const flow = flows?.[0];
+        if (!flow) {
+          break;
+        }
+        const path = pathForFlow(flow);
+        await this.router.navigate([path], {
+          queryParams: { next: this.router.url },
+          state: { reauth: auth },
+        });
+        break;
+      }
+      case AuthChangeEvent.FLOW_UPDATED: {
+        const p = pathForPendingFlow(auth);
+        if (!p) {
+          console.error('[auth] FLOW_UPDATED without pending flow route');
+          break;
+        }
+        await this.router.navigateByUrl(p);
+        break;
+      }
+      default:
+        break;
+    }
+  }
 }

@@ -13,6 +13,7 @@ import {
 } from '../../../../shared/utils/error.utils';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { AuthService } from '../../services/auth.service';
+import { readContinueUrl } from '../../utils/auth-route-query.util';
 
 @Component({
   selector: 'app-login-by-code-page',
@@ -47,6 +48,11 @@ export class LoginByCodePage implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const url = this.router.url.split('?')[0];
+    if (url.includes('/login/code/confirm')) {
+      this.step.set('code');
+      return;
+    }
     const s = this.route.snapshot.queryParamMap.get('step');
     if (s === 'confirm') {
       this.step.set('code');
@@ -188,8 +194,8 @@ export class LoginByCodePage implements OnInit, OnDestroy {
       );
       await firstValueFrom(this.auth.applyHeadlessSuccess(res, { fetchProfile: true }));
       this.isLoading.set(false);
-      const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/gallery';
-      void this.router.navigateByUrl(returnUrl.startsWith('/') ? returnUrl : '/gallery');
+      const nextUrl = readContinueUrl(this.route.snapshot.queryParamMap);
+      void this.router.navigateByUrl(nextUrl);
     } catch (e) {
       this.isLoading.set(false);
       if (e instanceof HttpErrorResponse) {

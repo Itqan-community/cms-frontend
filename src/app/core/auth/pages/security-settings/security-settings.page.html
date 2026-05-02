@@ -1,0 +1,131 @@
+<div class="security">
+  <header class="security__header">
+    <div class="security__header-row">
+      <a [routerLink]="['/gallery']" class="security__back">{{ 'AUTH.SECURITY.BACK' | translate }}</a>
+      <app-lang-switch></app-lang-switch>
+    </div>
+  </header>
+  <div class="security__container">
+    <div class="security__card">
+      <h1 class="security__title">{{ 'AUTH.SECURITY.TITLE' | translate }}</h1>
+      <p class="security__subtitle">{{ 'AUTH.SECURITY.SUBTITLE' | translate }}</p>
+
+      @if (pageError()) {
+        <div class="security__alert">{{ pageError() }}</div>
+      }
+
+      @if (isLoading()) {
+        <p class="security__hint">{{ 'COMMON.LOADING' | translate }}</p>
+      }
+
+      <section class="security__section">
+        <h2 class="security__h2">{{ 'AUTH.SECURITY.AUTHENTICATORS_TITLE' | translate }}</h2>
+        <ul class="security__list">
+          @for (a of authenticators(); track $index) {
+            <li class="security__li">
+              <span class="security__badge">{{ a.type }}</span>
+              @if (a.type === 'webauthn') {
+                <span>{{ a.name }}</span>
+              }
+              @if (a.type === 'recovery_codes') {
+                <span>{{
+                  'AUTH.SECURITY.RECOVERY_COUNT'
+                    | translate
+                      : { unused: a.unused_code_count, total: a.total_code_count }
+                }}</span>
+              }
+            </li>
+          } @empty {
+            <li class="security__hint">{{ 'AUTH.SECURITY.NO_AUTHENTICATORS' | translate }}</li>
+          }
+        </ul>
+      </section>
+
+      @if (mfaSupported().includes('totp')) {
+        <section class="security__section">
+          <h2 class="security__h2">{{ 'AUTH.SECURITY.TOTP_TITLE' | translate }}</h2>
+          @if (totpState(); as ts) {
+            @if (ts.kind === 'pending_setup') {
+            <p class="security__hint">{{ 'AUTH.SECURITY.TOTP_SETUP_HINT' | translate }}</p>
+            <p class="security__mono">{{ ts.meta.totp_url }}</p>
+            <button type="button" class="security__btn security__btn--secondary" (click)="copyText(ts.meta.totp_url)">
+              {{ 'AUTH.SECURITY.COPY_URI' | translate }}
+            </button>
+            <form [formGroup]="totpForm" (ngSubmit)="submitTotpCode()" class="security__form">
+              <label class="security__label" for="totp-code">{{ 'AUTH.SECURITY.TOTP_CODE_LABEL' | translate }}</label>
+              <input id="totp-code" class="security__input" formControlName="code" autocomplete="one-time-code" />
+              <button type="submit" class="security__btn" [disabled]="totpForm.invalid || isLoading()">
+                {{ 'AUTH.SECURITY.TOTP_ACTIVATE' | translate }}
+              </button>
+            </form>
+            }
+            @if (ts.kind === 'active') {
+            <p class="security__ok">{{ 'AUTH.SECURITY.TOTP_ACTIVE' | translate }}</p>
+            <button type="button" class="security__btn security__btn--danger" (click)="deactivateTotp()" [disabled]="isLoading()">
+              {{ 'AUTH.SECURITY.TOTP_DEACTIVATE' | translate }}
+            </button>
+            }
+          }
+        </section>
+      }
+
+      @if (mfaSupported().includes('recovery_codes')) {
+        <section class="security__section">
+          <h2 class="security__h2">{{ 'AUTH.SECURITY.RECOVERY_TITLE' | translate }}</h2>
+          <p class="security__hint">{{ 'AUTH.SECURITY.RECOVERY_HINT' | translate }}</p>
+          @if (recoveryLoadError()) {
+            <div class="security__alert">{{ recoveryLoadError() }}</div>
+          }
+          @if (recoveryData(); as rc) {
+            <p class="security__hint">{{
+              'AUTH.SECURITY.RECOVERY_COUNT'
+                | translate: { unused: rc.unused_code_count, total: rc.total_code_count }
+            }}</p>
+            @if (rc.unused_codes.length) {
+              <ul class="security__codes">
+                @for (c of rc.unused_codes; track c) {
+                  <li class="security__code">{{ c }}</li>
+                }
+              </ul>
+              <div class="security__row">
+                <button type="button" class="security__btn security__btn--secondary" (click)="copyRecoveryCodes()">
+                  {{ 'AUTH.SECURITY.COPY_ALL' | translate }}
+                </button>
+                <button type="button" class="security__btn security__btn--secondary" (click)="downloadRecoveryCodes()">
+                  {{ 'AUTH.SECURITY.DOWNLOAD' | translate }}
+                </button>
+              </div>
+            }
+          } @else {
+            <p class="security__hint">{{ 'AUTH.SECURITY.RECOVERY_UNAVAILABLE' | translate }}</p>
+          }
+          <div class="security__regen">
+            @if (!regenerateArmed()) {
+              <button type="button" class="security__btn security__btn--danger-outline" (click)="armRegenerate()">
+                {{ 'AUTH.SECURITY.RECOVERY_REGEN' | translate }}
+              </button>
+            } @else {
+              <p class="security__warn">{{ 'AUTH.SECURITY.RECOVERY_REGEN_WARN' | translate }}</p>
+              <div class="security__row">
+                <button type="button" class="security__btn security__btn--danger" (click)="confirmRegenerateRecoveryCodes()" [disabled]="isLoading()">
+                  {{ 'AUTH.SECURITY.RECOVERY_REGEN_CONFIRM' | translate }}
+                </button>
+                <button type="button" class="security__btn security__btn--secondary" (click)="cancelRegenerate()">
+                  {{ 'COMMON.CANCEL' | translate }}
+                </button>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      @if (passkeysSupported() && mfaSupported().includes('webauthn')) {
+        <section class="security__section">
+          <h2 class="security__h2">{{ 'AUTH.SECURITY.PASSKEY_TITLE' | translate }}</h2>
+          <p class="security__hint">{{ 'AUTH.SECURITY.PASSKEY_HINT' | translate }}</p>
+          <a [routerLink]="['/account/2fa/webauthn/add']" class="security__link-btn">{{ 'AUTH.SECURITY.PASSKEY_SETUP_LINK' | translate }}</a>
+        </section>
+      }
+    </div>
+  </div>
+</div>

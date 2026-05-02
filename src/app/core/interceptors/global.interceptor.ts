@@ -4,13 +4,15 @@ import { inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { HeadlessAppTokenService } from '../auth/headless/headless-app-token.service';
-import { isHeadlessAppAuthUrl } from '../auth/headless/headless-api-path.util';
+import {
+  isHeadlessAppAuthUrl,
+  shouldOmitHeadlessSessionTokenForRequest,
+} from '../auth/headless/headless-api-path.util';
 import { getDjangoCsrfTokenForRequest, isUnsafeHttpMethod } from '../utils/csrf.util';
 
 /**
- * App headless: `Authorization: Bearer` for CMS API routes; skip CSRF when Bearer is used or on `/auth/app/v1/`.
- * Legacy: CSRF for unsafe methods when no app access token and not an app auth URL.
- * @see https://docs.djangoproject.com/en/stable/ref/csrf/
+ * Attaches `X-Session-Token` for **all** CMS API URLs when stored (official app-mode demo behaviour).
+ * Prefers session token over Bearer when both exist.
  */
 export function headersInterceptor(
   req: HttpRequest<unknown>,
@@ -20,15 +22,29 @@ export function headersInterceptor(
   const api = environment.API_BASE_URL;
   const isApi = api ? req.url.startsWith(api) : false;
   const isAppAuth = isHeadlessAppAuthUrl(req.url);
+  const session = tokenStore.getSessionToken();
   const access = tokenStore.getAccessToken();
-  const addBearer = isApi && !isAppAuth && !!access;
-  const useCsrf = isApi && isUnsafeHttpMethod(req.method) && !isAppAuth && !addBearer;
+
+  const omitSession =
+    req.url.includes('/auth/app/v1/config') ||
+    shouldOmitHeadlessSessionTokenForRequest(req.url, req.method);
+
+  const addBearer = isApi && !isAppAuth && !!access && !session;
+
+  const useCsrf =
+    isApi &&
+    isUnsafeHttpMethod(req.method) &&
+    !isAppAuth &&
+    !addBearer &&
+    !session;
+
   const csrf = useCsrf ? getDjangoCsrfTokenForRequest() : null;
 
   req = req.clone({
     setHeaders: {
       ...(addBearer ? { Authorization: `Bearer ${access}` } : {}),
       ...(csrf ? { 'X-CSRFToken': csrf } : {}),
+      ...(isApi && session && !omitSession ? { 'X-Session-Token': session } : {}),
       'Accept-Language': localStorage.getItem('lang') || 'ar',
     },
   });

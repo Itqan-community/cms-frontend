@@ -1,23 +1,25 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import type { Router } from '@angular/router';
 import type { AllauthFlowId, AuthenticationResponse, Flow } from './headless-api.types';
+import { pathForFlow } from './allauth-auth.hooks';
 
+/** Legacy CMS shortcuts → official `/account/...` routes */
 export const AUTH_ROUTES = {
-  login: '/login',
-  register: '/register',
-  verifyEmail: '/verify-email',
-  loginByCode: '/login-by-code',
-  forgotPassword: '/forgot-password',
-  resetPassword: '/reset-password',
-  oauthCallback: '/auth/oauth/callback',
-  reauthenticate: '/reauthenticate',
-  mfa: '/mfa',
-  passkey: '/passkey',
-  providerSignup: '/provider-signup',
+  login: '/account/login',
+  register: '/account/signup',
+  verifyEmail: '/account/verify-email',
+  loginByCode: '/account/login/code',
+  forgotPassword: '/account/password/reset',
+  resetPassword: '/account/password/reset/complete',
+  oauthCallback: '/account/provider/callback',
+  reauthenticate: '/account/reauthenticate',
+  mfaTotp: '/account/authenticate/totp',
+  passkey: '/account/signup/passkey',
+  providerSignup: '/account/provider/signup',
 } as const;
 
 /**
- * Aliases for `settings.HEADLESS_FRONTEND_URLS` paths (BE); same components as `AUTH_ROUTES`.
+ * Aliases for `settings.HEADLESS_FRONTEND_URLS` paths (BE email links).
  */
 export const AUTH_ROUTES_HEADLESS = {
   accountConfirmEmail: (key: string) => `/accounts/confirm-email/${key}`,
@@ -35,9 +37,7 @@ export function isPasswordResetByCodePending(flows: Flow[] | undefined): boolean
   return flows.some((f) => f.id === 'password_reset_by_code' && f.is_pending === true);
 }
 
-/**
- * Picks the most relevant pending flow for routing, when multiple exist.
- */
+/** Picks the most relevant pending flow for routing, when multiple exist. */
 export function getPendingFlow(flows: Flow[] | undefined): Flow | null {
   if (!flows?.length) {
     return null;
@@ -49,26 +49,23 @@ export function getPendingFlow(flows: Flow[] | undefined): Flow | null {
   return null;
 }
 
-/**
- * Maps a flow id to an in-app path for initial navigation.
- */
+/** Fallback map when `pathForFlow` cannot derive path from incomplete flow metadata. */
 export function getRouteForFlowId(flowId: AllauthFlowId | string | undefined): string | null {
   if (!flowId) {
     return null;
   }
   const map: Partial<Record<string, string>> = {
     verify_email: AUTH_ROUTES.verifyEmail,
-    verify_phone: '/verify-phone', // not in main scope; reserved
-    login_by_code: AUTH_ROUTES.loginByCode,
-    mfa_authenticate: AUTH_ROUTES.mfa,
+    verify_phone: '/verify-phone',
+    login_by_code: '/account/login/code/confirm',
+    mfa_authenticate: '/account/authenticate/totp',
     provider_signup: AUTH_ROUTES.providerSignup,
+    password_reset_by_code: '/account/password/reset/confirm',
   };
   return map[flowId] ?? null;
 }
 
-/**
- * True when 401 + meta.is_authenticated + reauth flows (sensitive action blocked).
- */
+/** True when 401 + meta.is_authenticated + reauth flows (sensitive action blocked). */
 export function isReauthenticationBody(body: unknown): body is {
   status: 401;
   data: { flows?: { id: string }[] };
@@ -94,10 +91,7 @@ export function isReauthenticationBody(body: unknown): body is {
   );
 }
 
-/**
- * Tries to route to the correct screen for a 401 auth response (e.g. verify email, 2FA).
- * Returns true if navigation was performed.
- */
+/** Navigate using official pending-flow mapping where possible. */
 export function tryNavigateForAuth401(router: Router, error: HttpErrorResponse): boolean {
   if (error.status !== 401 || !error.error || typeof error.error !== 'object') {
     return false;
@@ -107,28 +101,21 @@ export function tryNavigateForAuth401(router: Router, error: HttpErrorResponse):
     return false;
   }
   const pending = getPendingFlow(auth.data.flows);
-  if (pending?.id === 'verify_email') {
-    void router.navigate([AUTH_ROUTES.verifyEmail]);
-    return true;
+  if (pending) {
+    try {
+      void router.navigateByUrl(pathForFlow(pending));
+      return true;
+    } catch {
+      /* fall through */
+    }
   }
-  if (
-    pending?.id === 'mfa_authenticate' ||
-    (!pending && auth.data.flows.some((f) => f.id === 'mfa_authenticate'))
-  ) {
-    void router.navigate([AUTH_ROUTES.mfa]);
-    return true;
-  }
-  if (pending?.id === 'login_by_code') {
-    void router.navigate([AUTH_ROUTES.loginByCode], { queryParams: { step: 'confirm' } });
-    return true;
-  }
-  if (pending?.id === 'password_reset_by_code' || isPasswordResetByCodePending(auth.data.flows)) {
-    void router.navigate([AUTH_ROUTES.resetPassword]);
-    return true;
-  }
-  const path = getRouteForFlowId(pending?.id);
+  const fallbackId =
+    pending?.id ??
+    auth.data.flows.find((f) => f.id === 'mfa_authenticate')?.id ??
+    auth.data.flows[0]?.id;
+  const path = getRouteForFlowId(fallbackId);
   if (path) {
-    void router.navigate([path]);
+    void router.navigateByUrl(path);
     return true;
   }
   return false;

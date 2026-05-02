@@ -1,18 +1,65 @@
 import { Injectable } from '@angular/core';
 import type { AppTokenRefreshResponse, AuthenticationMeta } from './headless-api.types';
 
-/** Storage keys for app-mode allauth (contract `meta.session_token` / `meta.access_token`). */
-export const HEADLESS_SESSION_TOKEN_KEY = 'headless_session_token';
-export const HEADLESS_ACCESS_TOKEN_KEY = 'headless_access_token';
-export const HEADLESS_REFRESH_TOKEN_KEY = 'headless_refresh_token';
+/** Official SPA stores session continuity under this `sessionStorage` key. */
+export const ALLAUTH_SESSION_TOKEN_STORAGE_KEY = 'sessionToken';
+
+const LEGACY_SESSION_KEY = 'headless_session_token';
+const HEADLESS_ACCESS_TOKEN_KEY = 'headless_access_token';
+const HEADLESS_REFRESH_TOKEN_KEY = 'headless_refresh_token';
 
 /**
- * No HttpClient — safe to inject from HTTP interceptors (avoids DI cycles with AuthService).
+ * App-mode session token storage (+ optional legacy JWT fields if backend still emits them).
+ * Injectable from HTTP interceptors (no HttpClient).
  */
 @Injectable({ providedIn: 'root' })
 export class HeadlessAppTokenService {
+  private legacyMigrated = false;
+
+  private migrateLegacyOnce(): void {
+    if (this.legacyMigrated) {
+      return;
+    }
+    this.legacyMigrated = true;
+    try {
+      const oldSession = localStorage.getItem(LEGACY_SESSION_KEY);
+      if (
+        oldSession &&
+        typeof sessionStorage !== 'undefined' &&
+        !sessionStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY)
+      ) {
+        sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, oldSession);
+      }
+      localStorage.removeItem(LEGACY_SESSION_KEY);
+    } catch {
+      /* storage unavailable */
+    }
+  }
+
   getSessionToken(): string | null {
-    return localStorage.getItem(HEADLESS_SESSION_TOKEN_KEY);
+    this.migrateLegacyOnce();
+    try {
+      return sessionStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY);
+    } catch {
+      return null;
+    }
+  }
+
+  setSessionToken(token: string): void {
+    try {
+      sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, token);
+      localStorage.removeItem(LEGACY_SESSION_KEY);
+    } catch {
+      /* ignore */
+    }
+  }
+
+  clearSessionToken(): void {
+    try {
+      sessionStorage.removeItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY);
+    } catch {
+      /* ignore */
+    }
   }
 
   getAccessToken(): string | null {
@@ -23,12 +70,13 @@ export class HeadlessAppTokenService {
     return localStorage.getItem(HEADLESS_REFRESH_TOKEN_KEY);
   }
 
+  /** Persist tokens from headless `meta` when backend sends them. */
   setFromMeta(meta: AuthenticationMeta | undefined): void {
     if (!meta) {
       return;
     }
     if (meta.session_token) {
-      localStorage.setItem(HEADLESS_SESSION_TOKEN_KEY, meta.session_token);
+      this.setSessionToken(meta.session_token);
     }
     if (meta.access_token) {
       localStorage.setItem(HEADLESS_ACCESS_TOKEN_KEY, meta.access_token);
@@ -38,7 +86,7 @@ export class HeadlessAppTokenService {
     }
   }
 
-  /** After `POST .../tokens/refresh` — may omit `refresh_token` if rotation is off. */
+  /** After `POST .../tokens/refresh` — kept for backends that still rotate JWTs. */
   applyTokenRefreshResponse(res: AppTokenRefreshResponse): void {
     if (res.data?.access_token) {
       localStorage.setItem(HEADLESS_ACCESS_TOKEN_KEY, res.data.access_token);
@@ -48,13 +96,10 @@ export class HeadlessAppTokenService {
     }
   }
 
-  clearSessionToken(): void {
-    localStorage.removeItem(HEADLESS_SESSION_TOKEN_KEY);
-  }
-
   clear(): void {
-    localStorage.removeItem(HEADLESS_SESSION_TOKEN_KEY);
+    this.clearSessionToken();
     localStorage.removeItem(HEADLESS_ACCESS_TOKEN_KEY);
     localStorage.removeItem(HEADLESS_REFRESH_TOKEN_KEY);
+    localStorage.removeItem(LEGACY_SESSION_KEY);
   }
 }

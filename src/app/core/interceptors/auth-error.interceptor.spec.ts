@@ -9,17 +9,12 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { HeadlessAuthApiService } from '../auth/headless/headless-auth-api.service';
+import { ALLAUTH_REAUTHENTICATE_URL } from '../auth/headless/allauth-auth.hooks';
 import { AuthService } from '../auth/services/auth.service';
-import {
-  authErrorInterceptor,
-  CMS_401_REFRESH_HEADER,
-  SESSION_401_RECHECK_HEADER,
-} from './auth-error.interceptor';
-import { headersInterceptor } from './global.interceptor';
+import { authErrorInterceptor, SESSION_401_RECHECK_HEADER } from './auth-error.interceptor';
 import { credentialsInterceptor } from './credentials.interceptor';
 import { csrfResponseInterceptor } from './csrf-response.interceptor';
-import { appSessionTokenInterceptor } from './app-session-token.interceptor';
+import { headersInterceptor } from './global.interceptor';
 
 describe('authErrorInterceptor', () => {
   let httpMock: HttpTestingController;
@@ -35,28 +30,19 @@ describe('authErrorInterceptor', () => {
       'sessionRecheckAfter401',
       'invalidateClientAuthAndGoLogin',
     ]);
-    const headlessMock = jasmine.createSpyObj<HeadlessAuthApiService>('HeadlessAuthApiService', [
-      'refreshAccessToken',
-    ]);
     authMock.sessionRecheckAfter401.and.returnValue(of(true));
-    headlessMock.refreshAccessToken.and.returnValue(
-      of({ status: 200, data: { access_token: 'new-access', refresh_token: 'new-refresh' } })
-    );
-
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(
           withInterceptors([
             credentialsInterceptor,
             csrfResponseInterceptor,
-            appSessionTokenInterceptor,
             headersInterceptor,
             authErrorInterceptor,
           ])
         ),
         provideHttpClientTesting(),
         { provide: AuthService, useValue: authMock },
-        { provide: HeadlessAuthApiService, useValue: headlessMock },
         {
           provide: Router,
           useValue: {
@@ -76,15 +62,11 @@ describe('authErrorInterceptor', () => {
 
   it('on 401 to API profile, rechecks session and retries with recheck header', (done) => {
     const authMock = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-    const headlessMock = TestBed.inject(
-      HeadlessAuthApiService
-    ) as jasmine.SpyObj<HeadlessAuthApiService>;
 
     http.get(profileUrl).subscribe({
       next: (body: unknown) => {
         expect(body).toEqual({ ok: true });
         expect(authMock.sessionRecheckAfter401).toHaveBeenCalled();
-        expect(headlessMock.refreshAccessToken).not.toHaveBeenCalled();
         done();
       },
     });
@@ -94,31 +76,6 @@ describe('authErrorInterceptor', () => {
 
     const r2 = httpMock.expectOne(
       (req) => req.url === profileUrl && req.headers.get(SESSION_401_RECHECK_HEADER) === '1'
-    );
-    r2.flush({ ok: true });
-  });
-
-  it('on 401 to API profile with refresh token, refreshes access token and retries once', (done) => {
-    const headlessMock = TestBed.inject(
-      HeadlessAuthApiService
-    ) as jasmine.SpyObj<HeadlessAuthApiService>;
-    localStorage.setItem('headless_refresh_token', 'refresh-1');
-
-    http.get(profileUrl).subscribe({
-      next: (body: unknown) => {
-        expect(body).toEqual({ ok: true });
-        expect(headlessMock.refreshAccessToken).toHaveBeenCalled();
-        expect(localStorage.getItem('headless_access_token')).toBe('new-access');
-        expect(localStorage.getItem('headless_refresh_token')).toBe('new-refresh');
-        done();
-      },
-    });
-
-    const r1 = httpMock.expectOne(profileUrl);
-    r1.flush({ message: 'unauth' }, { status: 401, statusText: 'Unauthorized' });
-
-    const r2 = httpMock.expectOne(
-      (req) => req.url === profileUrl && req.headers.get(CMS_401_REFRESH_HEADER) === '1'
     );
     r2.flush({ ok: true });
   });
@@ -145,16 +102,16 @@ describe('authErrorInterceptor', () => {
     );
   });
 
-  it('on 401 with reauthentication body (e.g. mfa_reauthenticate), navigates to /reauthenticate', (done) => {
+  it('on 401 with reauthentication body on CMS profile, navigates to account reauthenticate', (done) => {
     const router = TestBed.inject(Router) as unknown as { navigate: jasmine.Spy; url: string };
 
     http.get(profileUrl).subscribe({
       error: (err: HttpErrorResponse) => {
         expect(err.status).toBe(401);
         expect(router.navigate).toHaveBeenCalledWith(
-          ['/reauthenticate'],
+          [ALLAUTH_REAUTHENTICATE_URL],
           jasmine.objectContaining({
-            queryParams: { returnUrl: '/gallery' },
+            queryParams: { next: '/gallery' },
           })
         );
         done();

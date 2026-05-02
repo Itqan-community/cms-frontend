@@ -100,7 +100,7 @@ export class ResetPasswordPage implements OnInit {
           return;
         }
         if (e.status === 401) {
-          void this.router.navigate(['/login']);
+          void this.router.navigate(['/account/login']);
           return;
         }
         this.errorMessage.set(

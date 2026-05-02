@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
+import { accountAuthRoutes } from './core/auth/account.routes';
 import { authGuard } from './core/auth/guards/auth.guard';
-import { guestGuard } from './core/auth/guards/guest.guard';
 import { publisherHostGuard } from './core/guards/publisher-host.guard';
 
 export const routes: Routes = [
@@ -80,25 +80,8 @@ export const routes: Routes = [
       ),
   },
 
-  {
-    path: 'login',
-    loadComponent: () => import('./core/auth/pages/login/login.page').then((m) => m.LoginPage),
-    canActivate: [guestGuard],
-    data: { hideHeader: true },
-  },
-  {
-    path: 'register',
-    loadComponent: () =>
-      import('./core/auth/pages/register/register.page').then((m) => m.RegisterPage),
-    canActivate: [guestGuard],
-    data: { hideHeader: true },
-  },
-  {
-    path: 'verify-email',
-    loadComponent: () =>
-      import('./core/auth/pages/verify-email/verify-email.page').then((m) => m.VerifyEmailPage),
-    data: { hideHeader: true },
-  },
+  ...accountAuthRoutes,
+
   /** `HEADLESS_FRONTEND_URLS.account_confirm_email` (django-allauth) */
   {
     path: 'accounts',
@@ -117,108 +100,6 @@ export const routes: Routes = [
         data: { hideHeader: true, beHeadlessPath: 'account_confirm_email' },
       },
     ],
-  },
-  /** `account_reset_password` / `account_reset_password_from_key` / `account_signup` / `socialaccount_login_error` */
-  {
-    path: 'account',
-    children: [
-      {
-        path: 'password/reset',
-        redirectTo: '/forgot-password',
-        pathMatch: 'full',
-      },
-      {
-        path: 'password/reset/key/:key',
-        loadComponent: () =>
-          import('./core/auth/pages/reset-password/reset-password.page').then(
-            (m) => m.ResetPasswordPage
-          ),
-        canActivate: [guestGuard],
-        data: { hideHeader: true, beHeadlessPath: 'account_reset_password_from_key' },
-      },
-      {
-        path: 'signup',
-        redirectTo: '/register',
-        pathMatch: 'full',
-      },
-      {
-        path: 'provider/callback',
-        loadComponent: () =>
-          import('./core/auth/pages/oauth-callback/oauth-callback.page').then(
-            (m) => m.OauthCallbackPage
-          ),
-        data: { hideHeader: true, beHeadlessPath: 'socialaccount_login_error' },
-      },
-    ],
-  },
-  {
-    path: 'auth/oauth/callback',
-    loadComponent: () =>
-      import('./core/auth/pages/oauth-callback/oauth-callback.page').then(
-        (m) => m.OauthCallbackPage
-      ),
-    data: { hideHeader: true },
-  },
-  {
-    path: 'provider-signup',
-    loadComponent: () =>
-      import('./core/auth/pages/provider-signup/provider-signup.page').then(
-        (m) => m.ProviderSignupPage
-      ),
-    data: { hideHeader: true },
-  },
-  {
-    path: 'passkey',
-    loadComponent: () =>
-      import('./core/auth/pages/passkey/passkey.page').then((m) => m.PasskeyPage),
-    // No guestGuard: signup may continue after email verification while session exists.
-    data: { hideHeader: true },
-  },
-  {
-    path: 'passkey/setup',
-    loadComponent: () =>
-      import('./core/auth/pages/passkey/passkey.page').then((m) => m.PasskeyPage),
-    canActivate: [authGuard],
-    data: { hideHeader: true, mode: 'setup' },
-  },
-  {
-    path: 'login-by-code',
-    loadComponent: () =>
-      import('./core/auth/pages/login-by-code/login-by-code.page').then((m) => m.LoginByCodePage),
-    canActivate: [guestGuard],
-    data: { hideHeader: true },
-  },
-  {
-    path: 'forgot-password',
-    loadComponent: () =>
-      import('./core/auth/pages/forgot-password/forgot-password.page').then(
-        (m) => m.ForgotPasswordPage
-      ),
-    canActivate: [guestGuard],
-    data: { hideHeader: true },
-  },
-  {
-    path: 'reset-password',
-    loadComponent: () =>
-      import('./core/auth/pages/reset-password/reset-password.page').then(
-        (m) => m.ResetPasswordPage
-      ),
-    canActivate: [guestGuard],
-    data: { hideHeader: true },
-  },
-  {
-    path: 'mfa',
-    loadComponent: () => import('./core/auth/pages/mfa/mfa.page').then((m) => m.MfaPage),
-    canActivate: [guestGuard],
-    data: { hideHeader: true },
-  },
-  {
-    path: 'reauthenticate',
-    loadComponent: () =>
-      import('./core/auth/pages/reauthenticate/reauthenticate.page').then(
-        (m) => m.ReauthenticatePage
-      ),
-    data: { hideHeader: true },
   },
   {
     path: 'unauthorized',

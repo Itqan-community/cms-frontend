@@ -55,7 +55,7 @@ export class ForgotPasswordPage {
         const authErr = e.error as Partial<AuthenticationResponse>;
         this.auth.applyMetaTokens(authErr.meta);
         if (authErr.data?.flows && isPasswordResetByCodePending(authErr.data.flows as Flow[])) {
-          void this.router.navigate(['/reset-password'], {
+          void this.router.navigate(['/account/password/reset/complete'], {
             queryParams: { email: this.form.value.email as string },
           });
           return;

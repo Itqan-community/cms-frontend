@@ -4,12 +4,7 @@ import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
 import { HeadlessAuthApiService } from '../headless/headless-auth-api.service';
-import {
-  HeadlessAppTokenService,
-  HEADLESS_ACCESS_TOKEN_KEY,
-  HEADLESS_REFRESH_TOKEN_KEY,
-  HEADLESS_SESSION_TOKEN_KEY,
-} from '../headless/headless-app-token.service';
+import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
 import type { AuthenticatedResponse, ConfigurationResponse } from '../headless/headless-api.types';
 
 const mockUser = {
@@ -33,9 +28,12 @@ describe('AuthService (app / headless)', () => {
   let tokenStore: HeadlessAppTokenService;
 
   beforeEach(() => {
+    TestBed.resetTestingModule();
     localStorage.clear();
+    sessionStorage.clear();
     headless = jasmine.createSpyObj<HeadlessAuthApiService>('HeadlessAuthApiService', [
       'getConfig',
+      'getAuth',
       'getSession',
       'login',
       'signup',
@@ -54,6 +52,13 @@ describe('AuthService (app / headless)', () => {
       },
     };
     headless.getConfig.and.returnValue(of(mockConfig));
+    headless.getAuth.and.returnValue(
+      of({
+        status: 200,
+        data: { user: mockUser, methods: [] },
+        meta: { is_authenticated: true },
+      } as AuthenticatedResponse)
+    );
     headless.getSession.and.returnValue(
       of({
         status: 200,
@@ -81,9 +86,9 @@ describe('AuthService (app / headless)', () => {
       access_token: 'acc-1',
       refresh_token: 'ref-1',
     });
-    expect(localStorage.getItem(HEADLESS_SESSION_TOKEN_KEY)).toBe('sess-1');
-    expect(localStorage.getItem(HEADLESS_ACCESS_TOKEN_KEY)).toBe('acc-1');
-    expect(localStorage.getItem(HEADLESS_REFRESH_TOKEN_KEY)).toBe('ref-1');
+    expect(tokenStore.getSessionToken()).toBe('sess-1');
+    expect(tokenStore.getAccessToken()).toBe('acc-1');
+    expect(tokenStore.getRefreshToken()).toBe('ref-1');
   });
 
   it('applyHeadlessSuccess does not call getSession when user and access_token are present', (done) => {
@@ -101,12 +106,12 @@ describe('AuthService (app / headless)', () => {
     });
   });
 
-  it('applyHeadlessSuccess fetches session when authenticated but no access_token in first response', (done) => {
-    const first: AuthenticatedResponse = {
+  it('applyHeadlessSuccess fetches session when authenticated but user missing in first response', (done) => {
+    const first = {
       status: 200,
-      data: { user: mockUser, methods: [] },
+      data: { methods: [] },
       meta: { is_authenticated: true },
-    };
+    } as unknown as AuthenticatedResponse;
     let calls = 0;
     headless.getSession.and.callFake(() => {
       calls++;
@@ -137,56 +142,4 @@ describe('AuthService (app / headless)', () => {
     });
   });
 
-  it('restores authenticated UI state from storage when bootstrap session check fails', () => {
-    TestBed.resetTestingModule();
-    localStorage.clear();
-    localStorage.setItem(
-      'user',
-      JSON.stringify({
-        id: '1',
-        name: 'Persisted User',
-        email: 'persisted@example.com',
-        phone: '',
-        is_active: true,
-        is_profile_completed: true,
-      })
-    );
-    localStorage.setItem(HEADLESS_SESSION_TOKEN_KEY, 'sess-1');
-    localStorage.setItem(HEADLESS_ACCESS_TOKEN_KEY, 'acc-1');
-
-    const localHeadless = jasmine.createSpyObj<HeadlessAuthApiService>('HeadlessAuthApiService', [
-      'getConfig',
-      'getSession',
-      'login',
-      'signup',
-      'deleteSession',
-      'verifyEmail',
-    ]);
-    const localConfig: ConfigurationResponse = {
-      status: 200,
-      data: {
-        account: {
-          authentication_method: 'email',
-          is_open_for_signup: true,
-          email_verification_by_code_enabled: false,
-          login_by_code_enabled: false,
-        },
-      },
-    };
-    localHeadless.getConfig.and.returnValue(of(localConfig));
-    localHeadless.getSession.and.returnValue(throwError(() => new Error('session check failed')));
-
-    TestBed.configureTestingModule({
-      providers: [
-        AuthService,
-        { provide: HttpClient, useValue: { get: () => of({ id: 1 }), put: () => of({}) } },
-        { provide: Router, useValue: { navigate: jasmine.createSpy('navigate') } },
-        { provide: HeadlessAuthApiService, useValue: localHeadless },
-      ],
-    });
-
-    const localService = TestBed.inject(AuthService);
-    expect(localService.isAuthenticated()).toBe(true);
-    expect(localService.currentUser()?.email).toBe('persisted@example.com');
-  });
 });

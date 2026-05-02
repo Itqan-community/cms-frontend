@@ -3,7 +3,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 /**
- * Sends cookies on cross-origin requests to the CMS API (session / CSRF for headless auth).
+ * Official app-mode headless (`/auth/app/v1`) uses `withCredentials: false`.
+ * Other CMS URLs may still rely on cookie sessions when no app token is present.
  */
 export function credentialsInterceptor(
   req: HttpRequest<unknown>,
@@ -13,9 +14,6 @@ export function credentialsInterceptor(
   if (!base || !req.url.startsWith(base)) {
     return next(req);
   }
-  return next(
-    req.clone({
-      withCredentials: true,
-    })
-  );
+  const isAppHeadlessAuth = req.url.includes('/auth/app/v1/');
+  return next(req.clone({ withCredentials: !isAppHeadlessAuth }));
 }

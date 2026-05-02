@@ -1,19 +1,23 @@
 import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, catchError, switchMap, tap, throwError } from 'rxjs';
+import { Observable, catchError, switchMap, throwError } from 'rxjs';
 import * as Sentry from '@sentry/angular';
+import {
+  ALLAUTH_REAUTHENTICATE_URL,
+} from '../auth/headless/allauth-auth.hooks';
+import { AllauthAuthChangeBus } from '../auth/headless/allauth-auth-change.bus';
+import { applyAllauthEnvelopeSideEffects } from '../auth/headless/allauth-envelope.util';
+import {
+  isHeadlessAppAuthUrl,
+  isHeadlessAccountWebAuthnAuthenticatorsUrl,
+} from '../auth/headless/headless-api-path.util';
 import {
   isReauthenticationBody,
   tryNavigateForAuth401,
 } from '../auth/headless/headless-auth-flow.util';
 import { HeadlessAppTokenService } from '../auth/headless/headless-app-token.service';
-import { HeadlessAuthApiService } from '../auth/headless/headless-auth-api.service';
 import { AuthService } from '../auth/services/auth.service';
-import {
-  isHeadlessAppAuthUrl,
-  isHeadlessAccountWebAuthnAuthenticatorsUrl,
-} from '../auth/headless/headless-api-path.util';
 import { environment } from '../../../environments/environment';
 
 /**
@@ -22,12 +26,9 @@ import { environment } from '../../../environments/environment';
  */
 export const SESSION_401_RECHECK_HEADER = 'X-Cms-Auth-Session-Recheck';
 
-/** Set after one `POST /auth/app/v1/tokens/refresh` + retry, to avoid refresh loops. */
-export const CMS_401_REFRESH_HEADER = 'X-Cms-Auth-Refresh-Attempted';
-
 /**
- * App mode: 401 on app auth with flows → client routing. 401/403 on CMS → `X-Session-Token` + session resync, retry once.
- * 410 on app headless = session invalid (Gone) → clear local tokens and go to login.
+ * App-mode headless: sync envelope side-effects from JSON bodies.
+ * CMS APIs: one session recheck via `X-Session-Token`, then logout.
  */
 export function authErrorInterceptor(
   req: HttpRequest<unknown>,
@@ -37,27 +38,7 @@ export function authErrorInterceptor(
   const router = inject(Router);
   const apiBase = environment.API_BASE_URL;
   const tokenStore = inject(HeadlessAppTokenService);
-  const headless = inject(HeadlessAuthApiService);
-
-  const runCms401Recovery = (err: HttpErrorResponse): Observable<HttpEvent<unknown>> => {
-    if (!apiBase || !req.url.startsWith(apiBase) || isHeadlessAppAuthUrl(req.url)) {
-      return throwError(() => err);
-    }
-    if (!req.headers.has(CMS_401_REFRESH_HEADER) && tokenStore.getRefreshToken()) {
-      return headless.refreshAccessToken().pipe(
-        tap((res) => tokenStore.applyTokenRefreshResponse(res)),
-        switchMap(() =>
-          next(
-            req.clone({
-              setHeaders: { [CMS_401_REFRESH_HEADER]: '1' },
-            })
-          )
-        ),
-        catchError(() => runCmsSessionRecheck(err))
-      );
-    }
-    return runCmsSessionRecheck(err);
-  };
+  const authBus = inject(AllauthAuthChangeBus);
 
   const runCmsSessionRecheck = (err: HttpErrorResponse): Observable<HttpEvent<unknown>> => {
     if (!apiBase || !req.url.startsWith(apiBase) || isHeadlessAppAuthUrl(req.url)) {
@@ -84,10 +65,19 @@ export function authErrorInterceptor(
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+      if (
+        error.error &&
+        typeof error.error === 'object' &&
+        isHeadlessAppAuthUrl(req.url)
+      ) {
+        applyAllauthEnvelopeSideEffects(error.error, tokenStore, authBus);
+      }
+
       if (error.status === 401 && isReauthenticationBody(error.error)) {
         if (!isHeadlessAccountWebAuthnAuthenticatorsUrl(req.url)) {
-          const returnUrl = router.url;
-          void router.navigate(['/reauthenticate'], { queryParams: { returnUrl } });
+          void router.navigate([ALLAUTH_REAUTHENTICATE_URL], {
+            queryParams: { next: router.url },
+          });
         }
         return throwError(() => error);
       }
@@ -106,7 +96,7 @@ export function authErrorInterceptor(
         }
 
         if (apiBase && req.url.startsWith(apiBase)) {
-          return runCms401Recovery(error);
+          return runCmsSessionRecheck(error);
         }
       } else if (error.status !== 410) {
         Sentry.captureException(error, {

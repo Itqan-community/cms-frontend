@@ -48,6 +48,22 @@
           {{ 'AUTH.REAUTH.USE_PASSKEY' | translate }}
         </button>
       }
+      <div class="reauth__divider">{{ 'AUTH.REAUTH.OR_MFA' | translate }}</div>
+      <form [formGroup]="mfaForm" (ngSubmit)="onSubmitMfaCode()" class="reauth__form">
+        <div class="reauth__field">
+          <label for="mfa" class="reauth__label">{{ 'AUTH.MFA.CODE_LABEL' | translate }}</label>
+          <input
+            id="mfa"
+            class="reauth__input"
+            formControlName="code"
+            autocomplete="one-time-code"
+            [placeholder]="'AUTH.MFA.CODE_PLACEHOLDER' | translate"
+          />
+        </div>
+        <button type="submit" class="reauth__secondary" [disabled]="mfaForm.invalid || isLoading()">
+          {{ 'AUTH.REAUTH.SUBMIT_MFA' | translate }}
+        </button>
+      </form>
     </div>
   </div>
 </div>

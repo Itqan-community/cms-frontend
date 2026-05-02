@@ -11,6 +11,7 @@ import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
 import { LoginRequest } from '../../models/auth.model';
 import { AuthService } from '../../services/auth.service';
+import { readContinueUrl } from '../../utils/auth-route-query.util';
 
 @Component({
   selector: 'app-login-page',
@@ -54,9 +55,9 @@ export class LoginPage {
   /** Allauth `callback_url` for provider redirect (absolute). */
   get oauthCallbackUrl(): string {
     if (typeof window === 'undefined') {
-      return '/auth/oauth/callback';
+      return '/account/provider/callback';
     }
-    return `${window.location.origin}/auth/oauth/callback`;
+    return `${window.location.origin}/account/provider/callback`;
   }
 
   onLoginWithGoogle(): void {
@@ -79,16 +80,8 @@ export class LoginPage {
 
       this.authService.login(loginData).subscribe({
         next: () => {
-          // Get the return URL from query parameters, default to gallery
-          const returnUrl =
-            (this.activatedRoute.snapshot.queryParams['returnUrl'] as string) || '/gallery';
-
-          // Security: Ensure returnUrl is internal (starts with /)
-          if (returnUrl.startsWith('/')) {
-            this.router.navigateByUrl(returnUrl);
-          } else {
-            this.router.navigate(['/gallery']);
-          }
+          const nextUrl = readContinueUrl(this.activatedRoute.snapshot.queryParamMap);
+          void this.router.navigateByUrl(nextUrl);
         },
         error: (error: unknown) => {
           this.authService.isLoading.set(false);

@@ -2,20 +2,24 @@ import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../environments/environment';
+import { ALLAUTH_SESSION_TOKEN_STORAGE_KEY } from '../auth/headless/headless-app-token.service';
 import { appSessionTokenInterceptor } from './app-session-token.interceptor';
 import { credentialsInterceptor } from './credentials.interceptor';
 
 describe('appSessionTokenInterceptor', () => {
   const api = environment.API_BASE_URL;
 
-  beforeEach(() => localStorage.clear());
+  beforeEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+  });
 
   it('adds X-Session-Token for /auth/app/v1/ when a session token is stored', () => {
     if (!api) {
       pending('API_BASE_URL');
       return;
     }
-    localStorage.setItem('headless_session_token', 'tok-99');
+    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-99');
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(withInterceptors([credentialsInterceptor, appSessionTokenInterceptor])),
@@ -36,7 +40,7 @@ describe('appSessionTokenInterceptor', () => {
       pending('API_BASE_URL');
       return;
     }
-    localStorage.setItem('headless_session_token', 'tok-99');
+    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-99');
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -58,7 +62,7 @@ describe('appSessionTokenInterceptor', () => {
       pending('API_BASE_URL');
       return;
     }
-    localStorage.setItem('headless_session_token', 'tok-after-init');
+    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-after-init');
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -81,7 +85,7 @@ describe('appSessionTokenInterceptor', () => {
       pending('API_BASE_URL');
       return;
     }
-    localStorage.setItem('headless_session_token', 'tok-stale');
+    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-stale');
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -108,7 +112,7 @@ describe('appSessionTokenInterceptor', () => {
       pending('API_BASE_URL');
       return;
     }
-    localStorage.setItem('headless_session_token', 'tok-stale');
+    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-stale');
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [

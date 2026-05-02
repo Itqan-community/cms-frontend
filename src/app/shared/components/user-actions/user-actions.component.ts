@@ -16,12 +16,12 @@ import { UserAvatarComponent } from '../../components/user-avatar/user-avatar.co
       <div class="user-actions">
         <app-user-avatar [user]="authService.currentUser()" size="md"></app-user-avatar>
         <a
-          [routerLink]="['/passkey/setup']"
+          [routerLink]="['/account/2fa']"
           nz-button
-          [title]="'NAVIGATION.PASSKEY_SETUP' | translate"
+          [title]="'NAVIGATION.ACCOUNT_SECURITY' | translate"
           class="ant-btn-floating"
         >
-          {{ 'NAVIGATION.PASSKEY_SETUP' | translate }}
+          {{ 'NAVIGATION.ACCOUNT_SECURITY' | translate }}
         </a>
         <button
           nz-button
@@ -35,7 +35,7 @@ import { UserAvatarComponent } from '../../components/user-avatar/user-avatar.co
         </button>
       </div>
     } @else {
-      <a [routerLink]="['/login']" nz-button class="ant-btn-floating">
+      <a [routerLink]="['/account/login']" nz-button class="ant-btn-floating">
         {{ 'AUTH.LOGIN.SUBMIT_BUTTON' | translate }}
       </a>
     }

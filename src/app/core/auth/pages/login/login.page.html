@@ -98,7 +98,7 @@
         </div>
 
         <div class="login__links-row">
-          <a [routerLink]="['/forgot-password']" class="login__inline-link">
+          <a [routerLink]="['/account/password/reset']" class="login__inline-link">
             {{ 'AUTH.LOGIN.FORGOT_PASSWORD' | translate }}
           </a>
         </div>
@@ -118,7 +118,7 @@
 
       @if (authService.authConfig()?.loginByCodeEnabled) {
         <div class="login__alt-actions">
-          <a [routerLink]="['/login-by-code']" class="login__inline-link">
+          <a [routerLink]="['/account/login/code']" class="login__inline-link">
             {{ 'AUTH.LOGIN.LOGIN_WITH_CODE' | translate }}
           </a>
         </div>
@@ -148,7 +148,7 @@
       <div class="login__footer">
         <p class="login__footer-text">
           {{ 'AUTH.LOGIN.NO_ACCOUNT' | translate }}
-          <a [routerLink]="['/register']" class="login__footer-link">{{
+          <a [routerLink]="['/account/signup']" class="login__footer-link">{{
             'AUTH.LOGIN.CREATE_ACCOUNT_LINK' | translate
           }}</a>
         </p>

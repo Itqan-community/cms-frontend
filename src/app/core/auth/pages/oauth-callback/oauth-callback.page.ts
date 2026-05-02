@@ -5,6 +5,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
+import { readContinueUrl } from '../../utils/auth-route-query.util';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
 
 /**
@@ -47,14 +48,13 @@ export class OauthCallbackPage implements OnInit {
     const err = this.route.snapshot.queryParamMap.get('error');
     if (err) {
       this.message.set('AUTH.OAUTH.ERROR');
-      setTimeout(() => void this.router.navigate(['/login']), 2000);
+      setTimeout(() => void this.router.navigate(['/account/login']), 2000);
       return;
     }
     this.auth.bootstrapSessionFromServer({ fetchProfile: true }).subscribe({
       next: () => {
-        const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/gallery';
-        const safe = returnUrl.startsWith('/') ? returnUrl : '/gallery';
-        void this.router.navigateByUrl(safe);
+        const nextUrl = readContinueUrl(this.route.snapshot.queryParamMap);
+        void this.router.navigateByUrl(nextUrl);
       },
       error: (e: unknown) => {
         if (e instanceof HttpErrorResponse) {
@@ -63,7 +63,7 @@ export class OauthCallbackPage implements OnInit {
           }
         }
         this.message.set('AUTH.OAUTH.ERROR');
-        setTimeout(() => void this.router.navigate(['/login']), 2000);
+        setTimeout(() => void this.router.navigate(['/account/login']), 2000);
         console.error('OAuth session:', getErrorMessage(e as object));
       },
     });

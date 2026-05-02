@@ -13,6 +13,8 @@ export type AllauthFlowId =
   | 'login_by_code'
   | 'mfa_authenticate'
   | 'mfa_reauthenticate'
+  | 'mfa_signup_webauthn'
+  | 'mfa_trust'
   | 'password_reset_by_code'
   | 'provider_redirect'
   | 'provider_signup'
@@ -157,4 +159,58 @@ export interface ConfigurationResponse {
     mfa?: { supported_types: string[] };
   };
   meta?: { csrf_token?: string };
+}
+
+/** `GET /account/authenticators` */
+export type AuthenticatorListItem =
+  | { type: 'totp'; created_at: string; last_used_at: string | null }
+  | {
+      type: 'recovery_codes';
+      created_at: string;
+      last_used_at: string | null;
+      total_code_count: number;
+      unused_code_count: number;
+    }
+  | {
+      type: 'webauthn';
+      id: string;
+      name: string;
+      created_at: string;
+      last_used_at: string | null;
+      is_passwordless?: boolean;
+    };
+
+export interface AuthenticatorsListResponse {
+  status: 200;
+  data: AuthenticatorListItem[];
+}
+
+/** `GET /account/authenticators/totp` when TOTP is active */
+export interface TotpActiveResponse {
+  status: 200;
+  data: { type: 'totp'; created_at: string; last_used_at: string | null };
+  meta?: { recovery_codes_generated?: boolean };
+}
+
+/** `GET /account/authenticators/totp` when not configured (HTTP 404 body) */
+export interface TotpPendingResponseBody {
+  status: 404;
+  meta: { secret: string; totp_url: string };
+}
+
+export type TotpStatusResult =
+  | { kind: 'active'; data: TotpActiveResponse['data']; meta?: TotpActiveResponse['meta'] }
+  | { kind: 'pending_setup'; meta: { secret: string; totp_url: string } };
+
+/** `GET`/`POST /account/authenticators/recovery-codes` success */
+export interface RecoveryCodesResponse {
+  status: 200;
+  data: {
+    type: 'recovery_codes';
+    total_code_count: number;
+    unused_code_count: number;
+    unused_codes: string[];
+    created_at?: string;
+    last_used_at?: string | null;
+  };
 }

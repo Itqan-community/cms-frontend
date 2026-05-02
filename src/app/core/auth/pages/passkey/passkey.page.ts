@@ -30,6 +30,7 @@ import {
 } from '../../headless/webauthn.util';
 import { HeadlessAppTokenService } from '../../headless/headless-app-token.service';
 import { AuthService } from '../../services/auth.service';
+import { readContinueUrl } from '../../utils/auth-route-query.util';
 
 type PasskeyMode = 'login' | 'signup' | 'setup';
 
@@ -70,23 +71,28 @@ export class PasskeyPage implements OnInit {
   isLoading = signal(false);
   passkeyAvailable = signal(true);
   mode = signal<PasskeyMode>('login');
-  backRoute = signal<string>('/login');
+  backRoute = signal<string>('/account/login');
 
   ngOnInit(): void {
     this.passkeyAvailable.set(isPasskeyClientEnvironmentSupported());
     const routeData = this.route.snapshot.data ?? {};
     const routeMode = routeData['mode'];
     const queryFlow = this.route.snapshot.queryParamMap.get('flow');
+    const urlPath = this.router.url.split('?')[0];
+    const inferredSignup =
+      urlPath.includes('/signup/passkey') || urlPath.includes('/signup/passkey/create');
     const mode: PasskeyMode =
       routeMode === 'setup'
         ? 'setup'
-        : queryFlow === 'signup'
+        : inferredSignup || queryFlow === 'signup'
           ? 'signup'
           : queryFlow === 'login'
             ? 'login'
             : 'login';
     this.mode.set(mode);
-    this.backRoute.set(mode === 'setup' ? '/gallery' : mode === 'signup' ? '/register' : '/login');
+    this.backRoute.set(
+      mode === 'setup' ? '/gallery' : mode === 'signup' ? '/account/signup' : '/account/login'
+    );
 
     const emailQ = this.route.snapshot.queryParamMap.get('email');
     if (emailQ) {
@@ -205,9 +211,8 @@ export class PasskeyPage implements OnInit {
     const r = await firstValueFrom(this.authService.headlessAuth.postWebauthnLogin(body));
     await firstValueFrom(this.authService.applyHeadlessSuccess(r, { fetchProfile: true }));
     this.isLoading.set(false);
-    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/gallery';
-    const safe = returnUrl.startsWith('/') ? returnUrl : '/gallery';
-    void this.router.navigateByUrl(safe);
+    const nextUrl = readContinueUrl(this.route.snapshot.queryParamMap);
+    void this.router.navigateByUrl(nextUrl);
   }
 
   /**
@@ -254,9 +259,8 @@ export class PasskeyPage implements OnInit {
     const r = await firstValueFrom(this.authService.headlessAuth.completePasskeySignup(body));
     await firstValueFrom(this.authService.applyHeadlessSuccess(r, { fetchProfile: true }));
     this.isLoading.set(false);
-    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl') || '/gallery';
-    const safe = returnUrl.startsWith('/') ? returnUrl : '/gallery';
-    void this.router.navigateByUrl(safe);
+    const nextUrl = readContinueUrl(this.route.snapshot.queryParamMap);
+    void this.router.navigateByUrl(nextUrl);
   }
 
   private async setupPasskeyAuthenticator(): Promise<void> {

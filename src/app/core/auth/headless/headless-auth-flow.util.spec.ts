@@ -8,6 +8,17 @@ import {
 } from './headless-auth-flow.util';
 
 describe('headless-auth-flow.util', () => {
+  function stubRouter(): { router: Router; urls: string[] } {
+    const urls: string[] = [];
+    const router = {
+      navigateByUrl: (url: string) => {
+        urls.push(url);
+        return Promise.resolve(true);
+      },
+    } as unknown as Router;
+    return { router, urls };
+  }
+
   it('getPendingFlow returns first pending', () => {
     const f = getPendingFlow([
       { id: 'login' },
@@ -35,12 +46,7 @@ describe('headless-auth-flow.util', () => {
   });
 
   it('tryNavigateForAuth401 navigates for verify_email', () => {
-    const calls: { path: string }[] = [];
-    const router = {
-      navigate: (path: string[]) => {
-        calls.push({ path: path[0] ?? '' });
-      },
-    } as unknown as Router;
+    const { router, urls } = stubRouter();
     const err = new HttpErrorResponse({
       status: 401,
       error: {
@@ -51,16 +57,11 @@ describe('headless-auth-flow.util', () => {
     });
     const done = tryNavigateForAuth401(router, err);
     expect(done).toBe(true);
-    expect(calls[0].path).toBe('/verify-email');
+    expect(urls[0]).toBe('/account/verify-email');
   });
 
   it('tryNavigateForAuth401 navigates for password_reset_by_code', () => {
-    const calls: { path: string }[] = [];
-    const router = {
-      navigate: (path: string[]) => {
-        calls.push({ path: path[0] ?? '' });
-      },
-    } as unknown as Router;
+    const { router, urls } = stubRouter();
     const err = new HttpErrorResponse({
       status: 401,
       error: {
@@ -71,16 +72,11 @@ describe('headless-auth-flow.util', () => {
     });
     const done = tryNavigateForAuth401(router, err);
     expect(done).toBe(true);
-    expect(calls[0].path).toBe('/reset-password');
+    expect(urls[0]).toBe('/account/password/reset/confirm');
   });
 
   it('tryNavigateForAuth401 does not navigate when password_reset_by_code is listed but not pending', () => {
-    const calls: { path: string }[] = [];
-    const router = {
-      navigate: (path: string[]) => {
-        calls.push({ path: path[0] ?? '' });
-      },
-    } as unknown as Router;
+    const { router, urls } = stubRouter();
     const err = new HttpErrorResponse({
       status: 401,
       error: {
@@ -93,16 +89,11 @@ describe('headless-auth-flow.util', () => {
     });
     const done = tryNavigateForAuth401(router, err);
     expect(done).toBe(false);
-    expect(calls.length).toBe(0);
+    expect(urls.length).toBe(0);
   });
 
   it('tryNavigateForAuth401 navigates for provider_signup', () => {
-    const calls: { path: string }[] = [];
-    const router = {
-      navigate: (path: string[]) => {
-        calls.push({ path: path[0] ?? '' });
-      },
-    } as unknown as Router;
+    const { router, urls } = stubRouter();
     const err = new HttpErrorResponse({
       status: 401,
       error: {
@@ -113,6 +104,6 @@ describe('headless-auth-flow.util', () => {
     });
     const done = tryNavigateForAuth401(router, err);
     expect(done).toBe(true);
-    expect(calls[0].path).toBe('/provider-signup');
+    expect(urls[0]).toBe('/account/provider/signup');
   });
 });

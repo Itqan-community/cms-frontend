@@ -23,8 +23,8 @@
       @if (mode() === 'setup' && setupNeedsReauthenticate()) {
         <p class="passkey__reauth-hint">
           <a
-            [routerLink]="['/reauthenticate']"
-            [queryParams]="{ returnUrl: '/passkey/setup' }"
+            [routerLink]="['/account/reauthenticate']"
+            [queryParams]="{ next: '/account/2fa/webauthn/add' }"
             class="passkey__reauth-link"
           >
             {{ 'AUTH.PASSKEY.SETUP_REAUTH_LINK' | translate }}

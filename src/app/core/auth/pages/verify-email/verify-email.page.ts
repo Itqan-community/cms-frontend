@@ -7,6 +7,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
 import { AuthService } from '../../services/auth.service';
+import { readContinueUrl } from '../../utils/auth-route-query.util';
 
 @Component({
   selector: 'app-verify-email-page',
@@ -51,9 +52,7 @@ export class VerifyEmailPage implements OnInit {
     this.authService.verifyEmailWithKey(this.form.value.key as string).subscribe({
       next: () => {
         this.isSubmitting.set(false);
-        void this.router.navigateByUrl(
-          this.route.snapshot.queryParamMap.get('returnUrl') || '/gallery'
-        );
+        void this.router.navigateByUrl(readContinueUrl(this.route.snapshot.queryParamMap));
       },
       error: (err: unknown) => {
         this.isSubmitting.set(false);

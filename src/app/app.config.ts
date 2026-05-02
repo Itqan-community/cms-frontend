@@ -6,7 +6,6 @@ import {
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
 } from '@angular/core';
-import { catchError, firstValueFrom, of } from 'rxjs';
 import { provideRouter, Router } from '@angular/router';
 import * as Sentry from '@sentry/angular';
 import { environment } from '../environments/environment';
@@ -25,8 +24,7 @@ import { authErrorInterceptor } from './core/interceptors/auth-error.interceptor
 import { errorInterceptor } from './core/interceptors/error.interceptor';
 import { credentialsInterceptor } from './core/interceptors/credentials.interceptor';
 import { csrfResponseInterceptor } from './core/interceptors/csrf-response.interceptor';
-import { appSessionTokenInterceptor } from './core/interceptors/app-session-token.interceptor';
-import { HeadlessAuthApiService } from './core/auth/headless/headless-auth-api.service';
+import { AuthService } from './core/auth/services/auth.service';
 registerLocaleData(ar);
 
 export const appConfig: ApplicationConfig = {
@@ -56,17 +54,12 @@ export const appConfig: ApplicationConfig = {
       withInterceptors([
         credentialsInterceptor,
         csrfResponseInterceptor,
-        appSessionTokenInterceptor,
         headersInterceptor,
         authErrorInterceptor,
         errorInterceptor,
       ])
     ),
-    provideAppInitializer(() => {
-      const headless = inject(HeadlessAuthApiService);
-      // Load headless account config (app client; unsafe calls use Bearer or CSRF when no token).
-      return firstValueFrom(headless.getConfig().pipe(catchError(() => of(undefined))));
-    }),
+    provideAppInitializer(() => inject(AuthService).bootstrapOnce()),
     // ngx-translate setup
     provideTranslateService({
       loader: provideTranslateHttpLoader({

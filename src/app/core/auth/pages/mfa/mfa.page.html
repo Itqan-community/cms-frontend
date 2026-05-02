@@ -1,7 +1,7 @@
 <div class="mfa">
   <header class="mfa__header">
     <div class="mfa__header-row">
-      <a [routerLink]="['/login']" class="mfa__back">{{ 'AUTH.MFA.BACK' | translate }}</a>
+      <a [routerLink]="['/account/login']" class="mfa__back">{{ 'AUTH.MFA.BACK' | translate }}</a>
       <app-lang-switch></app-lang-switch>
     </div>
   </header>
@@ -27,6 +27,11 @@
           {{ 'AUTH.MFA.SUBMIT' | translate }}
         </button>
       </form>
+      @if (passkeyAvailable()) {
+        <button type="button" class="mfa__submit mfa__submit--secondary" [disabled]="isLoading()" (click)="onWebAuthn()">
+          {{ 'AUTH.MFA.USE_SECURITY_KEY' | translate }}
+        </button>
+      }
     </div>
   </div>
 </div>

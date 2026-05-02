@@ -16,6 +16,7 @@ import { WebAuthnRpIdMismatchError } from '../../headless/webauthn-rp-id.util';
 import { getWebAuthnRequestOptions, publicKeyCredentialToJson } from '../../headless/webauthn.util';
 import type { WebAuthnCredentialRequestData } from '../../headless/headless-api.types';
 import { AuthService } from '../../services/auth.service';
+import { readContinueUrl } from '../../utils/auth-route-query.util';
 
 /**
  * Reauthentication (safe continuation): success navigates to `returnUrl`. Cancel returns to
@@ -36,12 +37,14 @@ export class ReauthenticatePage implements OnInit {
   private readonly translate = inject(TranslateService);
 
   form: FormGroup;
+  mfaForm: FormGroup;
   errorMessage = signal<string>('');
   isLoading = signal(false);
   passkeyAvailable = signal(true);
 
   constructor() {
     this.form = this.fb.group({ password: ['', [Validators.required, Validators.minLength(1)]] });
+    this.mfaForm = this.fb.group({ code: ['', [Validators.required, Validators.minLength(4)]] });
   }
 
   ngOnInit(): void {
@@ -49,8 +52,7 @@ export class ReauthenticatePage implements OnInit {
   }
 
   get returnUrl(): string {
-    const u = this.route.snapshot.queryParamMap.get('returnUrl') || '/gallery';
-    return u.startsWith('/') ? u : '/gallery';
+    return readContinueUrl(this.route.snapshot.queryParamMap);
   }
 
   /** Safe continuation: leave reauth without replaying the original request. */
@@ -83,6 +85,32 @@ export class ReauthenticatePage implements OnInit {
         }
       }
       this.errorMessage.set(getErrorMessage(e) || this.translate.instant('AUTH.REAUTH.ERROR'));
+    }
+  }
+
+  async onSubmitMfaCode(): Promise<void> {
+    if (this.mfaForm.invalid) {
+      return;
+    }
+    this.errorMessage.set('');
+    this.isLoading.set(true);
+    try {
+      const res = await firstValueFrom(
+        this.auth.headlessAuth.mfaReauthenticate({ code: this.mfaForm.value.code as string })
+      );
+      await firstValueFrom(this.auth.applyHeadlessSuccess(res, { fetchProfile: false }));
+      this.isLoading.set(false);
+      void this.router.navigateByUrl(this.returnUrl);
+    } catch (e) {
+      this.isLoading.set(false);
+      if (e instanceof HttpErrorResponse) {
+        if (tryNavigateForAuth401(this.router, e)) {
+          return;
+        }
+      }
+      this.errorMessage.set(
+        getErrorMessage(e) || this.translate.instant('AUTH.REAUTH.MFA_ERROR')
+      );
     }
   }
 

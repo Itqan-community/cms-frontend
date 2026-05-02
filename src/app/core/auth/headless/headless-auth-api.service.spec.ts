@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import { HeadlessAppTokenService } from './headless-app-token.service';
 import { HeadlessAuthApiService } from './headless-auth-api.service';
-import { HEADLESS_CLIENT_APP, HEADLESS_CLIENT_BROWSER } from './headless-api.types';
+import { HEADLESS_CLIENT_APP } from './headless-api.types';
 
 describe('HeadlessAuthApiService', () => {
   let httpMock: HttpTestingController;
@@ -29,29 +29,33 @@ describe('HeadlessAuthApiService', () => {
     httpMock.verify();
   });
 
-  it('buildProviderRedirectUrl targets browser client provider redirect', () => {
+  it('getConfig GETs app client /config', (done) => {
     if (!api) {
       pending('API_BASE_URL');
       return;
     }
-    expect(service.buildProviderRedirectUrl()).toBe(
-      `${api}/auth/${HEADLESS_CLIENT_BROWSER}/v1/auth/provider/redirect`
-    );
+    service.getConfig().subscribe(() => done());
+    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_APP}/v1/config`);
+    expect(r.request.method).toBe('GET');
+    r.flush({ status: 200, data: { account: {} } });
   });
 
-  it('refreshAccessToken POSTs to app tokens/refresh with stored refresh_token', (done) => {
+  it('getSession GETs app client /auth/session', (done) => {
     if (!api) {
       pending('API_BASE_URL');
       return;
     }
-    localStorage.setItem('headless_refresh_token', 'rt-1');
-    service.refreshAccessToken().subscribe((res) => {
-      expect(res.data.access_token).toBe('a2');
-      done();
+    service.getSession().subscribe(() => done());
+    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_APP}/v1/auth/session`);
+    expect(r.request.method).toBe('GET');
+    r.flush({
+      status: 200,
+      data: {
+        user: { id: 1, display: 'u', email: 'a@b.co', has_usable_password: true },
+        methods: [],
+      },
+      meta: { is_authenticated: true },
     });
-    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_APP}/v1/tokens/refresh`);
-    expect(r.request.body).toEqual({ refresh_token: 'rt-1' });
-    r.flush({ status: 200, data: { access_token: 'a2' } });
   });
 
   it('postWebauthnLogin sends a single credential envelope when payload is already wrapped', (done) => {
@@ -118,5 +122,39 @@ describe('HeadlessAuthApiService', () => {
     );
     expect(r.request.body).toEqual({ credential: inner });
     r.flush({ status: 200, data: {} });
+  });
+
+  it('getWebauthnMfaOptions GETs auth/webauthn/authenticate', (done) => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    service.getWebauthnMfaOptions().subscribe((res) => {
+      expect(res.data.request_options.publicKey).toBeDefined();
+      done();
+    });
+    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_APP}/v1/auth/webauthn/authenticate`);
+    expect(r.request.method).toBe('GET');
+    r.flush({
+      status: 200,
+      data: { request_options: { publicKey: { challenge: new Uint8Array() } } },
+    });
+  });
+
+  it('listAuthenticators GETs account/authenticators', (done) => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    service.listAuthenticators().subscribe((res) => {
+      expect(res.data.length).toBe(1);
+      done();
+    });
+    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_APP}/v1/account/authenticators`);
+    expect(r.request.method).toBe('GET');
+    r.flush({
+      status: 200,
+      data: [{ type: 'totp', created_at: '2020-01-01', last_used_at: null }],
+    });
   });
 });
