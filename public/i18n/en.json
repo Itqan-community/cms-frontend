@@ -229,6 +229,7 @@
       "SUBTITLE": "Social logins linked to your account.",
       "CONNECT_SECTION": "Link a provider",
       "CONNECT_HINT": "You will sign in with the provider and return here after consent.",
+      "CONNECT_TECH_HINT": "If Connect fails or does nothing, the CMS and API usually need the same browser origin or a reverse proxy. See docs/AUTH_FLOW_MATRIX.md (Browser OAuth).",
       "CONNECT_GOOGLE": "Connect Google",
       "CONNECT_GITHUB": "Connect GitHub",
       "APP_MODE_HINT": "Adding new providers from this app requires enabling OAuth redirect in your deployment configuration.",

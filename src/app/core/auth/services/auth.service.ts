@@ -456,12 +456,26 @@ export class AuthService {
     return typeof next === 'string' && next.startsWith('/') ? next : ALLAUTH_LOGIN_REDIRECT_URL;
   }
 
+  /**
+   * While on headless social return routes, {@link OauthCallbackPage} owns post-OAuth navigation
+   * (`next`, provider-signup). Skip global `LOGGED_IN` redirects here to avoid racing `/gallery`.
+   */
+  private isOAuthProviderCallbackRoute(): boolean {
+    const path = this.router.url.split(/[?#]/)[0];
+    return (
+      path.endsWith('/account/provider/callback') || path.endsWith('/auth/oauth/callback')
+    );
+  }
+
   private async handleAuthChangeEvent(evt: AuthChangeEventType, auth: unknown): Promise<void> {
     switch (evt) {
       case AuthChangeEvent.LOGGED_OUT:
         await this.router.navigateByUrl(ALLAUTH_LOGOUT_REDIRECT_URL);
         break;
       case AuthChangeEvent.LOGGED_IN:
+        if (this.isOAuthProviderCallbackRoute()) {
+          break;
+        }
         await this.router.navigateByUrl(this.readNextQueryParam());
         break;
       case AuthChangeEvent.REAUTHENTICATED: {

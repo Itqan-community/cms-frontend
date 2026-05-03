@@ -75,7 +75,7 @@ describe('AuthService (app / headless)', () => {
     );
     headless.redirectToProvider.and.returnValue(Promise.resolve({ kind: 'json', body: {} }));
     routerMock = {
-      url: '/account/provider/callback?next=%2Faccount%2Fproviders',
+      url: '/account/login?next=%2Faccount%2Fproviders',
       navigate: jasmine.createSpy('navigate'),
       navigateByUrl: jasmine.createSpy('navigateByUrl'),
       parseUrl: jasmine
@@ -174,10 +174,18 @@ describe('AuthService (app / headless)', () => {
     expect(headless.redirectToProvider).toHaveBeenCalled();
   });
 
-  it('LOGGED_IN auth event navigates to query next URL', async () => {
+  it('LOGGED_IN auth event navigates to query next URL when not on OAuth callback', async () => {
     const fn = (service as unknown as { handleAuthChangeEvent: Function }).handleAuthChangeEvent;
     await fn.call(service, 'LOGGED_IN', {});
     expect(routerMock.navigateByUrl).toHaveBeenCalledWith('/account/providers');
   });
 
+  it('LOGGED_IN defers navigation when on provider OAuth callback route', async () => {
+    routerMock.url = '/account/provider/callback?next=%2Fgallery';
+    routerMock.parseUrl.and.returnValue({ queryParams: { next: '/gallery' } });
+    routerMock.navigateByUrl.calls.reset();
+    const fn = (service as unknown as { handleAuthChangeEvent: Function }).handleAuthChangeEvent;
+    await fn.call(service, 'LOGGED_IN', {});
+    expect(routerMock.navigateByUrl).not.toHaveBeenCalled();
+  });
 });

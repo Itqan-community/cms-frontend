@@ -43,10 +43,50 @@ Canonical SPA callback route: **`/account/provider/callback`** (`HEADLESS_FRONTE
 | Redirect | Browser | Same-origin API URLs use `fetch(redirect: 'manual')` + `Location`. Cross-origin dev setups fall back to a real HTML **form POST** (full navigation) for **`login`** only; **`connect`** requires readable redirect headers or same-origin API. |
 | Return | Callback route | `GET /auth/session` → authenticated **`navigateByUrl(next)`**; **`401`** with pending **`provider_signup`** → provider signup page; **`?error=`** → login (preserves **`next`** when present). |
 
-**Manual QA checklist**
+### Provider consoles (Google Cloud / GitHub OAuth app)
 
-1. Login with Google / GitHub (`oauthBrowserRedirectEnabled: true`, local/staging).
-2. Register-page social buttons (`process=login`) → provider signup path when BE requires it.
-3. Connected accounts: Connect Google/GitHub (`process=connect`), then disconnect.
-4. Callback `?error=` handling + redirect back with **`next`**.
-5. Production remains gated (`oauthBrowserRedirectEnabled: false`) until validated.
+Register **OAuth redirect / authorization callback URIs on the API host** (django-allauth default paths under `accounts/`), **not** the SPA URL:
+
+| Environment | API host | Google & GitHub authorized redirect URI |
+|-------------|----------|----------------------------------------|
+| Staging | `staging.api.cms.itqan.dev` | `https://staging.api.cms.itqan.dev/accounts/google/login/callback/` |
+| | | `https://staging.api.cms.itqan.dev/accounts/github/login/callback/` |
+| Production | `api.cms.itqan.dev` | `https://api.cms.itqan.dev/accounts/google/login/callback/` |
+| | | `https://api.cms.itqan.dev/accounts/github/login/callback/` |
+
+The SPA path **`https://<cms-host>/account/provider/callback`** is sent as headless **`callback_url`** so Django can redirect the user **back to the CMS after** the provider round-trip completes on the API. It is **not** substituted for the provider console redirect URI.
+
+### Backend env: `FRONTEND_BASE_URL`
+
+Must match the **public CMS origin** (scheme + host, no trailing slash) so `HEADLESS_FRONTEND_URLS` build correct links:
+
+| Environment | Expected example |
+|-------------|------------------|
+| Staging CMS | `https://staging.cms.itqan.dev` |
+| Production CMS | `https://cms.itqan.dev` |
+
+Mismatch causes failures after IdP consent even when social login works from Django admin (admin uses cookie flow on the API domain).
+
+### Credentials source (staging vs production)
+
+Staging **`SOCIALACCOUNT_PROVIDERS`** in backend base settings uses env **`GOOGLE_*` / `GITHUB_*`**. Production may rely on DB **`SocialApp`** rows instead. Ensure the active environment uses **one** source of truth so console redirect URIs match the deployed API host and client IDs.
+
+### Manual QA checklist (Google / GitHub matrix)
+
+**Staging / local with `oauthBrowserRedirectEnabled: true`**
+
+1. **Google login** — `/account/login` → Google → return to `/account/provider/callback` → session OK → lands on `next` or `/gallery`.
+2. **GitHub login** — same as Google.
+3. **Google signup** — `/account/signup` social (`process=login`) → provider signup if BE requires → complete → app entry.
+4. **GitHub signup** — same.
+5. **Connect** — `/account/providers` → Connect Google/GitHub (`process=connect`) → return → list updates (requires same-origin API or proxy for cross-origin connect).
+6. **Disconnect** — remove linked provider; list updates.
+7. **Callback error** — `/account/provider/callback?error=...` → message → login with **`next`** preserved when provided.
+8. **Production** — `oauthBrowserRedirectEnabled: false` until validated; repeat 1–7 after enabling.
+
+**Verification ops (before blaming FE)**
+
+- [ ] Google Cloud OAuth client includes staging **and** prod API callback URLs above (exact paths, trailing slash).
+- [ ] GitHub OAuth app authorization callback URL matches the API host in use.
+- [ ] `FRONTEND_BASE_URL` secret matches the CMS URL users open.
+- [ ] No conflicting DB `SocialApp` vs env `APP` credentials for the same provider in that environment.
