@@ -237,7 +237,9 @@
       "DISCONNECT_SUCCESS": "Provider disconnected.",
       "EMPTY": "No connected providers.",
       "LOAD_ERROR": "Could not load connected accounts.",
-      "ACTION_ERROR": "Could not disconnect the provider."
+      "ACTION_ERROR": "Could not disconnect the provider.",
+      "CONNECT_ERROR": "Could not start {{provider}} connection.",
+      "CONNECT_CROSS_ORIGIN_ERROR": "Connect requires same-origin API and app in this environment. Use the staging CMS domain or configure a reverse proxy."
     },
     "PROFILE": {
       "TITLE": "Your account",

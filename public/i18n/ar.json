@@ -237,7 +237,9 @@
       "DISCONNECT_SUCCESS": "تم فصل المزوّد.",
       "EMPTY": "لا توجد حسابات مرتبطة.",
       "LOAD_ERROR": "تعذر تحميل الحسابات المرتبطة.",
-      "ACTION_ERROR": "تعذر فصل المزوّد."
+      "ACTION_ERROR": "تعذر فصل المزوّد.",
+      "CONNECT_ERROR": "تعذر بدء ربط {{provider}}.",
+      "CONNECT_CROSS_ORIGIN_ERROR": "ربط المزوّد يتطلب أن يكون الـ API والتطبيق على نفس الأصل في هذه البيئة. استخدم نطاق CMS الخاص بالـ staging أو فعّل reverse proxy."
     },
     "PROFILE": {
       "TITLE": "حسابك",

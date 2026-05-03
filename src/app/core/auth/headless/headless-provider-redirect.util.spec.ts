@@ -58,4 +58,27 @@ describe('headless-provider-redirect.util', () => {
       expect((result.body as { status: number }).status).toBe(401);
     }
   });
+
+  it('returns explicit error for connect flow on opaque cross-origin redirect', async () => {
+    const fetchFn = jasmine.createSpy('fetch').and.returnValue(
+      Promise.resolve({
+        type: 'opaqueredirect',
+        status: 0,
+        headers: new Headers(),
+      } as unknown as Response)
+    );
+    const result = await startHeadlessProviderRedirect({
+      apiBaseUrl: 'https://api.example/cms-api',
+      provider: 'google',
+      process: 'connect',
+      callbackUrl: 'https://app.example/account/provider/callback',
+      sessionToken: 'sess-1',
+      fetchFn,
+      windowRef: {} as Window & typeof globalThis,
+    });
+    expect(result.kind).toBe('error');
+    if (result.kind === 'error') {
+      expect(result.message).toContain('cross-origin API');
+    }
+  });
 });

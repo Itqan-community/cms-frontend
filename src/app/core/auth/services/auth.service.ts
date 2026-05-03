@@ -353,8 +353,8 @@ export class AuthService {
   async startGoogleOAuth(
     callbackUrl: string,
     process: 'login' | 'connect' = 'login'
-  ): Promise<void> {
-    await this.startProviderOAuth(ALLAUTH_SOCIAL_PROVIDER_GOOGLE, callbackUrl, process);
+  ): Promise<ProviderRedirectResult> {
+    return await this.startProviderOAuth(ALLAUTH_SOCIAL_PROVIDER_GOOGLE, callbackUrl, process);
   }
 
   /**
@@ -364,25 +364,35 @@ export class AuthService {
   async startGitHubOAuth(
     callbackUrl: string,
     process: 'login' | 'connect' = 'login'
-  ): Promise<void> {
-    await this.startProviderOAuth(ALLAUTH_SOCIAL_PROVIDER_GITHUB, callbackUrl, process);
+  ): Promise<ProviderRedirectResult> {
+    return await this.startProviderOAuth(ALLAUTH_SOCIAL_PROVIDER_GITHUB, callbackUrl, process);
   }
 
   private async startProviderOAuth(
     providerId: string,
     callbackUrl: string,
     process: 'login' | 'connect'
-  ): Promise<void> {
+  ): Promise<ProviderRedirectResult> {
     if (!this.oauthBrowserRedirectEnabled) {
-      console.warn(
-        `[auth] ${providerId} OAuth redirect is disabled (oauthBrowserRedirectEnabled=false).`
-      );
-      return;
+      const result: ProviderRedirectResult = {
+        kind: 'error',
+        message: `${providerId} OAuth redirect is disabled (oauthBrowserRedirectEnabled=false).`,
+      };
+      this.applyProviderRedirectResult(result);
+      return result;
+    }
+    if (process === 'login') {
+      // Avoid stale app session binding before an anonymous provider-login redirect.
+      this.tokenStore.clearSessionToken();
     }
     const sessionToken = process === 'connect' ? this.tokenStore.getSessionToken() : undefined;
     if (process === 'connect' && !sessionToken) {
-      console.error('[auth] Connecting a provider requires an app session token; sign in again.');
-      return;
+      const result: ProviderRedirectResult = {
+        kind: 'error',
+        message: 'Connecting a provider requires an app session token; sign in again.',
+      };
+      this.applyProviderRedirectResult(result);
+      return result;
     }
     const result = await this.headless.redirectToProvider({
       provider: providerId,
@@ -391,6 +401,7 @@ export class AuthService {
       sessionToken,
     });
     this.applyProviderRedirectResult(result);
+    return result;
   }
 
   /** Applies redirect / JSON envelope from {@link HeadlessAuthApiService.redirectToProvider}. */
@@ -451,7 +462,7 @@ export class AuthService {
         await this.router.navigateByUrl(ALLAUTH_LOGOUT_REDIRECT_URL);
         break;
       case AuthChangeEvent.LOGGED_IN:
-        await this.router.navigateByUrl(ALLAUTH_LOGIN_REDIRECT_URL);
+        await this.router.navigateByUrl(this.readNextQueryParam());
         break;
       case AuthChangeEvent.REAUTHENTICATED: {
         const next = this.readNextQueryParam();

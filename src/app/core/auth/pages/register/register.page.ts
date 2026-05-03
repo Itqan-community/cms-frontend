@@ -39,11 +39,11 @@ export class RegisterPage {
   }
 
   onSignUpWithGoogle(): void {
-    this.authService.startGoogleOAuth(this.oauthCallbackUrl, 'login');
+    void this.authService.startGoogleOAuth(this.oauthCallbackUrl, 'login');
   }
 
   onSignUpWithGitHub(): void {
-    this.authService.startGitHubOAuth(this.oauthCallbackUrl, 'login');
+    void this.authService.startGitHubOAuth(this.oauthCallbackUrl, 'login');
   }
 
   registerForm: FormGroup;

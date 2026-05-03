@@ -26,6 +26,12 @@ describe('AuthService (app / headless)', () => {
   let service: AuthService;
   let headless: jasmine.SpyObj<HeadlessAuthApiService>;
   let tokenStore: HeadlessAppTokenService;
+  let routerMock: {
+    url: string;
+    navigate: jasmine.Spy;
+    navigateByUrl: jasmine.Spy;
+    parseUrl: jasmine.Spy;
+  };
 
   beforeEach(() => {
     TestBed.resetTestingModule();
@@ -68,12 +74,20 @@ describe('AuthService (app / headless)', () => {
       } as AuthenticatedResponse)
     );
     headless.redirectToProvider.and.returnValue(Promise.resolve({ kind: 'json', body: {} }));
+    routerMock = {
+      url: '/account/provider/callback?next=%2Faccount%2Fproviders',
+      navigate: jasmine.createSpy('navigate'),
+      navigateByUrl: jasmine.createSpy('navigateByUrl'),
+      parseUrl: jasmine
+        .createSpy('parseUrl')
+        .and.returnValue({ queryParams: { next: '/account/providers' } }),
+    };
 
     TestBed.configureTestingModule({
       providers: [
         AuthService,
         { provide: HttpClient, useValue: { get: () => of({ id: 1 }), put: () => of({}) } },
-        { provide: Router, useValue: { navigate: jasmine.createSpy('navigate') } },
+        { provide: Router, useValue: routerMock },
         { provide: HeadlessAuthApiService, useValue: headless },
       ],
     });
@@ -147,6 +161,23 @@ describe('AuthService (app / headless)', () => {
   it('startGoogleOAuth does not call redirectToProvider when oauthBrowserRedirectEnabled is false', async () => {
     await service.startGoogleOAuth('http://localhost/cb', 'login');
     expect(headless.redirectToProvider).not.toHaveBeenCalled();
+  });
+
+  it('startGoogleOAuth with login clears stale session token before redirect', async () => {
+    (service as { oauthBrowserRedirectEnabled: boolean }).oauthBrowserRedirectEnabled = true;
+    tokenStore.setSessionToken('stale-token');
+    headless.redirectToProvider.and.returnValue(
+      Promise.resolve({ kind: 'error', message: 'backend refused' })
+    );
+    await service.startGoogleOAuth('http://localhost/cb', 'login');
+    expect(tokenStore.getSessionToken()).toBeNull();
+    expect(headless.redirectToProvider).toHaveBeenCalled();
+  });
+
+  it('LOGGED_IN auth event navigates to query next URL', async () => {
+    const fn = (service as unknown as { handleAuthChangeEvent: Function }).handleAuthChangeEvent;
+    await fn.call(service, 'LOGGED_IN', {});
+    expect(routerMock.navigateByUrl).toHaveBeenCalledWith('/account/providers');
   });
 
 });

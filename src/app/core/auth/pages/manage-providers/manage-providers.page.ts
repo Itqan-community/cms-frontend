@@ -41,11 +41,31 @@ export class ManageProvidersPage implements OnInit {
   }
 
   connectGoogle(): void {
-    void this.auth.startGoogleOAuth(this.oauthConnectCallbackUrl, 'connect');
+    void this.connectProvider('google');
   }
 
   connectGitHub(): void {
-    void this.auth.startGitHubOAuth(this.oauthConnectCallbackUrl, 'connect');
+    void this.connectProvider('github');
+  }
+
+  private async connectProvider(provider: 'google' | 'github'): Promise<void> {
+    this.pageError.set('');
+    const result =
+      provider === 'google'
+        ? await this.auth.startGoogleOAuth(this.oauthConnectCallbackUrl, 'connect')
+        : await this.auth.startGitHubOAuth(this.oauthConnectCallbackUrl, 'connect');
+    if (result.kind !== 'error') {
+      return;
+    }
+    if (result.message.includes('cross-origin API')) {
+      this.pageError.set(this.translate.instant('AUTH.PROVIDERS.CONNECT_CROSS_ORIGIN_ERROR'));
+      return;
+    }
+    this.pageError.set(
+      this.translate.instant('AUTH.PROVIDERS.CONNECT_ERROR', {
+        provider: provider === 'google' ? 'Google' : 'GitHub',
+      })
+    );
   }
 
   async reload(): Promise<void> {

@@ -47,9 +47,8 @@ export class OauthCallbackPage implements OnInit {
   ngOnInit(): void {
     const qpm = this.route.snapshot.queryParamMap;
     const err = qpm.get('error');
-    const nextUrl = readContinueUrl(qpm);
-    const loginNav =
-      nextUrl !== '/gallery' ? { queryParams: { next: nextUrl } } : undefined;
+    const resumeUrl = readContinueUrl(qpm);
+    const loginNav = resumeUrl !== '/gallery' ? { queryParams: { next: resumeUrl } } : undefined;
 
     if (err) {
       this.message.set('AUTH.OAUTH.ERROR');
@@ -58,7 +57,6 @@ export class OauthCallbackPage implements OnInit {
     }
     this.auth.bootstrapSessionFromServer({ fetchProfile: true }).subscribe({
       next: () => {
-        const resumeUrl = readContinueUrl(this.route.snapshot.queryParamMap);
         void this.router.navigateByUrl(resumeUrl);
       },
       error: (e: unknown) => {

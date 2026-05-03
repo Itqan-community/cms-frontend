@@ -58,11 +58,11 @@ export class LoginPage {
   }
 
   onLoginWithGoogle(): void {
-    this.authService.startGoogleOAuth(this.oauthCallbackUrl, 'login');
+    void this.authService.startGoogleOAuth(this.oauthCallbackUrl, 'login');
   }
 
   onLoginWithGitHub(): void {
-    this.authService.startGitHubOAuth(this.oauthCallbackUrl, 'login');
+    void this.authService.startGitHubOAuth(this.oauthCallbackUrl, 'login');
   }
 
   onSubmit(): void {
