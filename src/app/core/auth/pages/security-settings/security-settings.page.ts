@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -47,6 +47,20 @@ export class SecuritySettingsPage implements OnInit {
 
   passkeysSupported = signal(false);
 
+  readonly totpQrDataUrl = signal<string | null>(null);
+
+  readonly renameDrafts = signal<Record<string, string>>({});
+
+  readonly otherAuthenticators = computed(() =>
+    this.authenticators().filter((a) => a.type !== 'webauthn')
+  );
+
+  readonly webauthnAuthenticators = computed(() =>
+    this.authenticators().filter(
+      (a): a is Extract<AuthenticatorListItem, { type: 'webauthn' }> => a.type === 'webauthn'
+    )
+  );
+
   ngOnInit(): void {
     this.passkeysSupported.set(isPasskeyClientEnvironmentSupported());
     void this.reloadAll();
@@ -65,9 +79,11 @@ export class SecuritySettingsPage implements OnInit {
       }
       const list = await firstValueFrom(this.auth.headlessAuth.listAuthenticators());
       this.authenticators.set(list.data ?? []);
+      this.syncRenameDraftsFromList(list.data ?? []);
 
       const totp = await firstValueFrom(this.auth.headlessAuth.getTotpStatus());
       this.totpState.set(totp);
+      await this.refreshTotpQr();
 
       if (totp.kind === 'active' || list.data.some((a) => a.type === 'recovery_codes')) {
         await this.loadRecoveryCodesSilently();
@@ -82,6 +98,86 @@ export class SecuritySettingsPage implements OnInit {
         this.pageError.set(getErrorMessage(e) || this.translate.instant('AUTH.SECURITY.LOAD_ERROR'));
       } else {
         this.pageError.set(this.translate.instant('AUTH.SECURITY.LOAD_ERROR'));
+      }
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  private syncRenameDraftsFromList(items: AuthenticatorListItem[]): void {
+    const next: Record<string, string> = {};
+    for (const a of items) {
+      if (a.type === 'webauthn') {
+        next[a.id] = a.name;
+      }
+    }
+    this.renameDrafts.set(next);
+  }
+
+  private async refreshTotpQr(): Promise<void> {
+    const ts = this.totpState();
+    if (!ts || ts.kind !== 'pending_setup') {
+      this.totpQrDataUrl.set(null);
+      return;
+    }
+    try {
+      const QRCode = (await import('qrcode')).default;
+      const dataUrl = await QRCode.toDataURL(ts.meta.totp_url, {
+        width: 220,
+        margin: 1,
+        errorCorrectionLevel: 'M',
+      });
+      this.totpQrDataUrl.set(dataUrl);
+    } catch {
+      this.totpQrDataUrl.set(null);
+    }
+  }
+
+  patchRenameDraft(id: string, value: string): void {
+    this.renameDrafts.update((m) => ({ ...m, [id]: value }));
+  }
+
+  async savePasskeyName(id: string): Promise<void> {
+    const name = (this.renameDrafts()[id] ?? '').trim();
+    if (!name) {
+      return;
+    }
+    this.pageError.set('');
+    this.isLoading.set(true);
+    try {
+      await firstValueFrom(this.auth.headlessAuth.updateWebauthnCredential(id, { name }));
+      await this.reloadAll();
+    } catch (e) {
+      if (e instanceof HttpErrorResponse) {
+        if (tryNavigateForAuth401(this.router, e)) {
+          return;
+        }
+        this.pageError.set(
+          getErrorMessage(e) || this.translate.instant('AUTH.SECURITY.PASSKEY_RENAME_ERROR')
+        );
+      }
+    } finally {
+      this.isLoading.set(false);
+    }
+  }
+
+  async deletePasskey(id: string): Promise<void> {
+    if (!confirm(this.translate.instant('AUTH.SECURITY.PASSKEY_DELETE_CONFIRM'))) {
+      return;
+    }
+    this.pageError.set('');
+    this.isLoading.set(true);
+    try {
+      await firstValueFrom(this.auth.headlessAuth.deleteWebauthnCredential([id]));
+      await this.reloadAll();
+    } catch (e) {
+      if (e instanceof HttpErrorResponse) {
+        if (tryNavigateForAuth401(this.router, e)) {
+          return;
+        }
+        this.pageError.set(
+          getErrorMessage(e) || this.translate.instant('AUTH.SECURITY.PASSKEY_DELETE_ERROR')
+        );
       }
     } finally {
       this.isLoading.set(false);

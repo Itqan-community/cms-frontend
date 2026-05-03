@@ -1,0 +1,103 @@
+<div class="account-manage profile-hub">
+  <header class="account-manage__header">
+    <div class="account-manage__header-row">
+      <a [routerLink]="['/gallery']" class="account-manage__back">{{ 'AUTH.PROFILE.BACK_LIBRARY' | translate }}</a>
+      <app-lang-switch></app-lang-switch>
+    </div>
+  </header>
+  <div class="account-manage__container">
+    <div class="account-manage__card">
+      <h1 class="account-manage__title">{{ 'AUTH.PROFILE.TITLE' | translate }}</h1>
+      <p class="account-manage__subtitle">{{ 'AUTH.PROFILE.SUBTITLE' | translate }}</p>
+
+      @if (pageError()) {
+        <div class="account-manage__alert">{{ pageError() }}</div>
+      }
+      @if (successMsg()) {
+        <div class="account-manage__ok">{{ successMsg() }}</div>
+      }
+
+      <section class="account-manage__section">
+        <h2 class="account-manage__h2">{{ 'AUTH.PROFILE.IDENTITY_TITLE' | translate }}</h2>
+        <div class="profile-hub__identity">
+          <div class="profile-hub__identity-row">
+            <span class="profile-hub__identity-label">{{ 'AUTH.PROFILE.NAME' | translate }}</span>
+            {{ displayName() }}
+          </div>
+          <div class="profile-hub__identity-row">
+            <span class="profile-hub__identity-label">{{ 'AUTH.PROFILE.EMAIL' | translate }}</span>
+            {{ displayEmail() }}
+          </div>
+          @if (displayPhone()) {
+            <div class="profile-hub__identity-row">
+              <span class="profile-hub__identity-label">{{ 'AUTH.PROFILE.PHONE' | translate }}</span>
+              {{ displayPhone() }}
+            </div>
+          }
+        </div>
+      </section>
+
+      <section class="account-manage__section">
+        <h2 class="account-manage__h2">{{ 'AUTH.PROFILE.ACCOUNT_TITLE' | translate }}</h2>
+        <p class="account-manage__hint">{{ 'AUTH.PROFILE.ACCOUNT_HINT' | translate }}</p>
+        <nav class="profile-hub__grid" aria-label="Account management">
+          <a class="profile-hub__link-card" [routerLink]="['/account/email']">
+            <span>{{ 'AUTH.PROFILE.LINK_EMAILS' | translate }}</span>
+            <span class="profile-hub__chevron" aria-hidden="true">›</span>
+          </a>
+          <a class="profile-hub__link-card" [routerLink]="['/account/password/change']">
+            <span>{{ 'AUTH.PROFILE.LINK_PASSWORD' | translate }}</span>
+            <span class="profile-hub__chevron" aria-hidden="true">›</span>
+          </a>
+          <a class="profile-hub__link-card" [routerLink]="['/account/2fa']">
+            <span>{{ 'AUTH.PROFILE.LINK_SECURITY' | translate }}</span>
+            <span class="profile-hub__chevron" aria-hidden="true">›</span>
+          </a>
+          <a class="profile-hub__link-card" [routerLink]="['/account/sessions']">
+            <span>{{ 'AUTH.PROFILE.LINK_SESSIONS' | translate }}</span>
+            <span class="profile-hub__chevron" aria-hidden="true">›</span>
+          </a>
+          <a class="profile-hub__link-card" [routerLink]="['/account/providers']">
+            <span>{{ 'AUTH.PROFILE.LINK_PROVIDERS' | translate }}</span>
+            <span class="profile-hub__chevron" aria-hidden="true">›</span>
+          </a>
+        </nav>
+      </section>
+
+      <section class="account-manage__section">
+        <h2 class="account-manage__h2">{{ 'AUTH.PROFILE.CMS_TITLE' | translate }}</h2>
+        <p class="account-manage__hint">{{ 'AUTH.PROFILE.CMS_HINT' | translate }}</p>
+
+        <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()" class="account-manage__form">
+          <label class="account-manage__label" for="bio">{{ 'PROFILE.PROJECT_QUESTION' | translate }}</label>
+          <textarea
+            id="bio"
+            class="profile-hub__textarea"
+            formControlName="bio"
+            rows="4"
+            [placeholder]="'PROFILE.BUSINESS_MODEL_PLACEHOLDER' | translate"
+          ></textarea>
+          @if (profileForm.get('bio')?.invalid && profileForm.get('bio')?.touched) {
+            <p class="account-manage__hint" style="color: #b91c1c">{{ getBioError() }}</p>
+          }
+
+          <label class="account-manage__label" for="project_url">{{ 'PROFILE.PROJECT_LINK_LABEL' | translate }}</label>
+          <input id="project_url" type="url" class="account-manage__input" formControlName="project_url" />
+
+          <label class="account-manage__label" for="project_summary">{{ 'PROFILE.ORGANIZATION' | translate }}</label>
+          <input id="project_summary" type="text" class="account-manage__input" formControlName="project_summary" />
+
+          <div class="account-manage__row">
+            <button type="submit" class="account-manage__btn" [disabled]="profileForm.invalid || isSaving()">
+              @if (isSaving()) {
+                {{ 'COMMON.LOADING' | translate }}
+              } @else {
+                {{ 'COMMON.SAVE' | translate }}
+              }
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  </div>
+</div>

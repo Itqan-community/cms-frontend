@@ -124,26 +124,30 @@
         </div>
       }
 
-      <div class="login__social">
-        <p class="login__social-title">{{ 'AUTH.LOGIN.OR_CONTINUE' | translate }}</p>
-        <div class="login__social-btns">
-          <button type="button" class="login__social-btn" (click)="onLoginWithGoogle()">
-            {{ 'AUTH.LOGIN.LOGIN_WITH_GOOGLE' | translate }}
-          </button>
-          <button type="button" class="login__social-btn" (click)="onLoginWithGitHub()">
-            {{ 'AUTH.LOGIN.LOGIN_WITH_GITHUB' | translate }}
-          </button>
+      @if (authService.oauthBrowserRedirectEnabled || passkeyAvailable()) {
+        <div class="login__social">
+          @if (authService.oauthBrowserRedirectEnabled) {
+            <p class="login__social-title">{{ 'AUTH.LOGIN.OR_CONTINUE' | translate }}</p>
+            <div class="login__social-btns">
+              <button type="button" class="login__social-btn" (click)="onLoginWithGoogle()">
+                {{ 'AUTH.LOGIN.LOGIN_WITH_GOOGLE' | translate }}
+              </button>
+              <button type="button" class="login__social-btn" (click)="onLoginWithGitHub()">
+                {{ 'AUTH.LOGIN.LOGIN_WITH_GITHUB' | translate }}
+              </button>
+            </div>
+          }
+          @if (passkeyAvailable()) {
+            <a
+              [routerLink]="['/passkey']"
+              [queryParams]="{ flow: 'login' }"
+              class="login__inline-link login__alt-actions"
+            >
+              {{ 'AUTH.LOGIN.SIGN_IN_WITH_PASSKEY' | translate }}
+            </a>
+          }
         </div>
-        @if (passkeyAvailable()) {
-          <a
-            [routerLink]="['/passkey']"
-            [queryParams]="{ flow: 'login' }"
-            class="login__inline-link login__alt-actions"
-          >
-            {{ 'AUTH.LOGIN.SIGN_IN_WITH_PASSKEY' | translate }}
-          </a>
-        }
-      </div>
+      }
 
       <div class="login__footer">
         <p class="login__footer-text">

@@ -10,7 +10,7 @@ import { HeadlessAppTokenService } from '../auth/headless/headless-app-token.ser
 
 /**
  * App headless: attach `X-Session-Token` from `meta.session_token` store for `/auth/app/v1/*` only.
- * Omits the header on anonymous WebAuthn steps — see `shouldOmitHeadlessSessionTokenForRequest`.
+ * Omits the header only for anonymous passkey-signup initiate POST — see `shouldOmitHeadlessSessionTokenForRequest`.
  */
 export function appSessionTokenInterceptor(
   req: HttpRequest<unknown>,

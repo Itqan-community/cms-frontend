@@ -196,6 +196,10 @@ export class PasskeyPage implements OnInit {
   }
 
   private async loginWithPasskey(): Promise<void> {
+    /** Same as passkey signup: drop stale app session so GET options establish a fresh stage token; POST must send it. */
+    if (!this.authService.isLoggedIn()) {
+      this.tokenStore.clearSessionToken();
+    }
     const res = await firstValueFrom(this.authService.headlessAuth.getWebauthnLoginOptions());
     const data = res.data as WebAuthnCredentialRequestData;
     const publicKey = await getWebAuthnRequestOptions(data);

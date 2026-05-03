@@ -57,6 +57,9 @@ export class AuthService {
   private readonly tokenStore = inject(HeadlessAppTokenService);
   private readonly authBus = inject(AllauthAuthChangeBus);
 
+  /** When false (default app mode), hide/disabled browser OAuth buttons until redirect+callback are wired. */
+  readonly oauthBrowserRedirectEnabled = environment.oauthBrowserRedirectEnabled;
+
   private readonly API_BASE_URL = environment.API_BASE_URL;
   private readonly USER_KEY = 'user';
 
@@ -314,6 +317,11 @@ export class AuthService {
 
   getProfile(): Observable<User> {
     return this.http.get<User>(`${this.API_BASE_URL}/auth/profile/`);
+  }
+
+  /** Full CMS profile payload for account hub (includes bio, URLs, etc.). */
+  getProfileDetails(): Observable<UpdateProfileResponse> {
+    return this.http.get<UpdateProfileResponse>(`${this.API_BASE_URL}/auth/profile/`);
   }
 
   updateProfile(profileData: UpdateProfileRequest): Observable<UpdateProfileResponse> {

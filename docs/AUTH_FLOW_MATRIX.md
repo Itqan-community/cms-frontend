@@ -19,7 +19,7 @@ Legend: **ST** = `X-Session-Token` from last `meta.session_token`. **401*** = co
 | Reauth (password) | Sensitive action | `POST /auth/reauthenticate` `{password}` | ST + Bearer per deploy | `200` | `401` reauth flows | Refresh meta |
 | Reauth MFA | | `POST /auth/2fa/reauthenticate` `{code}` | ST | `200` | `400` | — |
 | Reauth WebAuthn | | `GET` + `POST /auth/webauthn/reauthenticate` | ST | `200` | `400` | — |
-| Passkey login | `MFA_PASSKEY_LOGIN_ENABLED`, `webauthn` in supported types | `GET /auth/webauthn/login`; `POST` credential | Omit ST on anon GET/POST per FE rules | `200` | `401*` if more steps | Per spec |
+| Passkey login | `MFA_PASSKEY_LOGIN_ENABLED`, `webauthn` in supported types | `GET /auth/webauthn/login`; `POST` credential | Clear stale ST before first GET when logged out; attach ST on GET/POST once returned from GET `meta.session_token` | `200` | `401*` if more steps | Per spec |
 | Passkey signup | `MFA_PASSKEY_SIGNUP_ENABLED` + **mandatory** email verification + **verification by code** | `POST /auth/webauthn/signup` `{email}`; `GET`; `navigator.credentials.get`; `PUT` credential | ST after initiate | `200` | `401` verify email, etc. | Per spec |
 | Session | | `GET /auth/session`; `DELETE /auth/session` | ST / cookies | `200`/`401`/`410` | `410` gone | — |
 | JWT refresh | JWT strategy | `POST /auth/app/v1/tokens/refresh` `{refresh_token}` | — | `200` | `400` | New access (+ refresh if rotated) |

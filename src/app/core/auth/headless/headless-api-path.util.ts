@@ -8,7 +8,7 @@ export function isHeadlessAccountWebAuthnAuthenticatorsUrl(url: string): boolean
   return url.includes(HEADLESS_ACCOUNT_WEBAUTHN_AUTHENTICATORS_PATH);
 }
 
-/** Passkey login from logged-out UX: must not send a stale `X-Session-Token` or the server may expect a different step (often `incorrect_code`). */
+/** Passkey login — WebAuthn assertion completion must send `X-Session-Token` from the prior GET options step (same headless stage). */
 export const HEADLESS_WEBAUTHN_LOGIN_PATH_FRAGMENT = '/auth/webauthn/login';
 
 export function isHeadlessWebauthnLoginUrl(url: string): boolean {
@@ -24,14 +24,16 @@ export function isHeadlessWebauthnSignupInitiatePost(url: string, method: string
 }
 
 /**
- * Omit `X-Session-Token` on anonymous WebAuthn steps only:
- * - `GET`/`POST` …/auth/webauthn/login (identifier-first login)
- * - `POST` …/auth/webauthn/signup (email initiate)
+ * Omit `X-Session-Token` only where a stale token breaks the flow:
+ * - `POST` …/auth/webauthn/signup with `{ email }` only (anonymous initiate)
  *
- * All other app headless URLs (signup GET/PUT, setup, reauth, session, …) still attach the token when stored.
+ * Passkey login (`…/auth/webauthn/login`): attach token when present — GET returns `meta.session_token`
+ * and POST assertion must include it. Clear stale tokens at UX entry (`PasskeyPage.loginWithPasskey`) before the first GET.
+ *
+ * All other app headless URLs attach the token when stored.
  */
 export function shouldOmitHeadlessSessionTokenForRequest(url: string, method: string): boolean {
-  return isHeadlessWebauthnLoginUrl(url) || isHeadlessWebauthnSignupInitiatePost(url, method);
+  return isHeadlessWebauthnSignupInitiatePost(url, method);
 }
 
 export function isHeadlessAppAuthUrl(url: string): boolean {

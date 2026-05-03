@@ -1,0 +1,59 @@
+<div class="account-manage">
+  <header class="account-manage__header">
+    <div class="account-manage__header-row">
+      <a [routerLink]="['/account/profile']" class="account-manage__back">{{ 'AUTH.ACCOUNT.BACK_PROFILE' | translate }}</a>
+      <app-lang-switch></app-lang-switch>
+    </div>
+  </header>
+  <div class="account-manage__container">
+    <div class="account-manage__card">
+      <h1 class="account-manage__title">{{ 'AUTH.PROVIDERS.TITLE' | translate }}</h1>
+      <p class="account-manage__subtitle">{{ 'AUTH.PROVIDERS.SUBTITLE' | translate }}</p>
+
+      @if (!auth.oauthBrowserRedirectEnabled) {
+        <p class="account-manage__hint">{{ 'AUTH.PROVIDERS.APP_MODE_HINT' | translate }}</p>
+      }
+
+      @if (pageError()) {
+        <div class="account-manage__alert">{{ pageError() }}</div>
+      }
+      @if (successMsg()) {
+        <div class="account-manage__ok">{{ successMsg() }}</div>
+      }
+
+      @if (isLoading()) {
+        <p class="account-manage__hint">{{ 'COMMON.LOADING' | translate }}</p>
+      }
+
+      <section class="account-manage__section">
+        <button type="button" class="account-manage__btn account-manage__btn--secondary" [disabled]="isLoading()" (click)="reload()">
+          {{ 'COMMON.REFRESH' | translate }}
+        </button>
+
+        <ul class="account-manage__list">
+          @for (row of accounts(); track row.accountUid + row.providerId) {
+            <li class="account-manage__li">
+              <div>
+                <strong>{{ row.label }}</strong>
+              </div>
+              <div class="account-manage__li-actions">
+                <button
+                  type="button"
+                  class="account-manage__btn account-manage__btn--danger"
+                  [disabled]="isLoading()"
+                  (click)="disconnect(row.providerId, row.accountUid)"
+                >
+                  {{ 'AUTH.PROVIDERS.DISCONNECT' | translate }}
+                </button>
+              </div>
+            </li>
+          } @empty {
+            @if (!isLoading()) {
+              <li class="account-manage__hint">{{ 'AUTH.PROVIDERS.EMPTY' | translate }}</li>
+            }
+          }
+        </ul>
+      </section>
+    </div>
+  </div>
+</div>

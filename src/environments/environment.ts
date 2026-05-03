@@ -1,5 +1,7 @@
 export const environment = {
   production: false,
+  /** App mode: browser OAuth redirect is only enabled when backend + SPA callback flow are wired. */
+  oauthBrowserRedirectEnabled: false,
   API_BASE_URL: 'https://staging.api.cms.itqan.dev/cms-api',
   API_DOCS_URL: 'https://staging.api.cms.itqan.dev/docs',
   ADMIN_API_BASE_URL: 'https://staging.api.cms.itqan.dev/portal',

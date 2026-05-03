@@ -17,7 +17,7 @@ describe('headless-api-path.util', () => {
     expect(isHeadlessWebauthnLoginUrl(`${api}/auth/profile/`)).toBe(false);
   });
 
-  it('shouldOmitHeadlessSessionTokenForRequest for login GET/POST and signup POST only', () => {
+  it('shouldOmitHeadlessSessionTokenForRequest only for passkey signup initiate POST', () => {
     if (!api) {
       pending('API_BASE_URL');
       return;
@@ -26,8 +26,8 @@ describe('headless-api-path.util', () => {
     const signup = `${api}/auth/app/v1/auth/webauthn/signup`;
     const session = `${api}/auth/app/v1/auth/session`;
 
-    expect(shouldOmitHeadlessSessionTokenForRequest(login, 'GET')).toBe(true);
-    expect(shouldOmitHeadlessSessionTokenForRequest(login, 'POST')).toBe(true);
+    expect(shouldOmitHeadlessSessionTokenForRequest(login, 'GET')).toBe(false);
+    expect(shouldOmitHeadlessSessionTokenForRequest(login, 'POST')).toBe(false);
     expect(shouldOmitHeadlessSessionTokenForRequest(signup, 'POST')).toBe(true);
     expect(shouldOmitHeadlessSessionTokenForRequest(signup, 'GET')).toBe(false);
     expect(shouldOmitHeadlessSessionTokenForRequest(signup, 'PUT')).toBe(false);

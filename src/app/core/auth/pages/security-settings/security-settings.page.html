@@ -1,7 +1,7 @@
 <div class="security">
   <header class="security__header">
     <div class="security__header-row">
-      <a [routerLink]="['/gallery']" class="security__back">{{ 'AUTH.SECURITY.BACK' | translate }}</a>
+      <a [routerLink]="['/account/profile']" class="security__back">{{ 'AUTH.ACCOUNT.BACK_PROFILE' | translate }}</a>
       <app-lang-switch></app-lang-switch>
     </div>
   </header>
@@ -21,12 +21,9 @@
       <section class="security__section">
         <h2 class="security__h2">{{ 'AUTH.SECURITY.AUTHENTICATORS_TITLE' | translate }}</h2>
         <ul class="security__list">
-          @for (a of authenticators(); track $index) {
+          @for (a of otherAuthenticators(); track $index) {
             <li class="security__li">
               <span class="security__badge">{{ a.type }}</span>
-              @if (a.type === 'webauthn') {
-                <span>{{ a.name }}</span>
-              }
               @if (a.type === 'recovery_codes') {
                 <span>{{
                   'AUTH.SECURITY.RECOVERY_COUNT'
@@ -35,8 +32,15 @@
                 }}</span>
               }
             </li>
-          } @empty {
-            <li class="security__hint">{{ 'AUTH.SECURITY.NO_AUTHENTICATORS' | translate }}</li>
+          }
+          @if (otherAuthenticators().length === 0) {
+            <li class="security__hint">
+              @if (webauthnAuthenticators().length > 0) {
+                {{ 'AUTH.SECURITY.AUTHENTICATORS_PASSKEY_ONLY_HINT' | translate }}
+              } @else {
+                {{ 'AUTH.SECURITY.NO_AUTHENTICATORS' | translate }}
+              }
+            </li>
           }
         </ul>
       </section>
@@ -47,6 +51,10 @@
           @if (totpState(); as ts) {
             @if (ts.kind === 'pending_setup') {
             <p class="security__hint">{{ 'AUTH.SECURITY.TOTP_SETUP_HINT' | translate }}</p>
+            @if (totpQrDataUrl(); as qr) {
+              <img class="security__totp-qr" [src]="qr" width="220" height="220" alt="" role="presentation" decoding="async" />
+              <p class="security__hint">{{ 'AUTH.SECURITY.TOTP_SCAN_QR' | translate }}</p>
+            }
             <p class="security__mono">{{ ts.meta.totp_url }}</p>
             <button type="button" class="security__btn security__btn--secondary" (click)="copyText(ts.meta.totp_url)">
               {{ 'AUTH.SECURITY.COPY_URI' | translate }}
@@ -124,6 +132,33 @@
           <h2 class="security__h2">{{ 'AUTH.SECURITY.PASSKEY_TITLE' | translate }}</h2>
           <p class="security__hint">{{ 'AUTH.SECURITY.PASSKEY_HINT' | translate }}</p>
           <a [routerLink]="['/account/2fa/webauthn/add']" class="security__link-btn">{{ 'AUTH.SECURITY.PASSKEY_SETUP_LINK' | translate }}</a>
+
+          <ul class="security__list security__list--passkeys">
+            @for (pk of webauthnAuthenticators(); track pk.id) {
+              <li class="security__li security__li--passkey">
+                <div class="security__passkey-fields">
+                  <label class="security__label" [attr.for]="'pk-name-' + pk.id">{{ 'AUTH.SECURITY.PASSKEY_NAME_LABEL' | translate }}</label>
+                  <input
+                    [id]="'pk-name-' + pk.id"
+                    class="security__input security__input--passkey-name"
+                    type="text"
+                    [value]="renameDrafts()[pk.id] ?? pk.name"
+                    (input)="patchRenameDraft(pk.id, $any($event.target).value)"
+                  />
+                  <div class="security__row">
+                    <button type="button" class="security__btn security__btn--secondary" [disabled]="isLoading()" (click)="savePasskeyName(pk.id)">
+                      {{ 'AUTH.SECURITY.PASSKEY_SAVE_NAME' | translate }}
+                    </button>
+                    <button type="button" class="security__btn security__btn--danger" [disabled]="isLoading()" (click)="deletePasskey(pk.id)">
+                      {{ 'AUTH.SECURITY.PASSKEY_DELETE' | translate }}
+                    </button>
+                  </div>
+                </div>
+              </li>
+            } @empty {
+              <li class="security__hint">{{ 'AUTH.SECURITY.PASSKEY_EMPTY' | translate }}</li>
+            }
+          </ul>
         </section>
       }
     </div>

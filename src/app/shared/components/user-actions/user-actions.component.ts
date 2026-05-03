@@ -16,6 +16,14 @@ import { UserAvatarComponent } from '../../components/user-avatar/user-avatar.co
       <div class="user-actions">
         <app-user-avatar [user]="authService.currentUser()" size="md"></app-user-avatar>
         <a
+          [routerLink]="['/account/profile']"
+          nz-button
+          [title]="'NAVIGATION.ACCOUNT_PROFILE' | translate"
+          class="ant-btn-floating"
+        >
+          {{ 'NAVIGATION.ACCOUNT_PROFILE' | translate }}
+        </a>
+        <a
           [routerLink]="['/account/2fa']"
           nz-button
           [title]="'NAVIGATION.ACCOUNT_SECURITY' | translate"

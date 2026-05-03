@@ -22,6 +22,9 @@
             "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "inlineStyleLanguage": "less",
+            "optimization": {
+              "fonts": false
+            },
             "assets": [
               {
                 "glob": "**/*",

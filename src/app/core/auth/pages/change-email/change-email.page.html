@@ -1,0 +1,94 @@
+<div class="account-manage">
+  <header class="account-manage__header">
+    <div class="account-manage__header-row">
+      <a [routerLink]="['/account/profile']" class="account-manage__back">{{ 'AUTH.ACCOUNT.BACK_PROFILE' | translate }}</a>
+      <app-lang-switch></app-lang-switch>
+    </div>
+  </header>
+  <div class="account-manage__container">
+    <div class="account-manage__card">
+      <h1 class="account-manage__title">{{ 'AUTH.EMAIL.TITLE' | translate }}</h1>
+      <p class="account-manage__subtitle">{{ 'AUTH.EMAIL.SUBTITLE' | translate }}</p>
+
+      @if (pageError()) {
+        <div class="account-manage__alert">{{ pageError() }}</div>
+      }
+      @if (successMsg()) {
+        <div class="account-manage__ok">{{ successMsg() }}</div>
+      }
+
+      <section class="account-manage__section">
+        <h2 class="account-manage__h2">{{ 'AUTH.EMAIL.ADD_TITLE' | translate }}</h2>
+        <form [formGroup]="addForm" (ngSubmit)="onAddEmail()" class="account-manage__form">
+          <label class="account-manage__label" for="new-email">{{ 'AUTH.EMAIL.NEW_LABEL' | translate }}</label>
+          <input id="new-email" type="email" class="account-manage__input" formControlName="email" autocomplete="email" />
+          <div class="account-manage__row">
+            <button type="submit" class="account-manage__btn" [disabled]="addForm.invalid || isLoading()">
+              {{ 'AUTH.EMAIL.ADD_BUTTON' | translate }}
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <section class="account-manage__section">
+        <h2 class="account-manage__h2">{{ 'AUTH.EMAIL.LIST_TITLE' | translate }}</h2>
+        @if (isLoading()) {
+          <p class="account-manage__hint">{{ 'COMMON.LOADING' | translate }}</p>
+        }
+        <ul class="account-manage__list">
+          @for (row of emails(); track row.email) {
+            <li class="account-manage__li">
+              <div>
+                <strong>{{ row.email }}</strong>
+                @if (row.primary) {
+                  <span class="account-manage__badge account-manage__badge--ok">{{ 'AUTH.EMAIL.PRIMARY' | translate }}</span>
+                }
+                @if (row.verified) {
+                  <span class="account-manage__badge account-manage__badge--ok">{{ 'AUTH.EMAIL.VERIFIED' | translate }}</span>
+                } @else {
+                  <span class="account-manage__badge account-manage__badge--muted">{{ 'AUTH.EMAIL.UNVERIFIED' | translate }}</span>
+                }
+              </div>
+              <div class="account-manage__li-actions">
+                @if (!row.primary) {
+                  <button
+                    type="button"
+                    class="account-manage__btn account-manage__btn--secondary"
+                    [disabled]="isLoading()"
+                    (click)="makePrimary(row.email)"
+                  >
+                    {{ 'AUTH.EMAIL.MAKE_PRIMARY' | translate }}
+                  </button>
+                }
+                @if (!row.verified) {
+                  <button
+                    type="button"
+                    class="account-manage__btn account-manage__btn--secondary"
+                    [disabled]="isLoading()"
+                    (click)="requestVerification(row.email)"
+                  >
+                    {{ 'AUTH.EMAIL.SEND_VERIFY' | translate }}
+                  </button>
+                }
+                @if (!row.primary) {
+                  <button
+                    type="button"
+                    class="account-manage__btn account-manage__btn--danger"
+                    [disabled]="isLoading()"
+                    (click)="removeEmail(row.email)"
+                  >
+                    {{ 'AUTH.EMAIL.REMOVE' | translate }}
+                  </button>
+                }
+              </div>
+            </li>
+          } @empty {
+            @if (!isLoading()) {
+              <li class="account-manage__hint">{{ 'AUTH.EMAIL.EMPTY' | translate }}</li>
+            }
+          }
+        </ul>
+      </section>
+    </div>
+  </div>
+</div>

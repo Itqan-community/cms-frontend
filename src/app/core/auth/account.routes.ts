@@ -90,6 +90,13 @@ export const accountAuthRoutes: Routes = [
     data: H,
   },
   {
+    path: 'account/profile',
+    loadComponent: () =>
+      import('./pages/profile/profile.page').then((m) => m.AccountProfilePage),
+    canActivate: [authGuard],
+    data: H,
+  },
+  {
     path: 'account/login/code',
     loadComponent: () =>
       import('./pages/login-by-code/login-by-code.page').then((m) => m.LoginByCodePage),

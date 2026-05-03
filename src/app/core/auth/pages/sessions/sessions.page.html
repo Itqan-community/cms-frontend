@@ -1,0 +1,79 @@
+<div class="account-manage">
+  <header class="account-manage__header">
+    <div class="account-manage__header-row">
+      <a [routerLink]="['/account/profile']" class="account-manage__back">{{ 'AUTH.ACCOUNT.BACK_PROFILE' | translate }}</a>
+      <app-lang-switch></app-lang-switch>
+    </div>
+  </header>
+  <div class="account-manage__container">
+    <div class="account-manage__card">
+      <h1 class="account-manage__title">{{ 'AUTH.SESSIONS.TITLE' | translate }}</h1>
+      <p class="account-manage__subtitle">{{ 'AUTH.SESSIONS.SUBTITLE' | translate }}</p>
+
+      @if (pageError()) {
+        <div class="account-manage__alert">{{ pageError() }}</div>
+      }
+      @if (successMsg()) {
+        <div class="account-manage__ok">{{ successMsg() }}</div>
+      }
+
+      @if (isLoading()) {
+        <p class="account-manage__hint">{{ 'COMMON.LOADING' | translate }}</p>
+      }
+
+      <section class="account-manage__section">
+        <div class="account-manage__row">
+          <button
+            type="button"
+            class="account-manage__btn account-manage__btn--danger"
+            [disabled]="isLoading() || !otherSessionIds().length"
+            (click)="revokeOthers()"
+          >
+            {{ 'AUTH.SESSIONS.REVOKE_OTHERS' | translate }}
+          </button>
+          <button type="button" class="account-manage__btn account-manage__btn--secondary" [disabled]="isLoading()" (click)="reload()">
+            {{ 'COMMON.REFRESH' | translate }}
+          </button>
+        </div>
+
+        <ul class="account-manage__list">
+          @for (s of sessions(); track s.id) {
+            <li class="account-manage__li">
+              <div>
+                @if (s.is_current) {
+                  <span class="account-manage__badge account-manage__badge--ok">{{ 'AUTH.SESSIONS.CURRENT' | translate }}</span>
+                }
+                <div class="account-manage__mono">{{ s.user_agent || ('AUTH.SESSIONS.UNKNOWN_UA' | translate) }}</div>
+                <p class="account-manage__hint">
+                  {{ 'AUTH.SESSIONS.IP' | translate }}: {{ s.ip || '—' }}
+                  @if (s.created_at) {
+                    · {{ 'AUTH.SESSIONS.CREATED' | translate }}: {{ s.created_at }}
+                  }
+                  @if (s.last_seen_at) {
+                    · {{ 'AUTH.SESSIONS.LAST_SEEN' | translate }}: {{ s.last_seen_at }}
+                  }
+                </p>
+              </div>
+              <div class="account-manage__li-actions">
+                @if (!s.is_current) {
+                  <button
+                    type="button"
+                    class="account-manage__btn account-manage__btn--danger"
+                    [disabled]="isLoading()"
+                    (click)="revokeOne(s.id)"
+                  >
+                    {{ 'AUTH.SESSIONS.REVOKE' | translate }}
+                  </button>
+                }
+              </div>
+            </li>
+          } @empty {
+            @if (!isLoading()) {
+              <li class="account-manage__hint">{{ 'AUTH.SESSIONS.EMPTY' | translate }}</li>
+            }
+          }
+        </ul>
+      </section>
+    </div>
+  </div>
+</div>
