@@ -12,6 +12,7 @@ import {
 } from '../../headless/headless-account-data.util';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { AuthService } from '../../services/auth.service';
+import { buildHeadlessConnectOAuthCallbackUrl } from '../../utils/auth-route-query.util';
 
 @Component({
   standalone: true,
@@ -32,6 +33,19 @@ export class ManageProvidersPage implements OnInit {
 
   ngOnInit(): void {
     void this.reload();
+  }
+
+  /** Headless `callback_url` after provider consent — land back on this page. */
+  get oauthConnectCallbackUrl(): string {
+    return buildHeadlessConnectOAuthCallbackUrl('/account/providers');
+  }
+
+  connectGoogle(): void {
+    void this.auth.startGoogleOAuth(this.oauthConnectCallbackUrl, 'connect');
+  }
+
+  connectGitHub(): void {
+    void this.auth.startGitHubOAuth(this.oauthConnectCallbackUrl, 'connect');
   }
 
   async reload(): Promise<void> {

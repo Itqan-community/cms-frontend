@@ -45,16 +45,21 @@ export class OauthCallbackPage implements OnInit {
   message = signal('AUTH.OAUTH.PROCESSING');
 
   ngOnInit(): void {
-    const err = this.route.snapshot.queryParamMap.get('error');
+    const qpm = this.route.snapshot.queryParamMap;
+    const err = qpm.get('error');
+    const nextUrl = readContinueUrl(qpm);
+    const loginNav =
+      nextUrl !== '/gallery' ? { queryParams: { next: nextUrl } } : undefined;
+
     if (err) {
       this.message.set('AUTH.OAUTH.ERROR');
-      setTimeout(() => void this.router.navigate(['/account/login']), 2000);
+      setTimeout(() => void this.router.navigate(['/account/login'], loginNav), 2000);
       return;
     }
     this.auth.bootstrapSessionFromServer({ fetchProfile: true }).subscribe({
       next: () => {
-        const nextUrl = readContinueUrl(this.route.snapshot.queryParamMap);
-        void this.router.navigateByUrl(nextUrl);
+        const resumeUrl = readContinueUrl(this.route.snapshot.queryParamMap);
+        void this.router.navigateByUrl(resumeUrl);
       },
       error: (e: unknown) => {
         if (e instanceof HttpErrorResponse) {
@@ -63,7 +68,7 @@ export class OauthCallbackPage implements OnInit {
           }
         }
         this.message.set('AUTH.OAUTH.ERROR');
-        setTimeout(() => void this.router.navigate(['/account/login']), 2000);
+        setTimeout(() => void this.router.navigate(['/account/login'], loginNav), 2000);
         console.error('OAuth session:', getErrorMessage(e as object));
       },
     });

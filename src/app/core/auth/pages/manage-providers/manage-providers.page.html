@@ -14,6 +14,31 @@
         <p class="account-manage__hint">{{ 'AUTH.PROVIDERS.APP_MODE_HINT' | translate }}</p>
       }
 
+      @if (auth.oauthBrowserRedirectEnabled) {
+        <section class="account-manage__section account-manage__section--connect">
+          <h2 class="account-manage__h2">{{ 'AUTH.PROVIDERS.CONNECT_SECTION' | translate }}</h2>
+          <p class="account-manage__hint">{{ 'AUTH.PROVIDERS.CONNECT_HINT' | translate }}</p>
+          <div class="account-manage__row">
+            <button
+              type="button"
+              class="account-manage__btn account-manage__btn--secondary"
+              [disabled]="isLoading()"
+              (click)="connectGoogle()"
+            >
+              {{ 'AUTH.PROVIDERS.CONNECT_GOOGLE' | translate }}
+            </button>
+            <button
+              type="button"
+              class="account-manage__btn account-manage__btn--secondary"
+              [disabled]="isLoading()"
+              (click)="connectGitHub()"
+            >
+              {{ 'AUTH.PROVIDERS.CONNECT_GITHUB' | translate }}
+            </button>
+          </div>
+        </section>
+      }
+
       @if (pageError()) {
         <div class="account-manage__alert">{{ pageError() }}</div>
       }

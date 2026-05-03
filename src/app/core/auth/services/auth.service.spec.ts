@@ -39,6 +39,7 @@ describe('AuthService (app / headless)', () => {
       'signup',
       'deleteSession',
       'verifyEmail',
+      'redirectToProvider',
     ]);
     const mockConfig: ConfigurationResponse = {
       status: 200,
@@ -66,6 +67,7 @@ describe('AuthService (app / headless)', () => {
         meta: { is_authenticated: true },
       } as AuthenticatedResponse)
     );
+    headless.redirectToProvider.and.returnValue(Promise.resolve({ kind: 'json', body: {} }));
 
     TestBed.configureTestingModule({
       providers: [
@@ -140,6 +142,11 @@ describe('AuthService (app / headless)', () => {
       expect(ok).toBe(false);
       done();
     });
+  });
+
+  it('startGoogleOAuth does not call redirectToProvider when oauthBrowserRedirectEnabled is false', async () => {
+    await service.startGoogleOAuth('http://localhost/cb', 'login');
+    expect(headless.redirectToProvider).not.toHaveBeenCalled();
   });
 
 });

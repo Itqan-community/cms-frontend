@@ -5,6 +5,7 @@ import { environment } from '../../../../environments/environment';
 import { HeadlessAppTokenService } from './headless-app-token.service';
 import { HeadlessAuthApiService } from './headless-auth-api.service';
 import { HEADLESS_CLIENT_APP } from './headless-api.types';
+import * as providerRedirect from './headless-provider-redirect.util';
 
 describe('HeadlessAuthApiService', () => {
   let httpMock: HttpTestingController;
@@ -27,6 +28,29 @@ describe('HeadlessAuthApiService', () => {
 
   afterEach(() => {
     httpMock.verify();
+  });
+
+  it('redirectToProvider delegates to startHeadlessProviderRedirect', async () => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    spyOn(providerRedirect, 'startHeadlessProviderRedirect').and.returnValue(
+      Promise.resolve({ kind: 'form_submitted' })
+    );
+    await service.redirectToProvider({
+      provider: 'google',
+      process: 'login',
+      callbackUrl: 'https://app.example/cb',
+    });
+    expect(providerRedirect.startHeadlessProviderRedirect).toHaveBeenCalledWith(
+      jasmine.objectContaining({
+        apiBaseUrl: api,
+        provider: 'google',
+        process: 'login',
+        callbackUrl: 'https://app.example/cb',
+      })
+    );
   });
 
   it('getConfig GETs app client /config', (done) => {

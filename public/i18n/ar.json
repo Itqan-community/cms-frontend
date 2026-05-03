@@ -227,6 +227,10 @@
     "PROVIDERS": {
       "TITLE": "الحسابات المرتبطة",
       "SUBTITLE": "تسجيلات الدخول الاجتماعية المرتبطة بحسابك.",
+      "CONNECT_SECTION": "ربط مزوّد",
+      "CONNECT_HINT": "ستقوم بتسجيل الدخول عبر المزوّد ثم العودة إلى هنا بعد الموافقة.",
+      "CONNECT_GOOGLE": "ربط Google",
+      "CONNECT_GITHUB": "ربط GitHub",
       "APP_MODE_HINT": "إضافة مزوّدين جدد من هذا التطبيق يتطلّب تفعيل إعادة توجيه OAuth في إعدادات النشر.",
       "DISCONNECT": "فصل",
       "DISCONNECT_CONFIRM": "فصل هذا المزوّد عن حسابك؟",

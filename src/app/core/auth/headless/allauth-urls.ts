@@ -35,3 +35,7 @@ export const ALLAUTH_URLS = Object.freeze({
 
 /** Official demo User-Agent string used with app client (see allauth.js `request`). */
 export const ALLAUTH_APP_USER_AGENT = 'django-allauth example app';
+
+/** django-allauth provider ids for redirect/token endpoints. */
+export const ALLAUTH_SOCIAL_PROVIDER_GOOGLE = 'google';
+export const ALLAUTH_SOCIAL_PROVIDER_GITHUB = 'github';

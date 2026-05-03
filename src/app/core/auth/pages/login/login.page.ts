@@ -11,7 +11,7 @@ import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
 import { LoginRequest } from '../../models/auth.model';
 import { AuthService } from '../../services/auth.service';
-import { readContinueUrl } from '../../utils/auth-route-query.util';
+import { buildHeadlessOAuthCallbackUrl, readContinueUrl } from '../../utils/auth-route-query.util';
 
 @Component({
   selector: 'app-login-page',
@@ -54,10 +54,7 @@ export class LoginPage {
 
   /** Allauth `callback_url` for provider redirect (absolute). */
   get oauthCallbackUrl(): string {
-    if (typeof window === 'undefined') {
-      return '/account/provider/callback';
-    }
-    return `${window.location.origin}/account/provider/callback`;
+    return buildHeadlessOAuthCallbackUrl(this.activatedRoute);
   }
 
   onLoginWithGoogle(): void {

@@ -31,3 +31,22 @@ Legend: **ST** = `X-Session-Token` from last `meta.session_token`. **401*** = co
 ## JWT note (allauth)
 
 After full authentication, docs allow dropping `X-Session-Token` and using `Authorization: Bearer` for headless + app APIs. This FE keeps ST for `/auth/app/v1/*` while continuing to use Bearer for `/cms-api/*` non-auth routes.
+
+## Browser OAuth (Google / GitHub, headless app client)
+
+Canonical SPA callback route: **`/account/provider/callback`** (`HEADLESS_FRONTEND_URLS.socialaccount_login_error` on BE). Legacy **`/auth/oauth/callback`** still mounts the same component.
+
+| Step | Client | Details |
+|------|--------|---------|
+| Start | `POST /auth/app/v1/auth/provider/redirect` | **Form-encoded** body (`provider`, `process`, `callback_url`). **`process`** is `login` or `connect` only (allauth). Sign-up-with-provider uses **`login`**; incomplete profile continues via **`provider_signup`** → `/account/provider/signup`. |
+| Headers | APP client | `User-Agent: django-allauth example app`; **`connect`** sends **`X-Session-Token`**. Anonymous **`login`** omits ST so stale tokens do not bind the wrong session. |
+| Redirect | Browser | Same-origin API URLs use `fetch(redirect: 'manual')` + `Location`. Cross-origin dev setups fall back to a real HTML **form POST** (full navigation) for **`login`** only; **`connect`** requires readable redirect headers or same-origin API. |
+| Return | Callback route | `GET /auth/session` → authenticated **`navigateByUrl(next)`**; **`401`** with pending **`provider_signup`** → provider signup page; **`?error=`** → login (preserves **`next`** when present). |
+
+**Manual QA checklist**
+
+1. Login with Google / GitHub (`oauthBrowserRedirectEnabled: true`, local/staging).
+2. Register-page social buttons (`process=login`) → provider signup path when BE requires it.
+3. Connected accounts: Connect Google/GitHub (`process=connect`), then disconnect.
+4. Callback `?error=` handling + redirect back with **`next`**.
+5. Production remains gated (`oauthBrowserRedirectEnabled: false`) until validated.

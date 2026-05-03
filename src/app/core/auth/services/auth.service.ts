@@ -26,6 +26,8 @@ import {
   pathForFlow,
   pathForPendingFlow,
 } from '../headless/allauth-auth.hooks';
+import { ALLAUTH_SOCIAL_PROVIDER_GITHUB, ALLAUTH_SOCIAL_PROVIDER_GOOGLE } from '../headless/allauth-urls';
+import { applyAllauthEnvelopeSideEffects } from '../headless/allauth-envelope.util';
 import { AllauthAuthChangeBus } from '../headless/allauth-auth-change.bus';
 import type {
   AuthenticatedResponse,
@@ -38,6 +40,7 @@ import {
   AuthenticatedOrChallenge,
   HeadlessAuthApiService,
 } from '../headless/headless-auth-api.service';
+import type { ProviderRedirectResult } from '../headless/headless-provider-redirect.util';
 import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
 import {
   LoginRequest,
@@ -343,14 +346,72 @@ export class AuthService {
       );
   }
 
-  /** Strict app mode: browser OAuth redirect is not supported without backend token exchange. */
-  startGoogleOAuth(_callbackUrl: string, _process: 'login' | 'connect' = 'login'): void {
-    console.warn('[auth] Google OAuth redirect disabled in strict app mode.');
+  /**
+   * Starts Google OAuth via headless provider redirect (`POST .../auth/provider/redirect`).
+   * Requires `environment.oauthBrowserRedirectEnabled`.
+   */
+  async startGoogleOAuth(
+    callbackUrl: string,
+    process: 'login' | 'connect' = 'login'
+  ): Promise<void> {
+    await this.startProviderOAuth(ALLAUTH_SOCIAL_PROVIDER_GOOGLE, callbackUrl, process);
   }
 
-  /** Strict app mode: browser OAuth redirect is not supported without backend token exchange. */
-  startGitHubOAuth(_callbackUrl: string, _process: 'login' | 'connect' = 'login'): void {
-    console.warn('[auth] GitHub OAuth redirect disabled in strict app mode.');
+  /**
+   * Starts GitHub OAuth via headless provider redirect (`POST .../auth/provider/redirect`).
+   * Requires `environment.oauthBrowserRedirectEnabled`.
+   */
+  async startGitHubOAuth(
+    callbackUrl: string,
+    process: 'login' | 'connect' = 'login'
+  ): Promise<void> {
+    await this.startProviderOAuth(ALLAUTH_SOCIAL_PROVIDER_GITHUB, callbackUrl, process);
+  }
+
+  private async startProviderOAuth(
+    providerId: string,
+    callbackUrl: string,
+    process: 'login' | 'connect'
+  ): Promise<void> {
+    if (!this.oauthBrowserRedirectEnabled) {
+      console.warn(
+        `[auth] ${providerId} OAuth redirect is disabled (oauthBrowserRedirectEnabled=false).`
+      );
+      return;
+    }
+    const sessionToken = process === 'connect' ? this.tokenStore.getSessionToken() : undefined;
+    if (process === 'connect' && !sessionToken) {
+      console.error('[auth] Connecting a provider requires an app session token; sign in again.');
+      return;
+    }
+    const result = await this.headless.redirectToProvider({
+      provider: providerId,
+      process,
+      callbackUrl,
+      sessionToken,
+    });
+    this.applyProviderRedirectResult(result);
+  }
+
+  /** Applies redirect / JSON envelope from {@link HeadlessAuthApiService.redirectToProvider}. */
+  applyProviderRedirectResult(result: ProviderRedirectResult): void {
+    switch (result.kind) {
+      case 'redirect':
+        if (typeof window !== 'undefined') {
+          window.location.assign(result.location);
+        }
+        return;
+      case 'form_submitted':
+        return;
+      case 'json':
+        applyAllauthEnvelopeSideEffects(result.body, this.tokenStore, this.authBus);
+        return;
+      case 'error':
+        console.error('[auth] Provider redirect failed:', result.message);
+        return;
+      default:
+        return;
+    }
   }
 
   getStoredUser(): User | null {

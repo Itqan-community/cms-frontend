@@ -20,6 +20,11 @@ import {
 import { HeadlessAppTokenService } from './headless-app-token.service';
 import { webauthnCredentialRequestBody } from './headless-webauthn-http.util';
 import { ALLAUTH_APP_USER_AGENT, ALLAUTH_URLS } from './allauth-urls';
+import {
+  type ProviderRedirectProcess,
+  type ProviderRedirectResult,
+  startHeadlessProviderRedirect,
+} from './headless-provider-redirect.util';
 import { AllauthAuthChangeBus } from './allauth-auth-change.bus';
 import { applyAllauthEnvelopeSideEffects } from './allauth-envelope.util';
 
@@ -249,6 +254,26 @@ export class HeadlessAuthApiService {
         headers: this.jsonHeaders(),
       })
       .pipe(this.envTap());
+  }
+
+  /**
+   * Starts browser OAuth using headless `POST .../auth/provider/redirect` (form-encoded body).
+   * On success returns either an external redirect URL or a JSON envelope (errors / challenges).
+   */
+  redirectToProvider(payload: {
+    provider: string;
+    process: ProviderRedirectProcess;
+    callbackUrl: string;
+    /** Omit for anonymous `login`; required for `connect` with APP client session header. */
+    sessionToken?: string | null;
+  }): Promise<ProviderRedirectResult> {
+    return startHeadlessProviderRedirect({
+      apiBaseUrl: environment.API_BASE_URL,
+      provider: payload.provider,
+      process: payload.process,
+      callbackUrl: payload.callbackUrl,
+      sessionToken: payload.sessionToken,
+    });
   }
 
   authenticateByToken(payload: {

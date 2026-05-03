@@ -227,6 +227,10 @@
     "PROVIDERS": {
       "TITLE": "Connected accounts",
       "SUBTITLE": "Social logins linked to your account.",
+      "CONNECT_SECTION": "Link a provider",
+      "CONNECT_HINT": "You will sign in with the provider and return here after consent.",
+      "CONNECT_GOOGLE": "Connect Google",
+      "CONNECT_GITHUB": "Connect GitHub",
       "APP_MODE_HINT": "Adding new providers from this app requires enabling OAuth redirect in your deployment configuration.",
       "DISCONNECT": "Disconnect",
       "DISCONNECT_CONFIRM": "Disconnect this provider from your account?",

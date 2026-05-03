@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
@@ -11,6 +11,7 @@ import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
 import { RegisterRequest } from '../../models/auth.model';
 import { AuthService } from '../../services/auth.service';
+import { buildHeadlessOAuthCallbackUrl } from '../../utils/auth-route-query.util';
 
 @Component({
   selector: 'app-register-page',
@@ -29,14 +30,12 @@ import { AuthService } from '../../services/auth.service';
 export class RegisterPage {
   readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly activatedRoute = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
   private readonly translate = inject(TranslateService);
 
   get oauthCallbackUrl(): string {
-    if (typeof window === 'undefined') {
-      return '/auth/oauth/callback';
-    }
-    return `${window.location.origin}/auth/oauth/callback`;
+    return buildHeadlessOAuthCallbackUrl(this.activatedRoute);
   }
 
   onSignUpWithGoogle(): void {
