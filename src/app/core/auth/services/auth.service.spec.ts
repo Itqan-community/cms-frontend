@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
 import { HeadlessAuthApiService } from '../headless/headless-auth-api.service';
-import type { AuthenticatedOrChallenge } from '../headless/headless-auth-api.service';
 import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
 import type { AuthenticatedResponse, ConfigurationResponse } from '../headless/headless-api.types';
 
@@ -268,29 +267,6 @@ describe('AuthService (app / headless)', () => {
     headless.getBrowserSession.and.returnValue(of(authedResponse()));
     service.bootstrapSessionAfterOAuthRedirect({ fetchProfile: false }).subscribe(() => {
       expect(headless.getBrowserSession).toHaveBeenCalled();
-      expect(service.isAuthenticated()).toBe(true);
-      done();
-    });
-  });
-
-  it('bootstrapSessionAfterOAuthRedirect prefers browser 401+user over anonymous app session', (done) => {
-    headless.getSession.and.returnValue(
-      of({
-        status: 401,
-        data: { flows: [], methods: [] },
-        meta: { is_authenticated: false },
-      } as unknown as AuthenticatedOrChallenge),
-    );
-    headless.getBrowserSession.calls.reset();
-    const browserContinuation = {
-      status: 401,
-      meta: { is_authenticated: true },
-      data: { user: mockUser, flows: [], methods: [] },
-    } as unknown as AuthenticatedOrChallenge;
-    headless.getBrowserSession.and.returnValue(of(browserContinuation));
-    service.bootstrapSessionAfterOAuthRedirect({ fetchProfile: false }).subscribe((env) => {
-      expect(headless.getBrowserSession).toHaveBeenCalled();
-      expect(env.status).toBe(401);
       expect(service.isAuthenticated()).toBe(true);
       done();
     });

@@ -280,10 +280,7 @@
       "PROCESSING": "Processing authentication...",
       "SUCCESS": "Authentication successful! Redirecting...",
       "ERROR": "Authentication failed. Please try again.",
-      "INVALID_STATE": "Invalid authentication state. Please try again.",
-      "ACCESS_DENIED": "Sign-in was cancelled or not approved.",
-      "PROVIDER_ACCOUNT_IN_USE": "This Google or GitHub account is already linked to another user, or another account already uses it. Sign in with a different provider or use email and password.",
-      "SERVER_ERROR": "The identity provider returned an error. Please try again later."
+      "INVALID_STATE": "Invalid authentication state. Please try again."
     },
     "PROVIDER_SIGNUP": {
       "TITLE": "Complete your sign-up",

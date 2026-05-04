@@ -1,20 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import {
-  ALLAUTH_LOGIN_REDIRECT_URL,
-  authInfo,
-  pathForPendingFlow,
-} from '../../headless/allauth-auth.hooks';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
+import { ALLAUTH_LOGIN_REDIRECT_URL, authInfo, pathForPendingFlow } from '../../headless/allauth-auth.hooks';
+import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
-import {
-  oauthCallbackErrorDetailForDisplay,
-  oauthCallbackErrorTranslationKey,
-} from '../../utils/oauth-callback-error.util';
-import { isOauthReturnSessionEstablished } from '../../utils/oauth-callback-session.util';
 import { readContinueUrl } from '../../utils/auth-route-query.util';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
 
@@ -35,9 +26,6 @@ import { getErrorMessage } from '../../../../shared/utils/error.utils';
   template: `
     <div class="wrap">
       <p>{{ message() | translate }}</p>
-      @if (detail()) {
-        <p class="detail">{{ detail() }}</p>
-      }
     </div>
   `,
   styles: [
@@ -45,21 +33,11 @@ import { getErrorMessage } from '../../../../shared/utils/error.utils';
       .wrap {
         min-height: 100vh;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-        gap: 12px;
         background: var(--color-bg);
         font-size: 16px;
         color: #333333;
-        padding: 24px;
-        text-align: center;
-      }
-      .detail {
-        font-size: 14px;
-        color: #666666;
-        max-width: 480px;
-        word-break: break-word;
       }
     `,
   ],
@@ -70,8 +48,6 @@ export class OauthCallbackPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
 
   message = signal('AUTH.OAUTH.PROCESSING');
-  /** Sanitized server `error_description` (not translated). */
-  detail = signal<string | null>(null);
 
   ngOnInit(): void {
     const qpm = this.route.snapshot.queryParamMap;
@@ -80,25 +56,24 @@ export class OauthCallbackPage implements OnInit {
     const loginNav = resumeUrl !== '/gallery' ? { queryParams: { next: resumeUrl } } : undefined;
 
     if (err) {
-      this.message.set(oauthCallbackErrorTranslationKey(qpm));
-      const d = oauthCallbackErrorDetailForDisplay(qpm);
-      this.detail.set(d);
+      this.message.set('AUTH.OAUTH.ERROR');
       setTimeout(() => void this.router.navigate(['/account/login'], loginNav), 2000);
       return;
     }
     this.auth.bootstrapSessionAfterOAuthRedirect({ fetchProfile: true }).subscribe({
       next: (envelope) => {
+        const info = authInfo(envelope);
         const pendingPath = pathForPendingFlow(envelope);
+        if (info.isAuthenticated && envelope.status === 200 && info.user) {
+          void this.router.navigateByUrl(resumeUrl);
+          return;
+        }
         if (pendingPath) {
           const extras =
             resumeUrl !== ALLAUTH_LOGIN_REDIRECT_URL && resumeUrl.startsWith('/')
               ? loginNav ?? { queryParams: { next: resumeUrl } }
               : {};
           void this.router.navigate([pendingPath], extras);
-          return;
-        }
-        if (isOauthReturnSessionEstablished(envelope)) {
-          void this.router.navigateByUrl(resumeUrl);
           return;
         }
         this.message.set('AUTH.OAUTH.ERROR');
