@@ -124,17 +124,27 @@
         </div>
       }
 
-      @if (authService.oauthBrowserRedirectEnabled || passkeyAvailable()) {
+      @if (authService.showGoogleSocialAuth() || authService.showGithubSocialAuth() || passkeyAvailable()) {
         <div class="login__social">
-          @if (authService.oauthBrowserRedirectEnabled) {
+          @if (authService.showGoogleSocialAuth() || authService.showGithubSocialAuth()) {
             <p class="login__social-title">{{ 'AUTH.LOGIN.OR_CONTINUE' | translate }}</p>
             <div class="login__social-btns">
-              <button type="button" class="login__social-btn" (click)="onLoginWithGoogle()">
-                {{ 'AUTH.LOGIN.LOGIN_WITH_GOOGLE' | translate }}
-              </button>
-              <button type="button" class="login__social-btn" (click)="onLoginWithGitHub()">
-                {{ 'AUTH.LOGIN.LOGIN_WITH_GITHUB' | translate }}
-              </button>
+              @if (authService.socialGoogleUseAppTokenConfigured()) {
+                <div #googleBtnHost class="login__social-btn-host"></div>
+              }
+              @if (
+                authService.oauthBrowserRedirectEnabled &&
+                !authService.socialGoogleUseAppTokenConfigured()
+              ) {
+                <button type="button" class="login__social-btn" (click)="onLoginWithGoogle()">
+                  {{ 'AUTH.LOGIN.LOGIN_WITH_GOOGLE' | translate }}
+                </button>
+              }
+              @if (authService.oauthBrowserRedirectEnabled) {
+                <button type="button" class="login__social-btn" (click)="onLoginWithGitHub()">
+                  {{ 'AUTH.LOGIN.LOGIN_WITH_GITHUB' | translate }}
+                </button>
+              }
             </div>
           }
           @if (passkeyAvailable()) {

@@ -236,6 +236,7 @@
       "DISCONNECT": "فصل",
       "DISCONNECT_CONFIRM": "فصل هذا المزوّد عن حسابك؟",
       "DISCONNECT_SUCCESS": "تم فصل المزوّد.",
+      "CONNECT_SUCCESS": "تم ربط حساب Google بنجاح.",
       "EMPTY": "لا توجد حسابات مرتبطة.",
       "LOAD_ERROR": "تعذر تحميل الحسابات المرتبطة.",
       "ACTION_ERROR": "تعذر فصل المزوّد.",

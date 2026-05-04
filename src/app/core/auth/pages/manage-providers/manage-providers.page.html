@@ -10,32 +10,40 @@
       <h1 class="account-manage__title">{{ 'AUTH.PROVIDERS.TITLE' | translate }}</h1>
       <p class="account-manage__subtitle">{{ 'AUTH.PROVIDERS.SUBTITLE' | translate }}</p>
 
-      @if (!auth.oauthBrowserRedirectEnabled) {
+      @if (!auth.showGoogleSocialAuth() && !auth.showGithubSocialAuth()) {
         <p class="account-manage__hint">{{ 'AUTH.PROVIDERS.APP_MODE_HINT' | translate }}</p>
       }
 
-      @if (auth.oauthBrowserRedirectEnabled) {
+      @if (auth.showGoogleSocialAuth() || auth.showGithubSocialAuth()) {
         <section class="account-manage__section account-manage__section--connect">
           <h2 class="account-manage__h2">{{ 'AUTH.PROVIDERS.CONNECT_SECTION' | translate }}</h2>
           <p class="account-manage__hint">{{ 'AUTH.PROVIDERS.CONNECT_HINT' | translate }}</p>
-          <p class="account-manage__hint">{{ 'AUTH.PROVIDERS.CONNECT_TECH_HINT' | translate }}</p>
+          @if (!auth.socialGoogleUseAppTokenConfigured()) {
+            <p class="account-manage__hint">{{ 'AUTH.PROVIDERS.CONNECT_TECH_HINT' | translate }}</p>
+          }
           <div class="account-manage__row">
-            <button
-              type="button"
-              class="account-manage__btn account-manage__btn--secondary"
-              [disabled]="isLoading()"
-              (click)="connectGoogle()"
-            >
-              {{ 'AUTH.PROVIDERS.CONNECT_GOOGLE' | translate }}
-            </button>
-            <button
-              type="button"
-              class="account-manage__btn account-manage__btn--secondary"
-              [disabled]="isLoading()"
-              (click)="connectGitHub()"
-            >
-              {{ 'AUTH.PROVIDERS.CONNECT_GITHUB' | translate }}
-            </button>
+            @if (auth.socialGoogleUseAppTokenConfigured()) {
+              <div #googleConnectHost class="account-manage__btn-host"></div>
+            } @else if (auth.oauthBrowserRedirectEnabled) {
+              <button
+                type="button"
+                class="account-manage__btn account-manage__btn--secondary"
+                [disabled]="isLoading()"
+                (click)="connectGoogle()"
+              >
+                {{ 'AUTH.PROVIDERS.CONNECT_GOOGLE' | translate }}
+              </button>
+            }
+            @if (auth.oauthBrowserRedirectEnabled) {
+              <button
+                type="button"
+                class="account-manage__btn account-manage__btn--secondary"
+                [disabled]="isLoading()"
+                (click)="connectGitHub()"
+              >
+                {{ 'AUTH.PROVIDERS.CONNECT_GITHUB' | translate }}
+              </button>
+            }
           </div>
         </section>
       }

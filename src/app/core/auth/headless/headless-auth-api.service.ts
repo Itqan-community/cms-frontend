@@ -32,6 +32,7 @@ import {
   extractCsrfFromHeadlessConfigResponse,
   setCrossOriginDjangoCsrfToken,
 } from '../../utils/csrf.util';
+import type { ProviderTokenRequestBody } from '../utils/provider-token.payload.util';
 
 const JSON_CT = 'application/json';
 
@@ -317,16 +318,11 @@ export class HeadlessAuthApiService {
     });
   }
 
-  authenticateByToken(payload: {
-    provider: string;
-    token: string;
-    process?: 'login' | 'connect';
-  }): Observable<AuthenticatedOrChallenge> {
-    const body = {
-      provider: payload.provider,
-      token: payload.token,
-      process: payload.process ?? 'login',
-    };
+  /**
+   * Headless app client: `POST …/auth/app/v1/auth/provider/token`.
+   * **Google** requires `token: { id_token, client_id }`; **GitHub** uses `token: string` (access token).
+   */
+  authenticateByToken(body: ProviderTokenRequestBody): Observable<AuthenticatedOrChallenge> {
     return this.http
       .post<AuthenticatedResponse>(`${this.base()}${ALLAUTH_URLS.PROVIDER_TOKEN}`, body, {
         headers: this.jsonHeaders(),

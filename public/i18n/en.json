@@ -236,6 +236,7 @@
       "DISCONNECT": "Disconnect",
       "DISCONNECT_CONFIRM": "Disconnect this provider from your account?",
       "DISCONNECT_SUCCESS": "Provider disconnected.",
+      "CONNECT_SUCCESS": "Google account linked successfully.",
       "EMPTY": "No connected providers.",
       "LOAD_ERROR": "Could not load connected accounts.",
       "ACTION_ERROR": "Could not disconnect the provider.",
