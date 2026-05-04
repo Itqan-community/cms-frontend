@@ -49,6 +49,7 @@ import {
   UpdateProfileResponse,
   User,
 } from '../models/auth.model';
+import { getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
 
 @Injectable({
   providedIn: 'root',
@@ -425,6 +426,15 @@ export class AuthService {
       };
       this.applyProviderRedirectResult(result);
       return result;
+    }
+    /*
+     * Browser OAuth POST is CSRF-protected. App bootstrap loads `/auth/app/v1/config` without
+     * cookies, so `csrftoken` is never minted unless we prime `/auth/browser/v1/config`.
+     */
+    if (!getDjangoCsrfTokenForRequest()) {
+      await firstValueFrom(
+        this.headless.getBrowserConfig().pipe(catchError(() => of(undefined as ConfigurationResponse | undefined)))
+      );
     }
     const result = await this.headless.redirectToProvider({
       provider: providerId,

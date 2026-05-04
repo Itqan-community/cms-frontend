@@ -39,6 +39,7 @@ describe('AuthService (app / headless)', () => {
     sessionStorage.clear();
     headless = jasmine.createSpyObj<HeadlessAuthApiService>('HeadlessAuthApiService', [
       'getConfig',
+      'getBrowserConfig',
       'getAuth',
       'getSession',
       'getBrowserSession',
@@ -82,6 +83,19 @@ describe('AuthService (app / headless)', () => {
       } as AuthenticatedResponse)
     );
     headless.redirectToProvider.and.returnValue(Promise.resolve({ kind: 'json', body: {} }));
+    headless.getBrowserConfig.and.returnValue(
+      of({
+        status: 200,
+        data: {
+          account: {
+            authentication_method: 'email',
+            is_open_for_signup: true,
+            email_verification_by_code_enabled: false,
+            login_by_code_enabled: false,
+          },
+        },
+      } as ConfigurationResponse),
+    );
     routerMock = {
       url: '/account/login?next=%2Faccount%2Fproviders',
       navigate: jasmine.createSpy('navigate'),

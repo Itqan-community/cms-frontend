@@ -40,6 +40,17 @@ describe('HeadlessAuthApiService', () => {
     r.flush({ status: 200, data: { account: {} } });
   });
 
+  it('getBrowserConfig GETs browser client /config', (done) => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    service.getBrowserConfig().subscribe(() => done());
+    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_BROWSER}/v1/config`);
+    expect(r.request.method).toBe('GET');
+    r.flush({ status: 200, data: { account: {} } });
+  });
+
   it('getSession GETs app client /auth/session', (done) => {
     if (!api) {
       pending('API_BASE_URL');

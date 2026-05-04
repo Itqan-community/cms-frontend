@@ -57,12 +57,20 @@ export class LoginPage {
     return buildHeadlessOAuthCallbackUrl(this.activatedRoute);
   }
 
-  onLoginWithGoogle(): void {
-    void this.authService.startGoogleOAuth(this.oauthCallbackUrl, 'login');
+  async onLoginWithGoogle(): Promise<void> {
+    this.errorMessage.set('');
+    const r = await this.authService.startGoogleOAuth(this.oauthCallbackUrl, 'login');
+    if (r.kind === 'error') {
+      this.errorMessage.set(r.message || this.translate.instant('AUTH.OAUTH.ERROR'));
+    }
   }
 
-  onLoginWithGitHub(): void {
-    void this.authService.startGitHubOAuth(this.oauthCallbackUrl, 'login');
+  async onLoginWithGitHub(): Promise<void> {
+    this.errorMessage.set('');
+    const r = await this.authService.startGitHubOAuth(this.oauthCallbackUrl, 'login');
+    if (r.kind === 'error') {
+      this.errorMessage.set(r.message || this.translate.instant('AUTH.OAUTH.ERROR'));
+    }
   }
 
   onSubmit(): void {

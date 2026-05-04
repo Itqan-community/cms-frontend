@@ -28,6 +28,10 @@ import {
 } from './headless-provider-redirect.util';
 import { AllauthAuthChangeBus } from './allauth-auth-change.bus';
 import { applyAllauthEnvelopeSideEffects } from './allauth-envelope.util';
+import {
+  extractCsrfFromHeadlessConfigResponse,
+  setCrossOriginDjangoCsrfToken,
+} from '../../utils/csrf.util';
 
 const JSON_CT = 'application/json';
 
@@ -77,6 +81,26 @@ export class HeadlessAuthApiService {
         headers: this.headers(),
       })
       .pipe(this.envTap());
+  }
+
+  /**
+   * Issues (or rotates) Django `csrftoken` for `.itqan.dev`-style setups via `{ withCredentials }`
+   * (`/auth/browser/…` paths are cookie-backed). Needed before **`POST …/browser/…/auth/provider/redirect`**:
+   * bootstrap only touches `/auth/app/v1/config` (no credentials).
+   */
+  getBrowserConfig(): Observable<ConfigurationResponse> {
+    return this.http
+      .get<ConfigurationResponse>(`${this.browserBase()}${ALLAUTH_URLS.CONFIG}`, {
+        headers: this.headers(),
+      })
+      .pipe(
+        tap((body) => {
+          const csrf = extractCsrfFromHeadlessConfigResponse(body);
+          if (csrf) {
+            setCrossOriginDjangoCsrfToken(csrf);
+          }
+        })
+      );
   }
 
   /** Official SPA name — same as {@link getSession}. */

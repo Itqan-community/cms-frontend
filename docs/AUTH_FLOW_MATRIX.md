@@ -39,7 +39,7 @@ Canonical SPA callback route: **`/account/provider/callback`** (`HEADLESS_FRONTE
 | Step | Client | Details |
 |------|--------|---------|
 | Start | `POST /auth/browser/v1/auth/provider/redirect` | **Form-encoded** body (`provider`, `process`, `callback_url`). **`process`** is `login` or `connect` only (allauth). Sign-up-with-provider uses **`login`**; incomplete profile continues via **`provider_signup`** → `/account/provider/signup`. |
-| Headers / transport | **Browser** client URL; behavior differs by `process` | **`login`**: navigational **HTML form POST** only (no XHR). **`connect`**: `fetch(..., redirect: 'manual', credentials: 'include')` + **`X-Session-Token`** (browsers cannot attach custom headers on form POST). |
+| Headers / transport | **Browser** client URL; behavior differs by `process` | **`login`**: navigational **HTML form POST** only (no XHR); FE **GETs `/auth/browser/v1/config`** with credentials **first** whenever no CSRF is cached (`/auth/app/v1/config` bootstrap omits credentials, so Django may never mint `csrftoken` otherwise). **`connect`**: `fetch(...)` + **`X-Session-Token`**. |
 | Redirect | Browser | **`login`**: full document navigation from the form submit. **`connect`**: read **`Location`** from the `fetch` response when CORS exposes it; opaque cross-origin redirects surface a dedicated error string. |
 | Return | Callback route | Bootstrap session (app then browser session as needed); authenticated → **`navigateByUrl(next)`**; pending flow (e.g. **`provider_signup`**) → routed via `pathForPendingFlow`; **`?error=`** → login (preserves **`next`** when present). |
 

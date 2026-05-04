@@ -38,12 +38,20 @@ export class RegisterPage {
     return buildHeadlessOAuthCallbackUrl(this.activatedRoute);
   }
 
-  onSignUpWithGoogle(): void {
-    void this.authService.startGoogleOAuth(this.oauthCallbackUrl, 'login');
+  async onSignUpWithGoogle(): Promise<void> {
+    this.errorMessage.set('');
+    const r = await this.authService.startGoogleOAuth(this.oauthCallbackUrl, 'login');
+    if (r.kind === 'error') {
+      this.errorMessage.set(r.message || this.translate.instant('AUTH.OAUTH.ERROR'));
+    }
   }
 
-  onSignUpWithGitHub(): void {
-    void this.authService.startGitHubOAuth(this.oauthCallbackUrl, 'login');
+  async onSignUpWithGitHub(): Promise<void> {
+    this.errorMessage.set('');
+    const r = await this.authService.startGitHubOAuth(this.oauthCallbackUrl, 'login');
+    if (r.kind === 'error') {
+      this.errorMessage.set(r.message || this.translate.instant('AUTH.OAUTH.ERROR'));
+    }
   }
 
   registerForm: FormGroup;
