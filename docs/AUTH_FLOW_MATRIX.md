@@ -67,6 +67,16 @@ Must match the **public CMS origin** (scheme + host, no trailing slash) so `HEAD
 
 Mismatch causes failures after IdP consent even when social login works from Django admin (admin uses cookie flow on the API domain).
 
+### Debugging OAuth callback (login vs connect)
+
+When `/account/provider/callback` fails after Google/GitHub consent:
+
+1. Copy the **full browser URL** on that page (watch for **`error`**, **`error_description`**, **`next`**). The CMS maps common values to specific `AUTH.OAUTH.*` strings.
+2. In **Network** (filter `session`), record HTTP status and JSON for **`GET …/auth/app/v1/auth/session`** and **`GET …/auth/browser/v1/auth/session`** on that load.
+3. Under **Application → Cookies** for the **API host** (e.g. `staging.api.…`), check **`sessionid`** / **`csrftoken`** after the provider round-trip and before those `GET …/session` requests.
+
+If both session responses are **anonymous** (no `data.user`) for **`process=login`** while **`process=connect`** still works, prioritize **backend / env**: **`FRONTEND_BASE_URL`**, **`HEADLESS_FRONTEND_URLS`**, cookie **`SameSite`** / domain, and django-allauth logs for social **`login`**.
+
 ### Credentials source (staging vs production)
 
 Staging **`SOCIALACCOUNT_PROVIDERS`** in backend base settings uses env **`GOOGLE_*` / `GITHUB_*`**. Production may rely on DB **`SocialApp`** rows instead. Ensure the active environment uses **one** source of truth so console redirect URIs match the deployed API host and client IDs.

@@ -30,7 +30,6 @@ import { ALLAUTH_SOCIAL_PROVIDER_GITHUB, ALLAUTH_SOCIAL_PROVIDER_GOOGLE } from '
 import { applyAllauthEnvelopeSideEffects } from '../headless/allauth-envelope.util';
 import { AllauthAuthChangeBus } from '../headless/allauth-auth-change.bus';
 import type {
-  AuthenticatedResponse,
   AuthenticationMeta,
   AuthenticationResponse,
   ConfigurationResponse,
@@ -51,6 +50,7 @@ import {
   User,
 } from '../models/auth.model';
 import { getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
+import { isOauthReturnSessionEstablished } from '../utils/oauth-callback-session.util';
 
 @Injectable({
   providedIn: 'root',
@@ -235,14 +235,14 @@ export class AuthService {
     return this.headless.getSession().pipe(
       catchError((err) => this.observableHeadlessEnvelopeFromSessionHttpFailure(err)),
       switchMap((appRes) => {
-        if (this.isOauthReturnSessionEstablished(appRes)) {
+        if (isOauthReturnSessionEstablished(appRes)) {
           return this.applyHeadlessSuccess(appRes, { fetchProfile });
         }
         return this.headless.getBrowserSession().pipe(
           catchError((err) => this.observableHeadlessEnvelopeFromSessionHttpFailure(err)),
           switchMap((browserRes) =>
             this.applyHeadlessSuccess(
-              this.isOauthReturnSessionEstablished(browserRes) ? browserRes : appRes,
+              isOauthReturnSessionEstablished(browserRes) ? browserRes : appRes,
               { fetchProfile }
             )
           ),
@@ -274,12 +274,6 @@ export class AuthService {
     } as AuthenticationResponse);
   }
 
-  /** True when OAuth callback should treat the user as logged in with a usable profile payload. */
-  private isOauthReturnSessionEstablished(res: AuthenticatedOrChallenge): boolean {
-    const info = authInfo(res);
-    return !!(info.user && info.isAuthenticated && res.status === 200);
-  }
-
   applyHeadlessSuccess(
     res: AuthenticatedOrChallenge,
     options?: { fetchProfile?: boolean; _depth?: number }
@@ -294,9 +288,13 @@ export class AuthService {
 
     const fetchProfile = options?.fetchProfile !== false;
 
-    const payloadUser =
-      res.status === 200 && res.data && 'user' in res.data ? res.data.user : undefined;
-    if (res.meta?.is_authenticated && !payloadUser) {
+    const hasUserInEnvelope = !!(
+      res.data &&
+      typeof res.data === 'object' &&
+      'user' in res.data &&
+      (res.data as { user?: HeadlessUser | null }).user
+    );
+    if (res.meta?.is_authenticated && !hasUserInEnvelope) {
       return this.headless.getSession().pipe(
         switchMap((s) =>
           this.applyHeadlessSuccess(s, { ...options, fetchProfile, _depth: depth + 1 })

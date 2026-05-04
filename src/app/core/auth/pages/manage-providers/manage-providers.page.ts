@@ -13,6 +13,7 @@ import {
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { AuthService } from '../../services/auth.service';
 import { buildHeadlessConnectOAuthCallbackUrl } from '../../utils/auth-route-query.util';
+import { headlessMessageLooksLikeProviderAccountInUse } from '../../utils/oauth-callback-error.util';
 
 @Component({
   standalone: true,
@@ -55,6 +56,10 @@ export class ManageProvidersPage implements OnInit {
         ? await this.auth.startGoogleOAuth(this.oauthConnectCallbackUrl, 'connect')
         : await this.auth.startGitHubOAuth(this.oauthConnectCallbackUrl, 'connect');
     if (result.kind !== 'error') {
+      return;
+    }
+    if (headlessMessageLooksLikeProviderAccountInUse(result.message)) {
+      this.pageError.set(this.translate.instant('AUTH.OAUTH.PROVIDER_ACCOUNT_IN_USE'));
       return;
     }
     if (result.message.includes('cross-origin API')) {
