@@ -12,8 +12,8 @@
     }
 
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <label class="label" for="email">{{ 'AUTH.REGISTER.EMAIL_LABEL' | translate }}</label>
-      <input class="input" id="email" type="email" formControlName="email" autocomplete="email" />
+      <label class="label">{{ 'AUTH.REGISTER.EMAIL_LABEL' | translate }}</label>
+      <input class="input" type="email" formControlName="email" autocomplete="email" />
       @if (errorMessage()) {
         <p class="err">{{ errorMessage() }}</p>
       }
