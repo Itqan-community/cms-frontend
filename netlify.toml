@@ -29,8 +29,4 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# Shared redirects for all environments (SPA routing)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# SPA fallback + staging API proxies live in `dist/browser/_redirects` (see `deploy/netlify/*`).
