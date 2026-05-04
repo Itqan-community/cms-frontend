@@ -1,10 +1,11 @@
 import { getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
-import { ALLAUTH_URLS } from './allauth-urls';
+import { ALLAUTH_APP_USER_AGENT, ALLAUTH_URLS } from './allauth-urls';
 import { HEADLESS_CLIENT_BROWSER } from './headless-api.types';
 
 export type ProviderRedirectProcess = 'login' | 'connect';
 
 export type ProviderRedirectResult =
+  | { kind: 'redirect'; location: string }
   | { kind: 'json'; body: unknown }
   | { kind: 'form_submitted' }
   | { kind: 'error'; message: string };
@@ -42,22 +43,30 @@ export function submitHeadlessProviderRedirectForm(
 }
 
 /**
- * Both **`login`** and **`connect`** must use a **navigational** HTML form POST per BE contract.
+ * Initiates OAuth per django-allauth headless contract:
  *
- * `fetch(..., redirect: 'manual')` breaks **`connect`** on SPA↔API split origins: cross-origin 302 becomes
- * **`opaqueredirect`**, so JS cannot read `Location` and the IdP step never runs in the user agent.
- *
- * Django `RedirectToProviderForm` binds only `provider`, `callback_url`, `process`; **`connect`**
- * relies on cookie-backed session on the browser client (prime `/auth/browser/v1/config`). Navigational POST
- * sends cookies; `X-Session-Token` cannot be attached on a real form.
+ * - **`login`**: only a **navigational** `application/x-www-form-urlencoded` POST (no XHR/`fetch`).
+ * - **`connect`**: needs `X-Session-Token`; browsers cannot add that on navigational POST, so this
+ *   uses `fetch(..., redirect: 'manual')` with `credentials: 'include'` when possible.
  */
 export async function startHeadlessProviderRedirect(opts: {
   apiBaseUrl: string;
   provider: string;
   process: ProviderRedirectProcess;
   callbackUrl: string;
+  /** Set for `process: 'connect'` only — sent as `X-Session-Token`. */
+  sessionToken?: string | null;
+  windowRef?: Window & typeof globalThis;
+  fetchFn?: typeof fetch;
+  /**
+   * When provided, overrides {@link getDjangoCsrfTokenForRequest}. Use `'…'` to force a token or
+   * `''`/`null`-like behavior handled below (tests vs env).
+   */
   csrfMiddlewareToken?: string | null;
 }): Promise<ProviderRedirectResult> {
+  const win = opts.windowRef ?? (typeof window !== 'undefined' ? window : undefined);
+  const fetchFn =
+    opts.fetchFn ?? (typeof fetch !== 'undefined' ? fetch.bind(globalThis) : undefined);
   const actionUrl = buildHeadlessProviderRedirectPostUrl(opts.apiBaseUrl);
 
   const fields: Record<string, string> = {
@@ -71,16 +80,38 @@ export async function startHeadlessProviderRedirect(opts: {
     fields['csrfmiddlewaretoken'] = csrf;
   }
 
-  if (typeof document === 'undefined' || !document.body) {
+  if (opts.process === 'login') {
+    submitHeadlessProviderRedirectForm(actionUrl, fields);
+    return { kind: 'form_submitted' };
+  }
+
+  const body = new URLSearchParams(fields);
+
+  if (!fetchFn || !win) {
     return {
       kind: 'error',
-      message:
-        'Provider redirect requires a DOM (navigational form POST). SSR or non-browser contexts cannot start browser OAuth.',
+      message: 'Connect OAuth requires fetch in the browser; DOM-only environment not supported.',
     };
   }
 
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+    'Content-Type': 'application/x-www-form-urlencoded',
+    'User-Agent': ALLAUTH_APP_USER_AGENT,
+  };
+  if (opts.sessionToken) {
+    headers['X-Session-Token'] = opts.sessionToken;
+  }
+
+  let resp: Response;
   try {
-    submitHeadlessProviderRedirectForm(actionUrl, fields);
+    resp = await fetchFn(actionUrl, {
+      method: 'POST',
+      headers,
+      body: body.toString(),
+      redirect: 'manual',
+      credentials: 'include',
+    });
   } catch (e: unknown) {
     return {
       kind: 'error',
@@ -88,5 +119,38 @@ export async function startHeadlessProviderRedirect(opts: {
     };
   }
 
-  return { kind: 'form_submitted' };
+  if (resp.type === 'opaqueredirect') {
+    return {
+      kind: 'error',
+      message:
+        'Could not read OAuth redirect (cross-origin API). Use same-origin API URL or a reverse proxy, or connect accounts from an environment where the SPA and API share an origin.',
+    };
+  }
+
+  if (resp.status >= 300 && resp.status < 400) {
+    const loc = resp.headers.get('Location');
+    if (loc) {
+      return { kind: 'redirect', location: loc };
+    }
+    return { kind: 'error', message: 'Redirect response missing Location header.' };
+  }
+
+  const ct = resp.headers.get('Content-Type') ?? '';
+  if (ct.includes('application/json')) {
+    try {
+      const json: unknown = await resp.json();
+      return { kind: 'json', body: json };
+    } catch {
+      return { kind: 'error', message: 'Invalid JSON from provider redirect endpoint.' };
+    }
+  }
+
+  if (!resp.ok) {
+    return {
+      kind: 'error',
+      message: `Provider redirect failed (HTTP ${resp.status}).`,
+    };
+  }
+
+  return { kind: 'error', message: 'Unexpected response from provider redirect endpoint.' };
 }

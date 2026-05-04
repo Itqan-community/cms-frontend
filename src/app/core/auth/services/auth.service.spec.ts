@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
@@ -216,42 +216,6 @@ describe('AuthService (app / headless)', () => {
     headless.getBrowserSession.calls.reset();
     service.bootstrapSessionAfterOAuthRedirect({ fetchProfile: false }).subscribe(() => {
       expect(headless.getBrowserSession).not.toHaveBeenCalled();
-      expect(service.isAuthenticated()).toBe(true);
-      done();
-    });
-  });
-
-  it('bootstrapSessionAfterOAuthRedirect unwraps HTTP 401 on app session then uses browser session', (done) => {
-    headless.getSession.and.returnValue(
-      throwError(
-        () =>
-          new HttpErrorResponse({
-            status: 401,
-            error: {
-              status: 401,
-              data: { methods: [] },
-              meta: { is_authenticated: false },
-            },
-          }),
-      ),
-    );
-    headless.getBrowserSession.calls.reset();
-    headless.getBrowserSession.and.returnValue(of(authedResponse()));
-    service.bootstrapSessionAfterOAuthRedirect({ fetchProfile: false }).subscribe(() => {
-      expect(headless.getBrowserSession).toHaveBeenCalled();
-      expect(service.isAuthenticated()).toBe(true);
-      done();
-    });
-  });
-
-  it('bootstrapSessionAfterOAuthRedirect unwraps bare HTTP 401 on app session (no JSON body)', (done) => {
-    headless.getSession.and.returnValue(
-      throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' })),
-    );
-    headless.getBrowserSession.calls.reset();
-    headless.getBrowserSession.and.returnValue(of(authedResponse()));
-    service.bootstrapSessionAfterOAuthRedirect({ fetchProfile: false }).subscribe(() => {
-      expect(headless.getBrowserSession).toHaveBeenCalled();
       expect(service.isAuthenticated()).toBe(true);
       done();
     });

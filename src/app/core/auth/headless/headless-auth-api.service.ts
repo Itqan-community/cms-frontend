@@ -299,21 +299,23 @@ export class HeadlessAuthApiService {
   }
 
   /**
-   * Starts browser OAuth using navigational POST to `POST .../auth/browser/v1/auth/provider/redirect`
-   * ({@link startHeadlessProviderRedirect}); XHR/`fetch` is not used (cross-origin OAuth 302 becomes opaque).
-   * For **`connect`**, Django-allauth’s `RedirectToProviderForm` binds only cookie-backed session on the browser client —
-   * call sites should prime `@/auth/browser/v1/config` (see {@link AuthService}) so **`sessionid`** is present on the API host.
+   * Starts browser OAuth using headless `POST .../auth/browser/v1/auth/provider/redirect`
+   * (form-encoded body; {@link startHeadlessProviderRedirect}).
+   * On success returns either an external redirect URL or a JSON envelope (errors / challenges).
    */
   redirectToProvider(payload: {
     provider: string;
     process: ProviderRedirectProcess;
     callbackUrl: string;
+    /** Omit for anonymous `login`; required for `connect` with APP client session header. */
+    sessionToken?: string | null;
   }): Promise<ProviderRedirectResult> {
     return startHeadlessProviderRedirect({
       apiBaseUrl: environment.API_BASE_URL,
       provider: payload.provider,
       process: payload.process,
       callbackUrl: payload.callbackUrl,
+      sessionToken: payload.sessionToken,
     });
   }
 
