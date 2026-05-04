@@ -9,6 +9,7 @@ import {
   AuthenticatorsListResponse,
   ConfigurationResponse,
   HEADLESS_CLIENT_APP,
+  HEADLESS_CLIENT_BROWSER,
   PasskeySignup,
   RecoveryCodesResponse,
   TotpActiveResponse,
@@ -40,6 +41,10 @@ export class HeadlessAuthApiService {
 
   private base(): string {
     return `${environment.API_BASE_URL}/auth/${HEADLESS_CLIENT_APP}/v1`;
+  }
+
+  private browserBase(): string {
+    return `${environment.API_BASE_URL}/auth/${HEADLESS_CLIENT_BROWSER}/v1`;
   }
 
   /** Mirrors official SPA JSON responses + auth-change dispatch rules. */
@@ -82,6 +87,19 @@ export class HeadlessAuthApiService {
   getSession(): Observable<AuthenticatedOrChallenge> {
     return this.http
       .get<AuthenticatedResponse>(`${this.base()}${ALLAUTH_URLS.SESSION}`, {
+        headers: this.headers(),
+      })
+      .pipe(this.envTap());
+  }
+
+  /**
+   * Browser headless session (cookie-backed). Uses `withCredentials` via interceptor for non-app
+   * auth URLs (not under `/auth/app/v1`). Used after OAuth return when app session GET is still
+   * anonymous.
+   */
+  getBrowserSession(): Observable<AuthenticatedOrChallenge> {
+    return this.http
+      .get<AuthenticatedResponse>(`${this.browserBase()}${ALLAUTH_URLS.SESSION}`, {
         headers: this.headers(),
       })
       .pipe(this.envTap());
@@ -257,7 +275,8 @@ export class HeadlessAuthApiService {
   }
 
   /**
-   * Starts browser OAuth using headless `POST .../auth/provider/redirect` (form-encoded body).
+   * Starts browser OAuth using headless `POST .../auth/browser/v1/auth/provider/redirect`
+   * (form-encoded body; {@link startHeadlessProviderRedirect}).
    * On success returns either an external redirect URL or a JSON envelope (errors / challenges).
    */
   redirectToProvider(payload: {

@@ -9,13 +9,19 @@ export function readContinueUrl(params: ParamMap): string {
 /**
  * Absolute `callback_url` for headless `RedirectToProviderForm` (django-allauth validates absolute URLs).
  * Preserves `next` / `returnUrl` from the current route so `/account/provider/callback` can resume flow.
+ *
+ * @param opts.origin — override `window.location.origin` (tests / non-browser without spying `location`).
  */
-export function buildHeadlessOAuthCallbackUrl(route: ActivatedRoute | null): string {
+export function buildHeadlessOAuthCallbackUrl(
+  route: ActivatedRoute | null,
+  opts?: { origin?: string }
+): string {
   const pathOnly = '/account/provider/callback';
-  if (typeof window === 'undefined') {
+  const win = typeof window !== 'undefined' ? window : undefined;
+  const origin = opts?.origin ?? win?.location.origin;
+  if (!origin) {
     return pathOnly;
   }
-  const origin = window.location.origin;
   const params = route?.snapshot?.queryParamMap;
   const next = params?.get('next') || params?.get('returnUrl');
   if (next && next.startsWith('/')) {
@@ -27,12 +33,16 @@ export function buildHeadlessOAuthCallbackUrl(route: ActivatedRoute | null): str
 }
 
 /** Callback URL after linking a provider — return user to connected-accounts page. */
-export function buildHeadlessConnectOAuthCallbackUrl(nextPath = '/account/providers'): string {
+export function buildHeadlessConnectOAuthCallbackUrl(
+  nextPath = '/account/providers',
+  opts?: { origin?: string }
+): string {
   const pathOnly = '/account/provider/callback';
-  if (typeof window === 'undefined') {
+  const win = typeof window !== 'undefined' ? window : undefined;
+  const origin = opts?.origin ?? win?.location.origin;
+  if (!origin) {
     return pathOnly;
   }
-  const origin = window.location.origin;
   const u = new URL(pathOnly, origin);
   if (nextPath.startsWith('/')) {
     u.searchParams.set('next', nextPath);

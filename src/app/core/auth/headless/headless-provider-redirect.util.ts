@@ -1,5 +1,6 @@
+import { getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
 import { ALLAUTH_APP_USER_AGENT, ALLAUTH_URLS } from './allauth-urls';
-import { HEADLESS_CLIENT_APP } from './headless-api.types';
+import { HEADLESS_CLIENT_BROWSER } from './headless-api.types';
 
 export type ProviderRedirectProcess = 'login' | 'connect';
 
@@ -9,10 +10,13 @@ export type ProviderRedirectResult =
   | { kind: 'form_submitted' }
   | { kind: 'error'; message: string };
 
-/** Builds POST URL for django-allauth headless `RedirectToProviderView` (form body, not JSON). */
+/**
+ * POST target for django-allauth headless provider redirect — BE OpenAPI publishes this under the
+ * **browser** client only (`POST .../auth/browser/v1/auth/provider/redirect`), synchronous/non-XHR.
+ */
 export function buildHeadlessProviderRedirectPostUrl(apiBaseUrl: string): string {
   const base = apiBaseUrl.replace(/\/$/, '');
-  return `${base}/auth/${HEADLESS_CLIENT_APP}/v1${ALLAUTH_URLS.REDIRECT_TO_PROVIDER}`;
+  return `${base}/auth/${HEADLESS_CLIENT_BROWSER}/v1${ALLAUTH_URLS.REDIRECT_TO_PROVIDER}`;
 }
 
 export function submitHeadlessProviderRedirectForm(
@@ -39,12 +43,11 @@ export function submitHeadlessProviderRedirectForm(
 }
 
 /**
- * Starts OAuth redirect using the same mechanics as official `allauth.js` `postForm`:
- * `application/x-www-form-urlencoded` POST (django `RedirectToProviderForm` reads `request.POST`).
+ * Initiates OAuth per django-allauth headless contract:
  *
- * Uses `fetch(..., redirect: 'manual')` when possible so `Location` can be read on **same-origin**
- * API URLs. Falls back to a real HTML form POST when the redirect is opaque (typical cross-origin
- * dev setups); connect flows that require `X-Session-Token` cannot use that fallback.
+ * - **`login`**: only a **navigational** `application/x-www-form-urlencoded` POST (no XHR/`fetch`).
+ * - **`connect`**: needs `X-Session-Token`; browsers cannot add that on navigational POST, so this
+ *   uses `fetch(..., redirect: 'manual')` with `credentials: 'include'` when possible.
  */
 export async function startHeadlessProviderRedirect(opts: {
   apiBaseUrl: string;
@@ -55,6 +58,11 @@ export async function startHeadlessProviderRedirect(opts: {
   sessionToken?: string | null;
   windowRef?: Window & typeof globalThis;
   fetchFn?: typeof fetch;
+  /**
+   * When provided, overrides {@link getDjangoCsrfTokenForRequest}. Use `'…'` to force a token or
+   * `''`/`null`-like behavior handled below (tests vs env).
+   */
+  csrfMiddlewareToken?: string | null;
 }): Promise<ProviderRedirectResult> {
   const win = opts.windowRef ?? (typeof window !== 'undefined' ? window : undefined);
   const fetchFn =
@@ -66,12 +74,24 @@ export async function startHeadlessProviderRedirect(opts: {
     process: opts.process,
     callback_url: opts.callbackUrl,
   };
+  const csrf =
+    opts.csrfMiddlewareToken !== undefined ? opts.csrfMiddlewareToken : getDjangoCsrfTokenForRequest();
+  if (csrf) {
+    fields['csrfmiddlewaretoken'] = csrf;
+  }
+
+  if (opts.process === 'login') {
+    submitHeadlessProviderRedirectForm(actionUrl, fields);
+    return { kind: 'form_submitted' };
+  }
 
   const body = new URLSearchParams(fields);
 
   if (!fetchFn || !win) {
-    submitHeadlessProviderRedirectForm(actionUrl, fields);
-    return { kind: 'form_submitted' };
+    return {
+      kind: 'error',
+      message: 'Connect OAuth requires fetch in the browser; DOM-only environment not supported.',
+    };
   }
 
   const headers: Record<string, string> = {
@@ -90,7 +110,7 @@ export async function startHeadlessProviderRedirect(opts: {
       headers,
       body: body.toString(),
       redirect: 'manual',
-      credentials: 'omit',
+      credentials: 'include',
     });
   } catch (e: unknown) {
     return {
@@ -100,10 +120,6 @@ export async function startHeadlessProviderRedirect(opts: {
   }
 
   if (resp.type === 'opaqueredirect') {
-    if (!opts.sessionToken) {
-      submitHeadlessProviderRedirectForm(actionUrl, fields);
-      return { kind: 'form_submitted' };
-    }
     return {
       kind: 'error',
       message:

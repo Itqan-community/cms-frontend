@@ -3,6 +3,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
+import { ALLAUTH_LOGIN_REDIRECT_URL, authInfo, pathForPendingFlow } from '../../headless/allauth-auth.hooks';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { readContinueUrl } from '../../utils/auth-route-query.util';
@@ -13,6 +14,10 @@ import { getErrorMessage } from '../../../../shared/utils/error.utils';
  * Mounted at:
  * - `/auth/oauth/callback` (existing FE)
  * - `/account/provider/callback` (django `HEADLESS_FRONTEND_URLS.socialaccount_login_error`)
+ *
+ * If OAuth appears stuck after the identity provider: DevTools Network, filter for the
+ * django-allauth backend callback document (not fetch). Record HTTP status plus the Location
+ * header — a redirect should aim at this page's CMS URL (HEADLESS redirect callback URL).
  */
 @Component({
   selector: 'app-oauth-callback-page',
@@ -55,9 +60,24 @@ export class OauthCallbackPage implements OnInit {
       setTimeout(() => void this.router.navigate(['/account/login'], loginNav), 2000);
       return;
     }
-    this.auth.bootstrapSessionFromServer({ fetchProfile: true }).subscribe({
-      next: () => {
-        void this.router.navigateByUrl(resumeUrl);
+    this.auth.bootstrapSessionAfterOAuthRedirect({ fetchProfile: true }).subscribe({
+      next: (envelope) => {
+        const info = authInfo(envelope);
+        const pendingPath = pathForPendingFlow(envelope);
+        if (info.isAuthenticated && envelope.status === 200 && info.user) {
+          void this.router.navigateByUrl(resumeUrl);
+          return;
+        }
+        if (pendingPath) {
+          const extras =
+            resumeUrl !== ALLAUTH_LOGIN_REDIRECT_URL && resumeUrl.startsWith('/')
+              ? loginNav ?? { queryParams: { next: resumeUrl } }
+              : {};
+          void this.router.navigate([pendingPath], extras);
+          return;
+        }
+        this.message.set('AUTH.OAUTH.ERROR');
+        setTimeout(() => void this.router.navigate(['/account/login'], loginNav), 2000);
       },
       error: (e: unknown) => {
         if (e instanceof HttpErrorResponse) {

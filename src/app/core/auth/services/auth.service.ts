@@ -217,6 +217,38 @@ export class AuthService {
       .pipe(switchMap((res) => this.applyHeadlessSuccess(res, options)));
   }
 
+  /**
+   * After browser OAuth return: try app session first (`X-Session-Token` / server state), then
+   * cookie-backed browser session so split-host deployments can still hydrate JWT from `meta`.
+   */
+  bootstrapSessionAfterOAuthRedirect(options?: {
+    fetchProfile?: boolean;
+  }): Observable<AuthenticatedOrChallenge> {
+    const fetchProfile = options?.fetchProfile;
+    return this.headless.getSession().pipe(
+      switchMap((appRes) => {
+        if (this.isOauthReturnSessionEstablished(appRes)) {
+          return this.applyHeadlessSuccess(appRes, { fetchProfile });
+        }
+        return this.headless.getBrowserSession().pipe(
+          switchMap((browserRes) =>
+            this.applyHeadlessSuccess(
+              this.isOauthReturnSessionEstablished(browserRes) ? browserRes : appRes,
+              { fetchProfile }
+            )
+          ),
+          catchError(() => this.applyHeadlessSuccess(appRes, { fetchProfile }))
+        );
+      })
+    );
+  }
+
+  /** True when OAuth callback should treat the user as logged in with a usable profile payload. */
+  private isOauthReturnSessionEstablished(res: AuthenticatedOrChallenge): boolean {
+    const info = authInfo(res);
+    return !!(info.user && info.isAuthenticated && res.status === 200);
+  }
+
   applyHeadlessSuccess(
     res: AuthenticatedOrChallenge,
     options?: { fetchProfile?: boolean; _depth?: number }
@@ -347,7 +379,7 @@ export class AuthService {
   }
 
   /**
-   * Starts Google OAuth via headless provider redirect (`POST .../auth/provider/redirect`).
+   * Starts Google OAuth via headless browser client provider redirect (`POST .../auth/browser/v1/auth/provider/redirect`).
    * Requires `environment.oauthBrowserRedirectEnabled`.
    */
   async startGoogleOAuth(
@@ -358,7 +390,7 @@ export class AuthService {
   }
 
   /**
-   * Starts GitHub OAuth via headless provider redirect (`POST .../auth/provider/redirect`).
+   * Starts GitHub OAuth via headless browser client provider redirect (`POST .../auth/browser/v1/auth/provider/redirect`).
    * Requires `environment.oauthBrowserRedirectEnabled`.
    */
   async startGitHubOAuth(

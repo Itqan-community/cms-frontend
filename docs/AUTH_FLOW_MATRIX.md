@@ -38,10 +38,10 @@ Canonical SPA callback route: **`/account/provider/callback`** (`HEADLESS_FRONTE
 
 | Step | Client | Details |
 |------|--------|---------|
-| Start | `POST /auth/app/v1/auth/provider/redirect` | **Form-encoded** body (`provider`, `process`, `callback_url`). **`process`** is `login` or `connect` only (allauth). Sign-up-with-provider uses **`login`**; incomplete profile continues via **`provider_signup`** → `/account/provider/signup`. |
-| Headers | APP client | `User-Agent: django-allauth example app`; **`connect`** sends **`X-Session-Token`**. Anonymous **`login`** omits ST so stale tokens do not bind the wrong session. |
-| Redirect | Browser | Same-origin API URLs use `fetch(redirect: 'manual')` + `Location`. Cross-origin dev setups fall back to a real HTML **form POST** (full navigation) for **`login`** only; **`connect`** requires readable redirect headers or same-origin API. |
-| Return | Callback route | `GET /auth/session` → authenticated **`navigateByUrl(next)`**; **`401`** with pending **`provider_signup`** → provider signup page; **`?error=`** → login (preserves **`next`** when present). |
+| Start | `POST /auth/browser/v1/auth/provider/redirect` | **Form-encoded** body (`provider`, `process`, `callback_url`). **`process`** is `login` or `connect` only (allauth). Sign-up-with-provider uses **`login`**; incomplete profile continues via **`provider_signup`** → `/account/provider/signup`. |
+| Headers / transport | **Browser** client URL; behavior differs by `process` | **`login`**: navigational **HTML form POST** only (no XHR). **`connect`**: `fetch(..., redirect: 'manual', credentials: 'include')` + **`X-Session-Token`** (browsers cannot attach custom headers on form POST). |
+| Redirect | Browser | **`login`**: full document navigation from the form submit. **`connect`**: read **`Location`** from the `fetch` response when CORS exposes it; opaque cross-origin redirects surface a dedicated error string. |
+| Return | Callback route | Bootstrap session (app then browser session as needed); authenticated → **`navigateByUrl(next)`**; pending flow (e.g. **`provider_signup`**) → routed via `pathForPendingFlow`; **`?error=`** → login (preserves **`next`** when present). |
 
 ### Provider consoles (Google Cloud / GitHub OAuth app)
 
@@ -82,7 +82,7 @@ Staging **`SOCIALACCOUNT_PROVIDERS`** in backend base settings uses env **`GOOGL
 5. **Connect** — `/account/providers` → Connect Google/GitHub (`process=connect`) → return → list updates (requires same-origin API or proxy for cross-origin connect).
 6. **Disconnect** — remove linked provider; list updates.
 7. **Callback error** — `/account/provider/callback?error=...` → message → login with **`next`** preserved when provided.
-8. **Production** — `oauthBrowserRedirectEnabled: false` until validated; repeat 1–7 after enabling.
+8. **Production** — `oauthBrowserRedirectEnabled: true` in shipped env files; repeat 1–7 on production after deploy.
 
 **Verification ops (before blaming FE)**
 

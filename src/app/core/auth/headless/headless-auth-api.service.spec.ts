@@ -4,8 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import { HeadlessAppTokenService } from './headless-app-token.service';
 import { HeadlessAuthApiService } from './headless-auth-api.service';
-import { HEADLESS_CLIENT_APP } from './headless-api.types';
-import * as providerRedirect from './headless-provider-redirect.util';
+import { HEADLESS_CLIENT_APP, HEADLESS_CLIENT_BROWSER } from './headless-api.types';
 
 describe('HeadlessAuthApiService', () => {
   let httpMock: HttpTestingController;
@@ -30,29 +29,6 @@ describe('HeadlessAuthApiService', () => {
     httpMock.verify();
   });
 
-  it('redirectToProvider delegates to startHeadlessProviderRedirect', async () => {
-    if (!api) {
-      pending('API_BASE_URL');
-      return;
-    }
-    spyOn(providerRedirect, 'startHeadlessProviderRedirect').and.returnValue(
-      Promise.resolve({ kind: 'form_submitted' })
-    );
-    await service.redirectToProvider({
-      provider: 'google',
-      process: 'login',
-      callbackUrl: 'https://app.example/cb',
-    });
-    expect(providerRedirect.startHeadlessProviderRedirect).toHaveBeenCalledWith(
-      jasmine.objectContaining({
-        apiBaseUrl: api,
-        provider: 'google',
-        process: 'login',
-        callbackUrl: 'https://app.example/cb',
-      })
-    );
-  });
-
   it('getConfig GETs app client /config', (done) => {
     if (!api) {
       pending('API_BASE_URL');
@@ -71,6 +47,24 @@ describe('HeadlessAuthApiService', () => {
     }
     service.getSession().subscribe(() => done());
     const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_APP}/v1/auth/session`);
+    expect(r.request.method).toBe('GET');
+    r.flush({
+      status: 200,
+      data: {
+        user: { id: 1, display: 'u', email: 'a@b.co', has_usable_password: true },
+        methods: [],
+      },
+      meta: { is_authenticated: true },
+    });
+  });
+
+  it('getBrowserSession GETs browser client /auth/session', (done) => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    service.getBrowserSession().subscribe(() => done());
+    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_BROWSER}/v1/auth/session`);
     expect(r.request.method).toBe('GET');
     r.flush({
       status: 200,

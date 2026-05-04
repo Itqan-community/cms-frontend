@@ -41,6 +41,7 @@ describe('AuthService (app / headless)', () => {
       'getConfig',
       'getAuth',
       'getSession',
+      'getBrowserSession',
       'login',
       'signup',
       'deleteSession',
@@ -67,6 +68,13 @@ describe('AuthService (app / headless)', () => {
       } as AuthenticatedResponse)
     );
     headless.getSession.and.returnValue(
+      of({
+        status: 200,
+        data: { user: mockUser, methods: [] },
+        meta: { is_authenticated: true },
+      } as AuthenticatedResponse)
+    );
+    headless.getBrowserSession.and.returnValue(
       of({
         status: 200,
         data: { user: mockUser, methods: [] },
@@ -187,5 +195,30 @@ describe('AuthService (app / headless)', () => {
     const fn = (service as unknown as { handleAuthChangeEvent: Function }).handleAuthChangeEvent;
     await fn.call(service, 'LOGGED_IN', {});
     expect(routerMock.navigateByUrl).not.toHaveBeenCalled();
+  });
+
+  it('bootstrapSessionAfterOAuthRedirect skips browser when app session is established', (done) => {
+    headless.getSession.and.returnValue(of(authedResponse()));
+    headless.getBrowserSession.calls.reset();
+    service.bootstrapSessionAfterOAuthRedirect({ fetchProfile: false }).subscribe(() => {
+      expect(headless.getBrowserSession).not.toHaveBeenCalled();
+      expect(service.isAuthenticated()).toBe(true);
+      done();
+    });
+  });
+
+  it('bootstrapSessionAfterOAuthRedirect uses browser session when app anonymous', (done) => {
+    const anonymous = {
+      status: 200,
+      data: { methods: [] },
+      meta: { is_authenticated: false },
+    } as unknown as AuthenticatedResponse;
+    headless.getSession.and.returnValue(of(anonymous));
+    headless.getBrowserSession.and.returnValue(of(authedResponse()));
+    service.bootstrapSessionAfterOAuthRedirect({ fetchProfile: false }).subscribe(() => {
+      expect(headless.getBrowserSession).toHaveBeenCalled();
+      expect(service.isAuthenticated()).toBe(true);
+      done();
+    });
   });
 });
