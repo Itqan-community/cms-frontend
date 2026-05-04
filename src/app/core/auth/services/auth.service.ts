@@ -15,6 +15,8 @@ import {
   throwError,
 } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
+import { AllauthAuthChangeBus } from '../headless/allauth-auth-change.bus';
 import {
   ALLAUTH_LOGIN_REDIRECT_URL,
   ALLAUTH_LOGIN_URL,
@@ -26,23 +28,24 @@ import {
   pathForFlow,
   pathForPendingFlow,
 } from '../headless/allauth-auth.hooks';
-import { ALLAUTH_SOCIAL_PROVIDER_GITHUB, ALLAUTH_SOCIAL_PROVIDER_GOOGLE } from '../headless/allauth-urls';
 import { applyAllauthEnvelopeSideEffects } from '../headless/allauth-envelope.util';
-import { AllauthAuthChangeBus } from '../headless/allauth-auth-change.bus';
+import {
+  ALLAUTH_SOCIAL_PROVIDER_GITHUB,
+  ALLAUTH_SOCIAL_PROVIDER_GOOGLE,
+} from '../headless/allauth-urls';
 import type {
-  AuthenticatedResponse,
   AuthenticationMeta,
   AuthenticationResponse,
   ConfigurationResponse,
   Flow,
   HeadlessUser,
 } from '../headless/headless-api.types';
+import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
 import {
   AuthenticatedOrChallenge,
   HeadlessAuthApiService,
 } from '../headless/headless-auth-api.service';
 import type { ProviderRedirectResult } from '../headless/headless-provider-redirect.util';
-import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
 import {
   LoginRequest,
   RegisterRequest,
@@ -50,7 +53,6 @@ import {
   UpdateProfileResponse,
   User,
 } from '../models/auth.model';
-import { getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
 
 @Injectable({
   providedIn: 'root',
@@ -297,11 +299,13 @@ export class AuthService {
     const payloadUser =
       res.status === 200 && res.data && 'user' in res.data ? res.data.user : undefined;
     if (res.meta?.is_authenticated && !payloadUser) {
-      return this.headless.getSession().pipe(
-        switchMap((s) =>
-          this.applyHeadlessSuccess(s, { ...options, fetchProfile, _depth: depth + 1 })
-        )
-      );
+      return this.headless
+        .getSession()
+        .pipe(
+          switchMap((s) =>
+            this.applyHeadlessSuccess(s, { ...options, fetchProfile, _depth: depth + 1 })
+          )
+        );
     }
 
     if (
@@ -463,7 +467,9 @@ export class AuthService {
      */
     if (!getDjangoCsrfTokenForRequest()) {
       await firstValueFrom(
-        this.headless.getBrowserConfig().pipe(catchError(() => of(undefined as ConfigurationResponse | undefined)))
+        this.headless
+          .getBrowserConfig()
+          .pipe(catchError(() => of(undefined as ConfigurationResponse | undefined)))
       );
     }
     const result = await this.headless.redirectToProvider({
@@ -528,9 +534,7 @@ export class AuthService {
    */
   private isOAuthProviderCallbackRoute(): boolean {
     const path = this.router.url.split(/[?#]/)[0];
-    return (
-      path.endsWith('/account/provider/callback') || path.endsWith('/auth/oauth/callback')
-    );
+    return path.endsWith('/account/provider/callback') || path.endsWith('/auth/oauth/callback');
   }
 
   private async handleAuthChangeEvent(evt: AuthChangeEventType, auth: unknown): Promise<void> {
@@ -574,5 +578,18 @@ export class AuthService {
       default:
         break;
     }
+  }
+  // new simplified flow //
+  getConfig(): Observable<ConfigurationResponse> {
+    return this.http.get<ConfigurationResponse>(`${this.API_BASE_URL}/auth/app/v1/config`);
+  }
+  providerRedirect(providerId: string, callbackUrl: string): Observable<ProviderRedirectResult> {
+    return this.http.post<ProviderRedirectResult>(
+      `${this.API_BASE_URL}/auth/browser/v1/auth/provider/redirect`,
+      {
+        provider: providerId,
+        callbackUrl,
+      }
+    );
   }
 }

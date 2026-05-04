@@ -3,11 +3,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import { ConfigurationResponse } from '../../headless/headless-api.types';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
+import { ProviderRedirectResult } from '../../headless/headless-provider-redirect.util';
 import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
 import { LoginRequest } from '../../models/auth.model';
 import { AuthService } from '../../services/auth.service';
@@ -58,10 +60,40 @@ export class LoginPage {
   }
 
   async onLoginWithGoogle(): Promise<void> {
-    this.errorMessage.set('');
-    const r = await this.authService.startGoogleOAuth(this.oauthCallbackUrl, 'login');
-    if (r.kind === 'error') {
-      this.errorMessage.set(r.message || this.translate.instant('AUTH.OAUTH.ERROR'));
+    const enableNewMethod = localStorage.getItem('enableNewMethod') === 'true';
+    if (enableNewMethod) {
+      // let cleint_id = '';
+      // let openid_configuration_url = '';
+
+      this.authService.getConfig().subscribe({
+        next: (config: ConfigurationResponse) => {
+          // cleint_id = config.data.socialaccount?.providers?.[0]?.client_id || '';
+          // openid_configuration_url = config.data.socialaccount?.providers?.[0]?.openid_configuration_url || '';
+          console.log('hello from config', config);
+          this.authService
+            .providerRedirect(
+              config.data.socialaccount?.providers?.[0]?.id || 'google',
+              'https://staging.cms.itqan.dev/account/provider/callback'
+            )
+            .subscribe({
+              next: (result: ProviderRedirectResult) => {
+                console.log('hello from provider redirect', result);
+              },
+              error: (error) => {
+                console.error(error);
+              },
+            });
+        },
+        error: (error) => {
+          console.error(error);
+        },
+      });
+    } else {
+      this.errorMessage.set('');
+      const r = await this.authService.startGoogleOAuth(this.oauthCallbackUrl, 'login');
+      if (r.kind === 'error') {
+        this.errorMessage.set(r.message || this.translate.instant('AUTH.OAUTH.ERROR'));
+      }
     }
   }
 
