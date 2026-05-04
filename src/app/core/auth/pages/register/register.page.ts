@@ -1,29 +1,17 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import {
-  Component,
-  ElementRef,
-  OnDestroy,
-  afterNextRender,
-  inject,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
-import { pathForPendingFlow } from '../../headless/allauth-auth.hooks';
-import { getGsiGoogle } from '../../headless/google-gsi.types';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
-import type { AuthenticatedOrChallenge } from '../../headless/headless-auth-api.service';
 import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
 import { RegisterRequest } from '../../models/auth.model';
 import { AuthService } from '../../services/auth.service';
 import { buildHeadlessOAuthCallbackUrl } from '../../utils/auth-route-query.util';
-import { isOauthReturnSessionEstablished } from '../../utils/oauth-callback-session.util';
 
 @Component({
   selector: 'app-register-page',
@@ -39,23 +27,36 @@ import { isOauthReturnSessionEstablished } from '../../utils/oauth-callback-sess
   templateUrl: './register.page.html',
   styleUrls: ['./register.page.less'],
 })
-export class RegisterPage implements OnDestroy {
+export class RegisterPage {
   readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  readonly activatedRoute = inject(ActivatedRoute);
+  private readonly activatedRoute = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
   private readonly translate = inject(TranslateService);
 
-  readonly googleBtnHost = viewChild<ElementRef<HTMLDivElement>>('googleBtnHost');
+  get oauthCallbackUrl(): string {
+    return buildHeadlessOAuthCallbackUrl(this.activatedRoute);
+  }
+
+  async onSignUpWithGoogle(): Promise<void> {
+    this.errorMessage.set('');
+    const r = await this.authService.startGoogleOAuth(this.oauthCallbackUrl, 'login');
+    if (r.kind === 'error') {
+      this.errorMessage.set(r.message || this.translate.instant('AUTH.OAUTH.ERROR'));
+    }
+  }
+
+  async onSignUpWithGitHub(): Promise<void> {
+    this.errorMessage.set('');
+    const r = await this.authService.startGitHubOAuth(this.oauthCallbackUrl, 'login');
+    if (r.kind === 'error') {
+      this.errorMessage.set(r.message || this.translate.instant('AUTH.OAUTH.ERROR'));
+    }
+  }
 
   registerForm: FormGroup;
   errorMessage = signal<string>('');
   passkeyAvailable = signal(false);
-
-  passwordVisible = signal(false);
-  confirmPasswordVisible = signal(false);
-
-  private googleMountAttempted = false;
 
   constructor() {
     this.passkeyAvailable.set(isPasskeyClientEnvironmentSupported());
@@ -71,65 +72,10 @@ export class RegisterPage implements OnDestroy {
       },
       { validators: this.passwordMatchValidator }
     );
-    afterNextRender(() => {
-      void this.tryMountGoogleButton();
-    });
   }
 
-  ngOnDestroy(): void {
-    getGsiGoogle()?.accounts?.id?.cancel?.();
-  }
-
-  get oauthCallbackUrl(): string {
-    return buildHeadlessOAuthCallbackUrl(this.activatedRoute);
-  }
-
-  private async tryMountGoogleButton(): Promise<void> {
-    if (!this.authService.socialGoogleUseAppTokenConfigured() || this.googleMountAttempted) {
-      return;
-    }
-    const el = this.googleBtnHost()?.nativeElement;
-    if (!el) {
-      return;
-    }
-    this.googleMountAttempted = true;
-    const lang = localStorage.getItem('lang') ?? undefined;
-    await this.authService.mountGoogleSignInButton(el, 'login', {
-      locale: lang === 'ar' ? 'ar' : 'en',
-      onNext: (envelope: AuthenticatedOrChallenge) => this.onGoogleAppTokenResult(envelope),
-      onError: (m) => this.errorMessage.set(m),
-    });
-  }
-
-  private onGoogleAppTokenResult(envelope: AuthenticatedOrChallenge): void {
-    this.errorMessage.set('');
-    this.authService.navigateAfterGoogleAppTokenLogin(
-      this.activatedRoute.snapshot.queryParamMap,
-      envelope
-    );
-    if (!pathForPendingFlow(envelope) && !isOauthReturnSessionEstablished(envelope)) {
-      this.errorMessage.set(this.translate.instant('AUTH.OAUTH.ERROR'));
-    }
-  }
-
-  async onSignUpWithGoogle(): Promise<void> {
-    this.errorMessage.set('');
-    if (this.authService.socialGoogleUseAppTokenConfigured()) {
-      return;
-    }
-    const r = await this.authService.startGoogleOAuth(this.oauthCallbackUrl, 'login');
-    if (r.kind === 'error') {
-      this.errorMessage.set(r.message || this.translate.instant('AUTH.OAUTH.ERROR'));
-    }
-  }
-
-  async onSignUpWithGitHub(): Promise<void> {
-    this.errorMessage.set('');
-    const r = await this.authService.startGitHubOAuth(this.oauthCallbackUrl, 'login');
-    if (r.kind === 'error') {
-      this.errorMessage.set(r.message || this.translate.instant('AUTH.OAUTH.ERROR'));
-    }
-  }
+  passwordVisible = signal(false);
+  confirmPasswordVisible = signal(false);
 
   togglePasswordVisibility(): void {
     this.passwordVisible.set(!this.passwordVisible());

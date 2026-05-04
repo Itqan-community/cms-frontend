@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { ParamMap, Router } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   BehaviorSubject,
   Observable,
@@ -40,8 +40,6 @@ import {
   AuthenticatedOrChallenge,
   HeadlessAuthApiService,
 } from '../headless/headless-auth-api.service';
-import { GoogleGsiService } from '../headless/google-gsi.service';
-import { recoverHeadlessJsonOkOnHttpError } from '../headless/headless-http-recover.util';
 import type { ProviderRedirectResult } from '../headless/headless-provider-redirect.util';
 import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
 import {
@@ -51,11 +49,8 @@ import {
   UpdateProfileResponse,
   User,
 } from '../models/auth.model';
-import { getErrorMessage } from '../../../shared/utils/error.utils';
 import { getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
-import { readContinueUrl } from '../utils/auth-route-query.util';
 import { isOauthReturnSessionEstablished } from '../utils/oauth-callback-session.util';
-import { buildGoogleProviderTokenRequestBody } from '../utils/provider-token.payload.util';
 
 @Injectable({
   providedIn: 'root',
@@ -64,17 +59,12 @@ export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly router = inject(Router);
   private readonly headless = inject(HeadlessAuthApiService);
-  private readonly googleGsi = inject(GoogleGsiService);
   private readonly tokenStore = inject(HeadlessAppTokenService);
   private readonly authBus = inject(AllauthAuthChangeBus);
 
   /** When false (default app mode), hide/disabled browser OAuth buttons until redirect+callback are wired. */
   readonly oauthBrowserRedirectEnabled = environment.oauthBrowserRedirectEnabled;
 
-  /** Prefer GSI → `POST .../auth/app/v1/auth/provider/token` when set with a non-empty `googleClientId`. */
-  readonly socialGoogleUseAppTokenConfigured = computed(
-    () => !!(environment.socialGoogleUseAppToken && environment.googleClientId?.trim())
-  );
   private readonly API_BASE_URL = environment.API_BASE_URL;
   private readonly USER_KEY = 'user';
 
@@ -415,110 +405,6 @@ export class AuthService {
           }
         })
       );
-  }
-
-  /**
-   * `POST …/auth/app/v1/auth/provider/token` for Google (`id_token` + `client_id`), then hydrate profile/session.
-   * Unwraps HTTP error responses that carry headless envelopes (e.g. `401` `provider_signup`).
-   */
-  exchangeGoogleCredential(
-    process: 'login' | 'connect',
-    idTokenJwt: string
-  ): Observable<AuthenticatedOrChallenge> {
-    if (!environment.socialGoogleUseAppToken || !environment.googleClientId?.trim()) {
-      return throwError(() => new Error('Google app-token login is not configured.'));
-    }
-    if (process === 'login') {
-      this.tokenStore.clearSessionToken();
-    }
-    if (process === 'connect' && !this.tokenStore.getSessionToken()) {
-      return throwError(() => new Error('Connecting Google requires an app session token; sign in again.'));
-    }
-    const body = buildGoogleProviderTokenRequestBody(
-      process,
-      idTokenJwt,
-      environment.googleClientId.trim()
-    );
-    return recoverHeadlessJsonOkOnHttpError(this.headless.authenticateByToken(body)).pipe(
-      catchError((err: unknown) => {
-        if (err instanceof HttpErrorResponse && err.error && typeof err.error === 'object') {
-          const b = err.error as { status?: unknown };
-          if (typeof b.status === 'number') {
-            return of(err.error as AuthenticatedOrChallenge);
-          }
-        }
-        return throwError(() => err);
-      }),
-      switchMap((res) => this.applyHeadlessSuccess(res, { fetchProfile: true }))
-    );
-  }
-
-  /** Mount Google's Sign-In button (GSI); invokes `exchangeGoogleCredential` on success. */
-  async mountGoogleSignInButton(
-    host: HTMLElement,
-    process: 'login' | 'connect',
-    options: {
-      onNext: (envelope: AuthenticatedOrChallenge) => void;
-      onError: (message: string) => void;
-      locale?: string;
-    }
-  ): Promise<void> {
-    if (!this.socialGoogleUseAppTokenConfigured()) {
-      options.onError('Google Sign-In is not configured (set socialGoogleUseAppToken + googleClientId).');
-      return;
-    }
-    try {
-      await this.googleGsi.renderSignInButton(
-        host,
-        environment.googleClientId.trim(),
-        (credentialJwt) => {
-          this.exchangeGoogleCredential(process, credentialJwt).subscribe({
-            next: (env) => options.onNext(env),
-            error: (e: unknown) =>
-              options.onError(getErrorMessage(e) ?? 'Google sign-in failed.'),
-          });
-        },
-        {
-          ...(options.locale ? { locale: options.locale } : {}),
-        }
-      );
-    } catch (e: unknown) {
-      options.onError(e instanceof Error ? e.message : 'Google Sign-In unavailable.');
-    }
-  }
-
-  /**
-   * After app-mode Google token login: navigate to pending flow (`provider_signup`, …), resume URL, or stay unhandled.
-   * Use `resumeQuery` from `ActivatedRoute.snapshot.queryParamMap`.
-   */
-  navigateAfterGoogleAppTokenLogin(
-    resumeQuery: ParamMap,
-    envelope: AuthenticatedOrChallenge
-  ): void {
-    const pendingPath = pathForPendingFlow(envelope);
-    const resumeUrl = readContinueUrl(resumeQuery);
-    const loginExtras =
-      resumeUrl !== ALLAUTH_LOGIN_REDIRECT_URL && resumeUrl.startsWith('/')
-        ? { queryParams: { next: resumeUrl } }
-        : {};
-
-    if (pendingPath) {
-      void this.router.navigate([pendingPath], loginExtras);
-      return;
-    }
-    if (isOauthReturnSessionEstablished(envelope)) {
-      void this.router.navigateByUrl(resumeUrl);
-    }
-  }
-
-  /** True when any Google SSO entry-point should render (app token widget and/or legacy browser redirect button). */
-  showGoogleSocialAuth(): boolean {
-    return this.socialGoogleUseAppTokenConfigured() || this.oauthBrowserRedirectEnabled;
-  }
-
-  /** GitHub OAuth still uses browser redirect when enabled. */
-  showGithubSocialAuth(): boolean {
-    return this.oauthBrowserRedirectEnabled;
   }
 
   /**

@@ -255,27 +255,17 @@
         </button>
       </form>
 
-      @if (authService.showGoogleSocialAuth() || authService.showGithubSocialAuth() || passkeyAvailable()) {
+      @if (authService.oauthBrowserRedirectEnabled || passkeyAvailable()) {
         <div class="register__social">
-          @if (authService.showGoogleSocialAuth() || authService.showGithubSocialAuth()) {
+          @if (authService.oauthBrowserRedirectEnabled) {
             <p class="register__social-title">{{ 'AUTH.LOGIN.OR_CONTINUE' | translate }}</p>
             <div class="register__social-btns">
-              @if (authService.socialGoogleUseAppTokenConfigured()) {
-                <div #googleBtnHost class="register__social-btn-host"></div>
-              }
-              @if (
-                authService.oauthBrowserRedirectEnabled &&
-                !authService.socialGoogleUseAppTokenConfigured()
-              ) {
-                <button type="button" class="register__social-btn" (click)="onSignUpWithGoogle()">
-                  {{ 'AUTH.REGISTER.LOGIN_WITH_GOOGLE' | translate }}
-                </button>
-              }
-              @if (authService.oauthBrowserRedirectEnabled) {
-                <button type="button" class="register__social-btn" (click)="onSignUpWithGitHub()">
-                  {{ 'AUTH.REGISTER.LOGIN_WITH_GITHUB' | translate }}
-                </button>
-              }
+              <button type="button" class="register__social-btn" (click)="onSignUpWithGoogle()">
+                {{ 'AUTH.REGISTER.LOGIN_WITH_GOOGLE' | translate }}
+              </button>
+              <button type="button" class="register__social-btn" (click)="onSignUpWithGitHub()">
+                {{ 'AUTH.REGISTER.LOGIN_WITH_GITHUB' | translate }}
+              </button>
             </div>
           }
           @if (passkeyAvailable()) {

@@ -6,8 +6,6 @@
 export const environment = {
   production: false,
   oauthBrowserRedirectEnabled: true,
-  socialGoogleUseAppToken: false,
-  googleClientId: '',
   API_BASE_URL: 'http://127.0.0.1:8000/cms-api',
   API_DOCS_URL: 'http://127.0.0.1:8000/docs',
   ADMIN_API_BASE_URL: 'http://127.0.0.1:8000/portal',

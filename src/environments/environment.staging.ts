@@ -1,8 +1,6 @@
 export const environment = {
   production: false,
   oauthBrowserRedirectEnabled: true,
-  socialGoogleUseAppToken: true,
-  googleClientId: '511205364372-str6o7bdi6v5rfosqamju4aagbdqo9q8.apps.googleusercontent.com',
   API_BASE_URL: 'https://staging.api.cms.itqan.dev/cms-api',
   API_DOCS_URL: 'https://staging.api.cms.itqan.dev/docs',
   ADMIN_API_BASE_URL: 'https://staging.api.cms.itqan.dev/portal',

@@ -32,21 +32,7 @@ Legend: **ST** = `X-Session-Token` from last `meta.session_token`. **401*** = co
 
 After full authentication, docs allow dropping `X-Session-Token` and using `Authorization: Bearer` for headless + app APIs. This FE keeps ST for `/auth/app/v1/*` while continuing to use Bearer for `/cms-api/*` non-auth routes.
 
-## Google Sign-In — App-mode (`provider/token`)
-
-When **`socialGoogleUseAppToken`** is **`true`** and **`googleClientId`** is set in Angular [`environment`](src/environments/environment.staging.ts), login / signup / connect use:
-
-1. **Google Identity Services** (`https://accounts.google.com/gsi/client`) → user picks an account → **JWT `credential`** (ID token).
-2. **`POST /cms-api/auth/app/v1/auth/provider/token`** with JSON body `{ "provider": "google", "process": "login"|"connect", "token": { "id_token": "<credential>", "client_id": "<googleClientId>" } }`.
-3. Store **`meta.session_token`** → **`X-Session-Token`** on subsequent **`/auth/app/v1/*`** requests (JWT strategy).
-
-**GitHub** still uses **browser redirect** (`POST …/browser/…/auth/provider/redirect`) when **`oauthBrowserRedirectEnabled`** until a token or popup flow is added.
-
-### CSP (when headers are tightened)
-
-There is **no restrictive CMS meta CSP** in this repo today. If infra adds **Content-Security-Policy**, allow Google Identity Services: include **`https://accounts.google.com`** in **`script-src`** (and follow [Google’s GSI CSP guidance](https://developers.google.com/identity/gsi/web/guides/get-google-api-clientid#get_your_google_api_client_id) for **`frame-src`** / **`connect-src`** / **`style-src`** as applicable).
-
-## Browser OAuth (Google / GitHub, headless browser client)
+## Browser OAuth (Google / GitHub, headless app client)
 
 Canonical SPA callback route: **`/account/provider/callback`** (`HEADLESS_FRONTEND_URLS.socialaccount_login_error` on BE). Legacy **`/auth/oauth/callback`** still mounts the same component.
 
@@ -97,30 +83,20 @@ Staging **`SOCIALACCOUNT_PROVIDERS`** in backend base settings uses env **`GOOGL
 
 ### Manual QA checklist (Google / GitHub matrix)
 
-**With `socialGoogleUseAppToken: true` and `googleClientId` set (staging/production)**
+**Staging / local with `oauthBrowserRedirectEnabled: true`**
 
-1. **Google login** — `/account/login` → Google branded button → `POST …/auth/provider/token` → **`X-Session-Token`** set → navigates per `next` or `/gallery` (or `/account/provider/signup` when required).
-2. **Google signup** — same widget on `/account/signup` (`process=login`).
-3. **Google connect** — `/account/providers` → mounted Google button → **`process=connect`** → list refreshes.
-4. **GitHub login/signup/connect** — still **full-page** browser redirect → `/account/provider/callback` bootstrap when **`oauthBrowserRedirectEnabled`**.
-
-**Legacy / fallback (Google via browser redirect)**
-
-If **`socialGoogleUseAppToken`** is false or **`googleClientId`** is empty but **`oauthBrowserRedirectEnabled`** is true, Google uses the **Browser OAuth** rows below (`POST …/browser/…/provider/redirect`).
-
-**Staging / local with only `oauthBrowserRedirectEnabled: true` (no Google app token)**
-
-1. **Google login** — `/account/login` → navigational POST → IdP → `/account/provider/callback` → session bootstrap.
-2. **GitHub login** — same redirect + callback pattern.
-3. **Google / GitHub signup** — `/account/signup` social → callback or `provider_signup` when required.
-4. **Connect** — `/account/providers` → form POST redirect → callback → list refresh.
-5. **Disconnect** — remove linked provider; list updates.
-6. **Callback error** — `/account/provider/callback?error=...` → CMS message → login with **`next`** when provided.
-7. **Production** — set **`googleClientId`** for app-mode Google; keep **`oauthBrowserRedirectEnabled`** for GitHub; repeat checks after deploy.
+1. **Google login** — `/account/login` → Google → return to `/account/provider/callback` → session OK → lands on `next` or `/gallery`.
+2. **GitHub login** — same as Google.
+3. **Google signup** — `/account/signup` social (`process=login`) → provider signup if BE requires → complete → app entry.
+4. **GitHub signup** — same.
+5. **Connect** — `/account/providers` → Connect Google/GitHub (`process=connect`) → return → list updates (requires same-origin API or proxy for cross-origin connect).
+6. **Disconnect** — remove linked provider; list updates.
+7. **Callback error** — `/account/provider/callback?error=...` → message → login with **`next`** preserved when provided.
+8. **Production** — `oauthBrowserRedirectEnabled: true` in shipped env files; repeat 1–7 on production after deploy.
 
 **Verification ops (before blaming FE)**
 
-- [ ] **`googleClientId`** in Angular matches backend **`GOOGLE_CLIENT_ID`** Web client (Authorized JavaScript origins include your CMS origins for GSI).
+- [ ] Google Cloud OAuth client includes staging **and** prod API callback URLs above (exact paths, trailing slash).
 - [ ] GitHub OAuth app authorization callback URL matches the API host in use.
 - [ ] `FRONTEND_BASE_URL` secret matches the CMS URL users open.
 - [ ] No conflicting DB `SocialApp` vs env `APP` credentials for the same provider in that environment.

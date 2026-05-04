@@ -5,8 +5,6 @@ import { environment } from '../../../../environments/environment';
 import { HeadlessAppTokenService } from './headless-app-token.service';
 import { HeadlessAuthApiService } from './headless-auth-api.service';
 import { HEADLESS_CLIENT_APP, HEADLESS_CLIENT_BROWSER } from './headless-api.types';
-import { ALLAUTH_URLS } from './allauth-urls';
-import { buildGoogleProviderTokenRequestBody } from '../utils/provider-token.payload.util';
 
 describe('HeadlessAuthApiService', () => {
   let httpMock: HttpTestingController;
@@ -29,29 +27,6 @@ describe('HeadlessAuthApiService', () => {
 
   afterEach(() => {
     httpMock.verify();
-  });
-
-  it('authenticateByToken POSTs Google token as nested id_token plus client_id', (done) => {
-    if (!api) {
-      pending('API_BASE_URL');
-      return;
-    }
-    const body = buildGoogleProviderTokenRequestBody(
-      'login',
-      'eyJ.fake',
-      'cid.apps.googleusercontent.com'
-    );
-    service.authenticateByToken(body).subscribe(() => done());
-    const r = httpMock.expectOne(
-      `${api}/auth/${HEADLESS_CLIENT_APP}/v1${ALLAUTH_URLS.PROVIDER_TOKEN}`
-    );
-    expect(r.request.method).toBe('POST');
-    expect(r.request.body).toEqual(body);
-    r.flush({
-      status: 200,
-      data: { user: { id: 1, display: 'u', email: 'a@b.co', has_usable_password: true }, methods: [] },
-      meta: { is_authenticated: true },
-    });
   });
 
   it('getConfig GETs app client /config', (done) => {
