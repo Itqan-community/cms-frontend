@@ -1,6 +1,9 @@
 import { convertToParamMap } from '@angular/router';
 import type { ActivatedRoute } from '@angular/router';
-import { buildHeadlessConnectOAuthCallbackUrl, buildHeadlessOAuthCallbackUrl } from './auth-route-query.util';
+import {
+  buildHeadlessConnectOAuthCallbackUrl,
+  buildHeadlessOAuthCallbackUrl,
+} from './auth-route-query.util';
 
 describe('auth-route-query.util (OAuth callback)', () => {
   it('buildHeadlessOAuthCallbackUrl preserves next query param', () => {
@@ -16,8 +19,6 @@ describe('auth-route-query.util (OAuth callback)', () => {
   it('buildHeadlessConnectOAuthCallbackUrl defaults next to providers page', () => {
     expect(
       buildHeadlessConnectOAuthCallbackUrl('/account/providers', { origin: 'https://cms.example' })
-    ).toBe(
-      'https://cms.example/account/provider/callback?next=%2Faccount%2Fproviders'
-    );
+    ).toBe('https://cms.example/account/provider/callback?next=%2Faccount%2Fproviders');
   });
 });

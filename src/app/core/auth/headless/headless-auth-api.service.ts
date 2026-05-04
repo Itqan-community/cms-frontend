@@ -292,9 +292,13 @@ export class HeadlessAuthApiService {
 
   mfaTrust(trust: boolean): Observable<AuthenticatedOrChallenge> {
     return this.http
-      .post<AuthenticatedResponse>(`${this.base()}${ALLAUTH_URLS.MFA_TRUST}`, { trust }, {
-        headers: this.jsonHeaders(),
-      })
+      .post<AuthenticatedResponse>(
+        `${this.base()}${ALLAUTH_URLS.MFA_TRUST}`,
+        { trust },
+        {
+          headers: this.jsonHeaders(),
+        }
+      )
       .pipe(this.envTap());
   }
 
@@ -437,9 +441,13 @@ export class HeadlessAuthApiService {
 
   updateWebauthnCredential(id: string, data: Record<string, unknown>): Observable<unknown> {
     return this.http
-      .put(`${this.base()}${ALLAUTH_URLS.WEBAUTHN_AUTHENTICATOR}`, { id, ...data }, {
-        headers: this.jsonHeaders(),
-      })
+      .put(
+        `${this.base()}${ALLAUTH_URLS.WEBAUTHN_AUTHENTICATOR}`,
+        { id, ...data },
+        {
+          headers: this.jsonHeaders(),
+        }
+      )
       .pipe(this.envTap());
   }
 
@@ -464,10 +472,9 @@ export class HeadlessAuthApiService {
 
   getWebauthnMfaOptions(): Observable<WebAuthnRequestOptionsResponse> {
     return this.http
-      .get<WebAuthnRequestOptionsResponse>(
-        `${this.base()}${ALLAUTH_URLS.AUTHENTICATE_WEBAUTHN}`,
-        { headers: this.headers() }
-      )
+      .get<WebAuthnRequestOptionsResponse>(`${this.base()}${ALLAUTH_URLS.AUTHENTICATE_WEBAUTHN}`, {
+        headers: this.headers(),
+      })
       .pipe(this.envTap());
   }
 
@@ -483,10 +490,9 @@ export class HeadlessAuthApiService {
 
   listAuthenticators(): Observable<AuthenticatorsListResponse> {
     return this.http
-      .get<AuthenticatorsListResponse>(
-        `${this.base()}${ALLAUTH_URLS.AUTHENTICATORS}`,
-        { headers: this.headers() }
-      )
+      .get<AuthenticatorsListResponse>(`${this.base()}${ALLAUTH_URLS.AUTHENTICATORS}`, {
+        headers: this.headers(),
+      })
       .pipe(this.envTap());
   }
 
@@ -522,11 +528,9 @@ export class HeadlessAuthApiService {
 
   activateTotp(body: { code: string }): Observable<TotpActiveResponse> {
     return this.http
-      .post<TotpActiveResponse>(
-        `${this.base()}${ALLAUTH_URLS.TOTP_AUTHENTICATOR}`,
-        body,
-        { headers: this.jsonHeaders() }
-      )
+      .post<TotpActiveResponse>(`${this.base()}${ALLAUTH_URLS.TOTP_AUTHENTICATOR}`, body, {
+        headers: this.jsonHeaders(),
+      })
       .pipe(this.envTap());
   }
 
@@ -542,10 +546,9 @@ export class HeadlessAuthApiService {
 
   getRecoveryCodes(): Observable<RecoveryCodesResponse> {
     return this.http
-      .get<RecoveryCodesResponse>(
-        `${this.base()}${ALLAUTH_URLS.RECOVERY_CODES}`,
-        { headers: this.headers() }
-      )
+      .get<RecoveryCodesResponse>(`${this.base()}${ALLAUTH_URLS.RECOVERY_CODES}`, {
+        headers: this.headers(),
+      })
       .pipe(this.envTap());
   }
 

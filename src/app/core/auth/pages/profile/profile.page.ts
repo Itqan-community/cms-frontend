@@ -54,9 +54,7 @@ export class AccountProfilePage implements OnInit {
       });
     } catch (e) {
       if (e instanceof HttpErrorResponse) {
-        this.pageError.set(
-          getErrorMessage(e) || this.translate.instant('AUTH.PROFILE.LOAD_ERROR')
-        );
+        this.pageError.set(getErrorMessage(e) || this.translate.instant('AUTH.PROFILE.LOAD_ERROR'));
       }
     }
   }
@@ -81,9 +79,7 @@ export class AccountProfilePage implements OnInit {
       await this.loadDetails();
     } catch (e) {
       if (e instanceof HttpErrorResponse) {
-        this.pageError.set(
-          getErrorMessage(e) || this.translate.instant('AUTH.PROFILE.SAVE_ERROR')
-        );
+        this.pageError.set(getErrorMessage(e) || this.translate.instant('AUTH.PROFILE.SAVE_ERROR'));
       } else {
         this.pageError.set(this.translate.instant('AUTH.PROFILE.SAVE_ERROR'));
       }

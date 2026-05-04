@@ -94,7 +94,7 @@ describe('AuthService (app / headless)', () => {
             login_by_code_enabled: false,
           },
         },
-      } as ConfigurationResponse),
+      } as ConfigurationResponse)
     );
     routerMock = {
       url: '/account/login?next=%2Faccount%2Fproviders',
@@ -232,8 +232,8 @@ describe('AuthService (app / headless)', () => {
               data: { methods: [] },
               meta: { is_authenticated: false },
             },
-          }),
-      ),
+          })
+      )
     );
     headless.getBrowserSession.calls.reset();
     headless.getBrowserSession.and.returnValue(of(authedResponse()));
@@ -246,7 +246,7 @@ describe('AuthService (app / headless)', () => {
 
   it('bootstrapSessionAfterOAuthRedirect unwraps bare HTTP 401 on app session (no JSON body)', (done) => {
     headless.getSession.and.returnValue(
-      throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' })),
+      throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' }))
     );
     headless.getBrowserSession.calls.reset();
     headless.getBrowserSession.and.returnValue(of(authedResponse()));

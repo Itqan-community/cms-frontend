@@ -67,7 +67,7 @@ describe('headless-provider-redirect.util', () => {
 
   it('returns error when document.body is unavailable', async () => {
     const bodySpy = spyOnProperty(document, 'body', 'get').and.returnValue(
-      null as unknown as HTMLBodyElement,
+      null as unknown as HTMLBodyElement
     );
     const result = await startHeadlessProviderRedirect({
       apiBaseUrl: 'https://api.example/cms-api',

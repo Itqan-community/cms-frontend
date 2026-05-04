@@ -66,7 +66,9 @@ export async function startHeadlessProviderRedirect(opts: {
     callback_url: opts.callbackUrl,
   };
   const csrf =
-    opts.csrfMiddlewareToken !== undefined ? opts.csrfMiddlewareToken : getDjangoCsrfTokenForRequest();
+    opts.csrfMiddlewareToken !== undefined
+      ? opts.csrfMiddlewareToken
+      : getDjangoCsrfTokenForRequest();
   if (csrf) {
     fields['csrfmiddlewaretoken'] = csrf;
   }

@@ -108,9 +108,7 @@ export class ReauthenticatePage implements OnInit {
           return;
         }
       }
-      this.errorMessage.set(
-        getErrorMessage(e) || this.translate.instant('AUTH.REAUTH.MFA_ERROR')
-      );
+      this.errorMessage.set(getErrorMessage(e) || this.translate.instant('AUTH.REAUTH.MFA_ERROR'));
     }
   }
 

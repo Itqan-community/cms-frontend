@@ -179,8 +179,7 @@ export function parseProviderAccountsEnvelope(body: unknown): ConnectedProviderA
     if (!providerId || !accountUid) {
       continue;
     }
-    const name =
-      providerObj !== null ? pickStr(providerObj, ['name', 'id']) : providerId;
+    const name = providerObj !== null ? pickStr(providerObj, ['name', 'id']) : providerId;
     const label = `${name} · ${accountUid}`;
     out.push({ providerId, accountUid, label });
   }

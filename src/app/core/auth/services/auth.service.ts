@@ -26,7 +26,10 @@ import {
   pathForFlow,
   pathForPendingFlow,
 } from '../headless/allauth-auth.hooks';
-import { ALLAUTH_SOCIAL_PROVIDER_GITHUB, ALLAUTH_SOCIAL_PROVIDER_GOOGLE } from '../headless/allauth-urls';
+import {
+  ALLAUTH_SOCIAL_PROVIDER_GITHUB,
+  ALLAUTH_SOCIAL_PROVIDER_GOOGLE,
+} from '../headless/allauth-urls';
 import { applyAllauthEnvelopeSideEffects } from '../headless/allauth-envelope.util';
 import { AllauthAuthChangeBus } from '../headless/allauth-auth-change.bus';
 import type {
@@ -297,11 +300,13 @@ export class AuthService {
     const payloadUser =
       res.status === 200 && res.data && 'user' in res.data ? res.data.user : undefined;
     if (res.meta?.is_authenticated && !payloadUser) {
-      return this.headless.getSession().pipe(
-        switchMap((s) =>
-          this.applyHeadlessSuccess(s, { ...options, fetchProfile, _depth: depth + 1 })
-        )
-      );
+      return this.headless
+        .getSession()
+        .pipe(
+          switchMap((s) =>
+            this.applyHeadlessSuccess(s, { ...options, fetchProfile, _depth: depth + 1 })
+          )
+        );
     }
 
     if (
@@ -463,7 +468,9 @@ export class AuthService {
      */
     if (!getDjangoCsrfTokenForRequest()) {
       await firstValueFrom(
-        this.headless.getBrowserConfig().pipe(catchError(() => of(undefined as ConfigurationResponse | undefined)))
+        this.headless
+          .getBrowserConfig()
+          .pipe(catchError(() => of(undefined as ConfigurationResponse | undefined)))
       );
     }
     const result = await this.headless.redirectToProvider({
@@ -528,9 +535,7 @@ export class AuthService {
    */
   private isOAuthProviderCallbackRoute(): boolean {
     const path = this.router.url.split(/[?#]/)[0];
-    return (
-      path.endsWith('/account/provider/callback') || path.endsWith('/auth/oauth/callback')
-    );
+    return path.endsWith('/account/provider/callback') || path.endsWith('/auth/oauth/callback');
   }
 
   private async handleAuthChangeEvent(evt: AuthChangeEventType, auth: unknown): Promise<void> {

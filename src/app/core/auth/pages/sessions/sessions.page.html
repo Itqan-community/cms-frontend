@@ -1,7 +1,9 @@
 <div class="account-manage">
   <header class="account-manage__header">
     <div class="account-manage__header-row">
-      <a [routerLink]="['/account/profile']" class="account-manage__back">{{ 'AUTH.ACCOUNT.BACK_PROFILE' | translate }}</a>
+      <a [routerLink]="['/account/profile']" class="account-manage__back">{{
+        'AUTH.ACCOUNT.BACK_PROFILE' | translate
+      }}</a>
       <app-lang-switch></app-lang-switch>
     </div>
   </header>
@@ -31,7 +33,12 @@
           >
             {{ 'AUTH.SESSIONS.REVOKE_OTHERS' | translate }}
           </button>
-          <button type="button" class="account-manage__btn account-manage__btn--secondary" [disabled]="isLoading()" (click)="reload()">
+          <button
+            type="button"
+            class="account-manage__btn account-manage__btn--secondary"
+            [disabled]="isLoading()"
+            (click)="reload()"
+          >
             {{ 'COMMON.REFRESH' | translate }}
           </button>
         </div>
@@ -41,9 +48,13 @@
             <li class="account-manage__li">
               <div>
                 @if (s.is_current) {
-                  <span class="account-manage__badge account-manage__badge--ok">{{ 'AUTH.SESSIONS.CURRENT' | translate }}</span>
+                  <span class="account-manage__badge account-manage__badge--ok">{{
+                    'AUTH.SESSIONS.CURRENT' | translate
+                  }}</span>
                 }
-                <div class="account-manage__mono">{{ s.user_agent || ('AUTH.SESSIONS.UNKNOWN_UA' | translate) }}</div>
+                <div class="account-manage__mono">
+                  {{ s.user_agent || ('AUTH.SESSIONS.UNKNOWN_UA' | translate) }}
+                </div>
                 <p class="account-manage__hint">
                   {{ 'AUTH.SESSIONS.IP' | translate }}: {{ s.ip || '—' }}
                   @if (s.created_at) {

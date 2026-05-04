@@ -6,9 +6,7 @@ import { Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import {
-  getErrorMessage,
-} from '../../../../shared/utils/error.utils';
+import { getErrorMessage } from '../../../../shared/utils/error.utils';
 import type {
   AuthenticatorListItem,
   RecoveryCodesResponse,
@@ -31,7 +29,9 @@ export class SecuritySettingsPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly translate = inject(TranslateService);
 
-  totpForm: FormGroup = this.fb.group({ code: ['', [Validators.required, Validators.minLength(6)]] });
+  totpForm: FormGroup = this.fb.group({
+    code: ['', [Validators.required, Validators.minLength(6)]],
+  });
 
   isLoading = signal(false);
   pageError = signal<string>('');
@@ -95,7 +95,9 @@ export class SecuritySettingsPage implements OnInit {
         if (tryNavigateForAuth401(this.router, e)) {
           return;
         }
-        this.pageError.set(getErrorMessage(e) || this.translate.instant('AUTH.SECURITY.LOAD_ERROR'));
+        this.pageError.set(
+          getErrorMessage(e) || this.translate.instant('AUTH.SECURITY.LOAD_ERROR')
+        );
       } else {
         this.pageError.set(this.translate.instant('AUTH.SECURITY.LOAD_ERROR'));
       }

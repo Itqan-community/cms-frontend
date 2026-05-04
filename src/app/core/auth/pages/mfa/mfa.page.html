@@ -28,7 +28,12 @@
         </button>
       </form>
       @if (passkeyAvailable()) {
-        <button type="button" class="mfa__submit mfa__submit--secondary" [disabled]="isLoading()" (click)="onWebAuthn()">
+        <button
+          type="button"
+          class="mfa__submit mfa__submit--secondary"
+          [disabled]="isLoading()"
+          (click)="onWebAuthn()"
+        >
           {{ 'AUTH.MFA.USE_SECURITY_KEY' | translate }}
         </button>
       }

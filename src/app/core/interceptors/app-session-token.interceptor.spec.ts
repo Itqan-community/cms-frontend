@@ -99,7 +99,11 @@ describe('appSessionTokenInterceptor', () => {
     http.get(loginUrl).subscribe();
     let req = httpMock.expectOne(loginUrl);
     expect(req.request.headers.get('X-Session-Token')).toBe('tok-after-login-options');
-    req.flush({ status: 200, data: { request_options: { publicKey: {} } }, meta: { session_token: 'tok-2' } });
+    req.flush({
+      status: 200,
+      data: { request_options: { publicKey: {} } },
+      meta: { session_token: 'tok-2' },
+    });
     sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-2');
     http.post(loginUrl, { credential: { type: 'public-key' } }).subscribe();
     req = httpMock.expectOne(loginUrl);

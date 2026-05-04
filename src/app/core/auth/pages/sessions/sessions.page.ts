@@ -6,10 +6,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
-import {
-  ManagedSession,
-  parseSessionsEnvelope,
-} from '../../headless/headless-account-data.util';
+import { ManagedSession, parseSessionsEnvelope } from '../../headless/headless-account-data.util';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { AuthService } from '../../services/auth.service';
 
@@ -31,7 +28,9 @@ export class SessionsPage implements OnInit {
   readonly successMsg = signal('');
 
   readonly otherSessionIds = computed(() =>
-    this.sessions().filter((s) => !s.is_current).map((s) => s.id)
+    this.sessions()
+      .filter((s) => !s.is_current)
+      .map((s) => s.id)
   );
 
   ngOnInit(): void {

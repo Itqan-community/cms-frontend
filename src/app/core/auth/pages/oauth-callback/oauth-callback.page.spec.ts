@@ -45,7 +45,7 @@ describe('OauthCallbackPage', () => {
         status: 200,
         meta: { is_authenticated: true },
         data: { user: { id: 1 }, methods: [] },
-      }),
+      })
     );
 
     TestBed.createComponent(OauthCallbackPage).detectChanges();
@@ -62,20 +62,19 @@ describe('OauthCallbackPage', () => {
           flows: [{ id: 'provider_signup', is_pending: true }],
           methods: [],
         },
-      }),
+      })
     );
 
     TestBed.createComponent(OauthCallbackPage).detectChanges();
 
-    expect(router.navigate).toHaveBeenCalledWith(
-      ['/account/provider/signup'],
-      { queryParams: { next: '/settings' } },
-    );
+    expect(router.navigate).toHaveBeenCalledWith(['/account/provider/signup'], {
+      queryParams: { next: '/settings' },
+    });
   });
 
   it('on error shows message and redirects to login after timeout', fakeAsync(() => {
     bootstrapSessionAfterOAuthRedirect.and.returnValue(
-      throwError(() => new HttpErrorResponse({ status: 502 })),
+      throwError(() => new HttpErrorResponse({ status: 502 }))
     );
 
     TestBed.createComponent(OauthCallbackPage).detectChanges();

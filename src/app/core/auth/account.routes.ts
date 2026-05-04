@@ -91,8 +91,7 @@ export const accountAuthRoutes: Routes = [
   },
   {
     path: 'account/profile',
-    loadComponent: () =>
-      import('./pages/profile/profile.page').then((m) => m.AccountProfilePage),
+    loadComponent: () => import('./pages/profile/profile.page').then((m) => m.AccountProfilePage),
     canActivate: [authGuard],
   },
   {
@@ -206,7 +205,9 @@ export const accountAuthRoutes: Routes = [
   {
     path: 'account/2fa',
     loadComponent: () =>
-      import('./pages/security-settings/security-settings.page').then((m) => m.SecuritySettingsPage),
+      import('./pages/security-settings/security-settings.page').then(
+        (m) => m.SecuritySettingsPage
+      ),
     canActivate: [authGuard],
   },
   {
@@ -264,31 +265,41 @@ export const accountAuthRoutes: Routes = [
   {
     path: 'account/2fa/totp/activate',
     loadComponent: () =>
-      import('./pages/security-settings/security-settings.page').then((m) => m.SecuritySettingsPage),
+      import('./pages/security-settings/security-settings.page').then(
+        (m) => m.SecuritySettingsPage
+      ),
     canActivate: [authGuard],
   },
   {
     path: 'account/2fa/totp/deactivate',
     loadComponent: () =>
-      import('./pages/security-settings/security-settings.page').then((m) => m.SecuritySettingsPage),
+      import('./pages/security-settings/security-settings.page').then(
+        (m) => m.SecuritySettingsPage
+      ),
     canActivate: [authGuard],
   },
   {
     path: 'account/2fa/recovery-codes',
     loadComponent: () =>
-      import('./pages/security-settings/security-settings.page').then((m) => m.SecuritySettingsPage),
+      import('./pages/security-settings/security-settings.page').then(
+        (m) => m.SecuritySettingsPage
+      ),
     canActivate: [authGuard],
   },
   {
     path: 'account/2fa/recovery-codes/generate',
     loadComponent: () =>
-      import('./pages/security-settings/security-settings.page').then((m) => m.SecuritySettingsPage),
+      import('./pages/security-settings/security-settings.page').then(
+        (m) => m.SecuritySettingsPage
+      ),
     canActivate: [authGuard],
   },
   {
     path: 'account/2fa/webauthn',
     loadComponent: () =>
-      import('./pages/security-settings/security-settings.page').then((m) => m.SecuritySettingsPage),
+      import('./pages/security-settings/security-settings.page').then(
+        (m) => m.SecuritySettingsPage
+      ),
     canActivate: [authGuard],
   },
   {

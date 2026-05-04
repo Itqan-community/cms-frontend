@@ -162,7 +162,9 @@ describe('HeadlessAuthApiService', () => {
       expect(res.data.request_options.publicKey).toBeDefined();
       done();
     });
-    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_APP}/v1/auth/webauthn/authenticate`);
+    const r = httpMock.expectOne(
+      `${api}/auth/${HEADLESS_CLIENT_APP}/v1/auth/webauthn/authenticate`
+    );
     expect(r.request.method).toBe('GET');
     r.flush({
       status: 200,

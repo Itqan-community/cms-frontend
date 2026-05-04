@@ -1,7 +1,9 @@
 <div class="account-manage">
   <header class="account-manage__header">
     <div class="account-manage__header-row">
-      <a [routerLink]="['/account/profile']" class="account-manage__back">{{ 'AUTH.ACCOUNT.BACK_PROFILE' | translate }}</a>
+      <a [routerLink]="['/account/profile']" class="account-manage__back">{{
+        'AUTH.ACCOUNT.BACK_PROFILE' | translate
+      }}</a>
       <app-lang-switch></app-lang-switch>
     </div>
   </header>
@@ -52,7 +54,12 @@
       }
 
       <section class="account-manage__section">
-        <button type="button" class="account-manage__btn account-manage__btn--secondary" [disabled]="isLoading()" (click)="reload()">
+        <button
+          type="button"
+          class="account-manage__btn account-manage__btn--secondary"
+          [disabled]="isLoading()"
+          (click)="reload()"
+        >
           {{ 'COMMON.REFRESH' | translate }}
         </button>
 

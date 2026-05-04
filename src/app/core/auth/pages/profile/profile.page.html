@@ -1,7 +1,9 @@
 <div class="account-manage profile-hub">
   <header class="account-manage__header">
     <div class="account-manage__header-row">
-      <a [routerLink]="['/gallery']" class="account-manage__back">{{ 'AUTH.PROFILE.BACK_LIBRARY' | translate }}</a>
+      <a [routerLink]="['/gallery']" class="account-manage__back">{{
+        'AUTH.PROFILE.BACK_LIBRARY' | translate
+      }}</a>
       <app-lang-switch></app-lang-switch>
     </div>
   </header>
@@ -30,7 +32,9 @@
           </div>
           @if (displayPhone()) {
             <div class="profile-hub__identity-row">
-              <span class="profile-hub__identity-label">{{ 'AUTH.PROFILE.PHONE' | translate }}</span>
+              <span class="profile-hub__identity-label">{{
+                'AUTH.PROFILE.PHONE' | translate
+              }}</span>
               {{ displayPhone() }}
             </div>
           }
@@ -69,7 +73,9 @@
         <p class="account-manage__hint">{{ 'AUTH.PROFILE.CMS_HINT' | translate }}</p>
 
         <form [formGroup]="profileForm" (ngSubmit)="onSaveProfile()" class="account-manage__form">
-          <label class="account-manage__label" for="bio">{{ 'PROFILE.PROJECT_QUESTION' | translate }}</label>
+          <label class="account-manage__label" for="bio">{{
+            'PROFILE.PROJECT_QUESTION' | translate
+          }}</label>
           <textarea
             id="bio"
             class="profile-hub__textarea"
@@ -81,14 +87,32 @@
             <p class="account-manage__hint" style="color: #b91c1c">{{ getBioError() }}</p>
           }
 
-          <label class="account-manage__label" for="project_url">{{ 'PROFILE.PROJECT_LINK_LABEL' | translate }}</label>
-          <input id="project_url" type="url" class="account-manage__input" formControlName="project_url" />
+          <label class="account-manage__label" for="project_url">{{
+            'PROFILE.PROJECT_LINK_LABEL' | translate
+          }}</label>
+          <input
+            id="project_url"
+            type="url"
+            class="account-manage__input"
+            formControlName="project_url"
+          />
 
-          <label class="account-manage__label" for="project_summary">{{ 'PROFILE.ORGANIZATION' | translate }}</label>
-          <input id="project_summary" type="text" class="account-manage__input" formControlName="project_summary" />
+          <label class="account-manage__label" for="project_summary">{{
+            'PROFILE.ORGANIZATION' | translate
+          }}</label>
+          <input
+            id="project_summary"
+            type="text"
+            class="account-manage__input"
+            formControlName="project_summary"
+          />
 
           <div class="account-manage__row">
-            <button type="submit" class="account-manage__btn" [disabled]="profileForm.invalid || isSaving()">
+            <button
+              type="submit"
+              class="account-manage__btn"
+              [disabled]="profileForm.invalid || isSaving()"
+            >
               @if (isSaving()) {
                 {{ 'COMMON.LOADING' | translate }}
               } @else {

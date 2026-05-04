@@ -3,7 +3,11 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
-import { ALLAUTH_LOGIN_REDIRECT_URL, authInfo, pathForPendingFlow } from '../../headless/allauth-auth.hooks';
+import {
+  ALLAUTH_LOGIN_REDIRECT_URL,
+  authInfo,
+  pathForPendingFlow,
+} from '../../headless/allauth-auth.hooks';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { readContinueUrl } from '../../utils/auth-route-query.util';
@@ -71,7 +75,7 @@ export class OauthCallbackPage implements OnInit {
         if (pendingPath) {
           const extras =
             resumeUrl !== ALLAUTH_LOGIN_REDIRECT_URL && resumeUrl.startsWith('/')
-              ? loginNav ?? { queryParams: { next: resumeUrl } }
+              ? (loginNav ?? { queryParams: { next: resumeUrl } })
               : {};
           void this.router.navigate([pendingPath], extras);
           return;

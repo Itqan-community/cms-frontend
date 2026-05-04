@@ -49,8 +49,7 @@ flow2path[`mfa_authenticate:${AuthenticatorType.WEBAUTHN}`] = '/account/authenti
 flow2path[`mfa_reauthenticate:${AuthenticatorType.TOTP}`] = '/account/reauthenticate/totp';
 flow2path[`mfa_reauthenticate:${AuthenticatorType.RECOVERY_CODES}`] =
   '/account/reauthenticate/recovery-codes';
-flow2path[`mfa_reauthenticate:${AuthenticatorType.WEBAUTHN}`] =
-  '/account/reauthenticate/webauthn';
+flow2path[`mfa_reauthenticate:${AuthenticatorType.WEBAUTHN}`] = '/account/reauthenticate/webauthn';
 flow2path['mfa_signup_webauthn'] = '/account/signup/passkey/create';
 
 export type AuthInfo = {
@@ -79,8 +78,7 @@ export function authInfo(auth: unknown): AuthInfo {
     a.status === 200 || (a.status === 401 && a.meta?.is_authenticated === true);
   const requiresReauthentication = isAuthenticated && a.status === 401;
   const pendingFlow = a.data?.flows?.find((flow) => flow.is_pending);
-  const user =
-    isAuthenticated && a.data?.user !== undefined ? (a.data.user ?? null) : null;
+  const user = isAuthenticated && a.data?.user !== undefined ? (a.data.user ?? null) : null;
   return { isAuthenticated, requiresReauthentication, pendingFlow, user };
 }
 
@@ -145,8 +143,7 @@ export function determineAuthChangeEvent(
     if (fromInfo.requiresReauthentication) {
       return AuthChangeEvent.REAUTHENTICATED;
     }
-    const fromMethods =
-      (fromAuth as { data?: { methods?: unknown[] } })?.data?.methods ?? [];
+    const fromMethods = (fromAuth as { data?: { methods?: unknown[] } })?.data?.methods ?? [];
     const toMethods = toEnvelope.data?.methods ?? [];
     if (fromMethods.length < toMethods.length) {
       return AuthChangeEvent.REAUTHENTICATED;
