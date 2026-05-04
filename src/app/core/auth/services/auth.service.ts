@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import {
@@ -32,6 +32,7 @@ import { AllauthAuthChangeBus } from '../headless/allauth-auth-change.bus';
 import type {
   AuthenticatedResponse,
   AuthenticationMeta,
+  AuthenticationResponse,
   ConfigurationResponse,
   Flow,
   HeadlessUser,
@@ -221,17 +222,24 @@ export class AuthService {
   /**
    * After browser OAuth return: try app session first (`X-Session-Token` / server state), then
    * cookie-backed browser session so split-host deployments can still hydrate JWT from `meta`.
+   *
+   * `HttpClient` reports HTTP **401/403** on `GET …/session` as {@link HttpErrorResponse} — the
+   * headless envelope is still JSON in {@link HttpErrorResponse.error}. Normalize that stream so we
+   * can fall through to `/auth/browser/…/session` (staging HARs showed only **app** `/session` unless
+   * this unwrap runs — GitHub can still complete OAuth server-side without a visible authorize UI).
    */
   bootstrapSessionAfterOAuthRedirect(options?: {
     fetchProfile?: boolean;
   }): Observable<AuthenticatedOrChallenge> {
     const fetchProfile = options?.fetchProfile;
     return this.headless.getSession().pipe(
+      catchError((err) => this.observableHeadlessEnvelopeFromSessionHttpFailure(err)),
       switchMap((appRes) => {
         if (this.isOauthReturnSessionEstablished(appRes)) {
           return this.applyHeadlessSuccess(appRes, { fetchProfile });
         }
         return this.headless.getBrowserSession().pipe(
+          catchError((err) => this.observableHeadlessEnvelopeFromSessionHttpFailure(err)),
           switchMap((browserRes) =>
             this.applyHeadlessSuccess(
               this.isOauthReturnSessionEstablished(browserRes) ? browserRes : appRes,
@@ -242,6 +250,28 @@ export class AuthService {
         );
       })
     );
+  }
+
+  /** Map HTTP errors on app or browser session GET into a headless envelope so OAuth bootstrap can continue. */
+  private observableHeadlessEnvelopeFromSessionHttpFailure(
+    err: unknown
+  ): Observable<AuthenticatedOrChallenge> {
+    if (!(err instanceof HttpErrorResponse)) {
+      return throwError(() => err);
+    }
+    const body = err.error;
+    if (
+      body &&
+      typeof body === 'object' &&
+      typeof (body as { status?: unknown }).status === 'number'
+    ) {
+      return of(body as AuthenticatedOrChallenge);
+    }
+    return of({
+      status: 401,
+      data: { flows: [] },
+      meta: { is_authenticated: false },
+    } as AuthenticationResponse);
   }
 
   /** True when OAuth callback should treat the user as logged in with a usable profile payload. */
@@ -440,20 +470,14 @@ export class AuthService {
       provider: providerId,
       process,
       callbackUrl,
-      sessionToken,
     });
     this.applyProviderRedirectResult(result);
     return result;
   }
 
-  /** Applies redirect / JSON envelope from {@link HeadlessAuthApiService.redirectToProvider}. */
+  /** Applies POST/OAuth outcome from {@link HeadlessAuthApiService.redirectToProvider}. */
   applyProviderRedirectResult(result: ProviderRedirectResult): void {
     switch (result.kind) {
-      case 'redirect':
-        if (typeof window !== 'undefined') {
-          window.location.assign(result.location);
-        }
-        return;
       case 'form_submitted':
         return;
       case 'json':
