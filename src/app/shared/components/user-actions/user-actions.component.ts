@@ -14,22 +14,14 @@ import { UserAvatarComponent } from '../../components/user-avatar/user-avatar.co
   template: `
     @if (authService.isAuthenticated()) {
       <div class="user-actions">
-        <app-user-avatar [user]="authService.currentUser()" size="md"></app-user-avatar>
         <a
           [routerLink]="['/account/profile']"
-          nz-button
+          class="user-actions__avatar-link"
           [title]="'NAVIGATION.ACCOUNT_PROFILE' | translate"
-          class="ant-btn-floating"
+          [attr.aria-label]="'NAVIGATION.ACCOUNT_PROFILE' | translate"
+          (click)="avatarNavigate.emit()"
         >
-          {{ 'NAVIGATION.ACCOUNT_PROFILE' | translate }}
-        </a>
-        <a
-          [routerLink]="['/account/2fa']"
-          nz-button
-          [title]="'NAVIGATION.ACCOUNT_SECURITY' | translate"
-          class="ant-btn-floating"
-        >
-          {{ 'NAVIGATION.ACCOUNT_SECURITY' | translate }}
+          <app-user-avatar [user]="authService.currentUser()" size="md"></app-user-avatar>
         </a>
         <button
           nz-button
@@ -55,6 +47,9 @@ export class UserActionsComponent {
   mobileMode = input(false);
 
   logoutClicked = output<void>();
+
+  /** Mobile drawer closes when user opens account from avatar */
+  avatarNavigate = output<void>();
 
   onLogout(): void {
     this.logoutClicked.emit();

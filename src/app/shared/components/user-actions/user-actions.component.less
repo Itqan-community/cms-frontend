@@ -4,6 +4,20 @@
   column-gap: 12px; // gap-3
 }
 
+.user-actions__avatar-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  text-decoration: none;
+  color: inherit;
+  outline-offset: 2px;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-primary-600);
+  }
+}
+
 .user-actions__logout {
   display: inline-flex;
   align-items: center;

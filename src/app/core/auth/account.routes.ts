@@ -2,7 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { guestGuard } from './guards/guest.guard';
 
-/** Matches official SPA `data: { hideHeader: true }` usage for focused auth layouts. */
+/** Focused flows (login, MFA, resets): hide main app header. Account hub pages omit this so the shell matches the rest of the CMS. */
 const H = { hideHeader: true };
 
 /**
@@ -94,7 +94,6 @@ export const accountAuthRoutes: Routes = [
     loadComponent: () =>
       import('./pages/profile/profile.page').then((m) => m.AccountProfilePage),
     canActivate: [authGuard],
-    data: H,
   },
   {
     path: 'account/login/code',
@@ -120,14 +119,12 @@ export const accountAuthRoutes: Routes = [
     loadComponent: () =>
       import('./pages/change-email/change-email.page').then((m) => m.ChangeEmailPage),
     canActivate: [authGuard],
-    data: H,
   },
   {
     path: 'account/providers',
     loadComponent: () =>
       import('./pages/manage-providers/manage-providers.page').then((m) => m.ManageProvidersPage),
     canActivate: [authGuard],
-    data: H,
   },
   {
     path: 'account/provider/callback',
@@ -205,14 +202,12 @@ export const accountAuthRoutes: Routes = [
     loadComponent: () =>
       import('./pages/change-password/change-password.page').then((m) => m.ChangePasswordPage),
     canActivate: [authGuard],
-    data: H,
   },
   {
     path: 'account/2fa',
     loadComponent: () =>
       import('./pages/security-settings/security-settings.page').then((m) => m.SecuritySettingsPage),
     canActivate: [authGuard],
-    data: H,
   },
   {
     path: 'account/2fa/trust',
@@ -271,47 +266,41 @@ export const accountAuthRoutes: Routes = [
     loadComponent: () =>
       import('./pages/security-settings/security-settings.page').then((m) => m.SecuritySettingsPage),
     canActivate: [authGuard],
-    data: H,
   },
   {
     path: 'account/2fa/totp/deactivate',
     loadComponent: () =>
       import('./pages/security-settings/security-settings.page').then((m) => m.SecuritySettingsPage),
     canActivate: [authGuard],
-    data: H,
   },
   {
     path: 'account/2fa/recovery-codes',
     loadComponent: () =>
       import('./pages/security-settings/security-settings.page').then((m) => m.SecuritySettingsPage),
     canActivate: [authGuard],
-    data: H,
   },
   {
     path: 'account/2fa/recovery-codes/generate',
     loadComponent: () =>
       import('./pages/security-settings/security-settings.page').then((m) => m.SecuritySettingsPage),
     canActivate: [authGuard],
-    data: H,
   },
   {
     path: 'account/2fa/webauthn',
     loadComponent: () =>
       import('./pages/security-settings/security-settings.page').then((m) => m.SecuritySettingsPage),
     canActivate: [authGuard],
-    data: H,
   },
   {
     path: 'account/2fa/webauthn/add',
     loadComponent: () => import('./pages/passkey/passkey.page').then((m) => m.PasskeyPage),
     canActivate: [authGuard],
-    data: { ...H, mode: 'setup' },
+    data: { mode: 'setup' },
   },
   {
     path: 'account/sessions',
     loadComponent: () => import('./pages/sessions/sessions.page').then((m) => m.SessionsPage),
     canActivate: [authGuard],
-    data: H,
   },
 
   /* Alternate OAuth callback URL kept for backwards compatibility */

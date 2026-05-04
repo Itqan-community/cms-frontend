@@ -255,8 +255,10 @@
         </button>
       </form>
 
-      @if (authService.oauthBrowserRedirectEnabled || passkeyAvailable()) {
+      <!-- When re-enabling Google/GitHub: use @if (authService.oauthBrowserRedirectEnabled || passkeyAvailable()) -->
+      @if (passkeyAvailable()) {
         <div class="register__social">
+          <!-- OAuth Google/GitHub — temporarily hidden; uncomment to restore
           @if (authService.oauthBrowserRedirectEnabled) {
             <p class="register__social-title">{{ 'AUTH.LOGIN.OR_CONTINUE' | translate }}</p>
             <div class="register__social-btns">
@@ -268,15 +270,14 @@
               </button>
             </div>
           }
-          @if (passkeyAvailable()) {
-            <a
-              [routerLink]="['/passkey']"
-              [queryParams]="{ flow: 'signup' }"
-              class="register__inline-link register__alt-link"
-            >
-              {{ 'AUTH.REGISTER.SIGN_UP_WITH_PASSKEY' | translate }}
-            </a>
-          }
+          -->
+          <a
+            [routerLink]="['/passkey']"
+            [queryParams]="{ flow: 'signup' }"
+            class="register__inline-link register__alt-link"
+          >
+            {{ 'AUTH.REGISTER.SIGN_UP_WITH_PASSKEY' | translate }}
+          </a>
         </div>
       }
 
