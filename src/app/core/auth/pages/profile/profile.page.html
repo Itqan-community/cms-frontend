@@ -45,10 +45,12 @@
         <h2 class="account-manage__h2">{{ 'AUTH.PROFILE.ACCOUNT_TITLE' | translate }}</h2>
         <p class="account-manage__hint">{{ 'AUTH.PROFILE.ACCOUNT_HINT' | translate }}</p>
         <nav class="profile-hub__grid" aria-label="Account management">
+          <!--
           <a class="profile-hub__link-card" [routerLink]="['/account/email']">
             <span>{{ 'AUTH.PROFILE.LINK_EMAILS' | translate }}</span>
             <span class="profile-hub__chevron" aria-hidden="true">›</span>
           </a>
+          -->
           <a class="profile-hub__link-card" [routerLink]="['/account/password/change']">
             <span>{{ 'AUTH.PROFILE.LINK_PASSWORD' | translate }}</span>
             <span class="profile-hub__chevron" aria-hidden="true">›</span>
@@ -61,10 +63,12 @@
             <span>{{ 'AUTH.PROFILE.LINK_SESSIONS' | translate }}</span>
             <span class="profile-hub__chevron" aria-hidden="true">›</span>
           </a>
+          <!--
           <a class="profile-hub__link-card" [routerLink]="['/account/providers']">
             <span>{{ 'AUTH.PROFILE.LINK_PROVIDERS' | translate }}</span>
             <span class="profile-hub__chevron" aria-hidden="true">›</span>
           </a>
+          -->
         </nav>
       </section>
 

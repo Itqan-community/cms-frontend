@@ -129,7 +129,11 @@
       "NEW_PASSWORD": "New password",
       "SUBMIT": "Update password",
       "ERROR": "Could not reset password. The link or code may have expired.",
-      "BACK": "Back to sign in"
+      "EXPIRED": "The reset link has expired. Please request a new one."
+    },
+    "CHANGE_PASSWORD": {
+      "SUBTITLE": "Update your password to keep your account secure.",
+      "CURRENT_PASSWORD": "Current password"
     },
     "MFA": {
       "TITLE": "Two-factor authentication",

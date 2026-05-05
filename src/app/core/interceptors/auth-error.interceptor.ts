@@ -42,6 +42,12 @@ export function authErrorInterceptor(
     if (!apiBase || !req.url.startsWith(apiBase) || isHeadlessAppAuthUrl(req.url)) {
       return throwError(() => err);
     }
+
+    // Do not send x-cms-auth-session-recheck header for profile requests
+    if (req.url.includes('/auth/profile/') && req.method === 'GET') {
+      return throwError(() => err);
+    }
+
     if (!req.headers.has(SESSION_401_RECHECK_HEADER)) {
       return authService.sessionRecheckAfter401().pipe(
         switchMap((stillAuthenticated) => {

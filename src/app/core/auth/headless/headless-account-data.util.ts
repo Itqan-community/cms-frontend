@@ -38,6 +38,9 @@ function pickStr(obj: Record<string, unknown>, keys: string[]): string {
     if (typeof x === 'string' && x.trim()) {
       return x.trim();
     }
+    if (typeof x === 'number') {
+      return String(x).trim();
+    }
   }
   return '';
 }
