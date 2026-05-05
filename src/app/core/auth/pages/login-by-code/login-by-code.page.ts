@@ -24,6 +24,8 @@ import { readContinueUrl } from '../../utils/auth-route-query.util';
 })
 export class LoginByCodePage implements OnInit, OnDestroy {
   private static readonly CODE_REQUEST_TIMEOUT_MS = 15000;
+  private static readonly LOGIN_BY_CODE_EMAIL_KEY = 'login_by_code_email';
+  private static readonly RESEND_COOLDOWN_SECONDS = 60;
 
   readonly auth = inject(AuthService);
   private readonly router = inject(Router);
@@ -48,6 +50,11 @@ export class LoginByCodePage implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const savedEmail = localStorage.getItem(LoginByCodePage.LOGIN_BY_CODE_EMAIL_KEY);
+    if (savedEmail) {
+      this.emailForm.patchValue({ email: savedEmail });
+    }
+
     const url = this.router.url.split('?')[0];
     if (url.includes('/login/code/confirm')) {
       this.step.set('code');
@@ -65,6 +72,7 @@ export class LoginByCodePage implements OnInit, OnDestroy {
 
   goToEmail(): void {
     this.clearCooldown();
+    localStorage.removeItem(LoginByCodePage.LOGIN_BY_CODE_EMAIL_KEY);
     this.infoMessage.set('');
     this.errorMessage.set('');
     this.step.set('email');
@@ -100,7 +108,7 @@ export class LoginByCodePage implements OnInit, OnDestroy {
 
   private apply429Cooldown(err: HttpErrorResponse): void {
     const s = parseRetryAfterSeconds(err);
-    this.startCooldown(s ?? 30);
+    this.startCooldown(s ?? LoginByCodePage.RESEND_COOLDOWN_SECONDS);
   }
 
   private isRequestTimeoutError(error: unknown): boolean {
@@ -140,7 +148,8 @@ export class LoginByCodePage implements OnInit, OnDestroy {
           .pipe(timeout({ first: LoginByCodePage.CODE_REQUEST_TIMEOUT_MS }))
       );
       this.isLoading.set(false);
-      this.clearCooldown();
+      localStorage.setItem(LoginByCodePage.LOGIN_BY_CODE_EMAIL_KEY, this.emailForm.value.email);
+      this.startCooldown(LoginByCodePage.RESEND_COOLDOWN_SECONDS);
       if (opts.fromResend) {
         this.infoMessage.set(this.translate.instant('AUTH.LOGIN_BY_CODE.RESEND_SENT'));
         this.codeForm.patchValue({ code: '' });
@@ -194,6 +203,7 @@ export class LoginByCodePage implements OnInit, OnDestroy {
       );
       await firstValueFrom(this.auth.applyHeadlessSuccess(res, { fetchProfile: true }));
       this.isLoading.set(false);
+      localStorage.removeItem(LoginByCodePage.LOGIN_BY_CODE_EMAIL_KEY);
       const nextUrl = readContinueUrl(this.route.snapshot.queryParamMap);
       void this.router.navigateByUrl(nextUrl);
     } catch (e) {

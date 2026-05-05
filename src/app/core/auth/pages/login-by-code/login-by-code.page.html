@@ -33,13 +33,6 @@
               autocomplete="email"
             />
           </div>
-          @if (resendCooldownSeconds() > 0) {
-            <p class="lbc__cooldown">
-              {{
-                'AUTH.LOGIN_BY_CODE.TRY_AGAIN_IN' | translate: { seconds: resendCooldownSeconds() }
-              }}
-            </p>
-          }
           <button
             type="submit"
             class="lbc__submit"
@@ -47,6 +40,14 @@
           >
             {{ 'AUTH.LOGIN_BY_CODE.SEND_CODE' | translate }}
           </button>
+
+          <!--
+          @if (resendCooldownSeconds() > 0) {
+            <p class="lbc__cooldown">
+              ({{ resendCooldownSeconds() }}s)
+            </p>
+          }
+          -->
         </form>
       } @else {
         <form [formGroup]="codeForm" (ngSubmit)="confirmCode()" class="lbc__form">
@@ -66,6 +67,7 @@
           <button type="submit" class="lbc__submit" [disabled]="codeForm.invalid || isLoading()">
             {{ 'AUTH.LOGIN_BY_CODE.SIGN_IN' | translate }}
           </button>
+          <!--
           <div class="lbc__resend-row">
             <button
               type="button"
@@ -77,13 +79,11 @@
             </button>
             @if (resendCooldownSeconds() > 0) {
               <span class="lbc__cooldown-inline">
-                {{
-                  'AUTH.LOGIN_BY_CODE.TRY_AGAIN_IN'
-                    | translate: { seconds: resendCooldownSeconds() }
-                }}
+                ({{ resendCooldownSeconds() }}s)
               </span>
             }
           </div>
+          -->
           <button type="button" class="lbc__secondary" (click)="goToEmail()">
             {{ 'AUTH.LOGIN_BY_CODE.USE_OTHER_EMAIL' | translate }}
           </button>
