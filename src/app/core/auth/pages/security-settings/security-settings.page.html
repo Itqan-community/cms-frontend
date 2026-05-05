@@ -198,7 +198,7 @@
                     [id]="'pk-name-' + pk.id"
                     class="security__input security__input--passkey-name"
                     type="text"
-                    [value]="renameDrafts()[pk.id] ?? pk.name"
+                    [value]="renameDrafts()[pk.id]"
                     (input)="patchRenameDraft(pk.id, $any($event.target).value)"
                   />
                   <div class="security__row">

@@ -36,7 +36,8 @@
               "src/theme.less",
               "src/styles.less",
               "src/app/features/admin/styles/admin-global.less"
-            ]
+            ],
+            "allowedCommonJsDependencies": ["qrcode", "dijkstrajs"]
           },
           "configurations": {
             "production": {
