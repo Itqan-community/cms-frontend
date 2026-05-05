@@ -17,7 +17,8 @@ export function headersInterceptor(
 ): Observable<HttpEvent<unknown>> {
   const tokenStore = inject(HeadlessAppTokenService);
   const api = environment.API_BASE_URL;
-  const isApi = api ? req.url.startsWith(api) : false;
+  const adminApi = (environment as unknown as { ADMIN_API_BASE_URL?: string }).ADMIN_API_BASE_URL;
+  const isApi = (api && req.url.startsWith(api)) || (adminApi && req.url.startsWith(adminApi));
   const isAppAuth = isHeadlessAppAuthUrl(req.url);
   const access = tokenStore.getAccessToken();
 

@@ -5,12 +5,14 @@ import {
   BehaviorSubject,
   Observable,
   catchError,
+  filter,
   finalize,
   firstValueFrom,
   forkJoin,
   map,
   of,
   switchMap,
+  take,
   tap,
   throwError,
 } from 'rxjs';
@@ -33,7 +35,6 @@ import {
 import { applyAllauthEnvelopeSideEffects } from '../headless/allauth-envelope.util';
 import { AllauthAuthChangeBus } from '../headless/allauth-auth-change.bus';
 import type {
-  AuthenticatedResponse,
   AuthenticationMeta,
   AuthenticationResponse,
   ConfigurationResponse,
@@ -95,6 +96,9 @@ export class AuthService {
 
   private redirectPrimed = false;
   private prevAuthForRedirect: unknown = undefined;
+
+  private isRefreshing = false;
+  private refreshTokenSubject = new BehaviorSubject<boolean | null>(null);
 
   constructor() {
     this.authBus.changes$.subscribe((msg) => {
@@ -188,18 +192,53 @@ export class AuthService {
 
   /** CMS API recovery — mirrors session recheck intent from earlier interceptor behaviour. */
   sessionRecheckAfter401(): Observable<boolean> {
+    if (this.isRefreshing) {
+      return this.refreshTokenSubject.pipe(
+        filter((result) => result !== null),
+        take(1),
+        map((result) => !!result)
+      );
+    }
+
+    this.isRefreshing = true;
+    this.refreshTokenSubject.next(null);
+
+    const refreshToken = this.tokenStore.getRefreshToken();
+    if (refreshToken) {
+      return this.headless.refreshToken({ refresh_token: refreshToken }).pipe(
+        map(() => {
+          this.isRefreshing = false;
+          this.refreshTokenSubject.next(true);
+          return true;
+        }),
+        catchError(() => {
+          this.isRefreshing = false;
+          this.refreshTokenSubject.next(false);
+          return of(false);
+        })
+      );
+    }
+
     return this.headless.getSession().pipe(
       map((res) => {
         const info = authInfo(res);
         if (!info.isAuthenticated || res.status !== 200 || !info.user) {
+          this.isRefreshing = false;
+          this.refreshTokenSubject.next(false);
           return false;
         }
         this.authSnapshot.set(res);
         this.tokenStore.setFromMeta(res.meta);
         this.syncUserFromSnapshot(res);
+        this.isRefreshing = false;
+        this.refreshTokenSubject.next(true);
         return true;
       }),
-      catchError(() => of(false))
+      catchError(() => {
+        this.isRefreshing = false;
+        this.refreshTokenSubject.next(false);
+        return of(false);
+      })
     );
   }
 

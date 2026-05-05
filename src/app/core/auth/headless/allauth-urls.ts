@@ -31,6 +31,7 @@ export const ALLAUTH_URLS = Object.freeze({
   LOGIN_WEBAUTHN: '/auth/webauthn/login',
   SIGNUP_WEBAUTHN: '/auth/webauthn/signup',
   WEBAUTHN_AUTHENTICATOR: '/account/authenticators/webauthn',
+  TOKEN_REFRESH: '/tokens/refresh',
 } as const);
 
 /** Official demo User-Agent string used with app client (see allauth.js `request`). */

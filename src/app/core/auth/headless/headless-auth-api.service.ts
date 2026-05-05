@@ -4,6 +4,7 @@ import { Observable, catchError, map, MonoTypeOperatorFunction, of, tap, throwEr
 import { recoverHeadlessJsonOkOnHttpError } from './headless-http-recover.util';
 import { environment } from '../../../../environments/environment';
 import {
+  AppTokenRefreshResponse,
   AuthenticatedResponse,
   AuthenticationResponse,
   AuthenticatorsListResponse,
@@ -591,5 +592,17 @@ export class HeadlessAuthApiService {
         body: { provider: providerId, account: accountUid },
       })
       .pipe(this.envTap());
+  }
+
+  refreshToken(body: { refresh_token: string }): Observable<AppTokenRefreshResponse> {
+    return this.http
+      .post<AppTokenRefreshResponse>(`${this.base()}${ALLAUTH_URLS.TOKEN_REFRESH}`, body, {
+        headers: this.jsonHeaders(),
+      })
+      .pipe(
+        tap((res) => {
+          this.tokens.applyTokenRefreshResponse(res);
+        })
+      );
   }
 }

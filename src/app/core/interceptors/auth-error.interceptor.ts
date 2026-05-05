@@ -19,12 +19,6 @@ import { AuthService } from '../auth/services/auth.service';
 import { environment } from '../../../environments/environment';
 
 /**
- * Set on a single retry after `GET /auth/.../session` succeeds, to avoid infinite loops.
- * Internal only — not an external API contract.
- */
-export const SESSION_401_RECHECK_HEADER = 'X-Cms-Auth-Session-Recheck';
-
-/**
  * App-mode headless: sync envelope side-effects from JSON bodies.
  * CMS APIs: one `AuthService.sessionRecheckAfter401()` (allauth session) then logout; CMS calls use Bearer per `headersInterceptor`.
  */
@@ -39,32 +33,15 @@ export function authErrorInterceptor(
   const authBus = inject(AllauthAuthChangeBus);
 
   const runCmsSessionRecheck = (err: HttpErrorResponse): Observable<HttpEvent<unknown>> => {
-    if (!apiBase || !req.url.startsWith(apiBase) || isHeadlessAppAuthUrl(req.url)) {
-      return throwError(() => err);
-    }
-
-    // Do not send x-cms-auth-session-recheck header for profile requests
-    if (req.url.includes('/auth/profile/') && req.method === 'GET') {
-      return throwError(() => err);
-    }
-
-    if (!req.headers.has(SESSION_401_RECHECK_HEADER)) {
-      return authService.sessionRecheckAfter401().pipe(
-        switchMap((stillAuthenticated) => {
-          if (stillAuthenticated) {
-            return next(
-              req.clone({
-                setHeaders: { [SESSION_401_RECHECK_HEADER]: '1' },
-              })
-            );
-          }
-          authService.invalidateClientAuthAndGoLogin();
-          return throwError(() => err);
-        })
-      );
-    }
-    authService.invalidateClientAuthAndGoLogin();
-    return throwError(() => err);
+    return authService.sessionRecheckAfter401().pipe(
+      switchMap((stillAuthenticated) => {
+        if (stillAuthenticated) {
+          return next(req);
+        }
+        authService.invalidateClientAuthAndGoLogin();
+        return throwError(() => err);
+      })
+    );
   };
 
   return next(req).pipe(
@@ -95,7 +72,12 @@ export function authErrorInterceptor(
           return throwError(() => error);
         }
 
-        if (apiBase && req.url.startsWith(apiBase)) {
+        const adminApiBase = (environment as unknown as { ADMIN_API_BASE_URL?: string })
+          .ADMIN_API_BASE_URL;
+        const isApiRequest =
+          (apiBase && req.url.includes(apiBase)) ||
+          (adminApiBase && req.url.includes(adminApiBase));
+        if (isApiRequest) {
           return runCmsSessionRecheck(error);
         }
       } else if (error.status !== 410) {

@@ -11,7 +11,7 @@ import { of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { ALLAUTH_REAUTHENTICATE_URL } from '../auth/headless/allauth-auth.hooks';
 import { AuthService } from '../auth/services/auth.service';
-import { authErrorInterceptor, SESSION_401_RECHECK_HEADER } from './auth-error.interceptor';
+import { authErrorInterceptor } from './auth-error.interceptor';
 import { appSessionTokenInterceptor } from './app-session-token.interceptor';
 import { credentialsInterceptor } from './credentials.interceptor';
 import { csrfResponseInterceptor } from './csrf-response.interceptor';
@@ -76,9 +76,7 @@ describe('authErrorInterceptor', () => {
     const r1 = httpMock.expectOne(profileUrl);
     r1.flush({ message: 'unauth' }, { status: 401, statusText: 'Unauthorized' });
 
-    const r2 = httpMock.expectOne(
-      (req) => req.url === profileUrl && req.headers.get(SESSION_401_RECHECK_HEADER) === '1'
-    );
+    const r2 = httpMock.expectOne(profileUrl);
     r2.flush({ ok: true });
   });
 
