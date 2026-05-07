@@ -126,6 +126,7 @@ export class HeadlessAuthApiService {
     return this.http
       .get<AuthenticatedResponse>(`${this.browserBase()}${ALLAUTH_URLS.SESSION}`, {
         headers: this.headers(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }

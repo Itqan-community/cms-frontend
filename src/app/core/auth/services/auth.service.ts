@@ -52,7 +52,7 @@ import {
   UpdateProfileResponse,
   User,
 } from '../models/auth.model';
-import { getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
+import { getCookie, getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
 
 @Injectable({
   providedIn: 'root',
@@ -269,6 +269,16 @@ export class AuthService {
     fetchProfile?: boolean;
   }): Observable<AuthenticatedOrChallenge> {
     const fetchProfile = options?.fetchProfile;
+
+    // Browser OAuth redirect sets a Django sessionid cookie; use its value as the
+    // app-mode X-Session-Token so the interceptor includes it on the first GET session.
+    if (!this.tokenStore.getSessionToken()) {
+      const sessionId = getCookie('sessionid');
+      if (sessionId) {
+        this.tokenStore.setSessionToken(sessionId);
+      }
+    }
+
     return this.headless.getSession().pipe(
       catchError((err) => this.observableHeadlessEnvelopeFromSessionHttpFailure(err)),
       switchMap((appRes) => {
