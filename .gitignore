@@ -67,3 +67,7 @@ CLAUDE.md
 
 # Temp screenshots
 *.png
+
+# OpenCode artifacts
+*.ocx
+.opencode

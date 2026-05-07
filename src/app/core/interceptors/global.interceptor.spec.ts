@@ -31,24 +31,24 @@ describe('headersInterceptor', () => {
     };
   }
 
-  it('attaches Bearer for non-app CMS URLs when access_token is stored (no X-Session-Token)', () => {
+  it('attaches X-Session-Token for CMS URLs when session_token is stored (Bearer commented out)', () => {
     if (!api) {
       pending('API_BASE_URL');
       return;
     }
-    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'sess-parallel');
+    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'sess-cms');
     localStorage.setItem('headless_access_token', 'jwt-cms');
     const { http, httpMock } = setupChain();
     const profileUrl = `${api}/auth/profile/`;
     http.get(profileUrl).subscribe();
     const req = httpMock.expectOne(profileUrl);
-    expect(req.request.headers.get('Authorization')).toBe('Bearer jwt-cms');
-    expect(req.request.headers.get('X-Session-Token')).toBeNull();
+    expect(req.request.headers.get('X-Session-Token')).toBe('sess-cms');
+    expect(req.request.headers.get('Authorization')).toBeNull();
     req.flush({});
     httpMock.verify();
   });
 
-  it('app client URLs get X-Session-Token from app interceptor, not Bearer from headersInterceptor', () => {
+  it('app client URLs get X-Session-Token from headersInterceptor (same as CMS URLs now)', () => {
     if (!api) {
       pending('API_BASE_URL');
       return;
