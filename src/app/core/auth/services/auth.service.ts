@@ -257,21 +257,23 @@ export class AuthService {
   }
 
   /**
-   * After browser OAuth return: try app session first (`X-Session-Token` / server state), then
-   * cookie-backed browser session so split-host deployments can still hydrate JWT from `meta`.
+   * After browser OAuth return: **`GET /auth/browser/…/session` first** (cookie + credentials)
+   * so split-host setups work: `sessionid` lives on the API host and is not readable via JS
+   * `getCookie` from the SPA origin. If the browser session is not established, fall back to
+   * app `GET /auth/app/…/session` (e.g. existing `meta.session_token` / same-origin cookie seed).
+   *
+   * Same-origin deployments may still seed `X-Session-Token` from a readable `sessionid` below.
    *
    * `HttpClient` reports HTTP **401/403** on `GET …/session` as {@link HttpErrorResponse} — the
-   * headless envelope is still JSON in {@link HttpErrorResponse.error}. Normalize that stream so we
-   * can fall through to `/auth/browser/…/session` (staging HARs showed only **app** `/session` unless
-   * this unwrap runs — GitHub can still complete OAuth server-side without a visible authorize UI).
+   * headless envelope can still be JSON in {@link HttpErrorResponse.error}; unwrap so fallback
+   * can run.
    */
   bootstrapSessionAfterOAuthRedirect(options?: {
     fetchProfile?: boolean;
   }): Observable<AuthenticatedOrChallenge> {
     const fetchProfile = options?.fetchProfile;
 
-    // Browser OAuth redirect sets a Django sessionid cookie; use its value as the
-    // app-mode X-Session-Token so the interceptor includes it on the first GET session.
+    // Same-origin only: if Django sessionid is readable (not HttpOnly), seed app header store.
     if (!this.tokenStore.getSessionToken()) {
       const sessionId = getCookie('sessionid');
       if (sessionId) {
@@ -279,21 +281,21 @@ export class AuthService {
       }
     }
 
-    return this.headless.getSession().pipe(
+    return this.headless.getBrowserSession().pipe(
       catchError((err) => this.observableHeadlessEnvelopeFromSessionHttpFailure(err)),
-      switchMap((appRes) => {
-        if (this.isOauthReturnSessionEstablished(appRes)) {
-          return this.applyHeadlessSuccess(appRes, { fetchProfile });
+      switchMap((browserRes) => {
+        if (this.isOauthReturnSessionEstablished(browserRes)) {
+          return this.applyHeadlessSuccess(browserRes, { fetchProfile });
         }
-        return this.headless.getBrowserSession().pipe(
+        return this.headless.getSession().pipe(
           catchError((err) => this.observableHeadlessEnvelopeFromSessionHttpFailure(err)),
-          switchMap((browserRes) =>
+          switchMap((appRes) =>
             this.applyHeadlessSuccess(
-              this.isOauthReturnSessionEstablished(browserRes) ? browserRes : appRes,
+              this.isOauthReturnSessionEstablished(appRes) ? appRes : browserRes,
               { fetchProfile }
             )
           ),
-          catchError(() => this.applyHeadlessSuccess(appRes, { fetchProfile }))
+          catchError(() => this.applyHeadlessSuccess(browserRes, { fetchProfile }))
         );
       })
     );

@@ -63,7 +63,9 @@ User Browser
                                  X-CSRFToken (unsafe methods)
                                  withCredentials (browser session cookies)
 4. 401 recovery: try refresh token -> recheck session -> force re-login
-5. OAuth: Navigational form POST to provider, callback handled by OauthCallbackPage
+5. OAuth: Navigational form POST to provider; OauthCallback runs `bootstrapSessionAfterOAuthRedirect`
+   → **GET browser `/auth/.../session` first** (cookie credentials), then app `/auth/app/.../session` if needed;
+   `X-Session-Token` comes from `meta.session_token` / same-origin readable `sessionid`, not cross-origin cookies
 ```
 
 ### Content Access Flow (Gallery)
