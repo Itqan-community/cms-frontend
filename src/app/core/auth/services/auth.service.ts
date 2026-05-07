@@ -32,7 +32,6 @@ import {
   ALLAUTH_SOCIAL_PROVIDER_GITHUB,
   ALLAUTH_SOCIAL_PROVIDER_GOOGLE,
 } from '../headless/allauth-urls';
-import { applyAllauthEnvelopeSideEffects } from '../headless/allauth-envelope.util';
 import { AllauthAuthChangeBus } from '../headless/allauth-auth-change.bus';
 import type {
   AuthenticationMeta,
@@ -45,7 +44,6 @@ import {
   AuthenticatedOrChallenge,
   HeadlessAuthApiService,
 } from '../headless/headless-auth-api.service';
-import type { ProviderRedirectResult } from '../headless/headless-provider-redirect.util';
 import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
 import {
   LoginRequest,
@@ -65,9 +63,6 @@ export class AuthService {
   private readonly headless = inject(HeadlessAuthApiService);
   private readonly tokenStore = inject(HeadlessAppTokenService);
   private readonly authBus = inject(AllauthAuthChangeBus);
-
-  /** When false (default app mode), hide/disabled browser OAuth buttons until redirect+callback are wired. */
-  readonly oauthBrowserRedirectEnabled = environment.oauthBrowserRedirectEnabled;
 
   private readonly API_BASE_URL = environment.API_BASE_URL;
   private readonly USER_KEY = 'user';
@@ -454,24 +449,24 @@ export class AuthService {
   }
 
   /**
-   * Starts Google OAuth via headless browser client provider redirect (`POST .../auth/browser/v1/auth/provider/redirect`).
-   * Requires `environment.oauthBrowserRedirectEnabled`.
+   * Starts Google OAuth via browser-mode navigational form POST
+   * (`POST .../auth/browser/v1/auth/provider/redirect`).
    */
   async startGoogleOAuth(
     callbackUrl: string,
     process: 'login' | 'connect' = 'login'
-  ): Promise<ProviderRedirectResult> {
+  ): Promise<{ kind: 'redirecting' } | { kind: 'error'; message: string }> {
     return await this.startProviderOAuth(ALLAUTH_SOCIAL_PROVIDER_GOOGLE, callbackUrl, process);
   }
 
   /**
-   * Starts GitHub OAuth via headless browser client provider redirect (`POST .../auth/browser/v1/auth/provider/redirect`).
-   * Requires `environment.oauthBrowserRedirectEnabled`.
+   * Starts GitHub OAuth via browser-mode navigational form POST
+   * (`POST .../auth/browser/v1/auth/provider/redirect`).
    */
   async startGitHubOAuth(
     callbackUrl: string,
     process: 'login' | 'connect' = 'login'
-  ): Promise<ProviderRedirectResult> {
+  ): Promise<{ kind: 'redirecting' } | { kind: 'error'; message: string }> {
     return await this.startProviderOAuth(ALLAUTH_SOCIAL_PROVIDER_GITHUB, callbackUrl, process);
   }
 
@@ -479,32 +474,16 @@ export class AuthService {
     providerId: string,
     callbackUrl: string,
     process: 'login' | 'connect'
-  ): Promise<ProviderRedirectResult> {
-    if (!this.oauthBrowserRedirectEnabled) {
-      const result: ProviderRedirectResult = {
-        kind: 'error',
-        message: `${providerId} OAuth redirect is disabled (oauthBrowserRedirectEnabled=false).`,
-      };
-      this.applyProviderRedirectResult(result);
-      return result;
-    }
+  ): Promise<{ kind: 'redirecting' } | { kind: 'error'; message: string }> {
     if (process === 'login') {
-      // Avoid stale app session binding before an anonymous provider-login redirect.
       this.tokenStore.clearSessionToken();
     }
-    const sessionToken = process === 'connect' ? this.tokenStore.getSessionToken() : undefined;
-    if (process === 'connect' && !sessionToken) {
-      const result: ProviderRedirectResult = {
+    if (process === 'connect' && !this.tokenStore.getSessionToken()) {
+      return {
         kind: 'error',
         message: 'Connecting a provider requires an app session token; sign in again.',
       };
-      this.applyProviderRedirectResult(result);
-      return result;
     }
-    /*
-     * Browser OAuth POST is CSRF-protected. App bootstrap loads `/auth/app/v1/config` without
-     * cookies, so `csrftoken` is never minted unless we prime `/auth/browser/v1/config`.
-     */
     if (!getDjangoCsrfTokenForRequest()) {
       await firstValueFrom(
         this.headless
@@ -517,24 +496,10 @@ export class AuthService {
       process,
       callbackUrl,
     });
-    this.applyProviderRedirectResult(result);
-    return result;
-  }
-
-  /** Applies POST/OAuth outcome from {@link HeadlessAuthApiService.redirectToProvider}. */
-  applyProviderRedirectResult(result: ProviderRedirectResult): void {
-    switch (result.kind) {
-      case 'form_submitted':
-        return;
-      case 'json':
-        applyAllauthEnvelopeSideEffects(result.body, this.tokenStore, this.authBus);
-        return;
-      case 'error':
-        console.error('[auth] Provider redirect failed:', result.message);
-        return;
-      default:
-        return;
+    if (result.kind === 'error') {
+      return { kind: 'error', message: result.message };
     }
+    return { kind: 'redirecting' };
   }
 
   getStoredUser(): User | null {

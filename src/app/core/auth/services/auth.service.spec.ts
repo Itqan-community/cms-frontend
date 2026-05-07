@@ -82,7 +82,6 @@ describe('AuthService (app / headless)', () => {
         meta: { is_authenticated: true },
       } as AuthenticatedResponse)
     );
-    headless.redirectToProvider.and.returnValue(Promise.resolve({ kind: 'json', body: {} }));
     headless.getBrowserConfig.and.returnValue(
       of({
         status: 200,
@@ -96,6 +95,7 @@ describe('AuthService (app / headless)', () => {
         },
       } as ConfigurationResponse)
     );
+    headless.redirectToProvider.and.returnValue(Promise.resolve({ kind: 'form_submitted' }));
     routerMock = {
       url: '/account/login?next=%2Faccount%2Fproviders',
       navigate: jasmine.createSpy('navigate'),
@@ -180,13 +180,7 @@ describe('AuthService (app / headless)', () => {
     });
   });
 
-  it('startGoogleOAuth does not call redirectToProvider when oauthBrowserRedirectEnabled is false', async () => {
-    await service.startGoogleOAuth('http://localhost/cb', 'login');
-    expect(headless.redirectToProvider).not.toHaveBeenCalled();
-  });
-
   it('startGoogleOAuth with login clears stale session token before redirect', async () => {
-    (service as { oauthBrowserRedirectEnabled: boolean }).oauthBrowserRedirectEnabled = true;
     tokenStore.setSessionToken('stale-token');
     headless.redirectToProvider.and.returnValue(
       Promise.resolve({ kind: 'error', message: 'backend refused' })
@@ -197,7 +191,9 @@ describe('AuthService (app / headless)', () => {
   });
 
   it('LOGGED_IN auth event navigates to query next URL when not on OAuth callback', async () => {
-    const fn = (service as unknown as { handleAuthChangeEvent: Function }).handleAuthChangeEvent;
+    const fn = (
+      service as unknown as { handleAuthChangeEvent: (...args: unknown[]) => Promise<void> }
+    ).handleAuthChangeEvent;
     await fn.call(service, 'LOGGED_IN', {});
     expect(routerMock.navigateByUrl).toHaveBeenCalledWith('/account/providers');
   });
@@ -206,7 +202,9 @@ describe('AuthService (app / headless)', () => {
     routerMock.url = '/account/provider/callback?next=%2Fgallery';
     routerMock.parseUrl.and.returnValue({ queryParams: { next: '/gallery' } });
     routerMock.navigateByUrl.calls.reset();
-    const fn = (service as unknown as { handleAuthChangeEvent: Function }).handleAuthChangeEvent;
+    const fn = (
+      service as unknown as { handleAuthChangeEvent: (...args: unknown[]) => Promise<void> }
+    ).handleAuthChangeEvent;
     await fn.call(service, 'LOGGED_IN', {});
     expect(routerMock.navigateByUrl).not.toHaveBeenCalled();
   });

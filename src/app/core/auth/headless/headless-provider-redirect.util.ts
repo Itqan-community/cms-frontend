@@ -10,6 +10,56 @@ export type ProviderRedirectResult =
   | { kind: 'error'; message: string };
 
 /**
+ * App-mode provider redirect: JSON POST to `/auth/app/v1/auth/provider/redirect`.
+ * Requires BE upgrade to support `POST /auth/app/v1/auth/provider/redirect`.
+ * When enabled, returns the `redirect_url` from the JSON response for the SPA to navigate to.
+ * For now, browser-mode navigational form POST is used instead.
+ *
+ * import { ALLAUTH_APP_USER_AGENT } from './allauth-urls';
+ * import { HEADLESS_CLIENT_APP } from './headless-api.types';
+ * import { HEADLESS_APP_AUTH_PATH_FRAGMENT } from './headless-api-path.util';
+ *
+ * export async function appModeProviderRedirect(opts: {
+ *   apiBaseUrl: string;
+ *   provider: string;
+ *   process: ProviderRedirectProcess;
+ *   callbackUrl: string;
+ *   sessionToken?: string | null;
+ * }): Promise<string> {
+ *   const base = opts.apiBaseUrl.replace(/\/$/, '');
+ *   const url = `${base}${HEADLESS_APP_AUTH_PATH_FRAGMENT}auth/provider/redirect`;
+ *
+ *   const headers: Record<string, string> = {
+ *     'Content-Type': 'application/json',
+ *     Accept: 'application/json',
+ *     'User-Agent': ALLAUTH_APP_USER_AGENT,
+ *   };
+ *   if (opts.sessionToken) {
+ *     headers['X-Session-Token'] = opts.sessionToken;
+ *   }
+ *
+ *   const response = await fetch(url, {
+ *     method: 'POST',
+ *     headers,
+ *     body: JSON.stringify({
+ *       provider: opts.provider,
+ *       process: opts.process,
+ *       callback_url: opts.callbackUrl,
+ *     }),
+ *   });
+ *
+ *   const body = await response.json();
+ *   if (body?.data?.redirect_url) {
+ *     return body.data.redirect_url;
+ *   }
+ *   if (body?.errors?.[0]?.message) {
+ *     throw new Error(body.errors[0].message);
+ *   }
+ *   throw new Error(`Provider redirect failed (status ${response.status})`);
+ * }
+ */
+
+/**
  * POST target for django-allauth headless provider redirect — BE OpenAPI publishes this under the
  * **browser** client only (`POST .../auth/browser/v1/auth/provider/redirect`), synchronous/non-XHR.
  */
