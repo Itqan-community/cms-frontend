@@ -700,6 +700,8 @@
         "LABEL_RIWAYAH": "Riwayah",
         "LABEL_MADD": "Madd level",
         "LABEL_MEEM": "Meem jama'",
+        "PLACEHOLDER_MADD": "Select madd level (optional)",
+        "PLACEHOLDER_MEEM": "Select meem behavior (optional)",
         "LABEL_YEAR": "Year",
         "PLACEHOLDER_YEAR_HIJRI": "Year (Hijri)",
         "LABEL_LICENSE": "License",

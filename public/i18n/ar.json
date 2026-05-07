@@ -700,6 +700,8 @@
         "LABEL_RIWAYAH": "الرواية",
         "LABEL_MADD": "مستوى المد",
         "LABEL_MEEM": "ميم الجمع",
+        "PLACEHOLDER_MADD": "اختر مستوى المد (اختياري)",
+        "PLACEHOLDER_MEEM": "اختر سلوك ميم الجمع (اختياري)",
         "LABEL_YEAR": "السنة",
         "PLACEHOLDER_YEAR_HIJRI": "السنة (هجري)",
         "LABEL_LICENSE": "الترخيص",

@@ -44,9 +44,14 @@ export class PublisherService {
     publisherId: string,
     categories: string[] = [],
     searchQuery = '',
-    licenses: string[] = []
+    licenses: string[] = [],
+    page = 1,
+    page_size = 12
   ): Observable<ApiAssets> {
-    let params = new HttpParams().set('publisher_id', publisherId);
+    let params = new HttpParams()
+      .set('publisher_id', publisherId)
+      .set('page', String(page))
+      .set('page_size', String(page_size));
 
     categories.forEach((category) => {
       params = params.append('category', category);

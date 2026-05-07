@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
 import { ApiAssets, AssetDetails } from '../models/assets.model';
@@ -23,27 +23,29 @@ export class AssetsService {
     categories: string[],
     searchQuery: string,
     licenses: string[],
-    publisherId?: number | null
+    publisherId?: number | null,
+    page = 1,
+    page_size = 12
   ) {
-    let params = {};
+    let params = new HttpParams().set('page', String(page)).set('page_size', String(page_size));
 
-    if (categories && categories.length > 0) {
-      params = { ...params, category: categories };
-    }
+    (categories ?? []).forEach((c) => {
+      params = params.append('category', c);
+    });
+
+    (licenses ?? []).forEach((l) => {
+      params = params.append('license_code', l);
+    });
 
     if (searchQuery && searchQuery.trim() !== '') {
-      params = { ...params, search: searchQuery };
-    }
-
-    if (licenses && licenses.length > 0) {
-      params = { ...params, license_code: licenses };
+      params = params.set('search', searchQuery.trim());
     }
 
     if (publisherId) {
-      params = { ...params, publisher: publisherId };
+      params = params.set('publisher', String(publisherId));
     }
 
-    return this.http.get<ApiAssets>(`${this.BASE_URL}/assets/`, { params: params });
+    return this.http.get<ApiAssets>(`${this.BASE_URL}/assets/`, { params });
   }
 
   /**

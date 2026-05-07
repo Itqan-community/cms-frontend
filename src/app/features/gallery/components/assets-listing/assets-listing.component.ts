@@ -2,6 +2,7 @@ import { isPlatformServer } from '@angular/common';
 import { Component, computed, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateModule } from '@ngx-translate/core';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { ViewportService } from '../../../../core/services/viewport.service';
 import { AssetCardSkeletonComponent } from '../../../../shared/components/asset-card-skeleton/asset-card-skeleton.component';
 import { FiltersComponent } from '../../../../shared/components/filters/filters.component';
@@ -19,6 +20,7 @@ import { AssetCardComponent } from '../asset-card/asset-card.component';
     AssetCardSkeletonComponent,
     StateMessageComponent,
     TranslateModule,
+    NzPaginationModule,
   ],
   templateUrl: './assets-listing.component.html',
   styleUrl: './assets-listing.component.less',
@@ -38,6 +40,11 @@ export class AssetsListingComponent {
   categoriesSelection = signal<string[]>([]);
   searchQuery = signal<string>('');
   licensesSelection = signal<string[]>([]);
+
+  readonly page = signal(1);
+  readonly pageSize = signal(12);
+  readonly total = signal(0);
+  readonly pageSizeOptions: number[] = [12, 24, 48];
 
   hasActiveFilters = computed(
     () =>
@@ -66,32 +73,50 @@ export class AssetsListingComponent {
         this.categoriesSelection(),
         this.searchQuery(),
         this.licensesSelection(),
-        this.publisherId
+        this.publisherId,
+        this.page(),
+        this.pageSize()
       )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           this.assets.set(response.results);
+          this.total.set(response.count ?? response.results.length);
           this.loading.set(false);
         },
         error: () => {
           this.loading.set(false);
           this.errorState.set(true);
           this.assets.set([]);
+          this.total.set(0);
         },
       });
   }
 
   searchQueryChange(event: string) {
     this.searchQuery.set(event);
+    this.page.set(1);
     this.getAssets();
   }
   categoriesSelectionChange(event: string[]) {
     this.categoriesSelection.set(event);
+    this.page.set(1);
     this.getAssets();
   }
   licensesSelectionChange(event: string[]) {
     this.licensesSelection.set(event);
+    this.page.set(1);
+    this.getAssets();
+  }
+
+  onPageChange(index: number): void {
+    this.page.set(index);
+    this.getAssets();
+  }
+
+  onPageSizeChange(size: number): void {
+    this.pageSize.set(size);
+    this.page.set(1);
     this.getAssets();
   }
 }

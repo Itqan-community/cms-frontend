@@ -241,6 +241,7 @@ export class RecitationDetailComponent implements OnInit {
     this.tracksLoading.set(true);
     this.recitationsService
       .recitationTracksList({
+        slug: rec.slug ?? this.slug,
         asset_id: rec.id,
         page: this.tracksPage(),
         page_size: this.tracksPageSize,
@@ -654,16 +655,24 @@ export class RecitationDetailComponent implements OnInit {
     return this.licensesColors[license as keyof typeof LicensesColors] ?? '#8c8c8c';
   }
 
-  maddLabel(level: MaddLevel): string {
-    return level === MaddLevel.TWASSUT
-      ? this.translate.instant('ADMIN.RECITATIONS.FILTERS.MADD_TWASSUT')
-      : this.translate.instant('ADMIN.RECITATIONS.FILTERS.MADD_QASR');
+  maddLabel(level: MaddLevel | null | undefined): string {
+    if (level === MaddLevel.TWASSUT) {
+      return this.translate.instant('ADMIN.RECITATIONS.FILTERS.MADD_TWASSUT');
+    }
+    if (level === MaddLevel.QASR) {
+      return this.translate.instant('ADMIN.RECITATIONS.FILTERS.MADD_QASR');
+    }
+    return '';
   }
 
-  meemLabel(b: MeemBehavior): string {
-    return b === MeemBehavior.SILAH
-      ? this.translate.instant('ADMIN.RECITATIONS.FORM.MEEM_WASL_LONG')
-      : this.translate.instant('ADMIN.RECITATIONS.FILTERS.MEEM_SKOUN');
+  meemLabel(b: MeemBehavior | null | undefined): string {
+    if (b === MeemBehavior.SILAH) {
+      return this.translate.instant('ADMIN.RECITATIONS.FORM.MEEM_WASL_LONG');
+    }
+    if (b === MeemBehavior.SKOUN) {
+      return this.translate.instant('ADMIN.RECITATIONS.FILTERS.MEEM_SKOUN');
+    }
+    return '';
   }
 
   formatDurationMs(ms: number | null | undefined): string {

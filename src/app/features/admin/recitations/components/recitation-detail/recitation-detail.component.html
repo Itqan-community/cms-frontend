@@ -25,9 +25,15 @@
           <nz-tag [nzColor]="getLicenseColor(recitation()!.license)">{{
             recitation()!.license
           }}</nz-tag>
-          <nz-tag nzColor="cyan">{{ maddLabel(recitation()!.madd_level) }}</nz-tag>
-          <nz-tag nzColor="purple">{{ meemLabel(recitation()!.meem_behaviour) }}</nz-tag>
-          <nz-tag nzColor="default">{{ recitation()!.year }}</nz-tag>
+          @if (recitation()!.madd_level != null) {
+            <nz-tag nzColor="cyan">{{ maddLabel(recitation()!.madd_level) }}</nz-tag>
+          }
+          @if (recitation()!.meem_behaviour != null) {
+            <nz-tag nzColor="purple">{{ meemLabel(recitation()!.meem_behaviour) }}</nz-tag>
+          }
+          @if (recitation()!.year != null) {
+            <nz-tag nzColor="default">{{ recitation()!.year }}</nz-tag>
+          }
           <span class="admin-hero-meta__date">
             <ng-icon name="lucideCalendar" />
             {{ recitation()!.created_at | date: 'dd/MM/yyyy' }}
