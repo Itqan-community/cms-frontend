@@ -9,7 +9,6 @@ import {
   AuthenticationResponse,
   AuthenticatorsListResponse,
   ConfigurationResponse,
-  HEADLESS_CLIENT_APP,
   HEADLESS_CLIENT_BROWSER,
   PasskeySignup,
   RecoveryCodesResponse,
@@ -44,11 +43,13 @@ export class HeadlessAuthApiService {
   private readonly tokens = inject(HeadlessAppTokenService);
   private readonly authBus = inject(AllauthAuthChangeBus);
 
-  private base(): string {
+  /* App-mode base preserved for future BE upgrade:
+  private appBase(): string {
     return `${environment.API_BASE_URL}/auth/${HEADLESS_CLIENT_APP}/v1`;
   }
+  */
 
-  private browserBase(): string {
+  private base(): string {
     return `${environment.API_BASE_URL}/auth/${HEADLESS_CLIENT_BROWSER}/v1`;
   }
 
@@ -80,21 +81,10 @@ export class HeadlessAuthApiService {
     return this.http
       .get<ConfigurationResponse>(`${this.base()}${ALLAUTH_URLS.CONFIG}`, {
         headers: this.headers(),
-      })
-      .pipe(this.envTap());
-  }
-
-  /**
-   * Issues (or rotates) Django `csrftoken` for `.itqan.dev`-style setups via `{ withCredentials }`
-   * (`/auth/browser/…` paths are cookie-backed). Needed before **`POST …/browser/…/auth/provider/redirect`**:
-   * bootstrap only touches `/auth/app/v1/config` (no credentials).
-   */
-  getBrowserConfig(): Observable<ConfigurationResponse> {
-    return this.http
-      .get<ConfigurationResponse>(`${this.browserBase()}${ALLAUTH_URLS.CONFIG}`, {
-        headers: this.headers(),
+        withCredentials: true,
       })
       .pipe(
+        this.envTap(),
         tap((body) => {
           const csrf = extractCsrfFromHeadlessConfigResponse(body);
           if (csrf) {
@@ -113,28 +103,21 @@ export class HeadlessAuthApiService {
     return this.http
       .get<AuthenticatedResponse>(`${this.base()}${ALLAUTH_URLS.SESSION}`, {
         headers: this.headers(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
 
-  /**
-   * Browser headless session (cookie-backed). Uses `withCredentials` via interceptor for non-app
-   * auth URLs (not under `/auth/app/v1`). Used after OAuth return when app session GET is still
-   * anonymous.
-   */
+  /** Browser-mode session alias (cookie-backed). Kept for API compatibility. */
   getBrowserSession(): Observable<AuthenticatedOrChallenge> {
-    return this.http
-      .get<AuthenticatedResponse>(`${this.browserBase()}${ALLAUTH_URLS.SESSION}`, {
-        headers: this.headers(),
-        withCredentials: true,
-      })
-      .pipe(this.envTap());
+    return this.getSession();
   }
 
   deleteSession(): Observable<unknown> {
     return this.http
       .delete(`${this.base()}${ALLAUTH_URLS.SESSION}`, {
         headers: this.headers(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -143,6 +126,7 @@ export class HeadlessAuthApiService {
     return this.http
       .post<AuthenticatedResponse>(`${this.base()}${ALLAUTH_URLS.LOGIN}`, body, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -151,6 +135,7 @@ export class HeadlessAuthApiService {
     return this.http
       .post<AuthenticatedResponse>(`${this.base()}${ALLAUTH_URLS.SIGNUP}`, body, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -159,6 +144,7 @@ export class HeadlessAuthApiService {
     return this.http
       .post<AuthenticatedResponse>(`${this.base()}${ALLAUTH_URLS.REAUTHENTICATE}`, body, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -167,6 +153,7 @@ export class HeadlessAuthApiService {
     return this.http
       .post(`${this.base()}${ALLAUTH_URLS.REQUEST_LOGIN_CODE}`, body, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -175,6 +162,7 @@ export class HeadlessAuthApiService {
     return this.http
       .post<AuthenticatedResponse>(`${this.base()}${ALLAUTH_URLS.CONFIRM_LOGIN_CODE}`, body, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -183,6 +171,7 @@ export class HeadlessAuthApiService {
     return this.http
       .post(`${this.base()}${ALLAUTH_URLS.REQUEST_PASSWORD_RESET}`, body, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -195,6 +184,8 @@ export class HeadlessAuthApiService {
           'User-Agent': ALLAUTH_APP_USER_AGENT,
           'X-Password-Reset-Key': resetKey,
         }),
+
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -203,6 +194,7 @@ export class HeadlessAuthApiService {
     return this.http
       .post<AuthenticatedResponse>(`${this.base()}${ALLAUTH_URLS.RESET_PASSWORD}`, body, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -211,19 +203,26 @@ export class HeadlessAuthApiService {
     return this.http
       .post<AuthenticatedResponse>(`${this.base()}${ALLAUTH_URLS.CHANGE_PASSWORD}`, body, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
 
   getEmailAddresses(): Observable<unknown> {
     return this.http
-      .get(`${this.base()}${ALLAUTH_URLS.EMAIL}`, { headers: this.headers() })
+      .get(`${this.base()}${ALLAUTH_URLS.EMAIL}`, {
+        headers: this.headers(),
+        withCredentials: true,
+      })
       .pipe(this.envTap());
   }
 
   addEmail(body: { email: string }): Observable<unknown> {
     return this.http
-      .post(`${this.base()}${ALLAUTH_URLS.EMAIL}`, body, { headers: this.jsonHeaders() })
+      .post(`${this.base()}${ALLAUTH_URLS.EMAIL}`, body, {
+        headers: this.jsonHeaders(),
+        withCredentials: true,
+      })
       .pipe(this.envTap());
   }
 
@@ -231,6 +230,7 @@ export class HeadlessAuthApiService {
     return this.http
       .request('DELETE', `${this.base()}${ALLAUTH_URLS.EMAIL}`, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
         body,
       })
       .pipe(this.envTap());
@@ -238,13 +238,19 @@ export class HeadlessAuthApiService {
 
   markEmailAsPrimary(body: { email: string; primary: true }): Observable<unknown> {
     return this.http
-      .patch(`${this.base()}${ALLAUTH_URLS.EMAIL}`, body, { headers: this.jsonHeaders() })
+      .patch(`${this.base()}${ALLAUTH_URLS.EMAIL}`, body, {
+        headers: this.jsonHeaders(),
+        withCredentials: true,
+      })
       .pipe(this.envTap());
   }
 
   requestEmailVerification(body: { email: string }): Observable<unknown> {
     return this.http
-      .put(`${this.base()}${ALLAUTH_URLS.EMAIL}`, body, { headers: this.jsonHeaders() })
+      .put(`${this.base()}${ALLAUTH_URLS.EMAIL}`, body, {
+        headers: this.jsonHeaders(),
+        withCredentials: true,
+      })
       .pipe(this.envTap());
   }
 
@@ -256,6 +262,8 @@ export class HeadlessAuthApiService {
           'User-Agent': ALLAUTH_APP_USER_AGENT,
           'X-Email-Verification-Key': verificationKey,
         }),
+
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -264,6 +272,7 @@ export class HeadlessAuthApiService {
     return this.http
       .post<AuthenticatedResponse>(`${this.base()}${ALLAUTH_URLS.VERIFY_EMAIL}`, body, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -272,6 +281,7 @@ export class HeadlessAuthApiService {
     return this.http
       .post(`${this.base()}${ALLAUTH_URLS.VERIFY_EMAIL}/resend`, null, {
         headers: this.headers(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -280,6 +290,7 @@ export class HeadlessAuthApiService {
     return this.http
       .post<AuthenticatedResponse>(`${this.base()}${ALLAUTH_URLS.MFA_AUTHENTICATE}`, body, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -288,6 +299,7 @@ export class HeadlessAuthApiService {
     return this.http
       .post<AuthenticatedResponse>(`${this.base()}${ALLAUTH_URLS.MFA_REAUTHENTICATE}`, body, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -299,6 +311,7 @@ export class HeadlessAuthApiService {
         { trust },
         {
           headers: this.jsonHeaders(),
+          withCredentials: true,
         }
       )
       .pipe(this.envTap());
@@ -309,7 +322,7 @@ export class HeadlessAuthApiService {
    * `POST .../auth/browser/v1/auth/provider/redirect` (sync, non-XHR).
    * The form submission causes a full-page navigation to the provider.
    *
-   * CSRF token is expected to be primed by the caller via {@link getBrowserConfig}.
+   * CSRF token is expected to be primed by the caller via {@link getConfig}.
    * For `login` process, the caller should clear the session token first.
    * For `connect` process, the cookie-backed session must be available (same-origin proxy).
    */
@@ -339,13 +352,17 @@ export class HeadlessAuthApiService {
     return this.http
       .post<AuthenticatedResponse>(`${this.base()}${ALLAUTH_URLS.PROVIDER_TOKEN}`, body, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
 
   getSessions(): Observable<unknown> {
     return this.http
-      .get(`${this.base()}${ALLAUTH_URLS.SESSIONS}`, { headers: this.headers() })
+      .get(`${this.base()}${ALLAUTH_URLS.SESSIONS}`, {
+        headers: this.headers(),
+        withCredentials: true,
+      })
       .pipe(this.envTap());
   }
 
@@ -353,6 +370,7 @@ export class HeadlessAuthApiService {
     return this.http
       .request('DELETE', `${this.base()}${ALLAUTH_URLS.SESSIONS}`, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
         body: { sessions: ids },
       })
       .pipe(this.envTap());
@@ -362,6 +380,7 @@ export class HeadlessAuthApiService {
     return this.http
       .get<WebAuthnRequestOptionsResponse>(`${this.base()}${ALLAUTH_URLS.LOGIN_WEBAUTHN}`, {
         headers: this.headers(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -371,7 +390,7 @@ export class HeadlessAuthApiService {
       .post<AuthenticatedResponse>(
         `${this.base()}${ALLAUTH_URLS.LOGIN_WEBAUTHN}`,
         webauthnCredentialRequestBody(credential),
-        { headers: this.jsonHeaders() }
+        { headers: this.jsonHeaders(), withCredentials: true }
       )
       .pipe(this.envTap());
   }
@@ -380,6 +399,7 @@ export class HeadlessAuthApiService {
     return this.http
       .get<WebAuthnRequestOptionsResponse>(`${this.base()}${ALLAUTH_URLS.SIGNUP_WEBAUTHN}`, {
         headers: this.headers(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -389,6 +409,7 @@ export class HeadlessAuthApiService {
     return this.http
       .post<unknown>(`${this.base()}${ALLAUTH_URLS.SIGNUP_WEBAUTHN}`, body, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
         observe: 'response',
       })
       .pipe(
@@ -403,7 +424,7 @@ export class HeadlessAuthApiService {
       .put<AuthenticatedResponse>(
         `${this.base()}${ALLAUTH_URLS.SIGNUP_WEBAUTHN}`,
         webauthnCredentialRequestBody(credentialPayload),
-        { headers: this.jsonHeaders() }
+        { headers: this.jsonHeaders(), withCredentials: true }
       )
       .pipe(this.envTap());
   }
@@ -413,7 +434,7 @@ export class HeadlessAuthApiService {
     return this.http
       .get<WebAuthnCreationOptionsResponse>(
         `${this.base()}${ALLAUTH_URLS.WEBAUTHN_AUTHENTICATOR}${suffix}`,
-        { headers: this.headers() }
+        { headers: this.headers(), withCredentials: true }
       )
       .pipe(this.envTap());
   }
@@ -429,7 +450,7 @@ export class HeadlessAuthApiService {
         .post(
           `${this.base()}${ALLAUTH_URLS.WEBAUTHN_AUTHENTICATOR}`,
           webauthnCredentialRequestBody(credential),
-          { headers: this.jsonHeaders() }
+          { headers: this.jsonHeaders(), withCredentials: true }
         )
         .pipe(this.envTap())
     );
@@ -439,6 +460,7 @@ export class HeadlessAuthApiService {
     return this.http
       .request('DELETE', `${this.base()}${ALLAUTH_URLS.WEBAUTHN_AUTHENTICATOR}`, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
         body: { authenticators: ids },
       })
       .pipe(this.envTap());
@@ -451,6 +473,7 @@ export class HeadlessAuthApiService {
         { id, ...data },
         {
           headers: this.jsonHeaders(),
+          withCredentials: true,
         }
       )
       .pipe(this.envTap());
@@ -460,7 +483,7 @@ export class HeadlessAuthApiService {
     return this.http
       .get<WebAuthnRequestOptionsResponse>(
         `${this.base()}${ALLAUTH_URLS.REAUTHENTICATE_WEBAUTHN}`,
-        { headers: this.headers() }
+        { headers: this.headers(), withCredentials: true }
       )
       .pipe(this.envTap());
   }
@@ -470,7 +493,7 @@ export class HeadlessAuthApiService {
       .post<AuthenticatedResponse>(
         `${this.base()}${ALLAUTH_URLS.REAUTHENTICATE_WEBAUTHN}`,
         webauthnCredentialRequestBody(credential),
-        { headers: this.jsonHeaders() }
+        { headers: this.jsonHeaders(), withCredentials: true }
       )
       .pipe(this.envTap());
   }
@@ -479,6 +502,7 @@ export class HeadlessAuthApiService {
     return this.http
       .get<WebAuthnRequestOptionsResponse>(`${this.base()}${ALLAUTH_URLS.AUTHENTICATE_WEBAUTHN}`, {
         headers: this.headers(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -488,7 +512,7 @@ export class HeadlessAuthApiService {
       .post<AuthenticatedResponse>(
         `${this.base()}${ALLAUTH_URLS.AUTHENTICATE_WEBAUTHN}`,
         webauthnCredentialRequestBody(credential),
-        { headers: this.jsonHeaders() }
+        { headers: this.jsonHeaders(), withCredentials: true }
       )
       .pipe(this.envTap());
   }
@@ -497,44 +521,48 @@ export class HeadlessAuthApiService {
     return this.http
       .get<AuthenticatorsListResponse>(`${this.base()}${ALLAUTH_URLS.AUTHENTICATORS}`, {
         headers: this.headers(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
 
   getTotpStatus(): Observable<TotpStatusResult> {
     const url = `${this.base()}${ALLAUTH_URLS.TOTP_AUTHENTICATOR}`;
-    return this.http.get<TotpActiveResponse>(url, { headers: this.headers() }).pipe(
-      this.envTap(),
-      map((res) => ({
-        kind: 'active' as const,
-        data: res.data,
-        meta: res.meta,
-      })),
-      catchError((err: unknown) => {
-        if (!(err instanceof HttpErrorResponse) || err.status !== 404) {
+    return this.http
+      .get<TotpActiveResponse>(url, { headers: this.headers(), withCredentials: true })
+      .pipe(
+        this.envTap(),
+        map((res) => ({
+          kind: 'active' as const,
+          data: res.data,
+          meta: res.meta,
+        })),
+        catchError((err: unknown) => {
+          if (!(err instanceof HttpErrorResponse) || err.status !== 404) {
+            return throwError(() => err);
+          }
+          const body = err.error as Partial<TotpPendingResponseBody> | null;
+          if (
+            body &&
+            body.meta &&
+            typeof body.meta.secret === 'string' &&
+            typeof body.meta.totp_url === 'string'
+          ) {
+            return of({
+              kind: 'pending_setup' as const,
+              meta: { secret: body.meta.secret, totp_url: body.meta.totp_url },
+            });
+          }
           return throwError(() => err);
-        }
-        const body = err.error as Partial<TotpPendingResponseBody> | null;
-        if (
-          body &&
-          body.meta &&
-          typeof body.meta.secret === 'string' &&
-          typeof body.meta.totp_url === 'string'
-        ) {
-          return of({
-            kind: 'pending_setup' as const,
-            meta: { secret: body.meta.secret, totp_url: body.meta.totp_url },
-          });
-        }
-        return throwError(() => err);
-      })
-    );
+        })
+      );
   }
 
   activateTotp(body: { code: string }): Observable<TotpActiveResponse> {
     return this.http
       .post<TotpActiveResponse>(`${this.base()}${ALLAUTH_URLS.TOTP_AUTHENTICATOR}`, body, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -544,6 +572,7 @@ export class HeadlessAuthApiService {
       this.http
         .delete(`${this.base()}${ALLAUTH_URLS.TOTP_AUTHENTICATOR}`, {
           headers: this.jsonHeaders(),
+          withCredentials: true,
         })
         .pipe(this.envTap())
     );
@@ -553,6 +582,7 @@ export class HeadlessAuthApiService {
     return this.http
       .get<RecoveryCodesResponse>(`${this.base()}${ALLAUTH_URLS.RECOVERY_CODES}`, {
         headers: this.headers(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
@@ -563,7 +593,7 @@ export class HeadlessAuthApiService {
         .post<RecoveryCodesResponse>(
           `${this.base()}${ALLAUTH_URLS.RECOVERY_CODES}`,
           {},
-          { headers: this.jsonHeaders() }
+          { headers: this.jsonHeaders(), withCredentials: true }
         )
         .pipe(this.envTap())
     );
@@ -571,7 +601,10 @@ export class HeadlessAuthApiService {
 
   getProviderSignupInfo(): Observable<unknown> {
     return this.http
-      .get(`${this.base()}${ALLAUTH_URLS.PROVIDER_SIGNUP}`, { headers: this.headers() })
+      .get(`${this.base()}${ALLAUTH_URLS.PROVIDER_SIGNUP}`, {
+        headers: this.headers(),
+        withCredentials: true,
+      })
       .pipe(this.envTap());
   }
 
@@ -579,13 +612,17 @@ export class HeadlessAuthApiService {
     return this.http
       .post<AuthenticatedResponse>(`${this.base()}${ALLAUTH_URLS.PROVIDER_SIGNUP}`, body, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
       })
       .pipe(this.envTap());
   }
 
   getProviderAccounts(): Observable<unknown> {
     return this.http
-      .get(`${this.base()}${ALLAUTH_URLS.PROVIDERS}`, { headers: this.headers() })
+      .get(`${this.base()}${ALLAUTH_URLS.PROVIDERS}`, {
+        headers: this.headers(),
+        withCredentials: true,
+      })
       .pipe(this.envTap());
   }
 
@@ -593,6 +630,7 @@ export class HeadlessAuthApiService {
     return this.http
       .request('DELETE', `${this.base()}${ALLAUTH_URLS.PROVIDERS}`, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
         body: { provider: providerId, account: accountUid },
       })
       .pipe(this.envTap());
@@ -602,6 +640,7 @@ export class HeadlessAuthApiService {
     return this.http
       .post<AppTokenRefreshResponse>(`${this.base()}${ALLAUTH_URLS.TOKEN_REFRESH}`, body, {
         headers: this.jsonHeaders(),
+        withCredentials: true,
       })
       .pipe(
         tap((res) => {
