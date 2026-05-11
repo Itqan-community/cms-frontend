@@ -20,7 +20,7 @@ import {
 } from './headless-api.types';
 import { HeadlessAppTokenService } from './headless-app-token.service';
 import { webauthnCredentialRequestBody } from './headless-webauthn-http.util';
-import { ALLAUTH_URLS } from './allauth-urls';
+import { ALLAUTH_APP_USER_AGENT, ALLAUTH_URLS } from './allauth-urls';
 import {
   type ProviderRedirectProcess,
   type ProviderRedirectResult,
@@ -63,6 +63,7 @@ export class HeadlessAuthApiService {
   private headers(extra?: Record<string, string>): HttpHeaders {
     let h = new HttpHeaders({
       Accept: JSON_CT,
+      'User-Agent': ALLAUTH_APP_USER_AGENT,
     });
     if (extra) {
       for (const [k, v] of Object.entries(extra)) {
@@ -180,6 +181,7 @@ export class HeadlessAuthApiService {
       .get(`${this.base()}${ALLAUTH_URLS.RESET_PASSWORD}`, {
         headers: new HttpHeaders({
           Accept: JSON_CT,
+          'User-Agent': ALLAUTH_APP_USER_AGENT,
           'X-Password-Reset-Key': resetKey,
         }),
 
@@ -257,6 +259,7 @@ export class HeadlessAuthApiService {
       .get(`${this.base()}${ALLAUTH_URLS.VERIFY_EMAIL}`, {
         headers: new HttpHeaders({
           Accept: JSON_CT,
+          'User-Agent': ALLAUTH_APP_USER_AGENT,
           'X-Email-Verification-Key': verificationKey,
         }),
 
