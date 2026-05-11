@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
 import { HeadlessAppTokenService } from './headless-app-token.service';
 import { HeadlessAuthApiService } from './headless-auth-api.service';
-import { HEADLESS_CLIENT_BROWSER } from './headless-api.types';
+import { HEADLESS_CLIENT_APP, HEADLESS_CLIENT_BROWSER } from './headless-api.types';
 
 describe('HeadlessAuthApiService', () => {
   let httpMock: HttpTestingController;
@@ -29,27 +29,36 @@ describe('HeadlessAuthApiService', () => {
     httpMock.verify();
   });
 
-  it('getConfig GETs browser client /config with credentials', (done) => {
+  it('getConfig GETs app client /config', (done) => {
     if (!api) {
       pending('API_BASE_URL');
       return;
     }
     service.getConfig().subscribe(() => done());
-    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_BROWSER}/v1/config`);
+    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_APP}/v1/config`);
     expect(r.request.method).toBe('GET');
-    expect(r.request.withCredentials).toBeTrue();
     r.flush({ status: 200, data: { account: {} } });
   });
 
-  it('getSession GETs browser client /auth/session with credentials', (done) => {
+  it('getBrowserConfig GETs browser client /config', (done) => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    service.getBrowserConfig().subscribe(() => done());
+    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_BROWSER}/v1/config`);
+    expect(r.request.method).toBe('GET');
+    r.flush({ status: 200, data: { account: {} } });
+  });
+
+  it('getSession GETs app client /auth/session', (done) => {
     if (!api) {
       pending('API_BASE_URL');
       return;
     }
     service.getSession().subscribe(() => done());
-    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_BROWSER}/v1/auth/session`);
+    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_APP}/v1/auth/session`);
     expect(r.request.method).toBe('GET');
-    expect(r.request.withCredentials).toBeTrue();
     r.flush({
       status: 200,
       data: {
@@ -60,7 +69,7 @@ describe('HeadlessAuthApiService', () => {
     });
   });
 
-  it('getBrowserSession delegates to getSession with same browser URL', (done) => {
+  it('getBrowserSession GETs browser client /auth/session', (done) => {
     if (!api) {
       pending('API_BASE_URL');
       return;
@@ -68,7 +77,6 @@ describe('HeadlessAuthApiService', () => {
     service.getBrowserSession().subscribe(() => done());
     const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_BROWSER}/v1/auth/session`);
     expect(r.request.method).toBe('GET');
-    expect(r.request.withCredentials).toBeTrue();
     r.flush({
       status: 200,
       data: {
@@ -86,9 +94,8 @@ describe('HeadlessAuthApiService', () => {
     }
     const envelope = { credential: { type: 'public-key', id: 'assertion-1' } };
     service.postWebauthnLogin(envelope).subscribe(() => done());
-    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_BROWSER}/v1/auth/webauthn/login`);
+    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_APP}/v1/auth/webauthn/login`);
     expect(r.request.body).toEqual(envelope);
-    expect(r.request.withCredentials).toBeTrue();
     const body = r.request.body as { credential: { credential?: unknown } };
     expect(body.credential.credential).toBeUndefined();
     r.flush({ status: 200, data: { user: {}, methods: [] }, meta: { is_authenticated: true } });
@@ -102,10 +109,9 @@ describe('HeadlessAuthApiService', () => {
     const envelope = { credential: { type: 'public-key', id: 'cred-1' } };
     service.addWebauthnAuthenticator(envelope).subscribe(() => done());
     const r = httpMock.expectOne(
-      `${api}/auth/${HEADLESS_CLIENT_BROWSER}/v1/account/authenticators/webauthn`
+      `${api}/auth/${HEADLESS_CLIENT_APP}/v1/account/authenticators/webauthn`
     );
     expect(r.request.body).toEqual(envelope);
-    expect(r.request.withCredentials).toBeTrue();
     const body = r.request.body as { credential: { credential?: unknown } };
     expect(body.credential.credential).toBeUndefined();
     r.flush({ status: 200, data: {} });
@@ -118,10 +124,9 @@ describe('HeadlessAuthApiService', () => {
     }
     const envelope = { credential: { type: 'public-key', id: 'signup-assertion' } };
     service.completePasskeySignup(envelope).subscribe(() => done());
-    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_BROWSER}/v1/auth/webauthn/signup`);
+    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_APP}/v1/auth/webauthn/signup`);
     expect(r.request.method).toBe('PUT');
     expect(r.request.body).toEqual(envelope);
-    expect(r.request.withCredentials).toBeTrue();
     const body = r.request.body as { credential: { credential?: unknown } };
     expect(body.credential.credential).toBeUndefined();
     r.flush({
@@ -142,10 +147,9 @@ describe('HeadlessAuthApiService', () => {
     const inner = { type: 'public-key', id: 'cred-1' };
     service.addWebauthnAuthenticator(inner).subscribe(() => done());
     const r = httpMock.expectOne(
-      `${api}/auth/${HEADLESS_CLIENT_BROWSER}/v1/account/authenticators/webauthn`
+      `${api}/auth/${HEADLESS_CLIENT_APP}/v1/account/authenticators/webauthn`
     );
     expect(r.request.body).toEqual({ credential: inner });
-    expect(r.request.withCredentials).toBeTrue();
     r.flush({ status: 200, data: {} });
   });
 
@@ -159,10 +163,9 @@ describe('HeadlessAuthApiService', () => {
       done();
     });
     const r = httpMock.expectOne(
-      `${api}/auth/${HEADLESS_CLIENT_BROWSER}/v1/auth/webauthn/authenticate`
+      `${api}/auth/${HEADLESS_CLIENT_APP}/v1/auth/webauthn/authenticate`
     );
     expect(r.request.method).toBe('GET');
-    expect(r.request.withCredentials).toBeTrue();
     r.flush({
       status: 200,
       data: { request_options: { publicKey: { challenge: new Uint8Array() } } },
@@ -178,11 +181,8 @@ describe('HeadlessAuthApiService', () => {
       expect(res.data.length).toBe(1);
       done();
     });
-    const r = httpMock.expectOne(
-      `${api}/auth/${HEADLESS_CLIENT_BROWSER}/v1/account/authenticators`
-    );
+    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_APP}/v1/account/authenticators`);
     expect(r.request.method).toBe('GET');
-    expect(r.request.withCredentials).toBeTrue();
     r.flush({
       status: 200,
       data: [{ type: 'totp', created_at: '2020-01-01', last_used_at: null }],

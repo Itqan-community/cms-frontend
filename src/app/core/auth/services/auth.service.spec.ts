@@ -39,8 +39,10 @@ describe('AuthService (app / headless)', () => {
     sessionStorage.clear();
     headless = jasmine.createSpyObj<HeadlessAuthApiService>('HeadlessAuthApiService', [
       'getConfig',
+      'getBrowserConfig',
       'getAuth',
       'getSession',
+      'getBrowserSession',
       'login',
       'signup',
       'deleteSession',
@@ -72,6 +74,26 @@ describe('AuthService (app / headless)', () => {
         data: { user: mockUser, methods: [] },
         meta: { is_authenticated: true },
       } as AuthenticatedResponse)
+    );
+    headless.getBrowserSession.and.returnValue(
+      of({
+        status: 200,
+        data: { user: mockUser, methods: [] },
+        meta: { is_authenticated: true },
+      } as AuthenticatedResponse)
+    );
+    headless.getBrowserConfig.and.returnValue(
+      of({
+        status: 200,
+        data: {
+          account: {
+            authentication_method: 'email',
+            is_open_for_signup: true,
+            email_verification_by_code_enabled: false,
+            login_by_code_enabled: false,
+          },
+        },
+      } as ConfigurationResponse)
     );
     headless.redirectToProvider.and.returnValue(Promise.resolve({ kind: 'form_submitted' }));
     routerMock = {
@@ -187,16 +209,18 @@ describe('AuthService (app / headless)', () => {
     expect(routerMock.navigateByUrl).not.toHaveBeenCalled();
   });
 
-  it('bootstrapSessionAfterOAuthRedirect calls getSession directly and succeeds when authenticated', (done) => {
+  it('bootstrapSessionAfterOAuthRedirect skips app session when browser session is established', (done) => {
+    headless.getBrowserSession.and.returnValue(of(authedResponse()));
+    headless.getSession.calls.reset();
     service.bootstrapSessionAfterOAuthRedirect({ fetchProfile: false }).subscribe(() => {
-      expect(headless.getSession).toHaveBeenCalled();
+      expect(headless.getSession).not.toHaveBeenCalled();
       expect(service.isAuthenticated()).toBe(true);
       done();
     });
   });
 
-  it('bootstrapSessionAfterOAuthRedirect unwraps HTTP 401 error body from getSession', (done) => {
-    headless.getSession.and.returnValue(
+  it('bootstrapSessionAfterOAuthRedirect unwraps HTTP 401 on browser session then uses app session', (done) => {
+    headless.getBrowserSession.and.returnValue(
       throwError(
         () =>
           new HttpErrorResponse({
@@ -209,18 +233,39 @@ describe('AuthService (app / headless)', () => {
           })
       )
     );
+    headless.getSession.calls.reset();
+    headless.getSession.and.returnValue(of(authedResponse()));
     service.bootstrapSessionAfterOAuthRedirect({ fetchProfile: false }).subscribe(() => {
-      expect(service.isAuthenticated()).toBe(false);
+      expect(headless.getSession).toHaveBeenCalled();
+      expect(service.isAuthenticated()).toBe(true);
       done();
     });
   });
 
-  it('bootstrapSessionAfterOAuthRedirect unwraps bare HTTP 401 (no JSON body) from getSession', (done) => {
-    headless.getSession.and.returnValue(
+  it('bootstrapSessionAfterOAuthRedirect unwraps bare HTTP 401 on browser session (no JSON body)', (done) => {
+    headless.getBrowserSession.and.returnValue(
       throwError(() => new HttpErrorResponse({ status: 401, statusText: 'Unauthorized' }))
     );
+    headless.getSession.calls.reset();
+    headless.getSession.and.returnValue(of(authedResponse()));
     service.bootstrapSessionAfterOAuthRedirect({ fetchProfile: false }).subscribe(() => {
-      expect(service.isAuthenticated()).toBe(false);
+      expect(headless.getSession).toHaveBeenCalled();
+      expect(service.isAuthenticated()).toBe(true);
+      done();
+    });
+  });
+
+  it('bootstrapSessionAfterOAuthRedirect uses app session when browser anonymous', (done) => {
+    const anonymous = {
+      status: 200,
+      data: { methods: [] },
+      meta: { is_authenticated: false },
+    } as unknown as AuthenticatedResponse;
+    headless.getBrowserSession.and.returnValue(of(anonymous));
+    headless.getSession.and.returnValue(of(authedResponse()));
+    service.bootstrapSessionAfterOAuthRedirect({ fetchProfile: false }).subscribe(() => {
+      expect(headless.getSession).toHaveBeenCalled();
+      expect(service.isAuthenticated()).toBe(true);
       done();
     });
   });
