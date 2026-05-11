@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
+import { getCookie } from '../../utils/csrf.util';
 import type { AppTokenRefreshResponse, AuthenticationMeta } from './headless-api.types';
+
+/** Django default session cookie — used as fallback when `sessionStorage.sessionToken` is empty (same-origin readable cookies only). */
+export const DJANGO_SESSIONID_COOKIE_NAME = 'sessionid';
 
 /** Official SPA stores session continuity under this `sessionStorage` key. */
 export const ALLAUTH_SESSION_TOKEN_STORAGE_KEY = 'sessionToken';
@@ -36,13 +40,26 @@ export class HeadlessAppTokenService {
     }
   }
 
+  /**
+   * Resolved value for `X-Session-Token`: **sessionStorage first**, then readable `sessionid` cookie.
+   * Cookie fallback is persisted into sessionStorage so subsequent reads stay consistent.
+   */
   getSessionToken(): string | null {
     this.migrateLegacyOnce();
     try {
-      return sessionStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY);
+      const fromStorage = sessionStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY);
+      if (fromStorage) {
+        return fromStorage;
+      }
     } catch {
       return null;
     }
+    const fromCookie = getCookie(DJANGO_SESSIONID_COOKIE_NAME);
+    if (fromCookie) {
+      this.setSessionToken(fromCookie);
+      return fromCookie;
+    }
+    return null;
   }
 
   setSessionToken(token: string): void {

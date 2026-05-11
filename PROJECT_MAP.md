@@ -1,6 +1,6 @@
 # PROJECT_MAP — Itqan CMS Frontend
 
-> Last updated: 2026-05-07 Generated for AI-assisted development. Provide this doc to any LLM to
+> Last updated: 2026-05-11 Generated for AI-assisted development. Provide this doc to any LLM to
 > give full project context.
 
 ---
@@ -58,10 +58,9 @@ User Browser
 ```
 1. App bootstrap: GET /auth/session (app mode) + GET /_allauth/browser/v1/config
 2. Login: POST /auth/login -> receive session_token + access_token + refresh_token
-3. Interceptor attaches: Authorization: Bearer <access_token> (CMS API)
-                                 X-Session-Token (allauth app API)
-                                 X-CSRFToken (unsafe methods)
-                                 withCredentials (browser session cookies)
+3. Interceptor attaches: X-Session-Token on every `API_BASE_URL` / `ADMIN_API_BASE_URL` request when a token is resolved (sessionStorage `session_token` first; else readable `sessionid` cookie, persisted into sessionStorage). Exception: omit header on `POST …/auth/app/v1/auth/webauthn/signup` (anonymous initiate).
+                                 headersInterceptor: X-CSRFToken (unsafe methods), Accept-Language (unchanged policy)
+                                 withCredentials: false for `/auth/app/v1/`, true for other CMS/API routes (cookies)
 4. 401 recovery: try refresh token -> recheck session -> force re-login
 5. OAuth: Navigational form POST to provider; OauthCallback runs `bootstrapSessionAfterOAuthRedirect`
    → **GET browser `/auth/.../session` first** (cookie credentials), then app `/auth/app/.../session` if needed;
@@ -126,22 +125,22 @@ cms-frontend/
 
 ### Core Layer (`src/app/core/`)
 
-| Subdirectory     | Contents                                                                                                                       | Purpose                                                   |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------- |
-| `auth/`          | 21 pages + 1 service + 3 guards + headless API module (20+ files)                                                              | Full django-allauth headless SPA integration              |
-| `auth/headless/` | `HeadlessAuthApiService` (~60 methods), `HeadlessAppTokenService`, types, hooks, WebAuthn utils, CSRF utils, provider redirect | allauth headless contract implementation                  |
-| `constants/`     | `BREAKPOINTS`, `NAV_LINKS`                                                                                                     | Responsive breakpoints + navigation link definitions      |
-| `enums/`         | `Categories` (mushaf/tafsir/recitation), `Licenses` (CC0-CC-BY-NC-ND + colors)                                                 | Content categorization and licensing                      |
-| `guards/`        | `publisherHostGuard`                                                                                                           | Blocks publisher subdomain visitors from CMS routes       |
-| `interceptors/`  | 5 interceptors (credentials, CSRF response, app-session-token, headers/global, auth-error, error)                              | HTTP pipeline: auth headers, CSRF, error handling, Sentry |
-| `services/`      | `GoogleAnalyticsService`, `WebVitalsService`, `ViewportService`                                                                | Analytics, Core Web Vitals, responsive viewport detection |
-| `utils/`         | `csrf.util.ts`                                                                                                                 | Django CSRF (same-origin cookies + cross-origin override) |
+| Subdirectory     | Contents                                                                                                                       | Purpose                                                    |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
+| `auth/`          | 21 pages + 1 service + 3 guards + headless API module (20+ files)                                                              | Full django-allauth headless SPA integration               |
+| `auth/headless/` | `HeadlessAuthApiService` (~60 methods), `HeadlessAppTokenService`, types, hooks, WebAuthn utils, CSRF utils, provider redirect | allauth headless contract implementation                   |
+| `constants/`     | `BREAKPOINTS`, `NAV_LINKS`                                                                                                     | Responsive breakpoints + navigation link definitions       |
+| `enums/`         | `Categories` (mushaf/tafsir/recitation), `Licenses` (CC0-CC-BY-NC-ND + colors)                                                 | Content categorization and licensing                       |
+| `guards/`        | `publisherHostGuard`                                                                                                           | Blocks publisher subdomain visitors from CMS routes        |
+| `interceptors/`  | 6 interceptors (credentials, CSRF response, app-session-token, headers/global, auth-error, error)                              | HTTP pipeline: session token, CSRF, error handling, Sentry |
+| `services/`      | `GoogleAnalyticsService`, `WebVitalsService`, `ViewportService`                                                                | Analytics, Core Web Vitals, responsive viewport detection  |
+| `utils/`         | `csrf.util.ts`                                                                                                                 | Django CSRF (same-origin cookies + cross-origin override)  |
 
 ### Interceptor Pipeline (order matters)
 
 ```
 Request: credentialsInterceptor -> csrfResponseInterceptor
-         -> appSessionTokenInterceptor -> headersInterceptor
+         -> appSessionTokenInterceptor (X-Session-Token only) -> headersInterceptor (CSRF + Accept-Language)
 Response: authErrorInterceptor -> errorInterceptor
 ```
 
@@ -156,12 +155,14 @@ AuthService (orchestrator + state management via Signals)
        |
   |---------|---------|---------|
 Pages  Guards    Interceptors   Utils
-(21)   (3)       (5)           (route-query, CSRF)
+(21)   (3)       (6)           (route-query, CSRF)
 ```
 
 **Token management:**
 
-- `session_token` -> sessionStorage (allauth app session)
+- `session_token` / continuity: resolved via `HeadlessAppTokenService.getSessionToken()` — prefer
+  sessionStorage (`sessionToken`); if empty, readable `sessionid` cookie → copied into
+  sessionStorage on read
 - `access_token` + `refresh_token` -> localStorage (JWT for CMS API)
 - `csrftoken` cookie (same-origin) OR in-memory override (cross-origin)
 

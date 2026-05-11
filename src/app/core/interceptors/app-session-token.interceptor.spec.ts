@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import { ALLAUTH_SESSION_TOKEN_STORAGE_KEY } from '../auth/headless/headless-app-token.service';
 import { appSessionTokenInterceptor } from './app-session-token.interceptor';
 import { credentialsInterceptor } from './credentials.interceptor';
+import { headersInterceptor } from './global.interceptor';
 
 describe('appSessionTokenInterceptor', () => {
   const api = environment.API_BASE_URL;
@@ -35,7 +36,7 @@ describe('appSessionTokenInterceptor', () => {
     httpMock.verify();
   });
 
-  it('does not add X-Session-Token for CMS routes outside app headless', () => {
+  it('adds X-Session-Token for CMS URLs under API_BASE_URL', () => {
     if (!api) {
       pending('API_BASE_URL');
       return;
@@ -52,8 +53,108 @@ describe('appSessionTokenInterceptor', () => {
     const httpMock = TestBed.inject(HttpTestingController);
     http.get(`${api}/auth/profile/`).subscribe();
     const req = httpMock.expectOne(`${api}/auth/profile/`);
-    expect(req.request.headers.get('X-Session-Token')).toBeNull();
+    expect(req.request.headers.get('X-Session-Token')).toBe('tok-99');
     req.flush({});
+    httpMock.verify();
+  });
+
+  const adminApi = environment.ADMIN_API_BASE_URL;
+
+  it('adds X-Session-Token for ADMIN_API_BASE_URL routes', () => {
+    if (!adminApi) {
+      pending('ADMIN_API_BASE_URL');
+      return;
+    }
+    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-admin');
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([credentialsInterceptor, appSessionTokenInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
+    const http = TestBed.inject(HttpClient);
+    const httpMock = TestBed.inject(HttpTestingController);
+    const url = `${adminApi}/something`;
+    http.get(url).subscribe();
+    const req = httpMock.expectOne(url);
+    expect(req.request.headers.get('X-Session-Token')).toBe('tok-admin');
+    req.flush({});
+    httpMock.verify();
+  });
+
+  it('adds X-Session-Token from sessionid cookie when sessionStorage empty', () => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    spyOnProperty(document, 'cookie', 'get').and.returnValue('sessionid=cookie-sid-only; Path=/');
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([credentialsInterceptor, appSessionTokenInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
+    const http = TestBed.inject(HttpClient);
+    const httpMock = TestBed.inject(HttpTestingController);
+    http.get(`${api}/auth/profile/`).subscribe();
+    const req = httpMock.expectOne(`${api}/auth/profile/`);
+    expect(req.request.headers.get('X-Session-Token')).toBe('cookie-sid-only');
+    req.flush({});
+    httpMock.verify();
+    expect(sessionStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY)).toBe('cookie-sid-only');
+  });
+
+  it('prefers sessionStorage token over sessionid cookie', () => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'from-storage');
+    spyOnProperty(document, 'cookie', 'get').and.returnValue('sessionid=from-cookie; Path=/');
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([credentialsInterceptor, appSessionTokenInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
+    const http = TestBed.inject(HttpClient);
+    const httpMock = TestBed.inject(HttpTestingController);
+    http.get(`${api}/auth/profile/`).subscribe();
+    const req = httpMock.expectOne(`${api}/auth/profile/`);
+    expect(req.request.headers.get('X-Session-Token')).toBe('from-storage');
+    req.flush({});
+    httpMock.verify();
+  });
+
+  /**
+   * Production order: credentials → csrf-response → session → headers.
+   * Ensure headersInterceptor cannot re-introduce header on signup POST omit.
+   */
+  it('full chain omits X-Session-Token for passkey signup initiate POST after headersInterceptor', () => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-stale');
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(
+          withInterceptors([credentialsInterceptor, appSessionTokenInterceptor, headersInterceptor])
+        ),
+        provideHttpClientTesting(),
+      ],
+    });
+    const http = TestBed.inject(HttpClient);
+    const httpMock = TestBed.inject(HttpTestingController);
+    const signupUrl = `${api}/auth/app/v1/auth/webauthn/signup`;
+    http.post(signupUrl, { email: 'a@b.co' }).subscribe();
+    const req = httpMock.expectOne(signupUrl);
+    expect(req.request.headers.get('X-Session-Token')).toBeNull();
+    req.flush({ status: 200 });
     httpMock.verify();
   });
 

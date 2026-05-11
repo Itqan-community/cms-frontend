@@ -2,10 +2,23 @@ import { environment } from '../../../../environments/environment';
 import {
   shouldOmitHeadlessSessionTokenForRequest,
   isHeadlessWebauthnLoginUrl,
+  isBackendApiRequestUrl,
 } from './headless-api-path.util';
 
 describe('headless-api-path.util', () => {
   const api = environment.API_BASE_URL;
+  const adminApi = environment.ADMIN_API_BASE_URL;
+
+  it('isBackendApiRequestUrl matches API_BASE_URL and ADMIN_API_BASE_URL prefixes', () => {
+    if (!api || !adminApi) {
+      pending('API_BASE_URL / ADMIN_API_BASE_URL');
+      return;
+    }
+    expect(isBackendApiRequestUrl(`${api}/auth/profile/`)).toBe(true);
+    expect(isBackendApiRequestUrl(`${adminApi}/x`)).toBe(true);
+    expect(isBackendApiRequestUrl(api.substring(1))).toBe(false);
+    expect(isBackendApiRequestUrl('https://other.example/')).toBe(false);
+  });
 
   it('isHeadlessWebauthnLoginUrl matches app client login endpoint', () => {
     if (!api) {

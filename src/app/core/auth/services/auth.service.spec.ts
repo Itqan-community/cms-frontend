@@ -209,6 +209,19 @@ describe('AuthService (app / headless)', () => {
     expect(routerMock.navigateByUrl).not.toHaveBeenCalled();
   });
 
+  it('bootstrapSessionAfterOAuthRedirect works when session is backed only by readable sessionid cookie', (done) => {
+    spyOnProperty(document, 'cookie', 'get').and.returnValue('sessionid=oauth-cookie-seed; Path=/');
+    headless.getBrowserSession.and.returnValue(of(authedResponse()));
+    headless.getSession.calls.reset();
+
+    service.bootstrapSessionAfterOAuthRedirect({ fetchProfile: false }).subscribe(() => {
+      expect(tokenStore.getSessionToken()).toBe('oauth-cookie-seed');
+      expect(headless.getSession).not.toHaveBeenCalled();
+      expect(service.isAuthenticated()).toBe(true);
+      done();
+    });
+  });
+
   it('bootstrapSessionAfterOAuthRedirect skips app session when browser session is established', (done) => {
     headless.getBrowserSession.and.returnValue(of(authedResponse()));
     headless.getSession.calls.reset();

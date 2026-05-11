@@ -48,7 +48,7 @@ describe('headersInterceptor', () => {
     httpMock.verify();
   });
 
-  it('app client URLs get X-Session-Token from headersInterceptor (same as CMS URLs now)', () => {
+  it('app client URLs get X-Session-Token from appSessionTokenInterceptor before headersInterceptor', () => {
     if (!api) {
       pending('API_BASE_URL');
       return;

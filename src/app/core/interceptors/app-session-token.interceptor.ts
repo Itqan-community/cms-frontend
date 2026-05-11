@@ -1,15 +1,15 @@
 import { HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
 import {
-  isHeadlessAppAuthUrl,
+  isBackendApiRequestUrl,
   shouldOmitHeadlessSessionTokenForRequest,
 } from '../auth/headless/headless-api-path.util';
 import { HeadlessAppTokenService } from '../auth/headless/headless-app-token.service';
 
 /**
- * App headless: attach `X-Session-Token` from `meta.session_token` store for `/auth/app/v1/*` only.
+ * Backend API calls (`API_BASE_URL` / `ADMIN_API_BASE_URL`): attach `X-Session-Token`
+ * from session store (sessionStorage, with `sessionid` cookie fallback — see {@link HeadlessAppTokenService#getSessionToken}).
  * Omits the header only for anonymous passkey-signup initiate POST — see `shouldOmitHeadlessSessionTokenForRequest`.
  */
 export function appSessionTokenInterceptor(
@@ -17,8 +17,7 @@ export function appSessionTokenInterceptor(
   next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> {
   const store = inject(HeadlessAppTokenService);
-  const base = environment.API_BASE_URL;
-  if (!base || !req.url.startsWith(base) || !isHeadlessAppAuthUrl(req.url)) {
+  if (!isBackendApiRequestUrl(req.url)) {
     return next(req);
   }
   const t = store.getSessionToken();

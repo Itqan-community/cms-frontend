@@ -1,5 +1,18 @@
+import { environment } from '../../../../environments/environment';
+
 /** Allauth app client base path under `API_BASE_URL` (X-Session-Token transport). */
 export const HEADLESS_APP_AUTH_PATH_FRAGMENT = '/auth/app/v1/';
+
+/**
+ * True when the request targets the configured CMS or admin API base URLs
+ * (matches {@link credentialsInterceptor} / global API scope).
+ */
+export function isBackendApiRequestUrl(reqUrl: string): boolean {
+  const prefixes = [environment.API_BASE_URL, environment.ADMIN_API_BASE_URL].filter(
+    (p): p is string => typeof p === 'string' && p.length > 0
+  );
+  return prefixes.some((p) => reqUrl.startsWith(p));
+}
 
 /** Account WebAuthn enrollment (add passkey while logged in). Reauthentication 401 should be handled on-page, not global redirect. */
 export const HEADLESS_ACCOUNT_WEBAUTHN_AUTHENTICATORS_PATH = '/account/authenticators/webauthn';
