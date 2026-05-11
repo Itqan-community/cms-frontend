@@ -41,6 +41,10 @@ export class VerifyEmailPage implements OnInit {
     if (k) {
       this.form.patchValue({ key: k });
     }
+    const reason = this.route.snapshot.queryParamMap.get('reason');
+    if (reason === 'unverified_email') {
+      this.infoMessage.set(this.translate.instant('AUTH.VERIFY_EMAIL.UNVERIFIED_REDIRECT_INFO'));
+    }
   }
 
   onSubmit(): void {

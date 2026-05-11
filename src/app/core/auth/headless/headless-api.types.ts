@@ -200,7 +200,9 @@ export interface TotpPendingResponseBody {
 
 export type TotpStatusResult =
   | { kind: 'active'; data: TotpActiveResponse['data']; meta?: TotpActiveResponse['meta'] }
-  | { kind: 'pending_setup'; meta: { secret: string; totp_url: string } };
+  | { kind: 'pending_setup'; meta: { secret: string; totp_url: string } }
+  /** Bare HTTP `404` probe on `GET …/authenticators/totp` when TOTP is not enrolled yet. */
+  | { kind: 'not_configured' };
 
 /** `GET`/`POST /account/authenticators/recovery-codes` success */
 export interface RecoveryCodesResponse {

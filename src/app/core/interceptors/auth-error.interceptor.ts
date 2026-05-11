@@ -16,6 +16,7 @@ import {
 } from '../auth/headless/headless-auth-flow.util';
 import { HeadlessAppTokenService } from '../auth/headless/headless-app-token.service';
 import { AuthService } from '../auth/services/auth.service';
+import { shouldSuppressSentryForHeadlessHttpError } from './auth-error-sentry-suppress.util';
 import { environment } from '../../../environments/environment';
 
 /**
@@ -81,14 +82,17 @@ export function authErrorInterceptor(
           return runCmsSessionRecheck(error);
         }
       } else if (error.status !== 410) {
-        Sentry.captureException(error, {
-          extra: {
-            url: req.url,
-            method: req.method,
-            status: error.status,
-            statusText: error.statusText,
-          },
-        });
+        const suppressSentry = shouldSuppressSentryForHeadlessHttpError(req.url, req.method, error);
+        if (!suppressSentry) {
+          Sentry.captureException(error, {
+            extra: {
+              url: req.url,
+              method: req.method,
+              status: error.status,
+              statusText: error.statusText,
+            },
+          });
+        }
       }
 
       return throwError(() => error);

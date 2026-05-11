@@ -6,13 +6,13 @@ import { Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import { getErrorMessage, isUnverifiedEmailError } from '../../../../shared/utils/error.utils';
 import type {
   AuthenticatorListItem,
   RecoveryCodesResponse,
   TotpStatusResult,
 } from '../../headless/headless-api.types';
-import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
+import { AUTH_ROUTES, tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
 import { AuthService } from '../../services/auth.service';
 
@@ -61,6 +61,17 @@ export class SecuritySettingsPage implements OnInit {
     )
   );
 
+  /** True if navigated away (email must be verified before MFA / account actions). */
+  private redirectIfUnverifiedEmail(e: HttpErrorResponse): boolean {
+    if (!isUnverifiedEmailError(e)) {
+      return false;
+    }
+    void this.router.navigate([AUTH_ROUTES.verifyEmail], {
+      queryParams: { reason: 'unverified_email', from: 'security' },
+    });
+    return true;
+  }
+
   ngOnInit(): void {
     this.passkeysSupported.set(isPasskeyClientEnvironmentSupported());
     void this.reloadAll();
@@ -93,6 +104,9 @@ export class SecuritySettingsPage implements OnInit {
     } catch (e) {
       if (e instanceof HttpErrorResponse) {
         if (tryNavigateForAuth401(this.router, e)) {
+          return;
+        }
+        if (this.redirectIfUnverifiedEmail(e)) {
           return;
         }
         this.pageError.set(
@@ -154,6 +168,9 @@ export class SecuritySettingsPage implements OnInit {
         if (tryNavigateForAuth401(this.router, e)) {
           return;
         }
+        if (this.redirectIfUnverifiedEmail(e)) {
+          return;
+        }
         this.pageError.set(
           getErrorMessage(e) || this.translate.instant('AUTH.SECURITY.PASSKEY_RENAME_ERROR')
         );
@@ -177,6 +194,9 @@ export class SecuritySettingsPage implements OnInit {
         if (tryNavigateForAuth401(this.router, e)) {
           return;
         }
+        if (this.redirectIfUnverifiedEmail(e)) {
+          return;
+        }
         this.pageError.set(
           getErrorMessage(e) || this.translate.instant('AUTH.SECURITY.PASSKEY_DELETE_ERROR')
         );
@@ -197,6 +217,9 @@ export class SecuritySettingsPage implements OnInit {
         return;
       }
       if (e instanceof HttpErrorResponse) {
+        if (this.redirectIfUnverifiedEmail(e)) {
+          return;
+        }
         this.recoveryLoadError.set(
           getErrorMessage(e) || this.translate.instant('AUTH.SECURITY.RECOVERY_LOAD_ERROR')
         );
@@ -259,6 +282,9 @@ export class SecuritySettingsPage implements OnInit {
         if (tryNavigateForAuth401(this.router, e)) {
           return;
         }
+        if (this.redirectIfUnverifiedEmail(e)) {
+          return;
+        }
         this.pageError.set(
           getErrorMessage(e) || this.translate.instant('AUTH.SECURITY.RECOVERY_REGEN_ERROR')
         );
@@ -292,6 +318,10 @@ export class SecuritySettingsPage implements OnInit {
           this.isLoading.set(false);
           return;
         }
+        if (this.redirectIfUnverifiedEmail(e)) {
+          this.isLoading.set(false);
+          return;
+        }
         this.pageError.set(
           getErrorMessage(e) || this.translate.instant('AUTH.SECURITY.TOTP_ACTIVATE_ERROR')
         );
@@ -313,6 +343,9 @@ export class SecuritySettingsPage implements OnInit {
     } catch (e) {
       if (e instanceof HttpErrorResponse) {
         if (tryNavigateForAuth401(this.router, e)) {
+          return;
+        }
+        if (this.redirectIfUnverifiedEmail(e)) {
           return;
         }
         this.pageError.set(

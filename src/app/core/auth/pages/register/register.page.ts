@@ -6,8 +6,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import { getErrorMessage } from '../../../../shared/utils/error.utils';
-import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
+import { getErrorMessage, isUnverifiedEmailError } from '../../../../shared/utils/error.utils';
+import { AUTH_ROUTES, tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
 import { RegisterRequest } from '../../models/auth.model';
 import { AuthService } from '../../services/auth.service';
@@ -112,6 +112,12 @@ export class RegisterPage {
           this.authService.isLoading.set(false);
           if (error instanceof HttpErrorResponse) {
             if (tryNavigateForAuth401(this.router, error)) {
+              return;
+            }
+            if (isUnverifiedEmailError(error)) {
+              void this.router.navigate([AUTH_ROUTES.verifyEmail], {
+                queryParams: { reason: 'unverified_email' },
+              });
               return;
             }
             this.errorMessage.set(

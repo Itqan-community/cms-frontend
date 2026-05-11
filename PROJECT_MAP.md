@@ -144,6 +144,10 @@ Request: credentialsInterceptor -> csrfResponseInterceptor
 Response: authErrorInterceptor -> errorInterceptor
 ```
 
+`409` + `unverified_email` on `/auth/app/v1/*`: no global error toast, no Sentry; pages redirect to
+`/account/verify-email?reason=unverified_email` (login/register/security settings) with copy on
+verify-email.
+
 ### Auth Architecture (django-allauth headless SPA)
 
 ```

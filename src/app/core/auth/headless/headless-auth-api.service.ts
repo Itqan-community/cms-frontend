@@ -526,7 +526,7 @@ export class HeadlessAuthApiService {
             meta: { secret: body.meta.secret, totp_url: body.meta.totp_url },
           });
         }
-        return throwError(() => err);
+        return of({ kind: 'not_configured' as const });
       })
     );
   }

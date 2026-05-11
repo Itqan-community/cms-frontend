@@ -66,6 +66,7 @@
       "RESEND_SENT": "If your email is registered, a new code was sent.",
       "RESEND_ERROR": "Could not resend the code. Try again later.",
       "ERROR": "Verification failed. Check the code and try again.",
+      "UNVERIFIED_REDIRECT_INFO": "Your email is not verified yet. Enter the code from your email below, or use “Resend code”. After verification you can set up two-factor authentication and other security options.",
       "BACK": "Back",
       "BACK_TO_LOGIN": "Back to sign in"
     },
@@ -157,6 +158,7 @@
       "TOTP_CODE_LABEL": "Confirmation code",
       "TOTP_ACTIVATE": "Activate authenticator",
       "TOTP_ACTIVE": "Authenticator app is enabled.",
+      "TOTP_NOT_CONFIGURED_HINT": "Authenticator app (TOTP) is not enrolled yet. You can activate it once your email is verified.",
       "TOTP_DEACTIVATE": "Turn off authenticator app",
       "TOTP_DEACTIVATE_CONFIRM": "Turn off TOTP? You can still use other MFA methods if configured.",
       "TOTP_DEACTIVATE_ERROR": "Could not turn off TOTP.",

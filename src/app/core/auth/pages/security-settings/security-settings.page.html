@@ -102,6 +102,11 @@
                 {{ 'AUTH.SECURITY.TOTP_DEACTIVATE' | translate }}
               </button>
             }
+            @if (ts.kind === 'not_configured') {
+              <p class="security__hint">
+                {{ 'AUTH.SECURITY.TOTP_NOT_CONFIGURED_HINT' | translate }}
+              </p>
+            }
           }
         </section>
       }

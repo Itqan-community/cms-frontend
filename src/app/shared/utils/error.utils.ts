@@ -48,6 +48,33 @@ export function isWebAuthnIncorrectCodeError(error: unknown): boolean {
   return body!.errors.some((e) => e.code === 'incorrect_code');
 }
 
+/** Headless/account actions blocked until email is verified (e.g. TOTP enrollment). */
+export function isUnverifiedEmailError(error: unknown): boolean {
+  if (!(error instanceof HttpErrorResponse)) {
+    return false;
+  }
+  const httpStatus = error.status;
+  const body = error.error;
+  const bodyStatus =
+    body && typeof body === 'object' && typeof (body as { status?: unknown }).status === 'number'
+      ? (body as { status: number }).status
+      : null;
+
+  if (httpStatus !== 409 && bodyStatus !== 409) {
+    return false;
+  }
+
+  const errors = (
+    body as {
+      errors?: AllauthErrorItem[];
+    }
+  )?.errors;
+  if (!Array.isArray(errors) || !errors.length) {
+    return false;
+  }
+  return errors.some((e) => e.code === 'unverified_email');
+}
+
 export function getErrorMessage(error: unknown): string | null {
   if (error instanceof HttpErrorResponse) {
     const m = firstAllauthMessage(error.error);
@@ -60,14 +87,20 @@ export function getErrorMessage(error: unknown): string | null {
 }
 
 function firstAllauthMessage(body: unknown): string | null {
+  const joined = extractAllauthErrorsMessages(body);
+  return joined ?? null;
+}
+
+/** Join `errors[].message` when the JSON body matches an allauth error envelope (`status` + `errors`). */
+export function extractAllauthErrorsMessages(body: unknown): string | undefined {
   if (!body || typeof body !== 'object') {
-    return null;
+    return undefined;
   }
-  const er = body as ErrorResponse;
-  if (er.status === 400 && Array.isArray(er.errors) && er.errors.length) {
-    return joinAllauthErrors(er.errors);
+  const o = body as Partial<ErrorResponse> & { status?: number; errors?: AllauthErrorItem[] };
+  if (typeof o.status !== 'number' || !Array.isArray(o.errors) || !o.errors.length) {
+    return undefined;
   }
-  return null;
+  return joinAllauthErrors(o.errors);
 }
 
 export function joinAllauthErrors(errors: AllauthErrorItem[]): string {
