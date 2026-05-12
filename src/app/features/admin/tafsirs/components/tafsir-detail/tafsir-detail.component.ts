@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -10,6 +10,8 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
+import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
+import { AdminAuthService } from '../../../services/admin-auth.service';
 import { localizeLanguageCode } from '../../../utils/display-localization.util';
 import { AssetVersionsManagerComponent } from '../../../components/asset-versions-manager/asset-versions-manager.component';
 import { TafsirDetails } from '../../models/tafsirs.models';
@@ -40,6 +42,15 @@ export class TafsirDetailComponent implements OnInit {
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
   private readonly translate = inject(TranslateService);
+  private readonly adminAuth = inject(AdminAuthService);
+
+  readonly canUpdateTafsir = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR)
+  );
+
+  readonly canDeleteTafsir = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TAFSIR)
+  );
 
   readonly tafsir = signal<TafsirDetails | null>(null);
   readonly loading = signal(true);

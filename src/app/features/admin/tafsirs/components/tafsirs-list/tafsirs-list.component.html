@@ -4,12 +4,14 @@
       <h2 class="admin-list-header__title">{{ 'ADMIN.TAFSIRS.TITLE' | translate }}</h2>
       <p class="admin-list-header__subtitle">{{ 'ADMIN.TAFSIRS.SUBTITLE' | translate }}</p>
     </div>
-    <a routerLink="/admin/tafsirs/create">
-      <button nz-button nzType="primary" class="admin-add-btn">
-        <ng-icon name="lucidePlus" aria-hidden="true" />
-        {{ 'ADMIN.TAFSIRS.ADD_BUTTON' | translate }}
-      </button>
-    </a>
+    @if (canCreateTafsir()) {
+      <a routerLink="/admin/tafsirs/create">
+        <button nz-button nzType="primary" class="admin-add-btn">
+          <ng-icon name="lucidePlus" aria-hidden="true" />
+          {{ 'ADMIN.TAFSIRS.ADD_BUTTON' | translate }}
+        </button>
+      </a>
+    }
   </div>
 
   <app-tafsir-filters
@@ -106,16 +108,18 @@
                   >
                     <ng-icon name="lucideEye" aria-hidden="true" />
                   </a>
-                  <a
-                    nz-button
-                    nzType="text"
-                    class="action-icon action-icon--edit"
-                    nz-tooltip
-                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_EDIT' | translate"
-                    [routerLink]="['/admin/tafsirs', tafsir.slug, 'edit']"
-                  >
-                    <ng-icon name="lucideSquarePen" aria-hidden="true" />
-                  </a>
+                  @if (canUpdateTafsir()) {
+                    <a
+                      nz-button
+                      nzType="text"
+                      class="action-icon action-icon--edit"
+                      nz-tooltip
+                      [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_EDIT' | translate"
+                      [routerLink]="['/admin/tafsirs', tafsir.slug, 'edit']"
+                    >
+                      <ng-icon name="lucideSquarePen" aria-hidden="true" />
+                    </a>
+                  }
                 </div>
               </td>
             </tr>

@@ -1,4 +1,6 @@
 import { Routes } from '@angular/router';
+import { PORTAL_PERMISSIONS } from '../constants/portal-permission.constants';
+import { permissionGuard } from '../guards/permission.guard';
 import { RecitersLayoutComponent } from './reciters-layout.component';
 
 export const reciterRoutes: Routes = [
@@ -8,6 +10,7 @@ export const reciterRoutes: Routes = [
     children: [
       {
         path: '',
+        canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_READ_RECITER] })],
         loadComponent: () =>
           import('./components/reciters-list/reciters-list.component').then(
             (m) => m.RecitersListComponent
@@ -15,6 +18,7 @@ export const reciterRoutes: Routes = [
       },
       {
         path: 'create',
+        canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_CREATE_RECITER] })],
         loadComponent: () =>
           import('./components/reciter-form/reciter-form.component').then(
             (m) => m.ReciterFormComponent
@@ -22,6 +26,7 @@ export const reciterRoutes: Routes = [
       },
       {
         path: ':slug/edit',
+        canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_UPDATE_RECITER] })],
         loadComponent: () =>
           import('./components/reciter-form/reciter-form.component').then(
             (m) => m.ReciterFormComponent
@@ -29,6 +34,7 @@ export const reciterRoutes: Routes = [
       },
       {
         path: ':slug',
+        canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_READ_RECITER] })],
         loadComponent: () =>
           import('./components/reciter-detail/reciter-detail.component').then(
             (m) => m.ReciterDetailComponent

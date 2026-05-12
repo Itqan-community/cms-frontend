@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -21,6 +21,8 @@ import {
 } from '../../models/recitations.models';
 import { RecitationsService } from '../../services/recitations.service';
 import { RecitationFiltersComponent } from '../recitation-filters/recitation-filters.component';
+import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
+import { AdminAuthService } from '../../../services/admin-auth.service';
 import { AdminListBase } from '../../../utils/admin-list-base';
 import { AdminHijriYearPipe } from '../../../pipes/admin-hijri-year.pipe';
 
@@ -51,6 +53,15 @@ export class RecitationsListComponent extends AdminListBase<
 > {
   private readonly recitationsService = inject(RecitationsService);
   private readonly translate = inject(TranslateService);
+  private readonly adminAuth = inject(AdminAuthService);
+
+  readonly canCreateRecitation = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_CREATE_RECITATION)
+  );
+
+  readonly canUpdateRecitation = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_RECITATION)
+  );
 
   readonly recitationTableStorageKey = 'admin-list-recitations';
   readonly recitationTableColumns: AdminTableColumnOption[] = [

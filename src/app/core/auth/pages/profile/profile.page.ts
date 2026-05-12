@@ -47,6 +47,7 @@ export class AccountProfilePage implements OnInit {
     this.pageError.set('');
     try {
       const d = await firstValueFrom(this.auth.getProfileDetails());
+      this.auth.applyProfileFromApi(d);
       this.profileForm.patchValue({
         bio: d.bio ?? '',
         project_url: d.project_url ?? '',

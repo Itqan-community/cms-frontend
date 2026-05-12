@@ -5,10 +5,12 @@
       {{ sectionTitleKey | translate }}
     </h2>
     <div class="asset-versions-manager__header-actions">
-      <button nz-button nzType="primary" type="button" (click)="openCreateModal()">
-        <ng-icon name="lucidePlus" />
-        {{ t('ADD_BUTTON') | translate }}
-      </button>
+      @if (canMutateVersions()) {
+        <button nz-button nzType="primary" type="button" (click)="openCreateModal()">
+          <ng-icon name="lucidePlus" />
+          {{ t('ADD_BUTTON') | translate }}
+        </button>
+      }
       <nz-input-group [nzPrefix]="searchIconTpl" class="asset-versions-manager__search">
         <input
           nz-input
@@ -155,28 +157,32 @@
               </td>
               <td>
                 <div class="admin-list-actions">
-                  <button
-                    type="button"
-                    nz-button
-                    nzType="text"
-                    class="action-icon action-icon--edit"
-                    nz-tooltip
-                    [nzTooltipTitle]="t('TOOLTIP_EDIT') | translate"
-                    (click)="openEditModal(ver)"
-                  >
-                    <ng-icon name="lucideSquarePen" aria-hidden="true" />
-                  </button>
-                  <button
-                    type="button"
-                    nz-button
-                    nzType="text"
-                    class="action-icon action-icon--delete"
-                    nz-tooltip
-                    [nzTooltipTitle]="t('TOOLTIP_DELETE') | translate"
-                    (click)="deleteRow(ver)"
-                  >
-                    <ng-icon name="lucideTrash2" aria-hidden="true" />
-                  </button>
+                  @if (canMutateVersions()) {
+                    <button
+                      type="button"
+                      nz-button
+                      nzType="text"
+                      class="action-icon action-icon--edit"
+                      nz-tooltip
+                      [nzTooltipTitle]="t('TOOLTIP_EDIT') | translate"
+                      (click)="openEditModal(ver)"
+                    >
+                      <ng-icon name="lucideSquarePen" aria-hidden="true" />
+                    </button>
+                  }
+                  @if (canDeleteVersions()) {
+                    <button
+                      type="button"
+                      nz-button
+                      nzType="text"
+                      class="action-icon action-icon--delete"
+                      nz-tooltip
+                      [nzTooltipTitle]="t('TOOLTIP_DELETE') | translate"
+                      (click)="deleteRow(ver)"
+                    >
+                      <ng-icon name="lucideTrash2" aria-hidden="true" />
+                    </button>
+                  }
                 </div>
               </td>
             </tr>

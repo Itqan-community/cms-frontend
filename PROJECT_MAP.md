@@ -56,7 +56,9 @@ User Browser
 ### Authentication Flow (django-allauth headless SPA)
 
 ```
-1. App bootstrap: GET /auth/session (app mode) + GET /_allauth/browser/v1/config
+1. App bootstrap: GET /auth/session (app mode) + GET /_allauth/browser/v1/config; if authenticated,
+   GET /auth/profile/ merges portal `permissions` (code_name list) into `AuthService.currentUser` and
+   localStorage user snapshot.
 2. Login: POST /auth/login -> receive session_token + access_token + refresh_token
 3. Interceptor attaches: X-Session-Token on every `API_BASE_URL` / `ADMIN_API_BASE_URL` request when a token is resolved (sessionStorage `session_token` first; else readable `sessionid` cookie, persisted into sessionStorage). Exception: omit header on `POST …/auth/app/v1/auth/webauthn/signup` (anonymous initiate).
                                  headersInterceptor: X-CSRFToken (unsafe methods), Accept-Language (unchanged policy)
@@ -181,25 +183,26 @@ CompleteProfile
 
 ### Route Map
 
-| Path                  | Component              | Guards               | Notes                              |
-| --------------------- | ---------------------- | -------------------- | ---------------------------------- |
-| `/gallery`            | `GalleryPage`          | —                    | Main listing                       |
-| `/gallery/asset/:id`  | `AssetDetailsPage`     | —                    | Detail + access request + download |
-| `/publishers`         | `PublishersPage`       | `publisherHostGuard` | Stub                               |
-| `/publisher/:id`      | `PublisherDetailsPage` | `publisherHostGuard` | Detail + filtered assets           |
-| `/license/:id`        | `LicenseDetailsPage`   | —                    | License detail                     |
-| `/content-standards`  | `UsageStandardsPage`   | `publisherHostGuard` | Content guidelines                 |
-| `/unauthorized`       | `UnauthorizedPage`     | —                    | Stub                               |
-| `/complete-profile`   | `CompleteProfilePage`  | `authGuard`          | Profile completion                 |
-| `/account/*`          | (21 auth pages)        | guestGuard/authGuard | Auth & account management          |
-| `/admin`              | `AdminLayoutComponent` | —                    | Admin shell (guards commented out) |
-| `/admin/publishers`   | (lazy routes)          | —                    | Publisher CRUD                     |
-| `/admin/tafsirs`      | (lazy routes)          | —                    | Tafsir CRUD                        |
-| `/admin/translations` | (lazy routes)          | —                    | Translation CRUD                   |
-| `/admin/recitations`  | (lazy routes)          | —                    | Recitation CRUD                    |
-| `/admin/reciters`     | (lazy routes)          | —                    | Reciter CRUD                       |
-| `/admin/usage`        | (lazy routes)          | —                    | API usage analytics                |
-| `**`                  | redirect -> /gallery   | —                    | Wildcard                           |
+| Path                  | Component                      | Guards                           | Notes                                                                                     |
+| --------------------- | ------------------------------ | -------------------------------- | ----------------------------------------------------------------------------------------- |
+| `/gallery`            | `GalleryPage`                  | —                                | Main listing                                                                              |
+| `/gallery/asset/:id`  | `AssetDetailsPage`             | —                                | Detail + access request + download                                                        |
+| `/publishers`         | `PublishersPage`               | `publisherHostGuard`             | Stub                                                                                      |
+| `/publisher/:id`      | `PublisherDetailsPage`         | `publisherHostGuard`             | Detail + filtered assets                                                                  |
+| `/license/:id`        | `LicenseDetailsPage`           | —                                | License detail                                                                            |
+| `/content-standards`  | `UsageStandardsPage`           | `publisherHostGuard`             | Content guidelines                                                                        |
+| `/unauthorized`       | `UnauthorizedPage`             | —                                | Stub                                                                                      |
+| `/complete-profile`   | `CompleteProfilePage`          | `authGuard`                      | Profile completion                                                                        |
+| `/account/*`          | (21 auth pages)                | guestGuard/authGuard             | Auth & account management                                                                 |
+| `/admin`              | `AdminLayoutComponent`         | `authGuard`, `portalAccessGuard` | Permission-based admin shell                                                              |
+| `/admin` (default)    | `AdminPortalRedirectComponent` | —                                | Redirects to first allowed module (`publishers` for Itqan admin, else by read permission) |
+| `/admin/publishers`   | (lazy routes)                  | `itqanAdminGuard`                | Publisher CRUD (staff)                                                                    |
+| `/admin/tafsirs`      | (lazy routes)                  | per-route `permissionGuard`      | Tafsir CRUD                                                                               |
+| `/admin/translations` | (lazy routes)                  | per-route `permissionGuard`      | Translation CRUD                                                                          |
+| `/admin/recitations`  | (lazy routes)                  | per-route `permissionGuard`      | Recitation CRUD                                                                           |
+| `/admin/reciters`     | (lazy routes)                  | per-route `permissionGuard`      | Reciter CRUD                                                                              |
+| `/admin/usage`        | (lazy routes)                  | `portal_access`                  | API usage analytics                                                                       |
+| `**`                  | redirect -> /gallery           | —                                | Wildcard                                                                                  |
 
 ---
 
@@ -261,14 +264,18 @@ success.
 
 **Services:**
 
-- `admin-auth.service.ts` — Admin-specific auth
+- `admin-auth.service.ts` — `AdminAuthService`: exposes `currentUser`, role signals (`isAdmin`,
+  `isItqanAdmin`, `isPublisherAdmin`), and `hasPermission` / `hasAnyPermission` /
+  `hasAllPermissions` based on normalized profile permission codes. Constants:
+  `features/admin/constants/portal-permission.constants.ts`.
 - `admin-table-column-prefs.service.ts` — Persists column visibility per table
 - `admin-table-sort-prefs.service.ts` — Persists sort preferences
 - `asset-versions.service.ts` — Version management API
 - `quran-data.service.ts` — Quran metadata (pages, surahs, ayahs)
 
-**Guards:** `admin.guard.ts`, `itqan-admin.guard.ts`, `publisher-admin.guard.ts` **Note:** Guards
-are defined but currently commented out in routes.
+**Guards:** `admin.guard.ts` (legacy `is_admin` gate), `itqan-admin.guard.ts`,
+`publisher-admin.guard.ts`, `portal-access.guard.ts` (`portal_access`), `permission.guard.ts`
+(factory for route-level permission checks). Wired on `/admin` and lazy admin feature routes.
 
 **Pipes:** `admin-country-label.pipe.ts`, `admin-hijri-year.pipe.ts` **Base class:** `AdminListBase`
 — shared list page logic (loading, data fetching, error handling) **Utility:**
@@ -407,18 +414,18 @@ reciters, mushafs (pages/surahs/ayahs/words), usage analytics
 
 ## [ORPHANS & PENDING]
 
-| Item                                    | Status                | Notes                                                                                                     |
-| --------------------------------------- | --------------------- | --------------------------------------------------------------------------------------------------------- |
-| `features/error/pages/unautorized/`     | Stub                  | Directory misspelled (missing 'h'). Both 401 and 404 pages are empty placeholders.                        |
-| `features/publishers/pages/publishers/` | Stub                  | Publishers directory listing page is empty.                                                               |
-| `features/dashify/`                     | Unknown               | Minimal implementation, purpose unclear.                                                                  |
-| `features/admin/` guards                | Partially implemented | Guards defined (`admin.guard`, `itqan-admin.guard`, `publisher-admin.guard`) but commented out in routes. |
-| `shared/directives/`                    | Empty                 | Directory exists with no files.                                                                           |
-| `features/admin/mushafs/`               | In progress           | Complex UI with multiple tabs (Pages, Surahs, Ayahs, Words) — may be incomplete.                          |
-| `features/admin/audio/`                 | Partial               | Routes defined but implementation details need verification.                                              |
-| `features/admin/software/`              | Partial               | Routes defined but implementation details need verification.                                              |
-| Sentry `tracesSampleRate`               | Staging overrides     | 1.0 (100%) in staging — may be too high for non-production.                                               |
-| WebAuthn RP ID                          | Development mode      | `webauthnReplaceRpIdWithHostname` env flag allows RP ID patching in dev.                                  |
+| Item                                    | Status            | Notes                                                                              |
+| --------------------------------------- | ----------------- | ---------------------------------------------------------------------------------- |
+| `features/error/pages/unautorized/`     | Stub              | Directory misspelled (missing 'h'). Both 401 and 404 pages are empty placeholders. |
+| `features/publishers/pages/publishers/` | Stub              | Publishers directory listing page is empty.                                        |
+| `features/dashify/`                     | Unknown           | Minimal implementation, purpose unclear.                                           |
+| `features/admin/` guards                | Implemented       | `portal-access`, `permission`, `itqan-admin` guards active on admin routes.        |
+| `shared/directives/`                    | Empty             | Directory exists with no files.                                                    |
+| `features/admin/mushafs/`               | In progress       | Complex UI with multiple tabs (Pages, Surahs, Ayahs, Words) — may be incomplete.   |
+| `features/admin/audio/`                 | Partial           | Routes defined but implementation details need verification.                       |
+| `features/admin/software/`              | Partial           | Routes defined but implementation details need verification.                       |
+| Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                        |
+| WebAuthn RP ID                          | Development mode  | `webauthnReplaceRpIdWithHostname` env flag allows RP ID patching in dev.           |
 
 ---
 

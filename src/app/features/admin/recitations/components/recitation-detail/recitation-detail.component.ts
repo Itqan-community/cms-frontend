@@ -33,6 +33,8 @@ import type {
 import type { RecitationTimingUploadOut } from '../../models/recitation-timings.models';
 import { MaddLevel, MeemBehavior, RecitationDetails } from '../../models/recitations.models';
 import { RecitationTracksUploadOrchestratorService } from '../../services/recitation-tracks-upload.orchestrator';
+import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
+import { AdminAuthService } from '../../../services/admin-auth.service';
 import { RecitationsService } from '../../services/recitations.service';
 import {
   buildTimingUploadExtraMessage,
@@ -70,6 +72,19 @@ export class RecitationDetailComponent implements OnInit {
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
   private readonly translate = inject(TranslateService);
+  private readonly adminAuth = inject(AdminAuthService);
+
+  readonly canUpdateRecitation = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_RECITATION)
+  );
+
+  readonly canDeleteRecitation = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_RECITATION)
+  );
+
+  readonly canUploadTiming = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPLOAD_TIMING)
+  );
 
   readonly recitation = signal<RecitationDetails | null>(null);
   readonly loading = signal(true);

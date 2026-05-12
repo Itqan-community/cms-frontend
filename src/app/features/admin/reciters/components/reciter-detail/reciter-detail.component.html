@@ -52,14 +52,18 @@
       </div>
 
       <div class="admin-hero-actions">
-        <button nz-button nzType="primary" (click)="onEdit()">
-          <ng-icon name="lucideSquarePen" />
-          {{ 'ADMIN.COMMON.EDIT' | translate }}
-        </button>
-        <button nz-button nzDanger (click)="onDelete()">
-          <ng-icon name="lucideTrash2" />
-          {{ 'ADMIN.COMMON.DELETE' | translate }}
-        </button>
+        @if (canUpdateReciter()) {
+          <button nz-button nzType="primary" (click)="onEdit()">
+            <ng-icon name="lucideSquarePen" />
+            {{ 'ADMIN.COMMON.EDIT' | translate }}
+          </button>
+        }
+        @if (canDeleteReciter()) {
+          <button nz-button nzDanger (click)="onDelete()">
+            <ng-icon name="lucideTrash2" />
+            {{ 'ADMIN.COMMON.DELETE' | translate }}
+          </button>
+        }
       </div>
     </div>
 

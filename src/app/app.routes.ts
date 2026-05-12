@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 import { accountAuthRoutes } from './core/auth/account.routes';
 import { authGuard } from './core/auth/guards/auth.guard';
 import { publisherHostGuard } from './core/guards/publisher-host.guard';
+import { portalAccessGuard } from './features/admin/guards/portal-access.guard';
+import { itqanAdminGuard } from './features/admin/guards/itqan-admin.guard';
 
 export const routes: Routes = [
   {
@@ -18,24 +20,26 @@ export const routes: Routes = [
     path: 'admin',
     loadComponent: () =>
       import('./features/admin/admin-layout.component').then((m) => m.AdminLayoutComponent),
-    // canActivate: [authGuard, adminGuard],
+    canActivate: [authGuard, portalAccessGuard],
     data: { hideHeader: true, fullWidth: true },
     children: [
-      // Resolve /admin before the lazy '' adminRoutes (avoids ** catch-all flashing Coming Soon on redirect)
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'publishers',
+        loadComponent: () =>
+          import('./features/admin/admin-portal-redirect.component').then(
+            (m) => m.AdminPortalRedirectComponent
+          ),
       },
       {
         path: 'publishers',
-        // canActivate: [itqanAdminGuard],
+        canActivate: [itqanAdminGuard],
         loadChildren: () =>
           import('./features/admin/publishers/publishers.routes').then((m) => m.publishersRoutes),
       },
       {
         path: 'profile',
-        redirectTo: 'publishers',
+        redirectTo: '',
         pathMatch: 'full',
       },
       {

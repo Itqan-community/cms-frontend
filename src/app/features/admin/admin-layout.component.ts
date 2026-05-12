@@ -10,6 +10,7 @@ import { AuthService } from '../../core/auth/services/auth.service';
 import { LangSwitchComponent } from '../../shared/components/lang-switch/lang-switch.component';
 import { UserActionsComponent } from '../../shared/components/user-actions/user-actions.component';
 import { isPublisherHost } from '../../shared/utils/publisherhost.util';
+import { PORTAL_PERMISSIONS } from './constants/portal-permission.constants';
 import { AdminAuthService } from './services/admin-auth.service';
 
 interface CmsTab {
@@ -64,7 +65,6 @@ const TAB_USAGE: CmsTab = {
   label: 'ADMIN.MENU.USAGE',
   icon: 'lucideBarChart2',
 };
-const CORE_TABS: CmsTab[] = [TAB_TAFSIRS, TAB_TRANSLATIONS, TAB_RECITATIONS, TAB_RECITERS];
 
 @Component({
   selector: 'app-admin-layout',
@@ -100,7 +100,27 @@ export class AdminLayoutComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly tabs = computed(() => {
-    return [TAB_PUBLISHERS, TAB_MUSHAFS, ...CORE_TABS, TAB_USAGE];
+    const tabs: CmsTab[] = [];
+    if (this.adminAuth.isItqanAdmin()) {
+      tabs.push(TAB_PUBLISHERS);
+      tabs.push(TAB_MUSHAFS);
+    }
+    if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_TAFSIR)) {
+      tabs.push(TAB_TAFSIRS);
+    }
+    if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_TRANSLATION)) {
+      tabs.push(TAB_TRANSLATIONS);
+    }
+    if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_RECITATION)) {
+      tabs.push(TAB_RECITATIONS);
+    }
+    if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_RECITER)) {
+      tabs.push(TAB_RECITERS);
+    }
+    if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS)) {
+      tabs.push(TAB_USAGE);
+    }
+    return tabs;
   });
 
   constructor() {

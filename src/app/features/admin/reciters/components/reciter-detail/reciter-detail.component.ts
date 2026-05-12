@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -8,6 +8,8 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
+import { AdminAuthService } from '../../../services/admin-auth.service';
 import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
 import { ReciterDetails } from '../../models/reciters.models';
 import { RecitersAdminService } from '../../services/reciters.service';
@@ -35,6 +37,15 @@ export class ReciterDetailComponent implements OnInit {
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
   private readonly translate = inject(TranslateService);
+  private readonly adminAuth = inject(AdminAuthService);
+
+  readonly canUpdateReciter = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_RECITER)
+  );
+
+  readonly canDeleteReciter = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_RECITER)
+  );
 
   readonly reciter = signal<ReciterDetails | null>(null);
   readonly loading = signal(true);

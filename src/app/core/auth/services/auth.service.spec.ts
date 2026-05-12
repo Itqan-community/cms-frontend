@@ -22,6 +22,22 @@ function authedResponse(): AuthenticatedResponse {
   };
 }
 
+const profileApiPayload = {
+  id: '1',
+  name: 'Test',
+  email: 't@example.com',
+  phone: '',
+  is_active: true,
+  is_profile_completed: false,
+  bio: '',
+  project_summary: '',
+  project_url: '',
+  job_title: '',
+  created_at: '',
+  updated_at: '',
+  permissions: [{ code_name: 'portal_access', name: 'Portal' }],
+};
+
 describe('AuthService (app / headless)', () => {
   let service: AuthService;
   let headless: jasmine.SpyObj<HeadlessAuthApiService>;
@@ -32,6 +48,8 @@ describe('AuthService (app / headless)', () => {
     navigateByUrl: jasmine.Spy;
     parseUrl: jasmine.Spy;
   };
+
+  let httpClientMock: { get: jasmine.Spy; put: jasmine.Spy };
 
   beforeEach(() => {
     TestBed.resetTestingModule();
@@ -105,16 +123,27 @@ describe('AuthService (app / headless)', () => {
         .and.returnValue({ queryParams: { next: '/account/providers' } }),
     };
 
+    httpClientMock = {
+      get: jasmine.createSpy('httpGet').and.returnValue(of(profileApiPayload)),
+      put: jasmine.createSpy('httpPut').and.returnValue(of({})),
+    };
+
     TestBed.configureTestingModule({
       providers: [
         AuthService,
-        { provide: HttpClient, useValue: { get: () => of({ id: 1 }), put: () => of({}) } },
+        { provide: HttpClient, useValue: httpClientMock },
         { provide: Router, useValue: routerMock },
         { provide: HeadlessAuthApiService, useValue: headless },
       ],
     });
     service = TestBed.inject(AuthService);
     tokenStore = TestBed.inject(HeadlessAppTokenService);
+  });
+
+  it('bootstrapOnce merges normalized permissions from profile when authenticated', async () => {
+    await service.bootstrapOnce();
+    expect(httpClientMock.get).toHaveBeenCalled();
+    expect(service.getCurrentUser()?.permissions).toEqual(['portal_access']);
   });
 
   it('applyMetaTokens persists session_token, access_token and refresh_token', () => {

@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -15,6 +15,8 @@ import {
 import { ReciterListFilters, ReciterListItem, ReciterSorting } from '../../models/reciters.models';
 import { RecitersAdminService } from '../../services/reciters.service';
 import { ReciterFiltersComponent } from '../reciter-filters/reciter-filters.component';
+import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
+import { AdminAuthService } from '../../../services/admin-auth.service';
 import { AdminListBase } from '../../../utils/admin-list-base';
 import { AdminCountryLabelPipe } from '../../../pipes/admin-country-label.pipe';
 
@@ -41,6 +43,15 @@ import { AdminCountryLabelPipe } from '../../../pipes/admin-country-label.pipe';
 export class RecitersListComponent extends AdminListBase<ReciterListItem, ReciterListFilters> {
   private readonly recitersService = inject(RecitersAdminService);
   private readonly translate = inject(TranslateService);
+  private readonly adminAuth = inject(AdminAuthService);
+
+  readonly canCreateReciter = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_CREATE_RECITER)
+  );
+
+  readonly canUpdateReciter = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_RECITER)
+  );
 
   readonly reciterTableStorageKey = 'admin-list-reciters';
   readonly reciterTableColumns: AdminTableColumnOption[] = [

@@ -17,6 +17,8 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { Subject, debounceTime, distinctUntilChanged, finalize, takeUntil } from 'rxjs';
 import type { AssetVersion, AssetVersionParentKind } from '../../models/asset-versions.models';
 import { AssetVersionsService } from '../../services/asset-versions.service';
+import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
+import { AdminAuthService } from '../../services/admin-auth.service';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -47,6 +49,7 @@ export class AssetVersionsManagerComponent implements OnInit {
   private readonly modal = inject(NzModalService);
   readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly adminAuth = inject(AdminAuthService);
   private readonly search$ = new Subject<string>();
   /** Emits to abort the in-flight create/update HTTP request (unsubscribe → browser abort). */
   private readonly cancelInFlightSubmit$ = new Subject<void>();
@@ -132,7 +135,24 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.loadList();
   }
 
+  canMutateVersions(): boolean {
+    if (this.kind === 'tafsir') {
+      return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR);
+    }
+    return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION);
+  }
+
+  canDeleteVersions(): boolean {
+    if (this.kind === 'tafsir') {
+      return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TAFSIR);
+    }
+    return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TRANSLATION);
+  }
+
   openCreateModal(): void {
+    if (!this.canMutateVersions()) {
+      return;
+    }
     this.modalMode.set('create');
     this.editingId.set(null);
     this.form.reset({ name: '', summary: '' });
@@ -142,6 +162,9 @@ export class AssetVersionsManagerComponent implements OnInit {
   }
 
   openEditModal(row: AssetVersion): void {
+    if (!this.canMutateVersions()) {
+      return;
+    }
     this.modalMode.set('edit');
     this.editingId.set(row.id);
     this.form.patchValue({
@@ -193,6 +216,9 @@ export class AssetVersionsManagerComponent implements OnInit {
   }
 
   submit(): void {
+    if (!this.canMutateVersions()) {
+      return;
+    }
     if (this.form.invalid) {
       Object.values(this.form.controls).forEach((c) => {
         c.markAsDirty();
@@ -251,6 +277,9 @@ export class AssetVersionsManagerComponent implements OnInit {
   }
 
   deleteRow(row: AssetVersion): void {
+    if (!this.canDeleteVersions()) {
+      return;
+    }
     const dir = this.translate.currentLang === 'ar' ? 'rtl' : 'ltr';
     this.modal.confirm({
       nzTitle: this.translate.instant(`${this.i18nPrefix}.DELETE_CONFIRM_TITLE`),

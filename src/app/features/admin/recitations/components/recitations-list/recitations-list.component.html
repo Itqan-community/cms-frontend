@@ -4,12 +4,14 @@
       <h2 class="admin-list-header__title">{{ 'ADMIN.RECITATIONS.TITLE' | translate }}</h2>
       <p class="admin-list-header__subtitle">{{ 'ADMIN.RECITATIONS.SUBTITLE' | translate }}</p>
     </div>
-    <a routerLink="/admin/recitations/create">
-      <button nz-button nzType="primary" class="admin-add-btn">
-        <ng-icon name="lucidePlus" aria-hidden="true" />
-        {{ 'ADMIN.RECITATIONS.ADD_BUTTON' | translate }}
-      </button>
-    </a>
+    @if (canCreateRecitation()) {
+      <a routerLink="/admin/recitations/create">
+        <button nz-button nzType="primary" class="admin-add-btn">
+          <ng-icon name="lucidePlus" aria-hidden="true" />
+          {{ 'ADMIN.RECITATIONS.ADD_BUTTON' | translate }}
+        </button>
+      </a>
+    }
   </div>
 
   <app-recitation-filters
@@ -141,16 +143,18 @@
                   >
                     <ng-icon name="lucideEye" aria-hidden="true" />
                   </a>
-                  <a
-                    nz-button
-                    nzType="text"
-                    class="action-icon action-icon--edit"
-                    nz-tooltip
-                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_EDIT' | translate"
-                    [routerLink]="['/admin/recitations', item.slug ?? item.id, 'edit']"
-                  >
-                    <ng-icon name="lucideSquarePen" aria-hidden="true" />
-                  </a>
+                  @if (canUpdateRecitation()) {
+                    <a
+                      nz-button
+                      nzType="text"
+                      class="action-icon action-icon--edit"
+                      nz-tooltip
+                      [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_EDIT' | translate"
+                      [routerLink]="['/admin/recitations', item.slug ?? item.id, 'edit']"
+                    >
+                      <ng-icon name="lucideSquarePen" aria-hidden="true" />
+                    </a>
+                  }
                 </div>
               </td>
             </tr>

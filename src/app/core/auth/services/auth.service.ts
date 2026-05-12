@@ -47,6 +47,7 @@ import {
 import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
 import {
   LoginRequest,
+  normalizeProfilePermissionCodes,
   RegisterRequest,
   UpdateProfileRequest,
   UpdateProfileResponse,
@@ -143,6 +144,28 @@ export class AuthService {
           } else {
             this.authConfig.set(null);
           }
+        }),
+        switchMap(({ auth }) => {
+          if (auth === false || !authInfo(auth).isAuthenticated) {
+            return of(void 0);
+          }
+          return this.getProfile().pipe(
+            tap((p) => {
+              const cur = this.currentUser();
+              if (!cur) return;
+              const merged: User = {
+                ...cur,
+                ...p,
+                id: String(p.id ?? cur.id),
+                permissions: normalizeProfilePermissionCodes(p.permissions),
+              };
+              this.currentUser.set(merged);
+              localStorage.setItem(this.USER_KEY, JSON.stringify(merged));
+            }),
+            catchError(() => of(void 0))
+          );
+        }),
+        tap(() => {
           this.bootstrapDone.set(true);
           this.redirectPrimed = true;
         }),
@@ -367,7 +390,12 @@ export class AuthService {
         tap((p) => {
           const cur = this.currentUser();
           const base = cur ?? this.mapHeadlessToUser(res.data!.user);
-          const merged = { ...base, ...p, id: String(p.id ?? base.id) };
+          const merged: User = {
+            ...base,
+            ...p,
+            id: String(p.id ?? base.id),
+            permissions: normalizeProfilePermissionCodes(p.permissions),
+          };
           this.currentUser.set(merged);
           localStorage.setItem(this.USER_KEY, JSON.stringify(merged));
         }),
@@ -387,6 +415,7 @@ export class AuthService {
       phone: '',
       is_active: true,
       is_profile_completed: false,
+      permissions: [],
     };
   }
 
@@ -432,8 +461,32 @@ export class AuthService {
     void this.router.navigate([ALLAUTH_LOGIN_URL]);
   }
 
-  getProfile(): Observable<User> {
-    return this.http.get<User>(`${this.API_BASE_URL}/auth/profile/`);
+  getProfile(): Observable<UpdateProfileResponse> {
+    return this.http.get<UpdateProfileResponse>(`${this.API_BASE_URL}/auth/profile/`);
+  }
+
+  /** Merges full CMS profile payload (including `permissions`) into {@link currentUser}. */
+  applyProfileFromApi(profile: UpdateProfileResponse): void {
+    const cur = this.currentUser();
+    const base: User =
+      cur ??
+      ({
+        id: String(profile.id),
+        name: profile.name,
+        email: profile.email,
+        phone: profile.phone ?? '',
+        is_active: profile.is_active,
+        is_profile_completed: profile.is_profile_completed,
+        permissions: [],
+      } as User);
+    const merged: User = {
+      ...base,
+      ...profile,
+      id: String(profile.id ?? base.id),
+      permissions: normalizeProfilePermissionCodes(profile.permissions),
+    };
+    this.currentUser.set(merged);
+    localStorage.setItem(this.USER_KEY, JSON.stringify(merged));
   }
 
   /** Full CMS profile payload for account hub (includes bio, URLs, etc.). */
@@ -447,15 +500,20 @@ export class AuthService {
       .pipe(
         tap((response) => {
           const currentUser = this.currentUser();
-          if (currentUser && response.is_profile_completed) {
-            const updatedUser = {
-              ...currentUser,
-              is_profile_completed: response.is_profile_completed,
-              ...profileData,
-            };
-            this.currentUser.set(updatedUser);
-            localStorage.setItem(this.USER_KEY, JSON.stringify(updatedUser));
+          if (!currentUser) {
+            return;
           }
+          const updatedUser: User = {
+            ...currentUser,
+            ...profileData,
+            is_profile_completed: response.is_profile_completed,
+            permissions:
+              response.permissions !== undefined
+                ? normalizeProfilePermissionCodes(response.permissions)
+                : currentUser.permissions,
+          };
+          this.currentUser.set(updatedUser);
+          localStorage.setItem(this.USER_KEY, JSON.stringify(updatedUser));
         })
       );
   }

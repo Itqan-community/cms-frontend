@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -11,6 +11,8 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
 import { AssetVersionsManagerComponent } from '../../../components/asset-versions-manager/asset-versions-manager.component';
+import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
+import { AdminAuthService } from '../../../services/admin-auth.service';
 import { localizeLanguageCode } from '../../../utils/display-localization.util';
 import { TranslationDetails } from '../../models/translations.models';
 import { TranslationsService } from '../../services/translations.service';
@@ -40,6 +42,15 @@ export class TranslationDetailComponent implements OnInit {
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
   private readonly translate = inject(TranslateService);
+  private readonly adminAuth = inject(AdminAuthService);
+
+  readonly canUpdateTranslation = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION)
+  );
+
+  readonly canDeleteTranslation = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TRANSLATION)
+  );
 
   readonly translation = signal<TranslationDetails | null>(null);
   readonly loading = signal(true);

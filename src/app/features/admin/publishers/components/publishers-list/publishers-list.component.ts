@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -20,6 +20,7 @@ import { Publisher, PublisherUiFilters } from '../../models/publishers-stats.mod
 import { PublishersService } from '../../services/publishers.service';
 import { PublisherFiltersComponent } from '../publisher-filters/publisher-filters.component';
 import { AdminListBase } from '../../../utils/admin-list-base';
+import { AdminAuthService } from '../../../services/admin-auth.service';
 
 @Component({
   selector: 'app-publishers-list',
@@ -43,6 +44,10 @@ import { AdminListBase } from '../../../utils/admin-list-base';
 export class PublishersListComponent extends AdminListBase<Publisher, PublisherUiFilters> {
   private readonly publishersService = inject(PublishersService);
   private readonly translate = inject(TranslateService);
+  private readonly adminAuth = inject(AdminAuthService);
+
+  /** Publishers admin is Itqan staff only (no granular portal permission in API). */
+  readonly canManagePublishers = computed(() => this.adminAuth.isItqanAdmin());
 
   readonly publisherTableStorageKey = 'admin-list-publishers';
   readonly publisherTableColumns: AdminTableColumnOption[] = [

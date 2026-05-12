@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule } from '@ngx-translate/core';
@@ -18,6 +18,8 @@ import { AssetSortingQuery, TafsirFilters, TafsirItem } from '../../models/tafsi
 import { TafsirsService } from '../../services/tafsirs.service';
 import { TafsirFiltersComponent } from '../tafsir-filters/tafsir-filters.component';
 import { AdminListBase } from '../../../utils/admin-list-base';
+import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
+import { AdminAuthService } from '../../../services/admin-auth.service';
 
 @Component({
   selector: 'app-tafsirs-list',
@@ -41,6 +43,15 @@ import { AdminListBase } from '../../../utils/admin-list-base';
 })
 export class TafsirsListComponent extends AdminListBase<TafsirItem, TafsirFilters> {
   private readonly tafsirsService = inject(TafsirsService);
+  private readonly adminAuth = inject(AdminAuthService);
+
+  readonly canCreateTafsir = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_CREATE_TAFSIR)
+  );
+
+  readonly canUpdateTafsir = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR)
+  );
 
   readonly tafsirTableStorageKey = 'admin-list-tafsirs';
   readonly tafsirTableColumns: AdminTableColumnOption[] = [
