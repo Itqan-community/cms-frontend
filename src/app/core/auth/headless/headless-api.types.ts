@@ -211,7 +211,8 @@ export interface RecoveryCodesResponse {
     type: 'recovery_codes';
     total_code_count: number;
     unused_code_count: number;
-    unused_codes: string[];
+    /** Omitted or empty after one-time reveal; only guaranteed on first issue/regenerate. */
+    unused_codes?: string[];
     created_at?: string;
     last_used_at?: string | null;
   };

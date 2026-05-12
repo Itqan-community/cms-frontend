@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -23,7 +23,7 @@ import { AuthService } from '../../services/auth.service';
   styleUrls: ['./security-settings.page.less'],
   templateUrl: './security-settings.page.html',
 })
-export class SecuritySettingsPage implements OnInit {
+export class SecuritySettingsPage implements OnInit, OnDestroy {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
@@ -40,6 +40,11 @@ export class SecuritySettingsPage implements OnInit {
   totpState = signal<TotpStatusResult | null>(null);
   recoveryData = signal<RecoveryCodesResponse['data'] | null>(null);
   recoveryLoadError = signal<string>('');
+  /**
+   * Plaintext codes last returned by a one-time POST (regenerate); merged when GET omits `unused_codes`.
+   * Cleared on successful GET that includes plaintext, on 404, or on destroy.
+   */
+  recoveryPlaintextEphemeral = signal<string[] | null>(null);
 
   mfaSupported = signal<string[]>([]);
   /** User confirmed regeneration (single-session guard). */
@@ -61,6 +66,46 @@ export class SecuritySettingsPage implements OnInit {
     )
   );
 
+  /** Normalized list for display (always an array; never read optional API field raw in templates). */
+  readonly recoveryPlaintextCodes = computed(() =>
+    this.normalizeUnusedCodes(this.recoveryData()?.unused_codes)
+  );
+
+  readonly recoveryHasPlaintext = computed(() => this.recoveryPlaintextCodes().length > 0);
+
+  /** Codes exist but API no longer returns plaintext until next regenerate. */
+  readonly recoveryShowRedactedGuidance = computed(() => {
+    const rc = this.recoveryData();
+    if (!rc || this.recoveryHasPlaintext()) {
+      return false;
+    }
+    return (rc.unused_code_count ?? 0) > 0;
+  });
+
+  /** Authenticator has no unused codes left; user should regenerate. */
+  readonly recoveryShowAllUsedGuidance = computed(() => {
+    const rc = this.recoveryData();
+    if (!rc || this.recoveryHasPlaintext()) {
+      return false;
+    }
+    const unused = rc.unused_code_count ?? 0;
+    const total = rc.total_code_count ?? 0;
+    return unused === 0 && total > 0;
+  });
+
+  /**
+   * Plaintext is visible because we kept the last one-time POST payload for this page visit
+   * (GET omitted `unused_codes`). Ephemeral is cleared after a GET that returns plaintext.
+   */
+  readonly recoveryShowSessionRevealBanner = computed(
+    () => this.recoveryHasPlaintext() && (this.recoveryPlaintextEphemeral()?.length ?? 0) > 0
+  );
+
+  /** General reminder when codes are shown from GET (one-time / may not repeat). */
+  readonly recoveryShowOneTimeFromApiHint = computed(
+    () => this.recoveryHasPlaintext() && (this.recoveryPlaintextEphemeral()?.length ?? 0) === 0
+  );
+
   /** True if navigated away (email must be verified before MFA / account actions). */
   private redirectIfUnverifiedEmail(e: HttpErrorResponse): boolean {
     if (!isUnverifiedEmailError(e)) {
@@ -75,6 +120,48 @@ export class SecuritySettingsPage implements OnInit {
   ngOnInit(): void {
     this.passkeysSupported.set(isPasskeyClientEnvironmentSupported());
     void this.reloadAll();
+  }
+
+  ngOnDestroy(): void {
+    this.recoveryPlaintextEphemeral.set(null);
+  }
+
+  private normalizeUnusedCodes(raw: unknown): string[] {
+    if (!Array.isArray(raw)) {
+      return [];
+    }
+    return raw.filter((c): c is string => typeof c === 'string');
+  }
+
+  /**
+   * @param source `get` — server read: plaintext means ephemeral cache can be dropped.
+   *   `regeneratePost` — one-time create response: keep plaintext in ephemeral so a follow-up
+   *   redacted GET can still merge and show codes until the user leaves the page.
+   */
+  private applyRecoveryPayload(
+    data: RecoveryCodesResponse['data'],
+    source: 'get' | 'regeneratePost' = 'get'
+  ): void {
+    const fromApi = this.normalizeUnusedCodes(data.unused_codes);
+    const base: RecoveryCodesResponse['data'] = { ...data, unused_codes: fromApi };
+    if (fromApi.length > 0) {
+      if (source === 'get') {
+        this.recoveryPlaintextEphemeral.set(null);
+      } else {
+        this.recoveryPlaintextEphemeral.set(fromApi);
+      }
+      this.recoveryData.set(base);
+      return;
+    }
+    if (source === 'regeneratePost') {
+      this.recoveryPlaintextEphemeral.set(null);
+    }
+    const ephem = this.recoveryPlaintextEphemeral();
+    if (ephem && ephem.length > 0) {
+      this.recoveryData.set({ ...base, unused_codes: ephem });
+      return;
+    }
+    this.recoveryData.set(base);
   }
 
   async reloadAll(): Promise<void> {
@@ -100,6 +187,7 @@ export class SecuritySettingsPage implements OnInit {
         await this.loadRecoveryCodesSilently();
       } else {
         this.recoveryData.set(null);
+        this.recoveryPlaintextEphemeral.set(null);
       }
     } catch (e) {
       if (e instanceof HttpErrorResponse) {
@@ -210,10 +298,11 @@ export class SecuritySettingsPage implements OnInit {
     this.recoveryLoadError.set('');
     try {
       const res = await firstValueFrom(this.auth.headlessAuth.getRecoveryCodes());
-      this.recoveryData.set(res.data);
+      this.applyRecoveryPayload(res.data, 'get');
     } catch (e) {
       if (e instanceof HttpErrorResponse && e.status === 404) {
         this.recoveryData.set(null);
+        this.recoveryPlaintextEphemeral.set(null);
         return;
       }
       if (e instanceof HttpErrorResponse) {
@@ -236,7 +325,7 @@ export class SecuritySettingsPage implements OnInit {
   }
 
   async copyRecoveryCodes(): Promise<void> {
-    const codes = this.recoveryData()?.unused_codes ?? [];
+    const codes = this.recoveryPlaintextCodes();
     if (!codes.length) {
       return;
     }
@@ -244,7 +333,7 @@ export class SecuritySettingsPage implements OnInit {
   }
 
   downloadRecoveryCodes(): void {
-    const codes = this.recoveryData()?.unused_codes ?? [];
+    const codes = this.recoveryPlaintextCodes();
     if (!codes.length) {
       return;
     }
@@ -274,7 +363,7 @@ export class SecuritySettingsPage implements OnInit {
     this.isLoading.set(true);
     try {
       const res = await firstValueFrom(this.auth.headlessAuth.regenerateRecoveryCodes());
-      this.recoveryData.set(res.data);
+      this.applyRecoveryPayload(res.data, 'regeneratePost');
       this.regenerateArmed.set(false);
       await this.reloadAll();
     } catch (e) {
@@ -308,9 +397,6 @@ export class SecuritySettingsPage implements OnInit {
       );
       this.totpState.set({ kind: 'active', data: res.data, meta: res.meta });
       this.totpForm.reset();
-      if (res.meta?.recovery_codes_generated) {
-        await this.loadRecoveryCodesSilently();
-      }
       await this.reloadAll();
     } catch (e) {
       if (e instanceof HttpErrorResponse) {

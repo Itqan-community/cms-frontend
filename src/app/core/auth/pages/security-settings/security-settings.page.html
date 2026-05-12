@@ -125,9 +125,18 @@
                   | translate: { unused: rc.unused_code_count, total: rc.total_code_count }
               }}
             </p>
-            @if (rc.unused_codes.length) {
+            @if (recoveryShowSessionRevealBanner()) {
+              <p class="security__warn">
+                {{ 'AUTH.SECURITY.RECOVERY_JUST_GENERATED' | translate }}
+              </p>
+            } @else if (recoveryShowOneTimeFromApiHint()) {
+              <p class="security__warn">
+                {{ 'AUTH.SECURITY.RECOVERY_ONE_TIME_VISIBILITY' | translate }}
+              </p>
+            }
+            @if (recoveryHasPlaintext()) {
               <ul class="security__codes">
-                @for (c of rc.unused_codes; track c) {
+                @for (c of recoveryPlaintextCodes(); track c) {
                   <li class="security__code">{{ c }}</li>
                 }
               </ul>
@@ -147,6 +156,12 @@
                   {{ 'AUTH.SECURITY.DOWNLOAD' | translate }}
                 </button>
               </div>
+            }
+            @if (recoveryShowRedactedGuidance()) {
+              <p class="security__hint">{{ 'AUTH.SECURITY.RECOVERY_REDACTED' | translate }}</p>
+            }
+            @if (recoveryShowAllUsedGuidance()) {
+              <p class="security__hint">{{ 'AUTH.SECURITY.RECOVERY_ALL_USED' | translate }}</p>
             }
           } @else {
             <p class="security__hint">{{ 'AUTH.SECURITY.RECOVERY_UNAVAILABLE' | translate }}</p>

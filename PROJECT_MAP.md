@@ -175,8 +175,8 @@ Pages  Guards    Interceptors   Utils
 **Auth pages (lazy-loaded under `/account/*`):** Login, Register, ForgotPassword, ResetPassword,
 ChangePassword, ChangeEmail, Logout, LoginByCode (2-step), MFA (TOTP/WebAuthn/RecoveryCodes),
 Reauthenticate (3 modes), VerifyEmail, ProviderSignup, Passkey (3 modes), OAuthCallback,
-ManageProviders, SecuritySettings (TOTP/RecoveryCodes/WebAuthn), Sessions, Trust, Profile,
-CompleteProfile
+ManageProviders, SecuritySettings (TOTP / recovery codes: GET may omit plaintext; one-time POST
+merge + redacted UX), Sessions, Trust, Profile, CompleteProfile
 
 **Auth guards:** `authGuard` (requires auth), `guestGuard` (blocks authenticated users),
 `profileCompletedGuard` (requires completed profile)
