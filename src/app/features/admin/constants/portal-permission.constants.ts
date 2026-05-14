@@ -23,6 +23,11 @@ export const PORTAL_PERMISSIONS = {
   PORTAL_CREATE_TRANSLATION: 'portal_create_translation',
   PORTAL_UPDATE_TRANSLATION: 'portal_update_translation',
   PORTAL_DELETE_TRANSLATION: 'portal_delete_translation',
+
+  PORTAL_READ_PUBLISHER: 'portal_read_publisher',
+  PORTAL_CREATE_PUBLISHER: 'portal_create_publisher',
+  PORTAL_UPDATE_PUBLISHER: 'portal_update_publisher',
+  PORTAL_DELETE_PUBLISHER: 'portal_delete_publisher',
 } as const;
 
 export type PortalPermissionCode = (typeof PORTAL_PERMISSIONS)[keyof typeof PORTAL_PERMISSIONS];

@@ -328,7 +328,8 @@
     "NEXT": "Next",
     "SUBMIT": "Submit",
     "CLOSE": "Close",
-    "REFRESH": "Refresh"
+    "REFRESH": "Refresh",
+    "REDIRECT_TO_LIBRARY_IN": "Taking you to the library in {{seconds}} seconds…"
   },
   "FORMS": {
     "PLACEHOLDERS": {
@@ -354,6 +355,7 @@
     "NETWORK_ERROR": "Network error. Please check your connection and try again.",
     "SERVER_ERROR": "Server error. Please try again later.",
     "VALIDATION_ERROR": "Please correct the errors and try again.",
+    "UNAUTHORIZED_TITLE": "Access denied",
     "UNAUTHORIZED": "You are not authorized to perform this action.",
     "FORBIDDEN": "Access forbidden.",
     "NOT_FOUND": "The requested resource was not found."
@@ -626,6 +628,7 @@
       "SAVE": "Save",
       "CANCEL": "Cancel",
       "COMING_SOON": "Coming soon",
+      "COMING_SOON_DETAIL": "This section is still under construction. You'll be redirected to the library shortly.",
       "DELETE_CONFIRM_BODY": "<strong>{{name}}</strong> — This action cannot be undone.",
       "YES_DELETE": "Yes, delete",
       "NAME_EN": "Name (English)",

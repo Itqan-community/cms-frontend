@@ -1,4 +1,28 @@
-<div class="admin-coming-soon">
-  <ng-icon [name]="icon()" class="admin-coming-soon__icon" />
-  <p class="admin-coming-soon__text">{{ 'ADMIN.COMMON.COMING_SOON' | translate }}</p>
+<div class="portal-state-screen portal-state-screen--embedded">
+  <div class="portal-state-screen__container">
+    <div class="portal-state-screen__card">
+      <div class="portal-state-screen__decorative" aria-hidden="true"></div>
+      <div class="portal-state-screen__icon-wrap portal-state-screen__icon-wrap--neutral">
+        <ng-icon [name]="icon()" class="portal-state-screen__icon" aria-hidden="true" />
+      </div>
+      <h1 class="portal-state-screen__title">{{ 'ADMIN.COMMON.COMING_SOON' | translate }}</h1>
+      <p class="portal-state-screen__subtitle">
+        {{ 'ADMIN.COMMON.COMING_SOON_DETAIL' | translate }}
+      </p>
+      <button
+        nz-button
+        nzType="primary"
+        type="button"
+        class="portal-state-screen__cta"
+        (click)="goToGallery()"
+      >
+        {{ 'ADMIN.MENU.BACK_TO_GALLERY' | translate }}
+      </button>
+      @if (countdownSeconds() > 0) {
+        <p class="portal-state-screen__countdown" aria-live="polite">
+          {{ 'COMMON.REDIRECT_TO_LIBRARY_IN' | translate: { seconds: countdownSeconds() } }}
+        </p>
+      }
+    </div>
+  </div>
 </div>

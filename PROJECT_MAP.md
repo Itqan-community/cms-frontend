@@ -1,6 +1,6 @@
 # PROJECT_MAP — Itqan CMS Frontend
 
-> Last updated: 2026-05-11 Generated for AI-assisted development. Provide this doc to any LLM to
+> Last updated: 2026-05-14 Generated for AI-assisted development. Provide this doc to any LLM to
 > give full project context.
 
 ---
@@ -183,26 +183,26 @@ merge + redacted UX), Sessions, Trust, Profile, CompleteProfile
 
 ### Route Map
 
-| Path                  | Component                      | Guards                           | Notes                                                                                     |
-| --------------------- | ------------------------------ | -------------------------------- | ----------------------------------------------------------------------------------------- |
-| `/gallery`            | `GalleryPage`                  | —                                | Main listing                                                                              |
-| `/gallery/asset/:id`  | `AssetDetailsPage`             | —                                | Detail + access request + download                                                        |
-| `/publishers`         | `PublishersPage`               | `publisherHostGuard`             | Stub                                                                                      |
-| `/publisher/:id`      | `PublisherDetailsPage`         | `publisherHostGuard`             | Detail + filtered assets                                                                  |
-| `/license/:id`        | `LicenseDetailsPage`           | —                                | License detail                                                                            |
-| `/content-standards`  | `UsageStandardsPage`           | `publisherHostGuard`             | Content guidelines                                                                        |
-| `/unauthorized`       | `UnauthorizedPage`             | —                                | Stub                                                                                      |
-| `/complete-profile`   | `CompleteProfilePage`          | `authGuard`                      | Profile completion                                                                        |
-| `/account/*`          | (21 auth pages)                | guestGuard/authGuard             | Auth & account management                                                                 |
-| `/admin`              | `AdminLayoutComponent`         | `authGuard`, `portalAccessGuard` | Permission-based admin shell                                                              |
-| `/admin` (default)    | `AdminPortalRedirectComponent` | —                                | Redirects to first allowed module (`publishers` for Itqan admin, else by read permission) |
-| `/admin/publishers`   | (lazy routes)                  | `itqanAdminGuard`                | Publisher CRUD (staff)                                                                    |
-| `/admin/tafsirs`      | (lazy routes)                  | per-route `permissionGuard`      | Tafsir CRUD                                                                               |
-| `/admin/translations` | (lazy routes)                  | per-route `permissionGuard`      | Translation CRUD                                                                          |
-| `/admin/recitations`  | (lazy routes)                  | per-route `permissionGuard`      | Recitation CRUD                                                                           |
-| `/admin/reciters`     | (lazy routes)                  | per-route `permissionGuard`      | Reciter CRUD                                                                              |
-| `/admin/usage`        | (lazy routes)                  | `portal_access`                  | API usage analytics                                                                       |
-| `**`                  | redirect -> /gallery           | —                                | Wildcard                                                                                  |
+| Path                  | Component                      | Guards                           | Notes                                                                                               |
+| --------------------- | ------------------------------ | -------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `/gallery`            | `GalleryPage`                  | —                                | Main listing                                                                                        |
+| `/gallery/asset/:id`  | `AssetDetailsPage`             | —                                | Detail + access request + download                                                                  |
+| `/publishers`         | `PublishersPage`               | `publisherHostGuard`             | Stub                                                                                                |
+| `/publisher/:id`      | `PublisherDetailsPage`         | `publisherHostGuard`             | Detail + filtered assets                                                                            |
+| `/license/:id`        | `LicenseDetailsPage`           | —                                | License detail                                                                                      |
+| `/content-standards`  | `UsageStandardsPage`           | `publisherHostGuard`             | Content guidelines                                                                                  |
+| `/unauthorized`       | `UnauthorizedPage`             | —                                | Card UX; CTA + 5s countdown auto-redirect to `/gallery`; `hideHeader`; dir name typo `unautorized/` |
+| `/complete-profile`   | `CompleteProfilePage`          | `authGuard`                      | Profile completion                                                                                  |
+| `/account/*`          | (21 auth pages)                | guestGuard/authGuard             | Auth & account management                                                                           |
+| `/admin`              | `AdminLayoutComponent`         | `authGuard`, `portalAccessGuard` | Permission-based admin shell                                                                        |
+| `/admin` (default)    | `AdminPortalRedirectComponent` | —                                | Redirects to first allowed module (`publishers` for Itqan admin, else by read permission)           |
+| `/admin/publishers`   | (lazy routes)                  | `itqanAdminGuard`                | Publisher CRUD (staff)                                                                              |
+| `/admin/tafsirs`      | (lazy routes)                  | per-route `permissionGuard`      | Tafsir CRUD                                                                                         |
+| `/admin/translations` | (lazy routes)                  | per-route `permissionGuard`      | Translation CRUD                                                                                    |
+| `/admin/recitations`  | (lazy routes)                  | per-route `permissionGuard`      | Recitation CRUD                                                                                     |
+| `/admin/reciters`     | (lazy routes)                  | per-route `permissionGuard`      | Reciter CRUD                                                                                        |
+| `/admin/usage`        | (lazy routes)                  | `portal_access`                  | API usage analytics                                                                                 |
+| `**`                  | redirect -> /gallery           | —                                | Wildcard                                                                                            |
 
 ---
 
@@ -258,7 +258,8 @@ success.
 
 - `admin-column-picker/` — Column visibility toggles for tables
 - `asset-versions-manager/` — Version CRUD (tafsir/translation)
-- `coming-soon/` — Empty state placeholder
+- `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
+  `/gallery`
 - `search-panel/` — Search UI
 - `section-layout/` — Reusable section wrapper
 
@@ -414,18 +415,18 @@ reciters, mushafs (pages/surahs/ayahs/words), usage analytics
 
 ## [ORPHANS & PENDING]
 
-| Item                                    | Status            | Notes                                                                              |
-| --------------------------------------- | ----------------- | ---------------------------------------------------------------------------------- |
-| `features/error/pages/unautorized/`     | Stub              | Directory misspelled (missing 'h'). Both 401 and 404 pages are empty placeholders. |
-| `features/publishers/pages/publishers/` | Stub              | Publishers directory listing page is empty.                                        |
-| `features/dashify/`                     | Unknown           | Minimal implementation, purpose unclear.                                           |
-| `features/admin/` guards                | Implemented       | `portal-access`, `permission`, `itqan-admin` guards active on admin routes.        |
-| `shared/directives/`                    | Empty             | Directory exists with no files.                                                    |
-| `features/admin/mushafs/`               | In progress       | Complex UI with multiple tabs (Pages, Surahs, Ayahs, Words) — may be incomplete.   |
-| `features/admin/audio/`                 | Partial           | Routes defined but implementation details need verification.                       |
-| `features/admin/software/`              | Partial           | Routes defined but implementation details need verification.                       |
-| Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                        |
-| WebAuthn RP ID                          | Development mode  | `webauthnReplaceRpIdWithHostname` env flag allows RP ID patching in dev.           |
+| Item                                    | Status            | Notes                                                                                                               |
+| --------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `features/error/pages/unautorized/`     | Partial           | `UnauthorizedPage`: full UX + countdown redirect (directory spelling still misses `h`). `not-found` page unchanged. |
+| `features/publishers/pages/publishers/` | Stub              | Publishers directory listing page is empty.                                                                         |
+| `features/dashify/`                     | Unknown           | Minimal implementation, purpose unclear.                                                                            |
+| `features/admin/` guards                | Implemented       | `portal-access`, `permission`, `itqan-admin` guards active on admin routes.                                         |
+| `shared/directives/`                    | Empty             | Directory exists with no files.                                                                                     |
+| `features/admin/mushafs/`               | In progress       | Complex UI with multiple tabs (Pages, Surahs, Ayahs, Words) — may be incomplete.                                    |
+| `features/admin/audio/`                 | Partial           | Routes defined but implementation details need verification.                                                        |
+| `features/admin/software/`              | Partial           | Routes defined but implementation details need verification.                                                        |
+| Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                         |
+| WebAuthn RP ID                          | Development mode  | `webauthnReplaceRpIdWithHostname` env flag allows RP ID patching in dev.                                            |
 
 ---
 

@@ -22,13 +22,13 @@ interface CmsTab {
   disabled?: boolean;
 }
 
-const TAB_MUSHAFS: CmsTab = {
-  id: 'mushafs',
-  path: 'mushafs',
-  label: 'ADMIN.MENU.MUSHAFS',
-  icon: 'lucideBookOpen',
-  disabled: true,
-};
+// const TAB_MUSHAFS: CmsTab = {
+//   id: 'mushafs',
+//   path: 'mushafs',
+//   label: 'ADMIN.MENU.MUSHAFS',
+//   icon: 'lucideBookOpen',
+//   disabled: true,
+// };
 const TAB_TAFSIRS: CmsTab = {
   id: 'tafsirs',
   path: 'tafsirs',
@@ -103,7 +103,7 @@ export class AdminLayoutComponent {
     const tabs: CmsTab[] = [];
     if (this.adminAuth.isItqanAdmin()) {
       tabs.push(TAB_PUBLISHERS);
-      tabs.push(TAB_MUSHAFS);
+      // tabs.push(TAB_MUSHAFS);
     }
     if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_TAFSIR)) {
       tabs.push(TAB_TAFSIRS);
