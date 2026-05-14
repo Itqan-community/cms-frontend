@@ -27,6 +27,8 @@ export class AdminPortalRedirectComponent implements OnInit {
       { segment: 'translations', permission: PORTAL_PERMISSIONS.PORTAL_READ_TRANSLATION },
       { segment: 'recitations', permission: PORTAL_PERMISSIONS.PORTAL_READ_RECITATION },
       { segment: 'reciters', permission: PORTAL_PERMISSIONS.PORTAL_READ_RECITER },
+      // Shown in sidebar for all portal users during permission rollout; redirect only when READ is granted.
+      { segment: 'issues', permission: PORTAL_PERMISSIONS.PORTAL_READ_ISSUE_REPORT },
       { segment: 'usage', permission: PORTAL_PERMISSIONS.PORTAL_ACCESS },
     ];
 

@@ -1,0 +1,112 @@
+<div class="issue-form">
+  <div class="admin-page-header">
+    <div class="admin-page-header__text">
+      <h2 class="admin-page-header__title">
+        {{
+          (isEditMode() ? 'ADMIN.ISSUES.FORM.TITLE_EDIT' : 'ADMIN.ISSUES.FORM.TITLE_CREATE')
+            | translate
+        }}
+      </h2>
+      <p class="admin-page-header__subtitle">
+        {{
+          (isEditMode() ? 'ADMIN.ISSUES.FORM.SUBTITLE_EDIT' : 'ADMIN.ISSUES.FORM.SUBTITLE_CREATE')
+            | translate
+        }}
+      </p>
+    </div>
+    <a routerLink="/admin/issues">
+      <button nz-button nzType="default">
+        <ng-icon name="lucideArrowRight" />
+        {{ 'ADMIN.ISSUES.FORM.BACK_LIST' | translate }}
+      </button>
+    </a>
+  </div>
+
+  @if (loadingDetail()) {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 6 }"></nz-skeleton>
+  } @else {
+    <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="onSubmit()">
+      <div class="admin-form-card">
+        <h3 class="admin-form-card__title">
+          <ng-icon name="lucideFileText" /> {{ 'ADMIN.ISSUES.FORM.SECTION_REPORT' | translate }}
+        </h3>
+
+        @if (!isEditMode()) {
+          <nz-form-item>
+            <nz-form-label nzRequired>{{
+              'ADMIN.ISSUES.FORM.ASSET_LABEL' | translate
+            }}</nz-form-label>
+            <nz-form-control [nzErrorTip]="'ADMIN.ISSUES.FORM.ERR_ASSET' | translate">
+              <nz-select
+                formControlName="asset_id"
+                nzShowSearch
+                nzServerSearch
+                [nzLoading]="assetsLoading()"
+                [nzPlaceHolder]="'ADMIN.ISSUES.FORM.ASSET_PLACEHOLDER' | translate"
+                (nzOnSearch)="onAssetSearch($event)"
+              >
+                @for (a of assetOptions(); track a.id) {
+                  <nz-option [nzValue]="a.id" [nzLabel]="a.name"></nz-option>
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        } @else {
+          <nz-form-item>
+            <nz-form-label>{{ 'ADMIN.ISSUES.FORM.ASSET_LABEL' | translate }}</nz-form-label>
+            <nz-form-control>
+              <nz-select
+                formControlName="asset_id"
+                nzDisabled
+                [nzPlaceHolder]="'ADMIN.ISSUES.FORM.ASSET_READONLY' | translate"
+              >
+                @for (a of assetOptions(); track a.id) {
+                  <nz-option [nzValue]="a.id" [nzLabel]="a.name"></nz-option>
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+
+          <nz-form-item>
+            <nz-form-label nzRequired>{{
+              'ADMIN.ISSUES.FORM.STATUS_LABEL' | translate
+            }}</nz-form-label>
+            <nz-form-control [nzErrorTip]="'ADMIN.ISSUES.FORM.ERR_STATUS' | translate">
+              <nz-select
+                formControlName="status"
+                [nzPlaceHolder]="'ADMIN.ISSUES.FORM.STATUS_PLACEHOLDER' | translate"
+              >
+                @for (s of statusOptions; track s) {
+                  <nz-option [nzValue]="s" [nzLabel]="statusLabel(s)"></nz-option>
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        }
+
+        <nz-form-item>
+          <nz-form-label nzRequired>{{
+            'ADMIN.ISSUES.FORM.DESCRIPTION_LABEL' | translate
+          }}</nz-form-label>
+          <nz-form-control [nzErrorTip]="'ADMIN.ISSUES.FORM.ERR_DESCRIPTION' | translate">
+            <textarea
+              nz-input
+              formControlName="description"
+              rows="6"
+              [placeholder]="'ADMIN.ISSUES.FORM.DESCRIPTION_PLACEHOLDER' | translate"
+            ></textarea>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="issue-form__actions">
+        <button nz-button nzType="default" type="button" routerLink="/admin/issues">
+          {{ 'ADMIN.COMMON.CANCEL' | translate }}
+        </button>
+        <button nz-button nzType="primary" type="submit" [nzLoading]="submitting()">
+          {{ 'ADMIN.COMMON.SAVE' | translate }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

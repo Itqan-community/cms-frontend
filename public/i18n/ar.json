@@ -655,7 +655,8 @@
       "AUDIO": "الصوتيات",
       "MANAGE_PROFILE": "إدارة الملف",
       "BACK_TO_GALLERY": "العودة إلى المعرض",
-      "USAGE": "إحصائيات API"
+      "USAGE": "إحصائيات API",
+      "ISSUES": "إدارة البلاغات"
     },
     "PROFILE": {
       "TITLE": "ملف الناشر",
@@ -1225,6 +1226,73 @@
         "CREATE_SUCCESS": "تم إضافة القارئ بنجاح",
         "UPDATE_SUCCESS": "تم تحديث القارئ بنجاح",
         "DELETE_SUCCESS": "تم حذف القارئ بنجاح"
+      }
+    },
+    "ISSUES": {
+      "TITLE": "إدارة البلاغات",
+      "SUBTITLE": "عرض ومتابعة بلاغات المستخدمين على أصول الناشرين",
+      "EMPTY_TITLE": "لا توجد بلاغات",
+      "ADD_BUTTON": "تسجيل بلاغ",
+      "LIST_ERROR_TITLE": "تعذر تحميل البلاغات",
+      "LIST_ERROR_DESC": "تحقق من الاتصال وحاول مرة أخرى. إذا استمرت المشكلة، تواصل مع الدعم.",
+      "COLUMNS": {
+        "ID": "المعرّف",
+        "ASSET": "الأصل",
+        "DESCRIPTION": "الوصف",
+        "STATUS": "الحالة",
+        "REPORTER": "المُبلّغ",
+        "CREATED_AT": "تاريخ الإنشاء",
+        "ACTIONS": "الإجراءات"
+      },
+      "FILTERS": {
+        "STATUS": "الحالة",
+        "REPORTER_ID": "معرّف المُبلّغ"
+      },
+      "STATUS": {
+        "PENDING": "قيد الانتظار",
+        "UNDER_REVIEW": "قيد المراجعة",
+        "RESOLVED": "تم الحل",
+        "DISMISSED": "مرفوض"
+      },
+      "DETAIL": {
+        "BREADCRUMB": "إدارة البلاغات",
+        "ASSET_ID": "معرّف الأصل",
+        "DESCRIPTION_TITLE": "الوصف",
+        "NOT_FOUND": "تعذر العثور على هذا البلاغ."
+      },
+      "DELETE": {
+        "CONFIRM_TITLE": "حذف هذا البلاغ؟",
+        "CONFIRM_BODY": "<b>{{name}}</b> — هذا الإجراء لا يمكن التراجع عنه.",
+        "OK": "نعم، احذف",
+        "CANCEL": "إلغاء",
+        "DEFAULT_LABEL": "هذا البلاغ"
+      },
+      "MESSAGES": {
+        "CREATE_SUCCESS": "تم تسجيل البلاغ",
+        "CREATE_ERROR": "تعذر تسجيل البلاغ",
+        "UPDATE_SUCCESS": "تم تحديث البلاغ",
+        "UPDATE_ERROR": "تعذر تحديث البلاغ",
+        "DELETE_SUCCESS": "تم حذف البلاغ",
+        "DELETE_ERROR": "تعذر حذف البلاغ",
+        "LOAD_ERROR": "تعذر تحميل البلاغ"
+      },
+      "FORM": {
+        "TITLE_CREATE": "تسجيل بلاغ",
+        "TITLE_EDIT": "تعديل البلاغ",
+        "SUBTITLE_CREATE": "اختر الأصل وصف المشكلة",
+        "SUBTITLE_EDIT": "حدّث الوصف أو الحالة",
+        "BACK_LIST": "العودة للقائمة",
+        "SECTION_REPORT": "البلاغ",
+        "ASSET_LABEL": "الأصل",
+        "ASSET_PLACEHOLDER": "ابحث عن أصل…",
+        "ASSET_READONLY": "الأصل المرتبط",
+        "ERR_ASSET": "يرجى اختيار أصل",
+        "STATUS_LABEL": "الحالة",
+        "STATUS_PLACEHOLDER": "اختر الحالة",
+        "ERR_STATUS": "يرجى اختيار الحالة",
+        "DESCRIPTION_LABEL": "الوصف",
+        "DESCRIPTION_PLACEHOLDER": "صف المشكلة…",
+        "ERR_DESCRIPTION": "أدخل وصفاً لا يقل عن 3 أحرف"
       }
     },
     "PUBLISHERS": {

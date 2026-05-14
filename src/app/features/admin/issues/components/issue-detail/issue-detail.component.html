@@ -1,0 +1,91 @@
+<div class="issue-detail admin-list-page">
+  <div class="admin-breadcrumb">
+    <a routerLink="/admin/issues" class="admin-breadcrumb__link">{{
+      'ADMIN.ISSUES.DETAIL.BREADCRUMB' | translate
+    }}</a>
+    <ng-icon name="lucideChevronLeft" class="admin-breadcrumb__sep" />
+    @if (loading()) {
+      <span class="admin-breadcrumb__current">{{ 'ADMIN.COMMON.LOADING' | translate }}</span>
+    } @else if (issue()) {
+      <span class="admin-breadcrumb__current">#{{ issue()!.id }}</span>
+    } @else {
+      <span class="admin-breadcrumb__current">{{
+        'ADMIN.ISSUES.DETAIL.NOT_FOUND' | translate
+      }}</span>
+    }
+  </div>
+
+  @if (loading()) {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 8 }"></nz-skeleton>
+  } @else if (issue()) {
+    <div class="admin-hero">
+      <div class="admin-hero-placeholder issue-detail__icon-wrap">
+        <ng-icon name="lucideAlertCircle" />
+      </div>
+
+      <div class="admin-hero-info">
+        <div class="admin-hero-names">
+          <h1 class="admin-hero-name-ar">{{ issue()!.asset_name }}</h1>
+          <p class="admin-hero-name-en">
+            {{ 'ADMIN.ISSUES.DETAIL.ASSET_ID' | translate }}: {{ issue()!.asset_id }}
+          </p>
+        </div>
+
+        <div class="admin-hero-meta">
+          <nz-tag [nzColor]="statusTagColor(issue()!.status)">{{
+            'ADMIN.ISSUES.STATUS.' + issue()!.status.toUpperCase() | translate
+          }}</nz-tag>
+          <span class="admin-hero-meta__date">
+            <ng-icon name="lucideCalendar" />
+            {{ issue()!.created_at | date: 'dd/MM/yyyy HH:mm' }}
+          </span>
+        </div>
+
+        <p class="issue-detail__reporter">
+          <ng-icon name="lucideMail" />
+          {{ issue()!.reporter.email }}
+        </p>
+      </div>
+
+      <div class="admin-hero-actions">
+        @if (canUpdateIssue()) {
+          <button nz-button nzType="primary" type="button" (click)="onEdit()">
+            <ng-icon name="lucideSquarePen" />
+            {{ 'ADMIN.COMMON.EDIT' | translate }}
+          </button>
+        }
+        @if (canDeleteIssue()) {
+          <button nz-button nzDanger type="button" (click)="onDelete()">
+            <ng-icon name="lucideTrash2" />
+            {{ 'ADMIN.COMMON.DELETE' | translate }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="admin-descriptions">
+      <div class="admin-desc-col">
+        <h3 class="admin-desc-title">
+          <ng-icon name="lucideFileText" />
+          {{ 'ADMIN.ISSUES.DETAIL.DESCRIPTION_TITLE' | translate }}
+        </h3>
+        <p class="admin-desc-text">{{ issue()!.description }}</p>
+      </div>
+    </div>
+
+    <div class="admin-back">
+      <a routerLink="/admin/issues">
+        <button nz-button nzType="default">
+          <ng-icon name="lucideArrowRight" />
+          {{ 'ADMIN.COMMON.BACK_TO_LIST' | translate }}
+        </button>
+      </a>
+    </div>
+  } @else {
+    <div class="admin-not-found">
+      <ng-icon name="lucideAlertTriangle" class="admin-not-found__icon" />
+      <p>{{ 'ADMIN.ISSUES.DETAIL.NOT_FOUND' | translate }}</p>
+      <a routerLink="/admin/issues">{{ 'ADMIN.COMMON.BACK_TO_LIST' | translate }}</a>
+    </div>
+  }
+</div>

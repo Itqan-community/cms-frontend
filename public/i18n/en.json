@@ -655,7 +655,8 @@
       "AUDIO": "Audio",
       "MANAGE_PROFILE": "Manage profile",
       "BACK_TO_GALLERY": "Back to gallery",
-      "USAGE": "API Usage"
+      "USAGE": "API Usage",
+      "ISSUES": "Issue Management"
     },
     "PROFILE": {
       "TITLE": "Publisher profile",
@@ -1226,6 +1227,73 @@
         "CREATE_SUCCESS": "Reciter added successfully",
         "UPDATE_SUCCESS": "Reciter updated successfully",
         "DELETE_SUCCESS": "Reciter deleted successfully"
+      }
+    },
+    "ISSUES": {
+      "TITLE": "Issue Management",
+      "SUBTITLE": "View and manage consumer issue reports on publisher assets",
+      "EMPTY_TITLE": "No issue reports",
+      "ADD_BUTTON": "Report issue",
+      "LIST_ERROR_TITLE": "Could not load issue reports",
+      "LIST_ERROR_DESC": "Check your connection and try again. If the problem continues, contact support.",
+      "COLUMNS": {
+        "ID": "ID",
+        "ASSET": "Asset",
+        "DESCRIPTION": "Description",
+        "STATUS": "Status",
+        "REPORTER": "Reporter",
+        "CREATED_AT": "Created",
+        "ACTIONS": "Actions"
+      },
+      "FILTERS": {
+        "STATUS": "Status",
+        "REPORTER_ID": "Reporter ID"
+      },
+      "STATUS": {
+        "PENDING": "Pending",
+        "UNDER_REVIEW": "Under review",
+        "RESOLVED": "Resolved",
+        "DISMISSED": "Dismissed"
+      },
+      "DETAIL": {
+        "BREADCRUMB": "Issue Management",
+        "ASSET_ID": "Asset ID",
+        "DESCRIPTION_TITLE": "Description",
+        "NOT_FOUND": "This issue report could not be found."
+      },
+      "DELETE": {
+        "CONFIRM_TITLE": "Delete this issue report?",
+        "CONFIRM_BODY": "<b>{{name}}</b> — This action cannot be undone.",
+        "OK": "Yes, delete",
+        "CANCEL": "Cancel",
+        "DEFAULT_LABEL": "this report"
+      },
+      "MESSAGES": {
+        "CREATE_SUCCESS": "Issue report created",
+        "CREATE_ERROR": "Could not create issue report",
+        "UPDATE_SUCCESS": "Issue report updated",
+        "UPDATE_ERROR": "Could not update issue report",
+        "DELETE_SUCCESS": "Issue report deleted",
+        "DELETE_ERROR": "Could not delete issue report",
+        "LOAD_ERROR": "Could not load issue report"
+      },
+      "FORM": {
+        "TITLE_CREATE": "Report an issue",
+        "TITLE_EDIT": "Edit issue report",
+        "SUBTITLE_CREATE": "Select an asset and describe the issue",
+        "SUBTITLE_EDIT": "Update description or status",
+        "BACK_LIST": "Back to list",
+        "SECTION_REPORT": "Report",
+        "ASSET_LABEL": "Asset",
+        "ASSET_PLACEHOLDER": "Search assets…",
+        "ASSET_READONLY": "Linked asset",
+        "ERR_ASSET": "Choose an asset",
+        "STATUS_LABEL": "Status",
+        "STATUS_PLACEHOLDER": "Select status",
+        "ERR_STATUS": "Select a status",
+        "DESCRIPTION_LABEL": "Description",
+        "DESCRIPTION_PLACEHOLDER": "Describe the issue…",
+        "ERR_DESCRIPTION": "Enter a description (at least 3 characters)"
       }
     },
     "PUBLISHERS": {

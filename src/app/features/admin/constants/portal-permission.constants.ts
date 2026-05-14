@@ -28,6 +28,12 @@ export const PORTAL_PERMISSIONS = {
   PORTAL_CREATE_PUBLISHER: 'portal_create_publisher',
   PORTAL_UPDATE_PUBLISHER: 'portal_update_publisher',
   PORTAL_DELETE_PUBLISHER: 'portal_delete_publisher',
+
+  /** Issue reports (portal) — pending backend `PermissionChoice` seeds. */
+  PORTAL_READ_ISSUE_REPORT: 'portal_read_issue_report',
+  PORTAL_CREATE_ISSUE_REPORT: 'portal_create_issue_report',
+  PORTAL_UPDATE_ISSUE_REPORT: 'portal_update_issue_report',
+  PORTAL_DELETE_ISSUE_REPORT: 'portal_delete_issue_report',
 } as const;
 
 export type PortalPermissionCode = (typeof PORTAL_PERMISSIONS)[keyof typeof PORTAL_PERMISSIONS];

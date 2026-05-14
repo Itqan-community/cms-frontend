@@ -59,6 +59,12 @@ const TAB_RECITERS: CmsTab = {
   label: 'ADMIN.MENU.RECITERS',
   icon: 'lucideMic',
 };
+const TAB_ISSUES: CmsTab = {
+  id: 'issues',
+  path: 'issues',
+  label: 'ADMIN.MENU.ISSUES',
+  icon: 'lucideAlertCircle',
+};
 const TAB_USAGE: CmsTab = {
   id: 'usage',
   path: 'usage',
@@ -117,6 +123,10 @@ export class AdminLayoutComponent {
     if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_RECITER)) {
       tabs.push(TAB_RECITERS);
     }
+    // TODO(backend-permissions): gate with PORTAL_PERMISSIONS.PORTAL_READ_ISSUE_REPORT once seeded
+    // if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_ISSUE_REPORT)) {
+    tabs.push(TAB_ISSUES);
+    // }
     if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS)) {
       tabs.push(TAB_USAGE);
     }
