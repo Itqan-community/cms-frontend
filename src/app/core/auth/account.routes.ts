@@ -313,6 +313,11 @@ export const accountAuthRoutes: Routes = [
     loadComponent: () => import('./pages/sessions/sessions.page').then((m) => m.SessionsPage),
     canActivate: [authGuard],
   },
+  {
+    path: 'account/api-keys',
+    loadComponent: () => import('./pages/api-keys/api-keys.page').then((m) => m.ApiKeysPage),
+    canActivate: [authGuard],
+  },
 
   /* Alternate OAuth callback URL kept for backwards compatibility */
   {

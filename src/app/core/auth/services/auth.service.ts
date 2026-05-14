@@ -45,6 +45,12 @@ import {
   HeadlessAuthApiService,
 } from '../headless/headless-auth-api.service';
 import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
+import type {
+  ApiKeyCreateIn,
+  ApiKeyCreateResult,
+  ApiKeyPatchIn,
+  ManagedApiKey,
+} from '../models/api-keys.model';
 import {
   LoginRequest,
   normalizeProfilePermissionCodes,
@@ -53,6 +59,7 @@ import {
   UpdateProfileResponse,
   User,
 } from '../models/auth.model';
+import { normalizeApiKeyRow, parseApiKeyCreated, parseApiKeysList } from '../utils/api-keys.util';
 import { getCookie, getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
 
 @Injectable({
@@ -516,6 +523,39 @@ export class AuthService {
           localStorage.setItem(this.USER_KEY, JSON.stringify(updatedUser));
         })
       );
+  }
+
+  /** Developer API keys (`SessionToken` security in OpenAPI). */
+  listApiKeys(): Observable<ManagedApiKey[]> {
+    return this.http
+      .get<unknown>(`${this.API_BASE_URL}/api-keys/`)
+      .pipe(map((body) => parseApiKeysList(body)));
+  }
+
+  createApiKey(payload: ApiKeyCreateIn): Observable<ApiKeyCreateResult> {
+    return this.http
+      .post<unknown>(`${this.API_BASE_URL}/api-keys/`, payload)
+      .pipe(map((body) => parseApiKeyCreated(body)));
+  }
+
+  updateApiKey(id: string, patch: ApiKeyPatchIn): Observable<ManagedApiKey> {
+    return this.http
+      .patch<unknown>(`${this.API_BASE_URL}/api-keys/${encodeURIComponent(id)}/`, patch)
+      .pipe(
+        map((body) => {
+          const row = normalizeApiKeyRow(body);
+          if (!row) {
+            throw new Error('[api-keys] Unexpected update response shape');
+          }
+          return row;
+        })
+      );
+  }
+
+  deleteApiKey(id: string): Observable<void> {
+    return this.http
+      .delete<void>(`${this.API_BASE_URL}/api-keys/${encodeURIComponent(id)}/`)
+      .pipe(map(() => void 0));
   }
 
   /**

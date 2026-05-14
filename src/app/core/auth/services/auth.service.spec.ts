@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
 import { HeadlessAuthApiService } from '../headless/headless-auth-api.service';
 import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
@@ -49,7 +49,13 @@ describe('AuthService (app / headless)', () => {
     parseUrl: jasmine.Spy;
   };
 
-  let httpClientMock: { get: jasmine.Spy; put: jasmine.Spy };
+  let httpClientMock: {
+    get: jasmine.Spy;
+    put: jasmine.Spy;
+    post: jasmine.Spy;
+    patch: jasmine.Spy;
+    delete: jasmine.Spy;
+  };
 
   beforeEach(() => {
     TestBed.resetTestingModule();
@@ -126,6 +132,9 @@ describe('AuthService (app / headless)', () => {
     httpClientMock = {
       get: jasmine.createSpy('httpGet').and.returnValue(of(profileApiPayload)),
       put: jasmine.createSpy('httpPut').and.returnValue(of({})),
+      post: jasmine.createSpy('httpPost').and.returnValue(of({})),
+      patch: jasmine.createSpy('httpPatch').and.returnValue(of({})),
+      delete: jasmine.createSpy('httpDelete').and.returnValue(of(void 0)),
     };
 
     TestBed.configureTestingModule({
@@ -310,5 +319,41 @@ describe('AuthService (app / headless)', () => {
       expect(service.isAuthenticated()).toBe(true);
       done();
     });
+  });
+
+  it('listApiKeys GET /api-keys/ and parses rows', async () => {
+    httpClientMock.get.and.returnValue(of([{ id: '1', name: 'A', masked_key: 'mk' }]));
+    const rows = await firstValueFrom(service.listApiKeys());
+    expect(rows.length).toBe(1);
+    expect(rows[0]?.maskedKey).toBe('mk');
+    const url = httpClientMock.get.calls.mostRecent().args[0] as string;
+    expect(url.endsWith('/api-keys/')).toBe(true);
+  });
+
+  it('createApiKey POST body and parses create payload', async () => {
+    httpClientMock.post.and.returnValue(
+      of({ id: '2', name: 'B', masked_key: 'x', raw_key: 'secret' })
+    );
+    const r = await firstValueFrom(service.createApiKey({ name: 'B' }));
+    expect(httpClientMock.post.calls.mostRecent().args[1]).toEqual({ name: 'B' });
+    expect(r.rawKey).toBe('secret');
+    expect(r.key.id).toBe('2');
+  });
+
+  it('updateApiKey PATCH returns normalized row', async () => {
+    httpClientMock.patch.and.returnValue(
+      of({ id: '9', name: 'Renamed', masked_key: 'z', revoked: false })
+    );
+    const row = await firstValueFrom(service.updateApiKey('9', { name: 'Renamed' }));
+    expect(row.name).toBe('Renamed');
+    const patchUrl = httpClientMock.patch.calls.mostRecent().args[0] as string;
+    expect(patchUrl).toContain('/api-keys/');
+    expect(patchUrl).toContain('9');
+  });
+
+  it('deleteApiKey encodes id in URL segment', async () => {
+    await firstValueFrom(service.deleteApiKey('abc/def'));
+    const delUrl = httpClientMock.delete.calls.mostRecent().args[0] as string;
+    expect(delUrl).toContain('abc%2Fdef');
   });
 });

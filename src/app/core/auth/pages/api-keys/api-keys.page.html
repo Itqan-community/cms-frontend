@@ -1,0 +1,214 @@
+<div class="account-manage">
+  <header class="account-manage__header">
+    <div class="account-manage__header-row">
+      <a [routerLink]="['/account/profile']" class="account-manage__back">{{
+        'AUTH.ACCOUNT.BACK_PROFILE' | translate
+      }}</a>
+      <app-lang-switch></app-lang-switch>
+    </div>
+  </header>
+  <div class="account-manage__container">
+    <div class="account-manage__card">
+      <h1 class="account-manage__title">{{ 'AUTH.API_KEYS.TITLE' | translate }}</h1>
+      <p class="account-manage__subtitle">{{ 'AUTH.API_KEYS.SUBTITLE' | translate }}</p>
+
+      @if (pageError()) {
+        <div class="account-manage__alert">{{ pageError() }}</div>
+      }
+      @if (successMsg()) {
+        <div class="account-manage__ok">{{ successMsg() }}</div>
+      }
+
+      @if (revealedRawKey(); as reveal) {
+        <div class="api-keys__reveal" role="status">
+          <p class="account-manage__hint" style="margin-bottom: 8px; font-weight: 600">
+            {{ 'AUTH.API_KEYS.REVEAL_TITLE' | translate }}
+          </p>
+          <p class="account-manage__hint">{{ 'AUTH.API_KEYS.REVEAL_HINT' | translate }}</p>
+          @if (reveal.raw) {
+            <div class="account-manage__mono">{{ reveal.raw }}</div>
+          } @else {
+            <p class="account-manage__hint">{{ 'AUTH.API_KEYS.REVEAL_EMPTY' | translate }}</p>
+          }
+          <div class="api-keys__reveal-actions">
+            <button
+              type="button"
+              class="account-manage__btn account-manage__btn--secondary"
+              [disabled]="!reveal.raw || isLoading()"
+              (click)="copyRawKey(reveal.raw)"
+            >
+              {{ 'AUTH.API_KEYS.COPY' | translate }}
+            </button>
+            <button
+              type="button"
+              class="account-manage__btn account-manage__btn--secondary"
+              [disabled]="isLoading()"
+              (click)="dismissReveal()"
+            >
+              {{ 'AUTH.API_KEYS.DONE' | translate }}
+            </button>
+          </div>
+        </div>
+      }
+
+      @if (isLoading()) {
+        <p class="account-manage__hint">{{ 'COMMON.LOADING' | translate }}</p>
+      }
+
+      <section class="account-manage__section">
+        <h2 class="account-manage__h2">{{ 'AUTH.API_KEYS.CREATE_SECTION' | translate }}</h2>
+        <p class="account-manage__hint">{{ 'AUTH.API_KEYS.CREATE_HINT' | translate }}</p>
+        @if (!showCreateForm()) {
+          <div class="account-manage__row">
+            <button
+              type="button"
+              class="account-manage__btn"
+              [disabled]="isLoading()"
+              (click)="openCreateForm()"
+            >
+              <span class="api-keys__plus-icon" aria-hidden="true"></span>
+              {{ 'AUTH.API_KEYS.CREATE_TOGGLE' | translate }}
+            </button>
+            <button
+              type="button"
+              class="account-manage__btn account-manage__btn--secondary"
+              [disabled]="isLoading()"
+              (click)="reload()"
+            >
+              {{ 'COMMON.REFRESH' | translate }}
+            </button>
+          </div>
+        } @else {
+          <form [formGroup]="createForm" (ngSubmit)="onCreate()" class="account-manage__form">
+            <label class="account-manage__label" for="api-key-name">{{
+              'AUTH.API_KEYS.NAME_LABEL' | translate
+            }}</label>
+            <input
+              id="api-key-name"
+              type="text"
+              class="account-manage__input"
+              formControlName="name"
+              [placeholder]="'AUTH.API_KEYS.NAME_PLACEHOLDER' | translate"
+              autocomplete="off"
+            />
+            @if (createForm.controls.name.invalid && createForm.controls.name.touched) {
+              <p class="account-manage__hint" style="color: #b91c1c">
+                {{ 'FORMS.VALIDATION.REQUIRED' | translate }}
+              </p>
+            }
+            <div class="account-manage__row">
+              <button
+                type="submit"
+                class="account-manage__btn"
+                [disabled]="isLoading() || createForm.invalid"
+              >
+                {{ 'AUTH.API_KEYS.CREATE_BUTTON' | translate }}
+              </button>
+              <button
+                type="button"
+                class="account-manage__btn account-manage__btn--secondary"
+                [disabled]="isLoading()"
+                (click)="cancelCreateForm()"
+              >
+                {{ 'AUTH.API_KEYS.CREATE_CANCEL' | translate }}
+              </button>
+            </div>
+          </form>
+        }
+      </section>
+
+      <section class="account-manage__section" style="border-bottom: none; margin-bottom: 0">
+        <h2 class="account-manage__h2">{{ 'AUTH.API_KEYS.LIST_SECTION' | translate }}</h2>
+        <ul class="account-manage__list">
+          @for (k of keys(); track k.id || k.name + k.maskedKey) {
+            <li class="account-manage__li">
+              <div>
+                @if (k.isRevoked) {
+                  <span class="account-manage__badge account-manage__badge--muted">{{
+                    'AUTH.API_KEYS.STATUS_REVOKED' | translate
+                  }}</span>
+                } @else {
+                  <span class="account-manage__badge account-manage__badge--ok">{{
+                    'AUTH.API_KEYS.STATUS_ACTIVE' | translate
+                  }}</span>
+                }
+                @if (editingId() === k.id) {
+                  <input
+                    type="text"
+                    class="account-manage__input"
+                    style="margin-top: 8px; max-width: 100%"
+                    [value]="draftName(k.id)"
+                    (input)="updateDraft(k.id, $any($event.target).value)"
+                  />
+                } @else {
+                  <div style="font-weight: 600; margin-top: 4px">{{ k.name }}</div>
+                }
+                <div class="account-manage__mono">{{ k.maskedKey }}</div>
+                <p class="account-manage__hint">
+                  @if (k.createdAt) {
+                    {{ 'AUTH.API_KEYS.CREATED' | translate }}: {{ k.createdAt }}
+                  }
+                  @if (k.lastUsedAt) {
+                    @if (k.createdAt) {
+                      ·
+                    }
+                    {{ 'AUTH.API_KEYS.LAST_USED' | translate }}: {{ k.lastUsedAt }}
+                  }
+                </p>
+              </div>
+              <div class="account-manage__li-actions">
+                @if (editingId() === k.id) {
+                  <button
+                    type="button"
+                    class="account-manage__btn account-manage__btn--secondary"
+                    [disabled]="isLoading()"
+                    (click)="saveRename(k.id)"
+                  >
+                    {{ 'COMMON.SAVE' | translate }}
+                  </button>
+                  <button
+                    type="button"
+                    class="account-manage__btn account-manage__btn--secondary"
+                    [disabled]="isLoading()"
+                    (click)="cancelRename()"
+                  >
+                    {{ 'COMMON.CANCEL' | translate }}
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="account-manage__btn account-manage__btn--secondary"
+                    [disabled]="isLoading() || k.isRevoked || !k.id"
+                    (click)="startRename(k)"
+                  >
+                    {{ 'AUTH.API_KEYS.RENAME' | translate }}
+                  </button>
+                  <button
+                    type="button"
+                    class="account-manage__btn account-manage__btn--secondary"
+                    [disabled]="isLoading() || k.isRevoked || !k.id"
+                    (click)="revokeKey(k.id)"
+                  >
+                    {{ 'AUTH.API_KEYS.REVOKE' | translate }}
+                  </button>
+                  <button
+                    type="button"
+                    class="account-manage__btn account-manage__btn--danger"
+                    [disabled]="isLoading() || !k.id"
+                    (click)="deleteKey(k.id)"
+                  >
+                    {{ 'AUTH.API_KEYS.DELETE' | translate }}
+                  </button>
+                }
+              </div>
+            </li>
+          } @empty {
+            @if (!isLoading()) {
+              <li class="account-manage__hint">{{ 'AUTH.API_KEYS.EMPTY' | translate }}</li>
+            }
+          }
+        </ul>
+      </section>
+    </div>
+  </div>
+</div>

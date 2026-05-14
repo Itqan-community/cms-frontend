@@ -160,8 +160,8 @@ HeadlessAuthApiService (HTTP client for /auth/*)
 AuthService (orchestrator + state management via Signals)
        |
   |---------|---------|---------|
-Pages  Guards    Interceptors   Utils
-(21)   (3)       (6)           (route-query, CSRF)
+Pages   Guards    Interceptors   Utils
+(22)   (3)       (6)           (route-query, CSRF)
 ```
 
 **Token management:**
@@ -171,12 +171,15 @@ Pages  Guards    Interceptors   Utils
   sessionStorage on read
 - `access_token` + `refresh_token` -> localStorage (JWT for CMS API)
 - `csrftoken` cookie (same-origin) OR in-memory override (cross-origin)
+- `AuthService` CMS API helpers: `GET/POST/PATCH/DELETE` `API_BASE_URL/api-keys/…` with the same
+  `X-Session-Token`/CSRF interceptor stack; used by **`/account/api-keys`** (developer key UI).
 
 **Auth pages (lazy-loaded under `/account/*`):** Login, Register, ForgotPassword, ResetPassword,
 ChangePassword, ChangeEmail, Logout, LoginByCode (2-step), MFA (TOTP/WebAuthn/RecoveryCodes),
 Reauthenticate (3 modes), VerifyEmail, ProviderSignup, Passkey (3 modes), OAuthCallback,
 ManageProviders, SecuritySettings (TOTP / recovery codes: GET may omit plaintext; one-time POST
-merge + redacted UX), Sessions, Trust, Profile, CompleteProfile
+merge + redacted UX), Sessions, ApiKeys (`/account/api-keys`: list/create/rename/revoke/delete),
+Trust, Profile, CompleteProfile
 
 **Auth guards:** `authGuard` (requires auth), `guestGuard` (blocks authenticated users),
 `profileCompletedGuard` (requires completed profile)
@@ -193,7 +196,7 @@ merge + redacted UX), Sessions, Trust, Profile, CompleteProfile
 | `/content-standards`  | `UsageStandardsPage`           | `publisherHostGuard`             | Content guidelines                                                                                  |
 | `/unauthorized`       | `UnauthorizedPage`             | —                                | Card UX; CTA + 5s countdown auto-redirect to `/gallery`; `hideHeader`; dir name typo `unautorized/` |
 | `/complete-profile`   | `CompleteProfilePage`          | `authGuard`                      | Profile completion                                                                                  |
-| `/account/*`          | (21 auth pages)                | guestGuard/authGuard             | Auth & account management                                                                           |
+| `/account/*`          | (22 auth pages)                | guestGuard/authGuard             | Auth & account management                                                                           |
 | `/admin`              | `AdminLayoutComponent`         | `authGuard`, `portalAccessGuard` | Permission-based admin shell                                                                        |
 | `/admin` (default)    | `AdminPortalRedirectComponent` | —                                | Redirects to first allowed module (`publishers` for Itqan admin, else by read permission)           |
 | `/admin/publishers`   | (lazy routes)                  | `itqanAdminGuard`                | Publisher CRUD (staff)                                                                              |

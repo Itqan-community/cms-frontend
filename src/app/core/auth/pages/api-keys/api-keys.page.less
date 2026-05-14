@@ -1,0 +1,47 @@
+@import '../../styles/account-manage.layout.less';
+
+.api-keys__reveal {
+  padding: 12px;
+  border-radius: var(--radius-lg);
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  margin-bottom: 16px;
+}
+
+.api-keys__reveal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.api-keys__plus-icon {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  margin-inline-end: 8px;
+  vertical-align: middle;
+}
+
+.api-keys__plus-icon::before,
+.api-keys__plus-icon::after {
+  content: '';
+  position: absolute;
+  background: currentColor;
+  border-radius: 999px;
+}
+
+.api-keys__plus-icon::before {
+  width: 14px;
+  height: 2px;
+  left: 0;
+  top: 6px;
+}
+
+.api-keys__plus-icon::after {
+  width: 2px;
+  height: 14px;
+  left: 6px;
+  top: 0;
+}
