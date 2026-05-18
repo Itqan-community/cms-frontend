@@ -8,6 +8,18 @@
     gap: 16px;
   }
 
+  &__main {
+    flex: 3;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    min-width: 0;
+  }
+
+  &__pagination {
+    align-self: stretch;
+  }
+
   &__filters {
     flex: 1;
     max-width: max-content;
@@ -20,7 +32,7 @@
   }
 
   &__grid {
-    flex: 3;
+    flex: 1;
     display: grid;
     grid-template-columns: 1fr;
     gap: 20px;

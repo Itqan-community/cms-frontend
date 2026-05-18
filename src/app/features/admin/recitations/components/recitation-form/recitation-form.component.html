@@ -182,7 +182,11 @@
             <nz-form-item>
               <nz-form-label>{{ 'ADMIN.RECITATIONS.FORM.LABEL_MADD' | translate }}</nz-form-label>
               <nz-form-control>
-                <nz-select formControlName="madd_level">
+                <nz-select
+                  formControlName="madd_level"
+                  nzAllowClear
+                  [nzPlaceHolder]="'ADMIN.RECITATIONS.FORM.PLACEHOLDER_MADD' | translate"
+                >
                   @for (m of maddOptions; track m.v) {
                     <nz-option [nzValue]="m.v" [nzLabel]="m.labelKey | translate"></nz-option>
                   }
@@ -194,7 +198,11 @@
             <nz-form-item>
               <nz-form-label>{{ 'ADMIN.RECITATIONS.FORM.LABEL_MEEM' | translate }}</nz-form-label>
               <nz-form-control>
-                <nz-select formControlName="meem_behaviour">
+                <nz-select
+                  formControlName="meem_behaviour"
+                  nzAllowClear
+                  [nzPlaceHolder]="'ADMIN.RECITATIONS.FORM.PLACEHOLDER_MEEM' | translate"
+                >
                   @for (m of meemOptions; track m.v) {
                     <nz-option [nzValue]="m.v" [nzLabel]="m.labelKey | translate"></nz-option>
                   }

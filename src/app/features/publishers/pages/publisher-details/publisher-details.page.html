@@ -95,18 +95,34 @@
         <h2 class="assets-title">
           {{ 'UI.PUBLISHER_ASSETS' | translate }}
           @if (!assetsLoading()) {
-            ({{ assets().length }})
+            ({{ assetsTotal() }})
           }
         </h2>
-        <div class="assets-grid" [attr.aria-busy]="assetsLoading()">
-          @if (!isServer && assetsLoading()) {
-            @for (item of getSkeletonArray(); track item) {
-              <app-asset-card-skeleton />
+        <div class="assets-section__inner">
+          <div class="assets-grid" [attr.aria-busy]="assetsLoading()">
+            @if (!isServer && assetsLoading()) {
+              @for (item of getSkeletonArray(); track item) {
+                <app-asset-card-skeleton />
+              }
+            } @else {
+              @for (asset of assets(); track asset.id) {
+                <app-asset-card [asset]="asset" />
+              }
             }
-          } @else {
-            @for (asset of assets(); track asset.id) {
-              <app-asset-card [asset]="asset" />
-            }
+          </div>
+          @if (!assetsLoading() && assetsTotal() > 0) {
+            <div class="admin-pagination assets-section__pagination">
+              <nz-pagination
+                [nzPageIndex]="page()"
+                [nzTotal]="assetsTotal()"
+                [nzPageSize]="pageSize()"
+                [nzShowSizeChanger]="true"
+                [nzPageSizeOptions]="pageSizeOptions"
+                nzShowQuickJumper
+                (nzPageIndexChange)="onPageChange($event)"
+                (nzPageSizeChange)="onPageSizeChange($event)"
+              />
+            </div>
           }
         </div>
       </div>

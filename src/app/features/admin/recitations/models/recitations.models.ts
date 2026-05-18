@@ -40,9 +40,9 @@ export interface RecitationListItem {
   reciter: MinimalReciter;
   qiraah: MinimalQiraah;
   riwayah: MinimalRiwayah | null;
-  madd_level: MaddLevel;
-  meem_behaviour: MeemBehavior;
-  year: number;
+  madd_level: MaddLevel | null;
+  meem_behaviour: MeemBehavior | null;
+  year: number | null;
 }
 
 export interface RecitationDetails {
@@ -56,9 +56,9 @@ export interface RecitationDetails {
   reciter: MinimalReciter;
   qiraah: MinimalQiraah;
   riwayah: MinimalRiwayah | null;
-  madd_level: MaddLevel;
-  meem_behaviour: MeemBehavior;
-  year: number;
+  madd_level: MaddLevel | null;
+  meem_behaviour: MeemBehavior | null;
+  year: number | null;
   license: string;
   ayah_timings_url?: string | null;
   created_at: string;
