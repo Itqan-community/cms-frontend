@@ -14,10 +14,7 @@ jobs:
 
           token = os.environ["SENTRY_AUTH_TOKEN"]
           org = "itqan-3o"
-          headers = {
-              "Authorization": f"Bearer {token}",
-              "Content-Type": "application/json",
-          }
+          headers = {"Authorization": f"Bearer {token}", "Content-Type": "application/json"}
 
           def get(url):
               req = urllib.request.Request(url, headers=headers)
@@ -27,80 +24,64 @@ jobs:
               except urllib.error.HTTPError as e:
                   return {"error": e.read().decode()}, e.code
 
-          # Verify auth works
-          data, status = get(f"https://sentry.io/api/0/organizations/{org}/")
-          print(f"Org check HTTP {status}: {str(data)[:200]}")
+          def post(url):
+              req = urllib.request.Request(url, data=b"{}", headers=headers, method="POST")
+              try:
+                  with urllib.request.urlopen(req) as r:
+                      return r.read().decode(), r.status
+              except urllib.error.HTTPError as e:
+                  return e.read().decode(), e.code
 
-          if status != 200:
-              print("Auth failed or wrong org slug")
-              sys.exit(1)
+          # List projects
+          projects, _ = get(f"https://sentry.io/api/0/organizations/{org}/projects/?limit=20")
+          project_slugs = [p["slug"] for p in projects] if isinstance(projects, list) else []
+          print(f"Projects: {project_slugs}")
 
-          # Try issue alert rules (more common)
-          rules_data, rules_status = get(f"https://sentry.io/api/0/organizations/{org}/rules/?limit=50")
-          issue_rules = rules_data if isinstance(rules_data, list) else []
-          print(f"Issue alert rules: {len(issue_rules)} (HTTP {rules_status})")
+          # Check token scopes
+          token_info, _ = get("https://sentry.io/api/0/")
+          print(f"Token scopes: {token_info.get('scopes', 'unknown')[:5] if isinstance(token_info, dict) else str(token_info)[:200]}")
 
-          # Try metric alert rules
-          metric_data, metric_status = get(f"https://sentry.io/api/0/organizations/{org}/alert-rules/?limit=50")
-          metric_rules = metric_data if isinstance(metric_data, list) else []
-          print(f"Metric alert rules: {len(metric_rules)} (HTTP {metric_status})")
-
-          # Find a rule pointing to #incidents
-          target_rule = None
-          target_type = None
-
-          for r in issue_rules:
-              for action in r.get("actions", []):
-                  if "incidents" in str(action).lower():
-                      target_rule = r
-                      target_type = "issue"
-                      break
-              if target_rule:
-                  break
-
-          if not target_rule:
-              for r in metric_rules:
-                  for action in r.get("actions", []):
-                      if "incidents" in str(action).lower():
-                          target_rule = r
-                          target_type = "metric"
+          # Try project-level alert rules for each project
+          sent = False
+          for slug in project_slugs:
+              rules, status = get(f"https://sentry.io/api/0/projects/{org}/{slug}/rules/?limit=25")
+              if isinstance(rules, list) and rules:
+                  print(f"Project {slug}: {len(rules)} issue alert rules")
+                  # Find one targeting #incidents
+                  for r in rules:
+                      for action in r.get("actions", []):
+                          if "incidents" in str(action).lower() or "channel_id" in str(action).lower():
+                              print(f"Found incidents rule in {slug}: {r['name']} (id={r['id']})")
+                              result, code = post(f"https://sentry.io/api/0/projects/{org}/{slug}/rules/{r['id']}/test/")
+                              print(f"Test result HTTP {code}: {result[:200]}")
+                              if code in (200, 201, 202, 204):
+                                  print("SUCCESS: Sentry test notification sent to Slack")
+                                  sent = True
+                              break
+                      if sent:
                           break
-                  if target_rule:
+                  if sent:
                       break
-
-          # Fall back to first available rule
-          if not target_rule:
-              if issue_rules:
-                  target_rule = issue_rules[0]
-                  target_type = "issue"
-              elif metric_rules:
-                  target_rule = metric_rules[0]
-                  target_type = "metric"
-
-          if not target_rule:
-              print("No alert rules found in org")
-              sys.exit(1)
-
-          print(f"Selected {target_type} rule: {target_rule['name']} (id={target_rule['id']})")
-
-          # Send test notification
-          if target_type == "metric":
-              url = f"https://sentry.io/api/0/organizations/{org}/alert-rules/{target_rule['id']}/test/"
-          else:
-              url = f"https://sentry.io/api/0/organizations/{org}/rules/{target_rule['id']}/test/"
-
-          req2 = urllib.request.Request(url, data=b"{}", headers=headers, method="POST")
-          try:
-              with urllib.request.urlopen(req2) as resp2:
-                  result = resp2.read()
-                  print(f"SUCCESS: test notification sent: {result}")
-          except urllib.error.HTTPError as e:
-              body = e.read().decode()
-              print(f"HTTP {e.code}: {body}")
-              if e.code not in (200, 201, 202, 204):
-                  sys.exit(1)
               else:
-                  print("SUCCESS: test notification accepted")
+                  print(f"Project {slug}: no rules (HTTP {status})")
+
+          if not sent:
+              # Try sending test with first rule found anywhere
+              for slug in project_slugs:
+                  rules, status = get(f"https://sentry.io/api/0/projects/{org}/{slug}/rules/?limit=25")
+                  if isinstance(rules, list) and rules:
+                      r = rules[0]
+                      print(f"Fallback: testing first rule in {slug}: {r['name']}")
+                      result, code = post(f"https://sentry.io/api/0/projects/{org}/{slug}/rules/{r['id']}/test/")
+                      print(f"Test result HTTP {code}: {result[:200]}")
+                      if code in (200, 201, 202, 204):
+                          print("SUCCESS: Sentry test notification sent")
+                          sent = True
+                          break
+
+          if not sent:
+              print("ERROR: Could not send test notification - no accessible alert rules")
+              sys.exit(1)
 
           print("DONE")
           PYEOF
