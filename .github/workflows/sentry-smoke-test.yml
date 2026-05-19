@@ -1,0 +1,70 @@
+name: Sentry Smoke Test
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Sentry test alert notification
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+        run: |
+          python3 - <<'PYEOF'
+          import urllib.request, urllib.error, json, os, sys
+
+          token = os.environ["SENTRY_AUTH_TOKEN"]
+          org = "itqan-3o"
+          headers = {
+              "Authorization": f"Bearer {token}",
+              "Content-Type": "application/json",
+          }
+
+          # List metric alert rules
+          req = urllib.request.Request(
+              f"https://sentry.io/api/0/organizations/{org}/alert-rules/?limit=50",
+              headers=headers
+          )
+          with urllib.request.urlopen(req) as resp:
+              rules = json.load(resp)
+
+          print(f"Found {len(rules)} alert rules")
+
+          # Find one targeting #incidents
+          target_rule = None
+          for r in rules:
+              for action in r.get("actions", []):
+                  if "incidents" in str(action).lower():
+                      target_rule = r
+                      break
+              if target_rule:
+                  break
+
+          # Fall back to first rule if none targets #incidents
+          if not target_rule and rules:
+              target_rule = rules[0]
+
+          if not target_rule:
+              print("ERROR: no alert rules found")
+              sys.exit(1)
+
+          print(f"Testing rule: {target_rule['name']} (id={target_rule['id']})")
+
+          req2 = urllib.request.Request(
+              f"https://sentry.io/api/0/organizations/{org}/alert-rules/{target_rule['id']}/test/",
+              data=b"{}",
+              headers=headers,
+              method="POST"
+          )
+          try:
+              with urllib.request.urlopen(req2) as resp2:
+                  result = resp2.read()
+                  print(f"Test notification sent: {result}")
+          except urllib.error.HTTPError as e:
+              body = e.read()
+              print(f"HTTP {e.code}: {body}")
+              # 200 or 204 = success; some endpoints return 201
+              if e.code not in (200, 201, 204):
+                  sys.exit(1)
+
+          print("DONE")
+          PYEOF
