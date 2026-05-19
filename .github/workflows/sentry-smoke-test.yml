@@ -5,12 +5,12 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - name: Send Sentry test alert notification
+      - name: Send Sentry test event via ingest API
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
         run: |
           python3 - <<'PYEOF'
-          import urllib.request, urllib.error, json, os, sys
+          import urllib.request, urllib.error, json, os, sys, uuid, datetime
 
           token = os.environ["SENTRY_AUTH_TOKEN"]
           org = "itqan-3o"
@@ -24,64 +24,89 @@ jobs:
               except urllib.error.HTTPError as e:
                   return {"error": e.read().decode()}, e.code
 
-          def post(url):
-              req = urllib.request.Request(url, data=b"{}", headers=headers, method="POST")
-              try:
-                  with urllib.request.urlopen(req) as r:
-                      return r.read().decode(), r.status
-              except urllib.error.HTTPError as e:
-                  return e.read().decode(), e.code
+          # Check token scopes
+          token_data, _ = get("https://sentry.io/api/0/api-tokens/")
+          print(f"Token check: {str(token_data)[:300]}")
 
-          # List projects
+          # Get project client keys (DSN)
           projects, _ = get(f"https://sentry.io/api/0/organizations/{org}/projects/?limit=20")
           project_slugs = [p["slug"] for p in projects] if isinstance(projects, list) else []
           print(f"Projects: {project_slugs}")
 
-          # Check token scopes
-          token_info, _ = get("https://sentry.io/api/0/")
-          print(f"Token scopes: {token_info.get('scopes', 'unknown')[:5] if isinstance(token_info, dict) else str(token_info)[:200]}")
+          # Find DSN for cms-frontend project
+          target_slug = None
+          for slug in ["cms-frontend", "cms-frontend-staging", "qaran-apps-directory"]:
+              if slug in project_slugs:
+                  target_slug = slug
+                  break
 
-          # Try project-level alert rules for each project
-          sent = False
-          for slug in project_slugs:
-              rules, status = get(f"https://sentry.io/api/0/projects/{org}/{slug}/rules/?limit=25")
-              if isinstance(rules, list) and rules:
-                  print(f"Project {slug}: {len(rules)} issue alert rules")
-                  # Find one targeting #incidents
-                  for r in rules:
-                      for action in r.get("actions", []):
-                          if "incidents" in str(action).lower() or "channel_id" in str(action).lower():
-                              print(f"Found incidents rule in {slug}: {r['name']} (id={r['id']})")
-                              result, code = post(f"https://sentry.io/api/0/projects/{org}/{slug}/rules/{r['id']}/test/")
-                              print(f"Test result HTTP {code}: {result[:200]}")
-                              if code in (200, 201, 202, 204):
-                                  print("SUCCESS: Sentry test notification sent to Slack")
-                                  sent = True
-                              break
-                      if sent:
-                          break
-                  if sent:
-                      break
-              else:
-                  print(f"Project {slug}: no rules (HTTP {status})")
-
-          if not sent:
-              # Try sending test with first rule found anywhere
-              for slug in project_slugs:
-                  rules, status = get(f"https://sentry.io/api/0/projects/{org}/{slug}/rules/?limit=25")
-                  if isinstance(rules, list) and rules:
-                      r = rules[0]
-                      print(f"Fallback: testing first rule in {slug}: {r['name']}")
-                      result, code = post(f"https://sentry.io/api/0/projects/{org}/{slug}/rules/{r['id']}/test/")
-                      print(f"Test result HTTP {code}: {result[:200]}")
-                      if code in (200, 201, 202, 204):
-                          print("SUCCESS: Sentry test notification sent")
-                          sent = True
-                          break
-
-          if not sent:
-              print("ERROR: Could not send test notification - no accessible alert rules")
+          if not target_slug:
+              print(f"No target project found in {project_slugs}")
               sys.exit(1)
+
+          # Get project keys (DSN)
+          keys, status = get(f"https://sentry.io/api/0/projects/{org}/{target_slug}/keys/")
+          print(f"Keys for {target_slug} (HTTP {status}): {str(keys)[:300]}")
+
+          if status != 200 or not isinstance(keys, list) or not keys:
+              print("Could not get project DSN")
+              sys.exit(1)
+
+          dsn = keys[0].get("dsn", {}).get("public", "")
+          print(f"DSN: {dsn[:60]}...")
+
+          if not dsn:
+              print("No DSN found")
+              sys.exit(1)
+
+          # Send a test error event via Sentry's store endpoint
+          # DSN format: https://<key>@<host>/<project_id>
+          from urllib.parse import urlparse
+          parsed = urlparse(dsn)
+          public_key = parsed.username
+          host = parsed.hostname
+          project_id = parsed.path.strip("/")
+
+          store_url = f"https://{host}/api/{project_id}/store/"
+          event_id = uuid.uuid4().hex
+
+          event = {
+              "event_id": event_id,
+              "timestamp": datetime.datetime.utcnow().isoformat() + "Z",
+              "level": "error",
+              "message": "Smoke test: automated verification from GitHub Actions",
+              "exception": {
+                  "values": [{
+                      "type": "SmokeTestError",
+                      "value": "Automated smoke test - Sentry → Slack #incidents pipeline verification",
+                  }]
+              },
+              "tags": {"smoke_test": "true"},
+              "environment": "staging",
+          }
+
+          auth_header = f"Sentry sentry_version=7, sentry_client=smoke-test/1.0, sentry_key={public_key}"
+          ingest_req = urllib.request.Request(
+              store_url,
+              data=json.dumps(event).encode(),
+              headers={
+                  "Content-Type": "application/json",
+                  "X-Sentry-Auth": auth_header,
+              },
+              method="POST"
+          )
+
+          try:
+              with urllib.request.urlopen(ingest_req) as resp:
+                  result = resp.read().decode()
+                  print(f"SUCCESS: Event sent to Sentry (HTTP {resp.status}): {result[:200]}")
+                  print(f"Event ID: {event_id}")
+                  print("Sentry will process this event and fire alert rules → Slack #incidents")
+          except urllib.error.HTTPError as e:
+              body = e.read().decode()
+              print(f"HTTP {e.code}: {body}")
+              if e.code not in (200, 201):
+                  sys.exit(1)
 
           print("DONE")
           PYEOF
