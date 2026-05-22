@@ -159,7 +159,7 @@ export class RecitationsService {
   }
 
   /**
-   * GET /portal/assets/{slug}/recitation-tracks/?page=&page_size=
+   * GET /portal/recitations/{slug}/recitation-tracks/?page=&page_size=
    * (Previously numeric asset id in path; backend accepts recitation slug in the same segment.)
    */
   recitationTracksList(params: {
@@ -173,7 +173,7 @@ export class RecitationsService {
       .set('page', (params.page ?? 1).toString())
       .set('page_size', (params.page_size ?? 10).toString());
 
-    const url = `${this.portalBaseUrl}/assets/${encodeURIComponent(params.slug)}/recitation-tracks/`;
+    const url = `${this.portalBaseUrl}/recitations/${encodeURIComponent(params.slug)}/recitation-tracks/`;
 
     return this.http
       .get<{ results: RecitationTrackOut[]; count: number }>(url, { params: httpParams })

@@ -82,7 +82,7 @@ describe('RecitationsService', () => {
     req.flush(null);
   });
 
-  it('recitationTracksList should GET /portal/assets/{slug}/recitation-tracks/ with page params', (done) => {
+  it('recitationTracksList should GET /portal/recitations/{slug}/recitation-tracks/ with page params', (done) => {
     service
       .recitationTracksList({ slug: 'recitation-slug', asset_id: 42, page: 2, page_size: 10 })
       .subscribe((res) => {
@@ -98,7 +98,8 @@ describe('RecitationsService', () => {
 
     const req = httpMock.expectOne(
       (r) =>
-        r.url.includes('/portal/assets/recitation-slug/recitation-tracks/') && r.method === 'GET'
+        r.url.includes('/portal/recitations/recitation-slug/recitation-tracks/') &&
+        r.method === 'GET'
     );
     expect(req.request.params.get('page')).toBe('2');
     expect(req.request.params.get('page_size')).toBe('10');
