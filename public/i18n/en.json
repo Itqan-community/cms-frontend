@@ -676,6 +676,11 @@
       "EM_DASH": "—",
       "HIJRI_YEAR_SUFFIX": "AH"
     },
+    "TENANT": {
+      "ARIA_LABEL": "Publisher scope selector",
+      "PLACEHOLDER": "Select publisher",
+      "EMPTY": "No publishers available"
+    },
     "REFRESH_PROMPT": {
       "TITLE": "Do you want to reset data?",
       "CONTENT": "All projects and experimental data will be updated.",

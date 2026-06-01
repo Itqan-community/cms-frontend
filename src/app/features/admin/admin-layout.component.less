@@ -117,6 +117,21 @@
   align-items: center;
 }
 
+.admin-header-tenant {
+  flex: 1;
+  min-width: 220px;
+  max-width: 420px;
+  margin-inline: 20px;
+}
+
+.admin-header-tenant__select {
+  width: 100%;
+}
+
+.admin-header-tenant--mobile {
+  display: none;
+}
+
 // Specific override for Zorro layout alignment (RTL)
 [dir='rtl'] .ant-menu-inline.ant-menu-root .ant-menu-item,
 [dir='ltr'] .ant-menu-inline.ant-menu-root .ant-menu-item {
@@ -165,6 +180,34 @@
 }
 
 @media (max-width: 991px) {
+  .admin-header-shell .app-header {
+    height: auto;
+    min-height: 64px;
+  }
+
+  .admin-header-shell .app-header__container {
+    padding-block: 8px 10px;
+  }
+
+  .admin-header-tenant {
+    min-width: 0;
+    max-width: none;
+    margin-inline: 0;
+  }
+
+  .admin-header-tenant--desktop {
+    display: none;
+  }
+
+  .admin-header-tenant--mobile {
+    display: block;
+    margin-top: 8px;
+  }
+
+  .admin-header-shell .app-header__row {
+    min-height: 48px;
+  }
+
   .admin-mobile-sider-head {
     display: flex;
     justify-content: space-between;

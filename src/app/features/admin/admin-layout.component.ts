@@ -1,17 +1,20 @@
-import { Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 import { AuthService } from '../../core/auth/services/auth.service';
 import { LangSwitchComponent } from '../../shared/components/lang-switch/lang-switch.component';
 import { UserActionsComponent } from '../../shared/components/user-actions/user-actions.component';
 import { isPublisherHost } from '../../shared/utils/publisherhost.util';
 import { PORTAL_PERMISSIONS } from './constants/portal-permission.constants';
 import { AdminAuthService } from './services/admin-auth.service';
+import { AdminTenantService } from './services/admin-tenant.service';
 
 interface CmsTab {
   id: string;
@@ -82,6 +85,8 @@ const TAB_USAGE: CmsTab = {
     NzLayoutModule,
     NzMenuModule,
     NgIcon,
+    FormsModule,
+    NzSelectModule,
     LangSwitchComponent,
     UserActionsComponent,
     TranslateModule,
@@ -89,10 +94,11 @@ const TAB_USAGE: CmsTab = {
   templateUrl: './admin-layout.component.html',
   styleUrls: ['./admin-layout.component.less'],
 })
-export class AdminLayoutComponent {
+export class AdminLayoutComponent implements OnInit {
   private readonly modal = inject(NzModalService);
   private readonly adminAuth = inject(AdminAuthService);
   public readonly authService = inject(AuthService);
+  public readonly tenantService = inject(AdminTenantService);
   private readonly translate = inject(TranslateService);
   readonly isPublisherHost = isPublisherHost();
 
@@ -139,6 +145,10 @@ export class AdminLayoutComponent {
     });
   }
 
+  ngOnInit(): void {
+    this.tenantService.ensureReady().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
+  }
+
   onMobileMenuToggle(): void {
     if (!this.isMobileViewport()) return;
     const open = !this.isMobileMenuOpen();
@@ -166,6 +176,15 @@ export class AdminLayoutComponent {
 
   onLogout(): void {
     this.authService.logout().subscribe();
+  }
+
+  onTenantChange(publisherId: number): void {
+    if (publisherId === this.tenantService.getSelectedPublisherId()) {
+      return;
+    }
+    if (this.tenantService.setSelectedPublisherId(publisherId)) {
+      window.location.reload();
+    }
   }
 
   onRefresh(): void {

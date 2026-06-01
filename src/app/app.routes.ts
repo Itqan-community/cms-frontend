@@ -4,6 +4,7 @@ import { authGuard } from './core/auth/guards/auth.guard';
 import { publisherHostGuard } from './core/guards/publisher-host.guard';
 import { portalAccessGuard } from './features/admin/guards/portal-access.guard';
 import { itqanAdminGuard } from './features/admin/guards/itqan-admin.guard';
+import { tenantReadyGuard } from './features/admin/guards/tenant-ready.guard';
 
 export const routes: Routes = [
   {
@@ -20,7 +21,7 @@ export const routes: Routes = [
     path: 'admin',
     loadComponent: () =>
       import('./features/admin/admin-layout.component').then((m) => m.AdminLayoutComponent),
-    canActivate: [authGuard, portalAccessGuard],
+    canActivate: [authGuard, portalAccessGuard, tenantReadyGuard],
     data: { hideHeader: true, fullWidth: true },
     children: [
       {
