@@ -17,7 +17,7 @@ const cmsOrigin = stagingCmsOrigin();
 export const environment = {
   production: false,
   API_BASE_URL: cmsOrigin ? `${cmsOrigin}/cms-api` : 'https://staging.api.cms.itqan.dev/cms-api',
-  API_DOCS_URL: 'https://staging.api.cms.itqan.dev/docs',
+  API_DOCS_URL: 'https://docs.cms.itqan.dev',
   ADMIN_API_BASE_URL: cmsOrigin
     ? `${cmsOrigin}/portal`
     : 'https://staging.api.cms.itqan.dev/portal',
