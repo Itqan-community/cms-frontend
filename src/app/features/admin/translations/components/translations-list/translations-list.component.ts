@@ -1,26 +1,29 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, computed, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { NgIcon } from '@ng-icons/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzTableModule, NzTableSortOrder } from 'ng-zorro-antd/table';
+import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import { NgIcon } from '@ng-icons/core';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
+import {
+  AdminColumnPickerComponent,
+  AdminTableColumnOption,
+} from '../../../components/admin-column-picker/admin-column-picker.component';
 import {
   AssetSortingQuery,
   TranslationFilters,
   TranslationItem,
 } from '../../models/translations.models';
 import { TranslationsService } from '../../services/translations.service';
-import {
-  AdminColumnPickerComponent,
-  AdminTableColumnOption,
-} from '../../../components/admin-column-picker/admin-column-picker.component';
 import { TranslationFiltersComponent } from '../translation-filters/translation-filters.component';
+import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
+import { AdminAuthService } from '../../../services/admin-auth.service';
+import { AdminListBase } from '../../../utils/admin-list-base';
 
 @Component({
   selector: 'app-translations-list',
@@ -42,15 +45,17 @@ import { TranslationFiltersComponent } from '../translation-filters/translation-
   templateUrl: './translations-list.component.html',
   styleUrl: './translations-list.component.less',
 })
-export class TranslationsListComponent implements OnInit {
+export class TranslationsListComponent extends AdminListBase<TranslationItem, TranslationFilters> {
   private readonly translationsService = inject(TranslationsService);
-  private readonly router = inject(Router);
+  private readonly adminAuth = inject(AdminAuthService);
 
-  readonly translations = signal<TranslationItem[]>([]);
-  readonly total = signal(0);
-  readonly page = signal(1);
-  readonly pageSize = signal(10);
-  readonly loading = signal(false);
+  readonly canCreateTranslation = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_CREATE_TRANSLATION)
+  );
+
+  readonly canUpdateTranslation = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION)
+  );
 
   readonly translationTableStorageKey = 'admin-list-translations';
   readonly translationTableColumns: AdminTableColumnOption[] = [
@@ -60,15 +65,12 @@ export class TranslationsListComponent implements OnInit {
     { key: 'license', label: 'ADMIN.TRANSLATIONS.COLUMNS.LICENSE' },
     { key: 'created', label: 'ADMIN.TRANSLATIONS.COLUMNS.CREATED_AT' },
   ];
-  private readonly columnVisibility = signal<Record<string, boolean>>({});
-
-  private activeFilters: Partial<TranslationFilters> = {};
-  private ordering: AssetSortingQuery | undefined;
 
   readonly licensesColors = LicensesColors;
 
-  ngOnInit(): void {
-    this.load();
+  constructor() {
+    super();
+    this.initList(this.translationTableStorageKey);
   }
 
   load(): void {
@@ -78,11 +80,11 @@ export class TranslationsListComponent implements OnInit {
         page: this.page(),
         page_size: this.pageSize(),
         ...this.activeFilters,
-        ordering: this.ordering,
+        ordering: this.ordering as AssetSortingQuery,
       })
       .subscribe({
         next: (res) => {
-          this.translations.set(res.results);
+          this.items.set(res.results);
           this.total.set(res.count);
           this.loading.set(false);
         },
@@ -90,50 +92,6 @@ export class TranslationsListComponent implements OnInit {
           this.loading.set(false);
         },
       });
-  }
-
-  onFiltersChange(filters: Partial<TranslationFilters>): void {
-    this.activeFilters = filters;
-    this.page.set(1);
-    this.load();
-  }
-
-  onPageChange(page: number): void {
-    this.page.set(page);
-    this.load();
-  }
-
-  onPageSizeChange(size: number): void {
-    this.pageSize.set(size);
-    this.page.set(1);
-    this.load();
-  }
-
-  onSortChange(column: 'name' | 'created_at', order: NzTableSortOrder): void {
-    if (!order) {
-      this.ordering = undefined;
-    } else {
-      const prefix = order === 'descend' ? '-' : '';
-      this.ordering = `${prefix}${column}` as AssetSortingQuery;
-    }
-    this.page.set(1);
-    this.load();
-  }
-
-  onView(slug: string): void {
-    void this.router.navigate(['/admin/translations', slug]);
-  }
-
-  onEdit(slug: string): void {
-    void this.router.navigate(['/admin/translations', slug, 'edit']);
-  }
-
-  onTranslationColumnVisibility(v: Record<string, boolean>): void {
-    this.columnVisibility.set(v);
-  }
-
-  showTranslationCol(key: string): boolean {
-    return this.columnVisibility()[key] !== false;
   }
 
   getLicenseColor(license: string): string {

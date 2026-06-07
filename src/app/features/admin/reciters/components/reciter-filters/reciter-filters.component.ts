@@ -1,4 +1,14 @@
-import { Component, DestroyRef, EventEmitter, OnInit, Output, inject } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  EventEmitter,
+  OnInit,
+  Output,
+  inject,
+  input,
+  effect,
+  untracked,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
@@ -15,11 +25,10 @@ import { ReciterListFilters } from '../../models/reciters.models';
   imports: [FormsModule, NzInputModule, NzButtonModule, NzModalModule, NgIcon, TranslateModule],
   template: `
     <div class="reciter-filters">
-      <div class="reciter-filters__actions">
-        <nz-input-group [nzPrefix]="searchIcon" class="reciter-filters__search">
+      <div class="admin-filters-bar">
+        <nz-input-group [nzPrefix]="searchIcon">
           <input
             nz-input
-            nzSize="default"
             type="text"
             [placeholder]="'ADMIN.RECITERS.SEARCH_PLACEHOLDER' | translate"
             [ngModel]="searchValue"
@@ -31,8 +40,7 @@ import { ReciterListFilters } from '../../models/reciters.models';
         <button
           nz-button
           nzType="default"
-          nzSize="default"
-          class="reciter-filters__filters-btn"
+          class="admin-filters-bar__filter-btn"
           (click)="openFiltersModal()"
         >
           <ng-icon name="lucideFilter" />
@@ -66,14 +74,25 @@ import { ReciterListFilters } from '../../models/reciters.models';
 })
 export class ReciterFiltersComponent implements OnInit {
   @Output() filtersChange = new EventEmitter<Partial<ReciterListFilters>>();
+  initialFilters = input<Partial<ReciterListFilters>>({});
 
   private readonly destroyRef = inject(DestroyRef);
   private readonly searchSubject = new Subject<string>();
 
-  searchValue = '';
   isFiltersModalOpen = false;
+  searchValue = '';
 
   private currentFilters: Partial<ReciterListFilters> = {};
+
+  constructor() {
+    effect(() => {
+      const f = this.initialFilters();
+      untracked(() => {
+        this.currentFilters = { ...f };
+        this.searchValue = f.search || '';
+      });
+    });
+  }
 
   ngOnInit(): void {
     this.searchSubject

@@ -4,4 +4,5 @@ export const environment = {
   API_DOCS_URL: 'https://staging.api.cms.itqan.dev/developers-api/docs',
   ADMIN_API_BASE_URL: 'https://staging.api.cms.itqan.dev/portal',
   sentryDsn: '',
+  webauthnReplaceRpIdWithHostname: false,
 };

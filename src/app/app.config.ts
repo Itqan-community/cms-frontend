@@ -22,7 +22,11 @@ import { provideTranslateHttpLoader } from '@ngx-translate/http-loader';
 import { headersInterceptor } from './core/interceptors/global.interceptor';
 import { authErrorInterceptor } from './core/interceptors/auth-error.interceptor';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
-
+import { credentialsInterceptor } from './core/interceptors/credentials.interceptor';
+import { csrfResponseInterceptor } from './core/interceptors/csrf-response.interceptor';
+import { appSessionTokenInterceptor } from './core/interceptors/app-session-token.interceptor';
+import { tenantHeaderInterceptor } from './core/interceptors/tenant-header.interceptor';
+import { AuthService } from './core/auth/services/auth.service';
 registerLocaleData(ar);
 
 export const appConfig: ApplicationConfig = {
@@ -49,8 +53,17 @@ export const appConfig: ApplicationConfig = {
     appLucideIconsProvider,
     provideAnimationsAsync(),
     provideHttpClient(
-      withInterceptors([headersInterceptor, authErrorInterceptor, errorInterceptor])
+      withInterceptors([
+        credentialsInterceptor,
+        csrfResponseInterceptor,
+        appSessionTokenInterceptor,
+        tenantHeaderInterceptor,
+        headersInterceptor,
+        authErrorInterceptor,
+        errorInterceptor,
+      ])
     ),
+    provideAppInitializer(() => inject(AuthService).bootstrapOnce()),
     // ngx-translate setup
     provideTranslateService({
       loader: provideTranslateHttpLoader({

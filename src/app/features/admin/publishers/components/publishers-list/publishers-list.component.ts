@@ -1,21 +1,26 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, computed, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzTableModule, NzTableSortOrder } from 'ng-zorro-antd/table';
+import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import { NgIcon } from '@ng-icons/core';
-import { Publisher, PublisherUiFilters } from '../../models/publishers-stats.models';
-import { PublishersService } from '../../services/publishers.service';
-import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
 import {
   AdminColumnPickerComponent,
   AdminTableColumnOption,
 } from '../../../components/admin-column-picker/admin-column-picker.component';
+import {
+  formatHijriYearForAdminListing,
+  localizeCountryCodeOrName,
+} from '../../../utils/display-localization.util';
+import { Publisher, PublisherUiFilters } from '../../models/publishers-stats.models';
+import { PublishersService } from '../../services/publishers.service';
 import { PublisherFiltersComponent } from '../publisher-filters/publisher-filters.component';
+import { AdminListBase } from '../../../utils/admin-list-base';
+import { AdminAuthService } from '../../../services/admin-auth.service';
 
 @Component({
   selector: 'app-publishers-list',
@@ -36,31 +41,25 @@ import { PublisherFiltersComponent } from '../publisher-filters/publisher-filter
   templateUrl: './publishers-list.component.html',
   styleUrl: './publishers-list.component.less',
 })
-export class PublishersListComponent implements OnInit {
+export class PublishersListComponent extends AdminListBase<Publisher, PublisherUiFilters> {
   private readonly publishersService = inject(PublishersService);
-  private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
+  private readonly adminAuth = inject(AdminAuthService);
 
-  readonly publishers = signal<Publisher[]>([]);
-  readonly total = signal(0);
-  readonly page = signal(1);
-  readonly pageSize = signal(10);
-  readonly loading = signal(false);
+  /** Publishers admin is Itqan staff only (no granular portal permission in API). */
+  readonly canManagePublishers = computed(() => this.adminAuth.isItqanAdmin());
 
   readonly publisherTableStorageKey = 'admin-list-publishers';
   readonly publisherTableColumns: AdminTableColumnOption[] = [
     { key: 'name', label: 'ADMIN.PUBLISHERS.COLUMNS.NAME' },
     { key: 'country', label: 'ADMIN.PUBLISHERS.COLUMNS.COUNTRY' },
-    { key: 'description', label: 'ADMIN.PUBLISHERS.COLUMNS.DESCRIPTION' },
+    { key: 'foundation_year', label: 'ADMIN.PUBLISHERS.COLUMNS.FOUNDATION_YEAR' },
     { key: 'created', label: 'ADMIN.PUBLISHERS.COLUMNS.CREATED_AT' },
   ];
-  private readonly columnVisibility = signal<Record<string, boolean>>({});
 
-  private activeFilters: PublisherUiFilters = {};
-  private ordering: string | undefined;
-
-  ngOnInit(): void {
-    this.load();
+  constructor() {
+    super();
+    this.initList(this.publisherTableStorageKey);
   }
 
   load(): void {
@@ -74,7 +73,7 @@ export class PublishersListComponent implements OnInit {
       })
       .subscribe({
         next: (res) => {
-          this.publishers.set(res.results);
+          this.items.set(res.results);
           this.total.set(res.count);
           this.loading.set(false);
         },
@@ -84,67 +83,14 @@ export class PublishersListComponent implements OnInit {
       });
   }
 
-  onFiltersChange(filters: PublisherUiFilters): void {
-    this.activeFilters = filters;
-    this.page.set(1);
-    this.load();
-  }
-
-  onPageChange(page: number): void {
-    this.page.set(page);
-    this.load();
-  }
-
-  onPageSizeChange(size: number): void {
-    this.pageSize.set(size);
-    this.page.set(1);
-    this.load();
-  }
-
-  onSortChange(column: 'name' | 'created_at', order: NzTableSortOrder): void {
-    if (!order) {
-      this.ordering = undefined;
-    } else {
-      const prefix = order === 'descend' ? '-' : '';
-      this.ordering = `${prefix}${column}`;
-    }
-    this.page.set(1);
-    this.load();
-  }
-
-  onView(id: number): void {
-    void this.router.navigate(['/admin/publishers', id]);
-  }
-
-  onEdit(id: number): void {
-    void this.router.navigate(['/admin/publishers', id, 'edit']);
-  }
-
-  onPublisherColumnVisibility(v: Record<string, boolean>): void {
-    this.columnVisibility.set(v);
-  }
-
-  showPublisherCol(key: string): boolean {
-    return this.columnVisibility()[key] !== false;
-  }
-
   countryLabel(country: string | null | undefined): string {
     return localizeCountryCodeOrName(country, this.translate.currentLang);
   }
 
-  publisherDescriptionPreview(p: Publisher): string {
-    const raw = p.description_ar ?? p.description_en ?? p.description ?? '';
-    return this.truncate(raw);
-  }
-
-  private truncate(text: string | null | undefined, max = 120): string {
-    if (text == null || text === '') {
-      return '—';
-    }
-    const t = text.trim();
-    if (t.length <= max) {
-      return t;
-    }
-    return `${t.slice(0, max)}…`;
+  foundationYearDisplay(year: number | null | undefined): string {
+    return formatHijriYearForAdminListing(year, {
+      suffix: this.translate.instant('ADMIN.COMMON.HIJRI_YEAR_SUFFIX'),
+      empty: this.translate.instant('ADMIN.COMMON.EM_DASH'),
+    });
   }
 }

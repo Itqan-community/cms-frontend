@@ -126,7 +126,7 @@ export class AssetDetailsPage implements OnInit {
 
   downloadResource() {
     if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/account/login']);
       return;
     }
 
@@ -230,7 +230,7 @@ export class AssetDetailsPage implements OnInit {
 
   downloadOriginalResource() {
     if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/login']);
+      this.router.navigate(['/account/login']);
       return;
     }
 

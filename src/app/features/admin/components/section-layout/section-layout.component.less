@@ -1,13 +1,13 @@
 .admin-section-layout {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 16px;
 
   &__header {
     background: var(--admin-surface-white);
-    border-radius: var(--radius-xl);
-    padding: 24px 28px;
-    box-shadow: var(--shadow-card);
+    border-radius: var(--radius-lg); // 8px
+    padding: 16px 20px;
+    border: 1px solid var(--admin-border-200);
   }
 
   &__title {
@@ -28,9 +28,9 @@
     display: flex;
     gap: 4px;
     background: var(--admin-surface-white);
-    border-radius: var(--radius-xl);
-    padding: 6px;
-    box-shadow: var(--shadow-card);
+    border-radius: var(--radius-md); // 6px
+    padding: 4px;
+    border: 1px solid var(--admin-border-200);
     width: fit-content;
   }
 
@@ -59,7 +59,7 @@
       background: var(--admin-accent-50);
       color: var(--admin-accent-600);
       font-weight: 700;
-      box-shadow: 0 1px 6px rgba(22, 163, 74, 0.15);
+      border-bottom: 2px solid var(--admin-accent-600);
     }
   }
 

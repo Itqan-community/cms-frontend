@@ -25,6 +25,7 @@
   "scripts": {
     "start": "ng serve",
     "start:staging": "ng serve --configuration staging",
+    "start:local": "ng serve --configuration local",
     "build": "ng build --configuration production",
     "build:production": "ng build --configuration production",
     "build:staging": "ng build --configuration staging",
@@ -59,6 +60,7 @@
     "@ngx-translate/http-loader": "^17.0.0",
     "@sentry/angular": "^10.47.0",
     "ng-zorro-antd": "^20.3.1",
+    "qrcode": "^1.5.4",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "web-vitals": "^5.1.0",
@@ -72,6 +74,7 @@
     "@commitlint/config-conventional": "^19.0.0",
     "@sentry/cli": "^3.3.5",
     "@types/jasmine": "~5.1.0",
+    "@types/qrcode": "^1.5.6",
     "angular-eslint": "21.0.0",
     "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.8",

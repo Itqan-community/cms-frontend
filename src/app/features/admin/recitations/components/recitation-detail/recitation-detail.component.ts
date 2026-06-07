@@ -1,5 +1,15 @@
 import { DatePipe } from '@angular/common';
-import { Component, HostListener, OnInit, computed, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import {
+  Component,
+  ElementRef,
+  HostListener,
+  OnInit,
+  computed,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
@@ -20,9 +30,16 @@ import type {
   RecitationTrackValidateFileStatus,
   RecitationTrackValidateUploadOut,
 } from '../../models/recitation-tracks.models';
+import type { RecitationTimingUploadOut } from '../../models/recitation-timings.models';
 import { MaddLevel, MeemBehavior, RecitationDetails } from '../../models/recitations.models';
 import { RecitationTracksUploadOrchestratorService } from '../../services/recitation-tracks-upload.orchestrator';
+import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
+import { AdminAuthService } from '../../../services/admin-auth.service';
 import { RecitationsService } from '../../services/recitations.service';
+import {
+  buildTimingUploadExtraMessage,
+  buildTimingUploadSuccessDescription,
+} from '../../utils/timing-upload-result.format';
 
 const TRACKS_PAGE_SIZE = 10;
 const MAX_MP3_FILES = 114;
@@ -55,6 +72,19 @@ export class RecitationDetailComponent implements OnInit {
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
   private readonly translate = inject(TranslateService);
+  private readonly adminAuth = inject(AdminAuthService);
+
+  readonly canUpdateRecitation = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_RECITATION)
+  );
+
+  readonly canDeleteRecitation = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_RECITATION)
+  );
+
+  readonly canUploadTiming = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPLOAD_TIMING)
+  );
 
   readonly recitation = signal<RecitationDetails | null>(null);
   readonly loading = signal(true);
@@ -72,6 +102,12 @@ export class RecitationDetailComponent implements OnInit {
   readonly validateMessage = signal<string | null>(null);
   readonly validateTopStatus = signal<'idle' | 'valid' | 'invalid'>('idle');
   readonly validateLoading = signal(false);
+
+  readonly timingsFileInput = viewChild<ElementRef<HTMLInputElement>>('timingsFileInput');
+  readonly timingsFiles = signal<File[]>([]);
+  readonly timingsUploadLoading = signal(false);
+  /** Last successful POST /portal/timing/upload/ response — shown in banner (not toast). */
+  readonly timingsUploadResult = signal<RecitationTimingUploadOut | null>(null);
 
   /** Any row currently queued or uploading (may include parallel single-file runs). */
   readonly hasInFlightUploadRows = computed(() =>
@@ -241,7 +277,7 @@ export class RecitationDetailComponent implements OnInit {
     this.tracksLoading.set(true);
     this.recitationsService
       .recitationTracksList({
-        slug: rec.slug ?? this.slug,
+        recitation_slug: rec.slug ?? this.slug,
         asset_id: rec.id,
         page: this.tracksPage(),
         page_size: this.tracksPageSize,
@@ -259,6 +295,65 @@ export class RecitationDetailComponent implements OnInit {
   onTracksPageChange(page: number): void {
     this.tracksPage.set(page);
     this.loadTracksPage();
+  }
+
+  onPickTimingsFiles(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const list = input.files;
+    if (!list?.length) {
+      this.timingsFiles.set([]);
+      return;
+    }
+    this.timingsUploadResult.set(null);
+    this.timingsFiles.set(Array.from(list));
+  }
+
+  clearTimingsSelection(): void {
+    this.timingsFiles.set([]);
+    this.timingsUploadResult.set(null);
+    const el = this.timingsFileInput()?.nativeElement;
+    if (el) el.value = '';
+  }
+
+  onUploadTimings(): void {
+    const rec = this.recitation();
+    const files = this.timingsFiles();
+    if (!rec || files.length === 0 || this.timingsUploadLoading()) return;
+
+    this.timingsUploadLoading.set(true);
+    this.timingsUploadResult.set(null);
+    this.recitationsService.recitationTimingUpload(rec.id, files).subscribe({
+      next: (res: RecitationTimingUploadOut) => {
+        this.timingsUploadResult.set(res);
+        this.timingsFiles.set([]);
+        const el = this.timingsFileInput()?.nativeElement;
+        if (el) el.value = '';
+        this.load();
+      },
+      error: (err: unknown) => {
+        // Global `errorInterceptor` already shows `error.error.message` — do not duplicate.
+        // Show only structured `extra` (e.g. ResultDict) when present.
+        if (!(err instanceof HttpErrorResponse)) return;
+        const body = err.error;
+        const extra =
+          body && typeof body === 'object' && 'extra' in body
+            ? (body as { extra?: unknown }).extra
+            : undefined;
+        const detail = buildTimingUploadExtraMessage(extra, this.translate);
+        if (detail) {
+          this.message.error(detail, { nzDuration: 12000 });
+        }
+      },
+      complete: () => this.timingsUploadLoading.set(false),
+    });
+  }
+
+  clearTimingsUploadBanner(): void {
+    this.timingsUploadResult.set(null);
+  }
+
+  timingsSuccessBannerDescription(out: RecitationTimingUploadOut): string {
+    return buildTimingUploadSuccessDescription(out, this.translate);
   }
 
   onPickMp3Files(event: Event): void {

@@ -56,14 +56,52 @@
             </a>
           </div>
 
+          <div class="admin-header-tenant admin-header-tenant--desktop">
+            <nz-select
+              class="admin-header-tenant__select"
+              [attr.aria-label]="'ADMIN.TENANT.ARIA_LABEL' | translate"
+              [ngModel]="tenantService.selectedPublisherId()"
+              (ngModelChange)="onTenantChange($event)"
+              [nzPlaceHolder]="'ADMIN.TENANT.PLACEHOLDER' | translate"
+              [nzLoading]="tenantService.isLoading()"
+              [nzNotFoundContent]="'ADMIN.TENANT.EMPTY' | translate"
+              [nzDisabled]="tenantService.isLoading() || tenantService.publishers().length === 0"
+              nzShowSearch
+              nzSize="large"
+            >
+              @for (publisher of tenantService.publishers(); track publisher.id) {
+                <nz-option [nzValue]="publisher.id" [nzLabel]="publisher.name"></nz-option>
+              }
+            </nz-select>
+          </div>
+
           <!-- Actions -->
           <div class="app-header__actions">
             <!-- Ensure actions display flex properly always -->
             <div class="admin-header-actions">
               <app-lang-switch></app-lang-switch>
-              <app-user-actions (logoutClicked)="authService.logout()"></app-user-actions>
+              <app-user-actions (logoutClicked)="onLogout()"></app-user-actions>
             </div>
           </div>
+        </div>
+
+        <div class="admin-header-tenant admin-header-tenant--mobile">
+          <nz-select
+            class="admin-header-tenant__select"
+            [attr.aria-label]="'ADMIN.TENANT.ARIA_LABEL' | translate"
+            [ngModel]="tenantService.selectedPublisherId()"
+            (ngModelChange)="onTenantChange($event)"
+            [nzPlaceHolder]="'ADMIN.TENANT.PLACEHOLDER' | translate"
+            [nzLoading]="tenantService.isLoading()"
+            [nzNotFoundContent]="'ADMIN.TENANT.EMPTY' | translate"
+            [nzDisabled]="tenantService.isLoading() || tenantService.publishers().length === 0"
+            nzShowSearch
+            nzSize="large"
+          >
+            @for (publisher of tenantService.publishers(); track publisher.id) {
+              <nz-option [nzValue]="publisher.id" [nzLabel]="publisher.name"></nz-option>
+            }
+          </nz-select>
         </div>
       </div>
     </div>

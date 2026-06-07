@@ -1,9 +1,8 @@
 <div class="publisher-filters">
-  <div class="publisher-filters__actions">
-    <nz-input-group [nzPrefix]="searchIcon" class="publisher-filters__search">
+  <div class="admin-filters-bar">
+    <nz-input-group [nzPrefix]="searchIcon">
       <input
         nz-input
-        nzSize="default"
         type="text"
         [placeholder]="'ADMIN.PUBLISHERS.SEARCH_PLACEHOLDER' | translate"
         [ngModel]="searchValue"
@@ -15,8 +14,7 @@
     <button
       nz-button
       nzType="default"
-      nzSize="default"
-      class="publisher-filters__filters-btn"
+      class="admin-filters-bar__filter-btn"
       (click)="openFiltersModal()"
     >
       <ng-icon name="lucideFilter" />
@@ -43,7 +41,7 @@
           (ngModelChange)="onCountryChange($event)"
         >
           @for (country of countryOptions; track country) {
-            <nz-option [nzValue]="country" [nzLabel]="countryLabel(country)"></nz-option>
+            <nz-option [nzValue]="country" [nzLabel]="country | adminCountryLabel"></nz-option>
           }
         </nz-select>
 

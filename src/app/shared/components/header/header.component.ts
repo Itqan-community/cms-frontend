@@ -3,6 +3,8 @@ import { RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { NAV_LINKS } from '../../../core/constants/nav-links';
+import { PORTAL_PERMISSIONS } from '../../../features/admin/constants/portal-permission.constants';
+import { AdminAuthService } from '../../../features/admin/services/admin-auth.service';
 import { isPublisherHost } from '../../utils/publisherhost.util';
 import { LangSwitchComponent } from '../lang-switch/lang-switch.component';
 import { MobileMenuComponent } from '../mobile-menu/mobile-menu.component';
@@ -28,22 +30,21 @@ import { UserActionsComponent } from '../user-actions/user-actions.component';
 })
 export class HeaderComponent {
   public readonly authService = inject(AuthService);
+  private readonly adminAuth = inject(AdminAuthService);
   readonly isPublisherHost = isPublisherHost();
 
   readonly navLinks = computed((): NavigationLink[] => {
-    const links: NavigationLink[] = [...NAV_LINKS];
-    if (this.authService.currentUser()?.is_admin) {
-      links.push({
-        label: 'NAVIGATION.ADMIN_PORTAL',
-        link: '/admin',
-      });
-    }
-    return links;
+    const showAdmin = this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS);
+    return NAV_LINKS.filter((l) => l.link !== '/admin' || showAdmin);
   });
 
   isMobileMenuOpen = signal(false);
 
   onMobileMenuToggle(): void {
     this.isMobileMenuOpen.update((v) => !v);
+  }
+
+  onLogout(): void {
+    this.authService.logout().subscribe();
   }
 }

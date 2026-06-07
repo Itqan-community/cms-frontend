@@ -42,7 +42,7 @@
         <!-- Desktop Actions -->
         <div class="app-header__actions-desktop">
           <app-lang-switch></app-lang-switch>
-          <app-user-actions (logoutClicked)="authService.logout()"></app-user-actions>
+          <app-user-actions (logoutClicked)="onLogout()"></app-user-actions>
         </div>
 
         <!-- Mobile Menu Button -->
@@ -63,5 +63,5 @@
 <app-mobile-menu
   [(isOpen)]="isMobileMenuOpen"
   [links]="navLinks()"
-  (logout)="authService.logout()"
+  (logout)="onLogout()"
 ></app-mobile-menu>

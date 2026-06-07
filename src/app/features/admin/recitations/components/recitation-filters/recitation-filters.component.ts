@@ -1,4 +1,15 @@
-import { Component, DestroyRef, EventEmitter, OnInit, Output, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  EventEmitter,
+  OnInit,
+  Output,
+  inject,
+  signal,
+  input,
+  effect,
+  untracked,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule } from '@ngx-translate/core';
@@ -37,11 +48,10 @@ import { RecitationsService } from '../../services/recitations.service';
   ],
   template: `
     <div class="recitation-filters">
-      <div class="recitation-filters__actions">
-        <nz-input-group [nzPrefix]="searchIcon" class="recitation-filters__search">
+      <div class="admin-filters-bar">
+        <nz-input-group [nzPrefix]="searchIcon">
           <input
             nz-input
-            nzSize="default"
             type="text"
             [placeholder]="'ADMIN.RECITATIONS.SEARCH_PLACEHOLDER' | translate"
             [ngModel]="searchValue"
@@ -53,8 +63,7 @@ import { RecitationsService } from '../../services/recitations.service';
         <button
           nz-button
           nzType="default"
-          nzSize="default"
-          class="recitation-filters__filters-btn"
+          class="admin-filters-bar__filter-btn"
           (click)="openFiltersModal()"
         >
           <ng-icon name="lucideFilter" />
@@ -209,6 +218,7 @@ import { RecitationsService } from '../../services/recitations.service';
 })
 export class RecitationFiltersComponent implements OnInit {
   @Output() filtersChange = new EventEmitter<Partial<RecitationListFilters>>();
+  initialFilters = input<Partial<RecitationListFilters>>({});
 
   private readonly publishersFilterService = inject(PublishersFilterService);
   private readonly recitersService = inject(RecitersAdminService);
@@ -243,6 +253,28 @@ export class RecitationFiltersComponent implements OnInit {
   private readonly maxHijriYear = 1600;
 
   private currentFilters: Partial<RecitationListFilters> = {};
+
+  constructor() {
+    effect(() => {
+      const f = this.initialFilters();
+      untracked(() => {
+        this.hydrateFromFilters(f || {});
+      });
+    });
+  }
+
+  private hydrateFromFilters(f: Partial<RecitationListFilters>): void {
+    this.currentFilters = { ...f };
+    this.searchValue = f.search || '';
+    this.selectedPublisher = f.publisher_id != null ? Number(f.publisher_id) : null;
+    this.selectedReciter = f.reciter_id != null ? Number(f.reciter_id) : null;
+    this.selectedQiraah = f.qiraah_id != null ? Number(f.qiraah_id) : null;
+    this.selectedRiwayah = f.riwayah_id != null ? Number(f.riwayah_id) : null;
+    this.selectedMadd = (f.madd_level as MaddLevel) ?? null;
+    this.selectedMeem = (f.meem_behaviour as MeemBehavior) ?? null;
+    this.selectedLicense = f.license_code ?? null;
+    this.selectedHijriDate = f.year ? new Date(Number(f.year), 0, 1) : null;
+  }
 
   ngOnInit(): void {
     this.loadPublishers();

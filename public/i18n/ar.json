@@ -21,7 +21,11 @@
         "EMAIL_REQUIRED": "يرجى إدخال عنوان بريد إلكتروني صحيح",
         "PASSWORD_REQUIRED": "كلمة المرور مطلوبة",
         "LOGIN_FAILED": "فشل تسجيل الدخول. يرجى المحاولة مرة أخرى."
-      }
+      },
+      "FORGOT_PASSWORD": "نسيت كلمة المرور؟",
+      "OR_CONTINUE": "أو تابع باستخدام",
+      "LOGIN_WITH_CODE": "تسجيل الدخول برمز البريد",
+      "SIGN_IN_WITH_PASSKEY": "تسجيل الدخول بمفتاح المرور"
     },
     "REGISTER": {
       "TITLE": "إنشاء حسابك",
@@ -49,13 +53,288 @@
         "PASSWORD_REQUIRED": "كلمة المرور يجب أن تكون 6 أحرف على الأقل",
         "PASSWORD_MISMATCH": "كلمات المرور غير متطابقة",
         "REGISTER_FAILED": "فشل إنشاء الحساب. يرجى المحاولة مرة أخرى."
-      }
+      },
+      "SIGN_UP_WITH_PASSKEY": "التسجيل بمفتاح المرور"
+    },
+    "VERIFY_EMAIL": {
+      "TITLE": "تأكيد بريدك الإلكتروني",
+      "SUBTITLE": "أدخل رمز التحقق المرسل إلى بريدك.",
+      "CODE_LABEL": "رمز التحقق",
+      "CODE_PLACEHOLDER": "أدخل الرمز",
+      "SUBMIT": "تأكيد",
+      "RESEND": "إعادة إرسال الرمز",
+      "RESEND_SENT": "إن كان بريدك مسجّلاً، فقد أرسلنا رمزاً جديداً.",
+      "RESEND_ERROR": "تعذر إعادة إرسال الرمز. حاول لاحقاً.",
+      "ERROR": "فشل التحقق. تحقق من الرمز.",
+      "UNVERIFIED_REDIRECT_INFO": "لم يُتحقق من بريدك الإلكتروني بعد. أدخل الرمز المرسل إلى بريدك أدناه، أو استخدم «إعادة إرسال الرمز». بعد التحقق يمكنك تفعيل المصادقة الثنائية وخيارات الأمان الأخرى.",
+      "BACK": "رجوع",
+      "BACK_TO_LOGIN": "العودة لتسجيل الدخول"
+    },
+    "PASSKEY": {
+      "TITLE": "تسجيل الدخول بمفتاح المرور",
+      "SUBTITLE": "استخدم مفتاح الأمان أو مفتاح المرور على جهازك.",
+      "BUTTON": "المتابعة بمفتاح المرور",
+      "SIGNUP_TITLE": "إنشاء حساب بمفتاح المرور",
+      "SIGNUP_SUBTITLE": "أدخل بريدك للبدء. قد تحتاج لتأكيد البريد أولاً، ثم سجّل مفتاح المرور عند الطلب.",
+      "SIGNUP_EMAIL_LABEL": "البريد الإلكتروني",
+      "SIGNUP_BUTTON": "المتابعة بمفتاح المرور",
+      "SETUP_TITLE": "إعداد مفتاح المرور",
+      "SETUP_SUBTITLE": "أضف مفتاح مرور إلى حسابك لتسجيل الدخول بشكل أسرع لاحقاً.",
+      "SETUP_BUTTON": "إضافة مفتاح مرور",
+      "SETUP_SUCCESS": "تمت إضافة مفتاح المرور بنجاح.",
+      "SIGNUP_SESSION_MISSING": "تعذر بدء التسجيل بمفتاح المرور (لا توجد جلسة من الخادم). أغلق التبويبات الأخرى، حدّث الصفحة، وحاول مرة أخرى.",
+      "WEBAUTHN_STATE_ERROR": "انتهت خطوة مفتاح المرور أو انقطعت. عُد وابدأ من جديد.",
+      "SETUP_REAUTH_REQUIRED": "للأمان، أكّد كلمة المرور قبل إضافة مفتاح المرور.",
+      "SETUP_REAUTH_LINK": "تأكيد كلمة المرور للمتابعة",
+      "BACK": "العودة لتسجيل الدخول",
+      "ERROR": "فشل تسجيل الدخول بمفتاح المرور.",
+      "CANCELLED": "تم إلغاء مفتاح المرور.",
+      "UNSUPPORTED": "مفاتيح المرور غير متاحة في هذا المتصفح أو البيئة. استخدم البريد وكلمة المرور أو طريقة أخرى.",
+      "RP_ID_ORIGIN_MISMATCH": "مفاتيح المرور مضبوطة لـ «{{rpId}}» بينما أنت على «{{host}}». افتح التطبيق من عنوان الموقع الصحيح، أو اضبط الـ API لاستخدام نفس نطاق التطوير (عرض environment.webauthnReplaceRpIdWithHostname).",
+      "RP_ID_BROWSER_REJECT": "المتصفح رفض مفتاح المرور لأن عنوان الموقع لا يطابق نطاق المفتاح. استخدم عنوان التشغيل أو الاختبار الرسمي للمشروع."
+    },
+    "LOGIN_BY_CODE": {
+      "TITLE": "تسجيل الدخول بالرمز",
+      "SUBTITLE": "سنرسل لك رمز تسجيل دخول لمرة واحدة عبر البريد.",
+      "SEND_CODE": "إرسال الرمز",
+      "CODE_LABEL": "الرمز",
+      "CODE_PLACEHOLDER": "أدخل الرمز من بريدك",
+      "SIGN_IN": "تسجيل الدخول",
+      "USE_OTHER_EMAIL": "استخدام بريد آخر",
+      "BACK": "العودة لتسجيل الدخول",
+      "RESEND": "إعادة إرسال الرمز",
+      "RESEND_SENT": "أُرسل رمز جديد إلى بريدك.",
+      "TRY_AGAIN_IN": "حاول مرة أخرى خلال {{seconds}}ث",
+      "RATE_LIMIT": "طلبات كثيرة. انتظر قليلاً ثم أعد المحاولة.",
+      "SESSION_GONE": "انتهت جلسة تسجيل الدخول. عُد إلى صفحة الدخول وابدأ من جديد.",
+      "INCORRECT_CODE": "الرمز غير صحيح أو منتهٍ. حاول مرة أخرى.",
+      "REQUEST_TIMEOUT": "استغرق طلب الرمز وقتاً طويلاً. حاول مرة أخرى.",
+      "REQUEST_ERROR": "تعذر إرسال الرمز. حاول مرة أخرى.",
+      "CONFIRM_ERROR": "رمز غير صحيح. حاول مرة أخرى."
+    },
+    "FORGOT_PASSWORD": {
+      "TITLE": "إعادة تعيين كلمة المرور",
+      "SUBTITLE": "أدخل بريدك. إن وُجد حساب، سنرسل رابطاً لإعادة تعيين كلمة المرور.",
+      "SUBTITLE_CODE": "أدخل بريدك. إن وُجد حساب، سنرسل رمزاً لاستخدامه في الخطوة التالية.",
+      "SUBMIT_LINK": "إرسال رابط الاستعادة",
+      "SUBMIT_CODE": "إرسال رمز الاستعادة",
+      "SENT": "إن وُجد حساب لهذا البريد، ستصلك التعليمات قريباً.",
+      "ERROR": "حدث خطأ. حاول مرة أخرى.",
+      "BACK": "العودة لتسجيل الدخول"
+    },
+    "RESET_PASSWORD": {
+      "TITLE": "اختر كلمة مرور جديدة",
+      "CODE_LABEL": "رمز الاستعادة",
+      "CODE_PLACEHOLDER": "أدخل الرمز من بريدك",
+      "CODE_SENT_HINT": "إن وُجد حساب، أرسلنا رمز استعادة إلى {{email}}.",
+      "NEW_PASSWORD": "كلمة المرور الجديدة",
+      "SUBMIT": "تحديث كلمة المرور",
+      "ERROR": "تعذر إعادة التعيين. قد يكون الرابط أو الرمز منتهي الصلاحية.",
+      "BACK": "العودة لتسجيل الدخول"
+    },
+    "CHANGE_PASSWORD": {
+      "SUBTITLE": "قم بتحديث كلمة المرور الخاصة بك للحفاظ على أمان حسابك.",
+      "CURRENT_PASSWORD": "كلمة المرور الحالية"
+    },
+    "MFA": {
+      "TITLE": "المصادقة الثنائية",
+      "SUBTITLE": "أدخل الرمز من تطبيق المصادقة أو رمز استرداد.",
+      "CODE_LABEL": "رمز المصادقة",
+      "CODE_PLACEHOLDER": "رمز مكوّن من 6 أرقام",
+      "SUBMIT": "تحقق",
+      "BACK": "العودة لتسجيل الدخول",
+      "ERROR": "رمز غير صحيح. حاول مرة أخرى.",
+      "USE_SECURITY_KEY": "استخدام مفتاح الأمان / مفتاح المرور"
+    },
+    "SECURITY": {
+      "TITLE": "أمان الحساب",
+      "SUBTITLE": "إدارة المصادقة الثنائية ورموز الاسترداد ومفاتيح المرور.",
+      "BACK": "العودة إلى المكتبة",
+      "LOAD_ERROR": "تعذر تحميل إعدادات الأمان. حاول لاحقاً.",
+      "AUTHENTICATORS_TITLE": "المصادقون المسجّلون",
+      "NO_AUTHENTICATORS": "لم يُسجَّل أي مصادق MFA بعد.",
+      "TOTP_TITLE": "تطبيق المصادقة (TOTP)",
+      "TOTP_SETUP_HINT": "امسح رمز otpauth في تطبيق المصادقة، ثم أدخل الرمز المكوّن من 6 أرقام للتأكيد.",
+      "TOTP_CODE_LABEL": "رمز التأكيد",
+      "TOTP_ACTIVATE": "تفعيل المصادق",
+      "TOTP_ACTIVE": "تطبيق المصادقة مفعّل.",
+      "TOTP_NOT_CONFIGURED_HINT": "تطبيق المصادقة (TOTP) غير مسجَّل بعد. يمكنك تفعيله بعد التحقق من بريدك الإلكتروني.",
+      "TOTP_DEACTIVATE": "إيقاف تطبيق المصادقة",
+      "TOTP_DEACTIVATE_CONFIRM": "إيقاف TOTP؟ لا يزال بإمكانك استخدام وسائل MFA أخرى إن وُجدت.",
+      "TOTP_DEACTIVATE_ERROR": "تعذر إيقاف TOTP.",
+      "TOTP_ACTIVATE_ERROR": "رمز غير صحيح أو تعذر تفعيل TOTP.",
+      "COPY_URI": "نسخ رابط الإعداد",
+      "RECOVERY_TITLE": "رموز الاسترداد",
+      "RECOVERY_HINT": "احفظ هذه الرموز في مكان آمن. كل رمز يُستخدم مرة واحدة إن فقدت الوصول إلى المصادق.",
+      "RECOVERY_COUNT": "{{unused}} من {{total}} رموز متبقية",
+      "RECOVERY_UNAVAILABLE": "لا توجد رموز استرداد للعرض بعد. تظهر بعد تفعيل MFA (مثل TOTP).",
+      "RECOVERY_ONE_TIME_VISIBILITY": "قد لا يعرضها الخادم مرة أخرى. انسخها أو نزّلها الآن واحفظها في مكان آمن.",
+      "RECOVERY_JUST_GENERATED": "تم إنشاء رموز جديدة للتو. احفظها الآن — قد لا تتمكن من عرضها مجدداً بعد مغادرة هذه الصفحة.",
+      "RECOVERY_REDACTED": "توجد رموز استرداد غير مستخدمة في حسابك، لكن القائمة الكاملة مخفية لأسباب أمنية. أنشئ رموزاً جديدة إن احتجت نسخة قابلة للطباعة (يلغي ذلك الرموز غير المستخدمة الحالية).",
+      "RECOVERY_ALL_USED": "استُخدمت جميع رموز الاسترداد. أنشئ مجموعة جديدة إن احتجت رموزاً احتياطية لتسجيل الدخول.",
+      "RECOVERY_LOAD_ERROR": "تعذر تحميل رموز الاسترداد.",
+      "COPY_ALL": "نسخ الكل",
+      "DOWNLOAD": "تنزيل (.txt)",
+      "RECOVERY_REGEN": "إنشاء رموز استرداد جديدة…",
+      "RECOVERY_REGEN_WARN": "هذا يلغي جميع رموز الاسترداد غير المستخدمة سابقاً. تابع فقط إن احتفظت بالمجموعة الجديدة.",
+      "RECOVERY_REGEN_CONFIRM": "إنشاء رموز جديدة",
+      "RECOVERY_REGEN_ERROR": "تعذر إعادة إنشاء رموز الاسترداد.",
+      "PASSKEY_TITLE": "مفاتيح المرور",
+      "PASSKEY_HINT": "أضف مفتاح مرور لتسجيل الدخول دون إدخال كلمة المرور في كل مرة.",
+      "PASSKEY_SETUP_LINK": "إضافة أو إدارة مفاتيح المرور",
+      "TOTP_SCAN_QR": "امسح رمز QR بتطبيق المصادقة، أو انسخ الرابط أدناه.",
+      "AUTHENTICATORS_PASSKEY_ONLY_HINT": "يُعرض مفاتيح المرور أدناه فقط؛ استخدم قسم مفاتيح المرور لإدارتها.",
+      "PASSKEY_NAME_LABEL": "اسم مفتاح المرور",
+      "PASSKEY_SAVE_NAME": "حفظ الاسم",
+      "PASSKEY_DELETE": "إزالة مفتاح المرور",
+      "PASSKEY_DELETE_CONFIRM": "إزالة مفتاح المرور هذا من حسابك؟",
+      "PASSKEY_DELETE_ERROR": "تعذر إزالة مفتاح المرور.",
+      "PASSKEY_RENAME_ERROR": "تعذر تحديث اسم مفتاح المرور.",
+      "PASSKEY_EMPTY": "لا توجد مفاتيح مرور مسجّلة بعد."
+    },
+    "ACCOUNT": {
+      "BACK_PROFILE": "العودة إلى الحساب"
+    },
+    "EMAIL": {
+      "TITLE": "عناوين البريد",
+      "SUBTITLE": "إدارة العناوين على حسابك وتعيين الرئيسي وطلب التحقق.",
+      "LIST_TITLE": "عناوينك",
+      "ADD_TITLE": "إضافة عنوان بريد",
+      "NEW_LABEL": "بريد جديد",
+      "ADD_BUTTON": "إضافة البريد",
+      "PRIMARY": "رئيسي",
+      "VERIFIED": "مُتحقق",
+      "UNVERIFIED": "غير مُتحقق",
+      "MAKE_PRIMARY": "تعيين كرئيسي",
+      "SEND_VERIFY": "إرسال تحقق",
+      "REMOVE": "إزالة",
+      "EMPTY": "لا توجد عناوين.",
+      "LOAD_ERROR": "تعذر تحميل العناوين.",
+      "ACTION_ERROR": "حدث خطأ. حاول مرة أخرى.",
+      "ADD_SUCCESS": "تمت إضافة البريد.",
+      "PRIMARY_SUCCESS": "تم تحديث البريد الرئيسي.",
+      "VERIFY_SENT": "طلب تحقق — راجع بريدك.",
+      "REMOVE_SUCCESS": "تمت إزالة البريد.",
+      "REMOVE_CONFIRM": "إزالة {{email}} من هذا الحساب؟"
+    },
+    "SESSIONS": {
+      "TITLE": "الجلسات",
+      "SUBTITLE": "الأجهزة التي سجّلت الدخول منها. أنهِ أي جلسة لا تعرفها.",
+      "CURRENT": "هذه الجلسة",
+      "UNKNOWN_UA": "متصفح غير معروف",
+      "IP": "عنوان IP",
+      "CREATED": "تاريخ الإنشاء",
+      "LAST_SEEN": "آخر ظهور",
+      "REVOKE": "تسجيل الخروج",
+      "REVOKE_OTHERS": "إنهاء الجلسات الأخرى",
+      "REVOKE_CONFIRM": "إنهاء هذه الجلسة؟",
+      "REVOKE_OTHERS_CONFIRM": "إنهاء جميع الجلسات الأخرى؟",
+      "REVOKE_SUCCESS": "تم تحديث الجلسات.",
+      "EMPTY": "لا توجد جلسات للعرض.",
+      "LOAD_ERROR": "تعذر تحميل الجلسات.",
+      "ACTION_ERROR": "تعذر تحديث الجلسات."
+    },
+    "API_KEYS": {
+      "TITLE": "مفاتيح API",
+      "SUBTITLE": "أنشئ مفاتيح للوصول إلى أصول CMS برمجياً. احفظ الأسرار بأمان — تُعرض القيم الكاملة مرة واحدة فقط.",
+      "CREATE_SECTION": "إنشاء مفتاح",
+      "CREATE_HINT": "اختر اسماً واضحاً حتى يمكن سحبه أو تجديده لاحقاً.",
+      "NAME_LABEL": "اسم المفتاح",
+      "NAME_PLACEHOLDER": "مثل: الزحّاف الإنتاجي",
+      "CREATE_TOGGLE": "إنشاء مفتاح",
+      "CREATE_BUTTON": "إنشاء مفتاح API",
+      "CREATE_CANCEL": "إلغاء",
+      "LIST_SECTION": "مفاتيحك",
+      "EMPTY": "لا توجد مفاتيح بعد.",
+      "LOAD_ERROR": "تعذر تحميل مفاتيح API.",
+      "ACTION_ERROR": "حدث خطأ. حاول مرة أخرى.",
+      "CREATE_SUCCESS": "تم إنشاء مفتاح API.",
+      "CREATE_MISSING_RAW_HINT": "لم يُرجع الطلب السر كنصًا. حدّث الصفحة؛ إذا استمر الأمر تحقق من شكل استجابة الخادم.",
+      "REVEAL_TITLE": "مفتاحك الجديد (انسخ الآن)",
+      "REVEAL_HINT": "احفظ المفتاح في مكان آمن. لا يمكن عرض النص الكامل مرة أخرى بعد مغادرتك لهذه الصفحة.",
+      "REVEAL_EMPTY": "لم يُعد السر كنصًا — إن ضاع قد تحتاج لإنشاء مفتاح جديد.",
+      "COPY": "نسخ إلى الحافظة",
+      "COPY_OK": "تم النسخ.",
+      "DONE": "لقد احتفظت به",
+      "STATUS_ACTIVE": "نشط",
+      "STATUS_REVOKED": "ملغى",
+      "CREATED": "تاريخ الإنشاء",
+      "LAST_USED": "آخر استخدام",
+      "RENAME": "إعادة تسمية",
+      "RENAME_REQUIRED": "أدخل اسماً للمفتاح.",
+      "RENAME_SUCCESS": "تم تحديث مفتاح API.",
+      "REVOKE": "إلغاء",
+      "REVOKE_CONFIRM": "إلغاء مفتاح API هذا؟ ستتوقف الطلبات التي تستخدم هذا المفتاح.",
+      "REVOKE_SUCCESS": "تم إلغاء مفتاح API.",
+      "DELETE": "حذف",
+      "DELETE_CONFIRM": "حذف مفتاح API نهائياً؟ لا يمكن التراجع.",
+      "DELETE_SUCCESS": "تم حذف مفتاح API."
+    },
+    "PROVIDERS": {
+      "TITLE": "الحسابات المرتبطة",
+      "SUBTITLE": "تسجيلات الدخول الاجتماعية المرتبطة بحسابك.",
+      "CONNECT_SECTION": "ربط مزوّد",
+      "CONNECT_HINT": "ستقوم بتسجيل الدخول عبر المزوّد ثم العودة إلى هنا بعد الموافقة.",
+      "CONNECT_TECH_HINT": "إذا فشل الربط أو لم يحدث شيء، غالبًا تحتاج الواجهة وواجهة الـ API لنفس الأصل في المتصفح أو reverse proxy. راجع docs/AUTH_FLOW_MATRIX.md (Browser OAuth).",
+      "CONNECT_GOOGLE": "ربط Google",
+      "CONNECT_GITHUB": "ربط GitHub",
+      "APP_MODE_HINT": "إضافة مزوّدين جدد من هذا التطبيق يتطلّب تفعيل إعادة توجيه OAuth في إعدادات النشر.",
+      "DISCONNECT": "فصل",
+      "DISCONNECT_CONFIRM": "فصل هذا المزوّد عن حسابك؟",
+      "DISCONNECT_SUCCESS": "تم فصل المزوّد.",
+      "EMPTY": "لا توجد حسابات مرتبطة.",
+      "LOAD_ERROR": "تعذر تحميل الحسابات المرتبطة.",
+      "ACTION_ERROR": "تعذر فصل المزوّد.",
+      "CONNECT_ERROR": "تعذر بدء ربط {{provider}}.",
+      "CONNECT_CROSS_ORIGIN_ERROR": "ربط المزوّد يتطلب أن يكون الـ API والتطبيق على نفس الأصل في هذه البيئة. استخدم نطاق CMS الخاص بالـ staging أو فعّل reverse proxy."
+    },
+    "PROFILE": {
+      "TITLE": "حسابك",
+      "SUBTITLE": "الملف الشخصي وإعدادات الأمان في مكان واحد.",
+      "BACK_LIBRARY": "العودة إلى المكتبة",
+      "IDENTITY_TITLE": "الهوية",
+      "NAME": "الاسم",
+      "EMAIL": "البريد",
+      "PHONE": "الهاتف",
+      "ACCOUNT_TITLE": "الحساب والأمان",
+      "ACCOUNT_HINT": "إدارة تسجيل الدخول وMFA والأجهزة والمزوّدين.",
+      "LINK_EMAILS": "عناوين البريد",
+      "LINK_PASSWORD": "تغيير كلمة المرور",
+      "LINK_SECURITY": "الأمان وMFA",
+      "LINK_SESSIONS": "الجلسات النشطة",
+      "LINK_API_KEYS": "مفاتيح API",
+      "LINK_PROVIDERS": "الحسابات المرتبطة",
+      "CMS_TITLE": "ملف CMS",
+      "CMS_HINT": "المعلومات المعروضة في النظام (نبذة، روابط).",
+      "LOAD_ERROR": "تعذر تحميل تفاصيل الملف.",
+      "SAVE_SUCCESS": "تم حفظ الملف.",
+      "SAVE_ERROR": "تعذر حفظ الملف."
+    },
+    "REAUTH": {
+      "TITLE": "تأكيد هويتك",
+      "SUBTITLE": "لأمانك، أكّد كلمة المرور أو استخدم مفتاح المرور.",
+      "SUBTITLE_PASSWORD_ONLY": "لأمانك، أكّد كلمة المرور.",
+      "SUBMIT": "تأكيد",
+      "OR_MFA": "أو استخدم رمز المصادقة / الاسترداد",
+      "SUBMIT_MFA": "تأكيد بالرمز",
+      "USE_PASSKEY": "استخدام مفتاح المرور",
+      "CANCEL": "إلغاء",
+      "ERROR": "كلمة مرور غير صحيحة.",
+      "PASSKEY_ERROR": "فشل التحقق بمفتاح المرور.",
+      "MFA_ERROR": "رمز مصادقة غير صحيح."
     },
     "OAUTH": {
       "PROCESSING": "جاري معالجة المصادقة...",
       "SUCCESS": "تم التسجيل بنجاح! جاري التحويل...",
       "ERROR": "فشل التسجيل. يرجى المحاولة مرة أخرى.",
       "INVALID_STATE": "حالة مصادقة غير صحيحة. يرجى المحاولة مرة أخرى."
+    },
+    "PROVIDER_SIGNUP": {
+      "TITLE": "أكمل إنشاء الحساب",
+      "DESC": "نحتاج قليلاً من المعلومات لإكمال تسجيلك بعد تسجيل الدخول عبر المزوّد.",
+      "SUBMIT": "متابعة",
+      "ERROR": "تعذر إكمال التسجيل. يرجى المحاولة مرة أخرى.",
+      "LOAD_ERROR": "تعذر تحميل بيانات هذه الخطوة. قد لا تكون متاحة."
     }
   },
   "NAVIGATION": {
@@ -68,6 +347,9 @@
     "LICENSES": "التراخيص",
     "LOGIN": "تسجيل الدخول",
     "LOGOUT": "تسجيل الخروج",
+    "ACCOUNT_SECURITY": "الأمان",
+    "ACCOUNT_PROFILE": "الحساب",
+    "PASSKEY_SETUP": "مفتاح المرور",
     "ADMIN_PORTAL": "لوحة الإدارة"
   },
   "SETTINGS": "الإعدادات",
@@ -82,7 +364,9 @@
     "BACK": "رجوع",
     "NEXT": "التالي",
     "SUBMIT": "إرسال",
-    "CLOSE": "إغلاق"
+    "CLOSE": "إغلاق",
+    "REFRESH": "تحديث",
+    "REDIRECT_TO_LIBRARY_IN": "سنوصلك إلى المكتبة خلال {{seconds}} ثانية…"
   },
   "FORMS": {
     "PLACEHOLDERS": {
@@ -108,6 +392,7 @@
     "NETWORK_ERROR": "خطأ في الشبكة. يرجى التحقق من اتصالك والمحاولة مرة أخرى.",
     "SERVER_ERROR": "خطأ في الخادم. يرجى المحاولة مرة أخرى لاحقاً.",
     "VALIDATION_ERROR": "يرجى تصحيح الأخطاء والمحاولة مرة أخرى.",
+    "UNAUTHORIZED_TITLE": "تم رفض الوصول",
     "UNAUTHORIZED": "غير مخول للقيام بهذا الإجراء.",
     "FORBIDDEN": "الوصول محظور.",
     "NOT_FOUND": "المورد المطلوب غير موجود."
@@ -380,6 +665,7 @@
       "SAVE": "حفظ",
       "CANCEL": "إلغاء",
       "COMING_SOON": "قريباً",
+      "COMING_SOON_DETAIL": "هذا القسم لا يزال قيد الإعداد. سيتم تحويلك إلى المكتبة قريباً.",
       "DELETE_CONFIRM_BODY": "<strong>{{name}}</strong> — هذا الإجراء لا يمكن التراجع عنه.",
       "YES_DELETE": "نعم، احذف",
       "NAME_EN": "الاسم بالإنجليزية",
@@ -387,7 +673,13 @@
       "DESCRIPTION_EN": "الوصف بالإنجليزية",
       "DESCRIPTION_AR": "الوصف بالعربية",
       "PLACEHOLDER_EG": "مثال:",
-      "EM_DASH": "—"
+      "EM_DASH": "—",
+      "HIJRI_YEAR_SUFFIX": "هـ"
+    },
+    "TENANT": {
+      "ARIA_LABEL": "محدد نطاق الناشر",
+      "PLACEHOLDER": "اختر الناشر",
+      "EMPTY": "لا يوجد ناشرون متاحون"
     },
     "REFRESH_PROMPT": {
       "TITLE": "هل تريد إعادة تهيئة البيانات؟",
@@ -404,7 +696,9 @@
       "PUBLISHERS": "الناشرون",
       "AUDIO": "الصوتيات",
       "MANAGE_PROFILE": "إدارة الملف",
-      "BACK_TO_GALLERY": "العودة إلى المعرض"
+      "BACK_TO_GALLERY": "العودة إلى المعرض",
+      "USAGE": "إحصائيات API",
+      "ISSUES": "إدارة البلاغات"
     },
     "PROFILE": {
       "TITLE": "ملف الناشر",
@@ -528,7 +822,49 @@
         "VERSION_COL_NAME": "اسم الإصدار",
         "VERSION_COL_SIZE": "الحجم",
         "VERSION_COL_DATE": "تاريخ الإضافة",
-        "VERSION_COL_FILE": "الملف"
+        "VERSION_COL_FILE": "الملف",
+        "VERSIONS": {
+          "ADD_BUTTON": "إضافة إصدار جديد",
+          "MODAL_TITLE_CREATE": "إضافة إصدار جديد",
+          "MODAL_TITLE_EDIT": "تعديل الإصدار",
+          "FORM_NAME": "اسم الإصدار",
+          "FORM_SUMMARY": "الملخص",
+          "PLACEHOLDER_NAME": "مثال: v1.0 — النص الكامل",
+          "PLACEHOLDER_SUMMARY": "ملاحظات قصيرة عن هذا الملف…",
+          "ERR_NAME": "اسم الإصدار مطلوب",
+          "ERR_SUMMARY": "الملخص مطلوب",
+          "CHOOSE_FILE": "اختر ملفًا",
+          "SUBMIT_CREATE": "رفع الإصدار",
+          "SUBMIT_UPDATE": "حفظ التعديلات",
+          "CANCEL_EDIT": "إلغاء",
+          "CLEAR_FILE": "إزالة الملف",
+          "EDIT_FILE_HINT": "اختياري: اختر ملفًا جديدًا لاستبدال الحالي.",
+          "FILE_REQUIRED_HINT": "اختر ملفًا للرفع.",
+          "LIST_TITLE": "الإصدارات المنشورة",
+          "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
+          "COL_NAME": "اسم الإصدار",
+          "COL_SUMMARY": "الملخص",
+          "COL_SIZE": "الحجم",
+          "COL_DATE": "تاريخ الإضافة",
+          "COL_FILE": "الملف",
+          "COL_ACTIONS": "الإجراءات",
+          "TOOLTIP_EDIT": "تعديل",
+          "TOOLTIP_DELETE": "حذف",
+          "EMPTY_TITLE": "لا توجد إصدارات بعد",
+          "EMPTY_SUBTITLE": "استخدم «إضافة إصدار جديد» لرفع ملف.",
+          "DELETE_CONFIRM_TITLE": "حذف هذا الإصدار؟",
+          "DELETE_CONFIRM_BODY": "<b>{{name}}</b> — لا يمكن التراجع عن هذا الإجراء.",
+          "DELETE_OK": "حذف",
+          "MESSAGES": {
+            "LOAD_ERROR": "تعذّر تحميل الإصدارات.",
+            "SAVE_ERROR": "تعذّر حفظ الإصدار. حاول مرة أخرى.",
+            "CREATE_SUCCESS": "تمت إضافة الإصدار.",
+            "UPDATE_SUCCESS": "تم تحديث الإصدار.",
+            "DELETE_SUCCESS": "تم حذف الإصدار.",
+            "DELETE_ERROR": "تعذّر حذف الإصدار.",
+            "FILE_REQUIRED": "اختر ملفًا للرفع."
+          }
+        }
       },
       "MESSAGES": {
         "CREATE_SUCCESS": "تم إضافة التفسير بنجاح",
@@ -629,7 +965,49 @@
         "VERSION_COL_NAME": "اسم الإصدار",
         "VERSION_COL_SIZE": "الحجم",
         "VERSION_COL_DATE": "تاريخ الإضافة",
-        "VERSION_COL_FILE": "الملف"
+        "VERSION_COL_FILE": "الملف",
+        "VERSIONS": {
+          "ADD_BUTTON": "إضافة إصدار جديد",
+          "MODAL_TITLE_CREATE": "إضافة إصدار جديد",
+          "MODAL_TITLE_EDIT": "تعديل الإصدار",
+          "FORM_NAME": "اسم الإصدار",
+          "FORM_SUMMARY": "الملخص",
+          "PLACEHOLDER_NAME": "مثال: v1.0 — النص الكامل",
+          "PLACEHOLDER_SUMMARY": "ملاحظات قصيرة عن هذا الملف…",
+          "ERR_NAME": "اسم الإصدار مطلوب",
+          "ERR_SUMMARY": "الملخص مطلوب",
+          "CHOOSE_FILE": "اختر ملفًا",
+          "SUBMIT_CREATE": "رفع الإصدار",
+          "SUBMIT_UPDATE": "حفظ التعديلات",
+          "CANCEL_EDIT": "إلغاء",
+          "CLEAR_FILE": "إزالة الملف",
+          "EDIT_FILE_HINT": "اختياري: اختر ملفًا جديدًا لاستبدال الحالي.",
+          "FILE_REQUIRED_HINT": "اختر ملفًا للرفع.",
+          "LIST_TITLE": "الإصدارات المنشورة",
+          "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
+          "COL_NAME": "اسم الإصدار",
+          "COL_SUMMARY": "الملخص",
+          "COL_SIZE": "الحجم",
+          "COL_DATE": "تاريخ الإضافة",
+          "COL_FILE": "الملف",
+          "COL_ACTIONS": "الإجراءات",
+          "TOOLTIP_EDIT": "تعديل",
+          "TOOLTIP_DELETE": "حذف",
+          "EMPTY_TITLE": "لا توجد إصدارات بعد",
+          "EMPTY_SUBTITLE": "استخدم «إضافة إصدار جديد» لرفع ملف.",
+          "DELETE_CONFIRM_TITLE": "حذف هذا الإصدار؟",
+          "DELETE_CONFIRM_BODY": "<b>{{name}}</b> — لا يمكن التراجع عن هذا الإجراء.",
+          "DELETE_OK": "حذف",
+          "MESSAGES": {
+            "LOAD_ERROR": "تعذّر تحميل الإصدارات.",
+            "SAVE_ERROR": "تعذّر حفظ الإصدار. حاول مرة أخرى.",
+            "CREATE_SUCCESS": "تمت إضافة الإصدار.",
+            "UPDATE_SUCCESS": "تم تحديث الإصدار.",
+            "DELETE_SUCCESS": "تم حذف الإصدار.",
+            "DELETE_ERROR": "تعذّر حذف الإصدار.",
+            "FILE_REQUIRED": "اختر ملفًا للرفع."
+          }
+        }
       },
       "MESSAGES": {
         "CREATE_SUCCESS": "تم إضافة الترجمة بنجاح",
@@ -716,6 +1094,7 @@
         "LABEL_QIRAAH": "القراءة",
         "LABEL_RIWAYAH": "الرواية",
         "LABEL_PUBLISHER": "الناشر",
+        "DOWNLOAD_AYAH_TIMING": "تحميل ملف التزمين",
         "DESC_AR": "الوصف (عربي)",
         "DESC_EN": "الوصف (إنجليزي)"
       },
@@ -794,6 +1173,28 @@
           "DELETE_OK": "تم حذف الملف الصوتي.",
           "DELETE_ERROR": "تعذر حذف الملف الصوتي."
         }
+      },
+      "TIMINGS": {
+        "SECTION_TITLE": "تزمين الآيات",
+        "NO_FILE_YET": "لم يُرفع ملف تزمين للآيات بعد.",
+        "CHOOSE_FILES": "اختر ملفات JSON",
+        "UPLOAD": "رفع التزمين",
+        "CLEAR": "مسح",
+        "HINT": "ملف JSON لكل سورة. تُرسل كل الملفات في طلب رفع واحد.",
+        "BANNER": {
+          "TITLE": "اكتمل رفع التزمين"
+        },
+        "ERRORS": {
+          "EXTRA_CREATED": "تم الإنشاء: {{n}}",
+          "EXTRA_UPDATED": "تم التحديث: {{n}}",
+          "EXTRA_SKIPPED": "تم التخطي: {{n}}",
+          "EXTRA_MISSING_TRACKS": "لا يوجد ملف صوتي لأرقام السور: {{surahs}}",
+          "EXTRA_FILE_ISSUES": "مشاكل في الملفات:"
+        },
+        "MESSAGES": {
+          "UPLOAD_OK": "تم رفع ملفات التزمين بنجاح.",
+          "UPLOAD_ERROR": "تعذر رفع ملفات التزمين. حاول مرة أخرى."
+        }
       }
     },
     "RECITERS": {
@@ -825,6 +1226,12 @@
         "SUBTITLE_EDIT": "قم بتحديث بيانات القارئ",
         "BACK_LIST": "العودة للقائمة",
         "SECTION_NAME": "الاسم",
+        "SECTION_IMAGE": "الصورة",
+        "IMAGE_HINT": "صورة القارئ (صورة واحدة، بحد أقصى 10 ميجابايت)",
+        "REMOVE_IMAGE": "إزالة الصورة",
+        "UPLOAD_IMAGE": "رفع صورة",
+        "MSG_IMAGE_TYPE": "يرجى اختيار ملف صورة",
+        "MSG_IMAGE_SIZE": "يجب ألا يتجاوز حجم الصورة 10 ميجابايت",
         "SECTION_BIO": "السيرة",
         "SECTION_EXTRA": "البيانات الإضافية",
         "ERR_NAME_AR": "الاسم بالعربية مطلوب",
@@ -865,6 +1272,73 @@
         "DELETE_SUCCESS": "تم حذف القارئ بنجاح"
       }
     },
+    "ISSUES": {
+      "TITLE": "إدارة البلاغات",
+      "SUBTITLE": "عرض ومتابعة بلاغات المستخدمين على أصول الناشرين",
+      "EMPTY_TITLE": "لا توجد بلاغات",
+      "ADD_BUTTON": "تسجيل بلاغ",
+      "LIST_ERROR_TITLE": "تعذر تحميل البلاغات",
+      "LIST_ERROR_DESC": "تحقق من الاتصال وحاول مرة أخرى. إذا استمرت المشكلة، تواصل مع الدعم.",
+      "COLUMNS": {
+        "ID": "المعرّف",
+        "ASSET": "الأصل",
+        "DESCRIPTION": "الوصف",
+        "STATUS": "الحالة",
+        "REPORTER": "المُبلّغ",
+        "CREATED_AT": "تاريخ الإنشاء",
+        "ACTIONS": "الإجراءات"
+      },
+      "FILTERS": {
+        "STATUS": "الحالة",
+        "REPORTER_ID": "معرّف المُبلّغ"
+      },
+      "STATUS": {
+        "PENDING": "قيد الانتظار",
+        "UNDER_REVIEW": "قيد المراجعة",
+        "RESOLVED": "تم الحل",
+        "DISMISSED": "مرفوض"
+      },
+      "DETAIL": {
+        "BREADCRUMB": "إدارة البلاغات",
+        "ASSET_ID": "معرّف الأصل",
+        "DESCRIPTION_TITLE": "الوصف",
+        "NOT_FOUND": "تعذر العثور على هذا البلاغ."
+      },
+      "DELETE": {
+        "CONFIRM_TITLE": "حذف هذا البلاغ؟",
+        "CONFIRM_BODY": "<b>{{name}}</b> — هذا الإجراء لا يمكن التراجع عنه.",
+        "OK": "نعم، احذف",
+        "CANCEL": "إلغاء",
+        "DEFAULT_LABEL": "هذا البلاغ"
+      },
+      "MESSAGES": {
+        "CREATE_SUCCESS": "تم تسجيل البلاغ",
+        "CREATE_ERROR": "تعذر تسجيل البلاغ",
+        "UPDATE_SUCCESS": "تم تحديث البلاغ",
+        "UPDATE_ERROR": "تعذر تحديث البلاغ",
+        "DELETE_SUCCESS": "تم حذف البلاغ",
+        "DELETE_ERROR": "تعذر حذف البلاغ",
+        "LOAD_ERROR": "تعذر تحميل البلاغ"
+      },
+      "FORM": {
+        "TITLE_CREATE": "تسجيل بلاغ",
+        "TITLE_EDIT": "تعديل البلاغ",
+        "SUBTITLE_CREATE": "اختر الأصل وصف المشكلة",
+        "SUBTITLE_EDIT": "حدّث الوصف أو الحالة",
+        "BACK_LIST": "العودة للقائمة",
+        "SECTION_REPORT": "البلاغ",
+        "ASSET_LABEL": "الأصل",
+        "ASSET_PLACEHOLDER": "ابحث عن أصل…",
+        "ASSET_READONLY": "الأصل المرتبط",
+        "ERR_ASSET": "يرجى اختيار أصل",
+        "STATUS_LABEL": "الحالة",
+        "STATUS_PLACEHOLDER": "اختر الحالة",
+        "ERR_STATUS": "يرجى اختيار الحالة",
+        "DESCRIPTION_LABEL": "الوصف",
+        "DESCRIPTION_PLACEHOLDER": "صف المشكلة…",
+        "ERR_DESCRIPTION": "أدخل وصفاً لا يقل عن 3 أحرف"
+      }
+    },
     "PUBLISHERS": {
       "TITLE": "الناشرون",
       "SUBTITLE": "إدارة الجهات والمؤسسات الناشرة للمحتوى القرآني",
@@ -874,7 +1348,7 @@
       "COLUMNS": {
         "NAME": "الاسم",
         "COUNTRY": "الدولة",
-        "DESCRIPTION": "الوصف",
+        "FOUNDATION_YEAR": "سنة التأسيس",
         "VERIFIED": "موثق",
         "CREATED_AT": "تاريخ الإضافة",
         "ACTIONS": "الإجراءات"
@@ -902,6 +1376,8 @@
         "UPLOAD_IMAGE": "رفع صورة",
         "ERR_NAME_AR": "الاسم بالعربية مطلوب",
         "ERR_EMAIL": "البريد غير صالح",
+        "ERR_FOUNDATION_YEAR": "أدخل سنة صحيحة",
+        "PLACEHOLDER_FOUNDATION_YEAR_HIJRI": "السنة (هجري)",
         "SAVE_EDIT": "حفظ التعديلات",
         "SAVE_CREATE": "إضافة الناشر",
         "CONFIRM_EDIT_TITLE": "تأكيد تعديل الناشر",
@@ -1000,5 +1476,15 @@
       "TAB_BACKEND": "Backend",
       "TAB_IMPORT": "إستيراد البيانات"
     }
+  },
+  "USAGE": {
+    "TITLE": "إحصائيات API",
+    "SUBTITLE": "تحليلات طلبات API لحساب الناشر",
+    "ALL_PUBLISHERS": "جميع الناشرين",
+    "REQUESTS_OVER_TIME": "الطلبات عبر الزمن",
+    "TOP_ENDPOINTS": "أكثر النقاط استخداما",
+    "TOP_ENTITIES": "أكثر الكيانات طلبا",
+    "NO_DATA": "لا توجد بيانات للفترة المحددة",
+    "ERROR_UNAVAILABLE": "إحصائيات الاستخدام غير متاحة مؤقتا. يرجى المحاولة لاحقا."
   }
 }

@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import type { RecitationTimingUploadOut } from '../models/recitation-timings.models';
 import type {
   RecitationSurahTrackListItem,
   RecitationTrackDeleteTracksIn,
@@ -107,6 +108,19 @@ export class RecitationsService {
     return this.http.delete<void>(`${this.apiUrl}${slug}/`);
   }
 
+  /** POST /portal/timing/upload/ — multipart: asset_id, files[] */
+  recitationTimingUpload(assetId: number, files: File[]): Observable<RecitationTimingUploadOut> {
+    const formData = new FormData();
+    formData.append('asset_id', String(assetId));
+    for (const file of files) {
+      formData.append('files', file, file.name);
+    }
+    return this.http.post<RecitationTimingUploadOut>(
+      `${this.portalBaseUrl}/timing/upload/`,
+      formData
+    );
+  }
+
   // --- Recitation surah tracks (portal) ---
 
   recitationTracksValidateUpload(
@@ -163,8 +177,8 @@ export class RecitationsService {
    * (Previously numeric asset id in path; backend accepts recitation slug in the same segment.)
    */
   recitationTracksList(params: {
-    slug: string;
-    /** Passed through to normalized list rows for upload/delete flows that still reference asset_id. */
+    recitation_slug: string;
+    /** Recitation id — upload/delete APIs still use this as `asset_id`; list rows keep it for UI. */
     asset_id: number;
     page?: number;
     page_size?: number;
@@ -173,7 +187,7 @@ export class RecitationsService {
       .set('page', (params.page ?? 1).toString())
       .set('page_size', (params.page_size ?? 10).toString());
 
-    const url = `${this.portalBaseUrl}/recitations/${encodeURIComponent(params.slug)}/recitation-tracks/`;
+    const url = `${this.portalBaseUrl}/recitations/${encodeURIComponent(params.recitation_slug)}/recitation-tracks/`;
 
     return this.http
       .get<{ results: RecitationTrackOut[]; count: number }>(url, { params: httpParams })

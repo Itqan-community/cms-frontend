@@ -60,6 +60,7 @@ export interface RecitationDetails {
   meem_behaviour: MeemBehavior | null;
   year: number | null;
   license: string;
+  ayah_timings_url?: string | null;
   created_at: string;
   updated_at: string;
 }

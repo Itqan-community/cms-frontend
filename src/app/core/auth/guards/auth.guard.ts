@@ -2,6 +2,7 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { ALLAUTH_LOGIN_URL } from '../headless/allauth-auth.hooks';
 import { AuthService } from '../services/auth.service';
 
 /**
@@ -34,8 +35,8 @@ export const authGuard: CanActivateFn = (route, state) => {
   message.warning(translate.instant('AUTH.MUST_LOGIN_TO_VIEW'));
 
   // Store the attempted URL for redirecting after login
-  router.navigate(['/login'], {
-    queryParams: { returnUrl: state.url },
+  router.navigate([ALLAUTH_LOGIN_URL], {
+    queryParams: { next: state.url },
   });
 
   return false;

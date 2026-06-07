@@ -1,22 +1,25 @@
 import { DatePipe } from '@angular/common';
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Component, computed, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { NgIcon } from '@ng-icons/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzTableModule, NzTableSortOrder } from 'ng-zorro-antd/table';
+import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import { NgIcon } from '@ng-icons/core';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
-import { AssetSortingQuery, TafsirFilters, TafsirItem } from '../../models/tafsirs.models';
-import { TafsirsService } from '../../services/tafsirs.service';
 import {
   AdminColumnPickerComponent,
   AdminTableColumnOption,
 } from '../../../components/admin-column-picker/admin-column-picker.component';
+import { AssetSortingQuery, TafsirFilters, TafsirItem } from '../../models/tafsirs.models';
+import { TafsirsService } from '../../services/tafsirs.service';
 import { TafsirFiltersComponent } from '../tafsir-filters/tafsir-filters.component';
+import { AdminListBase } from '../../../utils/admin-list-base';
+import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
+import { AdminAuthService } from '../../../services/admin-auth.service';
 
 @Component({
   selector: 'app-tafsirs-list',
@@ -38,15 +41,17 @@ import { TafsirFiltersComponent } from '../tafsir-filters/tafsir-filters.compone
   templateUrl: './tafsirs-list.component.html',
   styleUrl: './tafsirs-list.component.less',
 })
-export class TafsirsListComponent implements OnInit {
+export class TafsirsListComponent extends AdminListBase<TafsirItem, TafsirFilters> {
   private readonly tafsirsService = inject(TafsirsService);
-  private readonly router = inject(Router);
+  private readonly adminAuth = inject(AdminAuthService);
 
-  readonly tafsirs = signal<TafsirItem[]>([]);
-  readonly total = signal(0);
-  readonly page = signal(1);
-  readonly pageSize = signal(10);
-  readonly loading = signal(false);
+  readonly canCreateTafsir = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_CREATE_TAFSIR)
+  );
+
+  readonly canUpdateTafsir = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR)
+  );
 
   readonly tafsirTableStorageKey = 'admin-list-tafsirs';
   readonly tafsirTableColumns: AdminTableColumnOption[] = [
@@ -56,15 +61,12 @@ export class TafsirsListComponent implements OnInit {
     { key: 'license', label: 'ADMIN.TAFSIRS.COLUMNS.LICENSE' },
     { key: 'created', label: 'ADMIN.TAFSIRS.COLUMNS.CREATED_AT' },
   ];
-  private readonly columnVisibility = signal<Record<string, boolean>>({});
-
-  private activeFilters: Partial<TafsirFilters> = {};
-  private ordering: AssetSortingQuery | undefined;
 
   readonly licensesColors = LicensesColors;
 
-  ngOnInit(): void {
-    this.load();
+  constructor() {
+    super();
+    this.initList(this.tafsirTableStorageKey);
   }
 
   load(): void {
@@ -74,11 +76,11 @@ export class TafsirsListComponent implements OnInit {
         page: this.page(),
         page_size: this.pageSize(),
         ...this.activeFilters,
-        ordering: this.ordering,
+        ordering: this.ordering as AssetSortingQuery,
       })
       .subscribe({
         next: (res) => {
-          this.tafsirs.set(res.results);
+          this.items.set(res.results);
           this.total.set(res.count);
           this.loading.set(false);
         },
@@ -86,50 +88,6 @@ export class TafsirsListComponent implements OnInit {
           this.loading.set(false);
         },
       });
-  }
-
-  onFiltersChange(filters: Partial<TafsirFilters>): void {
-    this.activeFilters = filters;
-    this.page.set(1);
-    this.load();
-  }
-
-  onPageChange(page: number): void {
-    this.page.set(page);
-    this.load();
-  }
-
-  onPageSizeChange(size: number): void {
-    this.pageSize.set(size);
-    this.page.set(1);
-    this.load();
-  }
-
-  onSortChange(column: 'name' | 'created_at', order: NzTableSortOrder): void {
-    if (!order) {
-      this.ordering = undefined;
-    } else {
-      const prefix = order === 'descend' ? '-' : '';
-      this.ordering = `${prefix}${column}` as AssetSortingQuery;
-    }
-    this.page.set(1);
-    this.load();
-  }
-
-  onView(slug: string): void {
-    void this.router.navigate(['/admin/tafsirs', slug]);
-  }
-
-  onEdit(slug: string): void {
-    void this.router.navigate(['/admin/tafsirs', slug, 'edit']);
-  }
-
-  onTafsirColumnVisibility(v: Record<string, boolean>): void {
-    this.columnVisibility.set(v);
-  }
-
-  showTafsirCol(key: string): boolean {
-    return this.columnVisibility()[key] !== false;
   }
 
   getLicenseColor(license: string): string {

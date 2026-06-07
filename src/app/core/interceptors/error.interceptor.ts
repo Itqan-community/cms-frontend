@@ -2,6 +2,9 @@ import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpRequest } from '@angul
 import { inject } from '@angular/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { catchError, Observable, throwError } from 'rxjs';
+import { isHeadlessAppAuthUrl } from '../auth/headless/headless-api-path.util';
+import { isExpectedTotpAuthenticatorStatusProbe404 } from './auth-error-sentry-suppress.util';
+import { isUnverifiedEmailError } from '../../shared/utils/error.utils';
 
 /**
  * Global Error Interceptor
@@ -17,6 +20,14 @@ export function errorInterceptor(
     catchError((error: HttpErrorResponse) => {
       // Ignore auth errors as they are handled by authErrorInterceptor
       if (error.status === 401 || error.status === 403) {
+        return throwError(() => error);
+      }
+
+      if (isHeadlessAppAuthUrl(req.url) && isUnverifiedEmailError(error)) {
+        return throwError(() => error);
+      }
+
+      if (isExpectedTotpAuthenticatorStatusProbe404(req.url, req.method, error)) {
         return throwError(() => error);
       }
 

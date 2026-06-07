@@ -1,1 +1,26 @@
-<p>unauthorized works</p>
+<div class="portal-state-screen">
+  <div class="portal-state-screen__container">
+    <div class="portal-state-screen__card">
+      <div class="portal-state-screen__decorative" aria-hidden="true"></div>
+      <div class="portal-state-screen__icon-wrap">
+        <ng-icon name="lucideAlertTriangle" class="portal-state-screen__icon" aria-hidden="true" />
+      </div>
+      <h1 class="portal-state-screen__title">{{ 'ERRORS.UNAUTHORIZED_TITLE' | translate }}</h1>
+      <p class="portal-state-screen__subtitle">{{ 'ERRORS.UNAUTHORIZED' | translate }}</p>
+      <button
+        nz-button
+        nzType="primary"
+        type="button"
+        class="portal-state-screen__cta"
+        (click)="goToGallery()"
+      >
+        {{ 'ADMIN.MENU.BACK_TO_GALLERY' | translate }}
+      </button>
+      @if (countdownSeconds() > 0) {
+        <p class="portal-state-screen__countdown" aria-live="polite">
+          {{ 'COMMON.REDIRECT_TO_LIBRARY_IN' | translate: { seconds: countdownSeconds() } }}
+        </p>
+      }
+    </div>
+  </div>
+</div>

@@ -1,15 +1,20 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { RouterLink, RouterOutlet } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 import { AuthService } from '../../core/auth/services/auth.service';
 import { LangSwitchComponent } from '../../shared/components/lang-switch/lang-switch.component';
 import { UserActionsComponent } from '../../shared/components/user-actions/user-actions.component';
 import { isPublisherHost } from '../../shared/utils/publisherhost.util';
+import { PORTAL_PERMISSIONS } from './constants/portal-permission.constants';
 import { AdminAuthService } from './services/admin-auth.service';
+import { AdminTenantService } from './services/admin-tenant.service';
 
 interface CmsTab {
   id: string;
@@ -20,20 +25,13 @@ interface CmsTab {
   disabled?: boolean;
 }
 
-const TAB_PROFILE: CmsTab = {
-  id: 'profile',
-  path: 'profile',
-  label: 'ADMIN.MENU.MANAGE_PROFILE',
-  icon: 'lucideIdCard',
-  disabled: true,
-};
-const TAB_MUSHAFS: CmsTab = {
-  id: 'mushafs',
-  path: 'mushafs',
-  label: 'ADMIN.MENU.MUSHAFS',
-  icon: 'lucideBookOpen',
-  disabled: true,
-};
+// const TAB_MUSHAFS: CmsTab = {
+//   id: 'mushafs',
+//   path: 'mushafs',
+//   label: 'ADMIN.MENU.MUSHAFS',
+//   icon: 'lucideBookOpen',
+//   disabled: true,
+// };
 const TAB_TAFSIRS: CmsTab = {
   id: 'tafsirs',
   path: 'tafsirs',
@@ -64,7 +62,18 @@ const TAB_RECITERS: CmsTab = {
   label: 'ADMIN.MENU.RECITERS',
   icon: 'lucideMic',
 };
-const CORE_TABS: CmsTab[] = [TAB_TAFSIRS, TAB_TRANSLATIONS, TAB_RECITATIONS, TAB_RECITERS];
+const TAB_ISSUES: CmsTab = {
+  id: 'issues',
+  path: 'issues',
+  label: 'ADMIN.MENU.ISSUES',
+  icon: 'lucideAlertCircle',
+};
+const TAB_USAGE: CmsTab = {
+  id: 'usage',
+  path: 'usage',
+  label: 'ADMIN.MENU.USAGE',
+  icon: 'lucideBarChart2',
+};
 
 @Component({
   selector: 'app-admin-layout',
@@ -76,6 +85,8 @@ const CORE_TABS: CmsTab[] = [TAB_TAFSIRS, TAB_TRANSLATIONS, TAB_RECITATIONS, TAB
     NzLayoutModule,
     NzMenuModule,
     NgIcon,
+    FormsModule,
+    NzSelectModule,
     LangSwitchComponent,
     UserActionsComponent,
     TranslateModule,
@@ -83,10 +94,11 @@ const CORE_TABS: CmsTab[] = [TAB_TAFSIRS, TAB_TRANSLATIONS, TAB_RECITATIONS, TAB
   templateUrl: './admin-layout.component.html',
   styleUrls: ['./admin-layout.component.less'],
 })
-export class AdminLayoutComponent {
+export class AdminLayoutComponent implements OnInit {
   private readonly modal = inject(NzModalService);
   private readonly adminAuth = inject(AdminAuthService);
   public readonly authService = inject(AuthService);
+  public readonly tenantService = inject(AdminTenantService);
   private readonly translate = inject(TranslateService);
   readonly isPublisherHost = isPublisherHost();
 
@@ -97,24 +109,44 @@ export class AdminLayoutComponent {
     this.translate.getCurrentLang() === 'ar' ? 'rtl' : 'ltr'
   );
 
+  private readonly destroyRef = inject(DestroyRef);
+
   readonly tabs = computed(() => {
-    // if (this.adminAuth.isItqanAdmin()) {
-    //   return [TAB_MUSHAFS, TAB_TAFSIRS, TAB_TRANSLATIONS, TAB_PUBLISHERS, TAB_AUDIO];
+    const tabs: CmsTab[] = [];
+    if (this.adminAuth.isItqanAdmin()) {
+      tabs.push(TAB_PUBLISHERS);
+      // tabs.push(TAB_MUSHAFS);
+    }
+    if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_TAFSIR)) {
+      tabs.push(TAB_TAFSIRS);
+    }
+    if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_TRANSLATION)) {
+      tabs.push(TAB_TRANSLATIONS);
+    }
+    if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_RECITATION)) {
+      tabs.push(TAB_RECITATIONS);
+    }
+    if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_RECITER)) {
+      tabs.push(TAB_RECITERS);
+    }
+    // TODO(backend-permissions): gate with PORTAL_PERMISSIONS.PORTAL_READ_ISSUE_REPORT once seeded
+    // if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_ISSUE_REPORT)) {
+    tabs.push(TAB_ISSUES);
     // }
-    // if (this.adminAuth.isPublisherAdmin()) {
-    return [TAB_PUBLISHERS, TAB_MUSHAFS, ...CORE_TABS];
-    // }
-    // return CORE_TABS;
+    if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS)) {
+      tabs.push(TAB_USAGE);
+    }
+    return tabs;
   });
 
   constructor() {
-    const syncDir = (): void => {
-      this.layoutDir.set(this.translate.getCurrentLang() === 'ar' ? 'rtl' : 'ltr');
-    };
-    syncDir();
-    this.translate.onLangChange.subscribe((e) => {
+    this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
       this.layoutDir.set(e.lang === 'ar' ? 'rtl' : 'ltr');
     });
+  }
+
+  ngOnInit(): void {
+    this.tenantService.ensureReady().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
   }
 
   onMobileMenuToggle(): void {
@@ -140,6 +172,19 @@ export class AdminLayoutComponent {
 
   onMenuItemClick(): void {
     this.closeMobileMenu();
+  }
+
+  onLogout(): void {
+    this.authService.logout().subscribe();
+  }
+
+  onTenantChange(publisherId: number): void {
+    if (publisherId === this.tenantService.getSelectedPublisherId()) {
+      return;
+    }
+    if (this.tenantService.setSelectedPublisherId(publisherId)) {
+      window.location.reload();
+    }
   }
 
   onRefresh(): void {

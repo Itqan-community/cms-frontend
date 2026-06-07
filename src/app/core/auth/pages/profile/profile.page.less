@@ -1,0 +1,59 @@
+@import '../../styles/account-manage.layout.less';
+
+.profile-hub__grid {
+  display: grid;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.profile-hub__link-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #e5e7eb;
+  border-radius: var(--radius-lg);
+  background: #fff;
+  text-decoration: none;
+  color: var(--color-primary-800);
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.profile-hub__link-card:hover {
+  background: var(--color-neutral-100);
+}
+
+.profile-hub__chevron {
+  opacity: 0.6;
+  font-size: 18px;
+}
+
+.profile-hub__identity {
+  font-size: 15px;
+  color: #374151;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.profile-hub__textarea {
+  min-height: 120px;
+  border: 1px solid #d1d5db;
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  font-size: 14px;
+  resize: vertical;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.profile-hub__identity-row {
+  margin-bottom: 6px;
+}
+
+.profile-hub__identity-label {
+  font-weight: 600;
+  color: #333333;
+  margin-inline-end: 8px;
+}

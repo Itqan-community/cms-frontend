@@ -45,6 +45,8 @@ export interface ReciterFormValue {
   bio_en: string;
   nationality?: string | null;
   date_of_death?: string | null;
+  /** Multipart file field; backend should accept as `image` (see `image_url` on detail). */
+  image?: File;
 }
 
 export interface RecitersListResponse {

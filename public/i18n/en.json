@@ -21,7 +21,11 @@
         "EMAIL_REQUIRED": "Please enter a valid email address",
         "PASSWORD_REQUIRED": "Password is required",
         "LOGIN_FAILED": "Login failed. Please try again."
-      }
+      },
+      "FORGOT_PASSWORD": "Forgot password?",
+      "OR_CONTINUE": "Or continue with",
+      "LOGIN_WITH_CODE": "Sign in with email code",
+      "SIGN_IN_WITH_PASSKEY": "Sign in with passkey"
     },
     "REGISTER": {
       "TITLE": "Create your account",
@@ -49,13 +53,288 @@
         "PASSWORD_REQUIRED": "Password must be at least 6 characters",
         "PASSWORD_MISMATCH": "Passwords do not match",
         "REGISTER_FAILED": "Registration failed. Please try again."
-      }
+      },
+      "SIGN_UP_WITH_PASSKEY": "Sign up with passkey"
+    },
+    "VERIFY_EMAIL": {
+      "TITLE": "Verify your email",
+      "SUBTITLE": "Enter the verification code sent to your email.",
+      "CODE_LABEL": "Verification code",
+      "CODE_PLACEHOLDER": "Enter the code",
+      "SUBMIT": "Verify",
+      "RESEND": "Resend code",
+      "RESEND_SENT": "If your email is registered, a new code was sent.",
+      "RESEND_ERROR": "Could not resend the code. Try again later.",
+      "ERROR": "Verification failed. Check the code and try again.",
+      "UNVERIFIED_REDIRECT_INFO": "Your email is not verified yet. Enter the code from your email below, or use “Resend code”. After verification you can set up two-factor authentication and other security options.",
+      "BACK": "Back",
+      "BACK_TO_LOGIN": "Back to sign in"
+    },
+    "PASSKEY": {
+      "TITLE": "Sign in with passkey",
+      "SUBTITLE": "Use your device passkey or security key to continue.",
+      "BUTTON": "Continue with passkey",
+      "SIGNUP_TITLE": "Create account with passkey",
+      "SIGNUP_SUBTITLE": "Enter your email to start. If required, verify your email first, then register your passkey when prompted.",
+      "SIGNUP_EMAIL_LABEL": "Email",
+      "SIGNUP_BUTTON": "Continue with passkey",
+      "SETUP_TITLE": "Set up passkey",
+      "SETUP_SUBTITLE": "Add a passkey to your account so you can sign in faster next time.",
+      "SETUP_BUTTON": "Add passkey",
+      "SETUP_SUCCESS": "Passkey added successfully.",
+      "SIGNUP_SESSION_MISSING": "Could not start passkey sign-up (no session from server). Close other tabs, refresh, and try again.",
+      "WEBAUTHN_STATE_ERROR": "This passkey step expired or was interrupted. Go back and try again from the start.",
+      "SETUP_REAUTH_REQUIRED": "For security, confirm your password before adding a passkey.",
+      "SETUP_REAUTH_LINK": "Confirm password to continue",
+      "BACK": "Back to sign in",
+      "ERROR": "Passkey sign-in failed. Please try again.",
+      "CANCELLED": "Passkey sign-in was cancelled.",
+      "UNSUPPORTED": "Passkeys are not available in this browser or environment. Use email and password or another sign-in method.",
+      "RP_ID_ORIGIN_MISMATCH": "Passkeys are configured for “{{rpId}}”, but you are on “{{host}}”. Open the app from the real site URL, or run the API with WebAuthn RP ID set to your dev host (see environment.webauthnReplaceRpIdWithHostname).",
+      "RP_ID_BROWSER_REJECT": "Your browser blocked this passkey because the site address does not match the passkey domain. Use the production or staging URL the team uses for the CMS."
+    },
+    "LOGIN_BY_CODE": {
+      "TITLE": "Sign in with code",
+      "SUBTITLE": "We will email you a one-time sign-in code.",
+      "SEND_CODE": "Send code",
+      "CODE_LABEL": "Code",
+      "CODE_PLACEHOLDER": "Enter the code from your email",
+      "SIGN_IN": "Sign in",
+      "USE_OTHER_EMAIL": "Use a different email",
+      "BACK": "Back to sign in",
+      "RESEND": "Resend code",
+      "RESEND_SENT": "A new code was sent to your email.",
+      "TRY_AGAIN_IN": "Try again in {{seconds}}s",
+      "RATE_LIMIT": "Too many requests. Please wait and try again.",
+      "SESSION_GONE": "This sign-in session expired. Return to the sign-in page to start again.",
+      "INCORRECT_CODE": "That code is incorrect or expired. Please try again.",
+      "REQUEST_TIMEOUT": "The code request took too long. Please try again.",
+      "REQUEST_ERROR": "Could not send the code. Try again.",
+      "CONFIRM_ERROR": "Invalid code. Please try again."
+    },
+    "FORGOT_PASSWORD": {
+      "TITLE": "Reset your password",
+      "SUBTITLE": "Enter your email. If an account exists, we will send a link to reset your password.",
+      "SUBTITLE_CODE": "Enter your email. If an account exists, we will send a reset code to use on the next screen.",
+      "SUBMIT_LINK": "Send reset link",
+      "SUBMIT_CODE": "Send reset code",
+      "SENT": "If an account exists for this email, you will receive instructions shortly.",
+      "ERROR": "Something went wrong. Please try again.",
+      "BACK": "Back to sign in"
+    },
+    "RESET_PASSWORD": {
+      "TITLE": "Choose a new password",
+      "CODE_LABEL": "Reset code",
+      "CODE_PLACEHOLDER": "Enter the code from your email",
+      "CODE_SENT_HINT": "If an account exists, we sent a reset code to {{email}}.",
+      "NEW_PASSWORD": "New password",
+      "SUBMIT": "Update password",
+      "ERROR": "Could not reset password. The link or code may have expired.",
+      "EXPIRED": "The reset link has expired. Please request a new one."
+    },
+    "CHANGE_PASSWORD": {
+      "SUBTITLE": "Update your password to keep your account secure.",
+      "CURRENT_PASSWORD": "Current password"
+    },
+    "MFA": {
+      "TITLE": "Two-factor authentication",
+      "SUBTITLE": "Enter the code from your authenticator app or a recovery code.",
+      "CODE_LABEL": "Authentication code",
+      "CODE_PLACEHOLDER": "6-digit code",
+      "SUBMIT": "Verify",
+      "BACK": "Back to sign in",
+      "ERROR": "Invalid code. Please try again.",
+      "USE_SECURITY_KEY": "Use security key / passkey"
+    },
+    "SECURITY": {
+      "TITLE": "Account security",
+      "SUBTITLE": "Manage two-factor authentication, recovery codes, and passkeys.",
+      "BACK": "Back to library",
+      "LOAD_ERROR": "Could not load security settings. Try again later.",
+      "AUTHENTICATORS_TITLE": "Registered authenticators",
+      "NO_AUTHENTICATORS": "No MFA authenticators are registered yet.",
+      "TOTP_TITLE": "Authenticator app (TOTP)",
+      "TOTP_SETUP_HINT": "Scan the otpauth URI in your authenticator app, then enter the 6-digit code to confirm.",
+      "TOTP_CODE_LABEL": "Confirmation code",
+      "TOTP_ACTIVATE": "Activate authenticator",
+      "TOTP_ACTIVE": "Authenticator app is enabled.",
+      "TOTP_NOT_CONFIGURED_HINT": "Authenticator app (TOTP) is not enrolled yet. You can activate it once your email is verified.",
+      "TOTP_DEACTIVATE": "Turn off authenticator app",
+      "TOTP_DEACTIVATE_CONFIRM": "Turn off TOTP? You can still use other MFA methods if configured.",
+      "TOTP_DEACTIVATE_ERROR": "Could not turn off TOTP.",
+      "TOTP_ACTIVATE_ERROR": "Invalid code or could not activate TOTP.",
+      "COPY_URI": "Copy setup URI",
+      "RECOVERY_TITLE": "Recovery codes",
+      "RECOVERY_HINT": "Save these codes in a safe place. Each code works once if you lose access to your authenticator.",
+      "RECOVERY_COUNT": "{{unused}} of {{total}} codes remaining",
+      "RECOVERY_UNAVAILABLE": "No recovery codes to show yet. They appear after you enable MFA (e.g. TOTP).",
+      "RECOVERY_ONE_TIME_VISIBILITY": "The server may not show these codes again. Copy or download them now and store them safely.",
+      "RECOVERY_JUST_GENERATED": "New codes were just created. Save them now — you may not be able to view them again after you leave this page.",
+      "RECOVERY_REDACTED": "Unused recovery codes exist on your account, but the full list is hidden for security. Generate new codes if you need a printable copy (this invalidates current unused codes).",
+      "RECOVERY_ALL_USED": "All recovery codes have been used. Generate a new set if you need backup codes for sign-in.",
+      "RECOVERY_LOAD_ERROR": "Could not load recovery codes.",
+      "COPY_ALL": "Copy all",
+      "DOWNLOAD": "Download (.txt)",
+      "RECOVERY_REGEN": "Generate new recovery codes…",
+      "RECOVERY_REGEN_WARN": "This invalidates all previous unused recovery codes. Continue only if you have saved the new set.",
+      "RECOVERY_REGEN_CONFIRM": "Generate new codes",
+      "RECOVERY_REGEN_ERROR": "Could not regenerate recovery codes.",
+      "PASSKEY_TITLE": "Passkeys",
+      "PASSKEY_HINT": "Add a passkey to sign in without typing your password.",
+      "PASSKEY_SETUP_LINK": "Add or manage passkeys",
+      "TOTP_SCAN_QR": "Scan this QR code with your authenticator app, or copy the URI below.",
+      "AUTHENTICATORS_PASSKEY_ONLY_HINT": "Only passkeys are listed below; use Passkeys to manage them.",
+      "PASSKEY_NAME_LABEL": "Passkey name",
+      "PASSKEY_SAVE_NAME": "Save name",
+      "PASSKEY_DELETE": "Remove passkey",
+      "PASSKEY_DELETE_CONFIRM": "Remove this passkey from your account?",
+      "PASSKEY_DELETE_ERROR": "Could not remove the passkey.",
+      "PASSKEY_RENAME_ERROR": "Could not update the passkey name.",
+      "PASSKEY_EMPTY": "No passkeys registered yet."
+    },
+    "ACCOUNT": {
+      "BACK_PROFILE": "Back to account"
+    },
+    "EMAIL": {
+      "TITLE": "Email addresses",
+      "SUBTITLE": "Manage addresses on your account, set a primary address, and request verification.",
+      "LIST_TITLE": "Your addresses",
+      "ADD_TITLE": "Add an email address",
+      "NEW_LABEL": "New email",
+      "ADD_BUTTON": "Add email",
+      "PRIMARY": "Primary",
+      "VERIFIED": "Verified",
+      "UNVERIFIED": "Unverified",
+      "MAKE_PRIMARY": "Make primary",
+      "SEND_VERIFY": "Send verification",
+      "REMOVE": "Remove",
+      "EMPTY": "No email addresses loaded.",
+      "LOAD_ERROR": "Could not load email addresses.",
+      "ACTION_ERROR": "Something went wrong. Try again.",
+      "ADD_SUCCESS": "Email added.",
+      "PRIMARY_SUCCESS": "Primary email updated.",
+      "VERIFY_SENT": "Verification requested — check your inbox.",
+      "REMOVE_SUCCESS": "Email removed.",
+      "REMOVE_CONFIRM": "Remove {{email}} from this account?"
+    },
+    "SESSIONS": {
+      "TITLE": "Sessions",
+      "SUBTITLE": "Devices where you are signed in. Revoke any session you do not recognize.",
+      "CURRENT": "This session",
+      "UNKNOWN_UA": "Unknown browser",
+      "IP": "IP",
+      "CREATED": "Created",
+      "LAST_SEEN": "Last seen",
+      "REVOKE": "Sign out",
+      "REVOKE_OTHERS": "Sign out other sessions",
+      "REVOKE_CONFIRM": "Sign out this session?",
+      "REVOKE_OTHERS_CONFIRM": "Sign out all other sessions?",
+      "REVOKE_SUCCESS": "Sessions updated.",
+      "EMPTY": "No sessions to display.",
+      "LOAD_ERROR": "Could not load sessions.",
+      "ACTION_ERROR": "Could not update sessions."
+    },
+    "API_KEYS": {
+      "TITLE": "API keys",
+      "SUBTITLE": "Create keys to access CMS assets programmatically. Store secrets safely — raw values are shown only once.",
+      "CREATE_SECTION": "Create a key",
+      "CREATE_HINT": "Choose a recognizable name so you can revoke or rotate keys later.",
+      "NAME_LABEL": "Key name",
+      "NAME_PLACEHOLDER": "e.g., Production crawler",
+      "CREATE_TOGGLE": "Create key",
+      "CREATE_BUTTON": "Create API key",
+      "CREATE_CANCEL": "Cancel",
+      "LIST_SECTION": "Your keys",
+      "EMPTY": "No API keys yet.",
+      "LOAD_ERROR": "Could not load API keys.",
+      "ACTION_ERROR": "Something went wrong. Try again.",
+      "CREATE_SUCCESS": "API key created.",
+      "CREATE_MISSING_RAW_HINT": "The API did not return a plaintext secret. Refresh the page; if this persists, check the backend response shape.",
+      "REVEAL_TITLE": "Your new API key (copy now)",
+      "REVEAL_HINT": "Save this somewhere safe. You cannot view the full secret again after you leave this page.",
+      "REVEAL_EMPTY": "No plaintext was returned — if you lose it you may need to create a new key.",
+      "COPY": "Copy to clipboard",
+      "COPY_OK": "Copied to clipboard.",
+      "DONE": "I have saved it",
+      "STATUS_ACTIVE": "Active",
+      "STATUS_REVOKED": "Revoked",
+      "CREATED": "Created",
+      "LAST_USED": "Last used",
+      "RENAME": "Rename",
+      "RENAME_REQUIRED": "Enter a name for this key.",
+      "RENAME_SUCCESS": "API key updated.",
+      "REVOKE": "Revoke",
+      "REVOKE_CONFIRM": "Revoke this API key? Requests using this key will stop working.",
+      "REVOKE_SUCCESS": "API key revoked.",
+      "DELETE": "Delete",
+      "DELETE_CONFIRM": "Permanently delete this API key? This cannot be undone.",
+      "DELETE_SUCCESS": "API key deleted."
+    },
+    "PROVIDERS": {
+      "TITLE": "Connected accounts",
+      "SUBTITLE": "Social logins linked to your account.",
+      "CONNECT_SECTION": "Link a provider",
+      "CONNECT_HINT": "You will sign in with the provider and return here after consent.",
+      "CONNECT_TECH_HINT": "If Connect fails or does nothing, the CMS and API usually need the same browser origin or a reverse proxy. See docs/AUTH_FLOW_MATRIX.md (Browser OAuth).",
+      "CONNECT_GOOGLE": "Connect Google",
+      "CONNECT_GITHUB": "Connect GitHub",
+      "APP_MODE_HINT": "Adding new providers from this app requires enabling OAuth redirect in your deployment configuration.",
+      "DISCONNECT": "Disconnect",
+      "DISCONNECT_CONFIRM": "Disconnect this provider from your account?",
+      "DISCONNECT_SUCCESS": "Provider disconnected.",
+      "EMPTY": "No connected providers.",
+      "LOAD_ERROR": "Could not load connected accounts.",
+      "ACTION_ERROR": "Could not disconnect the provider.",
+      "CONNECT_ERROR": "Could not start {{provider}} connection.",
+      "CONNECT_CROSS_ORIGIN_ERROR": "Connect requires same-origin API and app in this environment. Use the staging CMS domain or configure a reverse proxy."
+    },
+    "PROFILE": {
+      "TITLE": "Your account",
+      "SUBTITLE": "Profile and security settings in one place.",
+      "BACK_LIBRARY": "Back to library",
+      "IDENTITY_TITLE": "Identity",
+      "NAME": "Name",
+      "EMAIL": "Email",
+      "PHONE": "Phone",
+      "ACCOUNT_TITLE": "Account & security",
+      "ACCOUNT_HINT": "Manage login, MFA, devices, and linked providers.",
+      "LINK_EMAILS": "Email addresses",
+      "LINK_PASSWORD": "Change password",
+      "LINK_SECURITY": "Security & MFA",
+      "LINK_SESSIONS": "Active sessions",
+      "LINK_API_KEYS": "API keys",
+      "LINK_PROVIDERS": "Connected accounts",
+      "CMS_TITLE": "CMS profile",
+      "CMS_HINT": "Information shown across the CMS (bio, links).",
+      "LOAD_ERROR": "Could not load profile details.",
+      "SAVE_SUCCESS": "Profile saved.",
+      "SAVE_ERROR": "Could not save profile."
+    },
+    "REAUTH": {
+      "TITLE": "Confirm it is you",
+      "SUBTITLE": "For your security, please confirm your password or use your passkey.",
+      "SUBTITLE_PASSWORD_ONLY": "For your security, please confirm your password.",
+      "SUBMIT": "Confirm",
+      "OR_MFA": "Or use an authenticator / recovery code",
+      "SUBMIT_MFA": "Confirm with code",
+      "USE_PASSKEY": "Use passkey",
+      "CANCEL": "Cancel",
+      "ERROR": "Incorrect password.",
+      "PASSKEY_ERROR": "Passkey verification failed.",
+      "MFA_ERROR": "Invalid authenticator code."
     },
     "OAUTH": {
       "PROCESSING": "Processing authentication...",
       "SUCCESS": "Authentication successful! Redirecting...",
       "ERROR": "Authentication failed. Please try again.",
       "INVALID_STATE": "Invalid authentication state. Please try again."
+    },
+    "PROVIDER_SIGNUP": {
+      "TITLE": "Complete your sign-up",
+      "DESC": "We need a bit more information to finish creating your account after signing in with your provider.",
+      "SUBMIT": "Continue",
+      "ERROR": "Could not complete sign-up. Please try again.",
+      "LOAD_ERROR": "Could not load sign-up information. This step may not be available."
     }
   },
   "NAVIGATION": {
@@ -68,6 +347,9 @@
     "LICENSES": "Licenses",
     "LOGIN": "Login",
     "LOGOUT": "Logout",
+    "ACCOUNT_SECURITY": "Security",
+    "ACCOUNT_PROFILE": "Account",
+    "PASSKEY_SETUP": "Passkey",
     "ADMIN_PORTAL": "Admin portal"
   },
   "SETTINGS": "Settings",
@@ -82,7 +364,9 @@
     "BACK": "Back",
     "NEXT": "Next",
     "SUBMIT": "Submit",
-    "CLOSE": "Close"
+    "CLOSE": "Close",
+    "REFRESH": "Refresh",
+    "REDIRECT_TO_LIBRARY_IN": "Taking you to the library in {{seconds}} seconds…"
   },
   "FORMS": {
     "PLACEHOLDERS": {
@@ -108,6 +392,7 @@
     "NETWORK_ERROR": "Network error. Please check your connection and try again.",
     "SERVER_ERROR": "Server error. Please try again later.",
     "VALIDATION_ERROR": "Please correct the errors and try again.",
+    "UNAUTHORIZED_TITLE": "Access denied",
     "UNAUTHORIZED": "You are not authorized to perform this action.",
     "FORBIDDEN": "Access forbidden.",
     "NOT_FOUND": "The requested resource was not found."
@@ -380,6 +665,7 @@
       "SAVE": "Save",
       "CANCEL": "Cancel",
       "COMING_SOON": "Coming soon",
+      "COMING_SOON_DETAIL": "This section is still under construction. You'll be redirected to the library shortly.",
       "DELETE_CONFIRM_BODY": "<strong>{{name}}</strong> — This action cannot be undone.",
       "YES_DELETE": "Yes, delete",
       "NAME_EN": "Name (English)",
@@ -387,7 +673,13 @@
       "DESCRIPTION_EN": "Description (English)",
       "DESCRIPTION_AR": "Description (Arabic)",
       "PLACEHOLDER_EG": "e.g.",
-      "EM_DASH": "—"
+      "EM_DASH": "—",
+      "HIJRI_YEAR_SUFFIX": "AH"
+    },
+    "TENANT": {
+      "ARIA_LABEL": "Publisher scope selector",
+      "PLACEHOLDER": "Select publisher",
+      "EMPTY": "No publishers available"
     },
     "REFRESH_PROMPT": {
       "TITLE": "Do you want to reset data?",
@@ -404,7 +696,9 @@
       "PUBLISHERS": "Publishers",
       "AUDIO": "Audio",
       "MANAGE_PROFILE": "Manage profile",
-      "BACK_TO_GALLERY": "Back to gallery"
+      "BACK_TO_GALLERY": "Back to gallery",
+      "USAGE": "API Usage",
+      "ISSUES": "Issue Management"
     },
     "PROFILE": {
       "TITLE": "Publisher profile",
@@ -528,7 +822,49 @@
         "VERSION_COL_NAME": "Version name",
         "VERSION_COL_SIZE": "Size",
         "VERSION_COL_DATE": "Date added",
-        "VERSION_COL_FILE": "File"
+        "VERSION_COL_FILE": "File",
+        "VERSIONS": {
+          "ADD_BUTTON": "Add new version",
+          "MODAL_TITLE_CREATE": "Add new version",
+          "MODAL_TITLE_EDIT": "Edit version",
+          "FORM_NAME": "Version name",
+          "FORM_SUMMARY": "Summary",
+          "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
+          "PLACEHOLDER_SUMMARY": "Short notes about this file…",
+          "ERR_NAME": "Version name is required",
+          "ERR_SUMMARY": "Summary is required",
+          "CHOOSE_FILE": "Choose file",
+          "SUBMIT_CREATE": "Upload version",
+          "SUBMIT_UPDATE": "Save changes",
+          "CANCEL_EDIT": "Cancel",
+          "CLEAR_FILE": "Remove file",
+          "EDIT_FILE_HINT": "Optional: choose a new file to replace the current one.",
+          "FILE_REQUIRED_HINT": "Select a file to upload.",
+          "LIST_TITLE": "Published versions",
+          "SEARCH_PLACEHOLDER": "Search versions…",
+          "COL_NAME": "Version name",
+          "COL_SUMMARY": "Summary",
+          "COL_SIZE": "Size",
+          "COL_DATE": "Date added",
+          "COL_FILE": "File",
+          "COL_ACTIONS": "Actions",
+          "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_DELETE": "Delete",
+          "EMPTY_TITLE": "No versions yet",
+          "EMPTY_SUBTITLE": "Use “Add new version” to upload a file.",
+          "DELETE_CONFIRM_TITLE": "Delete this version?",
+          "DELETE_CONFIRM_BODY": "<b>{{name}}</b> — This cannot be undone.",
+          "DELETE_OK": "Delete",
+          "MESSAGES": {
+            "LOAD_ERROR": "Could not load versions.",
+            "SAVE_ERROR": "Could not save version. Try again.",
+            "CREATE_SUCCESS": "Version added.",
+            "UPDATE_SUCCESS": "Version updated.",
+            "DELETE_SUCCESS": "Version deleted.",
+            "DELETE_ERROR": "Could not delete version.",
+            "FILE_REQUIRED": "Choose a file to upload."
+          }
+        }
       },
       "MESSAGES": {
         "CREATE_SUCCESS": "Tafsir added successfully",
@@ -629,7 +965,49 @@
         "VERSION_COL_NAME": "Version name",
         "VERSION_COL_SIZE": "Size",
         "VERSION_COL_DATE": "Date added",
-        "VERSION_COL_FILE": "File"
+        "VERSION_COL_FILE": "File",
+        "VERSIONS": {
+          "ADD_BUTTON": "Add new version",
+          "MODAL_TITLE_CREATE": "Add new version",
+          "MODAL_TITLE_EDIT": "Edit version",
+          "FORM_NAME": "Version name",
+          "FORM_SUMMARY": "Summary",
+          "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
+          "PLACEHOLDER_SUMMARY": "Short notes about this file…",
+          "ERR_NAME": "Version name is required",
+          "ERR_SUMMARY": "Summary is required",
+          "CHOOSE_FILE": "Choose file",
+          "SUBMIT_CREATE": "Upload version",
+          "SUBMIT_UPDATE": "Save changes",
+          "CANCEL_EDIT": "Cancel",
+          "CLEAR_FILE": "Remove file",
+          "EDIT_FILE_HINT": "Optional: choose a new file to replace the current one.",
+          "FILE_REQUIRED_HINT": "Select a file to upload.",
+          "LIST_TITLE": "Published versions",
+          "SEARCH_PLACEHOLDER": "Search versions…",
+          "COL_NAME": "Version name",
+          "COL_SUMMARY": "Summary",
+          "COL_SIZE": "Size",
+          "COL_DATE": "Date added",
+          "COL_FILE": "File",
+          "COL_ACTIONS": "Actions",
+          "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_DELETE": "Delete",
+          "EMPTY_TITLE": "No versions yet",
+          "EMPTY_SUBTITLE": "Use “Add new version” to upload a file.",
+          "DELETE_CONFIRM_TITLE": "Delete this version?",
+          "DELETE_CONFIRM_BODY": "<b>{{name}}</b> — This cannot be undone.",
+          "DELETE_OK": "Delete",
+          "MESSAGES": {
+            "LOAD_ERROR": "Could not load versions.",
+            "SAVE_ERROR": "Could not save version. Try again.",
+            "CREATE_SUCCESS": "Version added.",
+            "UPDATE_SUCCESS": "Version updated.",
+            "DELETE_SUCCESS": "Version deleted.",
+            "DELETE_ERROR": "Could not delete version.",
+            "FILE_REQUIRED": "Choose a file to upload."
+          }
+        }
       },
       "MESSAGES": {
         "CREATE_SUCCESS": "Translation added successfully",
@@ -716,6 +1094,7 @@
         "LABEL_QIRAAH": "Qiraah",
         "LABEL_RIWAYAH": "Riwayah",
         "LABEL_PUBLISHER": "Publisher",
+        "DOWNLOAD_AYAH_TIMING": "Download timing file",
         "DESC_AR": "Description (Arabic)",
         "DESC_EN": "Description (EN)"
       },
@@ -784,6 +1163,28 @@
           "DELETE_ERROR": "Could not delete the audio file."
         }
       },
+      "TIMINGS": {
+        "SECTION_TITLE": "Ayah timings",
+        "NO_FILE_YET": "No ayah timing file has been uploaded yet.",
+        "CHOOSE_FILES": "Choose JSON files",
+        "UPLOAD": "Upload timings",
+        "CLEAR": "Clear",
+        "HINT": "One JSON file per surah. All files are sent in a single upload.",
+        "BANNER": {
+          "TITLE": "Timing upload complete"
+        },
+        "ERRORS": {
+          "EXTRA_CREATED": "Created: {{n}}",
+          "EXTRA_UPDATED": "Updated: {{n}}",
+          "EXTRA_SKIPPED": "Skipped: {{n}}",
+          "EXTRA_MISSING_TRACKS": "Missing tracks for surah numbers: {{surahs}}",
+          "EXTRA_FILE_ISSUES": "File issues:"
+        },
+        "MESSAGES": {
+          "UPLOAD_OK": "Ayah timings uploaded successfully.",
+          "UPLOAD_ERROR": "Could not upload timing files. Try again."
+        }
+      },
       "DELETE": {
         "CONFIRM_TITLE": "Delete this recitation?",
         "CONFIRM_BODY": "<b>{{name}}</b> — This action cannot be undone.",
@@ -826,6 +1227,12 @@
         "SUBTITLE_EDIT": "Update the reciter details",
         "BACK_LIST": "Back to list",
         "SECTION_NAME": "Name",
+        "SECTION_IMAGE": "Photo",
+        "IMAGE_HINT": "Reciter photo (one image, up to 10MB)",
+        "REMOVE_IMAGE": "Remove image",
+        "UPLOAD_IMAGE": "Upload image",
+        "MSG_IMAGE_TYPE": "Please choose an image file",
+        "MSG_IMAGE_SIZE": "Image must be 10MB or smaller",
         "SECTION_BIO": "Biography",
         "SECTION_EXTRA": "Additional details",
         "ERR_NAME_AR": "Arabic name is required",
@@ -866,6 +1273,73 @@
         "DELETE_SUCCESS": "Reciter deleted successfully"
       }
     },
+    "ISSUES": {
+      "TITLE": "Issue Management",
+      "SUBTITLE": "View and manage consumer issue reports on publisher assets",
+      "EMPTY_TITLE": "No issue reports",
+      "ADD_BUTTON": "Report issue",
+      "LIST_ERROR_TITLE": "Could not load issue reports",
+      "LIST_ERROR_DESC": "Check your connection and try again. If the problem continues, contact support.",
+      "COLUMNS": {
+        "ID": "ID",
+        "ASSET": "Asset",
+        "DESCRIPTION": "Description",
+        "STATUS": "Status",
+        "REPORTER": "Reporter",
+        "CREATED_AT": "Created",
+        "ACTIONS": "Actions"
+      },
+      "FILTERS": {
+        "STATUS": "Status",
+        "REPORTER_ID": "Reporter ID"
+      },
+      "STATUS": {
+        "PENDING": "Pending",
+        "UNDER_REVIEW": "Under review",
+        "RESOLVED": "Resolved",
+        "DISMISSED": "Dismissed"
+      },
+      "DETAIL": {
+        "BREADCRUMB": "Issue Management",
+        "ASSET_ID": "Asset ID",
+        "DESCRIPTION_TITLE": "Description",
+        "NOT_FOUND": "This issue report could not be found."
+      },
+      "DELETE": {
+        "CONFIRM_TITLE": "Delete this issue report?",
+        "CONFIRM_BODY": "<b>{{name}}</b> — This action cannot be undone.",
+        "OK": "Yes, delete",
+        "CANCEL": "Cancel",
+        "DEFAULT_LABEL": "this report"
+      },
+      "MESSAGES": {
+        "CREATE_SUCCESS": "Issue report created",
+        "CREATE_ERROR": "Could not create issue report",
+        "UPDATE_SUCCESS": "Issue report updated",
+        "UPDATE_ERROR": "Could not update issue report",
+        "DELETE_SUCCESS": "Issue report deleted",
+        "DELETE_ERROR": "Could not delete issue report",
+        "LOAD_ERROR": "Could not load issue report"
+      },
+      "FORM": {
+        "TITLE_CREATE": "Report an issue",
+        "TITLE_EDIT": "Edit issue report",
+        "SUBTITLE_CREATE": "Select an asset and describe the issue",
+        "SUBTITLE_EDIT": "Update description or status",
+        "BACK_LIST": "Back to list",
+        "SECTION_REPORT": "Report",
+        "ASSET_LABEL": "Asset",
+        "ASSET_PLACEHOLDER": "Search assets…",
+        "ASSET_READONLY": "Linked asset",
+        "ERR_ASSET": "Choose an asset",
+        "STATUS_LABEL": "Status",
+        "STATUS_PLACEHOLDER": "Select status",
+        "ERR_STATUS": "Select a status",
+        "DESCRIPTION_LABEL": "Description",
+        "DESCRIPTION_PLACEHOLDER": "Describe the issue…",
+        "ERR_DESCRIPTION": "Enter a description (at least 3 characters)"
+      }
+    },
     "PUBLISHERS": {
       "TITLE": "Publishers",
       "SUBTITLE": "Manage organizations publishing Quranic content",
@@ -875,7 +1349,7 @@
       "COLUMNS": {
         "NAME": "Name",
         "COUNTRY": "Country",
-        "DESCRIPTION": "Description",
+        "FOUNDATION_YEAR": "Foundation year",
         "VERIFIED": "Verified",
         "CREATED_AT": "Date Added",
         "ACTIONS": "Actions"
@@ -903,6 +1377,8 @@
         "UPLOAD_IMAGE": "Upload image",
         "ERR_NAME_AR": "Arabic name is required",
         "ERR_EMAIL": "Invalid email",
+        "ERR_FOUNDATION_YEAR": "Enter a valid year",
+        "PLACEHOLDER_FOUNDATION_YEAR_HIJRI": "Year (Hijri)",
         "SAVE_EDIT": "Save changes",
         "SAVE_CREATE": "Add publisher",
         "CONFIRM_EDIT_TITLE": "Confirm publisher update",
@@ -1001,5 +1477,15 @@
       "TAB_BACKEND": "Backend",
       "TAB_IMPORT": "Data import"
     }
+  },
+  "USAGE": {
+    "TITLE": "API Usage",
+    "SUBTITLE": "API request analytics for your publisher account",
+    "ALL_PUBLISHERS": "All publishers",
+    "REQUESTS_OVER_TIME": "Requests over time",
+    "TOP_ENDPOINTS": "Top endpoints",
+    "TOP_ENTITIES": "Top entities",
+    "NO_DATA": "No data for the selected period",
+    "ERROR_UNAVAILABLE": "Usage stats are temporarily unavailable. Please try again later."
   }
 }

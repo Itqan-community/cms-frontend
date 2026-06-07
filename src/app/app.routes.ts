@@ -1,7 +1,10 @@
 import { Routes } from '@angular/router';
+import { accountAuthRoutes } from './core/auth/account.routes';
 import { authGuard } from './core/auth/guards/auth.guard';
-import { guestGuard } from './core/auth/guards/guest.guard';
 import { publisherHostGuard } from './core/guards/publisher-host.guard';
+import { portalAccessGuard } from './features/admin/guards/portal-access.guard';
+import { itqanAdminGuard } from './features/admin/guards/itqan-admin.guard';
+import { tenantReadyGuard } from './features/admin/guards/tenant-ready.guard';
 
 export const routes: Routes = [
   {
@@ -18,24 +21,26 @@ export const routes: Routes = [
     path: 'admin',
     loadComponent: () =>
       import('./features/admin/admin-layout.component').then((m) => m.AdminLayoutComponent),
-    // canActivate: [authGuard, adminGuard],
+    canActivate: [authGuard, portalAccessGuard, tenantReadyGuard],
     data: { hideHeader: true, fullWidth: true },
     children: [
-      // Resolve /admin before the lazy '' adminRoutes (avoids ** catch-all flashing Coming Soon on redirect)
       {
         path: '',
         pathMatch: 'full',
-        redirectTo: 'publishers',
+        loadComponent: () =>
+          import('./features/admin/admin-portal-redirect.component').then(
+            (m) => m.AdminPortalRedirectComponent
+          ),
       },
       {
         path: 'publishers',
-        // canActivate: [itqanAdminGuard],
+        canActivate: [itqanAdminGuard],
         loadChildren: () =>
           import('./features/admin/publishers/publishers.routes').then((m) => m.publishersRoutes),
       },
       {
         path: 'profile',
-        redirectTo: 'publishers',
+        redirectTo: '',
         pathMatch: 'full',
       },
       {
@@ -61,6 +66,16 @@ export const routes: Routes = [
           import('./features/admin/reciters/reciters.routes').then((m) => m.reciterRoutes),
       },
       {
+        path: 'usage',
+        loadChildren: () =>
+          import('./features/admin/usage/usage.routes').then((m) => m.usageRoutes),
+      },
+      {
+        path: 'issues',
+        loadChildren: () =>
+          import('./features/admin/issues/issues.routes').then((m) => m.issueRoutes),
+      },
+      {
         path: '',
         loadChildren: () => import('./features/admin/admin.routes').then((m) => m.adminRoutes),
       },
@@ -75,18 +90,26 @@ export const routes: Routes = [
       ),
   },
 
+  ...accountAuthRoutes,
+
+  /** `HEADLESS_FRONTEND_URLS.account_confirm_email` (django-allauth) */
   {
-    path: 'login',
-    loadComponent: () => import('./core/auth/pages/login/login.page').then((m) => m.LoginPage),
-    canActivate: [guestGuard],
-    data: { hideHeader: true },
-  },
-  {
-    path: 'register',
-    loadComponent: () =>
-      import('./core/auth/pages/register/register.page').then((m) => m.RegisterPage),
-    canActivate: [guestGuard],
-    data: { hideHeader: true },
+    path: 'accounts',
+    children: [
+      {
+        path: 'confirm-email/:key',
+        loadComponent: () =>
+          import('./core/auth/pages/verify-email/verify-email.page').then((m) => m.VerifyEmailPage),
+        data: { hideHeader: true, beHeadlessPath: 'account_confirm_email' },
+      },
+      {
+        path: 'confirm-email/:key/',
+        pathMatch: 'full',
+        loadComponent: () =>
+          import('./core/auth/pages/verify-email/verify-email.page').then((m) => m.VerifyEmailPage),
+        data: { hideHeader: true, beHeadlessPath: 'account_confirm_email' },
+      },
+    ],
   },
   {
     path: 'unauthorized',

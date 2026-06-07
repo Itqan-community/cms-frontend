@@ -1,23 +1,105 @@
-.admin-coming-soon {
+.portal-state-screen {
+  min-height: 480px;
+  background-color: transparent;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 80px 20px;
-  background: var(--admin-surface-white);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-card);
-  gap: 12px;
+  padding: 24px 16px;
+
+  &--embedded {
+    min-height: min(560px, calc(100vh - 220px));
+  }
+
+  &__container {
+    width: 100%;
+    max-width: 448px;
+  }
+
+  &__card {
+    position: relative;
+    overflow: hidden;
+    padding: 40px 32px;
+    border-radius: var(--radius-xl);
+    background: var(--admin-surface-white);
+    border: 1px solid var(--admin-border-200);
+    box-shadow: var(--shadow-card);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  &__decorative {
+    position: absolute;
+    inset: -40% -20% auto -20%;
+    height: 55%;
+    background: linear-gradient(145deg, rgba(37, 99, 235, 0.08) 0%, rgba(37, 99, 235, 0) 72%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &__icon-wrap {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin-bottom: 4px;
+
+    &--neutral {
+      background: rgba(37, 99, 235, 0.1);
+    }
+  }
 
   &__icon {
-    font-size: 3.5rem;
+    font-size: 40px;
     color: var(--admin-text-300);
   }
 
-  &__text {
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: var(--admin-text-300);
+  &__title {
+    position: relative;
+    z-index: 1;
     margin: 0;
+    font-size: 22px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--admin-text-500, #262626);
+  }
+
+  &__subtitle {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.5;
+    font-weight: 400;
+    text-align: center;
+    color: var(--admin-text-300, #525252);
+  }
+
+  &__cta {
+    position: relative;
+    z-index: 1;
+    margin-top: 8px;
+    min-width: 200px;
+  }
+
+  &__countdown {
+    position: relative;
+    z-index: 1;
+    margin: 0;
+    margin-top: 16px;
+    font-size: 13px;
+    text-align: center;
+    color: var(--admin-text-300);
+  }
+
+  &__card > * {
+    &:not(.portal-state-screen__decorative) {
+      max-width: 100%;
+    }
   }
 }

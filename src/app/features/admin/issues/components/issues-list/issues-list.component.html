@@ -1,0 +1,132 @@
+<div class="issues-list admin-list-page">
+  <div class="admin-list-header">
+    <div class="admin-list-header__text">
+      <h2 class="admin-list-header__title">{{ 'ADMIN.ISSUES.TITLE' | translate }}</h2>
+      <p class="admin-list-header__subtitle">{{ 'ADMIN.ISSUES.SUBTITLE' | translate }}</p>
+    </div>
+    @if (canCreateIssue()) {
+      <a routerLink="/admin/issues/create">
+        <button nz-button nzType="primary" class="admin-add-btn">
+          <ng-icon name="lucidePlus" aria-hidden="true" />
+          {{ 'ADMIN.ISSUES.ADD_BUTTON' | translate }}
+        </button>
+      </a>
+    }
+  </div>
+
+  @if (loadFailed()) {
+    <nz-alert
+      nzType="error"
+      [nzMessage]="'ADMIN.ISSUES.LIST_ERROR_TITLE' | translate"
+      [nzDescription]="'ADMIN.ISSUES.LIST_ERROR_DESC' | translate"
+      nzShowIcon
+      class="issues-list__alert"
+    />
+  }
+
+  <app-issue-filters
+    [initialFilters]="activeFilters"
+    (filtersChange)="onIssueFiltersChange($event)"
+  />
+
+  <div class="admin-table-wrap">
+    <nz-spin [nzSpinning]="loading()">
+      <nz-table
+        #issueTable
+        [nzData]="items()"
+        [nzFrontPagination]="false"
+        [nzShowPagination]="false"
+        nzSize="middle"
+        [nzNoResult]="emptyTpl"
+      >
+        <thead>
+          <tr>
+            <th nzWidth="72px">{{ 'ADMIN.ISSUES.COLUMNS.ID' | translate }}</th>
+            <th nzWidth="160px">{{ 'ADMIN.ISSUES.COLUMNS.ASSET' | translate }}</th>
+            <th nzWidth="240px">{{ 'ADMIN.ISSUES.COLUMNS.DESCRIPTION' | translate }}</th>
+            <th nzWidth="120px">{{ 'ADMIN.ISSUES.COLUMNS.STATUS' | translate }}</th>
+            <th nzWidth="180px">{{ 'ADMIN.ISSUES.COLUMNS.REPORTER' | translate }}</th>
+            <th
+              nzWidth="130px"
+              [nzSortFn]="true"
+              [nzSortOrder]="getSortOrder('created_at')"
+              (nzSortOrderChange)="onSortChange(issuesTableStorageKey, 'created_at', $event)"
+            >
+              {{ 'ADMIN.ISSUES.COLUMNS.CREATED_AT' | translate }}
+            </th>
+            <th nzWidth="120px">{{ 'ADMIN.ISSUES.COLUMNS.ACTIONS' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of issueTable.data; track row.id) {
+            <tr class="admin-list-row">
+              <td>{{ row.id }}</td>
+              <td class="admin-list-name">
+                <a class="hoverable-link" [routerLink]="['/admin/issues', row.id]">
+                  {{ row.asset_name }}
+                </a>
+              </td>
+              <td class="admin-list-desc">{{ truncate(row.description) }}</td>
+              <td>
+                <nz-tag [nzColor]="statusTagColor(row.status)">{{
+                  'ADMIN.ISSUES.STATUS.' + (row.status | uppercase) | translate
+                }}</nz-tag>
+              </td>
+              <td>{{ row.reporter.email }}</td>
+              <td>{{ row.created_at | date: 'dd/MM/yyyy' }}</td>
+              <td (click)="$event.stopPropagation()">
+                <div class="admin-list-actions">
+                  <a
+                    nz-button
+                    nzType="text"
+                    class="action-icon action-icon--view"
+                    nz-tooltip
+                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_VIEW' | translate"
+                    [routerLink]="['/admin/issues', row.id]"
+                  >
+                    <ng-icon name="lucideEye" aria-hidden="true" />
+                  </a>
+                  @if (canUpdateIssue()) {
+                    <a
+                      nz-button
+                      nzType="text"
+                      class="action-icon action-icon--edit"
+                      nz-tooltip
+                      [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_EDIT' | translate"
+                      [routerLink]="['/admin/issues', row.id, 'edit']"
+                    >
+                      <ng-icon name="lucideSquarePen" aria-hidden="true" />
+                    </a>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-spin>
+  </div>
+
+  <ng-template #emptyTpl>
+    <div class="admin-empty-state">
+      <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
+      <p class="admin-empty-state__title">{{ 'ADMIN.ISSUES.EMPTY_TITLE' | translate }}</p>
+      <p class="admin-empty-state__subtitle">{{ 'ADMIN.COMMON.EMPTY_SUBTITLE' | translate }}</p>
+    </div>
+  </ng-template>
+
+  @if (!loading() && total() > 0) {
+    <div class="admin-pagination">
+      <nz-pagination
+        [nzPageIndex]="page()"
+        [nzTotal]="total()"
+        [nzPageSize]="pageSize()"
+        [nzShowSizeChanger]="true"
+        [nzPageSizeOptions]="[10, 25, 50]"
+        nzShowQuickJumper
+        (nzPageIndexChange)="onPageChange($event)"
+        (nzPageSizeChange)="onPageSizeChange($event)"
+      ></nz-pagination>
+    </div>
+  }
+</div>

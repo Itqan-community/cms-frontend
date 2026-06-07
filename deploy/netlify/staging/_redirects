@@ -1,0 +1,6 @@
+# Same-origin reverse proxy → staging API (session cookies + credentialed XHR work on staging.cms).
+# Google/GitHub authorized redirect URIs must include https://staging.cms.itqan.dev/accounts/... (Django must trust X-Forwarded-*).
+/cms-api/*  https://staging.api.cms.itqan.dev/cms-api/:splat  200
+/accounts/* https://staging.api.cms.itqan.dev/accounts/:splat 200
+/portal/*   https://staging.api.cms.itqan.dev/portal/:splat   200
+/*          /index.html                                           200

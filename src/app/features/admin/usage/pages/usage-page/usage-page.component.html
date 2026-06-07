@@ -1,0 +1,35 @@
+<div class="usage-page">
+  @if (isStaff()) {
+    <div class="usage-page__toolbar">
+      <nz-select
+        class="usage-page__publisher-select"
+        [ngModel]="selectedPublisherId()"
+        (ngModelChange)="onPublisherChange($event)"
+        nzPlaceHolder="{{ 'USAGE.ALL_PUBLISHERS' | translate }}"
+        nzAllowClear
+      >
+        @for (pub of publishers(); track pub.id) {
+          <nz-option [nzValue]="pub.id" [nzLabel]="pub.name"></nz-option>
+        }
+      </nz-select>
+    </div>
+  }
+  <nz-spin [nzSpinning]="loading()">
+    @if (hasError()) {
+      <nz-alert
+        nzType="warning"
+        [nzMessage]="'USAGE.ERROR_UNAVAILABLE' | translate"
+        nzShowIcon
+      ></nz-alert>
+    } @else if (!boardUrl() && !loading()) {
+      <nz-empty [nzNotFoundContent]="'USAGE.NO_DATA' | translate"></nz-empty>
+    } @else if (boardUrl()) {
+      <iframe
+        class="usage-page__board"
+        [src]="boardUrl()!"
+        frameborder="0"
+        allowfullscreen
+      ></iframe>
+    }
+  </nz-spin>
+</div>
