@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import type { RecitationTimingUploadOut } from '../models/recitation-timings.models';
 import type {
   RecitationSurahTrackListItem,
   RecitationTrackDeleteTracksIn,
@@ -17,7 +18,6 @@ import type {
   RecitationTrackValidateUploadIn,
   RecitationTrackValidateUploadOut,
 } from '../models/recitation-tracks.models';
-import type { RecitationTimingUploadOut } from '../models/recitation-timings.models';
 import {
   NamedId,
   RecitationDetails,
@@ -173,7 +173,8 @@ export class RecitationsService {
   }
 
   /**
-   * GET /portal/recitations/{recitation_slug}/recitation-tracks/?page=&page_size=
+   * GET /portal/recitations/{slug}/recitation-tracks/?page=&page_size=
+   * (Previously numeric asset id in path; backend accepts recitation slug in the same segment.)
    */
   recitationTracksList(params: {
     recitation_slug: string;
