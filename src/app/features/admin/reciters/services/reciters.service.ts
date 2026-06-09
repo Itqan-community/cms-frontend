@@ -35,16 +35,33 @@ export class RecitersAdminService {
   }
 
   create(body: ReciterFormValue): Observable<ReciterListItem> {
-    const formData = this.toFormData(body);
-    return this.http.post<ReciterListItem>(this.apiUrl, formData);
+    return this.http.post<ReciterListItem>(this.apiUrl, this.toRequestBody(body));
   }
 
   patch(slug: string, body: ReciterFormValue): Observable<ReciterDetails> {
-    return this.http.patch<ReciterDetails>(`${this.apiUrl}${slug}/`, this.toFormData(body));
+    return this.http.patch<ReciterDetails>(`${this.apiUrl}${slug}/`, this.toRequestBody(body));
   }
 
   delete(slug: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}${slug}/`);
+  }
+
+  /**
+   * Use JSON (which carries an explicit `null` for `date_of_death`) unless an
+   * image file is present, in which case multipart is required.
+   */
+  private toRequestBody(payload: ReciterFormValue): FormData | Record<string, unknown> {
+    if (payload.image) {
+      return this.toFormData(payload);
+    }
+    return {
+      name_ar: payload.name_ar,
+      name_en: payload.name_en,
+      bio_ar: payload.bio_ar ?? '',
+      bio_en: payload.bio_en ?? '',
+      nationality: payload.nationality || null,
+      date_of_death: payload.date_of_death ?? null,
+    };
   }
 
   private toFormData(payload: ReciterFormValue): FormData {

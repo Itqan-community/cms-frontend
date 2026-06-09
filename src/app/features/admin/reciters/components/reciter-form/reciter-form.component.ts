@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzDatePickerModule } from 'ng-zorro-antd/date-picker';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NgIcon } from '@ng-icons/core';
@@ -24,6 +25,7 @@ import { localizeCountryCodeOrName } from '../../../utils/display-localization.u
     ReactiveFormsModule,
     RouterLink,
     NzButtonModule,
+    NzDatePickerModule,
     NzFormModule,
     NzGridModule,
     NgIcon,
@@ -59,7 +61,7 @@ export class ReciterFormComponent implements OnInit {
     bio_ar: [''],
     bio_en: [''],
     nationality: [''],
-    date_of_death: [''],
+    date_of_death: this.fb.control<Date | null>(null),
   });
 
   private editSlug: string | null = null;
@@ -89,7 +91,7 @@ export class ReciterFormComponent implements OnInit {
       bio_ar: v.bio_ar ?? '',
       bio_en: v.bio_en ?? '',
       nationality: v.nationality ?? '',
-      date_of_death: v.date_of_death || null,
+      date_of_death: this.formatDate(v.date_of_death),
       image: this.imageFile() ?? undefined,
     };
 
@@ -141,7 +143,7 @@ export class ReciterFormComponent implements OnInit {
             bio_ar: data.bio_ar,
             bio_en: data.bio_en,
             nationality: data.nationality ?? '',
-            date_of_death: data.date_of_death ?? '',
+            date_of_death: data.date_of_death ? new Date(data.date_of_death) : null,
           });
           if (typeof data.image_url === 'string' && data.image_url) {
             this.imagePreview.set(data.image_url);
@@ -152,6 +154,14 @@ export class ReciterFormComponent implements OnInit {
           this.loadingDetail.set(false);
         },
       });
+  }
+
+  private formatDate(value: Date | null | undefined): string | null {
+    if (!value) return null;
+    const year = value.getFullYear();
+    const month = `${value.getMonth() + 1}`.padStart(2, '0');
+    const day = `${value.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
   }
 
   countryLabel(countryCode: string): string {

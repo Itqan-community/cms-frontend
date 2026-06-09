@@ -165,12 +165,12 @@
                 'ADMIN.RECITERS.FORM.DATE_DEATH_LABEL' | translate
               }}</nz-form-label>
               <nz-form-control>
-                <input
-                  nz-input
+                <nz-date-picker
                   formControlName="date_of_death"
-                  [placeholder]="'ADMIN.RECITERS.FORM.PLACEHOLDER_DATE_DEATH' | translate"
-                  dir="ltr"
-                />
+                  nzFormat="yyyy-MM-dd"
+                  [nzPlaceHolder]="'ADMIN.RECITERS.FORM.PLACEHOLDER_DATE_DEATH' | translate"
+                  style="width: 100%"
+                ></nz-date-picker>
               </nz-form-control>
             </nz-form-item>
           </div>
