@@ -95,14 +95,28 @@
   }
 }
 
-.carousel-wrapper {
-  position: relative;
+.preview-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
   width: 100%;
   max-width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: auto;
+}
+
+.preview-grid__item {
+  padding: 1rem;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 8px;
+  background: white;
+  overflow: hidden;
+}
+
+.preview-grid__empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--color-neutral-400);
+  margin: 0;
+  padding: 2rem 0;
 }
 
 // Sidebar

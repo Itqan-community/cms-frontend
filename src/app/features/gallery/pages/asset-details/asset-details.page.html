@@ -46,8 +46,14 @@
             <ng-icon name="lucideEye" />
             <span>{{ 'UI.CONTENT_PREVIEW' | translate }}</span>
           </div>
-          <div class="carousel-wrapper">
-            <app-image-carousel [images]="images()" />
+          <div class="preview-grid">
+            @for (source of previewSources(); track source.url) {
+              <div class="preview-grid__item">
+                <app-universal-previewer [source]="source" />
+              </div>
+            } @empty {
+              <p class="preview-grid__empty">{{ 'UI.NO_PREVIEW_AVAILABLE' | translate }}</p>
+            }
           </div>
         </div>
       </div>

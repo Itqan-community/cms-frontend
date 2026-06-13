@@ -17,9 +17,12 @@ import { AuthService } from '../../../../core/auth/services/auth.service';
 import { Licenses } from '../../../../core/enums/licenses.enum';
 import { AssetDetailSkeletonComponent } from '../../../../shared/components/asset-detail-skeleton/asset-detail-skeleton.component';
 import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/breadcrumb.component';
-import { ImageCarouselComponent } from '../../../../shared/components/image-carousel/image-carousel.component';
 import { LicenseTagComponent } from '../../../../shared/components/license-tag/license-tag.component';
 import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
+import {
+  PreviewSource,
+  UniversalPreviewerComponent,
+} from '../../../../shared/components/universal-previewer';
 import { AssetDetails } from '../../models/assets.model';
 import { AssetsService } from '../../services/assets.service';
 
@@ -27,7 +30,7 @@ import { AssetsService } from '../../services/assets.service';
   selector: 'app-asset-details-page',
   imports: [
     RouterModule,
-    ImageCarouselComponent,
+    UniversalPreviewerComponent,
     BreadcrumbComponent,
     LicenseTagComponent,
     StateMessageComponent,
@@ -58,7 +61,7 @@ export class AssetDetailsPage implements OnInit {
 
   readonly id = this.route.snapshot.params['id'];
   asset = signal<AssetDetails | null>(null);
-  images = signal<string[]>([]);
+  previewSources = signal<PreviewSource[]>([]);
   loading = signal<boolean>(true);
   errorState = signal<boolean>(false);
   notFound = signal<boolean>(false);
@@ -93,7 +96,13 @@ export class AssetDetailsPage implements OnInit {
       .subscribe({
         next: (asset) => {
           this.asset.set(asset);
-          this.images.set(asset.snapshots.map((snapshot) => snapshot.image_url));
+          this.previewSources.set(
+            asset.snapshots.map((snapshot) => ({
+              url: snapshot.image_url,
+              fileName: snapshot.image_url,
+              title: snapshot.title,
+            }))
+          );
           this.loading.set(false);
         },
         error: (err) => {
