@@ -1,0 +1,85 @@
+.universal-previewer {
+  inline-size: 100%;
+  max-inline-size: 100%;
+}
+
+.universal-previewer__title {
+  margin: 0 0 16px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.4;
+  color: rgba(0, 0, 0, 0.88);
+  word-break: break-word;
+}
+
+.universal-previewer__image-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  inline-size: 100%;
+}
+
+.universal-previewer__image {
+  display: block;
+  max-inline-size: 100%;
+  max-block-size: 70vh;
+  object-fit: contain;
+  cursor: zoom-in;
+}
+
+.universal-previewer__audio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  padding: 24px 16px;
+}
+
+.universal-previewer__audio-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 64px;
+  block-size: 64px;
+  border-radius: 50%;
+  background: rgba(22, 119, 255, 0.08);
+  color: #1677ff;
+}
+
+.universal-previewer__audio-player {
+  inline-size: 100%;
+}
+
+.universal-previewer__video {
+  display: block;
+  inline-size: 100%;
+  max-block-size: 70vh;
+  background: #000;
+}
+
+.universal-previewer__pdf {
+  display: block;
+  inline-size: 100%;
+  block-size: 700px;
+  border: none;
+}
+
+.universal-previewer__csv {
+  inline-size: 100%;
+}
+
+.universal-previewer__table {
+  inline-size: 100%;
+}
+
+.universal-previewer__download {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #1677ff;
+  text-decoration: none;
+}
+
+.universal-previewer__download:hover {
+  color: #4096ff;
+}

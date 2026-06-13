@@ -1477,6 +1477,16 @@
       "TAB_IMPORT": "إستيراد البيانات"
     }
   },
+  "UNIVERSAL_PREVIEWER": {
+    "DEFAULT_TITLE": "معاينة",
+    "IMAGE_ALT": "معاينة الصورة",
+    "PDF_TITLE": "معاينة PDF",
+    "UNSUPPORTED_TITLE": "المعاينة غير متاحة",
+    "UNSUPPORTED_SUBTITLE": "لا يمكن معاينة نوع الملف هذا في المتصفح.",
+    "CSV_LOAD_ERROR": "تعذر تحميل معاينة CSV",
+    "CSV_EMPTY": "ملف CSV فارغ",
+    "DOWNLOAD": "تنزيل الملف"
+  },
   "USAGE": {
     "TITLE": "إحصائيات API",
     "SUBTITLE": "تحليلات طلبات API لحساب الناشر",

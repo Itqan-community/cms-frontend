@@ -1478,6 +1478,16 @@
       "TAB_IMPORT": "Data import"
     }
   },
+  "UNIVERSAL_PREVIEWER": {
+    "DEFAULT_TITLE": "Preview",
+    "IMAGE_ALT": "Image preview",
+    "PDF_TITLE": "PDF preview",
+    "UNSUPPORTED_TITLE": "Preview not available",
+    "UNSUPPORTED_SUBTITLE": "This file type cannot be previewed in the browser.",
+    "CSV_LOAD_ERROR": "Could not load CSV preview",
+    "CSV_EMPTY": "CSV file is empty",
+    "DOWNLOAD": "Download file"
+  },
   "USAGE": {
     "TITLE": "API Usage",
     "SUBTITLE": "API request analytics for your publisher account",

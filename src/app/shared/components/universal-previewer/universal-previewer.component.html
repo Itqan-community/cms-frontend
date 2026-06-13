@@ -1,0 +1,128 @@
+<div class="universal-previewer">
+  @if (displayTitle()) {
+    <p class="universal-previewer__title">{{ displayTitle() }}</p>
+  }
+
+  @switch (fileType()) {
+    @case ('image') {
+      <div class="universal-previewer__image-wrap">
+        <img
+          nz-image
+          class="universal-previewer__image"
+          [nzSrc]="resolvedUrl()"
+          [alt]="displayTitle() || ('UNIVERSAL_PREVIEWER.IMAGE_ALT' | translate)"
+        />
+      </div>
+    }
+
+    @case ('audio') {
+      <div class="universal-previewer__audio">
+        <div class="universal-previewer__audio-icon" aria-hidden="true">
+          <ng-icon name="lucideMusic" size="32" />
+        </div>
+        @if (sanitizedUrl(); as safeUrl) {
+          <audio class="universal-previewer__audio-player" controls [src]="safeUrl"></audio>
+        }
+      </div>
+    }
+
+    @case ('video') {
+      @if (sanitizedUrl(); as safeUrl) {
+        <video class="universal-previewer__video" controls>
+          <source [src]="safeUrl" [type]="mimeType() || undefined" />
+        </video>
+      }
+    }
+
+    @case ('pdf') {
+      @if (sanitizedUrl(); as safeUrl) {
+        <iframe
+          class="universal-previewer__pdf"
+          [src]="safeUrl"
+          title="{{ 'UNIVERSAL_PREVIEWER.PDF_TITLE' | translate }}"
+        ></iframe>
+      }
+    }
+
+    @case ('csv') {
+      <div class="universal-previewer__csv">
+        <nz-spin [nzSpinning]="csvLoading()">
+          @if (csvError()) {
+            <nz-result
+              nzStatus="warning"
+              [nzTitle]="'UNIVERSAL_PREVIEWER.CSV_LOAD_ERROR' | translate"
+              [nzSubTitle]="'UNIVERSAL_PREVIEWER.UNSUPPORTED_SUBTITLE' | translate"
+            >
+              <div nz-result-extra>
+                @if (downloadUrl()) {
+                  <a
+                    class="universal-previewer__download"
+                    [href]="downloadUrl()"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <ng-icon name="lucideDownload" size="16" />
+                    {{ 'UNIVERSAL_PREVIEWER.DOWNLOAD' | translate }}
+                  </a>
+                }
+              </div>
+            </nz-result>
+          } @else if (!csvLoading() && csvData().headers.length === 0) {
+            <nz-result
+              nzStatus="warning"
+              [nzTitle]="'UNIVERSAL_PREVIEWER.CSV_EMPTY' | translate"
+            ></nz-result>
+          } @else {
+            <nz-table
+              class="universal-previewer__table"
+              [nzData]="csvData().rows"
+              [nzFrontPagination]="true"
+              [nzPageSize]="20"
+              nzSize="small"
+              [nzScroll]="{ x: 'max-content' }"
+            >
+              <thead>
+                <tr>
+                  @for (header of csvData().headers; track header) {
+                    <th>{{ header }}</th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of csvData().rows; track $index) {
+                  <tr>
+                    @for (header of csvData().headers; track header) {
+                      <td>{{ row[header] }}</td>
+                    }
+                  </tr>
+                }
+              </tbody>
+            </nz-table>
+          }
+        </nz-spin>
+      </div>
+    }
+
+    @default {
+      <nz-result
+        nzStatus="warning"
+        [nzTitle]="'UNIVERSAL_PREVIEWER.UNSUPPORTED_TITLE' | translate"
+        [nzSubTitle]="'UNIVERSAL_PREVIEWER.UNSUPPORTED_SUBTITLE' | translate"
+      >
+        <div nz-result-extra>
+          @if (downloadUrl()) {
+            <a
+              class="universal-previewer__download"
+              [href]="downloadUrl()"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <ng-icon name="lucideDownload" size="16" />
+              {{ 'UNIVERSAL_PREVIEWER.DOWNLOAD' | translate }}
+            </a>
+          }
+        </div>
+      </nz-result>
+    }
+  }
+</div>
