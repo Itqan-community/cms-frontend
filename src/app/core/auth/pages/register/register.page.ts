@@ -7,8 +7,8 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { getErrorMessage, isUnverifiedEmailError } from '../../../../shared/utils/error.utils';
+import { AuthSocialActionsComponent } from '../../components/auth-social-actions/auth-social-actions.component';
 import { AUTH_ROUTES, tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
-import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
 import { RegisterRequest } from '../../models/auth.model';
 import { AuthService } from '../../services/auth.service';
 import { buildHeadlessOAuthCallbackUrl } from '../../utils/auth-route-query.util';
@@ -23,6 +23,7 @@ import { buildHeadlessOAuthCallbackUrl } from '../../utils/auth-route-query.util
     TranslateModule,
     LangSwitchComponent,
     NgIcon,
+    AuthSocialActionsComponent,
   ],
   templateUrl: './register.page.html',
   styleUrls: ['./register.page.less'],
@@ -56,10 +57,8 @@ export class RegisterPage {
 
   registerForm: FormGroup;
   errorMessage = signal<string>('');
-  passkeyAvailable = signal(false);
 
   constructor() {
-    this.passkeyAvailable.set(isPasskeyClientEnvironmentSupported());
     this.registerForm = this.fb.group(
       {
         first_name: ['', [Validators.required]],
