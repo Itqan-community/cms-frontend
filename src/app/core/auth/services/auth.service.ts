@@ -61,6 +61,7 @@ import {
 } from '../models/auth.model';
 import { normalizeApiKeyRow, parseApiKeyCreated, parseApiKeysList } from '../utils/api-keys.util';
 import { getCookie, getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
+import { GoogleAnalyticsService } from '../../services/google-analytics.service';
 
 @Injectable({
   providedIn: 'root',
@@ -71,6 +72,7 @@ export class AuthService {
   private readonly headless = inject(HeadlessAuthApiService);
   private readonly tokenStore = inject(HeadlessAppTokenService);
   private readonly authBus = inject(AllauthAuthChangeBus);
+  private readonly googleAnalyticsService = inject(GoogleAnalyticsService);
 
   private readonly API_BASE_URL = environment.API_BASE_URL;
   private readonly USER_KEY = 'user';
@@ -655,9 +657,11 @@ export class AuthService {
   private async handleAuthChangeEvent(evt: AuthChangeEventType, auth: unknown): Promise<void> {
     switch (evt) {
       case AuthChangeEvent.LOGGED_OUT:
+        this.googleAnalyticsService.event('logout');
         await this.router.navigateByUrl(ALLAUTH_LOGOUT_REDIRECT_URL);
         break;
       case AuthChangeEvent.LOGGED_IN:
+        this.googleAnalyticsService.event('login');
         if (this.isOAuthProviderCallbackRoute()) {
           break;
         }

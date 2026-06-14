@@ -14,6 +14,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/auth/services/auth.service';
+import { GoogleAnalyticsService } from '../../../../core/services/google-analytics.service';
 import { Licenses } from '../../../../core/enums/licenses.enum';
 import { AssetDetailSkeletonComponent } from '../../../../shared/components/asset-detail-skeleton/asset-detail-skeleton.component';
 import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/breadcrumb.component';
@@ -55,6 +56,7 @@ export class AssetDetailsPage implements OnInit {
   private readonly message = inject(NzMessageService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly googleAnalyticsService = inject(GoogleAnalyticsService);
 
   readonly id = this.route.snapshot.params['id'];
   asset = signal<AssetDetails | null>(null);
@@ -172,6 +174,7 @@ export class AssetDetailsPage implements OnInit {
         .subscribe({
           next: () => {
             this.isSubmittingRequest.set(false);
+            this.googleAnalyticsService.event('access_request', { asset_id: asset.id });
             this.closeAccessRequestModal();
             this.openLicenseModal();
           },
@@ -252,9 +255,11 @@ export class AssetDetailsPage implements OnInit {
         next: (response) => {
           this.isDownloading.set(false);
           const downloadUrl = response.download_url;
-          // Extract filename from URL path
           const filename = this.extractFilenameFromPath(downloadUrl);
-          // Step 2: Download the actual file
+          this.googleAnalyticsService.event('file_download', {
+            asset_id: assetId,
+            file_name: filename,
+          });
           this.downloadFileFromUrl(downloadUrl, filename);
         },
         error: (error) => {
@@ -279,9 +284,14 @@ export class AssetDetailsPage implements OnInit {
         next: (response) => {
           this.isDownloading.set(false);
           const downloadUrl = response.download_url;
-          // Extract filename from URL path
           const filename = this.extractFilenameFromPath(downloadUrl);
-          // Step 2: Download the actual file
+          const assetId = this.asset()?.id;
+          if (assetId) {
+            this.googleAnalyticsService.event('file_download', {
+              asset_id: assetId,
+              file_name: filename,
+            });
+          }
           this.downloadFileFromUrl(downloadUrl, filename);
         },
         error: (error) => {

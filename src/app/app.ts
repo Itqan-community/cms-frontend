@@ -50,9 +50,14 @@ export class App {
       this.fullWidth.set(!!merged['fullWidth']);
     };
     syncShellFromRoute();
-    this.router.events
-      .pipe(filter((e) => e instanceof NavigationEnd))
-      .subscribe(syncShellFromRoute);
+    this.router.events.pipe(filter((e) => e instanceof NavigationEnd)).subscribe((event) => {
+      syncShellFromRoute();
+      const navigation = event as NavigationEnd;
+      this.googleAnalyticsService.pageView(
+        navigation.urlAfterRedirects,
+        this.titleService.getTitle()
+      );
+    });
 
     const currentLang = localStorage.getItem('lang') || 'ar';
     this.translate.addLangs(['ar', 'en']);
@@ -90,6 +95,7 @@ export class App {
 
     // Also update the document title after switching
     this.setAppTitle(newLang);
+    this.googleAnalyticsService.event('language_switch', { language: newLang });
   }
 
   private setAppTitle(lang: string) {
