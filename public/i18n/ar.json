@@ -698,7 +698,8 @@
       "MANAGE_PROFILE": "إدارة الملف",
       "BACK_TO_GALLERY": "العودة إلى المعرض",
       "USAGE": "إحصائيات API",
-      "ISSUES": "إدارة البلاغات"
+      "ISSUES": "إدارة البلاغات",
+      "MEMBERS": "إدارة الأعضاء"
     },
     "PROFILE": {
       "TITLE": "ملف الناشر",
@@ -1337,6 +1338,93 @@
         "DESCRIPTION_LABEL": "الوصف",
         "DESCRIPTION_PLACEHOLDER": "صف المشكلة…",
         "ERR_DESCRIPTION": "أدخل وصفاً لا يقل عن 3 أحرف"
+      }
+    },
+    "MEMBERS": {
+      "TITLE": "إدارة الأعضاء",
+      "SUBTITLE": "عرض ودعوة وإدارة أعضاء الناشر",
+      "EMPTY_TITLE": "لا يوجد أعضاء",
+      "INVITE_BUTTON": "دعوة عضو",
+      "SEARCH_PLACEHOLDER": "ابحث بالاسم أو البريد…",
+      "LIST_ERROR_TITLE": "تعذر تحميل الأعضاء",
+      "LIST_ERROR_DESC": "تحقق من الاتصال وحاول مرة أخرى.",
+      "EXPIRES_IN_DAYS": "ينتهي خلال {{days}} أيام",
+      "EXPIRES_TODAY": "ينتهي اليوم",
+      "TOOLTIP_RESEND": "إعادة إرسال الدعوة",
+      "TOOLTIP_CANCEL": "إلغاء الدعوة",
+      "TOOLTIP_REMOVE": "إزالة العضو",
+      "COLUMNS": {
+        "NAME": "الاسم",
+        "EMAIL": "البريد الإلكتروني",
+        "ROLE": "الدور",
+        "STATUS": "الحالة",
+        "CREATED_AT": "تاريخ الإضافة",
+        "ACTIONS": "الإجراءات"
+      },
+      "FILTERS": {
+        "STATUS": "الحالة"
+      },
+      "ROLE": {
+        "ADMIN": "مدير",
+        "STAFF": "موظف"
+      },
+      "STATUS": {
+        "PENDING": "قيد الانتظار",
+        "ACTIVE": "نشط"
+      },
+      "FORM": {
+        "TITLE_INVITE": "دعوة عضو",
+        "TITLE_EDIT": "تعديل العضو",
+        "NAME_LABEL": "الاسم",
+        "NAME_PLACEHOLDER": "اسم العضو",
+        "EMAIL_LABEL": "البريد الإلكتروني",
+        "EMAIL_PLACEHOLDER": "email@example.com",
+        "ROLE_LABEL": "الدور",
+        "INVITE_INFO": "سيتم إرسال رسالة دعوة إلى هذا البريد الإلكتروني.",
+        "SUBMIT_INVITE": "إرسال الدعوة",
+        "SUBMIT_EDIT": "حفظ",
+        "CANCEL": "إلغاء",
+        "CONFIRM_OK": "تأكيد",
+        "CONFIRM_CANCEL": "إلغاء",
+        "ERR_NAME": "يرجى إدخال الاسم",
+        "ERR_EMAIL": "يرجى إدخال بريد إلكتروني صالح"
+      },
+      "PROMOTE": {
+        "CONFIRM_TITLE": "ترقية إلى مدير؟",
+        "CONFIRM_BODY": "{{name}} — سيتمكن من إدارة الأعضاء."
+      },
+      "DEMOTE": {
+        "CONFIRM_TITLE": "تخفيض إلى موظف؟",
+        "CONFIRM_BODY": "{{name}} — لن يتمكن من إدارة الأعضاء."
+      },
+      "REMOVE": {
+        "CONFIRM_TITLE": "إزالة هذا العضو؟",
+        "CONFIRM_BODY": "{{name}} — سيتم إلغاء وصوله إلى البوابة.",
+        "CONFIRM_OK": "نعم، أزل"
+      },
+      "CANCEL": {
+        "CONFIRM_TITLE": "إلغاء هذه الدعوة؟",
+        "CONFIRM_BODY": "{{name}} — سيتوقف رابط الدعوة عن العمل.",
+        "CONFIRM_OK": "نعم، ألغِ"
+      },
+      "RESEND": {
+        "CONFIRM_TITLE": "إعادة إرسال الدعوة؟",
+        "CONFIRM_BODY": "{{name}} — سيتوقف الرابط السابق عن العمل فوراً.",
+        "CONFIRM_OK": "إعادة الإرسال"
+      },
+      "MESSAGES": {
+        "INVITE_SUCCESS": "تم إرسال الدعوة",
+        "INVITE_ERROR": "تعذر إرسال الدعوة",
+        "UPDATE_SUCCESS": "تم تحديث العضو",
+        "UPDATE_ERROR": "تعذر تحديث العضو",
+        "PROMOTE_SUCCESS": "تمت ترقية العضو إلى مدير",
+        "DEMOTE_SUCCESS": "تم تخفيض العضو إلى موظف",
+        "REMOVE_SUCCESS": "تمت إزالة العضو",
+        "REMOVE_ERROR": "تعذر إزالة العضو",
+        "CANCEL_SUCCESS": "تم إلغاء الدعوة",
+        "RESEND_SUCCESS": "تمت إعادة إرسال الدعوة",
+        "RESEND_ERROR": "تعذر إعادة إرسال الدعوة",
+        "NO_PUBLISHER": "يرجى اختيار ناشر"
       }
     },
     "PUBLISHERS": {
