@@ -3,7 +3,7 @@
     <a routerLink="/admin/publishers" class="admin-breadcrumb__link">{{
       'ADMIN.PUBLISHERS.DETAIL.BREADCRUMB' | translate
     }}</a>
-    <ng-icon name="lucideChevronLeft" class="admin-breadcrumb__sep" />
+    <ng-icon name="lucideChevronLeft" class="admin-breadcrumb__sep rtl-flip" />
     @if (loading()) {
       <span class="admin-breadcrumb__current">{{ 'ADMIN.COMMON.LOADING' | translate }}</span>
     } @else {
@@ -101,7 +101,7 @@
     <div class="admin-back">
       <a routerLink="/admin/publishers">
         <button nz-button nzType="default">
-          <ng-icon name="lucideArrowRight" />
+          <ng-icon name="lucideArrowRight" class="rtl-flip" />
           {{ 'ADMIN.COMMON.BACK_TO_LIST' | translate }}
         </button>
       </a>

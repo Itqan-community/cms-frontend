@@ -58,8 +58,8 @@
   background-color: white;
   border: 1px solid var(--color-neutral-200);
 
-  i {
-    font-size: 1rem;
+  ng-icon {
+    --ng-icon__size: var(--icon-sm);
   }
 }
 
@@ -88,10 +88,6 @@
 
   @media (max-width: 768px) {
     margin-inline-start: 0;
-  }
-
-  i {
-    font-size: 1.25rem;
   }
 }
 
@@ -125,8 +121,8 @@
   gap: 4px;
   font-size: 16px;
 
-  i {
-    font-size: 28px;
+  ng-icon {
+    --ng-icon__size: var(--icon-xl);
   }
 }
 
@@ -165,11 +161,6 @@
     background-color: var(--color-neutral-200) !important;
     border-color: var(--color-neutral-200) !important;
   }
-
-  i {
-    font-size: 1rem;
-    margin-inline-end: 0.5rem;
-  }
 }
 
 .download-button-secondary {
@@ -180,11 +171,6 @@
   height: 40px;
   margin-top: 0.5rem;
   cursor: pointer;
-
-  i {
-    font-size: 1rem;
-    margin-inline-start: 0.5rem;
-  }
 }
 
 .download-button-primary {
@@ -194,11 +180,6 @@
   gap: 0.5rem;
   height: 40px;
   cursor: pointer;
-
-  i {
-    font-size: 1rem;
-    margin-inline-start: 0.5rem;
-  }
 }
 
 // Publisher Card

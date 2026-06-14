@@ -40,11 +40,36 @@ body {
 }
 
 ng-icon {
-  // display: inline-flex;
-  // font-size: 20px;
-  // width: 1em;
-  // height: 1em;
-  // vertical-align: -0.125em;
+  --ng-icon__size: var(--icon-md);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  line-height: 0;
+}
+
+.icon-xs {
+  --ng-icon__size: var(--icon-xs);
+}
+
+.icon-sm {
+  --ng-icon__size: var(--icon-sm);
+}
+
+.icon-md {
+  --ng-icon__size: var(--icon-md);
+}
+
+.icon-lg {
+  --ng-icon__size: var(--icon-lg);
+}
+
+.icon-xl {
+  --ng-icon__size: var(--icon-xl);
+}
+
+.icon-2xl {
+  --ng-icon__size: var(--icon-2xl);
 }
 
 .card {

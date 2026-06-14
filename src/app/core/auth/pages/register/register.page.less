@@ -36,13 +36,7 @@
     background-color: var(--color-neutral-100);
   }
   &__back-icon {
-    width: 16px;
-    height: 16px;
-  }
-
-  /* RTL Support */
-  :host-context(html[dir='rtl']) &__back i {
-    transform: scaleX(-1);
+    --ng-icon__size: var(--icon-sm);
   }
 
   &__container {
@@ -159,6 +153,8 @@
     color: #9ca3af;
     transition: color 0.2s ease;
 
+    --ng-icon__size: var(--icon-md);
+
     display: flex;
     align-items: center;
     justify-content: center;
@@ -171,12 +167,11 @@
   &__input-icon {
     position: absolute;
     inset-inline-end: 5px;
-    height: 24px;
-    width: 24px;
     top: 50%;
     transform: translateY(-50%);
     color: #9ca3af;
 
+    --ng-icon__size: var(--icon-md);
     display: flex;
     align-items: center;
     justify-content: center;

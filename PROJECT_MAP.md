@@ -1,6 +1,6 @@
 # PROJECT_MAP — Itqan CMS Frontend
 
-> Last updated: 2026-05-14 Generated for AI-assisted development. Provide this doc to any LLM to
+> Last updated: 2026-06-14 Generated for AI-assisted development. Provide this doc to any LLM to
 > give full project context.
 
 ---
@@ -12,7 +12,7 @@
 | Framework    | Angular (standalone components)                         | ^20.3.7  |
 | Language     | TypeScript                                              | ~5.9.2   |
 | UI Library   | NG-ZORRO (Ant Design for Angular)                       | ^20.3.1  |
-| Icons        | @ng-icons/lucide                                        | ^32.5.0  |
+| Icons        | @ng-icons/core + @ng-icons/lucide (`<ng-icon>`)         | ^32.5.0  |
 | i18n         | @ngx-translate/core                                     | ^17.0.0  |
 | Styling      | LESS                                                    | ^4.2.0   |
 | Auth Backend | django-allauth (headless SPA mode)                      | —        |
@@ -449,7 +449,14 @@ analytics
 7. **Admin module structure** — `routes.ts`, `-layout.component.ts`, `components/`, `models/`,
    `services/`, `utils/` per entity
 8. **i18n first** — All user-facing strings use `translate` pipe or `TranslateService`
-9. **CSS variables** — Theming via `--color-*`, `--radius-*`, `--shadow-*` custom properties
-10. **RTL support** — Logical CSS properties throughout, `ltr-flip`/`rtl-flip` transform utilities
-11. **Responsive** — Mobile-first with breakpoints at 480/576/768/992/1200/1600px
-12. **Error classification** — `getErrorMessage()` utility for allauth-specific error parsing
+9. **CSS variables** — Theming via `--color-*`, `--radius-*`, `--icon-*`, `--shadow-*` custom
+   properties
+10. **Icons** — Single source: Lucide via `<ng-icon>` registered in
+    `icons/provide-app-lucide-icons.ts`; global defaults via
+    `provideNgIconsConfig({ size: 'var(--icon-md)', strokeWidth: 2 })` in `app.config.ts`; size
+    scale `--icon-xs` (14px) through `--icon-2xl` (40px) with utility classes
+    `.icon-xs`…`.icon-2xl`; directional icons (back arrows, breadcrumb chevrons) use `rtl-flip` in
+    RTL; no `nz-icon` or font-icon libraries
+11. **RTL support** — Logical CSS properties throughout, `ltr-flip`/`rtl-flip` transform utilities
+12. **Responsive** — Mobile-first with breakpoints at 480/576/768/992/1200/1600px
+13. **Error classification** — `getErrorMessage()` utility for allauth-specific error parsing

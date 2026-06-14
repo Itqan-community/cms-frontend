@@ -36,13 +36,13 @@
                 <div class="meta-item-group">
                   @if (publisher()!.address) {
                     <div class="meta-item">
-                      <i class="bx bx-map"></i>
+                      <ng-icon name="lucideMapPin" aria-hidden="true" />
                       <span>{{ publisher()!.address }}</span>
                     </div>
                   }
                   @if (publisher()!.website) {
                     <div class="meta-item">
-                      <i class="bx bx-globe"></i>
+                      <ng-icon name="lucideGlobe" aria-hidden="true" />
                       <a
                         [href]="publisher()!.website"
                         target="_blank"
@@ -75,7 +75,7 @@
           <div class="publisher-info-unavailable__row">
             <ng-icon
               name="lucideInfo"
-              class="publisher-info-unavailable__icon"
+              class="publisher-info-unavailable__icon icon-md"
               aria-hidden="true"
             />
             <div class="publisher-info-unavailable__copy">

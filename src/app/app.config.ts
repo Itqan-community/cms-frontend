@@ -11,6 +11,7 @@ import * as Sentry from '@sentry/angular';
 import { environment } from '../environments/environment';
 
 import { routes } from './app.routes';
+import { provideNgIconsConfig } from '@ng-icons/core';
 import { ar_EG, provideNzI18n } from 'ng-zorro-antd/i18n';
 import { appLucideIconsProvider } from './icons/provide-app-lucide-icons';
 import { registerLocaleData } from '@angular/common';
@@ -50,6 +51,7 @@ export const appConfig: ApplicationConfig = {
         ]
       : []),
     provideNzI18n(ar_EG),
+    provideNgIconsConfig({ strokeWidth: 2 }),
     appLucideIconsProvider,
     provideAnimationsAsync(),
     provideHttpClient(

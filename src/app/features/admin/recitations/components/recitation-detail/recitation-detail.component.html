@@ -3,7 +3,7 @@
     <a routerLink="/admin/recitations" class="admin-breadcrumb__link">{{
       'ADMIN.RECITATIONS.DETAIL.BREADCRUMB' | translate
     }}</a>
-    <ng-icon name="lucideChevronLeft" class="admin-breadcrumb__sep" />
+    <ng-icon name="lucideChevronLeft" class="admin-breadcrumb__sep rtl-flip" />
     @if (loading()) {
       <span class="admin-breadcrumb__current">{{ 'ADMIN.COMMON.LOADING' | translate }}</span>
     } @else {
@@ -524,7 +524,7 @@
     <div class="admin-back">
       <a routerLink="/admin/recitations">
         <button nz-button nzType="default">
-          <ng-icon name="lucideArrowRight" />
+          <ng-icon name="lucideArrowRight" class="rtl-flip" />
           {{ 'ADMIN.COMMON.BACK_TO_LIST' | translate }}
         </button>
       </a>
