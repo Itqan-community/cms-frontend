@@ -1,6 +1,6 @@
 # PROJECT_MAP — Itqan CMS Frontend
 
-> Last updated: 2026-05-14 Generated for AI-assisted development. Provide this doc to any LLM to
+> Last updated: 2026-06-15 Generated for AI-assisted development. Provide this doc to any LLM to
 > give full project context.
 
 ---
@@ -356,16 +356,36 @@ success.
 
 ## [ENVIRONMENTS]
 
-| Env                   | File                       | production | API_BASE_URL                    | OAuth    | Sentry |
-| --------------------- | -------------------------- | ---------- | ------------------------------- | -------- | ------ |
-| Default (staging dev) | `environment.ts`           | false      | `staging.api.cms.itqan.dev`     | disabled | —      |
-| Production            | `environment.prod.ts`      | true       | `api.cms.itqan.dev`             | enabled  | ✓      |
-| Staging               | `environment.staging.ts`   | false      | dynamic (same-origin detection) | enabled  | ✓      |
-| Local                 | `environment.local.ts`     | false      | `127.0.0.1:8000`                | enabled  | —      |
-| Publisher             | `environment.publisher.ts` | false      | `staging.api.cms.itqan.dev`     | enabled  | —      |
+| Env                   | File                       | production | API_BASE_URL                    | OAuth    | Sentry | GA4 (`gaTrackingId`) |
+| --------------------- | -------------------------- | ---------- | ------------------------------- | -------- | ------ | -------------------- |
+| Default (staging dev) | `environment.ts`           | false      | `staging.api.cms.itqan.dev`     | disabled | —      | —                    |
+| Production            | `environment.prod.ts`      | true       | `api.cms.itqan.dev`             | enabled  | ✓      | `G-Y38325E2JX`       |
+| Staging               | `environment.staging.ts`   | false      | dynamic (same-origin detection) | enabled  | ✓      | —                    |
+| Local                 | `environment.local.ts`     | false      | `127.0.0.1:8000`                | enabled  | —      | —                    |
+| Publisher             | `environment.publisher.ts` | false      | `staging.api.cms.itqan.dev`     | enabled  | —      | —                    |
 
 **Key env vars:** `API_BASE_URL`, `ADMIN_API_BASE_URL`, `API_DOCS_URL`, `gaTrackingId`, `sentryDsn`,
 `oauthBrowserRedirectEnabled`, `webauthnReplaceRpIdWithHostname`
+
+### Google Analytics (GA4)
+
+- **Service:** `src/app/core/services/google-analytics.service.ts` — loads `gtag.js`, sets
+  `send_page_view: false`, and emits manual SPA `page_view` events.
+- **Bootstrap:** `App` constructor calls `GoogleAnalyticsService.init()` and tracks route changes on
+  `NavigationEnd` via `pageView(urlAfterRedirects, documentTitle)`.
+- **Enablement:** GA runs only when `environment.production === true` and `gaTrackingId` is set.
+  Production is the only configured environment (`G-Y38325E2JX` in `environment.prod.ts`). Local,
+  staging, default, and publisher builds do not load GA unless explicitly expanded later.
+- **Automated checks:** `google-analytics.service.spec.ts` (init guards, script bootstrap,
+  `page_view` payload) and `app.spec.ts` (`NavigationEnd` → `pageView`).
+- **Manual acceptance (required for GA property verification):**
+  1. Deploy or serve a production build (`npm run build:production` → host `dist/browser`, or
+     production Netlify deploy at `https://cms.itqan.dev`).
+  2. Open GA4 for property `G-Y38325E2JX` → **Admin → DebugView** (or **Reports → Realtime**).
+  3. Visit a CMS route (e.g. `/gallery`) in the browser.
+  4. Confirm a `page_view` event appears with the visited `page_path` / `page_location`.
+  5. In local dev (`ng serve`, staging/local configs), confirm no `googletagmanager.com/gtag/js`
+     network request is made.
 
 ---
 
