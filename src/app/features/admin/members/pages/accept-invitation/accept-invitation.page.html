@@ -1,0 +1,46 @@
+<div class="accept-invite">
+  <header class="accept-invite__header">
+    <div class="accept-invite__header-row">
+      <a
+        [routerLink]="['/']"
+        class="accept-invite__back"
+        [title]="'INVITATION.ACCEPT.BACK' | translate"
+      >
+        {{ 'INVITATION.ACCEPT.BACK' | translate }}
+      </a>
+      <app-lang-switch></app-lang-switch>
+    </div>
+  </header>
+
+  <div class="accept-invite__container">
+    <div class="accept-invite__card">
+      <div class="accept-invite__logo">
+        <img src="/assets/images/logo.svg" alt="Itqan" width="50" height="50" />
+      </div>
+
+      @if (state() === 'loading') {
+        <h1 class="accept-invite__title">{{ 'INVITATION.ACCEPT.TITLE' | translate }}</h1>
+        <p class="accept-invite__subtitle">{{ 'INVITATION.ACCEPT.LOADING' | translate }}</p>
+        <div class="accept-invite__spinner-wrap" aria-busy="true">
+          <span class="accept-invite__spinner" aria-hidden="true"></span>
+        </div>
+      }
+
+      @if (state() === 'success') {
+        <h1 class="accept-invite__title">{{ 'INVITATION.ACCEPT.SUCCESS_TITLE' | translate }}</h1>
+        <p class="accept-invite__subtitle">{{ 'INVITATION.ACCEPT.SUCCESS_BODY' | translate }}</p>
+        <a routerLink="/account/login" class="accept-invite__submit">
+          {{ 'INVITATION.ACCEPT.GO_TO_LOGIN' | translate }}
+        </a>
+      }
+
+      @if (state() === 'error') {
+        <h1 class="accept-invite__title">{{ 'INVITATION.ACCEPT.TITLE' | translate }}</h1>
+        <div class="accept-invite__alert">{{ errorMessage() }}</div>
+        <a routerLink="/account/login" class="accept-invite__secondary">
+          {{ 'INVITATION.ACCEPT.GO_TO_LOGIN' | translate }}
+        </a>
+      }
+    </div>
+  </div>
+</div>

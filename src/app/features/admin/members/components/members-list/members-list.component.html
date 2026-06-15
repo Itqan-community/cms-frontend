@@ -1,0 +1,229 @@
+<div class="members-list admin-list-page">
+  <div class="admin-list-header">
+    <div class="admin-list-header__text">
+      <h2 class="admin-list-header__title">{{ 'ADMIN.MEMBERS.TITLE' | translate }}</h2>
+      <p class="admin-list-header__subtitle">{{ 'ADMIN.MEMBERS.SUBTITLE' | translate }}</p>
+    </div>
+    @if (canInvite()) {
+      <button
+        nz-button
+        nzType="primary"
+        class="admin-add-btn"
+        type="button"
+        (click)="openInviteModal()"
+      >
+        <ng-icon name="lucidePlus" aria-hidden="true" />
+        {{ 'ADMIN.MEMBERS.INVITE_BUTTON' | translate }}
+      </button>
+    }
+  </div>
+
+  @if (loadFailed()) {
+    <nz-alert
+      nzType="error"
+      [nzMessage]="'ADMIN.MEMBERS.LIST_ERROR_TITLE' | translate"
+      [nzDescription]="'ADMIN.MEMBERS.LIST_ERROR_DESC' | translate"
+      nzShowIcon
+      class="members-list__alert"
+    />
+  }
+
+  <app-member-filters
+    [initialFilters]="activeFilters"
+    (filtersChange)="onMemberFiltersChange($event)"
+  />
+
+  <div class="admin-table-wrap">
+    <nz-spin [nzSpinning]="loading()">
+      <nz-table
+        #memberTable
+        [nzData]="items()"
+        [nzFrontPagination]="false"
+        [nzShowPagination]="false"
+        nzSize="middle"
+        [nzNoResult]="emptyTpl"
+      >
+        <thead>
+          <tr>
+            <th nzWidth="160px">{{ 'ADMIN.MEMBERS.COLUMNS.NAME' | translate }}</th>
+            <th nzWidth="220px">{{ 'ADMIN.MEMBERS.COLUMNS.EMAIL' | translate }}</th>
+            <th nzWidth="100px">{{ 'ADMIN.MEMBERS.COLUMNS.ROLE' | translate }}</th>
+            <th nzWidth="180px">{{ 'ADMIN.MEMBERS.COLUMNS.STATUS' | translate }}</th>
+            <th
+              nzWidth="130px"
+              [nzSortFn]="true"
+              [nzSortOrder]="getSortOrder('created_at')"
+              (nzSortOrderChange)="onSortChange(membersTableStorageKey, 'created_at', $event)"
+            >
+              {{ 'ADMIN.MEMBERS.COLUMNS.CREATED_AT' | translate }}
+            </th>
+            <th nzWidth="140px">{{ 'ADMIN.MEMBERS.COLUMNS.ACTIONS' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of memberTable.data; track row.id) {
+            <tr class="admin-list-row">
+              <td class="admin-list-name">{{ row.name }}</td>
+              <td>{{ row.email }}</td>
+              <td>
+                <nz-tag [nzColor]="roleTagColor(row.role)">{{ roleLabel(row.role) }}</nz-tag>
+              </td>
+              <td>
+                <div class="members-list__status-cell">
+                  <nz-tag [nzColor]="statusTagColor(row.status)">{{
+                    'ADMIN.MEMBERS.STATUS.' + (row.status | uppercase) | translate
+                  }}</nz-tag>
+                  @if (row.status === 'pending' && expiresInDays(row.expires_at); as expiry) {
+                    <span class="members-list__expires">{{ expiry }}</span>
+                  }
+                </div>
+              </td>
+              <td>{{ row.created_at | date: 'dd/MM/yyyy' }}</td>
+              <td (click)="$event.stopPropagation()">
+                <div class="admin-list-actions">
+                  @if (canUpdate() && canManageRow(row)) {
+                    <button
+                      nz-button
+                      nzType="text"
+                      type="button"
+                      class="action-icon action-icon--edit"
+                      nz-tooltip
+                      [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_EDIT' | translate"
+                      (click)="openEditModal(row)"
+                    >
+                      <ng-icon name="lucideSquarePen" aria-hidden="true" />
+                    </button>
+                  }
+                  @if (canInvite() && row.status === 'pending') {
+                    <button
+                      nz-button
+                      nzType="text"
+                      type="button"
+                      class="action-icon action-icon--resend"
+                      nz-tooltip
+                      [nzTooltipTitle]="'ADMIN.MEMBERS.TOOLTIP_RESEND' | translate"
+                      (click)="onResend(row)"
+                    >
+                      <ng-icon name="lucideRotateCw" aria-hidden="true" />
+                    </button>
+                  }
+                  @if (canDelete() && canManageRow(row)) {
+                    <button
+                      nz-button
+                      nzType="text"
+                      type="button"
+                      class="action-icon action-icon--delete"
+                      nz-tooltip
+                      [nzTooltipTitle]="
+                        (row.status === 'pending'
+                          ? 'ADMIN.MEMBERS.TOOLTIP_CANCEL'
+                          : 'ADMIN.MEMBERS.TOOLTIP_REMOVE'
+                        ) | translate
+                      "
+                      (click)="onRemove(row)"
+                    >
+                      <ng-icon name="lucideTrash2" aria-hidden="true" />
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-spin>
+  </div>
+
+  <ng-template #emptyTpl>
+    <div class="admin-empty-state">
+      <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
+      <p class="admin-empty-state__title">{{ 'ADMIN.MEMBERS.EMPTY_TITLE' | translate }}</p>
+      <p class="admin-empty-state__subtitle">{{ 'ADMIN.COMMON.EMPTY_SUBTITLE' | translate }}</p>
+    </div>
+  </ng-template>
+
+  @if (!loading() && total() > 0) {
+    <div class="admin-pagination">
+      <nz-pagination
+        [nzPageIndex]="page()"
+        [nzTotal]="total()"
+        [nzPageSize]="pageSize()"
+        [nzShowSizeChanger]="true"
+        [nzPageSizeOptions]="[10, 25, 50]"
+        nzShowQuickJumper
+        (nzPageIndexChange)="onPageChange($event)"
+        (nzPageSizeChange)="onPageSizeChange($event)"
+      ></nz-pagination>
+    </div>
+  }
+
+  <nz-modal
+    [nzVisible]="formModalVisible()"
+    (nzVisibleChange)="onFormModalVisibleChange($event)"
+    (nzOnCancel)="closeFormModal()"
+    [nzTitle]="
+      (isInviteMode ? 'ADMIN.MEMBERS.FORM.TITLE_INVITE' : 'ADMIN.MEMBERS.FORM.TITLE_EDIT')
+        | translate
+    "
+    [nzWidth]="'min(520px, 92vw)'"
+    nzCentered
+    [nzOkLoading]="formSubmitting()"
+    [nzOkText]="
+      (isInviteMode ? 'ADMIN.MEMBERS.FORM.SUBMIT_INVITE' : 'ADMIN.MEMBERS.FORM.SUBMIT_EDIT')
+        | translate
+    "
+    [nzCancelText]="'ADMIN.MEMBERS.FORM.CANCEL' | translate"
+    (nzOnOk)="submitFormModal()"
+  >
+    <ng-container *nzModalContent>
+      <form nz-form [formGroup]="memberForm" class="members-list__form">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24" nzRequired>{{
+            'ADMIN.MEMBERS.FORM.NAME_LABEL' | translate
+          }}</nz-form-label>
+          <nz-form-control [nzSpan]="24" [nzErrorTip]="'ADMIN.MEMBERS.FORM.ERR_NAME' | translate">
+            <input
+              nz-input
+              formControlName="name"
+              [placeholder]="'ADMIN.MEMBERS.FORM.NAME_PLACEHOLDER' | translate"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24" nzRequired>{{
+            'ADMIN.MEMBERS.FORM.EMAIL_LABEL' | translate
+          }}</nz-form-label>
+          <nz-form-control [nzSpan]="24" [nzErrorTip]="'ADMIN.MEMBERS.FORM.ERR_EMAIL' | translate">
+            <input
+              nz-input
+              type="email"
+              formControlName="email"
+              [placeholder]="'ADMIN.MEMBERS.FORM.EMAIL_PLACEHOLDER' | translate"
+            />
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24">{{
+            'ADMIN.MEMBERS.FORM.ROLE_LABEL' | translate
+          }}</nz-form-label>
+          <nz-form-control [nzSpan]="24">
+            <nz-select formControlName="role">
+              @for (r of roleOptions; track r) {
+                <nz-option [nzValue]="r" [nzLabel]="roleLabel(r)"></nz-option>
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        @if (isInviteMode) {
+          <p class="members-list__invite-info">
+            <ng-icon name="lucideInfo" aria-hidden="true" />
+            {{ 'ADMIN.MEMBERS.FORM.INVITE_INFO' | translate }}
+          </p>
+        }
+      </form>
+    </ng-container>
+  </nz-modal>
+</div>

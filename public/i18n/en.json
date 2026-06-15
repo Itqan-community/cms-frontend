@@ -1,6 +1,18 @@
 {
   "APP_TITLE": "Itqan CMS",
   "WELCOME": "Welcome to the Store",
+  "INVITATION": {
+    "ACCEPT": {
+      "TITLE": "Accept invitation",
+      "BACK": "Back to home",
+      "LOADING": "Activating your account…",
+      "SUCCESS_TITLE": "Invitation accepted",
+      "SUCCESS_BODY": "Your membership is now active. You can sign in to the portal.",
+      "GO_TO_LOGIN": "Go to sign in",
+      "ERROR": "Could not accept this invitation. It may be expired or invalid.",
+      "NO_TOKEN": "Invalid invitation link: no token provided."
+    }
+  },
   "AUTH": {
     "MUST_LOGIN_TO_VIEW": "You must be logged in to view this page.",
     "LOGIN": {
@@ -698,7 +710,8 @@
       "MANAGE_PROFILE": "Manage profile",
       "BACK_TO_GALLERY": "Back to gallery",
       "USAGE": "API Usage",
-      "ISSUES": "Issue Management"
+      "ISSUES": "Issue Management",
+      "MEMBERS": "Members"
     },
     "PROFILE": {
       "TITLE": "Publisher profile",
@@ -1338,6 +1351,93 @@
         "DESCRIPTION_LABEL": "Description",
         "DESCRIPTION_PLACEHOLDER": "Describe the issue…",
         "ERR_DESCRIPTION": "Enter a description (at least 3 characters)"
+      }
+    },
+    "MEMBERS": {
+      "TITLE": "Members",
+      "SUBTITLE": "View, invite, and manage publisher members",
+      "EMPTY_TITLE": "No members",
+      "INVITE_BUTTON": "Invite member",
+      "SEARCH_PLACEHOLDER": "Search by name or email…",
+      "LIST_ERROR_TITLE": "Could not load members",
+      "LIST_ERROR_DESC": "Check your connection and try again.",
+      "EXPIRES_IN_DAYS": "Expires in {{days}} days",
+      "EXPIRES_TODAY": "Expires today",
+      "TOOLTIP_RESEND": "Resend invitation",
+      "TOOLTIP_CANCEL": "Cancel invitation",
+      "TOOLTIP_REMOVE": "Remove member",
+      "COLUMNS": {
+        "NAME": "Name",
+        "EMAIL": "Email",
+        "ROLE": "Role",
+        "STATUS": "Status",
+        "CREATED_AT": "Added",
+        "ACTIONS": "Actions"
+      },
+      "FILTERS": {
+        "STATUS": "Status"
+      },
+      "ROLE": {
+        "ADMIN": "Admin",
+        "STAFF": "Staff"
+      },
+      "STATUS": {
+        "PENDING": "Pending",
+        "ACTIVE": "Active"
+      },
+      "FORM": {
+        "TITLE_INVITE": "Invite member",
+        "TITLE_EDIT": "Edit member",
+        "NAME_LABEL": "Name",
+        "NAME_PLACEHOLDER": "Member name",
+        "EMAIL_LABEL": "Email",
+        "EMAIL_PLACEHOLDER": "email@example.com",
+        "ROLE_LABEL": "Role",
+        "INVITE_INFO": "An invitation email will be sent to this address.",
+        "SUBMIT_INVITE": "Send invitation",
+        "SUBMIT_EDIT": "Save",
+        "CANCEL": "Cancel",
+        "CONFIRM_OK": "Confirm",
+        "CONFIRM_CANCEL": "Cancel",
+        "ERR_NAME": "Please enter a name",
+        "ERR_EMAIL": "Please enter a valid email"
+      },
+      "PROMOTE": {
+        "CONFIRM_TITLE": "Promote to admin?",
+        "CONFIRM_BODY": "{{name}} — they will be able to manage members."
+      },
+      "DEMOTE": {
+        "CONFIRM_TITLE": "Demote to staff?",
+        "CONFIRM_BODY": "{{name}} — they will no longer manage members."
+      },
+      "REMOVE": {
+        "CONFIRM_TITLE": "Remove this member?",
+        "CONFIRM_BODY": "{{name}} — their portal access will be revoked.",
+        "CONFIRM_OK": "Yes, remove"
+      },
+      "CANCEL": {
+        "CONFIRM_TITLE": "Cancel this invitation?",
+        "CONFIRM_BODY": "{{name}} — the invitation link will stop working.",
+        "CONFIRM_OK": "Yes, cancel"
+      },
+      "RESEND": {
+        "CONFIRM_TITLE": "Resend invitation?",
+        "CONFIRM_BODY": "{{name}} — the previous link will stop working immediately.",
+        "CONFIRM_OK": "Resend"
+      },
+      "MESSAGES": {
+        "INVITE_SUCCESS": "Invitation sent",
+        "INVITE_ERROR": "Could not send invitation",
+        "UPDATE_SUCCESS": "Member updated",
+        "UPDATE_ERROR": "Could not update member",
+        "PROMOTE_SUCCESS": "Member promoted to admin",
+        "DEMOTE_SUCCESS": "Member demoted to staff",
+        "REMOVE_SUCCESS": "Member removed",
+        "REMOVE_ERROR": "Could not remove member",
+        "CANCEL_SUCCESS": "Invitation cancelled",
+        "RESEND_SUCCESS": "Invitation resent",
+        "RESEND_ERROR": "Could not resend invitation",
+        "NO_PUBLISHER": "Please select a publisher"
       }
     },
     "PUBLISHERS": {

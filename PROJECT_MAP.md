@@ -205,6 +205,7 @@ Trust, Profile, CompleteProfile
 | `/admin/recitations`  | (lazy routes)                  | per-route `permissionGuard`      | Recitation CRUD                                                                                     |
 | `/admin/reciters`     | (lazy routes)                  | per-route `permissionGuard`      | Reciter CRUD                                                                                        |
 | `/admin/issues`       | (lazy routes)                  | _(permission guards commented)_  | Issue reports (list/detail/create/edit/delete); TODO enable `portal_*_issue_report` guards          |
+| `/admin/members`      | (lazy routes)                  | `membersAccessGuard`             | Publisher member list/invite/edit/remove/resend via `/portal/members/` (modal UX on single list)    |
 | `/admin/usage`        | (lazy routes)                  | `portal_access`                  | API usage analytics                                                                                 |
 | `**`                  | redirect -> /gallery           | —                                | Wildcard                                                                                            |
 
@@ -246,18 +247,19 @@ success.
 
 **Modules (each follows identical CRUD pattern):**
 
-| Module          | Entity               | Key Models                          | Notes                                                                                             |
-| --------------- | -------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------- |
-| `publishers/`   | Publisher admin      | `Publisher`                         | CRUD + image upload                                                                               |
-| `tafsirs/`      | Tafsir (exegesis)    | `Tafsir`, `TafsirVersion`           | CRUD + version management                                                                         |
-| `translations/` | Translation          | `Translation`, `TranslationVersion` | CRUD + version management                                                                         |
-| `recitations/`  | Recitation (audio)   | `Recitation`                        | CRUD + track upload with progress + timings                                                       |
-| `reciters/`     | Reciter              | `Reciter`                           | CRUD + image upload + death info                                                                  |
-| `issues/`       | Issue reports        | `IssueReportOut`                    | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions |
-| `mushafs/`      | Mushaf (Quran pages) | Pages, Surahs, Ayahs, Words         | Complex nested UI with tabs and search                                                            |
-| `usage/`        | API Usage analytics  | Request logs                        | Charts, top endpoints, top entities                                                               |
-| `audio/`        | Audio management     | —                                   | Routes defined                                                                                    |
-| `software/`     | Software management  | —                                   | Routes defined                                                                                    |
+| Module          | Entity               | Key Models                          | Notes                                                                                                         |
+| --------------- | -------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `publishers/`   | Publisher admin      | `Publisher`                         | CRUD + image upload                                                                                           |
+| `tafsirs/`      | Tafsir (exegesis)    | `Tafsir`, `TafsirVersion`           | CRUD + version management                                                                                     |
+| `translations/` | Translation          | `Translation`, `TranslationVersion` | CRUD + version management                                                                                     |
+| `recitations/`  | Recitation (audio)   | `Recitation`                        | CRUD + track upload with progress + timings                                                                   |
+| `reciters/`     | Reciter              | `Reciter`                           | CRUD + image upload + death info                                                                              |
+| `issues/`       | Issue reports        | `IssueReportOut`                    | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions             |
+| `members/`      | Publisher members    | `MemberOut`                         | List/invite/update/remove/resend via `/portal/members/`; scoped by `AdminTenantService.selectedPublisherId()` |
+| `mushafs/`      | Mushaf (Quran pages) | Pages, Surahs, Ayahs, Words         | Complex nested UI with tabs and search                                                                        |
+| `usage/`        | API Usage analytics  | Request logs                        | Charts, top endpoints, top entities                                                                           |
+| `audio/`        | Audio management     | —                                   | Routes defined                                                                                                |
+| `software/`     | Software management  | —                                   | Routes defined                                                                                                |
 
 **Shared admin components:**
 
@@ -400,8 +402,8 @@ success.
 ### Admin Portal (`/portal/`)
 
 Full CRUD for: publishers, tafsirs (versions), translations (versions), recitations (with tracks),
-reciters, issue reports (`/portal/issue-reports/`), mushafs (pages/surahs/ayahs/words), usage
-analytics
+reciters, issue reports (`/portal/issue-reports/`), publisher members (`/portal/members/`), mushafs
+(pages/surahs/ayahs/words), usage analytics
 
 ---
 

@@ -76,6 +76,11 @@ export const routes: Routes = [
           import('./features/admin/issues/issues.routes').then((m) => m.issueRoutes),
       },
       {
+        path: 'members',
+        loadChildren: () =>
+          import('./features/admin/members/members.routes').then((m) => m.membersRoutes),
+      },
+      {
         path: '',
         loadChildren: () => import('./features/admin/admin.routes').then((m) => m.adminRoutes),
       },
@@ -91,6 +96,15 @@ export const routes: Routes = [
   },
 
   ...accountAuthRoutes,
+
+  {
+    path: 'portal/invitations/accept',
+    loadComponent: () =>
+      import('./features/admin/members/pages/accept-invitation/accept-invitation.page').then(
+        (m) => m.AcceptInvitationPage
+      ),
+    data: { hideHeader: true },
+  },
 
   /** `HEADLESS_FRONTEND_URLS.account_confirm_email` (django-allauth) */
   {
