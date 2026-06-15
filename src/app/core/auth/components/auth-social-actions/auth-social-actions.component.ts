@@ -34,7 +34,9 @@ export class AuthSocialActionsComponent {
     this.flow() === 'login' ? 'AUTH.LOGIN.LOGIN_WITH_GITHUB' : 'AUTH.REGISTER.LOGIN_WITH_GITHUB';
 
   readonly passkeyLabelKey = () =>
-    this.flow() === 'login' ? 'AUTH.LOGIN.SIGN_IN_WITH_PASSKEY' : 'AUTH.REGISTER.SIGN_UP_WITH_PASSKEY';
+    this.flow() === 'login'
+      ? 'AUTH.LOGIN.SIGN_IN_WITH_PASSKEY'
+      : 'AUTH.REGISTER.SIGN_UP_WITH_PASSKEY';
 
   onGoogleClick(): void {
     this.google.emit();
