@@ -711,7 +711,8 @@
       "BACK_TO_GALLERY": "العودة إلى المعرض",
       "USAGE": "إحصائيات API",
       "ISSUES": "إدارة البلاغات",
-      "MEMBERS": "إدارة الأعضاء"
+      "MEMBERS": "إدارة الأعضاء",
+      "ACCESS_REQUESTS": "طلبات الوصول"
     },
     "PROFILE": {
       "TITLE": "ملف الناشر",
@@ -1437,6 +1438,82 @@
         "RESEND_SUCCESS": "تمت إعادة إرسال الدعوة",
         "RESEND_ERROR": "تعذر إعادة إرسال الدعوة",
         "NO_PUBLISHER": "يرجى اختيار ناشر"
+      }
+    },
+    "ACCESS_REQUESTS": {
+      "TITLE": "طلبات الوصول",
+      "SUBTITLE": "مراجعة وإدارة طلبات المطورين للوصول إلى أصولك",
+      "EMPTY_TITLE": "لا توجد طلبات وصول بعد",
+      "SEARCH_PLACEHOLDER": "ابحث بالمطور أو الأصل…",
+      "LIST_ERROR_TITLE": "تعذر تحميل طلبات الوصول",
+      "LIST_ERROR_DESC": "تحقق من الاتصال وحاول مرة أخرى.",
+      "TOOLTIP_VIEW": "عرض التفاصيل",
+      "TOOLTIP_ACCEPT": "قبول الطلب",
+      "TOOLTIP_REJECT": "رفض الطلب",
+      "COLUMNS": {
+        "DEVELOPER": "المطور",
+        "ASSET": "الأصل",
+        "INTENDED_USE": "نوع الاستخدام",
+        "STATUS": "الحالة",
+        "CREATED_AT": "تاريخ الطلب",
+        "ACTIONS": "إجراءات"
+      },
+      "FILTERS": {
+        "STATUS": "الحالة"
+      },
+      "STATUS": {
+        "PENDING": "قيد الانتظار",
+        "APPROVED": "مقبول",
+        "REJECTED": "مرفوض"
+      },
+      "INTENDED_USE": {
+        "COMMERCIAL": "تجاري",
+        "NON_COMMERCIAL": "غير تجاري"
+      },
+      "TOGGLE": {
+        "LABEL": "قبول الطلبات تلقائياً",
+        "ON_HINT": "تُمنح الطلبات الجديدة تلقائياً",
+        "OFF_HINT": "تراجع كل طلب يدوياً",
+        "CONFIRM_OFF_TITLE": "إيقاف القبول التلقائي؟",
+        "CONFIRM_OFF_BODY": "ستحتاج إلى قبول أو رفض كل طلب وصول يدوياً من الآن فصاعداً.",
+        "CONFIRM_OFF_OK": "إيقاف"
+      },
+      "ACCEPT": {
+        "CONFIRM_TITLE": "قبول هذا الطلب؟",
+        "CONFIRM_BODY": "منح {{name}} وصولاً إلى {{asset}}.",
+        "CONFIRM_OK": "قبول"
+      },
+      "REJECT": {
+        "TITLE": "رفض طلب الوصول",
+        "REASON_LABEL": "سبب الرفض",
+        "REASON_PLACEHOLDER": "اشرح سبب رفض الوصول — سيراه المطور",
+        "SUBMIT": "رفض الطلب",
+        "ERR_REASON": "يرجى إدخال سبب الرفض"
+      },
+      "FORM": {
+        "CANCEL": "إلغاء"
+      },
+      "DRAWER": {
+        "TITLE": "تفاصيل طلب الوصول",
+        "LOAD_ERROR": "تعذر تحميل تفاصيل الطلب.",
+        "STATUS": "الحالة",
+        "REASON": "سبب المطور",
+        "APPROVED_AT": "تاريخ القبول",
+        "APPROVED_BY": "قُبل بواسطة",
+        "AUTO_ACCEPTED": "قُبل تلقائياً",
+        "REJECTED_AT": "تاريخ الرفض",
+        "REJECTED_BY": "رُفض بواسطة",
+        "REJECTION_REASON": "سبب الرفض"
+      },
+      "MESSAGES": {
+        "ACCEPT_SUCCESS": "تم قبول الطلب",
+        "ACCEPT_ERROR": "تعذر قبول الطلب",
+        "REJECT_SUCCESS": "تم رفض الطلب",
+        "REJECT_ERROR": "تعذر رفض الطلب",
+        "ALREADY_DECIDED": "تم البت في هذا الطلب مسبقاً — جاري تحديث القائمة",
+        "TOGGLE_ON_SUCCESS": "تم تفعيل القبول التلقائي",
+        "TOGGLE_OFF_SUCCESS": "تم إيقاف القبول التلقائي",
+        "TOGGLE_ERROR": "تعذر تحديث إعداد القبول التلقائي"
       }
     },
     "PUBLISHERS": {

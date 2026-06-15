@@ -39,6 +39,10 @@ export const PORTAL_PERMISSIONS = {
   PORTAL_INVITE_PUBLISHER_MEMBERS: 'portal_invite_publisher_members',
   PORTAL_UPDATE_PUBLISHER_MEMBERS: 'portal_update_publisher_members',
   PORTAL_DELETE_PUBLISHER_MEMBERS: 'portal_delete_publisher_members',
+
+  PORTAL_VIEW_ACCESS_REQUESTS: 'portal_view_access_requests',
+  PORTAL_ACCEPT_OR_REJECT_ACCESS_REQUESTS: 'portal_accept_or_reject_access_requests',
+  PORTAL_TOGGLE_ACCESS_REQUESTS_AUTO_ACCEPTANCE: 'portal_toggle_access_requests_auto_acceptance',
 } as const;
 
 export type PortalPermissionCode = (typeof PORTAL_PERMISSIONS)[keyof typeof PORTAL_PERMISSIONS];
