@@ -97,6 +97,15 @@ export const routes: Routes = [
 
   ...accountAuthRoutes,
 
+  {
+    path: 'portal/invitations/accept',
+    loadComponent: () =>
+      import('./features/admin/members/pages/accept-invitation/accept-invitation.page').then(
+        (m) => m.AcceptInvitationPage
+      ),
+    data: { hideHeader: true },
+  },
+
   /** `HEADLESS_FRONTEND_URLS.account_confirm_email` (django-allauth) */
   {
     path: 'accounts',

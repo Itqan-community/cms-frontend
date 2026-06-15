@@ -1,6 +1,18 @@
 {
   "APP_TITLE": "Itqan CMS",
   "WELCOME": "Welcome to the Store",
+  "INVITATION": {
+    "ACCEPT": {
+      "TITLE": "Accept invitation",
+      "BACK": "Back to home",
+      "LOADING": "Activating your account…",
+      "SUCCESS_TITLE": "Invitation accepted",
+      "SUCCESS_BODY": "Your membership is now active. You can sign in to the portal.",
+      "GO_TO_LOGIN": "Go to sign in",
+      "ERROR": "Could not accept this invitation. It may be expired or invalid.",
+      "NO_TOKEN": "Invalid invitation link: no token provided."
+    }
+  },
   "AUTH": {
     "MUST_LOGIN_TO_VIEW": "You must be logged in to view this page.",
     "LOGIN": {

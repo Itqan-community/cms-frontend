@@ -57,4 +57,11 @@ export class MembersService {
   resend(id: number): Observable<MemberOut> {
     return this.http.post<MemberOut>(`${this.baseUrl}/${id}/resend-invite/`, {});
   }
+
+  acceptInvitation(token: string): Observable<unknown> {
+    return this.http.post(
+      `${environment.ADMIN_API_BASE_URL}/invitations/${encodeURIComponent(token)}/accept/`,
+      {}
+    );
+  }
 }

@@ -16,6 +16,10 @@ function isPublishersMeRequest(url: string, adminApi: string): boolean {
   return url.startsWith(`${adminApi}/publishers/me`);
 }
 
+function isInvitationRequest(url: string, adminApi: string): boolean {
+  return url.startsWith(`${adminApi}/invitations/`);
+}
+
 export function tenantHeaderInterceptor(
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
@@ -26,6 +30,10 @@ export function tenantHeaderInterceptor(
   }
 
   if (isPublishersMeRequest(req.url, adminApi)) {
+    return next(req);
+  }
+
+  if (isInvitationRequest(req.url, adminApi)) {
     return next(req);
   }
 
