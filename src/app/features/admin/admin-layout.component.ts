@@ -140,7 +140,7 @@ export class AdminLayoutComponent implements OnInit {
     tabs.push(TAB_ISSUES);
     // }
     if (
-      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_VIEW_MEMBERS) ||
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_VIEW_PUBLISHER_MEMBERS) ||
       this.adminAuth.isItqanAdmin()
     ) {
       tabs.push(TAB_MEMBERS);

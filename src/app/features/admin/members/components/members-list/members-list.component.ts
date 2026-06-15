@@ -65,15 +65,15 @@ export class MembersListComponent extends AdminListBase<MemberOut, MemberUiFilte
   private readonly fb = inject(FormBuilder);
 
   readonly canInvite = computed(() =>
-    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_INVITE_MEMBERS)
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_INVITE_PUBLISHER_MEMBERS)
   );
 
   readonly canUpdate = computed(() =>
-    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_MEMBERS)
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_PUBLISHER_MEMBERS)
   );
 
   readonly canDelete = computed(() =>
-    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_MEMBERS)
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_PUBLISHER_MEMBERS)
   );
 
   readonly loadFailed = signal(false);
