@@ -711,7 +711,8 @@
       "BACK_TO_GALLERY": "Back to gallery",
       "USAGE": "API Usage",
       "ISSUES": "Issue Management",
-      "MEMBERS": "Members"
+      "MEMBERS": "Members",
+      "ACCESS_REQUESTS": "Access Requests"
     },
     "PROFILE": {
       "TITLE": "Publisher profile",
@@ -1437,6 +1438,83 @@
         "CANCEL_SUCCESS": "Invitation cancelled",
         "RESEND_SUCCESS": "Invitation resent",
         "RESEND_ERROR": "Could not resend invitation",
+        "NO_PUBLISHER": "Please select a publisher"
+      }
+    },
+    "ACCESS_REQUESTS": {
+      "TITLE": "Access Requests",
+      "SUBTITLE": "Review and manage developer requests for your assets",
+      "EMPTY_TITLE": "No access requests yet",
+      "SEARCH_PLACEHOLDER": "Search by developer or asset…",
+      "LIST_ERROR_TITLE": "Could not load access requests",
+      "LIST_ERROR_DESC": "Check your connection and try again.",
+      "TOOLTIP_VIEW": "View details",
+      "TOOLTIP_ACCEPT": "Accept request",
+      "TOOLTIP_REJECT": "Reject request",
+      "COLUMNS": {
+        "DEVELOPER": "Developer",
+        "ASSET": "Asset",
+        "INTENDED_USE": "Intended use",
+        "STATUS": "Status",
+        "CREATED_AT": "Requested",
+        "ACTIONS": "Actions"
+      },
+      "FILTERS": {
+        "STATUS": "Status"
+      },
+      "STATUS": {
+        "PENDING": "Pending",
+        "APPROVED": "Accepted",
+        "REJECTED": "Rejected"
+      },
+      "INTENDED_USE": {
+        "COMMERCIAL": "Commercial",
+        "NON_COMMERCIAL": "Non-commercial"
+      },
+      "TOGGLE": {
+        "LABEL": "Auto-accept requests",
+        "ON_HINT": "New requests are granted automatically",
+        "OFF_HINT": "You review each request manually",
+        "CONFIRM_OFF_TITLE": "Turn off auto-acceptance?",
+        "CONFIRM_OFF_BODY": "You'll need to manually accept or reject every access request from now on.",
+        "CONFIRM_OFF_OK": "Turn off"
+      },
+      "ACCEPT": {
+        "CONFIRM_TITLE": "Accept this request?",
+        "CONFIRM_BODY": "Grant {{name}} access to {{asset}}.",
+        "CONFIRM_OK": "Accept"
+      },
+      "REJECT": {
+        "TITLE": "Reject access request",
+        "REASON_LABEL": "Rejection reason",
+        "REASON_PLACEHOLDER": "Explain why access was denied — the developer will see this reason",
+        "SUBMIT": "Reject request",
+        "ERR_REASON": "Please enter a rejection reason"
+      },
+      "FORM": {
+        "CANCEL": "Cancel"
+      },
+      "DRAWER": {
+        "TITLE": "Access request details",
+        "LOAD_ERROR": "Could not load request details.",
+        "STATUS": "Status",
+        "REASON": "Developer reason",
+        "APPROVED_AT": "Accepted at",
+        "APPROVED_BY": "Accepted by",
+        "AUTO_ACCEPTED": "Auto-accepted",
+        "REJECTED_AT": "Rejected at",
+        "REJECTED_BY": "Rejected by",
+        "REJECTION_REASON": "Rejection reason"
+      },
+      "MESSAGES": {
+        "ACCEPT_SUCCESS": "Request accepted",
+        "ACCEPT_ERROR": "Could not accept request",
+        "REJECT_SUCCESS": "Request rejected",
+        "REJECT_ERROR": "Could not reject request",
+        "ALREADY_DECIDED": "This request was already decided — refreshing the list",
+        "TOGGLE_ON_SUCCESS": "Auto-acceptance enabled",
+        "TOGGLE_OFF_SUCCESS": "Auto-acceptance disabled",
+        "TOGGLE_ERROR": "Could not update auto-acceptance setting",
         "NO_PUBLISHER": "Please select a publisher"
       }
     },

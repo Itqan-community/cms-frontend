@@ -186,28 +186,29 @@ Trust, Profile, CompleteProfile
 
 ### Route Map
 
-| Path                  | Component                      | Guards                           | Notes                                                                                               |
-| --------------------- | ------------------------------ | -------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `/gallery`            | `GalleryPage`                  | —                                | Main listing                                                                                        |
-| `/gallery/asset/:id`  | `AssetDetailsPage`             | —                                | Detail + access request + download                                                                  |
-| `/publishers`         | `PublishersPage`               | `publisherHostGuard`             | Stub                                                                                                |
-| `/publisher/:id`      | `PublisherDetailsPage`         | `publisherHostGuard`             | Detail + filtered assets                                                                            |
-| `/license/:id`        | `LicenseDetailsPage`           | —                                | License detail                                                                                      |
-| `/content-standards`  | `UsageStandardsPage`           | `publisherHostGuard`             | Content guidelines                                                                                  |
-| `/unauthorized`       | `UnauthorizedPage`             | —                                | Card UX; CTA + 5s countdown auto-redirect to `/gallery`; `hideHeader`; dir name typo `unautorized/` |
-| `/complete-profile`   | `CompleteProfilePage`          | `authGuard`                      | Profile completion                                                                                  |
-| `/account/*`          | (22 auth pages)                | guestGuard/authGuard             | Auth & account management                                                                           |
-| `/admin`              | `AdminLayoutComponent`         | `authGuard`, `portalAccessGuard` | Permission-based admin shell                                                                        |
-| `/admin` (default)    | `AdminPortalRedirectComponent` | —                                | Redirects to first allowed module (`publishers` for Itqan admin, else by read permission)           |
-| `/admin/publishers`   | (lazy routes)                  | `itqanAdminGuard`                | Publisher CRUD (staff)                                                                              |
-| `/admin/tafsirs`      | (lazy routes)                  | per-route `permissionGuard`      | Tafsir CRUD                                                                                         |
-| `/admin/translations` | (lazy routes)                  | per-route `permissionGuard`      | Translation CRUD                                                                                    |
-| `/admin/recitations`  | (lazy routes)                  | per-route `permissionGuard`      | Recitation CRUD                                                                                     |
-| `/admin/reciters`     | (lazy routes)                  | per-route `permissionGuard`      | Reciter CRUD                                                                                        |
-| `/admin/issues`       | (lazy routes)                  | _(permission guards commented)_  | Issue reports (list/detail/create/edit/delete); TODO enable `portal_*_issue_report` guards          |
-| `/admin/members`      | (lazy routes)                  | `membersAccessGuard`             | Publisher member list/invite/edit/remove/resend via `/portal/members/` (modal UX on single list)    |
-| `/admin/usage`        | (lazy routes)                  | `portal_access`                  | API usage analytics                                                                                 |
-| `**`                  | redirect -> /gallery           | —                                | Wildcard                                                                                            |
+| Path                     | Component                      | Guards                           | Notes                                                                                                                                      |
+| ------------------------ | ------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/gallery`               | `GalleryPage`                  | —                                | Main listing                                                                                                                               |
+| `/gallery/asset/:id`     | `AssetDetailsPage`             | —                                | Detail + access request + download                                                                                                         |
+| `/publishers`            | `PublishersPage`               | `publisherHostGuard`             | Stub                                                                                                                                       |
+| `/publisher/:id`         | `PublisherDetailsPage`         | `publisherHostGuard`             | Detail + filtered assets                                                                                                                   |
+| `/license/:id`           | `LicenseDetailsPage`           | —                                | License detail                                                                                                                             |
+| `/content-standards`     | `UsageStandardsPage`           | `publisherHostGuard`             | Content guidelines                                                                                                                         |
+| `/unauthorized`          | `UnauthorizedPage`             | —                                | Card UX; CTA + 5s countdown auto-redirect to `/gallery`; `hideHeader`; dir name typo `unautorized/`                                        |
+| `/complete-profile`      | `CompleteProfilePage`          | `authGuard`                      | Profile completion                                                                                                                         |
+| `/account/*`             | (22 auth pages)                | guestGuard/authGuard             | Auth & account management                                                                                                                  |
+| `/admin`                 | `AdminLayoutComponent`         | `authGuard`, `portalAccessGuard` | Permission-based admin shell                                                                                                               |
+| `/admin` (default)       | `AdminPortalRedirectComponent` | —                                | Redirects to first allowed module (`publishers` for Itqan admin, else by read permission)                                                  |
+| `/admin/publishers`      | (lazy routes)                  | `itqanAdminGuard`                | Publisher CRUD (staff)                                                                                                                     |
+| `/admin/tafsirs`         | (lazy routes)                  | per-route `permissionGuard`      | Tafsir CRUD                                                                                                                                |
+| `/admin/translations`    | (lazy routes)                  | per-route `permissionGuard`      | Translation CRUD                                                                                                                           |
+| `/admin/recitations`     | (lazy routes)                  | per-route `permissionGuard`      | Recitation CRUD                                                                                                                            |
+| `/admin/reciters`        | (lazy routes)                  | per-route `permissionGuard`      | Reciter CRUD                                                                                                                               |
+| `/admin/issues`          | (lazy routes)                  | _(permission guards commented)_  | Issue reports (list/detail/create/edit/delete); TODO enable `portal_*_issue_report` guards                                                 |
+| `/admin/members`         | (lazy routes)                  | `membersAccessGuard`             | Publisher member list/invite/edit/remove/resend via `/portal/members/` (modal UX on single list)                                           |
+| `/admin/access-requests` | (lazy routes)                  | `accessRequestsAccessGuard`      | Asset access requests list/accept/reject + settings via `/portal/access-requests/` and `/portal/publishers/{id}/access-requests-settings/` |
+| `/admin/usage`           | (lazy routes)                  | `portal_access`                  | API usage analytics                                                                                                                        |
+| `**`                     | redirect -> /gallery           | —                                | Wildcard                                                                                                                                   |
 
 ---
 
@@ -247,19 +248,20 @@ success.
 
 **Modules (each follows identical CRUD pattern):**
 
-| Module          | Entity               | Key Models                          | Notes                                                                                                         |
-| --------------- | -------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `publishers/`   | Publisher admin      | `Publisher`                         | CRUD + image upload                                                                                           |
-| `tafsirs/`      | Tafsir (exegesis)    | `Tafsir`, `TafsirVersion`           | CRUD + version management                                                                                     |
-| `translations/` | Translation          | `Translation`, `TranslationVersion` | CRUD + version management                                                                                     |
-| `recitations/`  | Recitation (audio)   | `Recitation`                        | CRUD + track upload with progress + timings                                                                   |
-| `reciters/`     | Reciter              | `Reciter`                           | CRUD + image upload + death info                                                                              |
-| `issues/`       | Issue reports        | `IssueReportOut`                    | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions             |
-| `members/`      | Publisher members    | `MemberOut`                         | List/invite/update/remove/resend via `/portal/members/`; scoped by `AdminTenantService.selectedPublisherId()` |
-| `mushafs/`      | Mushaf (Quran pages) | Pages, Surahs, Ayahs, Words         | Complex nested UI with tabs and search                                                                        |
-| `usage/`        | API Usage analytics  | Request logs                        | Charts, top endpoints, top entities                                                                           |
-| `audio/`        | Audio management     | —                                   | Routes defined                                                                                                |
-| `software/`     | Software management  | —                                   | Routes defined                                                                                                |
+| Module             | Entity                | Key Models                          | Notes                                                                                                                                  |
+| ------------------ | --------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `publishers/`      | Publisher admin       | `Publisher`                         | CRUD + image upload                                                                                                                    |
+| `tafsirs/`         | Tafsir (exegesis)     | `Tafsir`, `TafsirVersion`           | CRUD + version management                                                                                                              |
+| `translations/`    | Translation           | `Translation`, `TranslationVersion` | CRUD + version management                                                                                                              |
+| `recitations/`     | Recitation (audio)    | `Recitation`                        | CRUD + track upload with progress + timings                                                                                            |
+| `reciters/`        | Reciter               | `Reciter`                           | CRUD + image upload + death info                                                                                                       |
+| `issues/`          | Issue reports         | `IssueReportOut`                    | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions                                      |
+| `members/`         | Publisher members     | `MemberOut`                         | List/invite/update/remove/resend via `/portal/members/`; scoped by `AdminTenantService.selectedPublisherId()`                          |
+| `access-requests/` | Asset access requests | `AccessRequestOut`                  | List/accept/reject + publisher settings (`/portal/publishers/{id}/access-requests-settings/`); detail drawer; permission-gated actions |
+| `mushafs/`         | Mushaf (Quran pages)  | Pages, Surahs, Ayahs, Words         | Complex nested UI with tabs and search                                                                                                 |
+| `usage/`           | API Usage analytics   | Request logs                        | Charts, top endpoints, top entities                                                                                                    |
+| `audio/`           | Audio management      | —                                   | Routes defined                                                                                                                         |
+| `software/`        | Software management   | —                                   | Routes defined                                                                                                                         |
 
 **Shared admin components:**
 
@@ -402,7 +404,9 @@ success.
 ### Admin Portal (`/portal/`)
 
 Full CRUD for: publishers, tafsirs (versions), translations (versions), recitations (with tracks),
-reciters, issue reports (`/portal/issue-reports/`), publisher members (`/portal/members/`), mushafs
+reciters, issue reports (`/portal/issue-reports/`), publisher members (`/portal/members/`), asset
+access requests (`/portal/access-requests/` — list, detail, accept, reject;
+`/portal/publishers/{id}/access-requests-settings/` — auto-acceptance), mushafs
 (pages/surahs/ayahs/words), usage analytics
 
 ---

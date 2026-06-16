@@ -74,6 +74,12 @@ const TAB_MEMBERS: CmsTab = {
   label: 'ADMIN.MENU.MEMBERS',
   icon: 'lucideUserCog',
 };
+const TAB_ACCESS_REQUESTS: CmsTab = {
+  id: 'access-requests',
+  path: 'access-requests',
+  label: 'ADMIN.MENU.ACCESS_REQUESTS',
+  icon: 'lucideKeyRound',
+};
 const TAB_USAGE: CmsTab = {
   id: 'usage',
   path: 'usage',
@@ -144,6 +150,12 @@ export class AdminLayoutComponent implements OnInit {
       this.adminAuth.isItqanAdmin()
     ) {
       tabs.push(TAB_MEMBERS);
+    }
+    if (
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_VIEW_ACCESS_REQUESTS) ||
+      this.adminAuth.isItqanAdmin()
+    ) {
+      tabs.push(TAB_ACCESS_REQUESTS);
     }
     if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS)) {
       tabs.push(TAB_USAGE);

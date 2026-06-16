@@ -1,0 +1,58 @@
+@import '../../../styles/admin-shared.less';
+
+.access-requests-list {
+  .admin-table-overrides();
+
+  &__alert {
+    margin-bottom: 16px;
+  }
+
+  &__toggle {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  &__toggle-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(0, 0, 0, 0.88);
+  }
+
+  &__toggle-hint {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.45);
+    max-width: 280px;
+    text-align: end;
+  }
+
+  &__developer-name {
+    display: block;
+    font-weight: 500;
+  }
+
+  &__developer-email {
+    display: block;
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.45);
+  }
+
+  &__reject-form {
+    padding-top: 8px;
+  }
+}
+
+@media (max-width: 768px) {
+  .access-requests-list {
+    &__toggle {
+      align-items: flex-start;
+      margin-top: 12px;
+    }
+
+    &__toggle-hint {
+      text-align: start;
+    }
+  }
+}
