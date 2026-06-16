@@ -43,7 +43,9 @@
       "eslint --fix --cache --concurrency=auto",
       "prettier --write"
     ],
-    "*.{json,html,css,less,md}": ["prettier --write"]
+    "*.{json,html,css,less,md}": [
+      "prettier --write"
+    ]
   },
   "private": true,
   "dependencies": {
