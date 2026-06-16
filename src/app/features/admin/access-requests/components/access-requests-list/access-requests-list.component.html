@@ -10,7 +10,7 @@
       </span>
       <nz-switch
         [ngModel]="autoAccept()"
-        [nzDisabled]="!canToggleAutoAcceptance() || autoAcceptLoading() || autoAcceptSaving()"
+        [nzDisabled]="!canManageSettings() || autoAcceptLoading() || autoAcceptSaving()"
         [nzLoading]="autoAcceptLoading() || autoAcceptSaving()"
         (ngModelChange)="onAutoAcceptChange($event)"
       />

@@ -1514,7 +1514,8 @@
         "ALREADY_DECIDED": "This request was already decided — refreshing the list",
         "TOGGLE_ON_SUCCESS": "Auto-acceptance enabled",
         "TOGGLE_OFF_SUCCESS": "Auto-acceptance disabled",
-        "TOGGLE_ERROR": "Could not update auto-acceptance setting"
+        "TOGGLE_ERROR": "Could not update auto-acceptance setting",
+        "NO_PUBLISHER": "Please select a publisher"
       }
     },
     "PUBLISHERS": {

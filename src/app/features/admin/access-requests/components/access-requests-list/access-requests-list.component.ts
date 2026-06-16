@@ -17,6 +17,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../../services/admin-auth.service';
+import { AdminTenantService } from '../../../services/admin-tenant.service';
 import { AdminListBase } from '../../../utils/admin-list-base';
 import {
   AccessRequestOut,
@@ -68,6 +69,7 @@ export class AccessRequestsListComponent
 {
   private readonly accessRequestsService = inject(AccessRequestsService);
   private readonly adminAuth = inject(AdminAuthService);
+  private readonly tenantService = inject(AdminTenantService);
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
   private readonly translate = inject(TranslateService);
@@ -77,8 +79,8 @@ export class AccessRequestsListComponent
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCEPT_OR_REJECT_ACCESS_REQUESTS)
   );
 
-  readonly canToggleAutoAcceptance = computed(() =>
-    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_TOGGLE_ACCESS_REQUESTS_AUTO_ACCEPTANCE)
+  readonly canManageSettings = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_MANAGE_ACCESS_REQUESTS_SETTINGS)
   );
 
   readonly loadFailed = signal(false);
@@ -159,7 +161,7 @@ export class AccessRequestsListComponent
   }
 
   onAutoAcceptChange(next: boolean): void {
-    if (this.autoAcceptSaving() || !this.canToggleAutoAcceptance()) {
+    if (this.autoAcceptSaving() || !this.canManageSettings()) {
       return;
     }
 
@@ -298,8 +300,13 @@ export class AccessRequestsListComponent
   }
 
   private loadAutoAcceptance(): void {
+    const publisherId = this.tenantService.selectedPublisherId();
+    if (publisherId == null) {
+      return;
+    }
+
     this.autoAcceptLoading.set(true);
-    this.accessRequestsService.getAutoAcceptance().subscribe({
+    this.accessRequestsService.getSettings(publisherId).subscribe({
       next: (res) => {
         this.autoAccept.set(res.auto_accept_access_requests);
         this.autoAcceptLoading.set(false);
@@ -311,27 +318,35 @@ export class AccessRequestsListComponent
   }
 
   private saveAutoAcceptance(value: boolean): void {
+    const publisherId = this.tenantService.selectedPublisherId();
+    if (publisherId == null) {
+      this.message.error(this.translate.instant('ADMIN.ACCESS_REQUESTS.MESSAGES.NO_PUBLISHER'));
+      return;
+    }
+
     this.autoAcceptSaving.set(true);
-    this.accessRequestsService.setAutoAcceptance({ auto_accept_access_requests: value }).subscribe({
-      next: (res) => {
-        this.autoAccept.set(res.auto_accept_access_requests);
-        this.autoAcceptSaving.set(false);
-        this.message.success(
-          this.translate.instant(
-            value
-              ? 'ADMIN.ACCESS_REQUESTS.MESSAGES.TOGGLE_ON_SUCCESS'
-              : 'ADMIN.ACCESS_REQUESTS.MESSAGES.TOGGLE_OFF_SUCCESS'
-          )
-        );
-      },
-      error: (err) => {
-        this.autoAcceptSaving.set(false);
-        this.loadAutoAcceptance();
-        this.message.error(
-          this.apiErrorMessage(err, 'ADMIN.ACCESS_REQUESTS.MESSAGES.TOGGLE_ERROR')
-        );
-      },
-    });
+    this.accessRequestsService
+      .setSettings(publisherId, { auto_accept_access_requests: value })
+      .subscribe({
+        next: (res) => {
+          this.autoAccept.set(res.auto_accept_access_requests);
+          this.autoAcceptSaving.set(false);
+          this.message.success(
+            this.translate.instant(
+              value
+                ? 'ADMIN.ACCESS_REQUESTS.MESSAGES.TOGGLE_ON_SUCCESS'
+                : 'ADMIN.ACCESS_REQUESTS.MESSAGES.TOGGLE_OFF_SUCCESS'
+            )
+          );
+        },
+        error: (err) => {
+          this.autoAcceptSaving.set(false);
+          this.loadAutoAcceptance();
+          this.message.error(
+            this.apiErrorMessage(err, 'ADMIN.ACCESS_REQUESTS.MESSAGES.TOGGLE_ERROR')
+          );
+        },
+      });
   }
 
   private handleActionError(err: unknown, fallbackKey: string): void {

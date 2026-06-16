@@ -13,11 +13,6 @@ export interface AssetRef {
   publisher_id: number;
 }
 
-export interface UserRef {
-  id: number;
-  name: string;
-}
-
 export interface AccessRequestOut {
   id: number;
   status: AccessRequestStatus;
@@ -30,9 +25,9 @@ export interface AccessRequestOut {
 
 export interface AccessRequestDetailOut extends AccessRequestOut {
   approved_at: string | null;
-  approved_by: UserRef | null;
+  approved_by: string | null;
   rejected_at: string | null;
-  rejected_by: UserRef | null;
+  rejected_by: string | null;
   rejection_reason: string | null;
 }
 
@@ -58,11 +53,11 @@ export interface RejectAccessRequestIn {
   rejection_reason: string;
 }
 
-export interface AutoAcceptanceOut {
+export interface AccessRequestsSettingsOut {
   publisher_id: number;
   auto_accept_access_requests: boolean;
 }
 
-export interface AutoAcceptanceIn {
+export interface AccessRequestsSettingsIn {
   auto_accept_access_requests: boolean;
 }

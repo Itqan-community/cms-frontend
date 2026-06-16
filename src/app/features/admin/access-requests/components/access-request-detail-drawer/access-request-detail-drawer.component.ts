@@ -45,10 +45,8 @@ export class AccessRequestDetailDrawerComponent {
     });
   }
 
-  onVisibleChange(open: boolean): void {
-    if (!open) {
-      this.closed.emit();
-    }
+  onClose(): void {
+    this.closed.emit();
   }
 
   statusTagColor(status: AccessRequestStatus): string {
@@ -71,6 +69,16 @@ export class AccessRequestDetailDrawerComponent {
   intendedUseLabel(use: IntendedUse): string {
     const key = use === 'non-commercial' ? 'NON_COMMERCIAL' : 'COMMERCIAL';
     return this.translate.instant(`ADMIN.ACCESS_REQUESTS.INTENDED_USE.${key}`);
+  }
+
+  formatActor(value: string | null): string {
+    if (!value) {
+      return '—';
+    }
+    if (value === 'System') {
+      return this.translate.instant('ADMIN.ACCESS_REQUESTS.DRAWER.AUTO_ACCEPTED');
+    }
+    return value;
   }
 
   private loadDetail(id: number): void {

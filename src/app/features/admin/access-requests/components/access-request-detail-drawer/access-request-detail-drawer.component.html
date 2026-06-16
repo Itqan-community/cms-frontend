@@ -1,9 +1,10 @@
 <nz-drawer
   [nzVisible]="visible()"
-  (nzVisibleChange)="onVisibleChange($event)"
   [nzTitle]="'ADMIN.ACCESS_REQUESTS.DRAWER.TITLE' | translate"
   [nzWidth]="'min(480px, 92vw)'"
   [nzClosable]="true"
+  [nzMaskClosable]="true"
+  (nzOnClose)="onClose()"
 >
   <ng-container *nzDrawerContent>
     <nz-spin [nzSpinning]="loading()">
@@ -63,13 +64,7 @@
             </div>
             <div class="access-request-detail-drawer__row">
               <dt>{{ 'ADMIN.ACCESS_REQUESTS.DRAWER.APPROVED_BY' | translate }}</dt>
-              <dd>
-                @if (d.approved_by) {
-                  {{ d.approved_by.name }}
-                } @else {
-                  {{ 'ADMIN.ACCESS_REQUESTS.DRAWER.AUTO_ACCEPTED' | translate }}
-                }
-              </dd>
+              <dd>{{ formatActor(d.approved_by) }}</dd>
             </div>
           }
 
@@ -86,7 +81,7 @@
             </div>
             <div class="access-request-detail-drawer__row">
               <dt>{{ 'ADMIN.ACCESS_REQUESTS.DRAWER.REJECTED_BY' | translate }}</dt>
-              <dd>{{ d.rejected_by?.name ?? '—' }}</dd>
+              <dd>{{ formatActor(d.rejected_by) }}</dd>
             </div>
             <div class="access-request-detail-drawer__row">
               <dt>{{ 'ADMIN.ACCESS_REQUESTS.DRAWER.REJECTION_REASON' | translate }}</dt>

@@ -6,8 +6,8 @@ import {
   AccessRequestDetailOut,
   AccessRequestListFilters,
   AccessRequestOut,
-  AutoAcceptanceIn,
-  AutoAcceptanceOut,
+  AccessRequestsSettingsIn,
+  AccessRequestsSettingsOut,
   PagedAccessRequestOut,
   RejectAccessRequestIn,
 } from '../models/access-requests.models';
@@ -49,11 +49,18 @@ export class AccessRequestsService {
     return this.http.post<AccessRequestOut>(`${this.baseUrl}/${id}/reject/`, body);
   }
 
-  getAutoAcceptance(): Observable<AutoAcceptanceOut> {
-    return this.http.get<AutoAcceptanceOut>(`${this.baseUrl}/auto-acceptance-toggle/`);
+  private settingsUrl(publisherId: number): string {
+    return `${environment.ADMIN_API_BASE_URL}/publishers/${publisherId}/access-requests-settings`;
   }
 
-  setAutoAcceptance(body: AutoAcceptanceIn): Observable<AutoAcceptanceOut> {
-    return this.http.put<AutoAcceptanceOut>(`${this.baseUrl}/auto-acceptance-toggle/`, body);
+  getSettings(publisherId: number): Observable<AccessRequestsSettingsOut> {
+    return this.http.get<AccessRequestsSettingsOut>(`${this.settingsUrl(publisherId)}/`);
+  }
+
+  setSettings(
+    publisherId: number,
+    body: AccessRequestsSettingsIn
+  ): Observable<AccessRequestsSettingsOut> {
+    return this.http.put<AccessRequestsSettingsOut>(`${this.settingsUrl(publisherId)}/`, body);
   }
 }
