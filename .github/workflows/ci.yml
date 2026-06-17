@@ -155,6 +155,7 @@ jobs:
 
       - name: Create Sentry release and upload sourcemaps
         if: steps.pre_version.outputs.version != steps.post_version.outputs.version
+        continue-on-error: true
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: itqan-3o
@@ -165,7 +166,7 @@ jobs:
           npx @sentry/cli sourcemaps upload --release="$VERSION" dist/browser
           npx @sentry/cli releases set-commits "$VERSION" --auto
           npx @sentry/cli releases finalize "$VERSION"
-          npx @sentry/cli releases deploys new "$VERSION" -e production
+          npx @sentry/cli releases deploys new --release "$VERSION" -e production
 
       - name: Update GitHub Release with AI notes
         if: steps.pre_version.outputs.version != steps.post_version.outputs.version
