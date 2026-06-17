@@ -48,6 +48,16 @@ Release 1.0.4.
 
 ---
 
+## [1.0.5] - 2026-06-17
+
+Release 1.0.5.
+
+## Changes
+
+- fix(release): verify gemini ai release notes generation
+
+---
+
 ## [Unreleased]
 
 ### Added
