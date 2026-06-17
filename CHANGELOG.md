@@ -28,6 +28,16 @@ Release 1.0.2.
 
 ---
 
+## [1.0.3] - 2026-06-17
+
+Release 1.0.3.
+
+## Changes
+
+- fix(ci): register sentry production deployment after release
+
+---
+
 ## [Unreleased]
 
 ### Added
