@@ -165,6 +165,7 @@ jobs:
           npx @sentry/cli sourcemaps upload --release="$VERSION" dist/browser
           npx @sentry/cli releases set-commits "$VERSION" --auto
           npx @sentry/cli releases finalize "$VERSION"
+          npx @sentry/cli releases deploys new "$VERSION" -e production
 
       - name: Update GitHub Release with AI notes
         if: steps.pre_version.outputs.version != steps.post_version.outputs.version
