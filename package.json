@@ -1,6 +1,6 @@
 {
   "name": "@itqan/cms-frontend",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Quranic Content Management System - Frontend application for managing and distributing Quranic assets",
   "author": "Itqan Community",
   "license": "MIT",
@@ -43,7 +43,9 @@
       "eslint --fix --cache --concurrency=auto",
       "prettier --write"
     ],
-    "*.{json,html,css,less,md}": ["prettier --write"]
+    "*.{json,html,css,less,md}": [
+      "prettier --write"
+    ]
   },
   "private": true,
   "dependencies": {

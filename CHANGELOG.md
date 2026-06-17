@@ -11,6 +11,12 @@ Release 1.0.0. See commit history for full details.
 
 ---
 
+## [1.0.1] - 2026-06-17
+
+Release 1.0.1. See commit history for full details.
+
+---
+
 ## [Unreleased]
 
 ### Added
