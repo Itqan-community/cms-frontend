@@ -38,6 +38,16 @@ Release 1.0.3.
 
 ---
 
+## [1.0.4] - 2026-06-17
+
+Release 1.0.4.
+
+## Changes
+
+- fix(ci): correct sentry deploys new syntax for v2 cli
+
+---
+
 ## [Unreleased]
 
 ### Added
