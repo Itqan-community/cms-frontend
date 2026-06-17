@@ -55,7 +55,7 @@ function writeOutputs(aiNotes) {
 
 if (!apiKey) {
   console.warn('GEMINI_API_KEY not set, using fallback release notes');
-  writeOutputs(`Release ${version}. See commit history for full details.`);
+  writeOutputs(`Release ${version}.\n\n## Changes\n\n${commits}`);
   process.exit(0);
 }
 
@@ -95,7 +95,7 @@ const req = https.request(options, (res) => {
       if (!aiNotes) throw new Error('Empty candidate response');
     } catch (e) {
       console.error('Gemini API error, using fallback:', e.message);
-      aiNotes = `Release ${version}. See commit history for full details.`;
+      aiNotes = `Release ${version}.\n\n## Changes\n\n${commits}`;
     }
     writeOutputs(aiNotes);
   });
