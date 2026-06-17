@@ -17,6 +17,17 @@ Release 1.0.1. See commit history for full details.
 
 ---
 
+## [1.0.2] - 2026-06-17
+
+Release 1.0.2.
+
+## Changes
+
+- fix(ci): auto-format package.json after npm version bump to prevent prettier failures
+- fix(ci): include commits in fallback release notes when Gemini API unavailable
+
+---
+
 ## [Unreleased]
 
 ### Added
