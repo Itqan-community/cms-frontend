@@ -1,0 +1,95 @@
+<nz-drawer
+  [nzVisible]="visible()"
+  [nzTitle]="'ADMIN.ACCESS_REQUESTS.DRAWER.TITLE' | translate"
+  [nzWidth]="'min(480px, 92vw)'"
+  [nzClosable]="true"
+  [nzMaskClosable]="true"
+  (nzOnClose)="onClose()"
+>
+  <ng-container *nzDrawerContent>
+    <nz-spin [nzSpinning]="loading()">
+      @if (loadFailed()) {
+        <p class="access-request-detail-drawer__error">
+          {{ 'ADMIN.ACCESS_REQUESTS.DRAWER.LOAD_ERROR' | translate }}
+        </p>
+      } @else if (detail(); as d) {
+        <dl class="access-request-detail-drawer__list">
+          <div class="access-request-detail-drawer__row">
+            <dt>{{ 'ADMIN.ACCESS_REQUESTS.DRAWER.STATUS' | translate }}</dt>
+            <dd>
+              <nz-tag [nzColor]="statusTagColor(d.status)">{{ statusLabel(d.status) }}</nz-tag>
+            </dd>
+          </div>
+
+          <div class="access-request-detail-drawer__row">
+            <dt>{{ 'ADMIN.ACCESS_REQUESTS.COLUMNS.DEVELOPER' | translate }}</dt>
+            <dd>
+              <span class="access-request-detail-drawer__name">{{ d.developer.name }}</span>
+              <span class="access-request-detail-drawer__sub">{{ d.developer.email }}</span>
+            </dd>
+          </div>
+
+          <div class="access-request-detail-drawer__row">
+            <dt>{{ 'ADMIN.ACCESS_REQUESTS.COLUMNS.ASSET' | translate }}</dt>
+            <dd>{{ d.asset.name }}</dd>
+          </div>
+
+          <div class="access-request-detail-drawer__row">
+            <dt>{{ 'ADMIN.ACCESS_REQUESTS.COLUMNS.INTENDED_USE' | translate }}</dt>
+            <dd>
+              <nz-tag>{{ intendedUseLabel(d.intended_use) }}</nz-tag>
+            </dd>
+          </div>
+
+          <div class="access-request-detail-drawer__row">
+            <dt>{{ 'ADMIN.ACCESS_REQUESTS.DRAWER.REASON' | translate }}</dt>
+            <dd class="access-request-detail-drawer__reason">{{ d.developer_access_reason }}</dd>
+          </div>
+
+          <div class="access-request-detail-drawer__row">
+            <dt>{{ 'ADMIN.ACCESS_REQUESTS.COLUMNS.CREATED_AT' | translate }}</dt>
+            <dd>{{ d.created_at | date: 'dd/MM/yyyy HH:mm' }}</dd>
+          </div>
+
+          @if (d.status === 'approved') {
+            <div class="access-request-detail-drawer__row">
+              <dt>{{ 'ADMIN.ACCESS_REQUESTS.DRAWER.APPROVED_AT' | translate }}</dt>
+              <dd>
+                @if (d.approved_at) {
+                  {{ d.approved_at | date: 'dd/MM/yyyy HH:mm' }}
+                } @else {
+                  —
+                }
+              </dd>
+            </div>
+            <div class="access-request-detail-drawer__row">
+              <dt>{{ 'ADMIN.ACCESS_REQUESTS.DRAWER.APPROVED_BY' | translate }}</dt>
+              <dd>{{ formatActor(d.approved_by) }}</dd>
+            </div>
+          }
+
+          @if (d.status === 'rejected') {
+            <div class="access-request-detail-drawer__row">
+              <dt>{{ 'ADMIN.ACCESS_REQUESTS.DRAWER.REJECTED_AT' | translate }}</dt>
+              <dd>
+                @if (d.rejected_at) {
+                  {{ d.rejected_at | date: 'dd/MM/yyyy HH:mm' }}
+                } @else {
+                  —
+                }
+              </dd>
+            </div>
+            <div class="access-request-detail-drawer__row">
+              <dt>{{ 'ADMIN.ACCESS_REQUESTS.DRAWER.REJECTED_BY' | translate }}</dt>
+              <dd>{{ formatActor(d.rejected_by) }}</dd>
+            </div>
+            <div class="access-request-detail-drawer__row">
+              <dt>{{ 'ADMIN.ACCESS_REQUESTS.DRAWER.REJECTION_REASON' | translate }}</dt>
+              <dd class="access-request-detail-drawer__reason">{{ d.rejection_reason ?? '—' }}</dd>
+            </div>
+          }
+        </dl>
+      }
+    </nz-spin>
+  </ng-container>
+</nz-drawer>

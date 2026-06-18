@@ -1,0 +1,38 @@
+@import '../../../styles/admin-shared.less';
+
+.members-list {
+  .admin-table-overrides();
+
+  &__alert {
+    margin-bottom: 16px;
+  }
+
+  &__status-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  &__expires {
+    font-size: 12px;
+    color: rgba(0, 0, 0, 0.45);
+  }
+
+  &__form {
+    padding-top: 8px;
+  }
+
+  &__invite-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin: 0;
+    padding: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    color: rgba(0, 0, 0, 0.65);
+    background: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+  }
+}
