@@ -92,17 +92,120 @@ jobs:
       - name: Build ${{ matrix.environment }}
         run: npm run build -- --configuration=${{ matrix.environment }}
 
-      - name: Upload source maps to Sentry
-        if: github.event_name == 'push'
+      - name: Upload source maps to Sentry (staging only)
+        if: github.event_name == 'push' && matrix.environment == 'staging'
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
           SENTRY_ORG: itqan-3o
-          SENTRY_PROJECT: ${{ matrix.environment == 'production' && 'cms-frontend' || 'cms-frontend-staging' }}
-        run: npx @sentry/cli sourcemaps upload --release="${{ github.sha }}-${{ matrix.environment }}" dist/browser
+          SENTRY_PROJECT: cms-frontend-staging
+        run: npx @sentry/cli sourcemaps upload --release="${{ github.sha }}-staging" dist/browser
+
+      - name: Upload production dist artifact
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master' && matrix.environment == 'production'
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-production
+          path: dist/browser
+          retention-days: 1
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [lint-and-test, type-check, build-check]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Record pre-release version
+        id: pre_version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Run semantic-release
+        run: npm run release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+
+      - name: Record post-release version
+        id: post_version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Download production dist artifact
+        if: steps.pre_version.outputs.version != steps.post_version.outputs.version
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-production
+          path: dist/browser
+
+      - name: Create Sentry release and upload sourcemaps
+        if: steps.pre_version.outputs.version != steps.post_version.outputs.version
+        continue-on-error: true
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: itqan-3o
+          SENTRY_PROJECT: cms-frontend
+        run: |
+          VERSION="v${{ steps.post_version.outputs.version }}"
+          npx @sentry/cli releases new "$VERSION"
+          npx @sentry/cli sourcemaps upload --release="$VERSION" dist/browser
+          npx @sentry/cli releases set-commits "$VERSION" --auto
+          npx @sentry/cli releases finalize "$VERSION"
+          npx @sentry/cli releases deploys new --release "$VERSION" -e production
+
+      - name: Update GitHub Release with AI notes
+        if: steps.pre_version.outputs.version != steps.post_version.outputs.version
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          AI_NOTES=$(cat /tmp/ai-release-notes.txt 2>/dev/null || echo "See commit history for details.")
+          gh release edit "v${{ steps.post_version.outputs.version }}" --notes "$AI_NOTES"
+
+      - name: Post release to Slack
+        if: steps.pre_version.outputs.version != steps.post_version.outputs.version
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_DEPLOY_WEBHOOK }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_DEPLOY_WEBHOOK not set, skipping"
+            exit 0
+          fi
+          VERSION="v${{ steps.post_version.outputs.version }}"
+          AI_NOTES=$(cat /tmp/ai-release-notes.txt 2>/dev/null | head -c 500)
+          curl -s -X POST "$SLACK_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n \
+              --arg version "$VERSION" \
+              --arg notes "$AI_NOTES" \
+              --arg repo "$GITHUB_REPOSITORY" \
+              '{
+                blocks: [{
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: (":rocket: *CMS Frontend " + $version + " Released*\n\n" + $notes + "\n\n<https://github.com/" + $repo + "/releases/tag/" + $version + "|View Release Notes>")
+                  }
+                }]
+              }')"
 
   notify:
     runs-on: ubuntu-latest
-    needs: [lint-and-test, type-check, build-check]
+    needs: [lint-and-test, type-check, build-check, release]
     if: always() && github.event_name == 'push'
 
     steps:

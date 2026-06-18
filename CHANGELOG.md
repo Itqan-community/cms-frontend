@@ -5,6 +5,59 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2026-06-16
+
+Release 1.0.0. See commit history for full details.
+
+---
+
+## [1.0.1] - 2026-06-17
+
+Release 1.0.1. See commit history for full details.
+
+---
+
+## [1.0.2] - 2026-06-17
+
+Release 1.0.2.
+
+## Changes
+
+- fix(ci): auto-format package.json after npm version bump to prevent prettier failures
+- fix(ci): include commits in fallback release notes when Gemini API unavailable
+
+---
+
+## [1.0.3] - 2026-06-17
+
+Release 1.0.3.
+
+## Changes
+
+- fix(ci): register sentry production deployment after release
+
+---
+
+## [1.0.4] - 2026-06-17
+
+Release 1.0.4.
+
+## Changes
+
+- fix(ci): correct sentry deploys new syntax for v2 cli
+
+---
+
+## [1.0.5] - 2026-06-17
+
+Release 1.0.5.
+
+## Changes
+
+- fix(release): verify gemini ai release notes generation
+
+---
+
 ## [Unreleased]
 
 ### Added
