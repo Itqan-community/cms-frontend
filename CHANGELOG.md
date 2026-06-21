@@ -76,6 +76,16 @@ Release 1.1.0.
 
 ---
 
+## [1.1.1] - 2026-06-21
+
+Release 1.1.1.
+
+## Changes
+
+- fix(deps): remove stale pnpm-lock.yaml so Netlify uses npm
+
+---
+
 ## [Unreleased]
 
 ### Added
