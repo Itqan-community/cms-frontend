@@ -86,6 +86,17 @@ Release 1.1.1.
 
 ---
 
+## [1.1.2] - 2026-06-22
+
+Release 1.1.2.
+
+## Changes
+
+- fix(admin): always submit reciter forms as multipart
+- fix(admin): reintroduce granular permissions for publisher management
+
+---
+
 ## [Unreleased]
 
 ### Added
