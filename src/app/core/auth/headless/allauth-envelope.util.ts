@@ -20,9 +20,13 @@ export function applyAllauthEnvelopeSideEffects(
   }
   const msg = body as AllauthEnvelopeLike;
   if (msg.status === 410) {
-    tokens.clearSessionToken();
+    tokens.blockSessionCookieFallback();
   }
-  if (msg.meta?.session_token && typeof msg.meta.session_token === 'string') {
+  if (
+    msg.meta?.session_token &&
+    typeof msg.meta.session_token === 'string' &&
+    !tokens.isSessionCookieFallbackBlocked()
+  ) {
     tokens.setSessionToken(msg.meta.session_token);
   }
   if (

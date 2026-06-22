@@ -267,6 +267,7 @@ export class AuthService {
           this.refreshTokenSubject.next(false);
           return false;
         }
+        this.tokenStore.unblockSessionCookieFallback();
         this.authSnapshot.set(res);
         this.tokenStore.setFromMeta(res.meta);
         this.syncUserFromSnapshot(res);
@@ -283,6 +284,7 @@ export class AuthService {
   }
 
   invalidateClientAuthAndGoLogin(): void {
+    this.tokenStore.blockSessionCookieFallback();
     this.clearLocalAuthUi({ preserveSessionStorageToken: false });
     this.authSnapshot.set(undefined);
     this.prevAuthForRedirect = undefined;
@@ -318,8 +320,8 @@ export class AuthService {
   }): Observable<AuthenticatedOrChallenge> {
     const fetchProfile = options?.fetchProfile;
 
-    // Same-origin only: if Django sessionid is readable (not HttpOnly), seed app header store.
-    if (!this.tokenStore.getSessionToken()) {
+    // Same-origin only: seed from readable `sessionid` when not in post-logout blocked state.
+    if (!this.tokenStore.isSessionCookieFallbackBlocked() && !this.tokenStore.getSessionToken()) {
       const sessionId = getCookie('sessionid');
       if (sessionId) {
         this.tokenStore.setSessionToken(sessionId);
@@ -383,6 +385,9 @@ export class AuthService {
       return of(res);
     }
     this.authSnapshot.set(res);
+    if (authInfo(res).isAuthenticated && res.status === 200) {
+      this.tokenStore.unblockSessionCookieFallback();
+    }
     this.tokenStore.setFromMeta(res.meta);
     this.syncUserFromSnapshot(res);
 
@@ -465,6 +470,7 @@ export class AuthService {
 
   logout(): Observable<void> {
     this.loggingOut = true;
+    this.tokenStore.blockSessionCookieFallback();
     this.clearLocalAuthUi({ preserveSessionStorageToken: false });
     this.authSnapshot.set(undefined);
 
@@ -608,6 +614,7 @@ export class AuthService {
     process: 'login' | 'connect'
   ): Promise<{ kind: 'redirecting' } | { kind: 'error'; message: string }> {
     if (process === 'login') {
+      this.tokenStore.blockSessionCookieFallback();
       this.tokenStore.clear();
       setCrossOriginDjangoCsrfToken(null);
       clearReadableDjangoAuthCookies();

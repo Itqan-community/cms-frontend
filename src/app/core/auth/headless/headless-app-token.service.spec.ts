@@ -38,4 +38,22 @@ describe('HeadlessAppTokenService', () => {
     spyOnProperty(document, 'cookie', 'get').and.returnValue('');
     expect(service.getSessionToken()).toBeNull();
   });
+
+  it('does not read sessionid cookie while session cookie fallback is blocked', () => {
+    spyOnProperty(document, 'cookie', 'get').and.returnValue('sessionid=cookie-val; Path=/');
+    service.blockSessionCookieFallback();
+    expect(service.getSessionToken()).toBeNull();
+    expect(sessionStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY)).toBeNull();
+  });
+
+  it('setFromMeta is ignored while session cookie fallback is blocked', () => {
+    service.blockSessionCookieFallback();
+    service.setFromMeta({
+      is_authenticated: false,
+      session_token: 'ignored',
+      access_token: 'ignored',
+    });
+    expect(service.getSessionToken()).toBeNull();
+    expect(service.getAccessToken()).toBeNull();
+  });
 });

@@ -234,6 +234,7 @@ describe('AuthService (app / headless)', () => {
 
   it('logout clears client auth before server session delete', async () => {
     tokenStore.setSessionToken('stale');
+    spyOnProperty(document, 'cookie', 'get').and.returnValue('sessionid=stale-cookie; Path=/');
     headless.deleteSession.and.callFake(() => {
       expect(tokenStore.getSessionToken()).toBeNull();
       return of({ status: 200 });
@@ -242,6 +243,7 @@ describe('AuthService (app / headless)', () => {
     await firstValueFrom(service.logout());
     expect(headless.deleteSession).toHaveBeenCalled();
     expect(headless.deleteBrowserSession).toHaveBeenCalled();
+    expect(tokenStore.isSessionCookieFallbackBlocked()).toBeTrue();
   });
 
   it('startGoogleOAuth with login clears stale auth state and browser session before redirect', async () => {

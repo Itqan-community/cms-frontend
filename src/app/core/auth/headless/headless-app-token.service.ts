@@ -16,6 +16,11 @@ const HEADLESS_REFRESH_TOKEN_KEY = 'headless_refresh_token';
 @Injectable({ providedIn: 'root' })
 export class HeadlessAppTokenService {
   private legacyMigrated = false;
+  /**
+   * When true, ignore readable `sessionid` cookie fallback (logout / 410).
+   * Prevents re-attaching a dead token as `X-Session-Token` on same-origin hosts.
+   */
+  private sessionCookieFallbackBlocked = false;
 
   private migrateLegacyOnce(): void {
     if (this.legacyMigrated) {
@@ -42,6 +47,9 @@ export class HeadlessAppTokenService {
    * Cookie fallback is persisted into sessionStorage so subsequent reads stay consistent.
    */
   getSessionToken(): string | null {
+    if (this.sessionCookieFallbackBlocked) {
+      return null;
+    }
     this.migrateLegacyOnce();
     try {
       const fromStorage = sessionStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY);
@@ -84,9 +92,22 @@ export class HeadlessAppTokenService {
     return localStorage.getItem(HEADLESS_REFRESH_TOKEN_KEY);
   }
 
+  blockSessionCookieFallback(): void {
+    this.sessionCookieFallbackBlocked = true;
+    this.clearSessionToken();
+  }
+
+  unblockSessionCookieFallback(): void {
+    this.sessionCookieFallbackBlocked = false;
+  }
+
+  isSessionCookieFallbackBlocked(): boolean {
+    return this.sessionCookieFallbackBlocked;
+  }
+
   /** Persist tokens from headless `meta` when backend sends them. */
   setFromMeta(meta: AuthenticationMeta | undefined): void {
-    if (!meta) {
+    if (!meta || this.sessionCookieFallbackBlocked) {
       return;
     }
     if (meta.session_token) {
