@@ -107,6 +107,20 @@ Release 1.1.3.
 
 ---
 
+## [1.1.4] - 2026-06-22
+
+Release 1.1.4.
+
+## Changes
+
+- fix(auth): restore passkey stage tokens and fix CI test hang
+- fix(auth): block sessionid cookie fallback after logout
+- fix(admin): redirect single-scope users to publisher detail and enhance permissions
+- fix(auth): prevent stale session GET after logout
+- fix(auth): clear browser session on logout and before OAuth login
+
+---
+
 ## [Unreleased]
 
 ### Added
