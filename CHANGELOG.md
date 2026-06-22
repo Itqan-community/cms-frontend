@@ -97,6 +97,16 @@ Release 1.1.2.
 
 ---
 
+## [1.1.3] - 2026-06-22
+
+Release 1.1.3.
+
+## Changes
+
+- fix(admin): send only changed reciter fields on patch
+
+---
+
 ## [Unreleased]
 
 ### Added
