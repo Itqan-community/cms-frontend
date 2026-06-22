@@ -79,6 +79,17 @@ export class PublishersListComponent extends AdminListBase<Publisher, PublisherU
       })
       .subscribe({
         next: (res) => {
+          // When the user is scoped to a single publisher (e.g. tenant-filtered),
+          // the list is pointless — go straight to that publisher's detail page.
+          // Only when it's genuinely a single-publisher scope, not a filtered-down
+          // result, so staff browsing all publishers keep the list.
+          if (res.count === 1 && this.page() === 1 && !this.hasActiveFilters()) {
+            this.loading.set(false);
+            void this.router.navigate(['/admin/publishers', res.results[0].id], {
+              replaceUrl: true,
+            });
+            return;
+          }
           this.items.set(res.results);
           this.total.set(res.count);
           this.loading.set(false);
@@ -87,6 +98,11 @@ export class PublishersListComponent extends AdminListBase<Publisher, PublisherU
           this.loading.set(false);
         },
       });
+  }
+
+  private hasActiveFilters(): boolean {
+    const f = this.activeFilters;
+    return !!(f.search || f.country || f.is_verified != null);
   }
 
   countryLabel(country: string | null | undefined): string {

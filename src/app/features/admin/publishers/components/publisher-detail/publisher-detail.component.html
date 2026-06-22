@@ -39,6 +39,14 @@
       </div>
 
       <div class="admin-hero-actions">
+        @if (canCreatePublisher()) {
+          <a routerLink="/admin/publishers/create">
+            <button nz-button nzType="default">
+              <ng-icon name="lucidePlus" />
+              {{ 'ADMIN.PUBLISHERS.ADD_BUTTON' | translate }}
+            </button>
+          </a>
+        }
         @if (canEditPublisher()) {
           <button nz-button nzType="primary" (click)="onEdit()">
             <ng-icon name="lucideSquarePen" />
