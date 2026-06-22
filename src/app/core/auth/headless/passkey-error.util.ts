@@ -1,7 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
-import { getErrorMessage, isWebAuthnIncorrectCodeError } from '../../../shared/utils/error.utils';
+import { resolveAuthErrorMessage } from '../../../shared/utils/auth-error-resolver.util';
+import { isWebAuthnIncorrectCodeError } from '../../../shared/utils/error.utils';
 import { isReauthenticationBody, tryNavigateForAuth401 } from './headless-auth-flow.util';
 import { WebAuthnRpIdMismatchError } from './webauthn-rp-id.util';
 
@@ -56,11 +57,19 @@ export function resolvePasskeyFlowError(
     }
     return {
       kind: 'message',
-      message: getErrorMessage(error) || translate.instant('AUTH.PASSKEY.ERROR'),
+      message: resolveAuthErrorMessage(
+        error,
+        { fallbackKey: 'AUTH.PASSKEY.ERROR', context: 'mfa_webauthn' },
+        translate
+      ),
     };
   }
   return {
     kind: 'message',
-    message: getErrorMessage(error) || translate.instant('AUTH.PASSKEY.ERROR'),
+    message: resolveAuthErrorMessage(
+      error,
+      { fallbackKey: 'AUTH.PASSKEY.ERROR', context: 'mfa_webauthn' },
+      translate
+    ),
   };
 }

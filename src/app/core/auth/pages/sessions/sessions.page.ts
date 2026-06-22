@@ -5,7 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
 import { ManagedSession, parseSessionsEnvelope } from '../../headless/headless-account-data.util';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { AuthService } from '../../services/auth.service';
@@ -52,7 +52,11 @@ export class SessionsPage implements OnInit {
       }
       this.pageError.set(
         e instanceof HttpErrorResponse
-          ? getErrorMessage(e) || this.translate.instant('AUTH.SESSIONS.LOAD_ERROR')
+          ? resolveAuthErrorMessage(
+              e,
+              { fallbackKey: 'AUTH.SESSIONS.LOAD_ERROR', context: 'sessions' },
+              this.translate
+            )
           : this.translate.instant('AUTH.SESSIONS.LOAD_ERROR')
       );
     } finally {
@@ -103,7 +107,11 @@ export class SessionsPage implements OnInit {
       }
       this.pageError.set(
         e instanceof HttpErrorResponse
-          ? getErrorMessage(e) || this.translate.instant('AUTH.SESSIONS.ACTION_ERROR')
+          ? resolveAuthErrorMessage(
+              e,
+              { fallbackKey: 'AUTH.SESSIONS.ACTION_ERROR', context: 'sessions' },
+              this.translate
+            )
           : this.translate.instant('AUTH.SESSIONS.ACTION_ERROR')
       );
     } finally {

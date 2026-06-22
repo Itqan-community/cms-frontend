@@ -8,7 +8,7 @@ import { NgIcon } from '@ng-icons/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { AuthBackLinkComponent } from '../../components/auth-back-link/auth-back-link.component';
-import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { AuthService } from '../../services/auth.service';
 
@@ -119,16 +119,25 @@ export class ResetPasswordPage implements OnInit {
           return;
         }
         if (e.status === 401) {
+          this.errorMessage.set(this.translate.instant('AUTH.RESET_PASSWORD.EXPIRED'));
           void this.router.navigate(['/account/login']);
           return;
         }
         this.errorMessage.set(
-          getErrorMessage(e) || this.translate.instant('AUTH.RESET_PASSWORD.ERROR')
+          resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.RESET_PASSWORD.ERROR', context: 'reset_password' },
+            this.translate
+          )
         );
         return;
       }
       this.errorMessage.set(
-        getErrorMessage(e) || this.translate.instant('AUTH.RESET_PASSWORD.ERROR')
+        resolveAuthErrorMessage(
+          e,
+          { fallbackKey: 'AUTH.RESET_PASSWORD.ERROR', context: 'reset_password' },
+          this.translate
+        )
       );
     }
   }

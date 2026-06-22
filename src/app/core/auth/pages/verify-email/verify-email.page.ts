@@ -6,7 +6,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { AuthBackLinkComponent } from '../../components/auth-back-link/auth-back-link.component';
-import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
 import { AuthService } from '../../services/auth.service';
 import { readContinueUrl } from '../../utils/auth-route-query.util';
 
@@ -70,7 +70,11 @@ export class VerifyEmailPage implements OnInit {
         this.isSubmitting.set(false);
         if (err instanceof HttpErrorResponse) {
           this.errorMessage.set(
-            getErrorMessage(err) || this.translate.instant('AUTH.VERIFY_EMAIL.ERROR')
+            resolveAuthErrorMessage(
+              err,
+              { fallbackKey: 'AUTH.VERIFY_EMAIL.ERROR', context: 'verify_email' },
+              this.translate
+            )
           );
         } else {
           this.errorMessage.set(this.translate.instant('AUTH.VERIFY_EMAIL.ERROR'));
@@ -88,7 +92,11 @@ export class VerifyEmailPage implements OnInit {
       },
       error: (err: unknown) => {
         this.errorMessage.set(
-          getErrorMessage(err) || this.translate.instant('AUTH.VERIFY_EMAIL.RESEND_ERROR')
+          resolveAuthErrorMessage(
+            err,
+            { fallbackKey: 'AUTH.VERIFY_EMAIL.RESEND_ERROR', context: 'verify_email' },
+            this.translate
+          )
         );
       },
     });

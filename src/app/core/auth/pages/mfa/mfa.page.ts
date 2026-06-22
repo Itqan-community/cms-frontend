@@ -8,10 +8,8 @@ import { NgIcon } from '@ng-icons/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { AuthBackLinkComponent } from '../../components/auth-back-link/auth-back-link.component';
-import {
-  getErrorMessage,
-  isWebAuthnIncorrectCodeError,
-} from '../../../../shared/utils/error.utils';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
+import { isWebAuthnIncorrectCodeError } from '../../../../shared/utils/error.utils';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
 import { WebAuthnRpIdMismatchError } from '../../headless/webauthn-rp-id.util';
@@ -71,7 +69,13 @@ export class MfaPage {
         if (tryNavigateForAuth401(this.router, e)) {
           return;
         }
-        this.errorMessage.set(getErrorMessage(e) || this.translate.instant('AUTH.MFA.ERROR'));
+        this.errorMessage.set(
+          resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.MFA.ERROR', context: 'mfa_totp' },
+            this.translate
+          )
+        );
         return;
       }
       this.errorMessage.set(this.translate.instant('AUTH.MFA.ERROR'));
@@ -128,7 +132,13 @@ export class MfaPage {
         if (tryNavigateForAuth401(this.router, e)) {
           return;
         }
-        this.errorMessage.set(getErrorMessage(e) || this.translate.instant('AUTH.MFA.ERROR'));
+        this.errorMessage.set(
+          resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.MFA.ERROR', context: 'mfa_webauthn' },
+            this.translate
+          )
+        );
         return;
       }
       this.errorMessage.set(this.translate.instant('AUTH.MFA.ERROR'));

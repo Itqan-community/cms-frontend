@@ -1,6 +1,8 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import {
   BehaviorSubject,
   Observable,
@@ -76,6 +78,8 @@ export class AuthService {
   private readonly headless = inject(HeadlessAuthApiService);
   private readonly tokenStore = inject(HeadlessAppTokenService);
   private readonly authBus = inject(AllauthAuthChangeBus);
+  private readonly translate = inject(TranslateService);
+  private readonly message = inject(NzMessageService);
 
   private readonly API_BASE_URL = environment.API_BASE_URL;
   private readonly USER_KEY = 'user';
@@ -283,7 +287,10 @@ export class AuthService {
     );
   }
 
-  invalidateClientAuthAndGoLogin(): void {
+  invalidateClientAuthAndGoLogin(options?: { sessionExpired?: boolean }): void {
+    if (options?.sessionExpired) {
+      this.message.warning(this.translate.instant('AUTH.SESSION_EXPIRED'));
+    }
     this.tokenStore.blockSessionCookieFallback();
     this.clearLocalAuthUi({ preserveSessionStorageToken: false });
     this.authSnapshot.set(undefined);
@@ -623,7 +630,7 @@ export class AuthService {
     if (process === 'connect' && !this.tokenStore.getSessionToken()) {
       return {
         kind: 'error',
-        message: 'Connecting a provider requires an app session token; sign in again.',
+        message: this.translate.instant('AUTH.PROVIDERS.SESSION_TOKEN_REQUIRED'),
       };
     }
     if (!getDjangoCsrfTokenForRequest()) {

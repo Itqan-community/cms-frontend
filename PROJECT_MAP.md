@@ -349,10 +349,11 @@ success.
 
 ### Utils
 
-| File                    | Exports                                                                                                                  | Purpose                                 |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------- |
-| `error.utils.ts`        | `parseRetryAfterSeconds`, `isIncorrectCodeError`, `isWebAuthnIncorrectCodeError`, `getErrorMessage`, `joinAllauthErrors` | Auth error parsing utilities            |
-| `publisherhost.util.ts` | `getPublisher()`, `getPublisherId()`, `isPublisherHost()`                                                                | Multi-tenant publisher domain detection |
+| File                          | Exports                                                                                                                                              | Purpose                                                        |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `error.utils.ts`              | `parseRetryAfterSeconds`, `isIncorrectCodeError`, `isWebAuthnIncorrectCodeError`, `getErrorMessage`, `joinAllauthErrors`, `extractAllauthErrorItems` | Auth error parsing utilities                                   |
+| `auth-error-resolver.util.ts` | `resolveAuthErrorMessage`, `isMessageLocalizedForUi`                                                                                                 | Auth UI errors: code→i18n map, localized backend msg, fallback |
+| `publisherhost.util.ts`       | `getPublisher()`, `getPublisherId()`, `isPublisherHost()`                                                                                            | Multi-tenant publisher domain detection                        |
 
 ### Directives (empty directory — placeholder for future use)
 
@@ -458,4 +459,5 @@ access requests (`/portal/access-requests/` — list, detail, accept, reject;
 9. **CSS variables** — Theming via `--color-*`, `--radius-*`, `--shadow-*` custom properties
 10. **RTL support** — Logical CSS properties throughout, `ltr-flip`/`rtl-flip` transform utilities
 11. **Responsive** — Mobile-first with breakpoints at 480/576/768/992/1200/1600px
-12. **Error classification** — `getErrorMessage()` utility for allauth-specific error parsing
+12. **Error classification** — `resolveAuthErrorMessage()` for auth pages (code map → localized
+    backend → i18n fallback); `getErrorMessage()` for low-level allauth envelope parsing

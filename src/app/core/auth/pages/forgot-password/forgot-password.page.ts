@@ -8,7 +8,7 @@ import { NgIcon } from '@ng-icons/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { AuthBackLinkComponent } from '../../components/auth-back-link/auth-back-link.component';
-import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
 import type { AuthenticationResponse, Flow } from '../../headless/headless-api.types';
 import {
   isPasswordResetByCodePending,
@@ -76,7 +76,11 @@ export class ForgotPasswordPage {
         return;
       }
       this.errorMessage.set(
-        getErrorMessage(e) || this.translate.instant('AUTH.FORGOT_PASSWORD.ERROR')
+        resolveAuthErrorMessage(
+          e,
+          { fallbackKey: 'AUTH.FORGOT_PASSWORD.ERROR', context: 'forgot_password' },
+          this.translate
+        )
       );
     }
   }

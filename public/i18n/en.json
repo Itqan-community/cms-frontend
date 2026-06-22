@@ -15,6 +15,24 @@
   },
   "AUTH": {
     "MUST_LOGIN_TO_VIEW": "You must be logged in to view this page.",
+    "SESSION_EXPIRED": "Your session has expired. Please sign in again.",
+    "ERRORS": {
+      "CODES": {
+        "ACCOUNT_INACTIVE": "This account is currently inactive.",
+        "CANNOT_REMOVE_PRIMARY_EMAIL": "You cannot remove your primary email address.",
+        "DUPLICATE_EMAIL": "This email address is already associated with this account.",
+        "EMAIL_PASSWORD_MISMATCH": "The email address and/or password you specified are not correct.",
+        "EMAIL_TAKEN": "A user is already registered with this email address.",
+        "INVALID": "Please check your input and try again.",
+        "INVALID_CREDENTIALS": "The email address and/or password you specified are not correct.",
+        "PASSWORD_MISMATCH": "Passwords do not match.",
+        "PHONE_PASSWORD_MISMATCH": "The phone number and/or password you specified are not correct.",
+        "REQUIRED": "Please fill in all required fields.",
+        "TOO_MANY_LOGIN_ATTEMPTS": "Too many failed login attempts. Try again later.",
+        "UNVERIFIED_EMAIL": "Please verify your email address before continuing.",
+        "USERNAME_PASSWORD_MISMATCH": "The username and/or password you specified are not correct."
+      }
+    },
     "COMMON": {
       "BACK_TO_LOGIN": "Back to sign in",
       "BACK_TO_SIGNUP": "Back to sign up",
@@ -152,7 +170,9 @@
     },
     "CHANGE_PASSWORD": {
       "SUBTITLE": "Update your password to keep your account secure.",
-      "CURRENT_PASSWORD": "Current password"
+      "CURRENT_PASSWORD": "Current password",
+      "SUCCESS": "Password changed successfully.",
+      "ERROR": "Failed to change password. Please try again."
     },
     "MFA": {
       "TITLE": "Two-factor authentication",
@@ -162,6 +182,7 @@
       "SUBMIT": "Verify",
       "BACK": "Back to sign in",
       "ERROR": "Invalid code. Please try again.",
+      "INCORRECT_CODE": "Invalid code. Please try again.",
       "USE_SECURITY_KEY": "Use security key / passkey",
       "USE_PASSKEY": "Sign in with passkey"
     },
@@ -305,7 +326,8 @@
       "LOAD_ERROR": "Could not load connected accounts.",
       "ACTION_ERROR": "Could not disconnect the provider.",
       "CONNECT_ERROR": "Could not start {{provider}} connection.",
-      "CONNECT_CROSS_ORIGIN_ERROR": "Connect requires same-origin API and app in this environment. Use the staging CMS domain or configure a reverse proxy."
+      "CONNECT_CROSS_ORIGIN_ERROR": "Connect requires same-origin API and app in this environment. Use the staging CMS domain or configure a reverse proxy.",
+      "SESSION_TOKEN_REQUIRED": "Connecting a provider requires an app session token; sign in again."
     },
     "PROFILE": {
       "TITLE": "Your account",
@@ -339,6 +361,7 @@
       "USE_PASSKEY": "Use passkey",
       "CANCEL": "Cancel",
       "ERROR": "Incorrect password.",
+      "INCORRECT_PASSWORD": "Incorrect password.",
       "PASSKEY_ERROR": "Passkey verification failed.",
       "MFA_ERROR": "Invalid authenticator code."
     },
@@ -346,7 +369,8 @@
       "TITLE": "Trust this browser?",
       "SUBTITLE": "You can skip two-factor authentication on this device for a while if you trust it.",
       "TRUST_BUTTON": "Trust this browser",
-      "DO_NOT_TRUST_BUTTON": "Do not trust"
+      "DO_NOT_TRUST_BUTTON": "Do not trust",
+      "ERROR": "Could not update browser trust settings. Please try again."
     },
     "OAUTH": {
       "PROCESSING": "Processing authentication...",

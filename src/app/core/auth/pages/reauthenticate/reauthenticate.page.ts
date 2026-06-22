@@ -8,10 +8,8 @@ import { NgIcon } from '@ng-icons/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { AuthBackLinkComponent } from '../../components/auth-back-link/auth-back-link.component';
-import {
-  getErrorMessage,
-  isWebAuthnIncorrectCodeError,
-} from '../../../../shared/utils/error.utils';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
+import { isWebAuthnIncorrectCodeError } from '../../../../shared/utils/error.utils';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
 import { WebAuthnRpIdMismatchError } from '../../headless/webauthn-rp-id.util';
@@ -90,15 +88,17 @@ export class ReauthenticatePage implements OnInit {
     } catch (e) {
       this.isLoading.set(false);
       if (e instanceof HttpErrorResponse) {
-        if (isWebAuthnIncorrectCodeError(e)) {
-          this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.WEBAUTHN_STATE_ERROR'));
-          return;
-        }
         if (tryNavigateForAuth401(this.router, e)) {
           return;
         }
       }
-      this.errorMessage.set(getErrorMessage(e) || this.translate.instant('AUTH.REAUTH.ERROR'));
+      this.errorMessage.set(
+        resolveAuthErrorMessage(
+          e,
+          { fallbackKey: 'AUTH.REAUTH.ERROR', context: 'reauth_password' },
+          this.translate
+        )
+      );
     }
   }
 
@@ -122,7 +122,13 @@ export class ReauthenticatePage implements OnInit {
           return;
         }
       }
-      this.errorMessage.set(getErrorMessage(e) || this.translate.instant('AUTH.REAUTH.MFA_ERROR'));
+      this.errorMessage.set(
+        resolveAuthErrorMessage(
+          e,
+          { fallbackKey: 'AUTH.REAUTH.MFA_ERROR', context: 'reauth_mfa' },
+          this.translate
+        )
+      );
     }
   }
 
@@ -174,7 +180,11 @@ export class ReauthenticatePage implements OnInit {
           return;
         }
         this.errorMessage.set(
-          getErrorMessage(e) || this.translate.instant('AUTH.REAUTH.PASSKEY_ERROR')
+          resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.REAUTH.PASSKEY_ERROR', context: 'mfa_webauthn' },
+            this.translate
+          )
         );
         return;
       }

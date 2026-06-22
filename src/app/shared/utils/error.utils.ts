@@ -75,6 +75,22 @@ export function isUnverifiedEmailError(error: unknown): boolean {
   return errors.some((e) => e.code === 'unverified_email');
 }
 
+/** Pull structured allauth `errors[]` from an `HttpErrorResponse` or raw envelope body. */
+export function extractAllauthErrorItems(error: unknown): AllauthErrorItem[] {
+  if (error instanceof HttpErrorResponse) {
+    return extractAllauthErrorItemsFromBody(error.error);
+  }
+  return extractAllauthErrorItemsFromBody(error);
+}
+
+function extractAllauthErrorItemsFromBody(body: unknown): AllauthErrorItem[] {
+  if (!body || typeof body !== 'object') {
+    return [];
+  }
+  const errors = (body as { errors?: AllauthErrorItem[] }).errors;
+  return Array.isArray(errors) ? errors.filter((e) => e && typeof e.message === 'string') : [];
+}
+
 export function getErrorMessage(error: unknown): string | null {
   if (error instanceof HttpErrorResponse) {
     const m = firstAllauthMessage(error.error);
