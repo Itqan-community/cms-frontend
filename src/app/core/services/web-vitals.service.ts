@@ -12,9 +12,13 @@ export class WebVitalsService {
   private hasStarted = false;
 
   constructor() {
-    if (isDevMode()) {
+    if (isDevMode() && !this.isKarmaTestRun()) {
       this.monitorCoreWebVitals();
     }
+  }
+
+  private isKarmaTestRun(): boolean {
+    return typeof window !== 'undefined' && '__karma__' in window;
   }
 
   private monitorCoreWebVitals(): void {

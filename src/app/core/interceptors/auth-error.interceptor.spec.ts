@@ -27,6 +27,7 @@ describe('authErrorInterceptor', () => {
 
   beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     const authMock = jasmine.createSpyObj<AuthService>('AuthService', [
       'sessionRecheckAfter401',
       'invalidateClientAuthAndGoLogin',

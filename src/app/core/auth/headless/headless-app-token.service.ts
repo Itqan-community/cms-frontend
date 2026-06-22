@@ -47,9 +47,6 @@ export class HeadlessAppTokenService {
    * Cookie fallback is persisted into sessionStorage so subsequent reads stay consistent.
    */
   getSessionToken(): string | null {
-    if (this.sessionCookieFallbackBlocked) {
-      return null;
-    }
     this.migrateLegacyOnce();
     try {
       const fromStorage = sessionStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY);
@@ -57,6 +54,9 @@ export class HeadlessAppTokenService {
         return fromStorage;
       }
     } catch {
+      return null;
+    }
+    if (this.sessionCookieFallbackBlocked) {
       return null;
     }
     const fromCookie = getCookie(DJANGO_SESSIONID_COOKIE_NAME);
@@ -107,7 +107,7 @@ export class HeadlessAppTokenService {
 
   /** Persist tokens from headless `meta` when backend sends them. */
   setFromMeta(meta: AuthenticationMeta | undefined): void {
-    if (!meta || this.sessionCookieFallbackBlocked) {
+    if (!meta) {
       return;
     }
     if (meta.session_token) {

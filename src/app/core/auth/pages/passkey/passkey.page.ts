@@ -196,9 +196,9 @@ export class PasskeyPage implements OnInit {
   }
 
   private async loginWithPasskey(): Promise<void> {
-    /** Same as passkey signup: drop stale app session so GET options establish a fresh stage token; POST must send it. */
+    /** Drop stale app session; block dead `sessionid` cookie but allow fresh stage token from GET options. */
     if (!this.authService.isLoggedIn()) {
-      this.tokenStore.clearSessionToken();
+      this.tokenStore.blockSessionCookieFallback();
     }
     const res = await firstValueFrom(this.authService.headlessAuth.getWebauthnLoginOptions());
     const data = res.data as WebAuthnCredentialRequestData;
@@ -225,9 +225,9 @@ export class PasskeyPage implements OnInit {
    */
   private async signupWithPasskey(): Promise<void> {
     const email = (this.signupForm.value['email'] as string).trim();
-    /** Anonymous passkey signup: drop stale app session so GET/PUT use the new `meta.session_token` only. */
+    /** Anonymous passkey signup: block dead cookie; GET/PUT use new `meta.session_token` only. */
     if (!this.authService.isLoggedIn()) {
-      this.tokenStore.clearSessionToken();
+      this.tokenStore.blockSessionCookieFallback();
     }
 
     const initResp = await firstValueFrom(
