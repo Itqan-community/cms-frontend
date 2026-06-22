@@ -19,29 +19,18 @@
       [message]="'ERRORS.SERVER_ERROR' | translate"
       [actionLabel]="'UI.TRY_AGAIN' | translate"
       actionIcon="lucideRotateCw"
-      [actionLoading]="loading()"
-      (actionClick)="loadSura(suraId())"
+      (actionClick)="retry()"
     />
-  } @else if (sura()) {
+  } @else if (surahMeta() && page()) {
     <header class="sura-view__header">
-      <a class="sura-view__back" routerLink="/mushaf">{{ 'MUSHAF.BACK_TO_INDEX' | translate }}</a>
-      <h1 class="sura-view__name">{{ sura()!.name }}</h1>
-      <p class="sura-view__meta">
-        {{ sura()!.transliterated_name }} · {{ ayahCountLabel() }}
-        {{ 'MUSHAF.AYAHS' | translate }}
-      </p>
+      <a class="sura-view__back" routerLink="/mushaf" [queryParams]="{ mushaf: selected().slug }">
+        {{ 'MUSHAF.BACK_TO_INDEX' | translate }}
+      </a>
+      <h1 class="sura-view__name">{{ surahMeta()!.nameArabic }}</h1>
+      <p class="sura-view__meta">{{ surahMeta()!.nameEnglish }} · {{ selected().nameAr }}</p>
+      <div class="sura-view__toolbar"><app-mushaf-switcher /></div>
     </header>
 
-    <div class="sura-view__text" dir="rtl">
-      @for (ayah of ayahs(); track ayah.id) {
-        <app-ayah-view
-          [ayah]="ayah"
-          [markerLink]="['/mushaf', sura()!.id, ayah.number_in_sura]"
-          [selectedWordId]="selectedWordId()"
-          (wordSelected)="onWordSelected($event)"
-        />
-        {{ ' ' }}
-      }
-    </div>
+    <app-mushaf-page [slug]="selected().slug" [page]="page()!" (ayahClick)="onAyahClick($event)" />
   }
 </section>

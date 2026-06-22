@@ -19,12 +19,13 @@
       [message]="'ERRORS.SERVER_ERROR' | translate"
       [actionLabel]="'UI.TRY_AGAIN' | translate"
       actionIcon="lucideRotateCw"
-      [actionLoading]="loading()"
-      (actionClick)="loadAyah(suraId(), ayahNumber())"
+      (actionClick)="retry()"
     />
-  } @else if (ayah() && sura()) {
+  } @else if (surahMeta() && page()) {
     <header class="ayah-focus__header">
-      <a class="ayah-focus__sura-link" [routerLink]="suraLink()">{{ sura()!.name }}</a>
+      <a class="ayah-focus__sura-link" [routerLink]="suraLink()" [queryParams]="mushafQuery()">
+        {{ surahMeta()!.nameArabic }}
+      </a>
       <span class="ayah-focus__divider">·</span>
       <span class="ayah-focus__ayah-no">
         {{ 'MUSHAF.AYAH' | translate }} {{ ayahNumberLabel() }}
@@ -37,16 +38,19 @@
         class="ayah-focus__nav-btn"
         [class.ayah-focus__nav-btn--disabled]="!hasPrev()"
         [routerLink]="hasPrev() ? prevLink() : null"
+        [queryParams]="mushafQuery()"
         [attr.aria-disabled]="!hasPrev()"
       >
         <ng-icon name="lucideChevronRight" />
         <span>{{ 'MUSHAF.PREVIOUS_AYAH' | translate }}</span>
       </a>
+      <app-mushaf-switcher />
       <a
         nz-button
         class="ayah-focus__nav-btn"
         [class.ayah-focus__nav-btn--disabled]="!hasNext()"
         [routerLink]="hasNext() ? nextLink() : null"
+        [queryParams]="mushafQuery()"
         [attr.aria-disabled]="!hasNext()"
       >
         <span>{{ 'MUSHAF.NEXT_AYAH' | translate }}</span>
@@ -54,19 +58,11 @@
       </a>
     </nav>
 
-    <div class="ayah-focus__ayah" dir="rtl">{{ ayah()!.text }}</div>
-
-    <section class="ayah-focus__words" dir="rtl">
-      <h2 class="ayah-focus__words-title">{{ 'MUSHAF.WORD_BY_WORD' | translate }}</h2>
-      <div class="ayah-focus__words-row">
-        @for (word of ayah()!.words; track word.id) {
-          <app-word-chip
-            [word]="word"
-            [selected]="word.id === selectedWord()?.id"
-            (wordClick)="onWordClick($event)"
-          />
-        }
-      </div>
-    </section>
+    <app-mushaf-page
+      [slug]="selected().slug"
+      [page]="page()!"
+      [highlightAyah]="highlight()"
+      (ayahClick)="onAyahClick($event)"
+    />
   }
 </section>

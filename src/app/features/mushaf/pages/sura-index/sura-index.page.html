@@ -2,6 +2,9 @@
   <header class="sura-index__header">
     <h1 class="sura-index__title">{{ 'MUSHAF.TITLE' | translate }}</h1>
     <p class="sura-index__subtitle">{{ 'MUSHAF.INDEX_SUBTITLE' | translate }}</p>
+    <div class="sura-index__toolbar">
+      <app-mushaf-switcher />
+    </div>
   </header>
 
   @if (loading()) {
@@ -19,12 +22,12 @@
       [actionLabel]="'UI.TRY_AGAIN' | translate"
       actionIcon="lucideRotateCw"
       [actionLoading]="loading()"
-      (actionClick)="loadSuras()"
+      (actionClick)="retry()"
     />
   } @else {
     <div class="sura-index__grid">
-      @for (sura of suras(); track sura.id) {
-        <app-sura-card [sura]="sura" />
+      @for (surah of surahs(); track surah.number) {
+        <app-sura-card [surah]="surah" [mushafSlug]="selected().slug" />
       }
     </div>
   }

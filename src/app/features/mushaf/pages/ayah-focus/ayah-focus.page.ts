@@ -1,15 +1,16 @@
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import { forkJoin } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { NgIcon } from '@ng-icons/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
-import { WordChipComponent } from '../../components/word-chip/word-chip.component';
-import { Ayah, Sura, Word } from '../../models/mushaf.model';
-import { MushafService } from '../../services/mushaf.service';
+import { AyahRef, MushafPageComponent } from '../../components/mushaf-page/mushaf-page.component';
+import { MushafSwitcherComponent } from '../../components/mushaf-switcher/mushaf-switcher.component';
+import { MushafSurahMeta } from '../../models/mushaf.model';
+import { MushafSelectionService } from '../../services/mushaf-selection.service';
+import { MushafSvgService } from '../../services/mushaf-svg.service';
 import { toArabicDigits } from '../../utils/arabic-digits.util';
 
 @Component({
@@ -17,7 +18,8 @@ import { toArabicDigits } from '../../utils/arabic-digits.util';
   standalone: true,
   imports: [
     RouterModule,
-    WordChipComponent,
+    MushafPageComponent,
+    MushafSwitcherComponent,
     StateMessageComponent,
     NgIcon,
     NzButtonModule,
@@ -27,48 +29,63 @@ import { toArabicDigits } from '../../utils/arabic-digits.util';
   styleUrl: './ayah-focus.page.less',
 })
 export class AyahFocusPage implements OnInit {
-  private readonly mushafService = inject(MushafService);
+  private readonly svgService = inject(MushafSvgService);
+  private readonly selection = inject(MushafSelectionService);
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
 
-  protected readonly sura = signal<Sura | null>(null);
-  protected readonly ayah = signal<Ayah | null>(null);
-  protected readonly selectedWord = signal<Word | null>(null);
+  protected readonly surahMeta = signal<MushafSurahMeta | null>(null);
+  protected readonly page = signal<number | null>(null);
   protected readonly loading = signal(true);
   protected readonly errorState = signal(false);
   protected readonly notFound = signal(false);
   protected readonly suraId = signal<number>(0);
   protected readonly ayahNumber = signal<number>(0);
+  protected readonly selected = this.selection.selected;
 
   protected readonly ayahNumberLabel = computed(() => toArabicDigits(this.ayahNumber()));
+  protected readonly highlight = computed<AyahRef>(() => ({
+    surah: this.suraId(),
+    ayah: this.ayahNumber(),
+  }));
   protected readonly hasPrev = computed(() => this.ayahNumber() > 1);
   protected readonly hasNext = computed(() => {
-    const sura = this.sura();
-    return sura ? this.ayahNumber() < sura.ayas_count : false;
+    const meta = this.surahMeta();
+    return meta ? this.ayahNumber() < meta.ayahCount : false;
   });
+
+  private slug(): string {
+    return this.selected().slug;
+  }
+
   protected readonly prevLink = computed(() => ['/mushaf', this.suraId(), this.ayahNumber() - 1]);
   protected readonly nextLink = computed(() => ['/mushaf', this.suraId(), this.ayahNumber() + 1]);
   protected readonly suraLink = computed(() => ['/mushaf', this.suraId()]);
+  protected readonly mushafQuery = computed(() => ({ mushaf: this.selected().slug }));
 
   ngOnInit(): void {
-    this.route.params.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
-      const suraId = Number(params['suraId']);
-      const ayahNumber = Number(params['ayahNumber']);
-      this.suraId.set(suraId);
-      this.ayahNumber.set(ayahNumber);
-      this.loadAyah(suraId, ayahNumber);
-    });
+    combineLatest([this.route.params, this.route.queryParams])
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(([params, query]) => {
+        const suraId = Number(params['suraId']);
+        const ayahNumber = Number(params['ayahNumber']);
+        const edition = this.selection.select(query['mushaf']);
+        this.suraId.set(suraId);
+        this.ayahNumber.set(ayahNumber);
+        this.loadAyah(edition.slug, suraId, ayahNumber);
+      });
   }
 
-  protected loadAyah(suraId: number, ayahNumber: number): void {
+  protected loadAyah(slug: string, suraId: number, ayahNumber: number): void {
     this.loading.set(true);
     this.errorState.set(false);
     this.notFound.set(false);
-    this.selectedWord.set(null);
 
     if (
       !Number.isInteger(suraId) ||
       suraId < 1 ||
+      suraId > 114 ||
       !Number.isInteger(ayahNumber) ||
       ayahNumber < 1
     ) {
@@ -77,29 +94,34 @@ export class AyahFocusPage implements OnInit {
       return;
     }
 
-    forkJoin({
-      sura: this.mushafService.getSura(suraId),
-      ayah: this.mushafService.getAyah(suraId, ayahNumber),
-    })
+    combineLatest([
+      this.svgService.getSurahMeta(slug, suraId),
+      this.svgService.resolvePage(slug, suraId, ayahNumber),
+    ])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ sura, ayah }) => {
-          this.sura.set(sura);
-          this.ayah.set(ayah);
+        next: ([meta, page]) => {
+          if (!meta || !page) {
+            this.loading.set(false);
+            this.notFound.set(true);
+            return;
+          }
+          this.surahMeta.set(meta);
+          this.page.set(page);
           this.loading.set(false);
         },
-        error: (err) => {
+        error: () => {
           this.loading.set(false);
-          if (err instanceof HttpErrorResponse && err.status === 404) {
-            this.notFound.set(true);
-          } else {
-            this.errorState.set(true);
-          }
+          this.errorState.set(true);
         },
       });
   }
 
-  protected onWordClick(word: Word): void {
-    this.selectedWord.set(this.selectedWord()?.id === word.id ? null : word);
+  protected retry(): void {
+    this.loadAyah(this.slug(), this.suraId(), this.ayahNumber());
+  }
+
+  protected onAyahClick(ref: AyahRef): void {
+    this.router.navigate(['/mushaf', ref.surah, ref.ayah], { queryParams: this.mushafQuery() });
   }
 }

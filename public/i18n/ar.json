@@ -1679,6 +1679,8 @@
     "NEXT_AYAH": "الآية التالية",
     "AYAH_NAVIGATION": "تنقل الآيات",
     "SURA_NOT_FOUND": "السورة غير موجودة",
-    "AYAH_NOT_FOUND": "الآية غير موجودة"
+    "AYAH_NOT_FOUND": "الآية غير موجودة",
+    "EDITION": "الرواية",
+    "ATTRIBUTION": "عرض المصحف بواسطة Quranpedia (quran-svg)"
   }
 }
