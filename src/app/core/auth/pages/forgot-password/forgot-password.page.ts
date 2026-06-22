@@ -2,10 +2,12 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgIcon } from '@ng-icons/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
+import { AuthBackLinkComponent } from '../../components/auth-back-link/auth-back-link.component';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
 import type { AuthenticationResponse, Flow } from '../../headless/headless-api.types';
 import {
@@ -17,7 +19,14 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-forgot-password-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, LangSwitchComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TranslateModule,
+    LangSwitchComponent,
+    AuthBackLinkComponent,
+    NgIcon,
+  ],
   styleUrls: ['./forgot-password.page.less'],
   templateUrl: './forgot-password.page.html',
 })

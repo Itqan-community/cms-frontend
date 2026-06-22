@@ -15,6 +15,11 @@
   },
   "AUTH": {
     "MUST_LOGIN_TO_VIEW": "You must be logged in to view this page.",
+    "COMMON": {
+      "BACK_TO_LOGIN": "Back to sign in",
+      "BACK_TO_SIGNUP": "Back to sign up",
+      "BACK_TO_GALLERY": "Back to gallery"
+    },
     "LOGIN": {
       "TITLE": "Welcome back",
       "SUBTITLE": "Sign in to continue to Itqan",
@@ -142,7 +147,8 @@
       "NEW_PASSWORD": "New password",
       "SUBMIT": "Update password",
       "ERROR": "Could not reset password. The link or code may have expired.",
-      "EXPIRED": "The reset link has expired. Please request a new one."
+      "EXPIRED": "The reset link has expired. Please request a new one.",
+      "BACK": "Back to sign in"
     },
     "CHANGE_PASSWORD": {
       "SUBTITLE": "Update your password to keep your account secure.",
@@ -156,7 +162,8 @@
       "SUBMIT": "Verify",
       "BACK": "Back to sign in",
       "ERROR": "Invalid code. Please try again.",
-      "USE_SECURITY_KEY": "Use security key / passkey"
+      "USE_SECURITY_KEY": "Use security key / passkey",
+      "USE_PASSKEY": "Sign in with passkey"
     },
     "SECURITY": {
       "TITLE": "Account security",
@@ -334,6 +341,12 @@
       "ERROR": "Incorrect password.",
       "PASSKEY_ERROR": "Passkey verification failed.",
       "MFA_ERROR": "Invalid authenticator code."
+    },
+    "TRUST": {
+      "TITLE": "Trust this browser?",
+      "SUBTITLE": "You can skip two-factor authentication on this device for a while if you trust it.",
+      "TRUST_BUTTON": "Trust this browser",
+      "DO_NOT_TRUST_BUTTON": "Do not trust"
     },
     "OAUTH": {
       "PROCESSING": "Processing authentication...",

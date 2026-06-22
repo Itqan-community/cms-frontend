@@ -47,16 +47,30 @@
     </button>
 
     @if (passkeyAvailable()) {
-      <a
-        [routerLink]="['/passkey']"
-        [queryParams]="{ flow: flow() }"
-        class="auth-social__btn auth-social__btn--passkey"
-        [attr.aria-label]="passkeyLabelKey() | translate"
-        [attr.title]="passkeyLabelKey() | translate"
-      >
-        <ng-icon name="lucideFingerprint" class="auth-social__passkey-icon" aria-hidden="true" />
-        <span>{{ passkeyLabelKey() | translate }}</span>
-      </a>
+      @if (flow() === 'login') {
+        <button
+          type="button"
+          class="auth-social__btn auth-social__btn--passkey"
+          [disabled]="passkeyLoading()"
+          [attr.aria-label]="passkeyLabelKey() | translate"
+          [attr.title]="passkeyLabelKey() | translate"
+          (click)="onPasskeyClick()"
+        >
+          <ng-icon name="lucideFingerprint" class="auth-social__passkey-icon" aria-hidden="true" />
+          <span>{{ passkeyLabelKey() | translate }}</span>
+        </button>
+      } @else {
+        <a
+          [routerLink]="['/passkey']"
+          [queryParams]="passkeySignupQueryParams()"
+          class="auth-social__btn auth-social__btn--passkey"
+          [attr.aria-label]="passkeyLabelKey() | translate"
+          [attr.title]="passkeyLabelKey() | translate"
+        >
+          <ng-icon name="lucideFingerprint" class="auth-social__passkey-icon" aria-hidden="true" />
+          <span>{{ passkeyLabelKey() | translate }}</span>
+        </a>
+      }
     }
   </div>
 

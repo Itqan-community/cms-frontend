@@ -5,6 +5,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
+import { AuthBackLinkComponent } from '../../components/auth-back-link/auth-back-link.component';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
 import { AuthService } from '../../services/auth.service';
 import { readContinueUrl } from '../../utils/auth-route-query.util';
@@ -12,7 +13,14 @@ import { readContinueUrl } from '../../utils/auth-route-query.util';
 @Component({
   selector: 'app-verify-email-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, LangSwitchComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    TranslateModule,
+    LangSwitchComponent,
+    AuthBackLinkComponent,
+  ],
   styleUrls: ['./verify-email.page.less'],
   templateUrl: './verify-email.page.html',
 })

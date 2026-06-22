@@ -257,6 +257,7 @@
 
       <app-auth-social-actions
         flow="signup"
+        [passkeySignupEmail]="registerForm.get('email')?.value ?? ''"
         (google)="onSignUpWithGoogle()"
         (github)="onSignUpWithGitHub()"
       />

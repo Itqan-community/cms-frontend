@@ -1,40 +1,48 @@
-<div class="mfa">
-  <header class="mfa__header">
-    <div class="mfa__header-row">
-      <a [routerLink]="['/account/login']" class="mfa__back">{{ 'AUTH.MFA.BACK' | translate }}</a>
+<div class="auth-guest mfa">
+  <header class="auth-guest__header">
+    <div class="auth-guest__header-row">
+      <app-auth-back-link [route]="['/account/login']" labelKey="AUTH.COMMON.BACK_TO_LOGIN" />
       <app-lang-switch></app-lang-switch>
     </div>
   </header>
-  <div class="mfa__container">
-    <div class="mfa__card">
-      <h1 class="mfa__title">{{ 'AUTH.MFA.TITLE' | translate }}</h1>
-      <p class="mfa__subtitle">{{ 'AUTH.MFA.SUBTITLE' | translate }}</p>
+  <div class="auth-guest__container">
+    <div class="auth-guest__card">
+      <div class="auth-guest__logo">
+        <img src="/assets/images/logo.svg" alt="Itqan" width="50" height="50" />
+      </div>
+      <h1 class="auth-guest__title">{{ 'AUTH.MFA.TITLE' | translate }}</h1>
+      <p class="auth-guest__subtitle">{{ 'AUTH.MFA.SUBTITLE' | translate }}</p>
       @if (errorMessage()) {
-        <div class="mfa__alert">{{ errorMessage() }}</div>
+        <div class="auth-guest__alert">{{ errorMessage() }}</div>
       }
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="mfa__form">
-        <div class="mfa__field">
-          <label for="c" class="mfa__label">{{ 'AUTH.MFA.CODE_LABEL' | translate }}</label>
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-guest__form">
+        <div class="auth-guest__field">
+          <label for="c" class="auth-guest__label">{{ 'AUTH.MFA.CODE_LABEL' | translate }}</label>
           <input
             id="c"
-            class="mfa__input"
+            class="auth-guest__input"
             formControlName="code"
             autocomplete="one-time-code"
             [placeholder]="'AUTH.MFA.CODE_PLACEHOLDER' | translate"
           />
         </div>
-        <button type="submit" class="mfa__submit" [disabled]="form.invalid || isLoading()">
-          {{ 'AUTH.MFA.SUBMIT' | translate }}
+        <button type="submit" class="auth-guest__submit" [disabled]="form.invalid || isLoading()">
+          @if (isLoading()) {
+            <span class="auth-guest__spinner" aria-hidden="true"></span>
+          } @else {
+            {{ 'AUTH.MFA.SUBMIT' | translate }}
+          }
         </button>
       </form>
       @if (passkeyAvailable()) {
         <button
           type="button"
-          class="mfa__submit mfa__submit--secondary"
+          class="auth-guest__submit auth-guest__submit--passkey"
           [disabled]="isLoading()"
           (click)="onWebAuthn()"
         >
-          {{ 'AUTH.MFA.USE_SECURITY_KEY' | translate }}
+          <ng-icon name="lucideFingerprint" class="auth-guest__passkey-icon" aria-hidden="true" />
+          {{ 'AUTH.MFA.USE_PASSKEY' | translate }}
         </button>
       }
     </div>
