@@ -193,6 +193,9 @@ Trust, Profile, CompleteProfile
 | `/publishers`            | `PublishersPage`               | `publisherHostGuard`             | Stub                                                                                                                                       |
 | `/publisher/:id`         | `PublisherDetailsPage`         | `publisherHostGuard`             | Detail + filtered assets                                                                                                                   |
 | `/license/:id`           | `LicenseDetailsPage`           | —                                | License detail                                                                                                                             |
+| `/mushaf`             | `SuraIndexPage`        | `authGuard`          | Mushaf reader — sura index         |
+| `/mushaf/:suraId`     | `SuraViewPage`         | `authGuard`          | Full-sura ayah-by-ayah view        |
+| `/mushaf/:suraId/:ayahNumber` | `AyahFocusPage` | `authGuard`          | Single-ayah focus + word-by-word   |
 | `/content-standards`     | `UsageStandardsPage`           | `publisherHostGuard`             | Content guidelines                                                                                                                         |
 | `/unauthorized`          | `UnauthorizedPage`             | —                                | Card UX; CTA + 5s countdown auto-redirect to `/gallery`; `hideHeader`; dir name typo `unautorized/`                                        |
 | `/complete-profile`      | `CompleteProfilePage`          | `authGuard`                      | Profile completion                                                                                                                         |
@@ -308,6 +311,26 @@ success.
 | File                 | Type | Purpose                     |
 | -------------------- | ---- | --------------------------- |
 | `LicenseDetailsPage` | Page | License information display |
+
+### 5b. Mushaf Reader (`src/app/features/mushaf/`)
+
+**Purpose:** Public (auth-gated) ayah-by-ayah Quran reader, modeled on quranpedia. Consumes the
+backend `/cms-api/suras/*` endpoints (`itqan-cms-backend/apps/quran`). All routes behind `authGuard`.
+
+| File                                         | Type       | Purpose                                                       |
+| -------------------------------------------- | ---------- | ------------------------------------------------------------- |
+| `models/mushaf.model.ts`                     | Interfaces | `Sura`, `Ayah`, `Word`, `PaginatedSuras`                      |
+| `services/mushaf.service.ts`                 | Service    | `getSuras()`, `getSura(id)`, `getSuraAyahs(id)`, `getAyah()`  |
+| `utils/arabic-digits.util.ts`                | Util       | `toArabicDigits()` for ayah/sura number markers               |
+| `pages/sura-index/`                          | Page       | Grid of 114 suras (loading/error states)                     |
+| `pages/sura-view/`                           | Page       | Full sura: header + all ayahs inline (Uthmani), 404 handling |
+| `pages/ayah-focus/`                          | Page       | Single ayah large + word-by-word + prev/next + back-to-sura  |
+| `components/sura-card/`                       | Component  | Sura tile (number, name, ayah count, Meccan/Medinan badge)   |
+| `components/ayah-view/`                       | Component  | One ayah's words + number marker (optional marker link)      |
+| `components/word-chip/`                       | Component  | Single word with hover/click highlight (`wordClick` output)  |
+
+**States:** loading (skeleton), error (retry), not-found (404: sura/ayah). **i18n:** `MUSHAF.*` +
+`NAV.MUSHAF` keys in en/ar.
 
 ### 6. Error (`src/app/features/error/`)
 

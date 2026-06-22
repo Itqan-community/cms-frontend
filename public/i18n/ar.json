@@ -434,7 +434,8 @@
     "API_DOCS": "وثائق الواجهات البرمجية (API)",
     "PUBLISHER_DASHBOARD": "لوحة التحكم للناشر",
     "ASSET_REQUEST_FORM": "أضف محتوى قرآني في إتقان",
-    "ADMIN_PORTAL": "لوحة الإدارة"
+    "ADMIN_PORTAL": "لوحة الإدارة",
+    "MUSHAF": "القرآن"
   },
   "HOME": {
     "WELCOME": "مرحبًا بك في إتقان CMS",
@@ -1664,5 +1665,20 @@
     "TOP_ENTITIES": "أكثر الكيانات طلبا",
     "NO_DATA": "لا توجد بيانات للفترة المحددة",
     "ERROR_UNAVAILABLE": "إحصائيات الاستخدام غير متاحة مؤقتا. يرجى المحاولة لاحقا."
+  },
+  "MUSHAF": {
+    "TITLE": "القرآن الكريم",
+    "INDEX_SUBTITLE": "تصفح السور واقرأ آية آية",
+    "AYAHS": "آية",
+    "AYAH": "آية",
+    "MECCAN": "مكية",
+    "MEDINAN": "مدنية",
+    "BACK_TO_INDEX": "العودة إلى السور",
+    "WORD_BY_WORD": "كلمة بكلمة",
+    "PREVIOUS_AYAH": "الآية السابقة",
+    "NEXT_AYAH": "الآية التالية",
+    "AYAH_NAVIGATION": "تنقل الآيات",
+    "SURA_NOT_FOUND": "السورة غير موجودة",
+    "AYAH_NOT_FOUND": "الآية غير موجودة"
   }
 }

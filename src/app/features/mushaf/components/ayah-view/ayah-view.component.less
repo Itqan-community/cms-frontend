@@ -1,0 +1,33 @@
+.ayah-view {
+  display: inline;
+
+  &__marker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.8em;
+    height: 1.8em;
+    margin-inline: 0.35em;
+    padding: 0 0.3em;
+    border-radius: 50%;
+    border: 1px solid var(--color-primary, #008060);
+    color: var(--color-primary, #008060);
+    font-size: 0.55em;
+    line-height: 1;
+    vertical-align: middle;
+    user-select: none;
+    text-decoration: none;
+  }
+
+  &__marker--link {
+    cursor: pointer;
+    transition:
+      background-color 0.15s ease,
+      color 0.15s ease;
+
+    &:hover {
+      background-color: var(--color-primary, #008060);
+      color: #fff;
+    }
+  }
+}

@@ -1,0 +1,14 @@
+<span class="ayah-view">
+  @for (word of ayah().words; track word.id) {
+    <app-word-chip
+      [word]="word"
+      [selected]="word.id === selectedWordId()"
+      (wordClick)="onWordClick($event)"
+    />
+  }
+  @if (markerLink(); as link) {
+    <a class="ayah-view__marker ayah-view__marker--link" [routerLink]="link">{{ markerLabel() }}</a>
+  } @else {
+    <span class="ayah-view__marker" aria-hidden="true">{{ markerLabel() }}</span>
+  }
+</span>

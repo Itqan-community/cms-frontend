@@ -1,0 +1,72 @@
+<section class="ayah-focus">
+  @if (loading()) {
+    <div class="ayah-focus__skeleton ayah-focus__skeleton--header"></div>
+    <div class="ayah-focus__skeleton ayah-focus__skeleton--body"></div>
+  } @else if (notFound()) {
+    <app-state-message
+      icon="lucideSearch"
+      iconVariant="default"
+      [title]="'MUSHAF.AYAH_NOT_FOUND' | translate"
+      [message]="'ERRORS.NOT_FOUND' | translate"
+      [secondaryActionLabel]="'MUSHAF.BACK_TO_INDEX' | translate"
+      secondaryRouterLink="/mushaf"
+    />
+  } @else if (errorState()) {
+    <app-state-message
+      icon="lucideAlertCircle"
+      iconVariant="error"
+      [title]="'UI.SOMETHING_WENT_WRONG' | translate"
+      [message]="'ERRORS.SERVER_ERROR' | translate"
+      [actionLabel]="'UI.TRY_AGAIN' | translate"
+      actionIcon="lucideRotateCw"
+      [actionLoading]="loading()"
+      (actionClick)="loadAyah(suraId(), ayahNumber())"
+    />
+  } @else if (ayah() && sura()) {
+    <header class="ayah-focus__header">
+      <a class="ayah-focus__sura-link" [routerLink]="suraLink()">{{ sura()!.name }}</a>
+      <span class="ayah-focus__divider">·</span>
+      <span class="ayah-focus__ayah-no">
+        {{ 'MUSHAF.AYAH' | translate }} {{ ayahNumberLabel() }}
+      </span>
+    </header>
+
+    <nav class="ayah-focus__nav" [attr.aria-label]="'MUSHAF.AYAH_NAVIGATION' | translate">
+      <a
+        nz-button
+        class="ayah-focus__nav-btn"
+        [class.ayah-focus__nav-btn--disabled]="!hasPrev()"
+        [routerLink]="hasPrev() ? prevLink() : null"
+        [attr.aria-disabled]="!hasPrev()"
+      >
+        <ng-icon name="lucideChevronRight" />
+        <span>{{ 'MUSHAF.PREVIOUS_AYAH' | translate }}</span>
+      </a>
+      <a
+        nz-button
+        class="ayah-focus__nav-btn"
+        [class.ayah-focus__nav-btn--disabled]="!hasNext()"
+        [routerLink]="hasNext() ? nextLink() : null"
+        [attr.aria-disabled]="!hasNext()"
+      >
+        <span>{{ 'MUSHAF.NEXT_AYAH' | translate }}</span>
+        <ng-icon name="lucideChevronLeft" />
+      </a>
+    </nav>
+
+    <div class="ayah-focus__ayah" dir="rtl">{{ ayah()!.text }}</div>
+
+    <section class="ayah-focus__words" dir="rtl">
+      <h2 class="ayah-focus__words-title">{{ 'MUSHAF.WORD_BY_WORD' | translate }}</h2>
+      <div class="ayah-focus__words-row">
+        @for (word of ayah()!.words; track word.id) {
+          <app-word-chip
+            [word]="word"
+            [selected]="word.id === selectedWord()?.id"
+            (wordClick)="onWordClick($event)"
+          />
+        }
+      </div>
+    </section>
+  }
+</section>

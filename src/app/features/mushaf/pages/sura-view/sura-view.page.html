@@ -1,0 +1,47 @@
+<section class="sura-view">
+  @if (loading()) {
+    <div class="sura-view__skeleton sura-view__skeleton--header"></div>
+    <div class="sura-view__skeleton sura-view__skeleton--body"></div>
+  } @else if (notFound()) {
+    <app-state-message
+      icon="lucideSearch"
+      iconVariant="default"
+      [title]="'MUSHAF.SURA_NOT_FOUND' | translate"
+      [message]="'ERRORS.NOT_FOUND' | translate"
+      [secondaryActionLabel]="'MUSHAF.BACK_TO_INDEX' | translate"
+      secondaryRouterLink="/mushaf"
+    />
+  } @else if (errorState()) {
+    <app-state-message
+      icon="lucideAlertCircle"
+      iconVariant="error"
+      [title]="'UI.SOMETHING_WENT_WRONG' | translate"
+      [message]="'ERRORS.SERVER_ERROR' | translate"
+      [actionLabel]="'UI.TRY_AGAIN' | translate"
+      actionIcon="lucideRotateCw"
+      [actionLoading]="loading()"
+      (actionClick)="loadSura(suraId())"
+    />
+  } @else if (sura()) {
+    <header class="sura-view__header">
+      <a class="sura-view__back" routerLink="/mushaf">{{ 'MUSHAF.BACK_TO_INDEX' | translate }}</a>
+      <h1 class="sura-view__name">{{ sura()!.name }}</h1>
+      <p class="sura-view__meta">
+        {{ sura()!.transliterated_name }} · {{ ayahCountLabel() }}
+        {{ 'MUSHAF.AYAHS' | translate }}
+      </p>
+    </header>
+
+    <div class="sura-view__text" dir="rtl">
+      @for (ayah of ayahs(); track ayah.id) {
+        <app-ayah-view
+          [ayah]="ayah"
+          [markerLink]="['/mushaf', sura()!.id, ayah.number_in_sura]"
+          [selectedWordId]="selectedWordId()"
+          (wordSelected)="onWordSelected($event)"
+        />
+        {{ ' ' }}
+      }
+    </div>
+  }
+</section>

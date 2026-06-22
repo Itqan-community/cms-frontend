@@ -1,0 +1,49 @@
+.sura-index {
+  max-width: 1100px;
+  margin-inline: auto;
+  padding: 1.5rem 1rem 3rem;
+
+  &__header {
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  &__title {
+    margin: 0 0 0.35rem;
+    font-size: 1.75rem;
+    font-weight: 700;
+  }
+
+  &__subtitle {
+    margin: 0;
+    color: var(--color-text-secondary, #6b7280);
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.75rem;
+  }
+
+  &__skeleton {
+    height: 4.1rem;
+    border-radius: var(--radius-md, 10px);
+    background: linear-gradient(
+      90deg,
+      var(--color-fill, #f3f4f6) 25%,
+      var(--color-border, #e5e7eb) 37%,
+      var(--color-fill, #f3f4f6) 63%
+    );
+    background-size: 400% 100%;
+    animation: sura-index-shimmer 1.4s ease infinite;
+  }
+}
+
+@keyframes sura-index-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}

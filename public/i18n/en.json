@@ -434,7 +434,8 @@
     "API_DOCS": "API Docs",
     "PUBLISHER_DASHBOARD": "Publisher Dashboard",
     "ASSET_REQUEST_FORM": "Add Quranic Content to ITQAN",
-    "ADMIN_PORTAL": "Admin Portal"
+    "ADMIN_PORTAL": "Admin Portal",
+    "MUSHAF": "Quran"
   },
   "HOME": {
     "WELCOME": "Welcome to Itqan CMS",
@@ -1119,7 +1120,6 @@
         "CLEAR": "Clear",
         "HINT_FILENAMES": "One file per surah, named 001 to 114 with .mp3 extension",
         "HINT_FILENAMES_EXAMPLE": "Example for Surah Al-Fatiha: \"001.mp3\"",
-
         "OVERALL_PROGRESS": "Overall upload progress",
         "ABORT_ALL": "Abort all uploads",
         "ABORT_ALL_CONFIRM_TITLE": "Abort all uploads?",
@@ -1665,5 +1665,20 @@
     "TOP_ENTITIES": "Top entities",
     "NO_DATA": "No data for the selected period",
     "ERROR_UNAVAILABLE": "Usage stats are temporarily unavailable. Please try again later."
+  },
+  "MUSHAF": {
+    "TITLE": "The Noble Quran",
+    "INDEX_SUBTITLE": "Browse the suras and read ayah by ayah",
+    "AYAHS": "ayahs",
+    "AYAH": "Ayah",
+    "MECCAN": "Meccan",
+    "MEDINAN": "Medinan",
+    "BACK_TO_INDEX": "Back to suras",
+    "WORD_BY_WORD": "Word by word",
+    "PREVIOUS_AYAH": "Previous ayah",
+    "NEXT_AYAH": "Next ayah",
+    "AYAH_NAVIGATION": "Ayah navigation",
+    "SURA_NOT_FOUND": "Sura not found",
+    "AYAH_NOT_FOUND": "Ayah not found"
   }
 }

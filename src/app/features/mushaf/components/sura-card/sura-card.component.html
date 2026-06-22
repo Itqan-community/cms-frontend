@@ -1,0 +1,14 @@
+<a class="sura-card" [routerLink]="['/mushaf', sura().id]">
+  <span class="sura-card__number" aria-hidden="true">{{ numberLabel() }}</span>
+  <span class="sura-card__body">
+    <span class="sura-card__name">{{ sura().name }}</span>
+    <span class="sura-card__meta">
+      <span class="sura-card__count">
+        {{ ayahCountLabel() }} {{ 'MUSHAF.AYAHS' | translate }}
+      </span>
+      <span class="sura-card__badge" [class.sura-card__badge--meccan]="isMeccan()">
+        {{ (isMeccan() ? 'MUSHAF.MECCAN' : 'MUSHAF.MEDINAN') | translate }}
+      </span>
+    </span>
+  </span>
+</a>
