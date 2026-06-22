@@ -7,6 +7,7 @@ import {
   ReciterFormValue,
   ReciterListFilters,
   ReciterListItem,
+  ReciterPatchValue,
   RecitersListResponse,
 } from '../models/reciters.models';
 
@@ -35,25 +36,45 @@ export class RecitersAdminService {
   }
 
   create(body: ReciterFormValue): Observable<ReciterListItem> {
-    return this.http.post<ReciterListItem>(this.apiUrl, this.toFormData(body));
+    return this.http.post<ReciterListItem>(this.apiUrl, this.toCreateFormData(body));
   }
 
-  patch(slug: string, body: ReciterFormValue): Observable<ReciterDetails> {
-    return this.http.patch<ReciterDetails>(`${this.apiUrl}${slug}/`, this.toFormData(body));
+  patch(slug: string, body: ReciterPatchValue): Observable<ReciterDetails> {
+    return this.http.patch<ReciterDetails>(`${this.apiUrl}${slug}/`, this.toPatchFormData(body));
   }
 
   delete(slug: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}${slug}/`);
   }
 
-  private toFormData(payload: ReciterFormValue): FormData {
+  private toCreateFormData(payload: ReciterFormValue): FormData {
     const data = new FormData();
     data.append('name_ar', payload.name_ar);
     data.append('name_en', payload.name_en ?? '');
     data.append('bio_ar', payload.bio_ar ?? '');
     data.append('bio_en', payload.bio_en ?? '');
-    data.append('nationality', payload.nationality ?? '');
-    data.append('date_of_death', payload.date_of_death ?? '');
+    if (payload.nationality) data.append('nationality', payload.nationality);
+    if (payload.date_of_death) data.append('date_of_death', payload.date_of_death);
+    if (payload.image) data.append('image', payload.image);
+    return data;
+  }
+
+  /**
+   * Partial multipart PATCH — only changed keys are appended. Empty strings are never
+   * sent for `date_of_death` (API rejects them); omit the field when unchanged or cleared.
+   */
+  private toPatchFormData(payload: ReciterPatchValue): FormData {
+    const data = new FormData();
+    if (payload.name_ar !== undefined) data.append('name_ar', payload.name_ar);
+    if (payload.name_en !== undefined) data.append('name_en', payload.name_en);
+    if (payload.bio_ar !== undefined) data.append('bio_ar', payload.bio_ar);
+    if (payload.bio_en !== undefined) data.append('bio_en', payload.bio_en);
+    if (payload.nationality !== undefined) {
+      data.append('nationality', payload.nationality ?? '');
+    }
+    if (payload.date_of_death) {
+      data.append('date_of_death', payload.date_of_death);
+    }
     if (payload.image) data.append('image', payload.image);
     return data;
   }
