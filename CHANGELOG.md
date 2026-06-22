@@ -58,6 +58,34 @@ Release 1.0.5.
 
 ---
 
+## [1.1.0] - 2026-06-18
+
+Release 1.1.0.
+
+## Changes
+
+- feat(assets): update access requests management contract
+- fix(members): route invitation accept page on staging
+- feat(access-requests): add management portal
+- fix: typo
+- fix: lint issues
+- feat(members): add invitation acceptance page
+- feat(members): update permissions
+- feat: publisher members management
+- feat(auth): redesign login/signup pages
+
+---
+
+## [1.1.1] - 2026-06-21
+
+Release 1.1.1.
+
+## Changes
+
+- fix(deps): remove stale pnpm-lock.yaml so Netlify uses npm
+
+---
+
 ## [Unreleased]
 
 ### Added
