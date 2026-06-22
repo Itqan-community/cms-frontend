@@ -25,6 +25,11 @@ import { PublisherUpdatePayload } from '../../models/publishers-stats.models';
 import { NATIONALITY } from '../../../reciters/nationality.enum';
 import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
 import { PublishersService } from '../../services/publishers.service';
+import { AdminTenantService } from '../../../services/admin-tenant.service';
+import {
+  resolvePublisherDetailRecoveryId,
+  buildSelectedPublisherDetailCommands,
+} from '../../../utils/admin-tenant-navigation.util';
 
 /** Hijri year optional: empty is valid; if set, must be within range */
 function optionalHijriYearRange(minY: number, maxY: number) {
@@ -67,6 +72,7 @@ export class PublisherFormComponent implements OnInit {
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
   private readonly translate = inject(TranslateService);
+  private readonly tenantService = inject(AdminTenantService);
 
   readonly isEditMode = signal(false);
   readonly loadingDetail = signal(false);
@@ -108,9 +114,12 @@ export class PublisherFormComponent implements OnInit {
   onCancel(): void {
     if (this.isEditMode() && this.editId != null) {
       void this.router.navigate(['/admin/publishers', this.editId]);
-    } else {
-      void this.router.navigate(['/admin/publishers']);
+      return;
     }
+    const commands = buildSelectedPublisherDetailCommands(
+      this.tenantService.getSelectedPublisherId()
+    );
+    void this.router.navigate(commands ?? ['/admin', 'publishers']);
   }
 
   onSubmit(): void {
@@ -217,8 +226,22 @@ export class PublisherFormComponent implements OnInit {
       },
       error: () => {
         this.loadingDetail.set(false);
+        if (this.editId != null) {
+          this.tryRecoverFromLoadError(this.editId);
+        }
       },
     });
+  }
+
+  private tryRecoverFromLoadError(routePublisherId: number): void {
+    const recoveryId = resolvePublisherDetailRecoveryId(
+      routePublisherId,
+      this.tenantService.getSelectedPublisherId(),
+      this.tenantService.publishers().map((publisher) => publisher.id)
+    );
+    if (recoveryId != null) {
+      void this.router.navigate(['/admin/publishers', recoveryId], { replaceUrl: true });
+    }
   }
 
   beforeIconUpload = (file: NzUploadFile): boolean => {

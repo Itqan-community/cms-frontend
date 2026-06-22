@@ -21,6 +21,7 @@ import { PublishersService } from '../../services/publishers.service';
 import { PublisherFiltersComponent } from '../publisher-filters/publisher-filters.component';
 import { AdminListBase } from '../../../utils/admin-list-base';
 import { AdminAuthService } from '../../../services/admin-auth.service';
+import { AdminTenantService } from '../../../services/admin-tenant.service';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 
 @Component({
@@ -46,6 +47,7 @@ export class PublishersListComponent extends AdminListBase<Publisher, PublisherU
   private readonly publishersService = inject(PublishersService);
   private readonly translate = inject(TranslateService);
   private readonly adminAuth = inject(AdminAuthService);
+  private readonly tenantService = inject(AdminTenantService);
 
   /** Gate create/edit on the granular portal permissions, not the is_admin flag. */
   readonly canCreatePublishers = computed(() =>
@@ -83,12 +85,16 @@ export class PublishersListComponent extends AdminListBase<Publisher, PublisherU
           // the list is pointless — go straight to that publisher's detail page.
           // Only when it's genuinely a single-publisher scope, not a filtered-down
           // result, so staff browsing all publishers keep the list.
-          if (res.count === 1 && this.page() === 1 && !this.hasActiveFilters()) {
-            this.loading.set(false);
-            void this.router.navigate(['/admin/publishers', res.results[0].id], {
-              replaceUrl: true,
-            });
-            return;
+          const isSingleScope = this.tenantService.publishers().length === 1;
+          if (isSingleScope && res.count === 1 && this.page() === 1 && !this.hasActiveFilters()) {
+            const publisherId = res.results[0]?.id ?? this.tenantService.getSelectedPublisherId();
+            if (publisherId != null) {
+              this.loading.set(false);
+              void this.router.navigate(['/admin/publishers', publisherId], {
+                replaceUrl: true,
+              });
+              return;
+            }
           }
           this.items.set(res.results);
           this.total.set(res.count);
