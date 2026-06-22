@@ -125,9 +125,8 @@ export class AdminLayoutComponent implements OnInit {
 
   readonly tabs = computed(() => {
     const tabs: CmsTab[] = [];
-    if (this.adminAuth.isItqanAdmin()) {
+    if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_PUBLISHER)) {
       tabs.push(TAB_PUBLISHERS);
-      // tabs.push(TAB_MUSHAFS);
     }
     if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_TAFSIR)) {
       tabs.push(TAB_TAFSIRS);

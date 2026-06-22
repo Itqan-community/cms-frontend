@@ -11,6 +11,7 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { AdminAuthService } from '../../../services/admin-auth.service';
+import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
 import { Publisher } from '../../models/publishers-stats.models';
 import { PublishersService } from '../../services/publishers.service';
@@ -42,7 +43,12 @@ export class PublisherDetailComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly adminAuth = inject(AdminAuthService);
 
-  readonly canManagePublishers = computed(() => this.adminAuth.isItqanAdmin());
+  readonly canEditPublisher = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_PUBLISHER)
+  );
+  readonly canDeletePublisher = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_PUBLISHER)
+  );
 
   readonly publisher = signal<Publisher | null>(null);
   readonly loading = signal(true);
