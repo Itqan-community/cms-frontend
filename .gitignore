@@ -71,3 +71,4 @@ CLAUDE.md
 # OpenCode artifacts
 *.ocx
 .opencode
+/.claude/

@@ -38,4 +38,29 @@ describe('HeadlessAppTokenService', () => {
     spyOnProperty(document, 'cookie', 'get').and.returnValue('');
     expect(service.getSessionToken()).toBeNull();
   });
+
+  it('does not read sessionid cookie while session cookie fallback is blocked', () => {
+    spyOnProperty(document, 'cookie', 'get').and.returnValue('sessionid=cookie-val; Path=/');
+    service.blockSessionCookieFallback();
+    expect(service.getSessionToken()).toBeNull();
+    expect(sessionStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY)).toBeNull();
+  });
+
+  it('still returns sessionStorage token while cookie fallback is blocked', () => {
+    service.blockSessionCookieFallback();
+    service.setSessionToken('passkey-stage-token');
+    spyOnProperty(document, 'cookie', 'get').and.returnValue('sessionid=stale-cookie; Path=/');
+    expect(service.getSessionToken()).toBe('passkey-stage-token');
+  });
+
+  it('setFromMeta persists API session_token while cookie fallback is blocked', () => {
+    service.blockSessionCookieFallback();
+    service.setFromMeta({
+      is_authenticated: false,
+      session_token: 'from-api',
+      access_token: 'acc',
+    });
+    expect(service.getSessionToken()).toBe('from-api');
+    expect(service.getAccessToken()).toBe('acc');
+  });
 });

@@ -52,3 +52,8 @@ export function shouldOmitHeadlessSessionTokenForRequest(url: string, method: st
 export function isHeadlessAppAuthUrl(url: string): boolean {
   return url.includes(HEADLESS_APP_AUTH_PATH_FRAGMENT);
 }
+
+/** `GET|DELETE …/auth/app/v1/auth/session` — anonymous calls must not send a stale `X-Session-Token`. */
+export function isHeadlessAppSessionUrl(url: string): boolean {
+  return isHeadlessAppAuthUrl(url) && url.includes('/auth/session');
+}
