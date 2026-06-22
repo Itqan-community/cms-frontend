@@ -43,6 +43,9 @@ export class PublisherDetailComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly adminAuth = inject(AdminAuthService);
 
+  readonly canCreatePublisher = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_CREATE_PUBLISHER)
+  );
   readonly canEditPublisher = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_PUBLISHER)
   );
