@@ -205,6 +205,7 @@ describe('AuthService (app / headless)', () => {
   });
 
   it('sessionRecheckAfter401 returns true and updates state when getSession is authenticated', (done) => {
+    tokenStore.setSessionToken('recheck-token');
     headless.getSession.and.returnValue(of(authedResponse()));
     service.sessionRecheckAfter401().subscribe((ok) => {
       expect(ok).toBe(true);
@@ -214,11 +215,33 @@ describe('AuthService (app / headless)', () => {
   });
 
   it('sessionRecheckAfter401 returns false on getSession error', (done) => {
+    tokenStore.setSessionToken('recheck-token');
     headless.getSession.and.returnValue(throwError(() => new Error('net')));
     service.sessionRecheckAfter401().subscribe((ok) => {
       expect(ok).toBe(false);
       done();
     });
+  });
+
+  it('sessionRecheckAfter401 skips getSession when no session or refresh token', (done) => {
+    headless.getSession.calls.reset();
+    service.sessionRecheckAfter401().subscribe((ok) => {
+      expect(ok).toBe(false);
+      expect(headless.getSession).not.toHaveBeenCalled();
+      done();
+    });
+  });
+
+  it('logout clears client auth before server session delete', async () => {
+    tokenStore.setSessionToken('stale');
+    headless.deleteSession.and.callFake(() => {
+      expect(tokenStore.getSessionToken()).toBeNull();
+      return of({ status: 200 });
+    });
+    headless.deleteBrowserSession.and.returnValue(of({ status: 200 }));
+    await firstValueFrom(service.logout());
+    expect(headless.deleteSession).toHaveBeenCalled();
+    expect(headless.deleteBrowserSession).toHaveBeenCalled();
   });
 
   it('startGoogleOAuth with login clears stale auth state and browser session before redirect', async () => {

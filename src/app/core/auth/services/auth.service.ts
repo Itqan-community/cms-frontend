@@ -107,13 +107,15 @@ export class AuthService {
 
   private isRefreshing = false;
   private refreshTokenSubject = new BehaviorSubject<boolean | null>(null);
+  /** Suppresses auth-bus redirect side-effects while an explicit logout is in flight. */
+  private loggingOut = false;
 
   constructor() {
     this.authBus.changes$.subscribe((msg) => {
       const prev = this.prevAuthForRedirect;
       this.authSnapshot.set(msg);
       this.syncUserFromSnapshot(msg);
-      if (this.redirectPrimed && prev !== undefined) {
+      if (this.redirectPrimed && prev !== undefined && !this.loggingOut) {
         const evt = determineAuthChangeEvent(prev, msg);
         if (evt) {
           void this.handleAuthChangeEvent(evt as AuthChangeEventType, msg);
@@ -249,6 +251,12 @@ export class AuthService {
           return of(false);
         })
       );
+    }
+
+    if (!this.tokenStore.getSessionToken()) {
+      this.isRefreshing = false;
+      this.refreshTokenSubject.next(false);
+      return of(false);
     }
 
     return this.headless.getSession().pipe(
@@ -456,26 +464,30 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
+    this.loggingOut = true;
+    this.clearLocalAuthUi({ preserveSessionStorageToken: false });
+    this.authSnapshot.set(undefined);
+
     return forkJoin([
       this.headless.deleteSession().pipe(catchError(() => of(null))),
       this.headless.deleteBrowserSession().pipe(catchError(() => of(null))),
     ]).pipe(
       tap(() => {
-        this.performLogoutAfterServer();
+        this.tokenStore.clearSessionToken();
+        this.prevAuthForRedirect = undefined;
+        void this.router.navigate([ALLAUTH_LOGIN_URL]);
       }),
       catchError(() => {
-        this.performLogoutAfterServer();
+        this.tokenStore.clearSessionToken();
+        this.prevAuthForRedirect = undefined;
+        void this.router.navigate([ALLAUTH_LOGIN_URL]);
         return of(void 0);
+      }),
+      finalize(() => {
+        this.loggingOut = false;
       }),
       map(() => void 0)
     );
-  }
-
-  private performLogoutAfterServer(): void {
-    this.clearLocalAuthUi({ preserveSessionStorageToken: false });
-    this.authSnapshot.set(undefined);
-    this.prevAuthForRedirect = undefined;
-    void this.router.navigate([ALLAUTH_LOGIN_URL]);
   }
 
   getProfile(): Observable<UpdateProfileResponse> {
