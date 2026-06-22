@@ -3,8 +3,9 @@ import { accountAuthRoutes } from './core/auth/account.routes';
 import { authGuard } from './core/auth/guards/auth.guard';
 import { publisherHostGuard } from './core/guards/publisher-host.guard';
 import { portalAccessGuard } from './features/admin/guards/portal-access.guard';
-import { itqanAdminGuard } from './features/admin/guards/itqan-admin.guard';
+import { permissionGuard } from './features/admin/guards/permission.guard';
 import { tenantReadyGuard } from './features/admin/guards/tenant-ready.guard';
+import { PORTAL_PERMISSIONS } from './features/admin/constants/portal-permission.constants';
 
 export const routes: Routes = [
   {
@@ -34,7 +35,7 @@ export const routes: Routes = [
       },
       {
         path: 'publishers',
-        canActivate: [itqanAdminGuard],
+        canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_READ_PUBLISHER] })],
         loadChildren: () =>
           import('./features/admin/publishers/publishers.routes').then((m) => m.publishersRoutes),
       },

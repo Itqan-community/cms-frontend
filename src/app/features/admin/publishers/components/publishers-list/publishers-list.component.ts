@@ -21,6 +21,7 @@ import { PublishersService } from '../../services/publishers.service';
 import { PublisherFiltersComponent } from '../publisher-filters/publisher-filters.component';
 import { AdminListBase } from '../../../utils/admin-list-base';
 import { AdminAuthService } from '../../../services/admin-auth.service';
+import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 
 @Component({
   selector: 'app-publishers-list',
@@ -46,8 +47,13 @@ export class PublishersListComponent extends AdminListBase<Publisher, PublisherU
   private readonly translate = inject(TranslateService);
   private readonly adminAuth = inject(AdminAuthService);
 
-  /** Publishers admin is Itqan staff only (no granular portal permission in API). */
-  readonly canManagePublishers = computed(() => this.adminAuth.isItqanAdmin());
+  /** Gate create/edit on the granular portal permissions, not the is_admin flag. */
+  readonly canCreatePublishers = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_CREATE_PUBLISHER)
+  );
+  readonly canEditPublishers = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_PUBLISHER)
+  );
 
   readonly publisherTableStorageKey = 'admin-list-publishers';
   readonly publisherTableColumns: AdminTableColumnOption[] = [

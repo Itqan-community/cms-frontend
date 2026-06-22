@@ -39,11 +39,13 @@
       </div>
 
       <div class="admin-hero-actions">
-        @if (canManagePublishers()) {
+        @if (canEditPublisher()) {
           <button nz-button nzType="primary" (click)="onEdit()">
             <ng-icon name="lucideSquarePen" />
             {{ 'ADMIN.COMMON.EDIT' | translate }}
           </button>
+        }
+        @if (canDeletePublisher()) {
           <button nz-button nzDanger (click)="onDelete()">
             <ng-icon name="lucideTrash2" />
             {{ 'ADMIN.COMMON.DELETE' | translate }}
