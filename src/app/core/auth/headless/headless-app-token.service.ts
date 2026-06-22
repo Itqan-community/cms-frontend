@@ -1,9 +1,6 @@
 import { Injectable } from '@angular/core';
-import { getCookie } from '../../utils/csrf.util';
+import { DJANGO_SESSIONID_COOKIE_NAME, getCookie } from '../../utils/csrf.util';
 import type { AppTokenRefreshResponse, AuthenticationMeta } from './headless-api.types';
-
-/** Django default session cookie — used as fallback when `sessionStorage.sessionToken` is empty (same-origin readable cookies only). */
-export const DJANGO_SESSIONID_COOKIE_NAME = 'sessionid';
 
 /** Official SPA stores session continuity under this `sessionStorage` key. */
 export const ALLAUTH_SESSION_TOKEN_STORAGE_KEY = 'sessionToken';

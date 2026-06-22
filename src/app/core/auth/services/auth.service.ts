@@ -60,7 +60,12 @@ import {
   User,
 } from '../models/auth.model';
 import { normalizeApiKeyRow, parseApiKeyCreated, parseApiKeysList } from '../utils/api-keys.util';
-import { getCookie, getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
+import {
+  clearReadableDjangoAuthCookies,
+  getCookie,
+  getDjangoCsrfTokenForRequest,
+  setCrossOriginDjangoCsrfToken,
+} from '../../utils/csrf.util';
 
 @Injectable({
   providedIn: 'root',
@@ -210,6 +215,8 @@ export class AuthService {
     localStorage.removeItem(this.USER_KEY);
     if (!opts?.preserveSessionStorageToken) {
       this.tokenStore.clear();
+      setCrossOriginDjangoCsrfToken(null);
+      clearReadableDjangoAuthCookies();
     }
     this.authStateSubject.next(false);
     this.currentUser.set(null);
@@ -449,7 +456,10 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
-    return this.headless.deleteSession().pipe(
+    return forkJoin([
+      this.headless.deleteSession().pipe(catchError(() => of(null))),
+      this.headless.deleteBrowserSession().pipe(catchError(() => of(null))),
+    ]).pipe(
       tap(() => {
         this.performLogoutAfterServer();
       }),
@@ -457,7 +467,7 @@ export class AuthService {
         this.performLogoutAfterServer();
         return of(void 0);
       }),
-      switchMap(() => of(void 0))
+      map(() => void 0)
     );
   }
 
@@ -586,7 +596,10 @@ export class AuthService {
     process: 'login' | 'connect'
   ): Promise<{ kind: 'redirecting' } | { kind: 'error'; message: string }> {
     if (process === 'login') {
-      this.tokenStore.clearSessionToken();
+      this.tokenStore.clear();
+      setCrossOriginDjangoCsrfToken(null);
+      clearReadableDjangoAuthCookies();
+      await firstValueFrom(this.headless.deleteBrowserSession().pipe(catchError(() => of(null))));
     }
     if (process === 'connect' && !this.tokenStore.getSessionToken()) {
       return {

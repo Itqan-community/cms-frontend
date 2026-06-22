@@ -139,6 +139,16 @@ export class HeadlessAuthApiService {
       .pipe(this.envTap());
   }
 
+  /** Cookie-backed browser session — required to clear `sessionid` after Google/OAuth login. */
+  deleteBrowserSession(): Observable<unknown> {
+    return this.http
+      .delete(`${this.browserBase()}${ALLAUTH_URLS.SESSION}`, {
+        headers: this.headers(),
+        withCredentials: true,
+      })
+      .pipe(this.envTap());
+  }
+
   login(body: { email: string; password: string }): Observable<AuthenticatedOrChallenge> {
     return this.http
       .post<AuthenticatedResponse>(`${this.base()}${ALLAUTH_URLS.LOGIN}`, body, {

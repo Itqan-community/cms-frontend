@@ -70,6 +70,7 @@ describe('AuthService (app / headless)', () => {
       'login',
       'signup',
       'deleteSession',
+      'deleteBrowserSession',
       'verifyEmail',
       'redirectToProvider',
     ]);
@@ -120,6 +121,8 @@ describe('AuthService (app / headless)', () => {
       } as ConfigurationResponse)
     );
     headless.redirectToProvider.and.returnValue(Promise.resolve({ kind: 'form_submitted' }));
+    headless.deleteSession.and.returnValue(of(null));
+    headless.deleteBrowserSession.and.returnValue(of(null));
     routerMock = {
       url: '/account/login?next=%2Faccount%2Fproviders',
       navigate: jasmine.createSpy('navigate'),
@@ -218,13 +221,15 @@ describe('AuthService (app / headless)', () => {
     });
   });
 
-  it('startGoogleOAuth with login clears stale session token before redirect', async () => {
+  it('startGoogleOAuth with login clears stale auth state and browser session before redirect', async () => {
     tokenStore.setSessionToken('stale-token');
+    localStorage.setItem('headless_access_token', 'stale-access');
     headless.redirectToProvider.and.returnValue(
       Promise.resolve({ kind: 'error', message: 'backend refused' })
     );
     await service.startGoogleOAuth('http://localhost/cb', 'login');
     expect(tokenStore.getSessionToken()).toBeNull();
+    expect(headless.deleteBrowserSession).toHaveBeenCalled();
     expect(headless.redirectToProvider).toHaveBeenCalled();
   });
 
