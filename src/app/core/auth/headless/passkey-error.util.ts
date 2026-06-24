@@ -4,9 +4,10 @@ import { TranslateService } from '@ngx-translate/core';
 import { resolveAuthErrorMessage } from '../../../shared/utils/auth-error-resolver.util';
 import { isWebAuthnIncorrectCodeError } from '../../../shared/utils/error.utils';
 import { isReauthenticationBody, tryNavigateForAuth401 } from './headless-auth-flow.util';
+import { isWebAuthnUserCancelledError } from './webauthn-client-error.util';
 import { WebAuthnRpIdMismatchError } from './webauthn-rp-id.util';
 
-export type PasskeyErrorContext = 'login' | 'signup' | 'setup';
+export type PasskeyErrorContext = 'login' | 'signup' | 'setup' | 'mfa' | 'reauth';
 
 export type PasskeyErrorResolution =
   | { kind: 'message'; message: string }
@@ -14,6 +15,21 @@ export type PasskeyErrorResolution =
   | { kind: 'navigated' }
   | { kind: 'none' };
 
+function fallbackKeyForContext(context: PasskeyErrorContext): string {
+  switch (context) {
+    case 'mfa':
+      return 'AUTH.MFA.ERROR';
+    case 'reauth':
+      return 'AUTH.REAUTH.PASSKEY_ERROR';
+    case 'login':
+    case 'signup':
+    case 'setup':
+    default:
+      return 'AUTH.PASSKEY.ERROR';
+  }
+}
+
+/** Shared resolver for passkey login/signup/setup and WebAuthn MFA/reauth steps. */
 export function resolvePasskeyFlowError(
   error: unknown,
   translate: TranslateService,
@@ -39,11 +55,17 @@ export function resolvePasskeyFlowError(
       message: translate.instant('AUTH.PASSKEY.RP_ID_BROWSER_REJECT'),
     };
   }
+  if (isWebAuthnUserCancelledError(error)) {
+    return {
+      kind: 'message',
+      message: translate.instant('AUTH.PASSKEY.CANCELLED'),
+    };
+  }
   if (error instanceof HttpErrorResponse) {
     if (isWebAuthnIncorrectCodeError(error)) {
       return {
         kind: 'message',
-        message: translate.instant('AUTH.PASSKEY.WEBAUTHN_STATE_ERROR'),
+        message: translate.instant('AUTH.PASSKEY.WEBAUTHN_VERIFICATION_FAILED'),
       };
     }
     if (context === 'setup' && isReauthenticationBody(error.error)) {
@@ -59,17 +81,13 @@ export function resolvePasskeyFlowError(
       kind: 'message',
       message: resolveAuthErrorMessage(
         error,
-        { fallbackKey: 'AUTH.PASSKEY.ERROR', context: 'mfa_webauthn' },
+        { fallbackKey: fallbackKeyForContext(context), context: 'mfa_webauthn' },
         translate
       ),
     };
   }
   return {
     kind: 'message',
-    message: resolveAuthErrorMessage(
-      error,
-      { fallbackKey: 'AUTH.PASSKEY.ERROR', context: 'mfa_webauthn' },
-      translate
-    ),
+    message: translate.instant(fallbackKeyForContext(context)),
   };
 }

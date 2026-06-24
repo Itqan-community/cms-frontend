@@ -91,13 +91,25 @@ function extractAllauthErrorItemsFromBody(body: unknown): AllauthErrorItem[] {
   return Array.isArray(errors) ? errors.filter((e) => e && typeof e.message === 'string') : [];
 }
 
+/** Angular HttpClient default message — not suitable for end users. */
+export function isAngularHttpFailureMessage(message: string): boolean {
+  return /^Http failure response for /i.test(message.trim());
+}
+
 export function getErrorMessage(error: unknown): string | null {
   if (error instanceof HttpErrorResponse) {
     const m = firstAllauthMessage(error.error);
     if (m) {
       return m;
     }
-    return error.error?.message ?? error.message;
+    const bodyMessage = error.error?.message;
+    if (typeof bodyMessage === 'string' && bodyMessage.trim()) {
+      return bodyMessage;
+    }
+    if (isAngularHttpFailureMessage(error.message)) {
+      return null;
+    }
+    return error.message;
   }
   return error instanceof Error ? error.message : null;
 }

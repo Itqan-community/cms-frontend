@@ -9,10 +9,9 @@ import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { AuthBackLinkComponent } from '../../components/auth-back-link/auth-back-link.component';
 import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
-import { isWebAuthnIncorrectCodeError } from '../../../../shared/utils/error.utils';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
+import { resolvePasskeyFlowError } from '../../headless/passkey-error.util';
 import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
-import { WebAuthnRpIdMismatchError } from '../../headless/webauthn-rp-id.util';
 import { getWebAuthnRequestOptions, publicKeyCredentialToJson } from '../../headless/webauthn.util';
 import type { WebAuthnCredentialRequestData } from '../../headless/headless-api.types';
 import { AuthService } from '../../services/auth.service';
@@ -97,6 +96,7 @@ export class MfaPage {
       })) as PublicKeyCredential | null;
       if (!cred) {
         this.isLoading.set(false);
+        this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.CANCELLED'));
         return;
       }
       const body = publicKeyCredentialToJson(cred);
@@ -107,41 +107,10 @@ export class MfaPage {
       void this.router.navigateByUrl(nextUrl);
     } catch (e) {
       this.isLoading.set(false);
-      if (e instanceof WebAuthnRpIdMismatchError) {
-        this.errorMessage.set(
-          this.translate.instant('AUTH.PASSKEY.RP_ID_ORIGIN_MISMATCH', {
-            rpId: e.rpId,
-            host: e.hostname,
-          })
-        );
-        return;
+      const resolution = resolvePasskeyFlowError(e, this.translate, this.router, 'mfa');
+      if (resolution.kind === 'message') {
+        this.errorMessage.set(resolution.message);
       }
-      if (
-        e instanceof DOMException &&
-        e.name === 'SecurityError' &&
-        /relying party|webauthn|well-known/i.test(e.message)
-      ) {
-        this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.RP_ID_BROWSER_REJECT'));
-        return;
-      }
-      if (e instanceof HttpErrorResponse) {
-        if (isWebAuthnIncorrectCodeError(e)) {
-          this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.WEBAUTHN_STATE_ERROR'));
-          return;
-        }
-        if (tryNavigateForAuth401(this.router, e)) {
-          return;
-        }
-        this.errorMessage.set(
-          resolveAuthErrorMessage(
-            e,
-            { fallbackKey: 'AUTH.MFA.ERROR', context: 'mfa_webauthn' },
-            this.translate
-          )
-        );
-        return;
-      }
-      this.errorMessage.set(this.translate.instant('AUTH.MFA.ERROR'));
     }
   }
 }

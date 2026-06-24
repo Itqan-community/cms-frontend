@@ -4,7 +4,6 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { catchError, Observable, throwError } from 'rxjs';
 import { isHeadlessAppAuthUrl } from '../auth/headless/headless-api-path.util';
 import { isExpectedTotpAuthenticatorStatusProbe404 } from './auth-error-sentry-suppress.util';
-import { isUnverifiedEmailError } from '../../shared/utils/error.utils';
 
 /**
  * Global Error Interceptor
@@ -23,7 +22,8 @@ export function errorInterceptor(
         return throwError(() => error);
       }
 
-      if (isHeadlessAppAuthUrl(req.url) && isUnverifiedEmailError(error)) {
+      // Headless auth pages handle their own user-facing errors (400, 409, etc.).
+      if (isHeadlessAppAuthUrl(req.url)) {
         return throwError(() => error);
       }
 

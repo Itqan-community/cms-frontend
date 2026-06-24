@@ -92,6 +92,24 @@ describe('auth-error-resolver.util', () => {
       expect(msg).toBe('Login failed.');
     });
 
+    it('maps incorrect_code in mfa_webauthn context', () => {
+      const err = new HttpErrorResponse({
+        status: 400,
+        error: {
+          status: 400,
+          errors: [{ code: 'incorrect_code', message: 'Bad' }],
+        },
+      });
+      const msg = resolveAuthErrorMessage(
+        err,
+        { fallbackKey: 'AUTH.MFA.ERROR', context: 'mfa_webauthn' },
+        mockTranslate('en', {
+          'AUTH.PASSKEY.WEBAUTHN_VERIFICATION_FAILED': 'Passkey not verified',
+        })
+      );
+      expect(msg).toBe('Passkey not verified');
+    });
+
     it('maps incorrect_code in mfa_totp context', () => {
       const err = new HttpErrorResponse({
         status: 400,

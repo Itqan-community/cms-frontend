@@ -119,6 +119,7 @@
       "SETUP_SUCCESS": "Passkey added successfully.",
       "SIGNUP_SESSION_MISSING": "Could not start passkey sign-up (no session from server). Close other tabs, refresh, and try again.",
       "WEBAUTHN_STATE_ERROR": "This passkey step expired or was interrupted. Go back and try again from the start.",
+      "WEBAUTHN_VERIFICATION_FAILED": "This passkey could not be verified. Try again or sign in another way.",
       "SETUP_REAUTH_REQUIRED": "For security, confirm your password before adding a passkey.",
       "SETUP_REAUTH_LINK": "Confirm password to continue",
       "BACK": "Back to sign in",

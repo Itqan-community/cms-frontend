@@ -1,6 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import type { AllauthErrorItem } from '../../core/auth/headless/headless-api.types';
-import { extractAllauthErrorItems, getErrorMessage } from './error.utils';
+import {
+  extractAllauthErrorItems,
+  getErrorMessage,
+  isAngularHttpFailureMessage,
+} from './error.utils';
 
 /**
  * django-allauth headless codes observed or documented (see allauth account adapter + headless docs).
@@ -74,7 +78,7 @@ const AUTH_ERROR_CONTEXT_CODE_I18N: Partial<
     incorrect_code: 'AUTH.MFA.INCORRECT_CODE',
   },
   mfa_webauthn: {
-    incorrect_code: 'AUTH.PASSKEY.WEBAUTHN_STATE_ERROR',
+    incorrect_code: 'AUTH.PASSKEY.WEBAUTHN_VERIFICATION_FAILED',
   },
   reauth_password: {
     email_password_mismatch: 'AUTH.REAUTH.INCORRECT_PASSWORD',
@@ -159,7 +163,9 @@ export function resolveAuthErrorMessage(
     }
   }
 
-  const backendMessage = primary?.message?.trim() || getErrorMessage(error)?.trim() || '' || '';
+  const rawBackendMessage = primary?.message?.trim() || getErrorMessage(error)?.trim() || '';
+  const backendMessage =
+    rawBackendMessage && !isAngularHttpFailureMessage(rawBackendMessage) ? rawBackendMessage : '';
   if (backendMessage && isMessageLocalizedForUi(backendMessage, uiLang)) {
     return backendMessage;
   }
