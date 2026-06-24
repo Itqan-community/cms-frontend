@@ -567,8 +567,8 @@
     "CREATED": "تاريخ الإنشاء"
   },
   "CATEGORIES": {
-    "mushaf": "المصحف",
     "tafsir": "التفسير",
+    "translation": "الترجمات",
     "recitation": "التلاوات"
   },
   "LICENSES": {

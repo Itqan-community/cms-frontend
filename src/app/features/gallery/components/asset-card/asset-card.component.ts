@@ -49,10 +49,10 @@ export class AssetCardComponent {
 
   get categoryIconName(): string {
     switch (this.asset().category) {
-      case Categories.MUSHAF:
-        return 'lucideBookmark';
       case Categories.TAFSIR:
         return 'lucideFileText';
+      case Categories.TRANSLATION:
+        return 'lucideLanguages';
       case Categories.RECITATION:
         return 'lucideMic';
       default:

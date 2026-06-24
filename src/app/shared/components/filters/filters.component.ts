@@ -7,7 +7,7 @@ import { NzCheckboxComponent, NzCheckboxGroupComponent } from 'ng-zorro-antd/che
 import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { Subject, debounceTime, distinctUntilChanged, merge, of, takeUntil } from 'rxjs';
-import { Categories } from '../../../core/enums/categories.enum';
+import { GALLERY_CATEGORY_ORDER } from '../../../core/enums/categories.enum';
 import { Licenses } from '../../../core/enums/licenses.enum';
 import { NgIcon } from '@ng-icons/core';
 import { LicenseTagComponent } from '../license-tag/license-tag.component';
@@ -41,20 +41,10 @@ export class FiltersComponent implements OnDestroy {
 
   readonly categoriesOptions = computed(() => {
     this.translationTick();
-    return [
-      {
-        label: this.translate.instant(`CATEGORIES.${Categories.MUSHAF}`),
-        value: Categories.MUSHAF,
-      },
-      {
-        label: this.translate.instant(`CATEGORIES.${Categories.TAFSIR}`),
-        value: Categories.TAFSIR,
-      },
-      {
-        label: this.translate.instant(`CATEGORIES.${Categories.RECITATION}`),
-        value: Categories.RECITATION,
-      },
-    ];
+    return GALLERY_CATEGORY_ORDER.map((value) => ({
+      label: this.translate.instant(`CATEGORIES.${value}`),
+      value,
+    }));
   });
   readonly licensesOptions = [
     { label: `LICENSES_LABELS.${Licenses.CC0}`, value: Licenses.CC0 },

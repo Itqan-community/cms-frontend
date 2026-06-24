@@ -567,8 +567,8 @@
     "CREATED": "Created"
   },
   "CATEGORIES": {
-    "mushaf": "Mushaf",
     "tafsir": "Tafsir",
+    "translation": "Translation",
     "recitation": "Recitation"
   },
   "LICENSES": {

@@ -113,10 +113,10 @@ export class AssetDetailsPage implements OnInit {
 
   getCategoryIcon(category: string): string {
     switch (category) {
-      case 'mushaf':
-        return 'lucideBookmark';
       case 'tafsir':
         return 'lucideFileText';
+      case 'translation':
+        return 'lucideLanguages';
       case 'recitation':
         return 'lucideMic';
       default:

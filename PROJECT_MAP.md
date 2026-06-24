@@ -132,7 +132,7 @@ cms-frontend/
 | `auth/`          | 21 pages + 1 service + 3 guards + headless API module (20+ files)                                                              | Full django-allauth headless SPA integration               |
 | `auth/headless/` | `HeadlessAuthApiService` (~60 methods), `HeadlessAppTokenService`, types, hooks, WebAuthn utils, CSRF utils, provider redirect | allauth headless contract implementation                   |
 | `constants/`     | `BREAKPOINTS`, `NAV_LINKS`                                                                                                     | Responsive breakpoints + navigation link definitions       |
-| `enums/`         | `Categories` (mushaf/tafsir/recitation), `Licenses` (CC0-CC-BY-NC-ND + colors)                                                 | Content categorization and licensing                       |
+| `enums/`         | `Categories` (tafsir/translation/recitation), `Licenses` (CC0-CC-BY-NC-ND + colors)                                            | Content categorization and licensing                       |
 | `guards/`        | `publisherHostGuard`                                                                                                           | Blocks publisher subdomain visitors from CMS routes        |
 | `interceptors/`  | 6 interceptors (credentials, CSRF response, app-session-token, headers/global, auth-error, error)                              | HTTP pipeline: session token, CSRF, error handling, Sentry |
 | `services/`      | `GoogleAnalyticsService`, `WebVitalsService`, `ViewportService`                                                                | Analytics, Core Web Vitals, responsive viewport detection  |
