@@ -520,6 +520,18 @@
       "RIWAYAS": "رواية متاحة",
       "RECITERS": "قارئ متاح",
       "RECITATIONS": "قراءة متاحة"
+    },
+    "REPORT_ISSUE": {
+      "BUTTON": "الإبلاغ عن مشكلة",
+      "TITLE": "الإبلاغ عن مشكلة",
+      "DESCRIPTION_LABEL": "الوصف",
+      "DESCRIPTION_PLACEHOLDER": "صف المشكلة…",
+      "ERR_DESCRIPTION": "أدخل وصفًا (10 أحرف على الأقل)",
+      "SUBMIT": "إرسال البلاغ",
+      "SUCCESS": "تم إرسال بلاغ المشكلة",
+      "ERROR": "تعذّر إرسال بلاغ المشكلة",
+      "FORBIDDEN": "ليس لديك صلاحية لإرسال هذا البلاغ",
+      "LOGIN_REQUIRED": "يرجى تسجيل الدخول للإبلاغ عن مشكلة"
     }
   },
   "UI": {
@@ -1388,7 +1400,7 @@
         "ERR_STATUS": "يرجى اختيار الحالة",
         "DESCRIPTION_LABEL": "الوصف",
         "DESCRIPTION_PLACEHOLDER": "صف المشكلة…",
-        "ERR_DESCRIPTION": "أدخل وصفاً لا يقل عن 3 أحرف"
+        "ERR_DESCRIPTION": "أدخل وصفاً لا يقل عن 10 أحرف"
       }
     },
     "MEMBERS": {

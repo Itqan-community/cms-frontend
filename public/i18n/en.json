@@ -520,6 +520,18 @@
       "RIWAYAS": "Riwayas",
       "RECITERS": "Reciters",
       "RECITATIONS": "Recitations"
+    },
+    "REPORT_ISSUE": {
+      "BUTTON": "Report issue",
+      "TITLE": "Report an issue",
+      "DESCRIPTION_LABEL": "Description",
+      "DESCRIPTION_PLACEHOLDER": "Describe the issue…",
+      "ERR_DESCRIPTION": "Enter a description (at least 10 characters)",
+      "SUBMIT": "Submit report",
+      "SUCCESS": "Your issue report was submitted",
+      "ERROR": "Could not submit issue report",
+      "FORBIDDEN": "You do not have permission to submit this report",
+      "LOGIN_REQUIRED": "Please log in to report an issue"
     }
   },
   "UI": {
@@ -1389,7 +1401,7 @@
         "ERR_STATUS": "Select a status",
         "DESCRIPTION_LABEL": "Description",
         "DESCRIPTION_PLACEHOLDER": "Describe the issue…",
-        "ERR_DESCRIPTION": "Enter a description (at least 3 characters)"
+        "ERR_DESCRIPTION": "Enter a description (at least 10 characters)"
       }
     },
     "MEMBERS": {

@@ -77,6 +77,8 @@ User Browser
 3. Access request: POST /cms-api/assets/{id}/request-access/ (if auth required)
 4. License confirmation: scroll-to-confirm modal
 5. Download: GET /cms-api/assets/{id}/download/ -> redirect to file
+6. Report issue: modal on asset detail -> POST /portal/issue-reports/ `{ asset_id, description }`
+   (login required; reporter from session; no portal permission gate on gallery CTA)
 ```
 
 ### Admin CRUD Flow (all entities follow same pattern)
@@ -189,7 +191,7 @@ Trust, Profile, CompleteProfile
 | Path                     | Component                      | Guards                           | Notes                                                                                                                                      |
 | ------------------------ | ------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `/gallery`               | `GalleryPage`                  | —                                | Main listing                                                                                                                               |
-| `/gallery/asset/:id`     | `AssetDetailsPage`             | —                                | Detail + access request + download                                                                                                         |
+| `/gallery/asset/:id`     | `AssetDetailsPage`             | —                                | Detail + access request + download + report issue modal                                                                                    |
 | `/publishers`            | `PublishersPage`               | `publisherHostGuard`             | Stub                                                                                                                                       |
 | `/publisher/:id`         | `PublisherDetailsPage`         | `publisherHostGuard`             | Detail + filtered assets                                                                                                                   |
 | `/license/:id`           | `LicenseDetailsPage`           | —                                | License detail                                                                                                                             |

@@ -64,7 +64,7 @@ export class IssueFormComponent implements OnInit {
 
   readonly form = this.fb.group({
     asset_id: [null as number | null, Validators.required],
-    description: ['', [Validators.required, Validators.minLength(3)]],
+    description: ['', [Validators.required, Validators.minLength(10)]],
     status: [null as IssueReportStatus | null],
   });
 
