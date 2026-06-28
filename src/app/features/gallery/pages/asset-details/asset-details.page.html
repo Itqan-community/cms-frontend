@@ -36,6 +36,9 @@
               <ng-icon [name]="getCategoryIcon(asset()!.category)" />
               <span>{{ 'CATEGORIES.' + asset()!.category | translate }}</span>
             </nz-tag>
+            @if (asset()!.is_open_access) {
+              <nz-tag nzColor="green">{{ 'GALLERY.OPEN_ACCESS_BADGE' | translate }}</nz-tag>
+            }
           </div>
           <p class="asset-description">{{ asset()!.description }}</p>
         </div>
@@ -91,6 +94,9 @@
                 {{ (isDownloading() ? 'UI.DOWNLOADING' : 'UI.DOWNLOAD_RESOURCE') | translate }}
                 <ng-icon name="lucideDownloadCloud" />
               </button>
+              @if (asset()!.is_open_access) {
+                <p class="open-access-hint">{{ 'GALLERY.OPEN_ACCESS_HINT' | translate }}</p>
+              }
             </div>
           </div>
         </div>

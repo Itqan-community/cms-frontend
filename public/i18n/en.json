@@ -513,6 +513,8 @@
     "VIEW": "View",
     "VIEW_DETAILS": "View Details",
     "VIEW_LICENSE": "View License",
+    "OPEN_ACCESS_BADGE": "Open access",
+    "OPEN_ACCESS_HINT": "No access request required for this resource.",
     "DETAILS_TITLE": "Asset Details",
     "ASSET_ID": "Asset ID",
     "DETAILS_DESC": "This is a placeholder for asset details.",
@@ -649,6 +651,9 @@
     "USAGE_OPTIONS": {
       "commercial": "Commercial",
       "non-commercial": "Non-Commercial"
+    },
+    "ERRORS": {
+      "SUBMISSION_FAILED": "Could not submit access request. Please try again."
     }
   },
   "CONTENT_STANDARDS": {
@@ -724,6 +729,11 @@
       "GO_BACK_LIST": "Back to list",
       "DOWNLOAD": "Download",
       "TAG_EXTERNAL": "External",
+      "TAG_OPEN_ACCESS": "Open access",
+      "TAG_API_ONLY": "API only",
+      "FILTER_OPEN_ACCESS": "Open access",
+      "FILTER_OPEN_ACCESS_YES": "Yes",
+      "FILTER_OPEN_ACCESS_NO": "No",
       "SAVE": "Save",
       "CANCEL": "Cancel",
       "COMING_SOON": "Coming soon",
@@ -736,7 +746,8 @@
       "DESCRIPTION_AR": "Description (Arabic)",
       "PLACEHOLDER_EG": "e.g.",
       "EM_DASH": "—",
-      "HIJRI_YEAR_SUFFIX": "AH"
+      "HIJRI_YEAR_SUFFIX": "AH",
+      "COLUMN_ACCESS": "Access"
     },
     "TENANT": {
       "ARIA_LABEL": "Publisher scope selector",
@@ -841,6 +852,10 @@
         "PLACEHOLDER_LONG_AR": "Detailed description…",
         "LABEL_EXTERNAL": "External tafsir?",
         "LABEL_EXTERNAL_URL": "External URL",
+        "LABEL_OPEN_ACCESS": "Open access",
+        "HELP_OPEN_ACCESS": "Anyone can use this asset directly without submitting an access request.",
+        "LABEL_API_ONLY": "API enrollment (tenant-only)",
+        "HELP_API_ONLY": "Available via the publisher API and hidden from the public CMS gallery.",
         "UPLOAD_TITLE": "Thumbnail",
         "UPLOAD_DRAG": "Click or drag image here",
         "UPLOAD_HINT": "PNG, JPG, WEBP — max 5MB",
@@ -984,6 +999,10 @@
         "PLACEHOLDER_LONG_AR": "Detailed description…",
         "LABEL_EXTERNAL": "External translation?",
         "LABEL_EXTERNAL_URL": "External URL",
+        "LABEL_OPEN_ACCESS": "Open access",
+        "HELP_OPEN_ACCESS": "Anyone can use this asset directly without submitting an access request.",
+        "LABEL_API_ONLY": "API enrollment (tenant-only)",
+        "HELP_API_ONLY": "Available via the publisher API and hidden from the public CMS gallery.",
         "UPLOAD_TITLE": "Thumbnail",
         "UPLOAD_DRAG": "Click or drag image here",
         "UPLOAD_HINT": "PNG, JPG, WEBP — max 5MB",
@@ -1125,6 +1144,7 @@
         "SECTION_NAME": "Name",
         "SECTION_DESC": "Description",
         "SECTION_LINKS": "Links & properties",
+        "SECTION_ACCESS_API": "Access & API",
         "ERR_NAME_AR": "Arabic name is required",
         "ERR_DESC_AR": "Arabic description is required",
         "ERR_DESC_EN": "English description is required",
@@ -1147,6 +1167,10 @@
         "LABEL_YEAR": "Year",
         "PLACEHOLDER_YEAR_HIJRI": "Year (Hijri)",
         "LABEL_LICENSE": "License",
+        "LABEL_OPEN_ACCESS": "Open access",
+        "HELP_OPEN_ACCESS": "Anyone can use this asset directly without submitting an access request.",
+        "LABEL_API_ONLY": "API enrollment (tenant-only)",
+        "HELP_API_ONLY": "Available via the publisher API and hidden from the public CMS gallery.",
         "MEEM_WASL_LONG": "Wasl (silah)",
         "SUBMIT_CREATE": "Add recitation",
         "SUBMIT_EDIT": "Save changes",

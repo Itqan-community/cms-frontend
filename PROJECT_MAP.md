@@ -73,13 +73,23 @@ User Browser
 
 ```
 1. Gallery page: GET /cms-api/assets/?category=&search=&license_code=
-2. Asset detail: GET /cms-api/assets/{id}/
-3. Access request: POST /cms-api/assets/{id}/request-access/ (if auth required)
-4. License confirmation: scroll-to-confirm modal
-5. Download: GET /cms-api/assets/{id}/download/ -> redirect to file
-6. Report issue: modal on asset detail -> POST /portal/issue-reports/ `{ asset_id, description }`
+2. Asset detail: GET /cms-api/assets/{id}/  (includes is_open_access)
+3. Download click:
+   - if is_open_access -> license confirmation modal (skip access request)
+   - else probe GET /cms-api/assets/{id}/download/
+     - 200 -> license confirmation modal (user already approved)
+     - 401/403 -> access request modal
+4. Access request: POST /cms-api/assets/{id}/request-access/ (if not open access and no prior approval)
+5. License confirmation: scroll-to-confirm modal
+6. Download: GET /cms-api/assets/{id}/download/ -> redirect to file
+7. Report issue: modal on asset detail -> POST /portal/issue-reports/ `{ asset_id, description }`
    (login required; reporter from session; no portal permission gate on gallery CTA)
 ```
+
+Portal assets (recitations, tafsirs, translations) expose `is_open_access` and
+`restricted_for_tenant` on create/update (POST/PATCH) and in list/detail responses. List filter:
+`is_open_access=true|false`. `restricted_for_tenant=true` assets are excluded from public CMS
+listings by the backend.
 
 ### Admin CRUD Flow (all entities follow same pattern)
 

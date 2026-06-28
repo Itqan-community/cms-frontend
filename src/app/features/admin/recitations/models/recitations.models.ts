@@ -43,6 +43,8 @@ export interface RecitationListItem {
   madd_level: MaddLevel | null;
   meem_behaviour: MeemBehavior | null;
   year: number | null;
+  is_open_access: boolean;
+  restricted_for_tenant: boolean;
 }
 
 export interface RecitationDetails {
@@ -61,6 +63,8 @@ export interface RecitationDetails {
   year: number | null;
   license: string;
   ayah_timings_url?: string | null;
+  is_open_access: boolean;
+  restricted_for_tenant: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -78,6 +82,8 @@ export interface RecitationFormValue {
   meem_behaviour: MeemBehavior | null;
   year: number | null;
   license: string;
+  is_open_access: boolean;
+  restricted_for_tenant: boolean;
 }
 
 export interface RecitationsListResponse {
@@ -119,6 +125,7 @@ export interface RecitationListFilters {
   meem_behaviour?: MeemBehavior;
   year?: number;
   license_code?: string;
+  is_open_access?: boolean;
   ordering?: RecitationSorting;
 }
 

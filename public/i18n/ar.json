@@ -513,6 +513,8 @@
     "VIEW": "عرض",
     "VIEW_DETAILS": "عرض التفاصيل",
     "VIEW_LICENSE": "عرض الترخيص",
+    "OPEN_ACCESS_BADGE": "وصول مفتوح",
+    "OPEN_ACCESS_HINT": "لا يلزم طلب وصول لهذا المورد.",
     "DETAILS_TITLE": "تفاصيل الأصل",
     "ASSET_ID": "معرّف الأصل",
     "DETAILS_DESC": "نص مؤقت لتفاصيل الأصل.",
@@ -649,6 +651,9 @@
     "USAGE_OPTIONS": {
       "commercial": "تجاري",
       "non-commercial": "غير تجاري"
+    },
+    "ERRORS": {
+      "SUBMISSION_FAILED": "تعذّر إرسال طلب الوصول. يرجى المحاولة مرة أخرى."
     }
   },
   "CONTENT_STANDARDS": {
@@ -724,6 +729,11 @@
       "GO_BACK_LIST": "العودة للقائمة",
       "DOWNLOAD": "تحميل",
       "TAG_EXTERNAL": "خارجي",
+      "TAG_OPEN_ACCESS": "وصول مفتوح",
+      "TAG_API_ONLY": "API فقط",
+      "FILTER_OPEN_ACCESS": "الوصول المفتوح",
+      "FILTER_OPEN_ACCESS_YES": "نعم",
+      "FILTER_OPEN_ACCESS_NO": "لا",
       "SAVE": "حفظ",
       "CANCEL": "إلغاء",
       "COMING_SOON": "قريباً",
@@ -736,7 +746,8 @@
       "DESCRIPTION_AR": "الوصف بالعربية",
       "PLACEHOLDER_EG": "مثال:",
       "EM_DASH": "—",
-      "HIJRI_YEAR_SUFFIX": "هـ"
+      "HIJRI_YEAR_SUFFIX": "هـ",
+      "COLUMN_ACCESS": "الوصول"
     },
     "TENANT": {
       "ARIA_LABEL": "محدد نطاق الناشر",
@@ -841,6 +852,10 @@
         "PLACEHOLDER_LONG_AR": "وصف تفصيلي…",
         "LABEL_EXTERNAL": "تفسير خارجي؟",
         "LABEL_EXTERNAL_URL": "رابط خارجي",
+        "LABEL_OPEN_ACCESS": "وصول مفتوح",
+        "HELP_OPEN_ACCESS": "يمكن لأي شخص استخدام هذا الأصل مباشرة دون تقديم طلب وصول.",
+        "LABEL_API_ONLY": "التسجيل في API (للناشر فقط)",
+        "HELP_API_ONLY": "متاح عبر واجهة برمجة تطبيقات الناشر ومخفي من معرض CMS العام.",
         "UPLOAD_TITLE": "الصورة المصغّرة",
         "UPLOAD_DRAG": "انقر أو اسحب الصورة هنا",
         "UPLOAD_HINT": "PNG, JPG, WEBP — بحد أقصى 5MB",
@@ -984,6 +999,10 @@
         "PLACEHOLDER_LONG_AR": "وصف تفصيلي…",
         "LABEL_EXTERNAL": "ترجمة خارجية؟",
         "LABEL_EXTERNAL_URL": "رابط خارجي",
+        "LABEL_OPEN_ACCESS": "وصول مفتوح",
+        "HELP_OPEN_ACCESS": "يمكن لأي شخص استخدام هذا الأصل مباشرة دون تقديم طلب وصول.",
+        "LABEL_API_ONLY": "التسجيل في API (للناشر فقط)",
+        "HELP_API_ONLY": "متاح عبر واجهة برمجة تطبيقات الناشر ومخفي من معرض CMS العام.",
         "UPLOAD_TITLE": "الصورة المصغّرة",
         "UPLOAD_DRAG": "انقر أو اسحب الصورة هنا",
         "UPLOAD_HINT": "PNG, JPG, WEBP — بحد أقصى 5MB",
@@ -1125,6 +1144,7 @@
         "SECTION_NAME": "الاسم",
         "SECTION_DESC": "الوصف",
         "SECTION_LINKS": "الربط والخصائص",
+        "SECTION_ACCESS_API": "الوصول وواجهة API",
         "ERR_NAME_AR": "الاسم بالعربية مطلوب",
         "ERR_DESC_AR": "الوصف بالعربية مطلوب",
         "ERR_DESC_EN": "الوصف بالإنجليزية مطلوب",
@@ -1147,6 +1167,10 @@
         "LABEL_YEAR": "السنة",
         "PLACEHOLDER_YEAR_HIJRI": "السنة (هجري)",
         "LABEL_LICENSE": "الترخيص",
+        "LABEL_OPEN_ACCESS": "وصول مفتوح",
+        "HELP_OPEN_ACCESS": "يمكن لأي شخص استخدام هذا الأصل مباشرة دون تقديم طلب وصول.",
+        "LABEL_API_ONLY": "التسجيل في API (للناشر فقط)",
+        "HELP_API_ONLY": "متاح عبر واجهة برمجة تطبيقات الناشر ومخفي من معرض CMS العام.",
         "MEEM_WASL_LONG": "وصل (صلّة)",
         "SUBMIT_CREATE": "إضافة التلاوة",
         "SUBMIT_EDIT": "حفظ التعديلات",

@@ -16,6 +16,7 @@ export interface Asset {
     name: string;
   };
   license: Licenses;
+  is_open_access?: boolean;
 }
 
 export interface AssetDetails {
@@ -34,6 +35,7 @@ export interface AssetDetails {
     id: number;
   };
   license: string;
+  is_open_access?: boolean;
   snapshots: AssetSnapshot[];
 }
 

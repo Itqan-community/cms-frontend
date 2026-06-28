@@ -19,6 +19,10 @@ import { PublisherFilterItem, TafsirFormValue } from '../../models/tafsirs.model
 import { PublishersFilterService } from '../../services/publishers-filter.service';
 import { TafsirsService } from '../../services/tafsirs.service';
 import { localizeLanguageCode } from '../../../utils/display-localization.util';
+import {
+  getErrorMessage,
+  isRestrictedForTenantConflictError,
+} from '../../../../../shared/utils/error.utils';
 
 @Component({
   selector: 'app-tafsir-form',
@@ -74,6 +78,8 @@ export class TafsirFormComponent implements OnInit {
     publisher_id: [null as number | null, [Validators.required]],
     is_external: [false],
     external_url: [''],
+    is_open_access: [false],
+    restricted_for_tenant: [false],
   });
 
   private editSlug: string | null = null;
@@ -141,8 +147,14 @@ export class TafsirFormComponent implements OnInit {
         this.submitting.set(false);
         void this.router.navigate(['/admin/tafsirs', res.slug]);
       },
-      error: () => {
+      error: (error) => {
         this.submitting.set(false);
+        if (isRestrictedForTenantConflictError(error)) {
+          const msg = getErrorMessage(error);
+          if (msg) {
+            this.message.error(msg);
+          }
+        }
       },
     });
   }
@@ -160,6 +172,8 @@ export class TafsirFormComponent implements OnInit {
       language: v.language ?? '',
       publisher_id: v.publisher_id!,
       is_external: v.is_external ?? false,
+      is_open_access: v.is_open_access ?? false,
+      restricted_for_tenant: v.restricted_for_tenant ?? false,
       external_url: v.external_url || null,
       thumbnail: this.thumbnailFile() ?? undefined,
     };
@@ -184,6 +198,8 @@ export class TafsirFormComponent implements OnInit {
             language: data.language ?? '',
             publisher_id: data.publisher.id,
             is_external: data.is_external,
+            is_open_access: data.is_open_access,
+            restricted_for_tenant: data.restricted_for_tenant,
             external_url: data.external_url ?? '',
           });
 

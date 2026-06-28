@@ -21,6 +21,7 @@ import { ImageCarouselComponent } from '../../../../shared/components/image-caro
 import { LicenseTagComponent } from '../../../../shared/components/license-tag/license-tag.component';
 import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
 import { IssuesService } from '../../../admin/issues/services/issues.service';
+import { getErrorMessage } from '../../../../shared/utils/error.utils';
 import { AssetDetails } from '../../models/assets.model';
 import { AssetsService } from '../../services/assets.service';
 
@@ -144,8 +145,36 @@ export class AssetDetailsPage implements OnInit {
       return;
     }
 
-    // Open access request modal instead of directly downloading
-    this.openAccessRequestModal();
+    if (asset.is_open_access) {
+      this.openLicenseModal();
+      return;
+    }
+
+    this.resolveDownloadAccess(asset.id);
+  }
+
+  private resolveDownloadAccess(assetId: number): void {
+    this.isDownloading.set(true);
+    this.http
+      .get<{ download_url: string }>(`${environment.API_BASE_URL}/assets/${assetId}/download/`)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.isDownloading.set(false);
+          this.openLicenseModal();
+        },
+        error: (error: HttpErrorResponse) => {
+          this.isDownloading.set(false);
+          if (error.status === 401 || error.status === 403) {
+            this.openAccessRequestModal();
+            return;
+          }
+          const defaultErrorKey =
+            error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR';
+          const errorMessage = getErrorMessage(error) ?? this.translate.instant(defaultErrorKey);
+          this.message.error(errorMessage);
+        },
+      });
   }
 
   openReportIssueModal() {
@@ -261,11 +290,12 @@ export class AssetDetailsPage implements OnInit {
           },
           error: (error) => {
             this.isSubmittingRequest.set(false);
-            const errorKey =
+            const defaultKey =
               error.status === 0
                 ? 'ERRORS.NETWORK_ERROR'
                 : 'ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED';
-            this.message.error(this.translate.instant(errorKey));
+            const errorMessage = getErrorMessage(error) ?? this.translate.instant(defaultKey);
+            this.message.error(errorMessage);
           },
         });
     } else {

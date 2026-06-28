@@ -114,6 +114,24 @@ import { localizeLanguageCode } from '../../../utils/display-localization.util';
 
             <nz-select
               class="tafsir-filters__select"
+              [nzPlaceHolder]="'ADMIN.COMMON.FILTER_OPEN_ACCESS' | translate"
+              nzSize="default"
+              nzAllowClear
+              [ngModel]="selectedOpenAccess"
+              (ngModelChange)="onOpenAccessChange($event)"
+            >
+              <nz-option
+                [nzValue]="true"
+                [nzLabel]="'ADMIN.COMMON.FILTER_OPEN_ACCESS_YES' | translate"
+              ></nz-option>
+              <nz-option
+                [nzValue]="false"
+                [nzLabel]="'ADMIN.COMMON.FILTER_OPEN_ACCESS_NO' | translate"
+              ></nz-option>
+            </nz-select>
+
+            <nz-select
+              class="tafsir-filters__select"
               [nzPlaceHolder]="'ADMIN.TAFSIRS.FILTERS.IS_EXTERNAL' | translate"
               nzSize="default"
               nzAllowClear
@@ -164,6 +182,7 @@ export class TafsirFiltersComponent implements OnInit {
   selectedLicense: string | null = null;
   selectedLanguage: 'ar' | 'en' | null = null;
   selectedExternal: boolean | null = null;
+  selectedOpenAccess: boolean | null = null;
   isFiltersModalOpen = false;
 
   private currentFilters: Partial<TafsirFilters> = {};
@@ -186,6 +205,9 @@ export class TafsirFiltersComponent implements OnInit {
     if (String(f.is_external) === 'true') this.selectedExternal = true;
     else if (String(f.is_external) === 'false') this.selectedExternal = false;
     else this.selectedExternal = null;
+    if (String(f.is_open_access) === 'true') this.selectedOpenAccess = true;
+    else if (String(f.is_open_access) === 'false') this.selectedOpenAccess = false;
+    else this.selectedOpenAccess = null;
   }
 
   ngOnInit(): void {
@@ -240,17 +262,25 @@ export class TafsirFiltersComponent implements OnInit {
     this.emit();
   }
 
+  onOpenAccessChange(value: boolean | null): void {
+    this.selectedOpenAccess = value;
+    this.currentFilters = { ...this.currentFilters, is_open_access: value ?? undefined };
+    this.emit();
+  }
+
   clearAdvancedFilters(): void {
     this.selectedPublisher = null;
     this.selectedLicense = null;
     this.selectedLanguage = null;
     this.selectedExternal = null;
+    this.selectedOpenAccess = null;
     this.currentFilters = {
       ...this.currentFilters,
       publisher_id: undefined,
       license_code: undefined,
       language: undefined,
       is_external: undefined,
+      is_open_access: undefined,
     };
     this.emit();
   }
