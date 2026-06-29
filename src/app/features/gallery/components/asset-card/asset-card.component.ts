@@ -61,6 +61,10 @@ export class AssetCardComponent {
         return 'lucideLanguages';
       case Categories.RECITATION:
         return 'lucideMic';
+      case Categories.FONT:
+        return 'lucidePalette';
+      case Categories.PROGRAM:
+        return 'lucideLayers';
       default:
         return 'lucideFile';
     }

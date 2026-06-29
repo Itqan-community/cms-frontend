@@ -131,6 +131,10 @@ export class AssetDetailsPage implements OnInit {
         return 'lucideLanguages';
       case 'recitation':
         return 'lucideMic';
+      case 'font':
+        return 'lucidePalette';
+      case 'program':
+        return 'lucideLayers';
       default:
         return 'lucideFile';
     }
