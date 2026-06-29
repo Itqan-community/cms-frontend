@@ -75,12 +75,14 @@ User Browser
 1. Gallery page: GET /cms-api/assets/?category=&search=&license_code=
 2. Asset detail: GET /cms-api/assets/{id}/  (includes is_open_access)
 3. Download click:
-   - if is_open_access -> license confirmation modal (skip access request)
+   - if is_open_access -> skip access request (probe not needed)
    - else probe GET /cms-api/assets/{id}/download/
-     - 200 -> license confirmation modal (user already approved)
+     - 200 -> user already approved
      - 401/403 -> access request modal
 4. Access request: POST /cms-api/assets/{id}/request-access/ (if not open access and no prior approval)
-5. License confirmation: scroll-to-confirm modal
+5. License confirmation (first time per user only):
+   - if localStorage has global acceptance for current user id -> skip modal
+   - else scroll-to-confirm modal; on confirm persist `gallery-license-accepted:{userId}` in localStorage
 6. Download: GET /cms-api/assets/{id}/download/ -> redirect to file
 7. Report issue: modal on asset detail -> POST /portal/issue-reports/ `{ asset_id, description }`
    (login required; reporter from session; no portal permission gate on gallery CTA)

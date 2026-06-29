@@ -24,6 +24,7 @@ import { IssuesService } from '../../../admin/issues/services/issues.service';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
 import { AssetDetails } from '../../models/assets.model';
 import { AssetsService } from '../../services/assets.service';
+import { AssetLicenseAcceptanceService } from '../../services/asset-license-acceptance.service';
 
 @Component({
   selector: 'app-asset-details-page',
@@ -49,6 +50,7 @@ import { AssetsService } from '../../services/assets.service';
 })
 export class AssetDetailsPage implements OnInit {
   private readonly assetsService = inject(AssetsService);
+  private readonly licenseAcceptance = inject(AssetLicenseAcceptanceService);
   private readonly issuesService = inject(IssuesService);
   private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
@@ -146,11 +148,26 @@ export class AssetDetailsPage implements OnInit {
     }
 
     if (asset.is_open_access) {
-      this.openLicenseModal();
+      this.proceedToDownloadAfterAccess();
       return;
     }
 
     this.resolveDownloadAccess(asset.id);
+  }
+
+  private proceedToDownloadAfterAccess(): void {
+    const asset = this.asset();
+    if (!asset?.id) {
+      return;
+    }
+
+    const userId = this.authService.currentUser()?.id;
+    if (userId && this.licenseAcceptance.hasAccepted(userId)) {
+      this.downloadAsset(asset.id);
+      return;
+    }
+
+    this.openLicenseModal();
   }
 
   private resolveDownloadAccess(assetId: number): void {
@@ -161,7 +178,7 @@ export class AssetDetailsPage implements OnInit {
       .subscribe({
         next: () => {
           this.isDownloading.set(false);
-          this.openLicenseModal();
+          this.proceedToDownloadAfterAccess();
         },
         error: (error: HttpErrorResponse) => {
           this.isDownloading.set(false);
@@ -286,7 +303,7 @@ export class AssetDetailsPage implements OnInit {
           next: () => {
             this.isSubmittingRequest.set(false);
             this.closeAccessRequestModal();
-            this.openLicenseModal();
+            this.proceedToDownloadAfterAccess();
           },
           error: (error) => {
             this.isSubmittingRequest.set(false);
@@ -333,9 +350,11 @@ export class AssetDetailsPage implements OnInit {
   }
 
   handleLicenseConfirm() {
-    // TODO: Handle license confirmation
+    const userId = this.authService.currentUser()?.id;
+    if (userId) {
+      this.licenseAcceptance.recordAcceptance(userId);
+    }
     this.closeLicenseModal();
-    // Proceed with download
     const asset = this.asset();
     if (asset?.id) {
       this.downloadAsset(asset.id);
