@@ -73,13 +73,17 @@ User Browser
 
 ```
 1. Gallery page: GET /cms-api/assets/?category=&search=&license_code=
-2. Asset detail: GET /cms-api/assets/{id}/  (includes is_open_access)
-3. Download click:
-   - if is_open_access -> skip access request (probe not needed)
-   - else probe GET /cms-api/assets/{id}/download/
-     - 200 -> user already approved
-     - 401/403 -> access request modal
-4. Access request: POST /cms-api/assets/{id}/request-access/ (if not open access and no prior approval)
+2. Asset detail: GET /cms-api/assets/{id}/  (includes is_open_access, access_status)
+3. Download click (logged in):
+   - access_status null -> open access path (license then download)
+   - not_requested -> access request modal
+   - pending -> blocked; show waiting state (no modal, no download)
+   - approved -> license then download
+   - rejected -> blocked; friendly contact Itqan message
+   (not logged in -> redirect to login)
+4. Access request: POST /cms-api/assets/{id}/request-access/ when access_status is not_requested
+   -> refetch GET /cms-api/assets/{id}/ and branch on new access_status
+   (approved -> license/download; pending -> waiting UI; rejected -> contact message)
 5. License confirmation (first time per user only):
    - if localStorage has global acceptance for current user id -> skip modal
    - else scroll-to-confirm modal; on confirm persist `gallery-license-accepted:{userId}` in localStorage

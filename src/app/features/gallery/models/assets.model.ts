@@ -1,6 +1,8 @@
 import { Categories } from '../../../core/enums/categories.enum';
 import { Licenses } from '../../../core/enums/licenses.enum';
 
+export type AssetAccessStatus = 'not_requested' | 'pending' | 'approved' | 'rejected';
+
 export interface ApiAssets {
   results: Asset[];
   count: number;
@@ -36,6 +38,7 @@ export interface AssetDetails {
   };
   license: string;
   is_open_access?: boolean;
+  access_status?: AssetAccessStatus | null;
   snapshots: AssetSnapshot[];
 }
 

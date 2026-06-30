@@ -89,13 +89,21 @@
                 class="download-button-primary"
                 (click)="downloadResource()"
                 [nzLoading]="isDownloading()"
-                [disabled]="isDownloading()"
+                [disabled]="isDownloading() || isDownloadBlocked()"
               >
-                {{ (isDownloading() ? 'UI.DOWNLOADING' : 'UI.DOWNLOAD_RESOURCE') | translate }}
-                <ng-icon name="lucideDownloadCloud" />
+                {{ primaryActionLabelKey() | translate }}
+                <ng-icon [name]="primaryActionIcon()" />
               </button>
               @if (asset()!.is_open_access) {
                 <p class="open-access-hint">{{ 'GALLERY.OPEN_ACCESS_HINT' | translate }}</p>
+              } @else if (asset()!.access_status === 'pending') {
+                <p class="access-status-hint access-status-hint--pending">
+                  {{ 'GALLERY.ACCESS_PENDING_HINT' | translate }}
+                </p>
+              } @else if (asset()!.access_status === 'rejected') {
+                <p class="access-status-hint access-status-hint--rejected">
+                  {{ 'GALLERY.ACCESS_REJECTED_HINT' | translate }}
+                </p>
               }
             </div>
           </div>

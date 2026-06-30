@@ -12,6 +12,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { Licenses } from '../../../../core/enums/licenses.enum';
@@ -151,12 +152,86 @@ export class AssetDetailsPage implements OnInit {
       return;
     }
 
-    if (asset.is_open_access) {
+    const status = asset.access_status ?? null;
+
+    if (status === 'not_requested') {
+      this.openAccessRequestModal();
+      return;
+    }
+
+    if (status === 'pending') {
+      this.message.info(this.translate.instant('GALLERY.ACCESS_PENDING_TOAST'));
+      return;
+    }
+
+    if (status === 'rejected') {
+      this.message.warning(this.translate.instant('GALLERY.ACCESS_REJECTED_TOAST'));
+      return;
+    }
+
+    this.proceedToDownloadAfterAccess();
+  }
+
+  isDownloadBlocked(): boolean {
+    if (!this.authService.isLoggedIn()) {
+      return false;
+    }
+
+    const status = this.asset()?.access_status ?? null;
+    return status === 'pending' || status === 'rejected';
+  }
+
+  isRequestAccessAction(): boolean {
+    if (!this.authService.isLoggedIn()) {
+      return false;
+    }
+
+    return (this.asset()?.access_status ?? null) === 'not_requested';
+  }
+
+  primaryActionLabelKey(): string {
+    if (this.isDownloading()) {
+      return 'UI.DOWNLOADING';
+    }
+
+    if (this.isRequestAccessAction()) {
+      return 'GALLERY.REQUEST_ACCESS_BUTTON';
+    }
+
+    return 'UI.DOWNLOAD_RESOURCE';
+  }
+
+  primaryActionIcon(): string {
+    return this.isRequestAccessAction() ? 'lucideKeyRound' : 'lucideDownloadCloud';
+  }
+
+  private refreshAssetDetails(): Observable<AssetDetails> {
+    return this.assetsService.getAssetDetails(this.id);
+  }
+
+  private applyRefreshedAsset(asset: AssetDetails): void {
+    this.asset.set(asset);
+    this.images.set(asset.snapshots.map((snapshot) => snapshot.image_url));
+  }
+
+  private handleAccessStatusAfterRequest(status: AssetDetails['access_status']): void {
+    if (status === 'approved' || status == null) {
+      this.message.success(this.translate.instant('GALLERY.ACCESS_REQUEST_APPROVED'));
       this.proceedToDownloadAfterAccess();
       return;
     }
 
-    this.resolveDownloadAccess(asset.id);
+    if (status === 'pending') {
+      this.message.success(this.translate.instant('GALLERY.ACCESS_REQUEST_SUBMITTED_PENDING'));
+      return;
+    }
+
+    if (status === 'rejected') {
+      this.message.warning(this.translate.instant('GALLERY.ACCESS_REJECTED_TOAST'));
+      return;
+    }
+
+    this.message.error(this.translate.instant('ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED'));
   }
 
   private proceedToDownloadAfterAccess(): void {
@@ -172,30 +247,6 @@ export class AssetDetailsPage implements OnInit {
     }
 
     this.openLicenseModal();
-  }
-
-  private resolveDownloadAccess(assetId: number): void {
-    this.isDownloading.set(true);
-    this.http
-      .get<{ download_url: string }>(`${environment.API_BASE_URL}/assets/${assetId}/download/`)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.isDownloading.set(false);
-          this.proceedToDownloadAfterAccess();
-        },
-        error: (error: HttpErrorResponse) => {
-          this.isDownloading.set(false);
-          if (error.status === 401 || error.status === 403) {
-            this.openAccessRequestModal();
-            return;
-          }
-          const defaultErrorKey =
-            error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR';
-          const errorMessage = getErrorMessage(error) ?? this.translate.instant(defaultErrorKey);
-          this.message.error(errorMessage);
-        },
-      });
   }
 
   openReportIssueModal() {
@@ -307,7 +358,22 @@ export class AssetDetailsPage implements OnInit {
           next: () => {
             this.isSubmittingRequest.set(false);
             this.closeAccessRequestModal();
-            this.proceedToDownloadAfterAccess();
+            this.refreshAssetDetails()
+              .pipe(takeUntilDestroyed(this.destroyRef))
+              .subscribe({
+                next: (refreshed) => {
+                  this.applyRefreshedAsset(refreshed);
+                  this.handleAccessStatusAfterRequest(refreshed.access_status);
+                },
+                error: (error) => {
+                  const defaultKey =
+                    error.status === 0
+                      ? 'ERRORS.NETWORK_ERROR'
+                      : 'ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED';
+                  const errorMessage = getErrorMessage(error) ?? this.translate.instant(defaultKey);
+                  this.message.error(errorMessage);
+                },
+              });
           },
           error: (error) => {
             this.isSubmittingRequest.set(false);
