@@ -28,6 +28,20 @@
     text-align: end;
   }
 
+  &__toggle-switch {
+    cursor: pointer;
+    display: inline-flex;
+
+    &--disabled {
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+  }
+
+  &__toggle-switch-control {
+    pointer-events: none;
+  }
+
   &__developer-name {
     display: block;
     font-weight: 500;

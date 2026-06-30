@@ -160,18 +160,14 @@ export class AccessRequestsListComponent
       });
   }
 
-  onAutoAcceptChange(next: boolean): void {
-    if (this.autoAcceptSaving() || !this.canManageSettings()) {
+  onAutoAcceptClick(): void {
+    if (this.autoAcceptSaving() || !this.canManageSettings() || this.autoAcceptLoading()) {
       return;
     }
 
-    const prev = this.autoAccept();
-    if (next === prev) {
-      return;
-    }
+    const next = !this.autoAccept();
 
     if (!next) {
-      this.autoAccept.set(true);
       this.modal.confirm({
         nzTitle: this.translate.instant('ADMIN.ACCESS_REQUESTS.TOGGLE.CONFIRM_OFF_TITLE'),
         nzContent: this.translate.instant('ADMIN.ACCESS_REQUESTS.TOGGLE.CONFIRM_OFF_BODY'),
