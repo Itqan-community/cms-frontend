@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
-import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
 import { UpdateProfileRequest } from '../../models/auth.model';
 import { AuthService } from '../../services/auth.service';
 
@@ -51,7 +51,11 @@ export class CompleteProfilePage {
         error: (error: unknown) => {
           this.isLoading.set(false);
           this.errorMessage.set(
-            getErrorMessage(error) || this.translate.instant('ERRORS.SERVER_ERROR')
+            resolveAuthErrorMessage(
+              error,
+              { fallbackKey: 'ERRORS.SERVER_ERROR', context: 'profile' },
+              this.translate
+            )
           );
         },
       });

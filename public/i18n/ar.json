@@ -15,6 +15,29 @@
   },
   "AUTH": {
     "MUST_LOGIN_TO_VIEW": "يجب تسجيل الدخول لعرض هذه الصفحة.",
+    "SESSION_EXPIRED": "انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى.",
+    "ERRORS": {
+      "CODES": {
+        "ACCOUNT_INACTIVE": "هذا الحساب غير نشط حالياً.",
+        "CANNOT_REMOVE_PRIMARY_EMAIL": "لا يمكنك إزالة عنوان بريدك الإلكتروني الرئيسي.",
+        "DUPLICATE_EMAIL": "عنوان البريد الإلكتروني هذا مرتبط بالفعل بهذا الحساب.",
+        "EMAIL_PASSWORD_MISMATCH": "البريد الإلكتروني و/أو كلمة المرور غير صحيحة.",
+        "EMAIL_TAKEN": "يوجد مستخدم مسجّل بهذا البريد الإلكتروني بالفعل.",
+        "INVALID": "يرجى التحقق من المدخلات والمحاولة مرة أخرى.",
+        "INVALID_CREDENTIALS": "البريد الإلكتروني و/أو كلمة المرور غير صحيحة.",
+        "PASSWORD_MISMATCH": "كلمتا المرور غير متطابقتين.",
+        "PHONE_PASSWORD_MISMATCH": "رقم الهاتف و/أو كلمة المرور غير صحيحة.",
+        "REQUIRED": "يرجى ملء جميع الحقول المطلوبة.",
+        "TOO_MANY_LOGIN_ATTEMPTS": "محاولات تسجيل دخول فاشلة كثيرة. حاول لاحقاً.",
+        "UNVERIFIED_EMAIL": "يرجى التحقق من بريدك الإلكتروني قبل المتابعة.",
+        "USERNAME_PASSWORD_MISMATCH": "اسم المستخدم و/أو كلمة المرور غير صحيحة."
+      }
+    },
+    "COMMON": {
+      "BACK_TO_LOGIN": "العودة لتسجيل الدخول",
+      "BACK_TO_SIGNUP": "العودة لإنشاء الحساب",
+      "BACK_TO_GALLERY": "العودة إلى المعرض"
+    },
     "LOGIN": {
       "TITLE": "مرحباً بعودتك",
       "SUBTITLE": "سجّل دخولك للمتابعة إلى إتقان",
@@ -96,6 +119,7 @@
       "SETUP_SUCCESS": "تمت إضافة مفتاح المرور بنجاح.",
       "SIGNUP_SESSION_MISSING": "تعذر بدء التسجيل بمفتاح المرور (لا توجد جلسة من الخادم). أغلق التبويبات الأخرى، حدّث الصفحة، وحاول مرة أخرى.",
       "WEBAUTHN_STATE_ERROR": "انتهت خطوة مفتاح المرور أو انقطعت. عُد وابدأ من جديد.",
+      "WEBAUTHN_VERIFICATION_FAILED": "تعذّر التحقق من مفتاح المرور هذا. حاول مرة أخرى أو سجّل الدخول بطريقة أخرى.",
       "SETUP_REAUTH_REQUIRED": "للأمان، أكّد كلمة المرور قبل إضافة مفتاح المرور.",
       "SETUP_REAUTH_LINK": "تأكيد كلمة المرور للمتابعة",
       "BACK": "العودة لتسجيل الدخول",
@@ -142,11 +166,14 @@
       "NEW_PASSWORD": "كلمة المرور الجديدة",
       "SUBMIT": "تحديث كلمة المرور",
       "ERROR": "تعذر إعادة التعيين. قد يكون الرابط أو الرمز منتهي الصلاحية.",
+      "EXPIRED": "انتهت صلاحية رابط إعادة التعيين. يرجى طلب رابط جديد.",
       "BACK": "العودة لتسجيل الدخول"
     },
     "CHANGE_PASSWORD": {
       "SUBTITLE": "قم بتحديث كلمة المرور الخاصة بك للحفاظ على أمان حسابك.",
-      "CURRENT_PASSWORD": "كلمة المرور الحالية"
+      "CURRENT_PASSWORD": "كلمة المرور الحالية",
+      "SUCCESS": "تم تغيير كلمة المرور بنجاح.",
+      "ERROR": "تعذر تغيير كلمة المرور. يرجى المحاولة مرة أخرى."
     },
     "MFA": {
       "TITLE": "المصادقة الثنائية",
@@ -156,7 +183,9 @@
       "SUBMIT": "تحقق",
       "BACK": "العودة لتسجيل الدخول",
       "ERROR": "رمز غير صحيح. حاول مرة أخرى.",
-      "USE_SECURITY_KEY": "استخدام مفتاح الأمان / مفتاح المرور"
+      "INCORRECT_CODE": "رمز غير صحيح. حاول مرة أخرى.",
+      "USE_SECURITY_KEY": "استخدام مفتاح الأمان / مفتاح المرور",
+      "USE_PASSKEY": "تسجيل الدخول بمفتاح المرور"
     },
     "SECURITY": {
       "TITLE": "أمان الحساب",
@@ -298,7 +327,8 @@
       "LOAD_ERROR": "تعذر تحميل الحسابات المرتبطة.",
       "ACTION_ERROR": "تعذر فصل المزوّد.",
       "CONNECT_ERROR": "تعذر بدء ربط {{provider}}.",
-      "CONNECT_CROSS_ORIGIN_ERROR": "ربط المزوّد يتطلب أن يكون الـ API والتطبيق على نفس الأصل في هذه البيئة. استخدم نطاق CMS الخاص بالـ staging أو فعّل reverse proxy."
+      "CONNECT_CROSS_ORIGIN_ERROR": "ربط المزوّد يتطلب أن يكون الـ API والتطبيق على نفس الأصل في هذه البيئة. استخدم نطاق CMS الخاص بالـ staging أو فعّل reverse proxy.",
+      "SESSION_TOKEN_REQUIRED": "ربط مزوّد يتطلب رمز جلسة التطبيق؛ يرجى تسجيل الدخول مرة أخرى."
     },
     "PROFILE": {
       "TITLE": "حسابك",
@@ -332,8 +362,16 @@
       "USE_PASSKEY": "استخدام مفتاح المرور",
       "CANCEL": "إلغاء",
       "ERROR": "كلمة مرور غير صحيحة.",
+      "INCORRECT_PASSWORD": "كلمة مرور غير صحيحة.",
       "PASSKEY_ERROR": "فشل التحقق بمفتاح المرور.",
       "MFA_ERROR": "رمز مصادقة غير صحيح."
+    },
+    "TRUST": {
+      "TITLE": "هل تثق بهذا المتصفح؟",
+      "SUBTITLE": "يمكنك تخطي المصادقة الثنائية على هذا الجهاز لفترة إذا كنت تثق به.",
+      "TRUST_BUTTON": "الوثوق بهذا المتصفح",
+      "DO_NOT_TRUST_BUTTON": "عدم الوثوق",
+      "ERROR": "تعذر تحديث إعدادات الوثوق بالمتصفح. يرجى المحاولة مرة أخرى."
     },
     "OAUTH": {
       "PROCESSING": "جاري معالجة المصادقة...",
@@ -476,6 +514,15 @@
     "VIEW": "عرض",
     "VIEW_DETAILS": "عرض التفاصيل",
     "VIEW_LICENSE": "عرض الترخيص",
+    "OPEN_ACCESS_BADGE": "وصول مفتوح",
+    "OPEN_ACCESS_HINT": "لا يلزم طلب وصول لهذا المورد.",
+    "REQUEST_ACCESS_BUTTON": "طلب الوصول",
+    "ACCESS_PENDING_HINT": "طلب الوصول الخاص بك قيد المراجعة. ستتمكن من التنزيل بعد الموافقة عليه.",
+    "ACCESS_PENDING_TOAST": "طلب الوصول الخاص بك لا يزال قيد الموافقة.",
+    "ACCESS_REJECTED_HINT": "لم تتم الموافقة على الوصول إلى هذا المورد. يرجى التواصل مع إتقان للمساعدة.",
+    "ACCESS_REJECTED_TOAST": "لم تتم الموافقة على الوصول إلى هذا المورد. يرجى التواصل مع إتقان للمساعدة.",
+    "ACCESS_REQUEST_SUBMITTED_PENDING": "تم إرسال طلب الوصول وهو بانتظار الموافقة.",
+    "ACCESS_REQUEST_APPROVED": "تمت الموافقة على الوصول. جارٍ بدء التنزيل.",
     "DETAILS_TITLE": "تفاصيل الأصل",
     "ASSET_ID": "معرّف الأصل",
     "DETAILS_DESC": "نص مؤقت لتفاصيل الأصل.",
@@ -483,6 +530,18 @@
       "RIWAYAS": "رواية متاحة",
       "RECITERS": "قارئ متاح",
       "RECITATIONS": "قراءة متاحة"
+    },
+    "REPORT_ISSUE": {
+      "BUTTON": "الإبلاغ عن مشكلة",
+      "TITLE": "الإبلاغ عن مشكلة",
+      "DESCRIPTION_LABEL": "الوصف",
+      "DESCRIPTION_PLACEHOLDER": "صف المشكلة…",
+      "ERR_DESCRIPTION": "أدخل وصفًا (10 أحرف على الأقل)",
+      "SUBMIT": "إرسال البلاغ",
+      "SUCCESS": "تم إرسال بلاغ المشكلة",
+      "ERROR": "تعذّر إرسال بلاغ المشكلة",
+      "FORBIDDEN": "ليس لديك صلاحية لإرسال هذا البلاغ",
+      "LOGIN_REQUIRED": "يرجى تسجيل الدخول للإبلاغ عن مشكلة"
     }
   },
   "UI": {
@@ -530,9 +589,11 @@
     "CREATED": "تاريخ الإنشاء"
   },
   "CATEGORIES": {
-    "mushaf": "المصحف",
     "tafsir": "التفسير",
-    "recitation": "التلاوات"
+    "translation": "الترجمات",
+    "recitation": "التلاوات",
+    "font": "الخطوط",
+    "program": "البرامج"
   },
   "LICENSES": {
     "CC0": "CC0",
@@ -600,6 +661,9 @@
     "USAGE_OPTIONS": {
       "commercial": "تجاري",
       "non-commercial": "غير تجاري"
+    },
+    "ERRORS": {
+      "SUBMISSION_FAILED": "تعذّر إرسال طلب الوصول. يرجى المحاولة مرة أخرى."
     }
   },
   "CONTENT_STANDARDS": {
@@ -675,6 +739,11 @@
       "GO_BACK_LIST": "العودة للقائمة",
       "DOWNLOAD": "تحميل",
       "TAG_EXTERNAL": "خارجي",
+      "TAG_OPEN_ACCESS": "وصول مفتوح",
+      "TAG_API_ONLY": "API فقط",
+      "FILTER_OPEN_ACCESS": "الوصول المفتوح",
+      "FILTER_OPEN_ACCESS_YES": "نعم",
+      "FILTER_OPEN_ACCESS_NO": "لا",
       "SAVE": "حفظ",
       "CANCEL": "إلغاء",
       "COMING_SOON": "قريباً",
@@ -687,7 +756,8 @@
       "DESCRIPTION_AR": "الوصف بالعربية",
       "PLACEHOLDER_EG": "مثال:",
       "EM_DASH": "—",
-      "HIJRI_YEAR_SUFFIX": "هـ"
+      "HIJRI_YEAR_SUFFIX": "هـ",
+      "COLUMN_ACCESS": "الوصول"
     },
     "TENANT": {
       "ARIA_LABEL": "محدد نطاق الناشر",
@@ -792,6 +862,10 @@
         "PLACEHOLDER_LONG_AR": "وصف تفصيلي…",
         "LABEL_EXTERNAL": "تفسير خارجي؟",
         "LABEL_EXTERNAL_URL": "رابط خارجي",
+        "LABEL_OPEN_ACCESS": "وصول مفتوح",
+        "HELP_OPEN_ACCESS": "يمكن لأي شخص استخدام هذا الأصل مباشرة دون تقديم طلب وصول.",
+        "LABEL_API_ONLY": "التسجيل في API (للناشر فقط)",
+        "HELP_API_ONLY": "متاح عبر واجهة برمجة تطبيقات الناشر ومخفي من معرض CMS العام.",
         "UPLOAD_TITLE": "الصورة المصغّرة",
         "UPLOAD_DRAG": "انقر أو اسحب الصورة هنا",
         "UPLOAD_HINT": "PNG, JPG, WEBP — بحد أقصى 5MB",
@@ -935,6 +1009,10 @@
         "PLACEHOLDER_LONG_AR": "وصف تفصيلي…",
         "LABEL_EXTERNAL": "ترجمة خارجية؟",
         "LABEL_EXTERNAL_URL": "رابط خارجي",
+        "LABEL_OPEN_ACCESS": "وصول مفتوح",
+        "HELP_OPEN_ACCESS": "يمكن لأي شخص استخدام هذا الأصل مباشرة دون تقديم طلب وصول.",
+        "LABEL_API_ONLY": "التسجيل في API (للناشر فقط)",
+        "HELP_API_ONLY": "متاح عبر واجهة برمجة تطبيقات الناشر ومخفي من معرض CMS العام.",
         "UPLOAD_TITLE": "الصورة المصغّرة",
         "UPLOAD_DRAG": "انقر أو اسحب الصورة هنا",
         "UPLOAD_HINT": "PNG, JPG, WEBP — بحد أقصى 5MB",
@@ -1076,6 +1154,7 @@
         "SECTION_NAME": "الاسم",
         "SECTION_DESC": "الوصف",
         "SECTION_LINKS": "الربط والخصائص",
+        "SECTION_ACCESS_API": "الوصول وواجهة API",
         "ERR_NAME_AR": "الاسم بالعربية مطلوب",
         "ERR_DESC_AR": "الوصف بالعربية مطلوب",
         "ERR_DESC_EN": "الوصف بالإنجليزية مطلوب",
@@ -1098,6 +1177,10 @@
         "LABEL_YEAR": "السنة",
         "PLACEHOLDER_YEAR_HIJRI": "السنة (هجري)",
         "LABEL_LICENSE": "الترخيص",
+        "LABEL_OPEN_ACCESS": "وصول مفتوح",
+        "HELP_OPEN_ACCESS": "يمكن لأي شخص استخدام هذا الأصل مباشرة دون تقديم طلب وصول.",
+        "LABEL_API_ONLY": "التسجيل في API (للناشر فقط)",
+        "HELP_API_ONLY": "متاح عبر واجهة برمجة تطبيقات الناشر ومخفي من معرض CMS العام.",
         "MEEM_WASL_LONG": "وصل (صلّة)",
         "SUBMIT_CREATE": "إضافة التلاوة",
         "SUBMIT_EDIT": "حفظ التعديلات",
@@ -1351,7 +1434,7 @@
         "ERR_STATUS": "يرجى اختيار الحالة",
         "DESCRIPTION_LABEL": "الوصف",
         "DESCRIPTION_PLACEHOLDER": "صف المشكلة…",
-        "ERR_DESCRIPTION": "أدخل وصفاً لا يقل عن 3 أحرف"
+        "ERR_DESCRIPTION": "أدخل وصفاً لا يقل عن 10 أحرف"
       }
     },
     "MEMBERS": {

@@ -40,7 +40,7 @@ export function authErrorInterceptor(
         if (stillAuthenticated) {
           return next(req);
         }
-        authService.invalidateClientAuthAndGoLogin();
+        authService.invalidateClientAuthAndGoLogin({ sessionExpired: true });
         return throwError(() => err);
       })
     );
@@ -63,7 +63,7 @@ export function authErrorInterceptor(
 
       if (error.status === 410 && isHeadlessAppAuthUrl(req.url)) {
         if (tokenStore.getSessionToken()) {
-          authService.invalidateClientAuthAndGoLogin();
+          authService.invalidateClientAuthAndGoLogin({ sessionExpired: true });
         } else if (isHeadlessAppSessionUrl(req.url) && req.method === 'GET') {
           tokenStore.clearSessionToken();
         }

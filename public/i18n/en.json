@@ -15,6 +15,29 @@
   },
   "AUTH": {
     "MUST_LOGIN_TO_VIEW": "You must be logged in to view this page.",
+    "SESSION_EXPIRED": "Your session has expired. Please sign in again.",
+    "ERRORS": {
+      "CODES": {
+        "ACCOUNT_INACTIVE": "This account is currently inactive.",
+        "CANNOT_REMOVE_PRIMARY_EMAIL": "You cannot remove your primary email address.",
+        "DUPLICATE_EMAIL": "This email address is already associated with this account.",
+        "EMAIL_PASSWORD_MISMATCH": "The email address and/or password you specified are not correct.",
+        "EMAIL_TAKEN": "A user is already registered with this email address.",
+        "INVALID": "Please check your input and try again.",
+        "INVALID_CREDENTIALS": "The email address and/or password you specified are not correct.",
+        "PASSWORD_MISMATCH": "Passwords do not match.",
+        "PHONE_PASSWORD_MISMATCH": "The phone number and/or password you specified are not correct.",
+        "REQUIRED": "Please fill in all required fields.",
+        "TOO_MANY_LOGIN_ATTEMPTS": "Too many failed login attempts. Try again later.",
+        "UNVERIFIED_EMAIL": "Please verify your email address before continuing.",
+        "USERNAME_PASSWORD_MISMATCH": "The username and/or password you specified are not correct."
+      }
+    },
+    "COMMON": {
+      "BACK_TO_LOGIN": "Back to sign in",
+      "BACK_TO_SIGNUP": "Back to sign up",
+      "BACK_TO_GALLERY": "Back to gallery"
+    },
     "LOGIN": {
       "TITLE": "Welcome back",
       "SUBTITLE": "Sign in to continue to Itqan",
@@ -96,6 +119,7 @@
       "SETUP_SUCCESS": "Passkey added successfully.",
       "SIGNUP_SESSION_MISSING": "Could not start passkey sign-up (no session from server). Close other tabs, refresh, and try again.",
       "WEBAUTHN_STATE_ERROR": "This passkey step expired or was interrupted. Go back and try again from the start.",
+      "WEBAUTHN_VERIFICATION_FAILED": "This passkey could not be verified. Try again or sign in another way.",
       "SETUP_REAUTH_REQUIRED": "For security, confirm your password before adding a passkey.",
       "SETUP_REAUTH_LINK": "Confirm password to continue",
       "BACK": "Back to sign in",
@@ -142,11 +166,14 @@
       "NEW_PASSWORD": "New password",
       "SUBMIT": "Update password",
       "ERROR": "Could not reset password. The link or code may have expired.",
-      "EXPIRED": "The reset link has expired. Please request a new one."
+      "EXPIRED": "The reset link has expired. Please request a new one.",
+      "BACK": "Back to sign in"
     },
     "CHANGE_PASSWORD": {
       "SUBTITLE": "Update your password to keep your account secure.",
-      "CURRENT_PASSWORD": "Current password"
+      "CURRENT_PASSWORD": "Current password",
+      "SUCCESS": "Password changed successfully.",
+      "ERROR": "Failed to change password. Please try again."
     },
     "MFA": {
       "TITLE": "Two-factor authentication",
@@ -156,7 +183,9 @@
       "SUBMIT": "Verify",
       "BACK": "Back to sign in",
       "ERROR": "Invalid code. Please try again.",
-      "USE_SECURITY_KEY": "Use security key / passkey"
+      "INCORRECT_CODE": "Invalid code. Please try again.",
+      "USE_SECURITY_KEY": "Use security key / passkey",
+      "USE_PASSKEY": "Sign in with passkey"
     },
     "SECURITY": {
       "TITLE": "Account security",
@@ -298,7 +327,8 @@
       "LOAD_ERROR": "Could not load connected accounts.",
       "ACTION_ERROR": "Could not disconnect the provider.",
       "CONNECT_ERROR": "Could not start {{provider}} connection.",
-      "CONNECT_CROSS_ORIGIN_ERROR": "Connect requires same-origin API and app in this environment. Use the staging CMS domain or configure a reverse proxy."
+      "CONNECT_CROSS_ORIGIN_ERROR": "Connect requires same-origin API and app in this environment. Use the staging CMS domain or configure a reverse proxy.",
+      "SESSION_TOKEN_REQUIRED": "Connecting a provider requires an app session token; sign in again."
     },
     "PROFILE": {
       "TITLE": "Your account",
@@ -332,8 +362,16 @@
       "USE_PASSKEY": "Use passkey",
       "CANCEL": "Cancel",
       "ERROR": "Incorrect password.",
+      "INCORRECT_PASSWORD": "Incorrect password.",
       "PASSKEY_ERROR": "Passkey verification failed.",
       "MFA_ERROR": "Invalid authenticator code."
+    },
+    "TRUST": {
+      "TITLE": "Trust this browser?",
+      "SUBTITLE": "You can skip two-factor authentication on this device for a while if you trust it.",
+      "TRUST_BUTTON": "Trust this browser",
+      "DO_NOT_TRUST_BUTTON": "Do not trust",
+      "ERROR": "Could not update browser trust settings. Please try again."
     },
     "OAUTH": {
       "PROCESSING": "Processing authentication...",
@@ -476,6 +514,15 @@
     "VIEW": "View",
     "VIEW_DETAILS": "View Details",
     "VIEW_LICENSE": "View License",
+    "OPEN_ACCESS_BADGE": "Open access",
+    "OPEN_ACCESS_HINT": "No access request required for this resource.",
+    "REQUEST_ACCESS_BUTTON": "Request Access",
+    "ACCESS_PENDING_HINT": "Your access request is being reviewed. You will be able to download once it is approved.",
+    "ACCESS_PENDING_TOAST": "Your access request is still pending approval.",
+    "ACCESS_REJECTED_HINT": "Access to this resource was not approved. Please contact Itqan for assistance.",
+    "ACCESS_REJECTED_TOAST": "Access to this resource was not approved. Please contact Itqan for assistance.",
+    "ACCESS_REQUEST_SUBMITTED_PENDING": "Your access request was submitted and is awaiting approval.",
+    "ACCESS_REQUEST_APPROVED": "Access approved. Starting download.",
     "DETAILS_TITLE": "Asset Details",
     "ASSET_ID": "Asset ID",
     "DETAILS_DESC": "This is a placeholder for asset details.",
@@ -483,6 +530,18 @@
       "RIWAYAS": "Riwayas",
       "RECITERS": "Reciters",
       "RECITATIONS": "Recitations"
+    },
+    "REPORT_ISSUE": {
+      "BUTTON": "Report issue",
+      "TITLE": "Report an issue",
+      "DESCRIPTION_LABEL": "Description",
+      "DESCRIPTION_PLACEHOLDER": "Describe the issue…",
+      "ERR_DESCRIPTION": "Enter a description (at least 10 characters)",
+      "SUBMIT": "Submit report",
+      "SUCCESS": "Your issue report was submitted",
+      "ERROR": "Could not submit issue report",
+      "FORBIDDEN": "You do not have permission to submit this report",
+      "LOGIN_REQUIRED": "Please log in to report an issue"
     }
   },
   "UI": {
@@ -530,9 +589,11 @@
     "CREATED": "Created"
   },
   "CATEGORIES": {
-    "mushaf": "Mushaf",
     "tafsir": "Tafsir",
-    "recitation": "Recitation"
+    "translation": "Translation",
+    "recitation": "Recitation",
+    "font": "Font",
+    "program": "Program"
   },
   "LICENSES": {
     "CC0": "CC0",
@@ -600,6 +661,9 @@
     "USAGE_OPTIONS": {
       "commercial": "Commercial",
       "non-commercial": "Non-Commercial"
+    },
+    "ERRORS": {
+      "SUBMISSION_FAILED": "Could not submit access request. Please try again."
     }
   },
   "CONTENT_STANDARDS": {
@@ -675,6 +739,11 @@
       "GO_BACK_LIST": "Back to list",
       "DOWNLOAD": "Download",
       "TAG_EXTERNAL": "External",
+      "TAG_OPEN_ACCESS": "Open access",
+      "TAG_API_ONLY": "API only",
+      "FILTER_OPEN_ACCESS": "Open access",
+      "FILTER_OPEN_ACCESS_YES": "Yes",
+      "FILTER_OPEN_ACCESS_NO": "No",
       "SAVE": "Save",
       "CANCEL": "Cancel",
       "COMING_SOON": "Coming soon",
@@ -687,7 +756,8 @@
       "DESCRIPTION_AR": "Description (Arabic)",
       "PLACEHOLDER_EG": "e.g.",
       "EM_DASH": "—",
-      "HIJRI_YEAR_SUFFIX": "AH"
+      "HIJRI_YEAR_SUFFIX": "AH",
+      "COLUMN_ACCESS": "Access"
     },
     "TENANT": {
       "ARIA_LABEL": "Publisher scope selector",
@@ -792,6 +862,10 @@
         "PLACEHOLDER_LONG_AR": "Detailed description…",
         "LABEL_EXTERNAL": "External tafsir?",
         "LABEL_EXTERNAL_URL": "External URL",
+        "LABEL_OPEN_ACCESS": "Open access",
+        "HELP_OPEN_ACCESS": "Anyone can use this asset directly without submitting an access request.",
+        "LABEL_API_ONLY": "API enrollment (tenant-only)",
+        "HELP_API_ONLY": "Available via the publisher API and hidden from the public CMS gallery.",
         "UPLOAD_TITLE": "Thumbnail",
         "UPLOAD_DRAG": "Click or drag image here",
         "UPLOAD_HINT": "PNG, JPG, WEBP — max 5MB",
@@ -935,6 +1009,10 @@
         "PLACEHOLDER_LONG_AR": "Detailed description…",
         "LABEL_EXTERNAL": "External translation?",
         "LABEL_EXTERNAL_URL": "External URL",
+        "LABEL_OPEN_ACCESS": "Open access",
+        "HELP_OPEN_ACCESS": "Anyone can use this asset directly without submitting an access request.",
+        "LABEL_API_ONLY": "API enrollment (tenant-only)",
+        "HELP_API_ONLY": "Available via the publisher API and hidden from the public CMS gallery.",
         "UPLOAD_TITLE": "Thumbnail",
         "UPLOAD_DRAG": "Click or drag image here",
         "UPLOAD_HINT": "PNG, JPG, WEBP — max 5MB",
@@ -1076,6 +1154,7 @@
         "SECTION_NAME": "Name",
         "SECTION_DESC": "Description",
         "SECTION_LINKS": "Links & properties",
+        "SECTION_ACCESS_API": "Access & API",
         "ERR_NAME_AR": "Arabic name is required",
         "ERR_DESC_AR": "Arabic description is required",
         "ERR_DESC_EN": "English description is required",
@@ -1098,6 +1177,10 @@
         "LABEL_YEAR": "Year",
         "PLACEHOLDER_YEAR_HIJRI": "Year (Hijri)",
         "LABEL_LICENSE": "License",
+        "LABEL_OPEN_ACCESS": "Open access",
+        "HELP_OPEN_ACCESS": "Anyone can use this asset directly without submitting an access request.",
+        "LABEL_API_ONLY": "API enrollment (tenant-only)",
+        "HELP_API_ONLY": "Available via the publisher API and hidden from the public CMS gallery.",
         "MEEM_WASL_LONG": "Wasl (silah)",
         "SUBMIT_CREATE": "Add recitation",
         "SUBMIT_EDIT": "Save changes",
@@ -1351,7 +1434,7 @@
         "ERR_STATUS": "Select a status",
         "DESCRIPTION_LABEL": "Description",
         "DESCRIPTION_PLACEHOLDER": "Describe the issue…",
-        "ERR_DESCRIPTION": "Enter a description (at least 3 characters)"
+        "ERR_DESCRIPTION": "Enter a description (at least 10 characters)"
       }
     },
     "MEMBERS": {

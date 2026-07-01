@@ -6,7 +6,7 @@ import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
 import { UpdateProfileRequest } from '../../models/auth.model';
 import { AuthService } from '../../services/auth.service';
 
@@ -55,7 +55,13 @@ export class AccountProfilePage implements OnInit {
       });
     } catch (e) {
       if (e instanceof HttpErrorResponse) {
-        this.pageError.set(getErrorMessage(e) || this.translate.instant('AUTH.PROFILE.LOAD_ERROR'));
+        this.pageError.set(
+          resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.PROFILE.LOAD_ERROR', context: 'profile' },
+            this.translate
+          )
+        );
       }
     }
   }
@@ -80,7 +86,13 @@ export class AccountProfilePage implements OnInit {
       await this.loadDetails();
     } catch (e) {
       if (e instanceof HttpErrorResponse) {
-        this.pageError.set(getErrorMessage(e) || this.translate.instant('AUTH.PROFILE.SAVE_ERROR'));
+        this.pageError.set(
+          resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.PROFILE.SAVE_ERROR', context: 'profile' },
+            this.translate
+          )
+        );
       } else {
         this.pageError.set(this.translate.instant('AUTH.PROFILE.SAVE_ERROR'));
       }

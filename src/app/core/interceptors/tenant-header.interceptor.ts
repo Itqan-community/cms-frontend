@@ -20,6 +20,15 @@ function isInvitationRequest(url: string, adminApi: string): boolean {
   return url.startsWith(`${adminApi}/invitations/`);
 }
 
+/** Consumer issue reports from gallery — no admin tenant context. */
+function isConsumerIssueReportCreate(url: string, method: string, adminApi: string): boolean {
+  if (method !== 'POST') {
+    return false;
+  }
+  const base = `${adminApi}/issue-reports`;
+  return url === base || url === `${base}/`;
+}
+
 export function tenantHeaderInterceptor(
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
@@ -34,6 +43,10 @@ export function tenantHeaderInterceptor(
   }
 
   if (isInvitationRequest(req.url, adminApi)) {
+    return next(req);
+  }
+
+  if (isConsumerIssueReportCreate(req.url, req.method, adminApi)) {
     return next(req);
   }
 

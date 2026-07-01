@@ -27,6 +27,7 @@ import { csrfResponseInterceptor } from './core/interceptors/csrf-response.inter
 import { appSessionTokenInterceptor } from './core/interceptors/app-session-token.interceptor';
 import { tenantHeaderInterceptor } from './core/interceptors/tenant-header.interceptor';
 import { AuthService } from './core/auth/services/auth.service';
+import { initializeAppTranslations } from './core/i18n/translate-app.initializer';
 registerLocaleData(ar);
 
 export const appConfig: ApplicationConfig = {
@@ -63,15 +64,16 @@ export const appConfig: ApplicationConfig = {
         errorInterceptor,
       ])
     ),
+    provideAppInitializer(() => initializeAppTranslations()),
     provideAppInitializer(() => inject(AuthService).bootstrapOnce()),
     // ngx-translate setup
     provideTranslateService({
       loader: provideTranslateHttpLoader({
         prefix: '/i18n/',
         suffix: '.json',
+        useHttpBackend: true,
       }),
       fallbackLang: 'ar',
-      lang: 'ar',
     }),
   ],
 };

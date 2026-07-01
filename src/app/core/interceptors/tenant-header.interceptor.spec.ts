@@ -137,4 +137,21 @@ describe('tenantHeaderInterceptor', () => {
       },
     });
   });
+
+  it('skips tenant header for consumer issue report create', () => {
+    if (!adminApi) {
+      pending('ADMIN_API_BASE_URL');
+      return;
+    }
+
+    const { http, httpMock, router } = setup();
+    const url = `${adminApi}/issue-reports/`;
+
+    http.post(url, { asset_id: 1, description: 'test issue' }).subscribe();
+    const req = httpMock.expectOne(url);
+    expect(req.request.headers.get('X-Tenant')).toBeNull();
+    expect(router.navigate).not.toHaveBeenCalled();
+    req.flush({ id: 1 });
+    httpMock.verify();
+  });
 });

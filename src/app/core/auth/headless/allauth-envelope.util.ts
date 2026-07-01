@@ -22,11 +22,7 @@ export function applyAllauthEnvelopeSideEffects(
   if (msg.status === 410) {
     tokens.blockSessionCookieFallback();
   }
-  if (
-    msg.meta?.session_token &&
-    typeof msg.meta.session_token === 'string' &&
-    !tokens.isSessionCookieFallbackBlocked()
-  ) {
+  if (msg.meta?.session_token && typeof msg.meta.session_token === 'string') {
     tokens.setSessionToken(msg.meta.session_token);
   }
   if (

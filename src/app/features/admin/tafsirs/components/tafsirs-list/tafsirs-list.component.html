@@ -49,6 +49,9 @@
                 {{ 'ADMIN.TAFSIRS.COLUMNS.NAME' | translate }}
               </th>
             }
+            @if (showCol('access')) {
+              <th nzWidth="130px">{{ 'ADMIN.COMMON.COLUMN_ACCESS' | translate }}</th>
+            }
             @if (showCol('description')) {
               <th nzWidth="240px">{{ 'ADMIN.TAFSIRS.COLUMNS.DESCRIPTION' | translate }}</th>
             }
@@ -79,6 +82,26 @@
                   <a class="hoverable-link" [routerLink]="['/admin/tafsirs', tafsir.slug]">
                     {{ tafsir.name }}
                   </a>
+                </td>
+              }
+              @if (showCol('access')) {
+                <td>
+                  @if (tafsir.is_open_access || tafsir.restricted_for_tenant) {
+                    <div class="admin-list-access-tags">
+                      @if (tafsir.is_open_access) {
+                        <nz-tag nzColor="green">{{
+                          'ADMIN.COMMON.TAG_OPEN_ACCESS' | translate
+                        }}</nz-tag>
+                      }
+                      @if (tafsir.restricted_for_tenant) {
+                        <nz-tag nzColor="orange">{{
+                          'ADMIN.COMMON.TAG_API_ONLY' | translate
+                        }}</nz-tag>
+                      }
+                    </div>
+                  } @else {
+                    <span class="admin-list-desc">{{ 'ADMIN.COMMON.EM_DASH' | translate }}</span>
+                  }
                 </td>
               }
 

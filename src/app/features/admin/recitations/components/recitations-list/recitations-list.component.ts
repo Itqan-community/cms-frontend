@@ -66,6 +66,7 @@ export class RecitationsListComponent extends AdminListBase<
   readonly recitationTableStorageKey = 'admin-list-recitations';
   readonly recitationTableColumns: AdminTableColumnOption[] = [
     { key: 'name', label: 'ADMIN.RECITATIONS.COLUMNS.NAME' },
+    { key: 'access', label: 'ADMIN.COMMON.COLUMN_ACCESS' },
     { key: 'description', label: 'ADMIN.RECITATIONS.COLUMNS.DESCRIPTION' },
     { key: 'publisher', label: 'ADMIN.RECITATIONS.COLUMNS.PUBLISHER' },
     { key: 'reciter', label: 'ADMIN.RECITATIONS.COLUMNS.RECITER' },

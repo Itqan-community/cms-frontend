@@ -21,12 +21,17 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
+import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { PublisherFilterItem } from '../../../tafsirs/models/tafsirs.models';
 import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
 import { ReciterListItem } from '../../../reciters/models/reciters.models';
 import { RecitersAdminService } from '../../../reciters/services/reciters.service';
 import { MaddLevel, MeemBehavior, NamedId } from '../../models/recitations.models';
 import { RecitationsService } from '../../services/recitations.service';
+import {
+  getErrorMessage,
+  isRestrictedForTenantConflictError,
+} from '../../../../../shared/utils/error.utils';
 
 /** Hijri year optional: empty is valid; if set, must be within range */
 function optionalHijriYearRange(minY: number, maxY: number) {
@@ -55,6 +60,7 @@ function optionalHijriYearRange(minY: number, maxY: number) {
     NzInputModule,
     NzSelectModule,
     NzSkeletonModule,
+    NzSwitchModule,
     TranslateModule,
   ],
   templateUrl: './recitation-form.component.html',
@@ -110,6 +116,8 @@ export class RecitationFormComponent implements OnInit {
     meem_behaviour: [null as MeemBehavior | null],
     year: [null as number | null, [optionalHijriYearRange(1300, 1600)]],
     license: ['', [Validators.required]],
+    is_open_access: [false],
+    restricted_for_tenant: [false],
   });
 
   private editSlug: string | null = null;
@@ -167,6 +175,8 @@ export class RecitationFormComponent implements OnInit {
       meem_behaviour: v.meem_behaviour ?? null,
       year: v.year ?? null,
       license: v.license ?? '',
+      is_open_access: v.is_open_access ?? false,
+      restricted_for_tenant: v.restricted_for_tenant ?? false,
     };
 
     this.submitting.set(true);
@@ -187,8 +197,14 @@ export class RecitationFormComponent implements OnInit {
         this.submitting.set(false);
         void this.router.navigate(['/admin/recitations', res.slug ?? String(res.id)]);
       },
-      error: () => {
+      error: (error) => {
         this.submitting.set(false);
+        if (isRestrictedForTenantConflictError(error)) {
+          const msg = getErrorMessage(error);
+          if (msg) {
+            this.message.error(msg);
+          }
+        }
       },
     });
   }
@@ -232,6 +248,8 @@ export class RecitationFormComponent implements OnInit {
             meem_behaviour: data.meem_behaviour,
             year: data.year,
             license: data.license,
+            is_open_access: data.is_open_access,
+            restricted_for_tenant: data.restricted_for_tenant,
           });
           this.loadRiwayahs(data.qiraah.id, data.riwayah?.id ?? null);
           this.selectedHijriDate.set(

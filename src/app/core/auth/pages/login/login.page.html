@@ -119,8 +119,10 @@
       <app-auth-social-actions
         flow="login"
         [loginByCodeEnabled]="authService.authConfig()?.loginByCodeEnabled ?? false"
+        [passkeyLoading]="passkeyLoading()"
         (google)="onLoginWithGoogle()"
         (github)="onLoginWithGitHub()"
+        (passkey)="onPasskeyLogin()"
       />
 
       <div class="login__footer">

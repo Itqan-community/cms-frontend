@@ -46,14 +46,21 @@ describe('HeadlessAppTokenService', () => {
     expect(sessionStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY)).toBeNull();
   });
 
-  it('setFromMeta is ignored while session cookie fallback is blocked', () => {
+  it('still returns sessionStorage token while cookie fallback is blocked', () => {
+    service.blockSessionCookieFallback();
+    service.setSessionToken('passkey-stage-token');
+    spyOnProperty(document, 'cookie', 'get').and.returnValue('sessionid=stale-cookie; Path=/');
+    expect(service.getSessionToken()).toBe('passkey-stage-token');
+  });
+
+  it('setFromMeta persists API session_token while cookie fallback is blocked', () => {
     service.blockSessionCookieFallback();
     service.setFromMeta({
       is_authenticated: false,
-      session_token: 'ignored',
-      access_token: 'ignored',
+      session_token: 'from-api',
+      access_token: 'acc',
     });
-    expect(service.getSessionToken()).toBeNull();
-    expect(service.getAccessToken()).toBeNull();
+    expect(service.getSessionToken()).toBe('from-api');
+    expect(service.getAccessToken()).toBe('acc');
   });
 });

@@ -75,13 +75,75 @@ export function isUnverifiedEmailError(error: unknown): boolean {
   return errors.some((e) => e.code === 'unverified_email');
 }
 
+/** Portal asset PATCH blocked when enabling restricted_for_tenant with existing access requests. */
+export function isRestrictedForTenantConflictError(error: unknown): boolean {
+  if (!(error instanceof HttpErrorResponse)) {
+    return false;
+  }
+  const httpStatus = error.status;
+  const body = error.error;
+  const bodyStatus =
+    body && typeof body === 'object' && typeof (body as { status?: unknown }).status === 'number'
+      ? (body as { status: number }).status
+      : null;
+
+  if (httpStatus !== 409 && bodyStatus !== 409) {
+    return false;
+  }
+
+  const errorName =
+    body &&
+    typeof body === 'object' &&
+    typeof (body as { error_name?: unknown }).error_name === 'string'
+      ? (body as { error_name: string }).error_name
+      : null;
+  if (errorName === 'restricted_for_tenant_conflict') {
+    return true;
+  }
+
+  const errors = (body as { errors?: AllauthErrorItem[] })?.errors;
+  if (Array.isArray(errors) && errors.length) {
+    return errors.some((e) => e.code === 'restricted_for_tenant_conflict');
+  }
+
+  return false;
+}
+
+/** Pull structured allauth `errors[]` from an `HttpErrorResponse` or raw envelope body. */
+export function extractAllauthErrorItems(error: unknown): AllauthErrorItem[] {
+  if (error instanceof HttpErrorResponse) {
+    return extractAllauthErrorItemsFromBody(error.error);
+  }
+  return extractAllauthErrorItemsFromBody(error);
+}
+
+function extractAllauthErrorItemsFromBody(body: unknown): AllauthErrorItem[] {
+  if (!body || typeof body !== 'object') {
+    return [];
+  }
+  const errors = (body as { errors?: AllauthErrorItem[] }).errors;
+  return Array.isArray(errors) ? errors.filter((e) => e && typeof e.message === 'string') : [];
+}
+
+/** Angular HttpClient default message — not suitable for end users. */
+export function isAngularHttpFailureMessage(message: string): boolean {
+  return /^Http failure response for /i.test(message.trim());
+}
+
 export function getErrorMessage(error: unknown): string | null {
   if (error instanceof HttpErrorResponse) {
     const m = firstAllauthMessage(error.error);
     if (m) {
       return m;
     }
-    return error.error?.message ?? error.message;
+    const bodyMessage = error.error?.message;
+    if (typeof bodyMessage === 'string' && bodyMessage.trim()) {
+      return bodyMessage;
+    }
+    if (isAngularHttpFailureMessage(error.message)) {
+      return null;
+    }
+    return error.message;
   }
   return error instanceof Error ? error.message : null;
 }

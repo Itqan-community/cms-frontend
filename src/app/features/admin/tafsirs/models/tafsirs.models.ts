@@ -39,6 +39,8 @@ export interface TafsirItem {
   license: string;
   language?: string | null;
   is_external: boolean;
+  is_open_access: boolean;
+  restricted_for_tenant: boolean;
   created_at: string;
 }
 
@@ -57,6 +59,8 @@ export interface TafsirDetails {
   license: string;
   language?: string | null;
   is_external: boolean;
+  is_open_access: boolean;
+  restricted_for_tenant: boolean;
   external_url: string | null;
   versions: AssetVersion[];
   created_at: string;
@@ -77,6 +81,7 @@ export interface TafsirFilters {
   license_code?: string;
   language?: AssetLangFilter;
   is_external?: boolean;
+  is_open_access?: boolean;
   ordering?: AssetSortingQuery;
 }
 
@@ -92,6 +97,8 @@ export interface TafsirFormValue {
   language: string;
   publisher_id: number;
   is_external: boolean;
+  is_open_access: boolean;
+  restricted_for_tenant: boolean;
   external_url?: string | null;
   thumbnail?: File;
 }

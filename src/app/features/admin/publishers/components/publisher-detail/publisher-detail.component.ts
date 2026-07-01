@@ -11,7 +11,12 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { AdminAuthService } from '../../../services/admin-auth.service';
+import { AdminTenantService } from '../../../services/admin-tenant.service';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
+import {
+  resolvePublisherDetailRecoveryId,
+  buildSelectedPublisherDetailCommands,
+} from '../../../utils/admin-tenant-navigation.util';
 import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
 import { Publisher } from '../../models/publishers-stats.models';
 import { PublishersService } from '../../services/publishers.service';
@@ -42,6 +47,7 @@ export class PublisherDetailComponent implements OnInit {
   private readonly message = inject(NzMessageService);
   private readonly translate = inject(TranslateService);
   private readonly adminAuth = inject(AdminAuthService);
+  private readonly tenantService = inject(AdminTenantService);
 
   readonly canCreatePublisher = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_CREATE_PUBLISHER)
@@ -55,6 +61,9 @@ export class PublisherDetailComponent implements OnInit {
 
   readonly publisher = signal<Publisher | null>(null);
   readonly loading = signal(true);
+  readonly publishersHomeLink = computed(() =>
+    buildSelectedPublisherDetailCommands(this.tenantService.getSelectedPublisherId())
+  );
 
   private id!: number;
 
@@ -72,8 +81,20 @@ export class PublisherDetailComponent implements OnInit {
       },
       error: () => {
         this.loading.set(false);
+        this.tryRecoverFromLoadError();
       },
     });
+  }
+
+  private tryRecoverFromLoadError(): void {
+    const recoveryId = resolvePublisherDetailRecoveryId(
+      this.id,
+      this.tenantService.getSelectedPublisherId(),
+      this.tenantService.publishers().map((publisher) => publisher.id)
+    );
+    if (recoveryId != null) {
+      void this.router.navigate(['/admin/publishers', recoveryId], { replaceUrl: true });
+    }
   }
 
   onEdit(): void {
@@ -98,7 +119,10 @@ export class PublisherDetailComponent implements OnInit {
         this.publishersService.deletePublisher(this.id).subscribe({
           next: () => {
             this.message.success(this.translate.instant('ADMIN.PUBLISHERS.DETAIL.DELETE_SUCCESS'));
-            void this.router.navigate(['/admin/publishers']);
+            const commands = buildSelectedPublisherDetailCommands(
+              this.tenantService.getSelectedPublisherId()
+            ) ?? ['/admin', 'publishers'];
+            void this.router.navigate(commands);
           },
         }),
     });

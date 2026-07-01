@@ -1,7 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ALLAUTH_URLS } from '../auth/headless/allauth-urls';
 import { isHeadlessAppAuthUrl } from '../auth/headless/headless-api-path.util';
-import { isUnverifiedEmailError } from '../../shared/utils/error.utils';
+import {
+  isUnverifiedEmailError,
+  isWebAuthnIncorrectCodeError,
+} from '../../shared/utils/error.utils';
 
 /**
  * GET `…/account/authenticators/totp` returns HTTP 404 both for “pending setup” (parsed in
@@ -29,6 +32,7 @@ export function shouldSuppressSentryForHeadlessHttpError(
 ): boolean {
   return (
     (isHeadlessAppAuthUrl(reqUrl) && isUnverifiedEmailError(error)) ||
+    (isHeadlessAppAuthUrl(reqUrl) && isWebAuthnIncorrectCodeError(error)) ||
     isExpectedTotpAuthenticatorStatusProbe404(reqUrl, reqMethod, error)
   );
 }

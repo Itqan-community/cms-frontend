@@ -6,7 +6,8 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import { getErrorMessage, isUnverifiedEmailError } from '../../../../shared/utils/error.utils';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
+import { isUnverifiedEmailError } from '../../../../shared/utils/error.utils';
 import { AuthSocialActionsComponent } from '../../components/auth-social-actions/auth-social-actions.component';
 import { AUTH_ROUTES, tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { RegisterRequest } from '../../models/auth.model';
@@ -120,13 +121,20 @@ export class RegisterPage {
               return;
             }
             this.errorMessage.set(
-              getErrorMessage(error) ||
-                this.translate.instant('AUTH.REGISTER.ERRORS.REGISTER_FAILED')
+              resolveAuthErrorMessage(
+                error,
+                { fallbackKey: 'AUTH.REGISTER.ERRORS.REGISTER_FAILED', context: 'register' },
+                this.translate
+              )
             );
             return;
           }
           this.errorMessage.set(
-            getErrorMessage(error) || this.translate.instant('AUTH.REGISTER.ERRORS.REGISTER_FAILED')
+            resolveAuthErrorMessage(
+              error,
+              { fallbackKey: 'AUTH.REGISTER.ERRORS.REGISTER_FAILED', context: 'register' },
+              this.translate
+            )
           );
         },
       });

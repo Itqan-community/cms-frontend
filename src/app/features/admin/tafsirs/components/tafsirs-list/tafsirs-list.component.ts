@@ -56,6 +56,7 @@ export class TafsirsListComponent extends AdminListBase<TafsirItem, TafsirFilter
   readonly tafsirTableStorageKey = 'admin-list-tafsirs';
   readonly tafsirTableColumns: AdminTableColumnOption[] = [
     { key: 'name', label: 'ADMIN.TAFSIRS.COLUMNS.NAME' },
+    { key: 'access', label: 'ADMIN.COMMON.COLUMN_ACCESS' },
     { key: 'description', label: 'ADMIN.TAFSIRS.COLUMNS.DESCRIPTION' },
     { key: 'publisher', label: 'ADMIN.TAFSIRS.COLUMNS.PUBLISHER' },
     { key: 'license', label: 'ADMIN.TAFSIRS.COLUMNS.LICENSE' },

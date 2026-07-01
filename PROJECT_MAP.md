@@ -73,11 +73,29 @@ User Browser
 
 ```
 1. Gallery page: GET /cms-api/assets/?category=&search=&license_code=
-2. Asset detail: GET /cms-api/assets/{id}/
-3. Access request: POST /cms-api/assets/{id}/request-access/ (if auth required)
-4. License confirmation: scroll-to-confirm modal
-5. Download: GET /cms-api/assets/{id}/download/ -> redirect to file
+2. Asset detail: GET /cms-api/assets/{id}/  (includes is_open_access, access_status)
+3. Download click (logged in):
+   - access_status null -> open access path (license then download)
+   - not_requested -> access request modal
+   - pending -> blocked; show waiting state (no modal, no download)
+   - approved -> license then download
+   - rejected -> blocked; friendly contact Itqan message
+   (not logged in -> redirect to login)
+4. Access request: POST /cms-api/assets/{id}/request-access/ when access_status is not_requested
+   -> refetch GET /cms-api/assets/{id}/ and branch on new access_status
+   (approved -> license/download; pending -> waiting UI; rejected -> contact message)
+5. License confirmation (first time per user only):
+   - if localStorage has global acceptance for current user id -> skip modal
+   - else scroll-to-confirm modal; on confirm persist `gallery-license-accepted:{userId}` in localStorage
+6. Download: GET /cms-api/assets/{id}/download/ -> redirect to file
+7. Report issue: modal on asset detail -> POST /portal/issue-reports/ `{ asset_id, description }`
+   (login required; reporter from session; no portal permission gate on gallery CTA)
 ```
+
+Portal assets (recitations, tafsirs, translations) expose `is_open_access` and
+`restricted_for_tenant` on create/update (POST/PATCH) and in list/detail responses. List filter:
+`is_open_access=true|false`. `restricted_for_tenant=true` assets are excluded from public CMS
+listings by the backend.
 
 ### Admin CRUD Flow (all entities follow same pattern)
 
@@ -132,7 +150,7 @@ cms-frontend/
 | `auth/`          | 21 pages + 1 service + 3 guards + headless API module (20+ files)                                                              | Full django-allauth headless SPA integration               |
 | `auth/headless/` | `HeadlessAuthApiService` (~60 methods), `HeadlessAppTokenService`, types, hooks, WebAuthn utils, CSRF utils, provider redirect | allauth headless contract implementation                   |
 | `constants/`     | `BREAKPOINTS`, `NAV_LINKS`                                                                                                     | Responsive breakpoints + navigation link definitions       |
-| `enums/`         | `Categories` (mushaf/tafsir/recitation), `Licenses` (CC0-CC-BY-NC-ND + colors)                                                 | Content categorization and licensing                       |
+| `enums/`         | `Categories` (tafsir/translation/recitation), `Licenses` (CC0-CC-BY-NC-ND + colors)                                            | Content categorization and licensing                       |
 | `guards/`        | `publisherHostGuard`                                                                                                           | Blocks publisher subdomain visitors from CMS routes        |
 | `interceptors/`  | 6 interceptors (credentials, CSRF response, app-session-token, headers/global, auth-error, error)                              | HTTP pipeline: session token, CSRF, error handling, Sentry |
 | `services/`      | `GoogleAnalyticsService`, `WebVitalsService`, `ViewportService`                                                                | Analytics, Core Web Vitals, responsive viewport detection  |
@@ -189,7 +207,7 @@ Trust, Profile, CompleteProfile
 | Path                          | Component                      | Guards                           | Notes                                                                                                                                      |
 | ----------------------------- | ------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `/gallery`                    | `GalleryPage`                  | —                                | Main listing                                                                                                                               |
-| `/gallery/asset/:id`          | `AssetDetailsPage`             | —                                | Detail + access request + download                                                                                                         |
+| `/gallery/asset/:id`          | `AssetDetailsPage`             | —                                | Detail + access request + download + report issue modal                                                                                    |
 | `/publishers`                 | `PublishersPage`               | `publisherHostGuard`             | Stub                                                                                                                                       |
 | `/publisher/:id`              | `PublisherDetailsPage`         | `publisherHostGuard`             | Detail + filtered assets                                                                                                                   |
 | `/license/:id`                | `LicenseDetailsPage`           | —                                | License detail                                                                                                                             |
@@ -378,10 +396,11 @@ footer).
 
 ### Utils
 
-| File                    | Exports                                                                                                                  | Purpose                                 |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------ | --------------------------------------- |
-| `error.utils.ts`        | `parseRetryAfterSeconds`, `isIncorrectCodeError`, `isWebAuthnIncorrectCodeError`, `getErrorMessage`, `joinAllauthErrors` | Auth error parsing utilities            |
-| `publisherhost.util.ts` | `getPublisher()`, `getPublisherId()`, `isPublisherHost()`                                                                | Multi-tenant publisher domain detection |
+| File                          | Exports                                                                                                                                              | Purpose                                                        |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `error.utils.ts`              | `parseRetryAfterSeconds`, `isIncorrectCodeError`, `isWebAuthnIncorrectCodeError`, `getErrorMessage`, `joinAllauthErrors`, `extractAllauthErrorItems` | Auth error parsing utilities                                   |
+| `auth-error-resolver.util.ts` | `resolveAuthErrorMessage`, `isMessageLocalizedForUi`                                                                                                 | Auth UI errors: code→i18n map, localized backend msg, fallback |
+| `publisherhost.util.ts`       | `getPublisher()`, `getPublisherId()`, `isPublisherHost()`                                                                                            | Multi-tenant publisher domain detection                        |
 
 ### Directives (empty directory — placeholder for future use)
 
@@ -487,4 +506,5 @@ access requests (`/portal/access-requests/` — list, detail, accept, reject;
 9. **CSS variables** — Theming via `--color-*`, `--radius-*`, `--shadow-*` custom properties
 10. **RTL support** — Logical CSS properties throughout, `ltr-flip`/`rtl-flip` transform utilities
 11. **Responsive** — Mobile-first with breakpoints at 480/576/768/992/1200/1600px
-12. **Error classification** — `getErrorMessage()` utility for allauth-specific error parsing
+12. **Error classification** — `resolveAuthErrorMessage()` for auth pages (code map → localized
+    backend → i18n fallback); `getErrorMessage()` for low-level allauth envelope parsing

@@ -60,6 +60,7 @@ export class TranslationsListComponent extends AdminListBase<TranslationItem, Tr
   readonly translationTableStorageKey = 'admin-list-translations';
   readonly translationTableColumns: AdminTableColumnOption[] = [
     { key: 'name', label: 'ADMIN.TRANSLATIONS.COLUMNS.NAME' },
+    { key: 'access', label: 'ADMIN.COMMON.COLUMN_ACCESS' },
     { key: 'description', label: 'ADMIN.TRANSLATIONS.COLUMNS.DESCRIPTION' },
     { key: 'publisher', label: 'ADMIN.TRANSLATIONS.COLUMNS.PUBLISHER' },
     { key: 'license', label: 'ADMIN.TRANSLATIONS.COLUMNS.LICENSE' },

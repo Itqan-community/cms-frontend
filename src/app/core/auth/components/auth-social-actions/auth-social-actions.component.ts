@@ -17,9 +17,13 @@ export type AuthSocialFlow = 'login' | 'signup';
 export class AuthSocialActionsComponent {
   readonly flow = input.required<AuthSocialFlow>();
   readonly loginByCodeEnabled = input(false);
+  readonly passkeyLoading = input(false);
+  /** Optional email to pre-fill on the signup passkey page. */
+  readonly passkeySignupEmail = input('');
 
   readonly google = output<void>();
   readonly github = output<void>();
+  readonly passkey = output<void>();
 
   readonly passkeyAvailable = signal(false);
 
@@ -44,5 +48,18 @@ export class AuthSocialActionsComponent {
 
   onGitHubClick(): void {
     this.github.emit();
+  }
+
+  onPasskeyClick(): void {
+    this.passkey.emit();
+  }
+
+  passkeySignupQueryParams(): Record<string, string> {
+    const params: Record<string, string> = { flow: 'signup' };
+    const email = this.passkeySignupEmail().trim();
+    if (email) {
+      params['email'] = email;
+    }
+    return params;
   }
 }

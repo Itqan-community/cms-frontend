@@ -6,7 +6,8 @@ import { Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import { getErrorMessage, isUnverifiedEmailError } from '../../../../shared/utils/error.utils';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
+import { isUnverifiedEmailError } from '../../../../shared/utils/error.utils';
 import type {
   AuthenticatorListItem,
   RecoveryCodesResponse,
@@ -198,7 +199,11 @@ export class SecuritySettingsPage implements OnInit, OnDestroy {
           return;
         }
         this.pageError.set(
-          getErrorMessage(e) || this.translate.instant('AUTH.SECURITY.LOAD_ERROR')
+          resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.SECURITY.LOAD_ERROR', context: 'security' },
+            this.translate
+          )
         );
       } else {
         this.pageError.set(this.translate.instant('AUTH.SECURITY.LOAD_ERROR'));
@@ -260,7 +265,11 @@ export class SecuritySettingsPage implements OnInit, OnDestroy {
           return;
         }
         this.pageError.set(
-          getErrorMessage(e) || this.translate.instant('AUTH.SECURITY.PASSKEY_RENAME_ERROR')
+          resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.SECURITY.PASSKEY_RENAME_ERROR', context: 'security' },
+            this.translate
+          )
         );
       }
     } finally {
@@ -286,7 +295,11 @@ export class SecuritySettingsPage implements OnInit, OnDestroy {
           return;
         }
         this.pageError.set(
-          getErrorMessage(e) || this.translate.instant('AUTH.SECURITY.PASSKEY_DELETE_ERROR')
+          resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.SECURITY.PASSKEY_DELETE_ERROR', context: 'security' },
+            this.translate
+          )
         );
       }
     } finally {
@@ -310,7 +323,11 @@ export class SecuritySettingsPage implements OnInit, OnDestroy {
           return;
         }
         this.recoveryLoadError.set(
-          getErrorMessage(e) || this.translate.instant('AUTH.SECURITY.RECOVERY_LOAD_ERROR')
+          resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.SECURITY.RECOVERY_LOAD_ERROR', context: 'security' },
+            this.translate
+          )
         );
       }
     }
@@ -375,7 +392,11 @@ export class SecuritySettingsPage implements OnInit, OnDestroy {
           return;
         }
         this.pageError.set(
-          getErrorMessage(e) || this.translate.instant('AUTH.SECURITY.RECOVERY_REGEN_ERROR')
+          resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.SECURITY.RECOVERY_REGEN_ERROR', context: 'security' },
+            this.translate
+          )
         );
         return;
       }
@@ -409,7 +430,11 @@ export class SecuritySettingsPage implements OnInit, OnDestroy {
           return;
         }
         this.pageError.set(
-          getErrorMessage(e) || this.translate.instant('AUTH.SECURITY.TOTP_ACTIVATE_ERROR')
+          resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.SECURITY.TOTP_ACTIVATE_ERROR', context: 'security' },
+            this.translate
+          )
         );
       }
     } finally {
@@ -435,7 +460,11 @@ export class SecuritySettingsPage implements OnInit, OnDestroy {
           return;
         }
         this.pageError.set(
-          getErrorMessage(e) || this.translate.instant('AUTH.SECURITY.TOTP_DEACTIVATE_ERROR')
+          resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.SECURITY.TOTP_DEACTIVATE_ERROR', context: 'security' },
+            this.translate
+          )
         );
       }
     } finally {

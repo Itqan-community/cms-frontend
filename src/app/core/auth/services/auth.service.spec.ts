@@ -1,6 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
 import { HeadlessAuthApiService } from '../headless/headless-auth-api.service';
@@ -146,6 +148,23 @@ describe('AuthService (app / headless)', () => {
         { provide: HttpClient, useValue: httpClientMock },
         { provide: Router, useValue: routerMock },
         { provide: HeadlessAuthApiService, useValue: headless },
+        {
+          provide: TranslateService,
+          useValue: {
+            instant: (key: string) => key,
+            getCurrentLang: () => 'en',
+            onLangChange: of({ lang: 'en' }),
+          },
+        },
+        {
+          provide: NzMessageService,
+          useValue: jasmine.createSpyObj<NzMessageService>('NzMessageService', [
+            'success',
+            'error',
+            'warning',
+            'info',
+          ]),
+        },
       ],
     });
     service = TestBed.inject(AuthService);

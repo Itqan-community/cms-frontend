@@ -199,6 +199,24 @@ import { RecitationsService } from '../../services/recitations.service';
               [ngModel]="selectedHijriDate"
               (ngModelChange)="onYearChange($event)"
             ></nz-date-picker>
+
+            <nz-select
+              class="recitation-filters__select"
+              [nzPlaceHolder]="'ADMIN.COMMON.FILTER_OPEN_ACCESS' | translate"
+              nzSize="default"
+              nzAllowClear
+              [ngModel]="selectedOpenAccess"
+              (ngModelChange)="onOpenAccessChange($event)"
+            >
+              <nz-option
+                [nzValue]="true"
+                [nzLabel]="'ADMIN.COMMON.FILTER_OPEN_ACCESS_YES' | translate"
+              ></nz-option>
+              <nz-option
+                [nzValue]="false"
+                [nzLabel]="'ADMIN.COMMON.FILTER_OPEN_ACCESS_NO' | translate"
+              ></nz-option>
+            </nz-select>
           </div>
         </ng-container>
         <ng-container *nzModalFooter>
@@ -247,6 +265,7 @@ export class RecitationFiltersComponent implements OnInit {
   selectedMeem: MeemBehavior | null = null;
   selectedLicense: string | null = null;
   selectedHijriDate: Date | null = null;
+  selectedOpenAccess: boolean | null = null;
   isFiltersModalOpen = false;
   readonly hijriDefaultPickerDate = new Date(1446, 0, 1);
   private readonly minHijriYear = 1300;
@@ -274,6 +293,9 @@ export class RecitationFiltersComponent implements OnInit {
     this.selectedMeem = (f.meem_behaviour as MeemBehavior) ?? null;
     this.selectedLicense = f.license_code ?? null;
     this.selectedHijriDate = f.year ? new Date(Number(f.year), 0, 1) : null;
+    if (String(f.is_open_access) === 'true') this.selectedOpenAccess = true;
+    else if (String(f.is_open_access) === 'false') this.selectedOpenAccess = false;
+    else this.selectedOpenAccess = null;
   }
 
   ngOnInit(): void {
@@ -369,6 +391,12 @@ export class RecitationFiltersComponent implements OnInit {
     this.emit();
   }
 
+  onOpenAccessChange(value: boolean | null): void {
+    this.selectedOpenAccess = value;
+    this.currentFilters = { ...this.currentFilters, is_open_access: value ?? undefined };
+    this.emit();
+  }
+
   clearAdvancedFilters(): void {
     this.selectedPublisher = null;
     this.selectedReciter = null;
@@ -378,6 +406,7 @@ export class RecitationFiltersComponent implements OnInit {
     this.selectedMeem = null;
     this.selectedLicense = null;
     this.selectedHijriDate = null;
+    this.selectedOpenAccess = null;
     this.currentFilters = {
       ...this.currentFilters,
       publisher_id: undefined,
@@ -388,6 +417,7 @@ export class RecitationFiltersComponent implements OnInit {
       meem_behaviour: undefined,
       license_code: undefined,
       year: undefined,
+      is_open_access: undefined,
     };
     this.emit();
   }
