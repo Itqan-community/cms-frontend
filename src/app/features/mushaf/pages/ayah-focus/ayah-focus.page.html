@@ -1,0 +1,68 @@
+<section class="ayah-focus">
+  @if (loading()) {
+    <div class="ayah-focus__skeleton ayah-focus__skeleton--header"></div>
+    <div class="ayah-focus__skeleton ayah-focus__skeleton--body"></div>
+  } @else if (notFound()) {
+    <app-state-message
+      icon="lucideSearch"
+      iconVariant="default"
+      [title]="'MUSHAF.AYAH_NOT_FOUND' | translate"
+      [message]="'ERRORS.NOT_FOUND' | translate"
+      [secondaryActionLabel]="'MUSHAF.BACK_TO_INDEX' | translate"
+      secondaryRouterLink="/mushaf"
+    />
+  } @else if (errorState()) {
+    <app-state-message
+      icon="lucideAlertCircle"
+      iconVariant="error"
+      [title]="'UI.SOMETHING_WENT_WRONG' | translate"
+      [message]="'ERRORS.SERVER_ERROR' | translate"
+      [actionLabel]="'UI.TRY_AGAIN' | translate"
+      actionIcon="lucideRotateCw"
+      (actionClick)="retry()"
+    />
+  } @else if (surahMeta() && page()) {
+    <header class="ayah-focus__header">
+      <a class="ayah-focus__sura-link" [routerLink]="suraLink()" [queryParams]="mushafQuery()">
+        {{ surahMeta()!.nameArabic }}
+      </a>
+      <span class="ayah-focus__divider">·</span>
+      <span class="ayah-focus__ayah-no">
+        {{ 'MUSHAF.AYAH' | translate }} {{ ayahNumberLabel() }}
+      </span>
+    </header>
+
+    <nav class="ayah-focus__nav" [attr.aria-label]="'MUSHAF.AYAH_NAVIGATION' | translate">
+      <a
+        nz-button
+        class="ayah-focus__nav-btn"
+        [class.ayah-focus__nav-btn--disabled]="!hasPrev()"
+        [routerLink]="hasPrev() ? prevLink() : null"
+        [queryParams]="mushafQuery()"
+        [attr.aria-disabled]="!hasPrev()"
+      >
+        <ng-icon name="lucideChevronRight" />
+        <span>{{ 'MUSHAF.PREVIOUS_AYAH' | translate }}</span>
+      </a>
+      <app-mushaf-switcher />
+      <a
+        nz-button
+        class="ayah-focus__nav-btn"
+        [class.ayah-focus__nav-btn--disabled]="!hasNext()"
+        [routerLink]="hasNext() ? nextLink() : null"
+        [queryParams]="mushafQuery()"
+        [attr.aria-disabled]="!hasNext()"
+      >
+        <span>{{ 'MUSHAF.NEXT_AYAH' | translate }}</span>
+        <ng-icon name="lucideChevronLeft" />
+      </a>
+    </nav>
+
+    <app-mushaf-page
+      [slug]="selected().slug"
+      [page]="page()!"
+      [highlightAyah]="highlight()"
+      (ayahClick)="onAyahClick($event)"
+    />
+  }
+</section>

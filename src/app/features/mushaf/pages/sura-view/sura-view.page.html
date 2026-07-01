@@ -1,0 +1,36 @@
+<section class="sura-view">
+  @if (loading()) {
+    <div class="sura-view__skeleton sura-view__skeleton--header"></div>
+    <div class="sura-view__skeleton sura-view__skeleton--body"></div>
+  } @else if (notFound()) {
+    <app-state-message
+      icon="lucideSearch"
+      iconVariant="default"
+      [title]="'MUSHAF.SURA_NOT_FOUND' | translate"
+      [message]="'ERRORS.NOT_FOUND' | translate"
+      [secondaryActionLabel]="'MUSHAF.BACK_TO_INDEX' | translate"
+      secondaryRouterLink="/mushaf"
+    />
+  } @else if (errorState()) {
+    <app-state-message
+      icon="lucideAlertCircle"
+      iconVariant="error"
+      [title]="'UI.SOMETHING_WENT_WRONG' | translate"
+      [message]="'ERRORS.SERVER_ERROR' | translate"
+      [actionLabel]="'UI.TRY_AGAIN' | translate"
+      actionIcon="lucideRotateCw"
+      (actionClick)="retry()"
+    />
+  } @else if (surahMeta() && page()) {
+    <header class="sura-view__header">
+      <a class="sura-view__back" routerLink="/mushaf" [queryParams]="{ mushaf: selected().slug }">
+        {{ 'MUSHAF.BACK_TO_INDEX' | translate }}
+      </a>
+      <h1 class="sura-view__name">{{ surahMeta()!.nameArabic }}</h1>
+      <p class="sura-view__meta">{{ surahMeta()!.nameEnglish }} · {{ selected().nameAr }}</p>
+      <div class="sura-view__toolbar"><app-mushaf-switcher /></div>
+    </header>
+
+    <app-mushaf-page [slug]="selected().slug" [page]="page()!" (ayahClick)="onAyahClick($event)" />
+  }
+</section>
