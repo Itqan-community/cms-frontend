@@ -40,7 +40,7 @@ User Browser
     |       |
     |       |-- Auth Layer (django-allauth headless)
     |       |       POST /auth/* -> Django allauth
-    |       |       Token storage: sessionStorage + localStorage
+    |       |       Token storage: localStorage (sessionToken + JWTs) + cross-tab sync
     |       |
     |       |-- CMS API Layer (HttpClient + interceptors)
     |       |       GET/POST /cms-api/* -> Django REST API
@@ -56,11 +56,9 @@ User Browser
 ### Authentication Flow (django-allauth headless SPA)
 
 ```
-1. App bootstrap: GET /auth/session (app mode) + GET /_allauth/browser/v1/config; if authenticated,
-   GET /auth/profile/ merges portal `permissions` (code_name list) into `AuthService.currentUser` and
-   localStorage user snapshot.
+1. App bootstrap: GET app `/auth/session` (with `localStorage` token if present); if not authenticated, GET browser `/auth/session` (credentials). Parallel GET `/config`. `storage` event syncs login/logout across tabs. If authenticated, GET `/auth/profile/` merges portal `permissions`.
 2. Login: POST /auth/login -> receive session_token + access_token + refresh_token
-3. Interceptor attaches: X-Session-Token on every `API_BASE_URL` / `ADMIN_API_BASE_URL` request when a token is resolved (sessionStorage `session_token` first; else readable `sessionid` cookie, persisted into sessionStorage). Exception: omit header on `POST …/auth/app/v1/auth/webauthn/signup` (anonymous initiate).
+3. Interceptor attaches: X-Session-Token on every `API_BASE_URL` / `ADMIN_API_BASE_URL` request when a token is resolved (localStorage `sessionToken` first; else readable `sessionid` cookie, persisted into localStorage). Exception: omit header on `POST …/auth/app/v1/auth/webauthn/signup` (anonymous initiate).
                                  headersInterceptor: X-CSRFToken (unsafe methods), Accept-Language (unchanged policy)
                                  withCredentials: false for `/auth/app/v1/`, true for other CMS/API routes (cookies)
 4. 401 recovery: try refresh token -> recheck session -> force re-login
@@ -185,8 +183,8 @@ Pages   Guards    Interceptors   Utils
 **Token management:**
 
 - `session_token` / continuity: resolved via `HeadlessAppTokenService.getSessionToken()` — prefer
-  sessionStorage (`sessionToken`); if empty, readable `sessionid` cookie → copied into
-  sessionStorage on read
+  localStorage (`sessionToken`, shared across tabs); if empty, readable `sessionid` cookie → copied into
+  localStorage on read; one-time migration from legacy `sessionStorage`
 - `access_token` + `refresh_token` -> localStorage (JWT for CMS API)
 - `csrftoken` cookie (same-origin) OR in-memory override (cross-origin)
 - `AuthService` CMS API helpers: `GET/POST/PATCH/DELETE` `API_BASE_URL/api-keys/…` with the same
