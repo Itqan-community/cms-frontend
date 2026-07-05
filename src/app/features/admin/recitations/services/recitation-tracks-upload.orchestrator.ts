@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import type {
   RecitationTrackUploadFinishPart,
@@ -68,31 +69,14 @@ export async function extractDurationMs(blob: Blob): Promise<number | null> {
  * Upload progress note (optional follow-up, do not mix with core UX until stable):
  * `fetch()` does not expose upload byte progress. For real per-chunk progress, implement an
  * isolated path using `XMLHttpRequest` + `xhr.upload.onprogress` for each presigned PUT, while
- * preserving retry/backoff, abort/signal behavior, and parity with this function’s success criteria
+ * preserving retry/backoff, abort/signal behavior, and parity with inline PUT success criteria
  * (HTTP ok + ETag header).
  */
-async function putWithRetry(url: string, chunk: Blob, maxAttempts: number): Promise<string> {
-  let lastErr: unknown;
-  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-    try {
-      const res = await fetch(url, { method: 'PUT', body: chunk });
-      if (!res.ok) throw new Error(`R2 responded ${res.status}`);
-      const etag = res.headers.get('ETag');
-      if (!etag) throw new Error('Missing ETag in R2 response');
-      return etag;
-    } catch (err) {
-      lastErr = err;
-      if (attempt < maxAttempts) {
-        await sleep(500 * Math.pow(2, attempt - 1));
-      }
-    }
-  }
-  throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
-}
 
 @Injectable({ providedIn: 'root' })
 export class RecitationTracksUploadOrchestratorService {
   private readonly recitationsService = inject(RecitationsService);
+  private readonly translate = inject(TranslateService);
   /** Multiple batches can run concurrently; a new batch does not cancel previous ones. */
   private readonly activeRunControllers = new Set<AbortController>();
   /** Per currently uploading file — allows cancelling one upload without aborting the whole run. */
@@ -148,10 +132,9 @@ export class RecitationTracksUploadOrchestratorService {
         if (err instanceof DOMException && err.name === 'AbortError') {
           continue;
         }
-        const msg = err instanceof Error ? err.message : String(err);
         cbs.onRowPatch(item.filename, {
           phase: 'failed',
-          errorMessage: msg,
+          errorMessage: this.formatUploadError(err),
           progress: 0,
         });
       }
@@ -363,5 +346,25 @@ export class RecitationTracksUploadOrchestratorService {
         this.fileAbortControllers.delete(filename);
       }
     }
+  }
+
+  private formatUploadError(err: unknown): string {
+    if (err instanceof DOMException && err.name === 'AbortError') {
+      return this.translate.instant('ADMIN.RECITATIONS.TRACKS.UPLOAD_ERRORS.CANCELLED');
+    }
+    const msg = err instanceof Error ? err.message : String(err);
+    const r2Match = /^R2 responded (\d+)$/.exec(msg);
+    if (r2Match) {
+      return this.translate.instant('ADMIN.RECITATIONS.TRACKS.UPLOAD_ERRORS.R2_RESPONSE', {
+        status: r2Match[1],
+      });
+    }
+    if (msg === 'Missing ETag in R2 response') {
+      return this.translate.instant('ADMIN.RECITATIONS.TRACKS.UPLOAD_ERRORS.MISSING_ETAG');
+    }
+    if (msg === 'Upload cancelled') {
+      return this.translate.instant('ADMIN.RECITATIONS.TRACKS.UPLOAD_ERRORS.CANCELLED');
+    }
+    return this.translate.instant('ADMIN.RECITATIONS.TRACKS.UPLOAD_ERRORS.GENERIC');
   }
 }

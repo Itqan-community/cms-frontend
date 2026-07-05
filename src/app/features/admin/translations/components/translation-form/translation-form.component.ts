@@ -18,11 +18,12 @@ import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { PublisherFilterItem, TranslationFormValue } from '../../models/translations.models';
 import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
 import { TranslationsService } from '../../services/translations.service';
-import { localizeLanguageCode } from '../../../utils/display-localization.util';
 import {
-  getErrorMessage,
-  isRestrictedForTenantConflictError,
-} from '../../../../../shared/utils/error.utils';
+  createDisplayLocalizationLabels,
+  localizeLanguageCode,
+} from '../../../utils/display-localization.util';
+import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
+import { isRestrictedForTenantConflictError } from '../../../../../shared/utils/error.utils';
 
 @Component({
   selector: 'app-translation-form',
@@ -150,10 +151,13 @@ export class TranslationFormComponent implements OnInit {
       error: (error) => {
         this.submitting.set(false);
         if (isRestrictedForTenantConflictError(error)) {
-          const msg = getErrorMessage(error);
-          if (msg) {
-            this.message.error(msg);
-          }
+          this.message.error(
+            resolveApiErrorMessage(
+              error,
+              { fallbackKey: 'ERRORS.RESTRICTED_FOR_TENANT_CONFLICT' },
+              this.translate
+            )
+          );
         }
       },
     });
@@ -231,6 +235,10 @@ export class TranslationFormComponent implements OnInit {
   }
 
   languageLabel(code: string): string {
-    return localizeLanguageCode(code, this.translate.currentLang);
+    return localizeLanguageCode(
+      code,
+      this.translate.currentLang,
+      createDisplayLocalizationLabels(this.translate)
+    );
   }
 }

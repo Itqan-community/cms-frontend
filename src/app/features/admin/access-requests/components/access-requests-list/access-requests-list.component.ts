@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgIcon } from '@ng-icons/core';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -19,6 +19,7 @@ import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constan
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import { AdminTenantService } from '../../../services/admin-tenant.service';
 import { AdminListBase } from '../../../utils/admin-list-base';
+import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
 import {
   AccessRequestOut,
   AccessRequestStatus,
@@ -72,7 +73,6 @@ export class AccessRequestsListComponent
   private readonly tenantService = inject(AdminTenantService);
   private readonly modal = inject(NzModalService);
   private readonly message = inject(NzMessageService);
-  private readonly translate = inject(TranslateService);
   private readonly fb = inject(FormBuilder);
 
   readonly canAcceptOrReject = computed(() =>
@@ -358,10 +358,6 @@ export class AccessRequestsListComponent
   }
 
   private apiErrorMessage(err: unknown, fallbackKey: string): string {
-    const message = (err as { error?: ApiErrorBody })?.error?.message;
-    if (message) {
-      return message;
-    }
-    return this.translate.instant(fallbackKey);
+    return resolveApiErrorMessage(err, { fallbackKey }, this.translate);
   }
 }

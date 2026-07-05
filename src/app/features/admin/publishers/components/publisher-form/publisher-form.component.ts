@@ -23,7 +23,10 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
 import { PublisherUpdatePayload } from '../../models/publishers-stats.models';
 import { NATIONALITY } from '../../../reciters/nationality.enum';
-import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
+import {
+  createDisplayLocalizationLabels,
+  localizeCountryCodeOrName,
+} from '../../../utils/display-localization.util';
 import { PublishersService } from '../../services/publishers.service';
 import { AdminTenantService } from '../../../services/admin-tenant.service';
 import {
@@ -274,7 +277,11 @@ export class PublisherFormComponent implements OnInit {
   }
 
   countryLabel(countryCode: string): string {
-    return localizeCountryCodeOrName(countryCode, this.translate.currentLang);
+    return localizeCountryCodeOrName(
+      countryCode,
+      this.translate.currentLang,
+      createDisplayLocalizationLabels(this.translate)
+    );
   }
 
   onFoundationYearChange(value: Date | null): void {

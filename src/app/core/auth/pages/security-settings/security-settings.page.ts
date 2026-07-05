@@ -30,6 +30,12 @@ export class SecuritySettingsPage implements OnInit, OnDestroy {
   private readonly fb = inject(FormBuilder);
   private readonly translate = inject(TranslateService);
 
+  authenticatorTypeLabel(type: string): string {
+    const key = `AUTH.SECURITY.AUTHENTICATOR_TYPE.${type}`;
+    const translated = this.translate.instant(key);
+    return translated !== key ? translated : type;
+  }
+
   totpForm: FormGroup = this.fb.group({
     code: ['', [Validators.required, Validators.minLength(6)]],
   });

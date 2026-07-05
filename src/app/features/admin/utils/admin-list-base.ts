@@ -1,6 +1,7 @@
 import { Directive, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
 import { NzTableSortOrder } from 'ng-zorro-antd/table';
 import { AdminTableSortPrefsService } from '../services/admin-table-sort-prefs.service';
 
@@ -14,6 +15,7 @@ export abstract class AdminListBase<T, F extends object> {
   protected readonly router = inject(Router);
   protected readonly route = inject(ActivatedRoute);
   protected readonly sortPrefs = inject(AdminTableSortPrefsService);
+  protected readonly translate = inject(TranslateService);
 
   readonly items = signal<T[]>([]);
   readonly total = signal(0);

@@ -469,7 +469,9 @@
               <tr>
                 <td>{{ track.surah_number }}</td>
                 <td>
-                  <span class="admin-mono">{{ track.filename ?? '—' }}</span>
+                  <span class="admin-mono">{{
+                    track.filename ?? ('COMMON.EM_DASH' | translate)
+                  }}</span>
                 </td>
                 <td>{{ formatDurationMs(track.duration_ms) }}</td>
                 <td>{{ formatBytes(track.size_bytes) }}</td>

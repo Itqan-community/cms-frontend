@@ -231,10 +231,18 @@
       "PASSKEY_DELETE_CONFIRM": "Remove this passkey from your account?",
       "PASSKEY_DELETE_ERROR": "Could not remove the passkey.",
       "PASSKEY_RENAME_ERROR": "Could not update the passkey name.",
-      "PASSKEY_EMPTY": "No passkeys registered yet."
+      "PASSKEY_EMPTY": "No passkeys registered yet.",
+      "AUTHENTICATOR_TYPE": {
+        "totp": "Authenticator app",
+        "recovery_codes": "Recovery codes",
+        "webauthn": "Passkey"
+      }
     },
     "ACCOUNT": {
       "BACK_PROFILE": "Back to account"
+    },
+    "LOGOUT": {
+      "SIGNING_OUT": "Signing out…"
     },
     "EMAIL": {
       "TITLE": "Email addresses",
@@ -416,7 +424,25 @@
     "SUBMIT": "Submit",
     "CLOSE": "Close",
     "REFRESH": "Refresh",
-    "REDIRECT_TO_LIBRARY_IN": "Taking you to the library in {{seconds}} seconds…"
+    "REDIRECT_TO_LIBRARY_IN": "Taking you to the library in {{seconds}} seconds…",
+    "HOME_ARIA": "Home page",
+    "OPEN_MENU_ARIA": "Open menu",
+    "LANG_SWITCH_TO_EN": "English",
+    "LANG_SWITCH_TO_AR": "العربية",
+    "LOGO_ALT": "Itqan",
+    "LOGO_ALT_CMS": "Itqan CMS",
+    "USER_AVATAR_ALT": "User avatar",
+    "USER_AVATAR_INITIAL": "U",
+    "EM_DASH": "—",
+    "LANG_NAMES": {
+      "AR": "Arabic",
+      "EN": "English"
+    },
+    "EMPTY_PLACEHOLDER": {
+      "COMING_SOON": "Coming soon: {{title}} management",
+      "DEFAULT_TITLE": "Content"
+    },
+    "MOCK_PUBLISHER_LABEL": "Publisher"
   },
   "FORMS": {
     "PLACEHOLDERS": {
@@ -427,7 +453,10 @@
       "LAST_NAME": "Enter your last name",
       "PHONE_NUMBER": "Enter your phone number",
       "TITLE": "e.g., Software Engineer, Researcher",
-      "PROJECT_LINK": "https://example.com"
+      "PROJECT_LINK": "https://example.com",
+      "URL_EXAMPLE": "https://example.com",
+      "URL_TAFSIR_EXAMPLE": "https://example.com/tafsir",
+      "EMAIL_EXAMPLE": "info@example.com"
     },
     "VALIDATION": {
       "REQUIRED": "This field is required",
@@ -445,9 +474,17 @@
     "UNAUTHORIZED_TITLE": "Access denied",
     "UNAUTHORIZED": "You are not authorized to perform this action.",
     "FORBIDDEN": "Access forbidden.",
-    "NOT_FOUND": "The requested resource was not found."
+    "NOT_FOUND": "The requested resource was not found.",
+    "NOT_FOUND_PAGE": {
+      "TITLE": "Page not found",
+      "MESSAGE": "The page you are looking for does not exist or may have been moved.",
+      "CTA": "Back to library"
+    },
+    "RESTRICTED_FOR_TENANT_CONFLICT": "This asset has pending access requests. Resolve them before enabling tenant restriction.",
+    "TENANT_REQUIRED": "Select a publisher before continuing."
   },
   "PROFILE": {
+    "HUB_ARIA": "Account management",
     "COMPLETE_PROFILE_TITLE": "Complete Your Profile",
     "COMPLETE_PROFILE_DESCRIPTION": "Help us understand more about you and your project",
     "PROJECT_QUESTION": "What are you working on? Tell us about your project?",
@@ -604,6 +641,9 @@
     "CC-BY-NC-ND": "CC BY-NC-ND"
   },
   "LICENSES_LABELS": {
+    "INFO_ARIA": "License info",
+    "DETAILS_ARIA": "License details",
+    "LEARN_MORE_ARIA": "Learn more about {{license}}",
     "CC0": "Fully Open",
     "CC-BY": "Attribution",
     "CC-BY-SA": "Attribution ShareAlike",
@@ -657,6 +697,9 @@
     "LICENSE_INFO": "License Information",
     "CONFIRM": "Confirm",
     "SCROLL_HINT": "Please scroll down to read the full content",
+    "LICENSE_TERMS": {
+      "BODY": "License Agreement for {{name}}\n\nLicense type: {{license}}\n\nTerms and Conditions\n\n1. Grant of License\nBy downloading this resource, you agree to comply with the terms of the {{license}} license.\n\n2. Permitted Uses\n- You may use this resource for personal and commercial projects\n- You may modify and adapt the resource for your needs\n- You must provide appropriate attribution when required\n\n3. Restrictions\n- You may not redistribute original files without permission\n- You may not claim ownership of the original work\n- Commercial use may require additional permissions\n\n4. Warranties and Liability\nThis resource is provided \"as is\" without warranties of any kind.\nThe publisher is not liable for any damages resulting from use of this resource.\n\n5. Termination\nThis license terminates automatically if you violate any terms.\nUpon termination, you must cease all use and delete all copies.\n\nBy clicking \"Confirm\", you acknowledge that you have read and agree to these terms."
+    },
     "USAGE_OPTIONS": {
       "commercial": "Commercial",
       "non-commercial": "Non-Commercial"
@@ -1240,6 +1283,12 @@
           "DONE": "Done",
           "FAILED": "Failed",
           "CANCELLED": "Cancelled"
+        },
+        "UPLOAD_ERRORS": {
+          "R2_RESPONSE": "Storage upload failed (HTTP {{status}}).",
+          "MISSING_ETAG": "Storage upload completed without a valid response.",
+          "CANCELLED": "Upload cancelled.",
+          "GENERIC": "Upload failed. Please try again."
         },
         "NAV_LEAVE_TITLE": "Uploads in progress",
         "NAV_LEAVE_CONTENT": "If you leave this page, any in-progress uploads will stop and their temporary multipart data will be cleaned up. Successfully uploaded audio will remain.",

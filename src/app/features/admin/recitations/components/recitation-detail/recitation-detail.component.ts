@@ -771,7 +771,7 @@ export class RecitationDetailComponent implements OnInit {
   }
 
   formatDurationMs(ms: number | null | undefined): string {
-    if (ms == null || ms <= 0) return '—';
+    if (ms == null || ms <= 0) return this.translate.instant('COMMON.EM_DASH');
     const totalSec = Math.round(ms / 1000);
     const h = Math.floor(totalSec / 3600);
     const m = Math.floor((totalSec % 3600) / 60);
@@ -781,7 +781,7 @@ export class RecitationDetailComponent implements OnInit {
   }
 
   formatBytes(n: number | null | undefined): string {
-    if (n == null || n <= 0) return '—';
+    if (n == null || n <= 0) return this.translate.instant('COMMON.EM_DASH');
     if (n < 1024) return `${n} B`;
     if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
     return `${(n / (1024 * 1024)).toFixed(2)} MB`;

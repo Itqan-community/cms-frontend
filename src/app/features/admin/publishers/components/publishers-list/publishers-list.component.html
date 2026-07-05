@@ -77,7 +77,7 @@
               @if (showCol('name')) {
                 <td class="admin-list-name">
                   <a class="hoverable-link" [routerLink]="['/admin/publishers', p.id]">
-                    {{ p.name || p.name_ar || p.name_en || '—' }}
+                    {{ p.name || p.name_ar || p.name_en || ('COMMON.EM_DASH' | translate) }}
                   </a>
                 </td>
               }

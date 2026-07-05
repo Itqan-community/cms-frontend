@@ -101,7 +101,7 @@ export class TranslationsListComponent extends AdminListBase<TranslationItem, Tr
 
   truncate(text: string | null | undefined, max = 120): string {
     if (text == null || text === '') {
-      return '—';
+      return this.translate.instant('COMMON.EM_DASH');
     }
     const t = text.trim();
     if (t.length <= max) {

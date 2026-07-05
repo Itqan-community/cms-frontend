@@ -22,7 +22,7 @@ import { ImageCarouselComponent } from '../../../../shared/components/image-caro
 import { LicenseTagComponent } from '../../../../shared/components/license-tag/license-tag.component';
 import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
 import { IssuesService } from '../../../admin/issues/services/issues.service';
-import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import { resolveApiErrorMessage } from '../../../../shared/utils/api-error-resolver.util';
 import { AssetDetails } from '../../models/assets.model';
 import { AssetsService } from '../../services/assets.service';
 import { AssetLicenseAcceptanceService } from '../../services/asset-license-acceptance.service';
@@ -366,22 +366,32 @@ export class AssetDetailsPage implements OnInit {
                   this.handleAccessStatusAfterRequest(refreshed.access_status);
                 },
                 error: (error) => {
-                  const defaultKey =
-                    error.status === 0
-                      ? 'ERRORS.NETWORK_ERROR'
-                      : 'ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED';
-                  const errorMessage = getErrorMessage(error) ?? this.translate.instant(defaultKey);
+                  const errorMessage = resolveApiErrorMessage(
+                    error,
+                    {
+                      fallbackKey:
+                        error.status === 0
+                          ? 'ERRORS.NETWORK_ERROR'
+                          : 'ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED',
+                    },
+                    this.translate
+                  );
                   this.message.error(errorMessage);
                 },
               });
           },
           error: (error) => {
             this.isSubmittingRequest.set(false);
-            const defaultKey =
-              error.status === 0
-                ? 'ERRORS.NETWORK_ERROR'
-                : 'ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED';
-            const errorMessage = getErrorMessage(error) ?? this.translate.instant(defaultKey);
+            const errorMessage = resolveApiErrorMessage(
+              error,
+              {
+                fallbackKey:
+                  error.status === 0
+                    ? 'ERRORS.NETWORK_ERROR'
+                    : 'ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED',
+              },
+              this.translate
+            );
             this.message.error(errorMessage);
           },
         });
@@ -462,9 +472,13 @@ export class AssetDetailsPage implements OnInit {
         },
         error: (error) => {
           this.isDownloading.set(false);
-          const defaultErrorKey =
-            error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR';
-          const errorMessage = error.error?.message || this.translate.instant(defaultErrorKey);
+          const errorMessage = resolveApiErrorMessage(
+            error,
+            {
+              fallbackKey: error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR',
+            },
+            this.translate
+          );
           this.message.error(errorMessage);
         },
       });
@@ -489,9 +503,13 @@ export class AssetDetailsPage implements OnInit {
         },
         error: (error) => {
           this.isDownloading.set(false);
-          const defaultErrorKey =
-            error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR';
-          const errorMessage = error.error?.message || this.translate.instant(defaultErrorKey);
+          const errorMessage = resolveApiErrorMessage(
+            error,
+            {
+              fallbackKey: error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR',
+            },
+            this.translate
+          );
           this.message.error(errorMessage);
         },
       });

@@ -56,7 +56,7 @@
                   {{ s.user_agent || ('AUTH.SESSIONS.UNKNOWN_UA' | translate) }}
                 </div>
                 <p class="account-manage__hint">
-                  {{ 'AUTH.SESSIONS.IP' | translate }}: {{ s.ip || '—' }}
+                  {{ 'AUTH.SESSIONS.IP' | translate }}: {{ s.ip || ('COMMON.EM_DASH' | translate) }}
                   @if (s.created_at) {
                     · {{ 'AUTH.SESSIONS.CREATED' | translate }}: {{ s.created_at }}
                   }

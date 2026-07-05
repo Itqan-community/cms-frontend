@@ -5,6 +5,9 @@ import {
   getErrorMessage,
   isAngularHttpFailureMessage,
 } from './error.utils';
+import { isMessageLocalizedForUi } from './message-localization.util';
+
+export { isMessageLocalizedForUi } from './message-localization.util';
 
 /**
  * django-allauth headless codes observed or documented (see allauth account adapter + headless docs).
@@ -42,10 +45,6 @@ export interface ResolveAuthErrorOptions {
   fallbackKey: string;
   context?: AuthErrorContext;
 }
-
-const GENERIC_BACKEND_MESSAGES = new Set(
-  ['server error', 'error', 'bad request', 'internal server error'].map((s) => s.toLowerCase())
-);
 
 /** Global code → i18n key (context-agnostic). */
 const AUTH_ERROR_CODE_I18N: Record<string, string> = {
@@ -101,24 +100,6 @@ const AUTH_ERROR_CONTEXT_CODE_I18N: Partial<
     invalid_credentials: 'AUTH.CHANGE_PASSWORD.ERROR',
   },
 };
-
-const ARABIC_SCRIPT_RE = /[\u0600-\u06FF]/;
-
-export function isMessageLocalizedForUi(message: string, uiLang: string): boolean {
-  const trimmed = message.trim();
-  if (!trimmed || GENERIC_BACKEND_MESSAGES.has(trimmed.toLowerCase())) {
-    return false;
-  }
-  const hasArabic = ARABIC_SCRIPT_RE.test(trimmed);
-  const lang = (uiLang || 'ar').toLowerCase().split('-')[0];
-  if (lang === 'ar') {
-    return hasArabic;
-  }
-  if (lang === 'en') {
-    return !hasArabic;
-  }
-  return true;
-}
 
 function resolveCodeI18nKey(code: string | undefined, context?: AuthErrorContext): string | null {
   if (!code) {

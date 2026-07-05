@@ -22,7 +22,10 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NgIcon } from '@ng-icons/core';
 import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
 import { PublisherFilterItem, TranslationFilters } from '../../models/translations.models';
-import { localizeLanguageCode } from '../../../utils/display-localization.util';
+import {
+  createDisplayLocalizationLabels,
+  localizeLanguageCode,
+} from '../../../utils/display-localization.util';
 
 @Component({
   selector: 'app-translation-filters',
@@ -306,6 +309,10 @@ export class TranslationFiltersComponent implements OnInit {
   }
 
   languageLabel(code: string): string {
-    return localizeLanguageCode(code, this.translate.currentLang);
+    return localizeLanguageCode(
+      code,
+      this.translate.currentLang,
+      createDisplayLocalizationLabels(this.translate)
+    );
   }
 }

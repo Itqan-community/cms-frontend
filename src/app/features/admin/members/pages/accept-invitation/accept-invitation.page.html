@@ -15,7 +15,12 @@
   <div class="accept-invite__container">
     <div class="accept-invite__card">
       <div class="accept-invite__logo">
-        <img src="/assets/images/logo.svg" alt="Itqan" width="50" height="50" />
+        <img
+          src="/assets/images/logo.svg"
+          [alt]="'COMMON.LOGO_ALT' | translate"
+          width="50"
+          height="50"
+        />
       </div>
 
       @if (state() === 'loading') {

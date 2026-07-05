@@ -316,14 +316,14 @@ export class AssetVersionsManagerComponent implements OnInit {
   }
 
   formatBytes(n: number | null | undefined): string {
-    if (n == null || n <= 0) return '—';
+    if (n == null || n <= 0) return this.translate.instant('COMMON.EM_DASH');
     if (n < 1024) return `${n} B`;
     if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
     return `${(n / (1024 * 1024)).toFixed(2)} MB`;
   }
 
   truncate(text: string | null | undefined, max = 80): string {
-    if (text == null || text === '') return '—';
+    if (text == null || text === '') return this.translate.instant('COMMON.EM_DASH');
     const t = text.trim();
     if (t.length <= max) return t;
     return `${t.slice(0, max)}…`;

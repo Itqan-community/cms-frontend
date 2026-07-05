@@ -7,7 +7,7 @@
   nzPopoverTrigger="hover"
   role="button"
   aria-expanded="{{ expanded() }}"
-  aria-label="License info"
+  [attr.aria-label]="'LICENSES_LABELS.INFO_ARIA' | translate"
   (click)="handleTagClick()"
 >
   <span class="tag-label">
@@ -24,7 +24,11 @@
 </nz-tag>
 
 @if (mode() === 'inline' && expanded()) {
-  <div class="inline-details" role="region" aria-label="License details">
+  <div
+    class="inline-details"
+    role="region"
+    [attr.aria-label]="'LICENSES_LABELS.DETAILS_ARIA' | translate"
+  >
     <ng-container *ngTemplateOutlet="licenseContent"></ng-container>
   </div>
 }
@@ -54,7 +58,7 @@
       rel="noopener noreferrer"
       class="license-link"
       role="link"
-      aria-label="Learn more about {{ licenseTitle }}"
+      [attr.aria-label]="'LICENSES_LABELS.LEARN_MORE_ARIA' | translate: { license: licenseTitle }"
     >
       <ng-icon name="lucideExternalLink" aria-hidden="true" />
       <span>{{ LearnMoreText }}</span>

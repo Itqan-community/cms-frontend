@@ -396,10 +396,17 @@ success.
 - **Languages:** English (`en`), Arabic (`ar`)
 - **Default:** Arabic (`ar`) — set in both `index.html` and `app.config.ts`
 - **Persistence:** `localStorage.getItem('lang')`
-- **Switch:** Full page reload on language toggle
+- **Switch:** Full page reload on language toggle (`LangSwitchComponent`)
 - **RTL:** `<html dir="rtl">` with logical CSS properties (`margin-inline`, `padding-inline`)
-- **Keys:** ~1370 per language, translated across all domains (auth, navigation, gallery, admin with
-  770 keys, content standards, licenses, errors, forms)
+- **Keys:** 1483 per language (parity verified); domains include auth, navigation, gallery, admin,
+  content standards, licenses, errors, forms, access-request license terms
+- **API errors:** Hybrid resolver in `shared/utils/api-error-resolver.util.ts` — maps `error_name` /
+  known codes to i18n, shows backend `message` when language matches UI, else fallback key; global
+  `error.interceptor.ts` uses it; component-level handlers dedupe via
+  `shouldSuppressGlobalErrorToast`
+- **Auth errors:** `shared/utils/auth-error-resolver.util.ts` (django-allauth code catalog)
+- **Backend handoff:** Portal validate-upload `message`, timing upload `file_errors[]`, and generic
+  error `message` fields should localize via `Accept-Language` (sent by `global.interceptor.ts`)
 
 ---
 

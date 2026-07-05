@@ -28,10 +28,8 @@ import { ReciterListItem } from '../../../reciters/models/reciters.models';
 import { RecitersAdminService } from '../../../reciters/services/reciters.service';
 import { MaddLevel, MeemBehavior, NamedId } from '../../models/recitations.models';
 import { RecitationsService } from '../../services/recitations.service';
-import {
-  getErrorMessage,
-  isRestrictedForTenantConflictError,
-} from '../../../../../shared/utils/error.utils';
+import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
+import { isRestrictedForTenantConflictError } from '../../../../../shared/utils/error.utils';
 
 /** Hijri year optional: empty is valid; if set, must be within range */
 function optionalHijriYearRange(minY: number, maxY: number) {
@@ -200,10 +198,13 @@ export class RecitationFormComponent implements OnInit {
       error: (error) => {
         this.submitting.set(false);
         if (isRestrictedForTenantConflictError(error)) {
-          const msg = getErrorMessage(error);
-          if (msg) {
-            this.message.error(msg);
-          }
+          this.message.error(
+            resolveApiErrorMessage(
+              error,
+              { fallbackKey: 'ERRORS.RESTRICTED_FOR_TENANT_CONFLICT' },
+              this.translate
+            )
+          );
         }
       },
     });

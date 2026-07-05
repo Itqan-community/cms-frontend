@@ -38,13 +38,13 @@
                       fill="white"
                       text-anchor="middle"
                     >
-                      Publisher
+                      {{ 'COMMON.MOCK_PUBLISHER_LABEL' | translate }}
                     </text>
                   </svg>
                 </div>
               } @else {
                 <img
-                  alt="Itqan CMS"
+                  [alt]="'COMMON.LOGO_ALT_CMS' | translate"
                   loading="lazy"
                   width="120"
                   height="40"
@@ -125,7 +125,7 @@
       <div class="admin-mobile-sider-head">
         <div class="admin-mobile-sider-logo" aria-hidden="true">
           <img
-            alt="Itqan CMS"
+            [alt]="'COMMON.LOGO_ALT_CMS' | translate"
             loading="lazy"
             width="98"
             height="32"

@@ -26,8 +26,12 @@ export class AccountProfilePage implements OnInit {
   readonly successMsg = signal('');
   readonly isSaving = signal(false);
 
-  readonly displayName = computed(() => this.auth.currentUser()?.name ?? '—');
-  readonly displayEmail = computed(() => this.auth.currentUser()?.email ?? '—');
+  readonly displayName = computed(
+    () => this.auth.currentUser()?.name ?? this.translate.instant('COMMON.EM_DASH')
+  );
+  readonly displayEmail = computed(
+    () => this.auth.currentUser()?.email ?? this.translate.instant('COMMON.EM_DASH')
+  );
   readonly displayPhone = computed(() => {
     const p = this.auth.currentUser()?.phone;
     return p?.trim() ? p : '';
