@@ -1235,6 +1235,8 @@
         "LABEL_RIWAYAH": "Riwayah",
         "LABEL_PUBLISHER": "Publisher",
         "DOWNLOAD_AYAH_TIMING": "Download timing file",
+        "VIEW_ON_GALLERY": "View on Gallery",
+        "VIEW_RECITER": "View Reciter",
         "DESC_AR": "Description (Arabic)",
         "DESC_EN": "Description (EN)"
       },

@@ -71,6 +71,24 @@
       </div>
 
       <div class="admin-hero-actions">
+        @if (canViewOnGallery()) {
+          <a
+            nz-button
+            [href]="galleryAssetUrl()"
+            target="_blank"
+            rel="noopener noreferrer"
+            (click)="onViewOnGalleryClick()"
+          >
+            <ng-icon name="lucideExternalLink" />
+            {{ 'ADMIN.RECITATIONS.DETAIL.VIEW_ON_GALLERY' | translate }}
+          </a>
+        }
+        @if (canViewReciter()) {
+          <a nz-button [routerLink]="reciterRouterLink()">
+            <ng-icon name="lucideMic" />
+            {{ 'ADMIN.RECITATIONS.DETAIL.VIEW_RECITER' | translate }}
+          </a>
+        }
         @if (canUpdateRecitation()) {
           <button nz-button nzType="primary" (click)="onEdit()">
             <ng-icon name="lucideSquarePen" />

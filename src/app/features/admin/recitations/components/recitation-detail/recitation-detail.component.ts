@@ -24,6 +24,7 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
+import { GoogleAnalyticsService } from '../../../../../core/services/google-analytics.service';
 import type {
   RecitationSurahTrackListItem,
   RecitationTrackUploadRowState,
@@ -73,6 +74,7 @@ export class RecitationDetailComponent implements OnInit {
   private readonly message = inject(NzMessageService);
   private readonly translate = inject(TranslateService);
   private readonly adminAuth = inject(AdminAuthService);
+  private readonly ga = inject(GoogleAnalyticsService);
 
   readonly canUpdateRecitation = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_RECITATION)
@@ -85,6 +87,16 @@ export class RecitationDetailComponent implements OnInit {
   readonly canUploadTiming = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPLOAD_TIMING)
   );
+
+  readonly canViewOnGallery = computed(() => {
+    const rec = this.recitation();
+    return !!rec?.id && !rec.restricted_for_tenant;
+  });
+
+  readonly canViewReciter = computed(() => {
+    const rec = this.recitation();
+    return !!rec?.reciter?.slug;
+  });
 
   readonly recitation = signal<RecitationDetails | null>(null);
   readonly loading = signal(true);
@@ -740,6 +752,22 @@ export class RecitationDetailComponent implements OnInit {
       return this.translate.instant('ADMIN.RECITATIONS.TRACKS.STATUS.CANCELLED');
     }
     return '';
+  }
+
+  galleryAssetUrl(): string {
+    const id = this.recitation()?.id;
+    return id ? `/gallery/asset/${id}` : '';
+  }
+
+  onViewOnGalleryClick(): void {
+    const rec = this.recitation();
+    if (!rec?.id) return;
+    this.ga.trackEvent('view_on_gallery', { asset_id: rec.id, source: 'recitation_detail' });
+  }
+
+  reciterRouterLink(): string[] {
+    const reciterSlug = this.recitation()?.reciter?.slug;
+    return reciterSlug ? ['/admin/reciters', reciterSlug] : [];
   }
 
   onEdit(): void {

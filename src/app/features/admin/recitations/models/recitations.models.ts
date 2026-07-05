@@ -12,6 +12,7 @@ export enum MeemBehavior {
 
 export interface MinimalReciter {
   id: number;
+  slug: string;
   name: string;
 }
 
