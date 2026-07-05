@@ -1,5 +1,7 @@
 import { inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CanActivateFn, Router } from '@angular/router';
+import { filter, map, take } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 /**
@@ -22,14 +24,20 @@ export const profileCompletedGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  const user = authService.getCurrentUser();
+  return toObservable(authService.bootstrapDone).pipe(
+    filter(Boolean),
+    take(1),
+    map(() => {
+      const user = authService.getCurrentUser();
 
-  // If user exists and profile is completed, allow access
-  if (user?.is_profile_completed) {
-    return true;
-  }
+      // If user exists and profile is completed, allow access
+      if (user?.is_profile_completed) {
+        return true;
+      }
 
-  // Profile not completed, redirect to complete-profile page
-  router.navigate(['/complete-profile']);
-  return false;
+      // Profile not completed, redirect to complete-profile page
+      router.navigate(['/complete-profile']);
+      return false;
+    })
+  );
 };

@@ -63,7 +63,9 @@ export const appConfig: ApplicationConfig = {
         errorInterceptor,
       ])
     ),
-    provideAppInitializer(() => inject(AuthService).bootstrapOnce()),
+    provideAppInitializer(() => {
+      void inject(AuthService).bootstrapOnce();
+    }),
     // ngx-translate setup
     provideTranslateService({
       loader: provideTranslateHttpLoader({

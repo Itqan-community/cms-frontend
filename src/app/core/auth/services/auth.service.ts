@@ -15,6 +15,7 @@ import {
   take,
   tap,
   throwError,
+  timeout,
 } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
@@ -61,6 +62,9 @@ import {
 } from '../models/auth.model';
 import { normalizeApiKeyRow, parseApiKeyCreated, parseApiKeysList } from '../utils/api-keys.util';
 import { getCookie, getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
+
+/** Bound on the initial session/config calls so a hung backend can't stall bootstrapDone forever. */
+const AUTH_BOOTSTRAP_TIMEOUT_MS = 15000;
 
 @Injectable({
   providedIn: 'root',
@@ -126,12 +130,15 @@ export class AuthService {
     return firstValueFrom(
       forkJoin({
         auth: this.headless.getAuth().pipe(
+          timeout(AUTH_BOOTSTRAP_TIMEOUT_MS),
           catchError(() => {
             this.authBootstrapFailed.set(true);
             return of(false as const);
           })
         ),
-        config: this.headless.getConfig().pipe(catchError(() => of(undefined))),
+        config: this.headless
+          .getConfig()
+          .pipe(timeout(AUTH_BOOTSTRAP_TIMEOUT_MS), catchError(() => of(undefined))),
       }).pipe(
         tap(({ auth, config }) => {
           if (auth !== false) {

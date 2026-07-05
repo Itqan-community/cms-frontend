@@ -1,5 +1,7 @@
 import { inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CanActivateFn, Router } from '@angular/router';
+import { filter, map, take } from 'rxjs';
 import { AuthService } from '../services/auth.service';
 
 /**
@@ -22,11 +24,17 @@ export const guestGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (!authService.isLoggedIn()) {
-    return true;
-  }
+  return toObservable(authService.bootstrapDone).pipe(
+    filter(Boolean),
+    take(1),
+    map(() => {
+      if (!authService.isLoggedIn()) {
+        return true;
+      }
 
-  // Already logged in, redirect to home
-  router.navigate(['/gallery']);
-  return false;
+      // Already logged in, redirect to home
+      router.navigate(['/gallery']);
+      return false;
+    })
+  );
 };
