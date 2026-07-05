@@ -531,7 +531,9 @@
   "CATEGORIES": {
     "mushaf": "Mushaf",
     "tafsir": "Tafsir",
-    "recitation": "Recitation"
+    "recitation": "Recitation",
+    "font": "Font",
+    "program": "Program"
   },
   "LICENSES": {
     "CC0": "CC0",

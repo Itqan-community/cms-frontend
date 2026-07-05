@@ -531,7 +531,9 @@
   "CATEGORIES": {
     "mushaf": "المصحف",
     "tafsir": "التفسير",
-    "recitation": "التلاوات"
+    "recitation": "التلاوات",
+    "font": "الخطوط",
+    "program": "البرامج"
   },
   "LICENSES": {
     "CC0": "CC0",
