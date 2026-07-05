@@ -132,7 +132,7 @@ describe('authErrorInterceptor', () => {
 
   it('on 410 to app headless session, invalidates client auth and does not retry', (done) => {
     const authMock = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-    sessionStorage.setItem('sessionToken', 'session-x');
+    localStorage.setItem('sessionToken', 'session-x');
 
     http.get(appSessionUrl).subscribe({
       error: (err) => {

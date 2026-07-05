@@ -44,7 +44,10 @@ import {
   AuthenticatedOrChallenge,
   HeadlessAuthApiService,
 } from '../headless/headless-auth-api.service';
-import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
+import {
+  ALLAUTH_SESSION_TOKEN_STORAGE_KEY,
+  HeadlessAppTokenService,
+} from '../headless/headless-app-token.service';
 import type {
   ApiKeyCreateIn,
   ApiKeyCreateResult,
@@ -123,6 +126,12 @@ export class AuthService {
       }
       this.prevAuthForRedirect = msg;
     });
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', (event) => {
+        this.handleCrossTabSessionTokenChange(event);
+      });
+    }
   }
 
   /**
@@ -132,12 +141,7 @@ export class AuthService {
   bootstrapOnce(): Promise<void> {
     return firstValueFrom(
       forkJoin({
-        auth: this.headless.getAuth().pipe(
-          catchError(() => {
-            this.authBootstrapFailed.set(true);
-            return of(false as const);
-          })
-        ),
+        auth: this.resolveBootstrapSession(),
         config: this.headless.getConfig().pipe(catchError(() => of(undefined))),
       }).pipe(
         tap(({ auth, config }) => {
@@ -160,7 +164,7 @@ export class AuthService {
           }
         }),
         switchMap(({ auth }) => {
-          if (auth === false || !authInfo(auth).isAuthenticated) {
+          if (auth === false || !this.isOauthReturnSessionEstablished(auth)) {
             return of(void 0);
           }
           return this.getProfile().pipe(
@@ -186,6 +190,88 @@ export class AuthService {
         map(() => void 0)
       )
     );
+  }
+
+  /**
+   * App session first (fast path when `localStorage` token exists); browser session with
+   * credentials when app session is not established (split-host cookie-backed auth).
+   */
+  private resolveBootstrapSession(): Observable<AuthenticatedOrChallenge | false> {
+    return this.headless.getAuth().pipe(
+      catchError(() => {
+        this.authBootstrapFailed.set(true);
+        return of(false as const);
+      }),
+      switchMap((appRes) => {
+        if (appRes !== false && this.isOauthReturnSessionEstablished(appRes)) {
+          return of(appRes);
+        }
+        return this.headless.getBrowserSession().pipe(
+          catchError((err) => this.observableHeadlessEnvelopeFromSessionHttpFailure(err)),
+          map((browserRes) => {
+            if (this.isOauthReturnSessionEstablished(browserRes)) {
+              return browserRes;
+            }
+            return appRes !== false ? appRes : browserRes;
+          })
+        );
+      })
+    );
+  }
+
+  /** Sync auth state when another tab sets or clears the shared session token. */
+  private handleCrossTabSessionTokenChange(event: StorageEvent): void {
+    if (event.storageArea !== localStorage || event.key !== ALLAUTH_SESSION_TOKEN_STORAGE_KEY) {
+      return;
+    }
+    if (this.loggingOut) {
+      return;
+    }
+    if (!event.newValue) {
+      this.tokenStore.blockSessionCookieFallback();
+      this.clearLocalAuthUi({ preserveSessionStorageToken: false });
+      this.authSnapshot.set(undefined);
+      this.prevAuthForRedirect = undefined;
+      void this.router.navigate([ALLAUTH_LOGIN_URL]);
+      return;
+    }
+    if (event.oldValue === event.newValue) {
+      return;
+    }
+    this.headless
+      .getSession()
+      .pipe(
+        tap((res) => {
+          this.authSnapshot.set(res);
+          this.tokenStore.setFromMeta(res.meta);
+          this.syncUserFromSnapshot(res);
+          this.prevAuthForRedirect = res;
+        }),
+        switchMap((res) => {
+          if (!this.isOauthReturnSessionEstablished(res)) {
+            return of(void 0);
+          }
+          return this.getProfile().pipe(
+            tap((p) => {
+              const cur = this.currentUser();
+              if (!cur) {
+                return;
+              }
+              const merged: User = {
+                ...cur,
+                ...p,
+                id: String(p.id ?? cur.id),
+                permissions: normalizeProfilePermissionCodes(p.permissions),
+              };
+              this.currentUser.set(merged);
+              localStorage.setItem(this.USER_KEY, JSON.stringify(merged));
+            }),
+            catchError(() => of(void 0))
+          );
+        }),
+        catchError(() => of(void 0))
+      )
+      .subscribe();
   }
 
   private syncUserFromSnapshot(msg: unknown): void {
