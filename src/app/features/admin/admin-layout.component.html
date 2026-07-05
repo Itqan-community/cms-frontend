@@ -157,7 +157,7 @@
               </span>
             } @else {
               <a
-                [routerLink]="['/admin', tab.path]"
+                [routerLink]="tabRouterLink(tab)"
                 class="admin-sidenav-link"
                 (click)="onMenuItemClick()"
               >

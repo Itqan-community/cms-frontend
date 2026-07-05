@@ -70,6 +70,7 @@ describe('AuthService (app / headless)', () => {
       'login',
       'signup',
       'deleteSession',
+      'deleteBrowserSession',
       'verifyEmail',
       'redirectToProvider',
     ]);
@@ -120,6 +121,8 @@ describe('AuthService (app / headless)', () => {
       } as ConfigurationResponse)
     );
     headless.redirectToProvider.and.returnValue(Promise.resolve({ kind: 'form_submitted' }));
+    headless.deleteSession.and.returnValue(of(null));
+    headless.deleteBrowserSession.and.returnValue(of(null));
     routerMock = {
       url: '/account/login?next=%2Faccount%2Fproviders',
       navigate: jasmine.createSpy('navigate'),
@@ -202,6 +205,7 @@ describe('AuthService (app / headless)', () => {
   });
 
   it('sessionRecheckAfter401 returns true and updates state when getSession is authenticated', (done) => {
+    tokenStore.setSessionToken('recheck-token');
     headless.getSession.and.returnValue(of(authedResponse()));
     service.sessionRecheckAfter401().subscribe((ok) => {
       expect(ok).toBe(true);
@@ -211,6 +215,7 @@ describe('AuthService (app / headless)', () => {
   });
 
   it('sessionRecheckAfter401 returns false on getSession error', (done) => {
+    tokenStore.setSessionToken('recheck-token');
     headless.getSession.and.returnValue(throwError(() => new Error('net')));
     service.sessionRecheckAfter401().subscribe((ok) => {
       expect(ok).toBe(false);
@@ -218,13 +223,38 @@ describe('AuthService (app / headless)', () => {
     });
   });
 
-  it('startGoogleOAuth with login clears stale session token before redirect', async () => {
+  it('sessionRecheckAfter401 skips getSession when no session or refresh token', (done) => {
+    headless.getSession.calls.reset();
+    service.sessionRecheckAfter401().subscribe((ok) => {
+      expect(ok).toBe(false);
+      expect(headless.getSession).not.toHaveBeenCalled();
+      done();
+    });
+  });
+
+  it('logout clears client auth before server session delete', async () => {
+    tokenStore.setSessionToken('stale');
+    spyOnProperty(document, 'cookie', 'get').and.returnValue('sessionid=stale-cookie; Path=/');
+    headless.deleteSession.and.callFake(() => {
+      expect(tokenStore.getSessionToken()).toBeNull();
+      return of({ status: 200 });
+    });
+    headless.deleteBrowserSession.and.returnValue(of({ status: 200 }));
+    await firstValueFrom(service.logout());
+    expect(headless.deleteSession).toHaveBeenCalled();
+    expect(headless.deleteBrowserSession).toHaveBeenCalled();
+    expect(tokenStore.isSessionCookieFallbackBlocked()).toBeTrue();
+  });
+
+  it('startGoogleOAuth with login clears stale auth state and browser session before redirect', async () => {
     tokenStore.setSessionToken('stale-token');
+    localStorage.setItem('headless_access_token', 'stale-access');
     headless.redirectToProvider.and.returnValue(
       Promise.resolve({ kind: 'error', message: 'backend refused' })
     );
     await service.startGoogleOAuth('http://localhost/cb', 'login');
     expect(tokenStore.getSessionToken()).toBeNull();
+    expect(headless.deleteBrowserSession).toHaveBeenCalled();
     expect(headless.redirectToProvider).toHaveBeenCalled();
   });
 

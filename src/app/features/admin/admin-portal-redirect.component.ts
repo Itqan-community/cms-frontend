@@ -2,6 +2,8 @@ import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { PORTAL_PERMISSIONS } from './constants/portal-permission.constants';
 import { AdminAuthService } from './services/admin-auth.service';
+import { AdminTenantService } from './services/admin-tenant.service';
+import { buildSelectedPublisherDetailCommands } from './utils/admin-tenant-navigation.util';
 
 /**
  * Default `/admin` child: sends the user to the first module they can access
@@ -15,10 +17,16 @@ import { AdminAuthService } from './services/admin-auth.service';
 export class AdminPortalRedirectComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly adminAuth = inject(AdminAuthService);
+  private readonly tenantService = inject(AdminTenantService);
 
   ngOnInit(): void {
     if (this.adminAuth.isItqanAdmin()) {
-      void this.router.navigate(['/admin', 'publishers'], { replaceUrl: true });
+      this.tenantService.ensureReady().subscribe(() => {
+        const commands = buildSelectedPublisherDetailCommands(
+          this.tenantService.getSelectedPublisherId()
+        ) ?? ['/admin', 'publishers'];
+        void this.router.navigate(commands, { replaceUrl: true });
+      });
       return;
     }
 

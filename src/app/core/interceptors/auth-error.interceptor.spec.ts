@@ -27,6 +27,7 @@ describe('authErrorInterceptor', () => {
 
   beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     const authMock = jasmine.createSpyObj<AuthService>('AuthService', [
       'sessionRecheckAfter401',
       'invalidateClientAuthAndGoLogin',
@@ -131,12 +132,27 @@ describe('authErrorInterceptor', () => {
 
   it('on 410 to app headless session, invalidates client auth and does not retry', (done) => {
     const authMock = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
-    localStorage.setItem('headless_session_token', 'session-x');
+    sessionStorage.setItem('sessionToken', 'session-x');
 
     http.get(appSessionUrl).subscribe({
       error: (err) => {
         expect(err.status).toBe(410);
         expect(authMock.invalidateClientAuthAndGoLogin).toHaveBeenCalled();
+        done();
+      },
+    });
+
+    const r1 = httpMock.expectOne(appSessionUrl);
+    r1.flush('gone', { status: 410, statusText: 'Gone' });
+  });
+
+  it('on 410 to app headless session GET without stored token, does not force login redirect', (done) => {
+    const authMock = TestBed.inject(AuthService) as jasmine.SpyObj<AuthService>;
+
+    http.get(appSessionUrl).subscribe({
+      error: (err) => {
+        expect(err.status).toBe(410);
+        expect(authMock.invalidateClientAuthAndGoLogin).not.toHaveBeenCalled();
         done();
       },
     });

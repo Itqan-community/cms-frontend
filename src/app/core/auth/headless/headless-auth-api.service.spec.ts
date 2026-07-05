@@ -87,6 +87,18 @@ describe('HeadlessAuthApiService', () => {
     });
   });
 
+  it('deleteBrowserSession DELETEs browser client /auth/session with credentials', (done) => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    service.deleteBrowserSession().subscribe(() => done());
+    const r = httpMock.expectOne(`${api}/auth/${HEADLESS_CLIENT_BROWSER}/v1/auth/session`);
+    expect(r.request.method).toBe('DELETE');
+    expect(r.request.withCredentials).toBeTrue();
+    r.flush({ status: 200 });
+  });
+
   it('postWebauthnLogin sends a single credential envelope when payload is already wrapped', (done) => {
     if (!api) {
       pending('API_BASE_URL');

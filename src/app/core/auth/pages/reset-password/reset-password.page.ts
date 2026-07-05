@@ -2,10 +2,12 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgIcon } from '@ng-icons/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
+import { AuthBackLinkComponent } from '../../components/auth-back-link/auth-back-link.component';
 import { getErrorMessage } from '../../../../shared/utils/error.utils';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { AuthService } from '../../services/auth.service';
@@ -13,7 +15,14 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-reset-password-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, LangSwitchComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TranslateModule,
+    LangSwitchComponent,
+    AuthBackLinkComponent,
+    NgIcon,
+  ],
   styleUrls: ['./reset-password.page.less'],
   templateUrl: './reset-password.page.html',
 })
@@ -31,6 +40,16 @@ export class ResetPasswordPage implements OnInit {
   resetKey = signal<string | null>(null);
   /** Hint: email used when coming from forgot-password (code flow). */
   sentToEmail = signal<string | null>(null);
+  passwordVisible = signal(false);
+  confirmPasswordVisible = signal(false);
+
+  togglePasswordVisibility(): void {
+    this.passwordVisible.set(!this.passwordVisible());
+  }
+
+  toggleConfirmPasswordVisibility(): void {
+    this.confirmPasswordVisible.set(!this.confirmPasswordVisible());
+  }
 
   constructor() {
     this.form = this.fb.group(

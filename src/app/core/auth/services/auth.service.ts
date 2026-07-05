@@ -60,7 +60,12 @@ import {
   User,
 } from '../models/auth.model';
 import { normalizeApiKeyRow, parseApiKeyCreated, parseApiKeysList } from '../utils/api-keys.util';
-import { getCookie, getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
+import {
+  clearReadableDjangoAuthCookies,
+  getCookie,
+  getDjangoCsrfTokenForRequest,
+  setCrossOriginDjangoCsrfToken,
+} from '../../utils/csrf.util';
 
 @Injectable({
   providedIn: 'root',
@@ -102,13 +107,15 @@ export class AuthService {
 
   private isRefreshing = false;
   private refreshTokenSubject = new BehaviorSubject<boolean | null>(null);
+  /** Suppresses auth-bus redirect side-effects while an explicit logout is in flight. */
+  private loggingOut = false;
 
   constructor() {
     this.authBus.changes$.subscribe((msg) => {
       const prev = this.prevAuthForRedirect;
       this.authSnapshot.set(msg);
       this.syncUserFromSnapshot(msg);
-      if (this.redirectPrimed && prev !== undefined) {
+      if (this.redirectPrimed && prev !== undefined && !this.loggingOut) {
         const evt = determineAuthChangeEvent(prev, msg);
         if (evt) {
           void this.handleAuthChangeEvent(evt as AuthChangeEventType, msg);
@@ -210,6 +217,8 @@ export class AuthService {
     localStorage.removeItem(this.USER_KEY);
     if (!opts?.preserveSessionStorageToken) {
       this.tokenStore.clear();
+      setCrossOriginDjangoCsrfToken(null);
+      clearReadableDjangoAuthCookies();
     }
     this.authStateSubject.next(false);
     this.currentUser.set(null);
@@ -244,6 +253,12 @@ export class AuthService {
       );
     }
 
+    if (!this.tokenStore.getSessionToken()) {
+      this.isRefreshing = false;
+      this.refreshTokenSubject.next(false);
+      return of(false);
+    }
+
     return this.headless.getSession().pipe(
       map((res) => {
         const info = authInfo(res);
@@ -252,6 +267,7 @@ export class AuthService {
           this.refreshTokenSubject.next(false);
           return false;
         }
+        this.tokenStore.unblockSessionCookieFallback();
         this.authSnapshot.set(res);
         this.tokenStore.setFromMeta(res.meta);
         this.syncUserFromSnapshot(res);
@@ -268,6 +284,7 @@ export class AuthService {
   }
 
   invalidateClientAuthAndGoLogin(): void {
+    this.tokenStore.blockSessionCookieFallback();
     this.clearLocalAuthUi({ preserveSessionStorageToken: false });
     this.authSnapshot.set(undefined);
     this.prevAuthForRedirect = undefined;
@@ -303,8 +320,8 @@ export class AuthService {
   }): Observable<AuthenticatedOrChallenge> {
     const fetchProfile = options?.fetchProfile;
 
-    // Same-origin only: if Django sessionid is readable (not HttpOnly), seed app header store.
-    if (!this.tokenStore.getSessionToken()) {
+    // Same-origin only: seed from readable `sessionid` when not in post-logout blocked state.
+    if (!this.tokenStore.isSessionCookieFallbackBlocked() && !this.tokenStore.getSessionToken()) {
       const sessionId = getCookie('sessionid');
       if (sessionId) {
         this.tokenStore.setSessionToken(sessionId);
@@ -368,6 +385,9 @@ export class AuthService {
       return of(res);
     }
     this.authSnapshot.set(res);
+    if (authInfo(res).isAuthenticated && res.status === 200) {
+      this.tokenStore.unblockSessionCookieFallback();
+    }
     this.tokenStore.setFromMeta(res.meta);
     this.syncUserFromSnapshot(res);
 
@@ -449,23 +469,31 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
-    return this.headless.deleteSession().pipe(
-      tap(() => {
-        this.performLogoutAfterServer();
-      }),
-      catchError(() => {
-        this.performLogoutAfterServer();
-        return of(void 0);
-      }),
-      switchMap(() => of(void 0))
-    );
-  }
-
-  private performLogoutAfterServer(): void {
+    this.loggingOut = true;
+    this.tokenStore.blockSessionCookieFallback();
     this.clearLocalAuthUi({ preserveSessionStorageToken: false });
     this.authSnapshot.set(undefined);
-    this.prevAuthForRedirect = undefined;
-    void this.router.navigate([ALLAUTH_LOGIN_URL]);
+
+    return forkJoin([
+      this.headless.deleteSession().pipe(catchError(() => of(null))),
+      this.headless.deleteBrowserSession().pipe(catchError(() => of(null))),
+    ]).pipe(
+      tap(() => {
+        this.tokenStore.clearSessionToken();
+        this.prevAuthForRedirect = undefined;
+        void this.router.navigate([ALLAUTH_LOGIN_URL]);
+      }),
+      catchError(() => {
+        this.tokenStore.clearSessionToken();
+        this.prevAuthForRedirect = undefined;
+        void this.router.navigate([ALLAUTH_LOGIN_URL]);
+        return of(void 0);
+      }),
+      finalize(() => {
+        this.loggingOut = false;
+      }),
+      map(() => void 0)
+    );
   }
 
   getProfile(): Observable<UpdateProfileResponse> {
@@ -586,7 +614,11 @@ export class AuthService {
     process: 'login' | 'connect'
   ): Promise<{ kind: 'redirecting' } | { kind: 'error'; message: string }> {
     if (process === 'login') {
-      this.tokenStore.clearSessionToken();
+      this.tokenStore.blockSessionCookieFallback();
+      this.tokenStore.clear();
+      setCrossOriginDjangoCsrfToken(null);
+      clearReadableDjangoAuthCookies();
+      await firstValueFrom(this.headless.deleteBrowserSession().pipe(catchError(() => of(null))));
     }
     if (process === 'connect' && !this.tokenStore.getSessionToken()) {
       return {

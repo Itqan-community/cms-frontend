@@ -2,10 +2,12 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgIcon } from '@ng-icons/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
+import { AuthBackLinkComponent } from '../../components/auth-back-link/auth-back-link.component';
 import {
   getErrorMessage,
   isWebAuthnIncorrectCodeError,
@@ -21,7 +23,14 @@ import { readContinueUrl } from '../../utils/auth-route-query.util';
 @Component({
   selector: 'app-mfa-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, LangSwitchComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TranslateModule,
+    LangSwitchComponent,
+    AuthBackLinkComponent,
+    NgIcon,
+  ],
   styleUrls: ['./mfa.page.less'],
   templateUrl: './mfa.page.html',
 })

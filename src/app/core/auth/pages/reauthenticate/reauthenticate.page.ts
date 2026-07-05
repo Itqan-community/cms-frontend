@@ -4,8 +4,10 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgIcon } from '@ng-icons/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
+import { AuthBackLinkComponent } from '../../components/auth-back-link/auth-back-link.component';
 import {
   getErrorMessage,
   isWebAuthnIncorrectCodeError,
@@ -25,7 +27,14 @@ import { readContinueUrl } from '../../utils/auth-route-query.util';
 @Component({
   selector: 'app-reauthenticate-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslateModule, LangSwitchComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TranslateModule,
+    LangSwitchComponent,
+    AuthBackLinkComponent,
+    NgIcon,
+  ],
   styleUrls: ['./reauthenticate.page.less'],
   templateUrl: './reauthenticate.page.html',
 })
@@ -41,6 +50,7 @@ export class ReauthenticatePage implements OnInit {
   errorMessage = signal<string>('');
   isLoading = signal(false);
   passkeyAvailable = signal(true);
+  passwordVisible = signal(false);
 
   constructor() {
     this.form = this.fb.group({ password: ['', [Validators.required, Validators.minLength(1)]] });
@@ -49,6 +59,10 @@ export class ReauthenticatePage implements OnInit {
 
   ngOnInit(): void {
     this.passkeyAvailable.set(isPasskeyClientEnvironmentSupported());
+  }
+
+  togglePasswordVisibility(): void {
+    this.passwordVisible.set(!this.passwordVisible());
   }
 
   get returnUrl(): string {

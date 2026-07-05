@@ -49,6 +49,9 @@ export interface ReciterFormValue {
   image?: File;
 }
 
+/** PATCH /portal/reciters/{reciter_slug}/ — only include changed fields. */
+export type ReciterPatchValue = Partial<ReciterFormValue>;
+
 export interface RecitersListResponse {
   results: ReciterListItem[];
   count: number;

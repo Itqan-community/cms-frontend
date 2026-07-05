@@ -21,6 +21,8 @@ import { PublishersService } from '../../services/publishers.service';
 import { PublisherFiltersComponent } from '../publisher-filters/publisher-filters.component';
 import { AdminListBase } from '../../../utils/admin-list-base';
 import { AdminAuthService } from '../../../services/admin-auth.service';
+import { AdminTenantService } from '../../../services/admin-tenant.service';
+import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 
 @Component({
   selector: 'app-publishers-list',
@@ -45,9 +47,15 @@ export class PublishersListComponent extends AdminListBase<Publisher, PublisherU
   private readonly publishersService = inject(PublishersService);
   private readonly translate = inject(TranslateService);
   private readonly adminAuth = inject(AdminAuthService);
+  private readonly tenantService = inject(AdminTenantService);
 
-  /** Publishers admin is Itqan staff only (no granular portal permission in API). */
-  readonly canManagePublishers = computed(() => this.adminAuth.isItqanAdmin());
+  /** Gate create/edit on the granular portal permissions, not the is_admin flag. */
+  readonly canCreatePublishers = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_CREATE_PUBLISHER)
+  );
+  readonly canEditPublishers = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_PUBLISHER)
+  );
 
   readonly publisherTableStorageKey = 'admin-list-publishers';
   readonly publisherTableColumns: AdminTableColumnOption[] = [
@@ -73,6 +81,21 @@ export class PublishersListComponent extends AdminListBase<Publisher, PublisherU
       })
       .subscribe({
         next: (res) => {
+          // When the user is scoped to a single publisher (e.g. tenant-filtered),
+          // the list is pointless — go straight to that publisher's detail page.
+          // Only when it's genuinely a single-publisher scope, not a filtered-down
+          // result, so staff browsing all publishers keep the list.
+          const isSingleScope = this.tenantService.publishers().length === 1;
+          if (isSingleScope && res.count === 1 && this.page() === 1 && !this.hasActiveFilters()) {
+            const publisherId = res.results[0]?.id ?? this.tenantService.getSelectedPublisherId();
+            if (publisherId != null) {
+              this.loading.set(false);
+              void this.router.navigate(['/admin/publishers', publisherId], {
+                replaceUrl: true,
+              });
+              return;
+            }
+          }
           this.items.set(res.results);
           this.total.set(res.count);
           this.loading.set(false);
@@ -81,6 +104,11 @@ export class PublishersListComponent extends AdminListBase<Publisher, PublisherU
           this.loading.set(false);
         },
       });
+  }
+
+  private hasActiveFilters(): boolean {
+    const f = this.activeFilters;
+    return !!(f.search || f.country || f.is_verified != null);
   }
 
   countryLabel(country: string | null | undefined): string {

@@ -9,6 +9,7 @@ import { applyAllauthEnvelopeSideEffects } from '../auth/headless/allauth-envelo
 import {
   isHeadlessAppAuthUrl,
   isHeadlessAccountWebAuthnAuthenticatorsUrl,
+  isHeadlessAppSessionUrl,
 } from '../auth/headless/headless-api-path.util';
 import {
   isReauthenticationBody,
@@ -61,7 +62,11 @@ export function authErrorInterceptor(
       }
 
       if (error.status === 410 && isHeadlessAppAuthUrl(req.url)) {
-        authService.invalidateClientAuthAndGoLogin();
+        if (tokenStore.getSessionToken()) {
+          authService.invalidateClientAuthAndGoLogin();
+        } else if (isHeadlessAppSessionUrl(req.url) && req.method === 'GET') {
+          tokenStore.clearSessionToken();
+        }
         return throwError(() => error);
       }
 

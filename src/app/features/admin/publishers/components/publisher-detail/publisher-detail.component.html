@@ -1,8 +1,8 @@
 <div class="publisher-detail admin-list-page">
   <div class="admin-breadcrumb">
-    <a routerLink="/admin/publishers" class="admin-breadcrumb__link">{{
+    <span class="admin-breadcrumb__link admin-breadcrumb__link--static">{{
       'ADMIN.PUBLISHERS.DETAIL.BREADCRUMB' | translate
-    }}</a>
+    }}</span>
     <ng-icon name="lucideChevronLeft" class="admin-breadcrumb__sep" />
     @if (loading()) {
       <span class="admin-breadcrumb__current">{{ 'ADMIN.COMMON.LOADING' | translate }}</span>
@@ -39,11 +39,21 @@
       </div>
 
       <div class="admin-hero-actions">
-        @if (canManagePublishers()) {
+        @if (canCreatePublisher()) {
+          <a routerLink="/admin/publishers/create">
+            <button nz-button nzType="default">
+              <ng-icon name="lucidePlus" />
+              {{ 'ADMIN.PUBLISHERS.ADD_BUTTON' | translate }}
+            </button>
+          </a>
+        }
+        @if (canEditPublisher()) {
           <button nz-button nzType="primary" (click)="onEdit()">
             <ng-icon name="lucideSquarePen" />
             {{ 'ADMIN.COMMON.EDIT' | translate }}
           </button>
+        }
+        @if (canDeletePublisher()) {
           <button nz-button nzDanger (click)="onDelete()">
             <ng-icon name="lucideTrash2" />
             {{ 'ADMIN.COMMON.DELETE' | translate }}
@@ -97,20 +107,13 @@
         </nz-descriptions-item>
       </nz-descriptions>
     </div>
-
-    <div class="admin-back">
-      <a routerLink="/admin/publishers">
-        <button nz-button nzType="default">
-          <ng-icon name="lucideArrowRight" />
-          {{ 'ADMIN.COMMON.BACK_TO_LIST' | translate }}
-        </button>
-      </a>
-    </div>
   } @else {
     <div class="admin-not-found">
       <ng-icon name="lucideAlertTriangle" class="admin-not-found__icon" />
       <p>{{ 'ADMIN.PUBLISHERS.DETAIL.NOT_FOUND' | translate }}</p>
-      <a routerLink="/admin/publishers">{{ 'ADMIN.COMMON.GO_BACK_LIST' | translate }}</a>
+      @if (publishersHomeLink(); as homeLink) {
+        <a [routerLink]="homeLink">{{ 'ADMIN.PUBLISHERS.DETAIL.BREADCRUMB' | translate }}</a>
+      }
     </div>
   }
 </div>
