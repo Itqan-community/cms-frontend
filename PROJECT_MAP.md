@@ -183,8 +183,8 @@ Pages   Guards    Interceptors   Utils
 **Token management:**
 
 - `session_token` / continuity: resolved via `HeadlessAppTokenService.getSessionToken()` — prefer
-  localStorage (`sessionToken`, shared across tabs); if empty, readable `sessionid` cookie → copied into
-  localStorage on read; one-time migration from legacy `sessionStorage`
+  localStorage (`sessionToken`, shared across tabs); if empty, readable `sessionid` cookie → copied
+  into localStorage on read; one-time migration from legacy `sessionStorage`
 - `access_token` + `refresh_token` -> localStorage (JWT for CMS API)
 - `csrftoken` cookie (same-origin) OR in-memory override (cross-origin)
 - `AuthService` CMS API helpers: `GET/POST/PATCH/DELETE` `API_BASE_URL/api-keys/…` with the same
