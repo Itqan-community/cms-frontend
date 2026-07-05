@@ -143,6 +143,32 @@ Release 1.2.0.
 
 ---
 
+## [1.3.0] - 2026-07-05
+
+Release 1.3.0.
+
+## Changes
+
+- feat(gallery): add font and program category filters
+- chore(release): 1.2.0 [skip ci]
+- fix(admin): route publishers nav to selected tenant detail
+- feat(auth): unify guest auth UI and streamline passkey flows
+- chore(release): 1.1.4 [skip ci]
+- fix(auth): restore passkey stage tokens and fix CI test hang
+- fix(auth): block sessionid cookie fallback after logout
+- fix(admin): redirect single-scope users to publisher detail and enhance permissions
+- fix(auth): prevent stale session GET after logout
+- fix(auth): clear browser session on logout and before OAuth login
+- chore(release): 1.1.3 [skip ci]
+- fix(admin): send only changed reciter fields on patch
+- chore(release): 1.1.2 [skip ci]
+- fix(admin): always submit reciter forms as multipart
+- fix(admin): reintroduce granular permissions for publisher management
+- chore(release): 1.1.1 [skip ci]
+- fix(deps): remove stale pnpm-lock.yaml so Netlify uses npm
+
+---
+
 ## [Unreleased]
 
 ### Added
