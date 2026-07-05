@@ -169,6 +169,17 @@ Release 1.3.0.
 
 ---
 
+## [1.3.1] - 2026-07-05
+
+Release 1.3.1.
+
+## Changes
+
+- chore: fix PROJECT_MAP.md prettier formatting for CI
+- fix(auth): persist session across tabs for split-host deployments
+
+---
+
 ## [Unreleased]
 
 ### Added
