@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -10,6 +10,10 @@ import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-res
 import { isUnverifiedEmailError } from '../../../../shared/utils/error.utils';
 import { AuthSocialActionsComponent } from '../../components/auth-social-actions/auth-social-actions.component';
 import { AUTH_ROUTES, tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
+import {
+  isPasskeyAutoPromptCancellation,
+  shouldAttemptPasskeyAutoPrompt,
+} from '../../headless/passkey-auto-prompt.util';
 import { PasskeyAuthFlowService } from '../../headless/passkey-auth.flow';
 import { resolvePasskeyFlowError } from '../../headless/passkey-error.util';
 import { LoginRequest } from '../../models/auth.model';
@@ -31,13 +35,15 @@ import { buildHeadlessOAuthCallbackUrl, readContinueUrl } from '../../utils/auth
   styleUrls: ['./login.page.less'],
   templateUrl: './login.page.html',
 })
-export class LoginPage {
+export class LoginPage implements OnInit {
   readonly authService = inject(AuthService);
   private readonly passkeyFlow = inject(PasskeyAuthFlowService);
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
   private readonly translate = inject(TranslateService);
+
+  private autoPasskeyAttempted = false;
 
   passwordVisible = signal(false);
 
@@ -54,6 +60,15 @@ export class LoginPage {
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
+  }
+
+  ngOnInit(): void {
+    if (this.authService.isLoggedIn()) {
+      return;
+    }
+    if (shouldAttemptPasskeyAutoPrompt()) {
+      void this.onPasskeyLogin({ auto: true });
+    }
   }
 
   /** Allauth `callback_url` for provider redirect (absolute). */
@@ -77,18 +92,30 @@ export class LoginPage {
     }
   }
 
-  async onPasskeyLogin(): Promise<void> {
+  async onPasskeyLogin(options?: { auto?: boolean }): Promise<void> {
+    const isAuto = options?.auto === true;
+    if (isAuto && this.autoPasskeyAttempted) {
+      return;
+    }
+    if (isAuto) {
+      this.autoPasskeyAttempted = true;
+    }
     this.errorMessage.set('');
     this.passkeyLoading.set(true);
     try {
       const continueUrl = readContinueUrl(this.activatedRoute.snapshot.queryParamMap);
       const result = await this.passkeyFlow.loginWithPasskey(continueUrl);
       if (!result.ok) {
-        this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.CANCELLED'));
+        if (!isAuto || !isPasskeyAutoPromptCancellation(result)) {
+          this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.CANCELLED'));
+        }
         return;
       }
       void this.router.navigateByUrl(result.nextUrl);
     } catch (e) {
+      if (isAuto && isPasskeyAutoPromptCancellation(e)) {
+        return;
+      }
       const resolution = resolvePasskeyFlowError(e, this.translate, this.router, 'login');
       if (resolution.kind === 'message') {
         this.errorMessage.set(resolution.message);

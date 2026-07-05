@@ -11,6 +11,7 @@ import type {
   AuthenticationMeta,
   WebAuthnCredentialCreationData,
 } from '../../headless/headless-api.types';
+import { isPasskeyAutoPromptCancellation } from '../../headless/passkey-auto-prompt.util';
 import { PasskeyAuthFlowService } from '../../headless/passkey-auth.flow';
 import { resolvePasskeyFlowError } from '../../headless/passkey-error.util';
 import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
@@ -59,6 +60,8 @@ export class PasskeyPage implements OnInit {
   backRoute = signal<string>('/account/login');
   backLabelKey = signal<string>('AUTH.COMMON.BACK_TO_LOGIN');
 
+  private autoPasskeyAttempted = false;
+
   ngOnInit(): void {
     this.passkeyAvailable.set(isPasskeyClientEnvironmentSupported());
     const routeData = this.route.snapshot.data ?? {};
@@ -98,7 +101,7 @@ export class PasskeyPage implements OnInit {
     }
 
     if (this.mode() === 'login' && this.passkeyAvailable() && queryFlow === 'login') {
-      void this.submitPasskey();
+      void this.submitPasskey({ auto: true });
     }
   }
 
@@ -132,9 +135,16 @@ export class PasskeyPage implements OnInit {
     return 'AUTH.PASSKEY.BUTTON';
   }
 
-  async submitPasskey(): Promise<void> {
+  async submitPasskey(options?: { auto?: boolean }): Promise<void> {
+    const isAuto = options?.auto === true;
     if (!this.passkeyAvailable()) {
       return;
+    }
+    if (isAuto && this.autoPasskeyAttempted) {
+      return;
+    }
+    if (isAuto) {
+      this.autoPasskeyAttempted = true;
     }
     if (this.mode() === 'signup') {
       this.signupForm.markAllAsTouched();
@@ -154,7 +164,9 @@ export class PasskeyPage implements OnInit {
         if (!result.ok) {
           this.isLoading.set(false);
           if (result.reason === 'cancelled') {
-            this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.CANCELLED'));
+            if (!isAuto) {
+              this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.CANCELLED'));
+            }
           } else {
             this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.SIGNUP_SESSION_MISSING'));
           }
@@ -168,7 +180,9 @@ export class PasskeyPage implements OnInit {
         const result = await this.passkeyFlow.loginWithPasskey(continueUrl);
         if (!result.ok) {
           this.isLoading.set(false);
-          this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.CANCELLED'));
+          if (!isAuto || !isPasskeyAutoPromptCancellation(result)) {
+            this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.CANCELLED'));
+          }
           return;
         }
         this.isLoading.set(false);
@@ -176,6 +190,9 @@ export class PasskeyPage implements OnInit {
       }
     } catch (e) {
       this.isLoading.set(false);
+      if (isAuto && isPasskeyAutoPromptCancellation(e)) {
+        return;
+      }
       const resolution = resolvePasskeyFlowError(
         e,
         this.translate,
