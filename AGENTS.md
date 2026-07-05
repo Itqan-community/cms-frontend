@@ -113,3 +113,29 @@ not stop until `[ORPHANS & PENDING]` is empty and the product is complete.
 
 **Execution order:** Start with impact analysis and assumptions (Think Before Coding), then proceed
 with direct surgical implementation.
+
+---
+
+## 4. Pre-Commit Verification & Recitation Bulk Upload UX
+
+### Protocol A: Lint Before Commit
+
+Before creating any git commit for work you performed:
+
+1. Run `ReadLints` on every file you created or modified; fix all reported errors.
+2. Run `npm run lint` when `node_modules` is available; fix all errors and warnings (`--max-warnings=0`).
+3. Do not commit with known lint issues in touched files.
+
+### Protocol B: Recitation Bulk Upload Post-Success UX
+
+When changing recitation track bulk upload on the admin Recitation Detail page
+(`src/app/features/admin/recitations/components/recitation-detail/`):
+
+- **Full success:** redirect to Gallery Asset Detail at `/gallery/asset/{assetId}` after the success
+  toast; do not leave the misleading backend validate banner ("All files are valid…") visible.
+- **Upload start:** clear the validate banner as soon as the batch is queued.
+- **Partial failure:** stay on the admin page; clear the validate banner; keep only `failed` /
+  `cancelled` rows for retry; refresh the tracks list.
+- **In-flight uploads:** hide the validate banner while rows are `queued` or `uploading`.
+- **Single-file retry:** same banner/row cleanup on success; redirect only from full batch success
+  via `startUpload()`, not per-file retry.

@@ -381,16 +381,26 @@ export class RecitationDetailComponent implements OnInit {
       totalBytes: file.size,
     }));
     this.uploadRows.set(rows);
-    this.validateMessage.set(null);
-    this.validateTopStatus.set('idle');
+    this.clearValidateUi();
     this.runValidate();
     input.value = '';
   }
 
   clearUploadSelection(): void {
     this.uploadRows.set([]);
+    this.clearValidateUi();
+  }
+
+  private clearValidateUi(): void {
     this.validateMessage.set(null);
     this.validateTopStatus.set('idle');
+  }
+
+  /** Keep only rows the user can retry after a batch upload. */
+  private pruneActionableUploadRows(): void {
+    this.uploadRows.update((rows) =>
+      rows.filter((r) => r.phase === 'failed' || r.phase === 'cancelled')
+    );
   }
 
   private runValidate(): void {
@@ -462,8 +472,7 @@ export class RecitationDetailComponent implements OnInit {
     if (!this.canRemoveUploadRow(row)) return;
     this.uploadRows.update((rows) => rows.filter((r) => r.filename !== row.filename));
     if (!this.uploadRows().length) {
-      this.validateMessage.set(null);
-      this.validateTopStatus.set('idle');
+      this.clearValidateUi();
       return;
     }
     this.runValidate();
@@ -474,7 +483,7 @@ export class RecitationDetailComponent implements OnInit {
     this.uploadRows.update((rows) =>
       rows.filter((r) => r.validateStatus !== 'invalid' && r.validateStatus !== 'skip')
     );
-    this.validateMessage.set(null);
+    this.clearValidateUi();
     const remaining = this.uploadRows();
     if (!remaining.length) {
       this.validateTopStatus.set('idle');
@@ -517,6 +526,8 @@ export class RecitationDetailComponent implements OnInit {
     );
     if (!toUpload.length) return;
 
+    this.clearValidateUi();
+
     const batchFilenames = new Set(toUpload.map((r) => r.filename));
     toUpload.forEach((r) => {
       this.patchUploadRow(r.filename, {
@@ -551,6 +562,7 @@ export class RecitationDetailComponent implements OnInit {
         this.message.success(
           this.translate.instant('ADMIN.RECITATIONS.TRACKS.MESSAGES.UPLOAD_ALL_OK', { count: ok })
         );
+        void this.router.navigate(['/gallery/asset', rec.id]);
       } else {
         this.message.warning(
           this.translate.instant('ADMIN.RECITATIONS.TRACKS.MESSAGES.UPLOAD_PARTIAL', {
@@ -558,8 +570,10 @@ export class RecitationDetailComponent implements OnInit {
             failed,
           })
         );
+        this.clearValidateUi();
+        this.pruneActionableUploadRows();
+        this.loadTracksPage();
       }
-      this.loadTracksPage();
     } finally {
       this.markBatchQueuedAsCancelled(batchFilenames);
     }
@@ -627,6 +641,8 @@ export class RecitationDetailComponent implements OnInit {
       return;
     }
 
+    this.clearValidateUi();
+
     this.patchUploadRow(fn, {
       phase: 'queued',
       progress: 0,
@@ -643,7 +659,14 @@ export class RecitationDetailComponent implements OnInit {
       }
     );
     this.trackUploadTask(task);
-    void task.then(() => this.loadTracksPage());
+    void task.then(() => {
+      const row = this.uploadRows().find((r) => r.filename === fn);
+      if (row?.phase === 'success') {
+        this.clearValidateUi();
+        this.pruneActionableUploadRows();
+      }
+      this.loadTracksPage();
+    });
   }
 
   deleteTrack(track: RecitationSurahTrackListItem): void {

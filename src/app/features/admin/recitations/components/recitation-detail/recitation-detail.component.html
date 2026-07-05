@@ -261,7 +261,7 @@
           </p>
         </div>
 
-        @if (validateMessage()) {
+        @if (validateMessage() && !hasInFlightUploadRows()) {
           <nz-alert
             [nzType]="validateTopStatus() === 'valid' ? 'success' : 'error'"
             [nzMessage]="validateMessage()"
