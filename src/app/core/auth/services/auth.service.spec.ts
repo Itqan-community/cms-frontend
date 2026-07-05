@@ -4,7 +4,10 @@ import { Router } from '@angular/router';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
 import { HeadlessAuthApiService } from '../headless/headless-auth-api.service';
-import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
+import {
+  ALLAUTH_SESSION_TOKEN_STORAGE_KEY,
+  HeadlessAppTokenService,
+} from '../headless/headless-app-token.service';
 import type { AuthenticatedResponse, ConfigurationResponse } from '../headless/headless-api.types';
 
 const mockUser = {
@@ -156,6 +159,61 @@ describe('AuthService (app / headless)', () => {
     await service.bootstrapOnce();
     expect(httpClientMock.get).toHaveBeenCalled();
     expect(service.getCurrentUser()?.permissions).toEqual(['portal_access']);
+  });
+
+  it('bootstrapOnce authenticates when session token exists in localStorage (new tab)', async () => {
+    localStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'shared-tab-token');
+    headless.getAuth.and.returnValue(of(authedResponse()));
+    await service.bootstrapOnce();
+    expect(service.isAuthenticated()).toBe(true);
+    expect(headless.getAuth).toHaveBeenCalled();
+  });
+
+  it('bootstrapOnce falls back to browser session when app session is not established', async () => {
+    const anonymous = {
+      status: 200,
+      data: { methods: [] },
+      meta: { is_authenticated: false },
+    } as unknown as AuthenticatedResponse;
+    headless.getAuth.and.returnValue(of(anonymous));
+    headless.getBrowserSession.and.returnValue(of(authedResponse()));
+    headless.getBrowserSession.calls.reset();
+    await service.bootstrapOnce();
+    expect(headless.getBrowserSession).toHaveBeenCalled();
+    expect(service.isAuthenticated()).toBe(true);
+  });
+
+  it('handleCrossTabSessionTokenChange logs out when token cleared in another tab', () => {
+    tokenStore.setSessionToken('shared');
+    const fn = (
+      service as unknown as { handleCrossTabSessionTokenChange: (e: StorageEvent) => void }
+    ).handleCrossTabSessionTokenChange;
+    fn.call(service, {
+      key: ALLAUTH_SESSION_TOKEN_STORAGE_KEY,
+      storageArea: localStorage,
+      oldValue: 'shared',
+      newValue: null,
+    } as StorageEvent);
+    expect(tokenStore.getSessionToken()).toBeNull();
+    expect(routerMock.navigate).toHaveBeenCalled();
+  });
+
+  it('handleCrossTabSessionTokenChange syncs auth when token set in another tab', (done) => {
+    const fn = (
+      service as unknown as { handleCrossTabSessionTokenChange: (e: StorageEvent) => void }
+    ).handleCrossTabSessionTokenChange;
+    headless.getSession.and.returnValue(of(authedResponse()));
+    fn.call(service, {
+      key: ALLAUTH_SESSION_TOKEN_STORAGE_KEY,
+      storageArea: localStorage,
+      oldValue: null,
+      newValue: 'new-shared-token',
+    } as StorageEvent);
+    setTimeout(() => {
+      expect(headless.getSession).toHaveBeenCalled();
+      expect(service.isAuthenticated()).toBe(true);
+      done();
+    }, 0);
   });
 
   it('applyMetaTokens persists session_token, access_token and refresh_token', () => {

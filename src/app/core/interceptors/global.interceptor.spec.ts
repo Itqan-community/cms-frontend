@@ -36,7 +36,7 @@ describe('headersInterceptor', () => {
       pending('API_BASE_URL');
       return;
     }
-    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'sess-cms');
+    localStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'sess-cms');
     localStorage.setItem('headless_access_token', 'jwt-cms');
     const { http, httpMock } = setupChain();
     const profileUrl = `${api}/auth/profile/`;
@@ -53,7 +53,7 @@ describe('headersInterceptor', () => {
       pending('API_BASE_URL');
       return;
     }
-    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'sess-app');
+    localStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'sess-app');
     localStorage.setItem('headless_access_token', 'jwt-not-for-app-route');
     const { http, httpMock } = setupChain();
     const sessionUrl = `${api}/auth/app/v1/auth/session`;
