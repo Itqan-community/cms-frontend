@@ -246,6 +246,18 @@ Release 1.4.1.
 
 ---
 
+## [1.4.2] - 2026-07-06
+
+Release 1.4.2.
+
+## Changes
+
+- fix(gallery): keep RTL cards equal width
+- chore(release): 1.4.1 [skip ci]
+- fix(gallery): stabilize card height and open-access badge
+
+---
+
 ## [Unreleased]
 
 ### Added
