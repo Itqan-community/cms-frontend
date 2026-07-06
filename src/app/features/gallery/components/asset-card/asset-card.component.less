@@ -1,16 +1,20 @@
 :host {
   display: block;
+  width: 100%;
+  max-width: 100%;
   height: 100%;
-  min-height: 0;
+  min-width: 0;
 }
 
 .asset-card {
   display: flex;
   flex-direction: column;
   gap: 16px; // gap-4 equivalent
+  width: 100%;
+  max-width: 100%;
   height: 100%;
   max-height: 320px; // max row height 320px
-  min-height: 0;
+  min-width: 0;
   overflow: hidden;
   border-radius: 20px; // rounded-[20px]
   padding: 16px 0; // py-4
@@ -33,10 +37,18 @@
     gap: 8px;
     padding: 0 16px; // px-4
     flex-shrink: 0;
+    min-width: 0;
 
-    i {
+    ng-icon {
+      flex-shrink: 0;
       font-size: 32px;
       color: var(--color-primary-400);
+    }
+
+    &-license {
+      min-width: 0;
+      flex: 1 1 auto;
+      overflow: hidden;
     }
   }
 
@@ -44,9 +56,14 @@
     display: flex;
     align-items: center;
     flex-shrink: 0;
+    max-width: 100%;
 
     .ant-tag {
       margin: 0;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
   }
 
@@ -55,6 +72,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    min-width: 0;
     min-height: 0; // Allow flex item to shrink below content size
 
     .content-wrapper {
@@ -62,6 +80,7 @@
       flex-direction: column;
       height: 100%;
       gap: 16px; // gap-4
+      min-width: 0;
       min-height: 0; // Allow flex item to shrink
 
       .main-content {
@@ -83,6 +102,8 @@
             font-weight: 600; // font-semibold
             color: var(--color-neutral-600);
             margin-bottom: 8px; // mb-2
+            overflow-wrap: anywhere;
+            word-break: break-word;
             display: -webkit-box; // line-clamp-2 (Webkit)
             -webkit-line-clamp: 2; // line-clamp-2
             line-clamp: 2; // Standard line-clamp
@@ -94,6 +115,8 @@
             color: var(--color-neutral-400); // text-muted-foreground
             font-size: 14px; // text-sm
             margin-bottom: 0;
+            overflow-wrap: anywhere;
+            word-break: break-word;
             display: -webkit-box; // line-clamp-3 (Webkit)
             -webkit-line-clamp: 3; // line-clamp-3
             line-clamp: 3; // Standard line-clamp
@@ -124,6 +147,8 @@
               -webkit-box-orient: vertical;
               overflow: hidden;
               text-overflow: ellipsis;
+              overflow-wrap: anywhere;
+              word-break: break-word;
 
               &:hover {
                 text-decoration: underline;
@@ -139,6 +164,12 @@
         gap: 8px;
         flex-shrink: 0;
         margin-top: auto;
+        width: 100%;
+        min-width: 0;
+
+        a.ant-btn {
+          width: 100%;
+        }
       }
     }
   }
