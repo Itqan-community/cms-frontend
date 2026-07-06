@@ -4,7 +4,8 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { combineLatest } from 'rxjs';
 import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
-import { AyahRef, MushafPageComponent } from '../../components/mushaf-page/mushaf-page.component';
+import { AyahRef } from '../../components/mushaf-page/mushaf-page.component';
+import { MushafScrollComponent } from '../../components/mushaf-scroll/mushaf-scroll.component';
 import { MushafSwitcherComponent } from '../../components/mushaf-switcher/mushaf-switcher.component';
 import { MushafSurahMeta } from '../../models/mushaf.model';
 import { MushafSelectionService } from '../../services/mushaf-selection.service';
@@ -15,7 +16,7 @@ import { MushafSvgService } from '../../services/mushaf-svg.service';
   standalone: true,
   imports: [
     RouterModule,
-    MushafPageComponent,
+    MushafScrollComponent,
     MushafSwitcherComponent,
     StateMessageComponent,
     TranslateModule,
@@ -31,7 +32,8 @@ export class SuraViewPage implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly surahMeta = signal<MushafSurahMeta | null>(null);
-  protected readonly page = signal<number | null>(null);
+  protected readonly startPage = signal<number | null>(null);
+  protected readonly endPage = signal<number | null>(null);
   protected readonly loading = signal(true);
   protected readonly errorState = signal(false);
   protected readonly notFound = signal(false);
@@ -60,18 +62,21 @@ export class SuraViewPage implements OnInit {
       return;
     }
 
-    this.svgService
-      .getSurahMeta(slug, suraId)
+    combineLatest([
+      this.svgService.getSurahMeta(slug, suraId),
+      this.svgService.getSurahPageRange(slug, suraId),
+    ])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (meta) => {
-          if (!meta) {
+        next: ([meta, range]) => {
+          if (!meta || !range) {
             this.loading.set(false);
             this.notFound.set(true);
             return;
           }
           this.surahMeta.set(meta);
-          this.page.set(meta.pageNumber);
+          this.startPage.set(range.startPage);
+          this.endPage.set(range.endPage);
           this.loading.set(false);
         },
         error: () => {

@@ -3,10 +3,9 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { combineLatest } from 'rxjs';
-import { NgIcon } from '@ng-icons/core';
-import { NzButtonModule } from 'ng-zorro-antd/button';
 import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
-import { AyahRef, MushafPageComponent } from '../../components/mushaf-page/mushaf-page.component';
+import { AyahRef } from '../../components/mushaf-page/mushaf-page.component';
+import { MushafScrollComponent } from '../../components/mushaf-scroll/mushaf-scroll.component';
 import { MushafSwitcherComponent } from '../../components/mushaf-switcher/mushaf-switcher.component';
 import { MushafSurahMeta } from '../../models/mushaf.model';
 import { MushafSelectionService } from '../../services/mushaf-selection.service';
@@ -18,11 +17,9 @@ import { toArabicDigits } from '../../utils/arabic-digits.util';
   standalone: true,
   imports: [
     RouterModule,
-    MushafPageComponent,
+    MushafScrollComponent,
     MushafSwitcherComponent,
     StateMessageComponent,
-    NgIcon,
-    NzButtonModule,
     TranslateModule,
   ],
   templateUrl: './ayah-focus.page.html',
@@ -36,7 +33,9 @@ export class AyahFocusPage implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly surahMeta = signal<MushafSurahMeta | null>(null);
-  protected readonly page = signal<number | null>(null);
+  protected readonly startPage = signal<number | null>(null);
+  protected readonly endPage = signal<number | null>(null);
+  protected readonly targetPage = signal<number | null>(null);
   protected readonly loading = signal(true);
   protected readonly errorState = signal(false);
   protected readonly notFound = signal(false);
@@ -49,18 +48,11 @@ export class AyahFocusPage implements OnInit {
     surah: this.suraId(),
     ayah: this.ayahNumber(),
   }));
-  protected readonly hasPrev = computed(() => this.ayahNumber() > 1);
-  protected readonly hasNext = computed(() => {
-    const meta = this.surahMeta();
-    return meta ? this.ayahNumber() < meta.ayahCount : false;
-  });
 
   private slug(): string {
     return this.selected().slug;
   }
 
-  protected readonly prevLink = computed(() => ['/mushaf', this.suraId(), this.ayahNumber() - 1]);
-  protected readonly nextLink = computed(() => ['/mushaf', this.suraId(), this.ayahNumber() + 1]);
   protected readonly suraLink = computed(() => ['/mushaf', this.suraId()]);
   protected readonly mushafQuery = computed(() => ({ mushaf: this.selected().slug }));
 
@@ -96,18 +88,21 @@ export class AyahFocusPage implements OnInit {
 
     combineLatest([
       this.svgService.getSurahMeta(slug, suraId),
+      this.svgService.getSurahPageRange(slug, suraId),
       this.svgService.resolvePage(slug, suraId, ayahNumber),
     ])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ([meta, page]) => {
-          if (!meta || !page) {
+        next: ([meta, range, page]) => {
+          if (!meta || !range || !page) {
             this.loading.set(false);
             this.notFound.set(true);
             return;
           }
           this.surahMeta.set(meta);
-          this.page.set(page);
+          this.startPage.set(range.startPage);
+          this.endPage.set(range.endPage);
+          this.targetPage.set(page);
           this.loading.set(false);
         },
         error: () => {

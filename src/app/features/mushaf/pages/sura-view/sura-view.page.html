@@ -21,7 +21,7 @@
       actionIcon="lucideRotateCw"
       (actionClick)="retry()"
     />
-  } @else if (surahMeta() && page()) {
+  } @else if (surahMeta() && startPage() && endPage()) {
     <header class="sura-view__header">
       <a class="sura-view__back" routerLink="/mushaf" [queryParams]="{ mushaf: selected().slug }">
         {{ 'MUSHAF.BACK_TO_INDEX' | translate }}
@@ -31,6 +31,11 @@
       <div class="sura-view__toolbar"><app-mushaf-switcher /></div>
     </header>
 
-    <app-mushaf-page [slug]="selected().slug" [page]="page()!" (ayahClick)="onAyahClick($event)" />
+    <app-mushaf-scroll
+      [slug]="selected().slug"
+      [startPage]="startPage()!"
+      [endPage]="endPage()!"
+      (ayahClick)="onAyahClick($event)"
+    />
   }
 </section>

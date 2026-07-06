@@ -89,6 +89,35 @@ export class MushafSvgService {
     );
   }
 
+  /** Total mushaf page count for an edition (derived from markers.json). */
+  getPageCount(slug: string): Observable<number> {
+    return this.getMarkers(slug).pipe(
+      map((markers) => markers.reduce((max, m) => Math.max(max, m.page), 0))
+    );
+  }
+
+  /**
+   * The inclusive page range a surah spans in an edition: from its own start
+   * page to the page just before the next surah starts (the last surah runs to
+   * the final mushaf page).
+   */
+  getSurahPageRange(
+    slug: string,
+    suraId: number
+  ): Observable<{ startPage: number; endPage: number } | null> {
+    return combineLatest([this.getSurahs(slug), this.getPageCount(slug)]).pipe(
+      map(([surahs, totalPages]) => {
+        const ordered = [...surahs].sort((a, b) => a.number - b.number);
+        const idx = ordered.findIndex((s) => s.number === suraId);
+        if (idx === -1) return null;
+        const startPage = ordered[idx].pageNumber;
+        const next = ordered[idx + 1];
+        const endPage = next ? Math.max(startPage, next.pageNumber - 1) : totalPages;
+        return { startPage, endPage };
+      })
+    );
+  }
+
   /** Raw SVG text for a page (cached). */
   getPageSvg(slug: string, page: number): Observable<string> {
     const key = `${slug}:${page}`;
