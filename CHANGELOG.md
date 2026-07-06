@@ -258,6 +258,18 @@ Release 1.4.2.
 
 ---
 
+## [1.4.3] - 2026-07-06
+
+Release 1.4.3.
+
+## Changes
+
+- fix(auth): keep public browsing anonymous
+- chore(release): 1.4.2 [skip ci]
+- fix(gallery): keep RTL cards equal width
+
+---
+
 ## [Unreleased]
 
 ### Added
