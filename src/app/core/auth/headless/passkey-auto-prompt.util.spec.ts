@@ -6,9 +6,7 @@ import {
 describe('passkey-auto-prompt.util', () => {
   describe('shouldAttemptPasskeyAutoPrompt', () => {
     it('returns true when PublicKeyCredential is available in secure context', () => {
-      expect(shouldAttemptPasskeyAutoPrompt()).toBe(
-        typeof PublicKeyCredential !== 'undefined'
-      );
+      expect(shouldAttemptPasskeyAutoPrompt()).toBe(typeof PublicKeyCredential !== 'undefined');
     });
   });
 

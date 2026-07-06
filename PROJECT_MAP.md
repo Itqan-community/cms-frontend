@@ -264,20 +264,20 @@ success.
 
 **Modules (each follows identical CRUD pattern):**
 
-| Module             | Entity                | Key Models                          | Notes                                                                                                                                  |
-| ------------------ | --------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `publishers/`      | Publisher admin       | `Publisher`                         | CRUD + image upload                                                                                                                    |
-| `tafsirs/`         | Tafsir (exegesis)     | `Tafsir`, `TafsirVersion`           | CRUD + version management                                                                                                              |
-| `translations/`    | Translation           | `Translation`, `TranslationVersion` | CRUD + version management                                                                                                              |
+| Module             | Entity                | Key Models                          | Notes                                                                                                                                                                            |
+| ------------------ | --------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `publishers/`      | Publisher admin       | `Publisher`                         | CRUD + image upload                                                                                                                                                              |
+| `tafsirs/`         | Tafsir (exegesis)     | `Tafsir`, `TafsirVersion`           | CRUD + version management                                                                                                                                                        |
+| `translations/`    | Translation           | `Translation`, `TranslationVersion` | CRUD + version management                                                                                                                                                        |
 | `recitations/`     | Recitation (audio)    | `Recitation`                        | CRUD + track upload with progress + timings; full bulk upload success redirects to `/gallery/asset/{id}`; partial failure clears validate banner and keeps failed rows for retry |
-| `reciters/`        | Reciter               | `Reciter`                           | CRUD + image upload + death info                                                                                                       |
-| `issues/`          | Issue reports         | `IssueReportOut`                    | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions                                      |
-| `members/`         | Publisher members     | `MemberOut`                         | List/invite/update/remove/resend via `/portal/members/`; scoped by `AdminTenantService.selectedPublisherId()`                          |
-| `access-requests/` | Asset access requests | `AccessRequestOut`                  | List/accept/reject + publisher settings (`/portal/publishers/{id}/access-requests-settings/`); detail drawer; permission-gated actions |
-| `mushafs/`         | Mushaf (Quran pages)  | Pages, Surahs, Ayahs, Words         | Complex nested UI with tabs and search                                                                                                 |
-| `usage/`           | API Usage analytics   | Request logs                        | Charts, top endpoints, top entities                                                                                                    |
-| `audio/`           | Audio management      | —                                   | Routes defined                                                                                                                         |
-| `software/`        | Software management   | —                                   | Routes defined                                                                                                                         |
+| `reciters/`        | Reciter               | `Reciter`                           | CRUD + image upload + death info                                                                                                                                                 |
+| `issues/`          | Issue reports         | `IssueReportOut`                    | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions                                                                                |
+| `members/`         | Publisher members     | `MemberOut`                         | List/invite/update/remove/resend via `/portal/members/`; scoped by `AdminTenantService.selectedPublisherId()`                                                                    |
+| `access-requests/` | Asset access requests | `AccessRequestOut`                  | List/accept/reject + publisher settings (`/portal/publishers/{id}/access-requests-settings/`); detail drawer; permission-gated actions                                           |
+| `mushafs/`         | Mushaf (Quran pages)  | Pages, Surahs, Ayahs, Words         | Complex nested UI with tabs and search                                                                                                                                           |
+| `usage/`           | API Usage analytics   | Request logs                        | Charts, top endpoints, top entities                                                                                                                                              |
+| `audio/`           | Audio management      | —                                   | Routes defined                                                                                                                                                                   |
+| `software/`        | Software management   | —                                   | Routes defined                                                                                                                                                                   |
 
 **Shared admin components:**
 

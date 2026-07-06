@@ -123,7 +123,8 @@ with direct surgical implementation.
 Before creating any git commit for work you performed:
 
 1. Run `ReadLints` on every file you created or modified; fix all reported errors.
-2. Run `npm run lint` when `node_modules` is available; fix all errors and warnings (`--max-warnings=0`).
+2. Run `npm run lint` when `node_modules` is available; fix all errors and warnings
+   (`--max-warnings=0`).
 3. Do not commit with known lint issues in touched files.
 
 ### Protocol B: Recitation Bulk Upload Post-Success UX
