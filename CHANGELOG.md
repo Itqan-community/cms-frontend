@@ -212,6 +212,40 @@ Release 1.4.0.
 
 ---
 
+## [1.4.1] - 2026-07-06
+
+Release 1.4.1.
+
+## Changes
+
+- fix(gallery): stabilize card height and open-access badge
+- chore(release): 1.4.0 [skip ci]
+- fix(test): replace ESM spyOn with passkey env helpers in auth specs
+- fix(ci): restore npm bin-links so CI can resolve prettier and ng
+- feat(auth): auto-prompt passkey on login and MFA pages
+- chore: disable npm bin-links for NTFS dev environments
+- feat(recitations): add gallery and reciter links on detail page
+- fix(recitations): redirect to gallery after successful bulk track upload
+- fix(i18n): complete localization audit with hybrid API error resolver
+- chore: fix PROJECT_MAP.md prettier formatting for CI
+- fix(auth): persist session across tabs for split-host deployments
+- fix(access-requests): defer auto-accept toggle until backend confirms
+- feat(gallery): integrate access_status for asset downloads
+- feat(gallery): add font and program category filters
+- feat(gallery): persist global license acceptance per user
+- feat(assets): add open access and tenant API enrollment toggles
+- feat(gallery): add report issue modal on asset details page
+- fix(test): provide TranslateService and NzMessageService in AuthService specs
+- fix(gallery): align category filters with API asset categories
+- fix(i18n): load Arabic translations before app bootstrap
+- fix(auth): improve passkey/WebAuthn error handling and messages
+- fix(auth): centralize error messages with localized fallbacks
+- chore(deps-dev): bump @commitlint/config-conventional
+- chore(deps): bump actions/setup-node from 4 to 6
+- chore(deps): bump codecov/codecov-action from 3 to 6
+
+---
+
 ## [Unreleased]
 
 ### Added
