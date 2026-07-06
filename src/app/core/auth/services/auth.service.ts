@@ -373,7 +373,19 @@ export class AuthService {
     );
   }
 
+  /** Clears stale client auth without login redirect or session-expired toast (public browsing). */
+  clearStaleClientSession(): void {
+    this.tokenStore.blockSessionCookieFallback();
+    this.clearLocalAuthUi({ preserveSessionStorageToken: false });
+    this.authSnapshot.set(undefined);
+    this.prevAuthForRedirect = undefined;
+  }
+
   invalidateClientAuthAndGoLogin(options?: { sessionExpired?: boolean }): void {
+    if (!this.isLoggedIn() && !this.currentUser()) {
+      this.clearStaleClientSession();
+      return;
+    }
     if (options?.sessionExpired) {
       this.message.warning(this.translate.instant('AUTH.SESSION_EXPIRED'));
     }
