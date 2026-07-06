@@ -2,7 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import * as webauthnCapability from '../../headless/webauthn-capability.util';
+import {
+  restorePasskeyEnvironment,
+  setPasskeyClientEnvironmentSupported,
+  snapshotPasskeyEnvironment,
+  type PasskeyEnvironmentSnapshot,
+} from '../../headless/passkey-test-env.helper';
 import { AuthService } from '../../services/auth.service';
 import { MfaPage } from './mfa.page';
 
@@ -11,8 +16,11 @@ describe('MfaPage', () => {
   let getWebauthnMfaOptions: jasmine.Spy;
   let postWebauthnMfa: jasmine.Spy;
   let applyHeadlessSuccess: jasmine.Spy;
+  let passkeyEnvSnapshot: PasskeyEnvironmentSnapshot;
 
   beforeEach(async () => {
+    passkeyEnvSnapshot = snapshotPasskeyEnvironment();
+    setPasskeyClientEnvironmentSupported(false);
     getWebauthnMfaOptions = jasmine.createSpy('getWebauthnMfaOptions').and.returnValue(
       of({
         data: {
@@ -27,7 +35,6 @@ describe('MfaPage', () => {
     );
     postWebauthnMfa = jasmine.createSpy('postWebauthnMfa');
     applyHeadlessSuccess = jasmine.createSpy('applyHeadlessSuccess').and.returnValue(of({}));
-    spyOn(webauthnCapability, 'isPasskeyClientEnvironmentSupported').and.returnValue(false);
 
     await TestBed.configureTestingModule({
       imports: [MfaPage, TranslateModule.forRoot()],
@@ -56,6 +63,10 @@ describe('MfaPage', () => {
     }).compileComponents();
   });
 
+  afterEach(() => {
+    restorePasskeyEnvironment(passkeyEnvSnapshot);
+  });
+
   function createFixture(): MfaPage {
     fixture = TestBed.createComponent(MfaPage);
     fixture.detectChanges();
@@ -63,7 +74,7 @@ describe('MfaPage', () => {
   }
 
   it('auto-calls getWebauthnMfaOptions on init when passkey is supported', async () => {
-    (webauthnCapability.isPasskeyClientEnvironmentSupported as jasmine.Spy).and.returnValue(true);
+    setPasskeyClientEnvironmentSupported(true);
     spyOn(navigator.credentials, 'get').and.resolveTo(null);
     getWebauthnMfaOptions.calls.reset();
     TestBed.resetTestingModule();
@@ -99,7 +110,7 @@ describe('MfaPage', () => {
   });
 
   it('does not set error on auto-cancel when credentials.get returns null', async () => {
-    (webauthnCapability.isPasskeyClientEnvironmentSupported as jasmine.Spy).and.returnValue(true);
+    setPasskeyClientEnvironmentSupported(true);
     spyOn(navigator.credentials, 'get').and.resolveTo(null);
     const page = createFixture();
     await fixture.whenStable();
@@ -107,7 +118,7 @@ describe('MfaPage', () => {
   });
 
   it('sets error on manual cancel when credentials.get returns null', async () => {
-    (webauthnCapability.isPasskeyClientEnvironmentSupported as jasmine.Spy).and.returnValue(true);
+    setPasskeyClientEnvironmentSupported(true);
     const getCred = spyOn(navigator.credentials, 'get').and.resolveTo(null);
     const page = createFixture();
     await fixture.whenStable();
@@ -118,7 +129,7 @@ describe('MfaPage', () => {
   });
 
   it('silences user-cancelled DOMException on auto prompt', async () => {
-    (webauthnCapability.isPasskeyClientEnvironmentSupported as jasmine.Spy).and.returnValue(true);
+    setPasskeyClientEnvironmentSupported(true);
     spyOn(navigator.credentials, 'get').and.rejectWith(
       new DOMException('not allowed', 'NotAllowedError')
     );
