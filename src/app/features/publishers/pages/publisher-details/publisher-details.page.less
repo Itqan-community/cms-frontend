@@ -213,6 +213,7 @@
   grid-template-columns: 1fr;
   gap: 1.25rem;
   margin-bottom: 2rem;
+  grid-auto-rows: 320px;
 
   @media (min-width: 768px) {
     grid-template-columns: repeat(2, 1fr);
@@ -220,6 +221,11 @@
 
   @media (min-width: 1280px) {
     grid-template-columns: repeat(3, 1fr);
+  }
+
+  & > * {
+    height: 100%;
+    min-height: 0;
   }
 }
 

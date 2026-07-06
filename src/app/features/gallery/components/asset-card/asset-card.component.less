@@ -1,9 +1,17 @@
+:host {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
 .asset-card {
   display: flex;
   flex-direction: column;
   gap: 16px; // gap-4 equivalent
   height: 100%;
   max-height: 320px; // max row height 320px
+  min-height: 0;
+  overflow: hidden;
   border-radius: 20px; // rounded-[20px]
   padding: 16px 0; // py-4
   background: white;
@@ -24,6 +32,7 @@
     justify-content: space-between;
     gap: 8px;
     padding: 0 16px; // px-4
+    flex-shrink: 0;
 
     i {
       font-size: 32px;
@@ -34,7 +43,7 @@
   &__access-row {
     display: flex;
     align-items: center;
-    margin-bottom: 8px;
+    flex-shrink: 0;
 
     .ant-tag {
       margin: 0;
@@ -56,14 +65,19 @@
       min-height: 0; // Allow flex item to shrink
 
       .main-content {
-        flex: 1;
+        flex: 1 1 auto;
         display: flex;
         flex-direction: column;
-        justify-content: space-between;
-        // gap: 24px; // Reduced gap to fit better
+        justify-content: flex-start;
+        gap: 8px;
         min-height: 0; // Allow flex item to shrink
+        overflow: hidden;
 
         .text-content {
+          flex: 1 1 auto;
+          min-height: 0;
+          overflow: hidden;
+
           h3 {
             font-size: 18px; // text-lg
             font-weight: 600; // font-semibold
@@ -79,7 +93,7 @@
           p {
             color: var(--color-neutral-400); // text-muted-foreground
             font-size: 14px; // text-sm
-            margin-bottom: 16px; // mb-4
+            margin-bottom: 0;
             display: -webkit-box; // line-clamp-3 (Webkit)
             -webkit-line-clamp: 3; // line-clamp-3
             line-clamp: 3; // Standard line-clamp
@@ -90,7 +104,9 @@
         }
 
         .publisher-info {
-          flex-shrink: 0; // Don't shrink publisher info
+          flex-shrink: 0;
+          margin-top: auto;
+
           .publisher-text {
             font-size: 14px;
             color: var(--color-neutral-400);
@@ -102,7 +118,12 @@
             }
 
             a {
-              max-width: max-content;
+              display: -webkit-box;
+              -webkit-line-clamp: 1;
+              line-clamp: 1;
+              -webkit-box-orient: vertical;
+              overflow: hidden;
+              text-overflow: ellipsis;
 
               &:hover {
                 text-decoration: underline;
@@ -113,8 +134,11 @@
       }
 
       .button-container {
-        flex-shrink: 0; // Don't shrink button
-        margin-top: auto; // mt-auto
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex-shrink: 0;
+        margin-top: auto;
       }
     }
   }

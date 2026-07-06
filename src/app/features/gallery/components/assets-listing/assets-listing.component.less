@@ -36,7 +36,7 @@
     display: grid;
     grid-template-columns: 1fr;
     gap: 20px;
-    grid-auto-rows: minmax(0, 320px); // max row height 320px
+    grid-auto-rows: 320px;
 
     // Responsive breakpoints matching reference
     @media (min-width: 768px) {
@@ -47,9 +47,10 @@
       grid-template-columns: repeat(3, 1fr);
     }
 
-    // Ensure all cards have equal height
+    // Ensure all cards stretch to the fixed row height
     & > * {
       height: 100%;
+      min-height: 0;
     }
   }
 
