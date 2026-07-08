@@ -1,9 +1,11 @@
 import { isPlatformServer } from '@angular/common';
-import { Component, inject, OnInit, PLATFORM_ID, signal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, PLATFORM_ID, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
+import { JsonLdService } from '../../../../core/services/json-ld.service';
+import { SeoService } from '../../../../core/services/seo.service';
 import { ViewportService } from '../../../../core/services/viewport.service';
 import { AssetCardComponent } from '../../../../features/gallery/components/asset-card/asset-card.component';
 import { AssetCardSkeletonComponent } from '../../../../shared/components/asset-card-skeleton/asset-card-skeleton.component';
@@ -27,12 +29,14 @@ import { Publisher, PublisherService } from '../../services/publisher.service';
   templateUrl: './publisher-details.page.html',
   styleUrl: './publisher-details.page.less',
 })
-export class PublisherDetailsPage implements OnInit {
+export class PublisherDetailsPage implements OnInit, OnDestroy {
   private readonly publisherService = inject(PublisherService);
   private readonly route = inject(ActivatedRoute);
 
   private readonly platformId = inject(PLATFORM_ID);
   private readonly viewportService = inject(ViewportService);
+  private readonly seo = inject(SeoService);
+  private readonly jsonLd = inject(JsonLdService);
 
   isServer = isPlatformServer(this.platformId);
 
@@ -67,9 +71,33 @@ export class PublisherDetailsPage implements OnInit {
   getPublisherDetails() {
     this.publisherLoading.set(true);
     this.publisherService.getPublisher(this.id).subscribe({
-      next: (publisher) => this.publisher.set(publisher),
+      next: (publisher) => {
+        this.publisher.set(publisher);
+        this.setSeoFromPublisher(publisher);
+      },
       complete: () => this.publisherLoading.set(false),
       error: () => this.publisherLoading.set(false),
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.jsonLd.remove();
+  }
+
+  private setSeoFromPublisher(publisher: Publisher): void {
+    this.seo.setSeo({
+      title: `${publisher.name} | ITQAN`,
+      description: publisher.description,
+      path: `/publisher/${publisher.id}`,
+      image: publisher.icon_url || undefined,
+    });
+    this.jsonLd.setSchema({
+      '@context': 'https://schema.org',
+      '@type': 'Organization',
+      name: publisher.name,
+      description: publisher.description,
+      url: publisher.website || undefined,
+      logo: publisher.icon_url || undefined,
     });
   }
 

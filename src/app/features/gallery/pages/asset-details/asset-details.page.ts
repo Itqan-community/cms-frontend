@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -15,6 +15,8 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { Licenses } from '../../../../core/enums/licenses.enum';
+import { JsonLdService } from '../../../../core/services/json-ld.service';
+import { SeoService } from '../../../../core/services/seo.service';
 import { AssetDetailSkeletonComponent } from '../../../../shared/components/asset-detail-skeleton/asset-detail-skeleton.component';
 import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/breadcrumb.component';
 import { ImageCarouselComponent } from '../../../../shared/components/image-carousel/image-carousel.component';
@@ -45,7 +47,7 @@ import { AssetsService } from '../../services/assets.service';
   templateUrl: './asset-details.page.html',
   styleUrl: './asset-details.page.less',
 })
-export class AssetDetailsPage implements OnInit {
+export class AssetDetailsPage implements OnInit, OnDestroy {
   private readonly assetsService = inject(AssetsService);
   private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
@@ -55,6 +57,8 @@ export class AssetDetailsPage implements OnInit {
   private readonly message = inject(NzMessageService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly seo = inject(SeoService);
+  private readonly jsonLd = inject(JsonLdService);
 
   readonly id = this.route.snapshot.params['id'];
   asset = signal<AssetDetails | null>(null);
@@ -95,6 +99,7 @@ export class AssetDetailsPage implements OnInit {
           this.asset.set(asset);
           this.images.set(asset.snapshots.map((snapshot) => snapshot.image_url));
           this.loading.set(false);
+          this.setSeoFromAsset(asset);
         },
         error: (err) => {
           this.loading.set(false);
@@ -105,6 +110,30 @@ export class AssetDetailsPage implements OnInit {
           }
         },
       });
+  }
+
+  ngOnDestroy(): void {
+    this.jsonLd.remove();
+  }
+
+  private setSeoFromAsset(asset: AssetDetails): void {
+    this.seo.setSeo({
+      title: `${asset.name} | ITQAN`,
+      description: asset.description || asset.long_description,
+      path: `/gallery/asset/${asset.id}`,
+      image: asset.thumbnail_url || undefined,
+    });
+    this.jsonLd.setSchema({
+      '@context': 'https://schema.org',
+      '@type': 'CreativeWork',
+      name: asset.name,
+      description: asset.description || asset.long_description,
+      image: asset.thumbnail_url || undefined,
+      creator: {
+        '@type': 'Organization',
+        name: asset.publisher?.name,
+      },
+    });
   }
 
   retryLoad() {
