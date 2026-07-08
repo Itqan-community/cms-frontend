@@ -1,53 +1,60 @@
-<div class="verify">
-  <header class="verify__header">
-    <div class="verify__header-row">
-      <a [routerLink]="['/']" class="verify__back" [title]="'AUTH.VERIFY_EMAIL.BACK' | translate">
-        {{ 'AUTH.VERIFY_EMAIL.BACK' | translate }}
-      </a>
+<div class="auth-guest verify">
+  <header class="auth-guest__header">
+    <div class="auth-guest__header-row">
+      <app-auth-back-link [route]="['/']" labelKey="AUTH.VERIFY_EMAIL.BACK" />
       <app-lang-switch></app-lang-switch>
     </div>
   </header>
-  <div class="verify__container">
-    <div class="verify__card">
-      <div class="verify__logo">
-        <img src="/assets/images/logo.svg" alt="Itqan" width="50" height="50" />
+  <div class="auth-guest__container">
+    <div class="auth-guest__card">
+      <div class="auth-guest__logo">
+        <img
+          src="/assets/images/logo.svg"
+          [alt]="'COMMON.LOGO_ALT' | translate"
+          width="50"
+          height="50"
+        />
       </div>
-      <h1 class="verify__title">{{ 'AUTH.VERIFY_EMAIL.TITLE' | translate }}</h1>
-      <p class="verify__subtitle">{{ 'AUTH.VERIFY_EMAIL.SUBTITLE' | translate }}</p>
+      <h1 class="auth-guest__title">{{ 'AUTH.VERIFY_EMAIL.TITLE' | translate }}</h1>
+      <p class="auth-guest__subtitle">{{ 'AUTH.VERIFY_EMAIL.SUBTITLE' | translate }}</p>
 
-      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="verify__form">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-guest__form">
         @if (errorMessage()) {
-          <div class="verify__alert">{{ errorMessage() }}</div>
+          <div class="auth-guest__alert">{{ errorMessage() }}</div>
         }
         @if (infoMessage()) {
-          <div class="verify__info">{{ infoMessage() }}</div>
+          <div class="auth-guest__info">{{ infoMessage() }}</div>
         }
-        <div class="verify__field">
-          <label for="key" class="verify__label">{{
+        <div class="auth-guest__field">
+          <label for="key" class="auth-guest__label">{{
             'AUTH.VERIFY_EMAIL.CODE_LABEL' | translate
           }}</label>
           <input
             id="key"
-            class="verify__input"
+            class="auth-guest__input"
             formControlName="key"
             [placeholder]="'AUTH.VERIFY_EMAIL.CODE_PLACEHOLDER' | translate"
             autocomplete="one-time-code"
           />
         </div>
-        <button type="submit" class="verify__submit" [disabled]="form.invalid || isSubmitting()">
+        <button
+          type="submit"
+          class="auth-guest__submit"
+          [disabled]="form.invalid || isSubmitting()"
+        >
           @if (isSubmitting()) {
-            <span class="verify__spinner" aria-hidden="true"></span>
+            <span class="auth-guest__spinner" aria-hidden="true"></span>
           } @else {
             {{ 'AUTH.VERIFY_EMAIL.SUBMIT' | translate }}
           }
         </button>
       </form>
-      <button type="button" class="verify__secondary" (click)="onResend()">
+      <button type="button" class="auth-guest__secondary" (click)="onResend()">
         {{ 'AUTH.VERIFY_EMAIL.RESEND' | translate }}
       </button>
-      <p class="verify__footer">
-        <a [routerLink]="['/account/login']" class="verify__link">{{
-          'AUTH.VERIFY_EMAIL.BACK_TO_LOGIN' | translate
+      <p class="auth-guest__footer">
+        <a [routerLink]="['/account/login']" class="auth-guest__footer-link">{{
+          'AUTH.COMMON.BACK_TO_LOGIN' | translate
         }}</a>
       </p>
     </div>

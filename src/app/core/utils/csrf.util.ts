@@ -29,6 +29,19 @@ export function getDjangoCsrfTokenFromCookie(): string | null {
   return getCookie('csrftoken');
 }
 
+/** Django default session cookie — readable only when not HttpOnly (same-origin setups). */
+export const DJANGO_SESSIONID_COOKIE_NAME = 'sessionid';
+
+/** Best-effort expiry for auth cookies JS can touch (non-HttpOnly). Server logout remains required for HttpOnly `sessionid`. */
+export function clearReadableDjangoAuthCookies(): void {
+  if (typeof document === 'undefined') {
+    return;
+  }
+  for (const name of ['csrftoken', DJANGO_SESSIONID_COOKIE_NAME] as const) {
+    document.cookie = `${name}=; Max-Age=0; path=/`;
+  }
+}
+
 /**
  * Optional override when the token cannot be read from `document.cookie` (cross-origin)
  * or when supplied explicitly from config JSON / response headers. For same-origin

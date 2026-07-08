@@ -1,6 +1,8 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import {
   BehaviorSubject,
   Observable,
@@ -45,7 +47,10 @@ import {
   AuthenticatedOrChallenge,
   HeadlessAuthApiService,
 } from '../headless/headless-auth-api.service';
-import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
+import {
+  ALLAUTH_SESSION_TOKEN_STORAGE_KEY,
+  HeadlessAppTokenService,
+} from '../headless/headless-app-token.service';
 import type {
   ApiKeyCreateIn,
   ApiKeyCreateResult,
@@ -61,7 +66,12 @@ import {
   User,
 } from '../models/auth.model';
 import { normalizeApiKeyRow, parseApiKeyCreated, parseApiKeysList } from '../utils/api-keys.util';
-import { getCookie, getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
+import {
+  clearReadableDjangoAuthCookies,
+  getCookie,
+  getDjangoCsrfTokenForRequest,
+  setCrossOriginDjangoCsrfToken,
+} from '../../utils/csrf.util';
 
 /** Bound on the initial session/config calls so a hung backend can't stall bootstrapDone forever. */
 const AUTH_BOOTSTRAP_TIMEOUT_MS = 15000;
@@ -75,6 +85,8 @@ export class AuthService {
   private readonly headless = inject(HeadlessAuthApiService);
   private readonly tokenStore = inject(HeadlessAppTokenService);
   private readonly authBus = inject(AllauthAuthChangeBus);
+  private readonly translate = inject(TranslateService);
+  private readonly message = inject(NzMessageService);
 
   private readonly API_BASE_URL = environment.API_BASE_URL;
   private readonly USER_KEY = 'user';
@@ -106,13 +118,15 @@ export class AuthService {
 
   private isRefreshing = false;
   private refreshTokenSubject = new BehaviorSubject<boolean | null>(null);
+  /** Suppresses auth-bus redirect side-effects while an explicit logout is in flight. */
+  private loggingOut = false;
 
   constructor() {
     this.authBus.changes$.subscribe((msg) => {
       const prev = this.prevAuthForRedirect;
       this.authSnapshot.set(msg);
       this.syncUserFromSnapshot(msg);
-      if (this.redirectPrimed && prev !== undefined) {
+      if (this.redirectPrimed && prev !== undefined && !this.loggingOut) {
         const evt = determineAuthChangeEvent(prev, msg);
         if (evt) {
           void this.handleAuthChangeEvent(evt as AuthChangeEventType, msg);
@@ -120,6 +134,12 @@ export class AuthService {
       }
       this.prevAuthForRedirect = msg;
     });
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', (event) => {
+        this.handleCrossTabSessionTokenChange(event);
+      });
+    }
   }
 
   /**
@@ -129,16 +149,17 @@ export class AuthService {
   bootstrapOnce(): Promise<void> {
     return firstValueFrom(
       forkJoin({
-        auth: this.headless.getAuth().pipe(
+        auth: this.resolveBootstrapSession().pipe(
           timeout(AUTH_BOOTSTRAP_TIMEOUT_MS),
           catchError(() => {
             this.authBootstrapFailed.set(true);
             return of(false as const);
           })
         ),
-        config: this.headless
-          .getConfig()
-          .pipe(timeout(AUTH_BOOTSTRAP_TIMEOUT_MS), catchError(() => of(undefined))),
+        config: this.headless.getConfig().pipe(
+          timeout(AUTH_BOOTSTRAP_TIMEOUT_MS),
+          catchError(() => of(undefined))
+        ),
       }).pipe(
         tap(({ auth, config }) => {
           if (auth !== false) {
@@ -160,7 +181,7 @@ export class AuthService {
           }
         }),
         switchMap(({ auth }) => {
-          if (auth === false || !authInfo(auth).isAuthenticated) {
+          if (auth === false || !this.isOauthReturnSessionEstablished(auth)) {
             return of(void 0);
           }
           return this.getProfile().pipe(
@@ -186,6 +207,88 @@ export class AuthService {
         map(() => void 0)
       )
     );
+  }
+
+  /**
+   * App session first (fast path when `localStorage` token exists); browser session with
+   * credentials when app session is not established (split-host cookie-backed auth).
+   */
+  private resolveBootstrapSession(): Observable<AuthenticatedOrChallenge | false> {
+    return this.headless.getAuth().pipe(
+      catchError(() => {
+        this.authBootstrapFailed.set(true);
+        return of(false as const);
+      }),
+      switchMap((appRes) => {
+        if (appRes !== false && this.isOauthReturnSessionEstablished(appRes)) {
+          return of(appRes);
+        }
+        return this.headless.getBrowserSession().pipe(
+          catchError((err) => this.observableHeadlessEnvelopeFromSessionHttpFailure(err)),
+          map((browserRes) => {
+            if (this.isOauthReturnSessionEstablished(browserRes)) {
+              return browserRes;
+            }
+            return appRes !== false ? appRes : browserRes;
+          })
+        );
+      })
+    );
+  }
+
+  /** Sync auth state when another tab sets or clears the shared session token. */
+  private handleCrossTabSessionTokenChange(event: StorageEvent): void {
+    if (event.storageArea !== localStorage || event.key !== ALLAUTH_SESSION_TOKEN_STORAGE_KEY) {
+      return;
+    }
+    if (this.loggingOut) {
+      return;
+    }
+    if (!event.newValue) {
+      this.tokenStore.blockSessionCookieFallback();
+      this.clearLocalAuthUi({ preserveSessionStorageToken: false });
+      this.authSnapshot.set(undefined);
+      this.prevAuthForRedirect = undefined;
+      void this.router.navigate([ALLAUTH_LOGIN_URL]);
+      return;
+    }
+    if (event.oldValue === event.newValue) {
+      return;
+    }
+    this.headless
+      .getSession()
+      .pipe(
+        tap((res) => {
+          this.authSnapshot.set(res);
+          this.tokenStore.setFromMeta(res.meta);
+          this.syncUserFromSnapshot(res);
+          this.prevAuthForRedirect = res;
+        }),
+        switchMap((res) => {
+          if (!this.isOauthReturnSessionEstablished(res)) {
+            return of(void 0);
+          }
+          return this.getProfile().pipe(
+            tap((p) => {
+              const cur = this.currentUser();
+              if (!cur) {
+                return;
+              }
+              const merged: User = {
+                ...cur,
+                ...p,
+                id: String(p.id ?? cur.id),
+                permissions: normalizeProfilePermissionCodes(p.permissions),
+              };
+              this.currentUser.set(merged);
+              localStorage.setItem(this.USER_KEY, JSON.stringify(merged));
+            }),
+            catchError(() => of(void 0))
+          );
+        }),
+        catchError(() => of(void 0))
+      )
+      .subscribe();
   }
 
   private syncUserFromSnapshot(msg: unknown): void {
@@ -217,6 +320,8 @@ export class AuthService {
     localStorage.removeItem(this.USER_KEY);
     if (!opts?.preserveSessionStorageToken) {
       this.tokenStore.clear();
+      setCrossOriginDjangoCsrfToken(null);
+      clearReadableDjangoAuthCookies();
     }
     this.authStateSubject.next(false);
     this.currentUser.set(null);
@@ -251,6 +356,12 @@ export class AuthService {
       );
     }
 
+    if (!this.tokenStore.getSessionToken()) {
+      this.isRefreshing = false;
+      this.refreshTokenSubject.next(false);
+      return of(false);
+    }
+
     return this.headless.getSession().pipe(
       map((res) => {
         const info = authInfo(res);
@@ -259,6 +370,7 @@ export class AuthService {
           this.refreshTokenSubject.next(false);
           return false;
         }
+        this.tokenStore.unblockSessionCookieFallback();
         this.authSnapshot.set(res);
         this.tokenStore.setFromMeta(res.meta);
         this.syncUserFromSnapshot(res);
@@ -274,7 +386,23 @@ export class AuthService {
     );
   }
 
-  invalidateClientAuthAndGoLogin(): void {
+  /** Clears stale client auth without login redirect or session-expired toast (public browsing). */
+  clearStaleClientSession(): void {
+    this.tokenStore.blockSessionCookieFallback();
+    this.clearLocalAuthUi({ preserveSessionStorageToken: false });
+    this.authSnapshot.set(undefined);
+    this.prevAuthForRedirect = undefined;
+  }
+
+  invalidateClientAuthAndGoLogin(options?: { sessionExpired?: boolean }): void {
+    if (!this.isLoggedIn() && !this.currentUser()) {
+      this.clearStaleClientSession();
+      return;
+    }
+    if (options?.sessionExpired) {
+      this.message.warning(this.translate.instant('AUTH.SESSION_EXPIRED'));
+    }
+    this.tokenStore.blockSessionCookieFallback();
     this.clearLocalAuthUi({ preserveSessionStorageToken: false });
     this.authSnapshot.set(undefined);
     this.prevAuthForRedirect = undefined;
@@ -310,8 +438,8 @@ export class AuthService {
   }): Observable<AuthenticatedOrChallenge> {
     const fetchProfile = options?.fetchProfile;
 
-    // Same-origin only: if Django sessionid is readable (not HttpOnly), seed app header store.
-    if (!this.tokenStore.getSessionToken()) {
+    // Same-origin only: seed from readable `sessionid` when not in post-logout blocked state.
+    if (!this.tokenStore.isSessionCookieFallbackBlocked() && !this.tokenStore.getSessionToken()) {
       const sessionId = getCookie('sessionid');
       if (sessionId) {
         this.tokenStore.setSessionToken(sessionId);
@@ -375,6 +503,9 @@ export class AuthService {
       return of(res);
     }
     this.authSnapshot.set(res);
+    if (authInfo(res).isAuthenticated && res.status === 200) {
+      this.tokenStore.unblockSessionCookieFallback();
+    }
     this.tokenStore.setFromMeta(res.meta);
     this.syncUserFromSnapshot(res);
 
@@ -456,23 +587,31 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
-    return this.headless.deleteSession().pipe(
-      tap(() => {
-        this.performLogoutAfterServer();
-      }),
-      catchError(() => {
-        this.performLogoutAfterServer();
-        return of(void 0);
-      }),
-      switchMap(() => of(void 0))
-    );
-  }
-
-  private performLogoutAfterServer(): void {
+    this.loggingOut = true;
+    this.tokenStore.blockSessionCookieFallback();
     this.clearLocalAuthUi({ preserveSessionStorageToken: false });
     this.authSnapshot.set(undefined);
-    this.prevAuthForRedirect = undefined;
-    void this.router.navigate([ALLAUTH_LOGIN_URL]);
+
+    return forkJoin([
+      this.headless.deleteSession().pipe(catchError(() => of(null))),
+      this.headless.deleteBrowserSession().pipe(catchError(() => of(null))),
+    ]).pipe(
+      tap(() => {
+        this.tokenStore.clearSessionToken();
+        this.prevAuthForRedirect = undefined;
+        void this.router.navigate([ALLAUTH_LOGIN_URL]);
+      }),
+      catchError(() => {
+        this.tokenStore.clearSessionToken();
+        this.prevAuthForRedirect = undefined;
+        void this.router.navigate([ALLAUTH_LOGIN_URL]);
+        return of(void 0);
+      }),
+      finalize(() => {
+        this.loggingOut = false;
+      }),
+      map(() => void 0)
+    );
   }
 
   getProfile(): Observable<UpdateProfileResponse> {
@@ -593,12 +732,16 @@ export class AuthService {
     process: 'login' | 'connect'
   ): Promise<{ kind: 'redirecting' } | { kind: 'error'; message: string }> {
     if (process === 'login') {
-      this.tokenStore.clearSessionToken();
+      this.tokenStore.blockSessionCookieFallback();
+      this.tokenStore.clear();
+      setCrossOriginDjangoCsrfToken(null);
+      clearReadableDjangoAuthCookies();
+      await firstValueFrom(this.headless.deleteBrowserSession().pipe(catchError(() => of(null))));
     }
     if (process === 'connect' && !this.tokenStore.getSessionToken()) {
       return {
         kind: 'error',
-        message: 'Connecting a provider requires an app session token; sign in again.',
+        message: this.translate.instant('AUTH.PROVIDERS.SESSION_TOKEN_REQUIRED'),
       };
     }
     if (!getDjangoCsrfTokenForRequest()) {

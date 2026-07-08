@@ -87,6 +87,8 @@ export class RecitationsService {
       params = params.set('meem_behaviour', filters.meem_behaviour);
     if (filters.year != null) params = params.set('year', String(filters.year));
     if (filters.license_code) params = params.set('license_code', filters.license_code);
+    if (filters.is_open_access != null)
+      params = params.set('is_open_access', filters.is_open_access.toString());
     if (filters.ordering) params = params.set('ordering', filters.ordering);
 
     return this.http.get<RecitationsListResponse>(this.apiUrl, { params });

@@ -16,7 +16,12 @@
   <div class="register__container">
     <div class="register__card">
       <div class="register__logo">
-        <img src="/assets/images/logo.svg" alt="Itqan" width="50" height="50" />
+        <img
+          src="/assets/images/logo.svg"
+          [alt]="'COMMON.LOGO_ALT' | translate"
+          width="50"
+          height="50"
+        />
       </div>
 
       <div class="register__welcome">
@@ -255,26 +260,12 @@
         </button>
       </form>
 
-      <div class="register__social">
-        <p class="register__social-title">{{ 'AUTH.LOGIN.OR_CONTINUE' | translate }}</p>
-        <div class="register__social-btns">
-          <button type="button" class="register__social-btn" (click)="onSignUpWithGoogle()">
-            {{ 'AUTH.REGISTER.LOGIN_WITH_GOOGLE' | translate }}
-          </button>
-          <button type="button" class="register__social-btn" (click)="onSignUpWithGitHub()">
-            {{ 'AUTH.REGISTER.LOGIN_WITH_GITHUB' | translate }}
-          </button>
-        </div>
-        @if (passkeyAvailable()) {
-          <a
-            [routerLink]="['/passkey']"
-            [queryParams]="{ flow: 'signup' }"
-            class="register__inline-link register__alt-link"
-          >
-            {{ 'AUTH.REGISTER.SIGN_UP_WITH_PASSKEY' | translate }}
-          </a>
-        }
-      </div>
+      <app-auth-social-actions
+        flow="signup"
+        [passkeySignupEmail]="registerForm.get('email')?.value ?? ''"
+        (google)="onSignUpWithGoogle()"
+        (github)="onSignUpWithGitHub()"
+      />
 
       <div class="register__footer">
         <p class="register__footer-text">

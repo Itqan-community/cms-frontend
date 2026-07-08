@@ -28,6 +28,8 @@ export class TafsirsService {
     if (filters.language) params = params.set('language', filters.language);
     if (filters.is_external != null)
       params = params.set('is_external', filters.is_external.toString());
+    if (filters.is_open_access != null)
+      params = params.set('is_open_access', filters.is_open_access.toString());
     if (filters.ordering) params = params.set('ordering', filters.ordering);
 
     return this.http.get<TafsirsList>(this.apiUrl, { params });
@@ -71,6 +73,12 @@ export class TafsirsService {
     append('publisher_id', payload.publisher_id);
     if (payload.is_external !== undefined) {
       data.append('is_external', String(payload.is_external));
+    }
+    if (payload.is_open_access !== undefined) {
+      data.append('is_open_access', String(payload.is_open_access));
+    }
+    if (payload.restricted_for_tenant !== undefined) {
+      data.append('restricted_for_tenant', String(payload.restricted_for_tenant));
     }
     append('external_url', payload.external_url);
     if (payload.thumbnail) {

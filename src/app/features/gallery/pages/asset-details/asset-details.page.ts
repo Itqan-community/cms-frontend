@@ -12,6 +12,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { Licenses } from '../../../../core/enums/licenses.enum';
@@ -20,8 +21,11 @@ import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/br
 import { ImageCarouselComponent } from '../../../../shared/components/image-carousel/image-carousel.component';
 import { LicenseTagComponent } from '../../../../shared/components/license-tag/license-tag.component';
 import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
+import { IssuesService } from '../../../admin/issues/services/issues.service';
+import { resolveApiErrorMessage } from '../../../../shared/utils/api-error-resolver.util';
 import { AssetDetails } from '../../models/assets.model';
 import { AssetsService } from '../../services/assets.service';
+import { AssetLicenseAcceptanceService } from '../../services/asset-license-acceptance.service';
 
 @Component({
   selector: 'app-asset-details-page',
@@ -47,6 +51,8 @@ import { AssetsService } from '../../services/assets.service';
 })
 export class AssetDetailsPage implements OnInit {
   private readonly assetsService = inject(AssetsService);
+  private readonly licenseAcceptance = inject(AssetLicenseAcceptanceService);
+  private readonly issuesService = inject(IssuesService);
   private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
@@ -67,8 +73,11 @@ export class AssetDetailsPage implements OnInit {
   canConfirmLicense = signal<boolean>(false);
   isSubmittingRequest = signal<boolean>(false);
   isDownloading = signal<boolean>(false);
+  isReportIssueModalVisible = signal<boolean>(false);
+  isSubmittingReportIssue = signal<boolean>(false);
 
   accessRequestForm: FormGroup;
+  reportIssueForm: FormGroup;
 
   usageOptions = [{ value: 'commercial' }, { value: 'non-commercial' }];
 
@@ -76,6 +85,9 @@ export class AssetDetailsPage implements OnInit {
     this.accessRequestForm = this.fb.group({
       intended_use: ['', [Validators.required]],
       purpose: ['', [Validators.required]],
+    });
+    this.reportIssueForm = this.fb.group({
+      description: ['', [Validators.required, Validators.minLength(10)]],
     });
   }
 
@@ -95,6 +107,7 @@ export class AssetDetailsPage implements OnInit {
           this.asset.set(asset);
           this.images.set(asset.snapshots.map((snapshot) => snapshot.image_url));
           this.loading.set(false);
+          this.maybeOpenReportIssueModal();
         },
         error: (err) => {
           this.loading.set(false);
@@ -113,12 +126,16 @@ export class AssetDetailsPage implements OnInit {
 
   getCategoryIcon(category: string): string {
     switch (category) {
-      case 'mushaf':
-        return 'lucideBookmark';
       case 'tafsir':
         return 'lucideFileText';
+      case 'translation':
+        return 'lucideLanguages';
       case 'recitation':
         return 'lucideMic';
+      case 'font':
+        return 'lucidePalette';
+      case 'program':
+        return 'lucideLayers';
       default:
         return 'lucideFile';
     }
@@ -135,8 +152,176 @@ export class AssetDetailsPage implements OnInit {
       return;
     }
 
-    // Open access request modal instead of directly downloading
-    this.openAccessRequestModal();
+    const status = asset.access_status ?? null;
+
+    if (status === 'not_requested') {
+      this.openAccessRequestModal();
+      return;
+    }
+
+    if (status === 'pending') {
+      this.message.info(this.translate.instant('GALLERY.ACCESS_PENDING_TOAST'));
+      return;
+    }
+
+    if (status === 'rejected') {
+      this.message.warning(this.translate.instant('GALLERY.ACCESS_REJECTED_TOAST'));
+      return;
+    }
+
+    this.proceedToDownloadAfterAccess();
+  }
+
+  isDownloadBlocked(): boolean {
+    if (!this.authService.isLoggedIn()) {
+      return false;
+    }
+
+    const status = this.asset()?.access_status ?? null;
+    return status === 'pending' || status === 'rejected';
+  }
+
+  isRequestAccessAction(): boolean {
+    if (!this.authService.isLoggedIn()) {
+      return false;
+    }
+
+    return (this.asset()?.access_status ?? null) === 'not_requested';
+  }
+
+  primaryActionLabelKey(): string {
+    if (this.isDownloading()) {
+      return 'UI.DOWNLOADING';
+    }
+
+    if (this.isRequestAccessAction()) {
+      return 'GALLERY.REQUEST_ACCESS_BUTTON';
+    }
+
+    return 'UI.DOWNLOAD_RESOURCE';
+  }
+
+  primaryActionIcon(): string {
+    return this.isRequestAccessAction() ? 'lucideKeyRound' : 'lucideDownloadCloud';
+  }
+
+  private refreshAssetDetails(): Observable<AssetDetails> {
+    return this.assetsService.getAssetDetails(this.id);
+  }
+
+  private applyRefreshedAsset(asset: AssetDetails): void {
+    this.asset.set(asset);
+    this.images.set(asset.snapshots.map((snapshot) => snapshot.image_url));
+  }
+
+  private handleAccessStatusAfterRequest(status: AssetDetails['access_status']): void {
+    if (status === 'approved' || status == null) {
+      this.message.success(this.translate.instant('GALLERY.ACCESS_REQUEST_APPROVED'));
+      this.proceedToDownloadAfterAccess();
+      return;
+    }
+
+    if (status === 'pending') {
+      this.message.success(this.translate.instant('GALLERY.ACCESS_REQUEST_SUBMITTED_PENDING'));
+      return;
+    }
+
+    if (status === 'rejected') {
+      this.message.warning(this.translate.instant('GALLERY.ACCESS_REJECTED_TOAST'));
+      return;
+    }
+
+    this.message.error(this.translate.instant('ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED'));
+  }
+
+  private proceedToDownloadAfterAccess(): void {
+    const asset = this.asset();
+    if (!asset?.id) {
+      return;
+    }
+
+    const userId = this.authService.currentUser()?.id;
+    if (userId && this.licenseAcceptance.hasAccepted(userId)) {
+      this.downloadAsset(asset.id);
+      return;
+    }
+
+    this.openLicenseModal();
+  }
+
+  openReportIssueModal() {
+    if (!this.authService.isLoggedIn()) {
+      void this.router.navigate(['/account/login'], {
+        queryParams: { next: `/gallery/asset/${this.id}?reportIssue=1` },
+      });
+      return;
+    }
+
+    this.isReportIssueModalVisible.set(true);
+  }
+
+  closeReportIssueModal() {
+    this.isReportIssueModalVisible.set(false);
+    this.reportIssueForm.reset();
+  }
+
+  handleReportIssueModalCancel() {
+    this.closeReportIssueModal();
+  }
+
+  handleReportIssueModalOk() {
+    if (!this.reportIssueForm.valid) {
+      this.reportIssueForm.get('description')?.markAsTouched();
+      return;
+    }
+
+    const asset = this.asset();
+    if (!asset?.id) {
+      return;
+    }
+
+    const description = this.reportIssueForm.value.description ?? '';
+    this.isSubmittingReportIssue.set(true);
+
+    this.issuesService
+      .create({ asset_id: asset.id, description })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.isSubmittingReportIssue.set(false);
+          this.message.success(this.translate.instant('GALLERY.REPORT_ISSUE.SUCCESS'));
+          this.closeReportIssueModal();
+        },
+        error: (error) => {
+          this.isSubmittingReportIssue.set(false);
+          if (error.status === 401) {
+            this.message.error(this.translate.instant('GALLERY.REPORT_ISSUE.LOGIN_REQUIRED'));
+            return;
+          }
+          if (error.status === 403) {
+            this.message.error(this.translate.instant('GALLERY.REPORT_ISSUE.FORBIDDEN'));
+            return;
+          }
+          const errorKey =
+            error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'GALLERY.REPORT_ISSUE.ERROR';
+          this.message.error(this.translate.instant(errorKey));
+        },
+      });
+  }
+
+  private maybeOpenReportIssueModal(): void {
+    const reportIssue = this.route.snapshot.queryParamMap.get('reportIssue');
+    if (reportIssue !== '1' || !this.authService.isLoggedIn() || !this.asset()) {
+      return;
+    }
+
+    this.isReportIssueModalVisible.set(true);
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { reportIssue: null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
   }
 
   openAccessRequestModal() {
@@ -173,15 +358,41 @@ export class AssetDetailsPage implements OnInit {
           next: () => {
             this.isSubmittingRequest.set(false);
             this.closeAccessRequestModal();
-            this.openLicenseModal();
+            this.refreshAssetDetails()
+              .pipe(takeUntilDestroyed(this.destroyRef))
+              .subscribe({
+                next: (refreshed) => {
+                  this.applyRefreshedAsset(refreshed);
+                  this.handleAccessStatusAfterRequest(refreshed.access_status);
+                },
+                error: (error) => {
+                  const errorMessage = resolveApiErrorMessage(
+                    error,
+                    {
+                      fallbackKey:
+                        error.status === 0
+                          ? 'ERRORS.NETWORK_ERROR'
+                          : 'ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED',
+                    },
+                    this.translate
+                  );
+                  this.message.error(errorMessage);
+                },
+              });
           },
           error: (error) => {
             this.isSubmittingRequest.set(false);
-            const errorKey =
-              error.status === 0
-                ? 'ERRORS.NETWORK_ERROR'
-                : 'ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED';
-            this.message.error(this.translate.instant(errorKey));
+            const errorMessage = resolveApiErrorMessage(
+              error,
+              {
+                fallbackKey:
+                  error.status === 0
+                    ? 'ERRORS.NETWORK_ERROR'
+                    : 'ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED',
+              },
+              this.translate
+            );
+            this.message.error(errorMessage);
           },
         });
     } else {
@@ -219,9 +430,11 @@ export class AssetDetailsPage implements OnInit {
   }
 
   handleLicenseConfirm() {
-    // TODO: Handle license confirmation
+    const userId = this.authService.currentUser()?.id;
+    if (userId) {
+      this.licenseAcceptance.recordAcceptance(userId);
+    }
     this.closeLicenseModal();
-    // Proceed with download
     const asset = this.asset();
     if (asset?.id) {
       this.downloadAsset(asset.id);
@@ -259,9 +472,13 @@ export class AssetDetailsPage implements OnInit {
         },
         error: (error) => {
           this.isDownloading.set(false);
-          const defaultErrorKey =
-            error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR';
-          const errorMessage = error.error?.message || this.translate.instant(defaultErrorKey);
+          const errorMessage = resolveApiErrorMessage(
+            error,
+            {
+              fallbackKey: error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR',
+            },
+            this.translate
+          );
           this.message.error(errorMessage);
         },
       });
@@ -286,9 +503,13 @@ export class AssetDetailsPage implements OnInit {
         },
         error: (error) => {
           this.isDownloading.set(false);
-          const defaultErrorKey =
-            error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR';
-          const errorMessage = error.error?.message || this.translate.instant(defaultErrorKey);
+          const errorMessage = resolveApiErrorMessage(
+            error,
+            {
+              fallbackKey: error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR',
+            },
+            this.translate
+          );
           this.message.error(errorMessage);
         },
       });

@@ -6,7 +6,7 @@ import { Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
 import {
   ManagedEmailAddress,
   parseEmailAddressesEnvelope,
@@ -52,7 +52,11 @@ export class ChangeEmailPage implements OnInit {
       }
       this.pageError.set(
         e instanceof HttpErrorResponse
-          ? getErrorMessage(e) || this.translate.instant('AUTH.EMAIL.LOAD_ERROR')
+          ? resolveAuthErrorMessage(
+              e,
+              { fallbackKey: 'AUTH.EMAIL.LOAD_ERROR', context: 'email' },
+              this.translate
+            )
           : this.translate.instant('AUTH.EMAIL.LOAD_ERROR')
       );
     } finally {
@@ -140,7 +144,13 @@ export class ChangeEmailPage implements OnInit {
       if (tryNavigateForAuth401(this.router, e)) {
         return;
       }
-      this.pageError.set(getErrorMessage(e) || this.translate.instant('AUTH.EMAIL.ACTION_ERROR'));
+      this.pageError.set(
+        resolveAuthErrorMessage(
+          e,
+          { fallbackKey: 'AUTH.EMAIL.ACTION_ERROR', context: 'email' },
+          this.translate
+        )
+      );
       return;
     }
     this.pageError.set(this.translate.instant('AUTH.EMAIL.ACTION_ERROR'));

@@ -1,18 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgIcon } from '@ng-icons/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import {
-  getErrorMessage,
-  isWebAuthnIncorrectCodeError,
-} from '../../../../shared/utils/error.utils';
+import { AuthBackLinkComponent } from '../../components/auth-back-link/auth-back-link.component';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
+import { isPasskeyAutoPromptCancellation } from '../../headless/passkey-auto-prompt.util';
+import { resolvePasskeyFlowError } from '../../headless/passkey-error.util';
 import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
-import { WebAuthnRpIdMismatchError } from '../../headless/webauthn-rp-id.util';
 import { getWebAuthnRequestOptions, publicKeyCredentialToJson } from '../../headless/webauthn.util';
 import type { WebAuthnCredentialRequestData } from '../../headless/headless-api.types';
 import { AuthService } from '../../services/auth.service';
@@ -21,16 +21,25 @@ import { readContinueUrl } from '../../utils/auth-route-query.util';
 @Component({
   selector: 'app-mfa-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, LangSwitchComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TranslateModule,
+    LangSwitchComponent,
+    AuthBackLinkComponent,
+    NgIcon,
+  ],
   styleUrls: ['./mfa.page.less'],
   templateUrl: './mfa.page.html',
 })
-export class MfaPage {
+export class MfaPage implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
   private readonly translate = inject(TranslateService);
+
+  private autoPasskeyAttempted = false;
 
   form: FormGroup;
   errorMessage = signal<string>('');
@@ -40,6 +49,12 @@ export class MfaPage {
   constructor() {
     this.form = this.fb.group({ code: ['', [Validators.required, Validators.minLength(4)]] });
     this.passkeyAvailable.set(isPasskeyClientEnvironmentSupported());
+  }
+
+  ngOnInit(): void {
+    if (this.passkeyAvailable()) {
+      void this.onWebAuthn({ auto: true });
+    }
   }
 
   async onSubmit(): Promise<void> {
@@ -62,16 +77,29 @@ export class MfaPage {
         if (tryNavigateForAuth401(this.router, e)) {
           return;
         }
-        this.errorMessage.set(getErrorMessage(e) || this.translate.instant('AUTH.MFA.ERROR'));
+        this.errorMessage.set(
+          resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.MFA.ERROR', context: 'mfa_totp' },
+            this.translate
+          )
+        );
         return;
       }
       this.errorMessage.set(this.translate.instant('AUTH.MFA.ERROR'));
     }
   }
 
-  async onWebAuthn(): Promise<void> {
+  async onWebAuthn(options?: { auto?: boolean }): Promise<void> {
+    const isAuto = options?.auto === true;
     if (!this.passkeyAvailable()) {
       return;
+    }
+    if (isAuto && this.autoPasskeyAttempted) {
+      return;
+    }
+    if (isAuto) {
+      this.autoPasskeyAttempted = true;
     }
     this.errorMessage.set('');
     this.isLoading.set(true);
@@ -84,6 +112,9 @@ export class MfaPage {
       })) as PublicKeyCredential | null;
       if (!cred) {
         this.isLoading.set(false);
+        if (!isAuto) {
+          this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.CANCELLED'));
+        }
         return;
       }
       const body = publicKeyCredentialToJson(cred);
@@ -94,35 +125,13 @@ export class MfaPage {
       void this.router.navigateByUrl(nextUrl);
     } catch (e) {
       this.isLoading.set(false);
-      if (e instanceof WebAuthnRpIdMismatchError) {
-        this.errorMessage.set(
-          this.translate.instant('AUTH.PASSKEY.RP_ID_ORIGIN_MISMATCH', {
-            rpId: e.rpId,
-            host: e.hostname,
-          })
-        );
+      if (isAuto && isPasskeyAutoPromptCancellation(e)) {
         return;
       }
-      if (
-        e instanceof DOMException &&
-        e.name === 'SecurityError' &&
-        /relying party|webauthn|well-known/i.test(e.message)
-      ) {
-        this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.RP_ID_BROWSER_REJECT'));
-        return;
+      const resolution = resolvePasskeyFlowError(e, this.translate, this.router, 'mfa');
+      if (resolution.kind === 'message') {
+        this.errorMessage.set(resolution.message);
       }
-      if (e instanceof HttpErrorResponse) {
-        if (isWebAuthnIncorrectCodeError(e)) {
-          this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.WEBAUTHN_STATE_ERROR'));
-          return;
-        }
-        if (tryNavigateForAuth401(this.router, e)) {
-          return;
-        }
-        this.errorMessage.set(getErrorMessage(e) || this.translate.instant('AUTH.MFA.ERROR'));
-        return;
-      }
-      this.errorMessage.set(this.translate.instant('AUTH.MFA.ERROR'));
     }
   }
 }

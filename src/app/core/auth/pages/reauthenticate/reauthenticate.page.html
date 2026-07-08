@@ -1,16 +1,27 @@
-<div class="reauth">
-  <header class="reauth__header">
-    <div class="reauth__header-row">
-      <button type="button" class="reauth__back" (click)="goBack()">
-        {{ 'AUTH.REAUTH.CANCEL' | translate }}
-      </button>
+<div class="auth-guest reauth">
+  <header class="auth-guest__header">
+    <div class="auth-guest__header-row">
+      <app-auth-back-link
+        labelKey="AUTH.REAUTH.CANCEL"
+        [useRouter]="false"
+        [disabled]="isLoading()"
+        (clicked)="goBack()"
+      />
       <app-lang-switch></app-lang-switch>
     </div>
   </header>
-  <div class="reauth__container">
-    <div class="reauth__card">
-      <h1 class="reauth__title">{{ 'AUTH.REAUTH.TITLE' | translate }}</h1>
-      <p class="reauth__subtitle">
+  <div class="auth-guest__container">
+    <div class="auth-guest__card">
+      <div class="auth-guest__logo">
+        <img
+          src="/assets/images/logo.svg"
+          [alt]="'COMMON.LOGO_ALT' | translate"
+          width="50"
+          height="50"
+        />
+      </div>
+      <h1 class="auth-guest__title">{{ 'AUTH.REAUTH.TITLE' | translate }}</h1>
+      <p class="auth-guest__subtitle">
         @if (passkeyAvailable()) {
           {{ 'AUTH.REAUTH.SUBTITLE' | translate }}
         } @else {
@@ -18,49 +29,74 @@
         }
       </p>
       @if (errorMessage()) {
-        <div class="reauth__alert">{{ errorMessage() }}</div>
+        <div class="auth-guest__alert">{{ errorMessage() }}</div>
       }
-      <form [formGroup]="form" (ngSubmit)="onSubmitPassword()" class="reauth__form">
-        <div class="reauth__field">
-          <label for="pw" class="reauth__label">{{
+      <form [formGroup]="form" (ngSubmit)="onSubmitPassword()" class="auth-guest__form">
+        <div class="auth-guest__field">
+          <label for="pw" class="auth-guest__label">{{
             'AUTH.LOGIN.PASSWORD_LABEL' | translate
           }}</label>
-          <input
-            id="pw"
-            class="reauth__input"
-            type="password"
-            formControlName="password"
-            autocomplete="current-password"
-          />
+          <div class="auth-guest__input-wrapper">
+            <input
+              id="pw"
+              class="auth-guest__input"
+              [type]="passwordVisible() ? 'text' : 'password'"
+              formControlName="password"
+              autocomplete="current-password"
+            />
+            <button
+              type="button"
+              class="auth-guest__password-toggle"
+              (click)="togglePasswordVisibility()"
+              [attr.aria-label]="
+                (passwordVisible() ? 'AUTH.LOGIN.HIDE_PASSWORD' : 'AUTH.LOGIN.SHOW_PASSWORD')
+                  | translate
+              "
+            >
+              <ng-icon
+                [name]="passwordVisible() ? 'lucideEyeOff' : 'lucideEye'"
+                aria-hidden="true"
+              />
+            </button>
+          </div>
         </div>
-        <button type="submit" class="reauth__submit" [disabled]="form.invalid || isLoading()">
-          {{ 'AUTH.REAUTH.SUBMIT' | translate }}
+        <button type="submit" class="auth-guest__submit" [disabled]="form.invalid || isLoading()">
+          @if (isLoading()) {
+            <span class="auth-guest__spinner" aria-hidden="true"></span>
+          } @else {
+            {{ 'AUTH.REAUTH.SUBMIT' | translate }}
+          }
         </button>
       </form>
       @if (passkeyAvailable()) {
-        <div class="reauth__divider">{{ 'AUTH.LOGIN.OR_CONTINUE' | translate }}</div>
+        <div class="auth-guest__divider">{{ 'AUTH.LOGIN.OR_CONTINUE' | translate }}</div>
         <button
           type="button"
-          class="reauth__secondary"
+          class="auth-guest__submit auth-guest__submit--passkey"
           (click)="onPasskey()"
           [disabled]="isLoading()"
         >
+          <ng-icon name="lucideFingerprint" class="auth-guest__passkey-icon" aria-hidden="true" />
           {{ 'AUTH.REAUTH.USE_PASSKEY' | translate }}
         </button>
       }
-      <div class="reauth__divider">{{ 'AUTH.REAUTH.OR_MFA' | translate }}</div>
-      <form [formGroup]="mfaForm" (ngSubmit)="onSubmitMfaCode()" class="reauth__form">
-        <div class="reauth__field">
-          <label for="mfa" class="reauth__label">{{ 'AUTH.MFA.CODE_LABEL' | translate }}</label>
+      <div class="auth-guest__divider">{{ 'AUTH.REAUTH.OR_MFA' | translate }}</div>
+      <form [formGroup]="mfaForm" (ngSubmit)="onSubmitMfaCode()" class="auth-guest__form">
+        <div class="auth-guest__field">
+          <label for="mfa" class="auth-guest__label">{{ 'AUTH.MFA.CODE_LABEL' | translate }}</label>
           <input
             id="mfa"
-            class="reauth__input"
+            class="auth-guest__input"
             formControlName="code"
             autocomplete="one-time-code"
             [placeholder]="'AUTH.MFA.CODE_PLACEHOLDER' | translate"
           />
         </div>
-        <button type="submit" class="reauth__secondary" [disabled]="mfaForm.invalid || isLoading()">
+        <button
+          type="submit"
+          class="auth-guest__submit auth-guest__submit--secondary"
+          [disabled]="mfaForm.invalid || isLoading()"
+        >
           {{ 'AUTH.REAUTH.SUBMIT_MFA' | translate }}
         </button>
       </form>

@@ -1,1 +1,15 @@
-<p>not-found.page works!</p>
+<div class="portal-state-screen">
+  <div class="portal-state-screen__container">
+    <div class="portal-state-screen__card">
+      <div class="portal-state-screen__decorative" aria-hidden="true"></div>
+      <div class="portal-state-screen__icon-wrap">
+        <ng-icon name="lucideSearch" class="portal-state-screen__icon" aria-hidden="true" />
+      </div>
+      <h1 class="portal-state-screen__title">{{ 'ERRORS.NOT_FOUND_PAGE.TITLE' | translate }}</h1>
+      <p class="portal-state-screen__subtitle">{{ 'ERRORS.NOT_FOUND_PAGE.MESSAGE' | translate }}</p>
+      <a nz-button nzType="primary" routerLink="/gallery" class="portal-state-screen__cta">
+        {{ 'ERRORS.NOT_FOUND_PAGE.CTA' | translate }}
+      </a>
+    </div>
+  </div>
+</div>

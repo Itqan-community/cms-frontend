@@ -61,7 +61,7 @@
 
       <div class="filters__card-content">
         <nz-checkbox-group
-          [nzOptions]="categoriesOptions"
+          [nzOptions]="categoriesOptions()"
           [(ngModel)]="categoriesSelection"
           (ngModelChange)="onCategoriesSelectionChange($event)"
         />

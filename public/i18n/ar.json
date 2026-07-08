@@ -1,8 +1,43 @@
 {
   "APP_TITLE": "إتقان لإدارة المحتوى",
   "WELCOME": "مرحباً بك في المتجر",
+  "INVITATION": {
+    "ACCEPT": {
+      "TITLE": "قبول الدعوة",
+      "BACK": "العودة إلى الرئيسية",
+      "LOADING": "جاري تفعيل حسابك…",
+      "SUCCESS_TITLE": "تم قبول الدعوة",
+      "SUCCESS_BODY": "تم تفعيل عضويتك. يمكنك الآن تسجيل الدخول إلى البوابة.",
+      "GO_TO_LOGIN": "الذهاب لتسجيل الدخول",
+      "ERROR": "تعذر قبول الدعوة. قد تكون منتهية أو غير صالحة.",
+      "NO_TOKEN": "رابط الدعوة غير صالح: لا يوجد رمز."
+    }
+  },
   "AUTH": {
     "MUST_LOGIN_TO_VIEW": "يجب تسجيل الدخول لعرض هذه الصفحة.",
+    "SESSION_EXPIRED": "انتهت صلاحية جلستك. يرجى تسجيل الدخول مرة أخرى.",
+    "ERRORS": {
+      "CODES": {
+        "ACCOUNT_INACTIVE": "هذا الحساب غير نشط حالياً.",
+        "CANNOT_REMOVE_PRIMARY_EMAIL": "لا يمكنك إزالة عنوان بريدك الإلكتروني الرئيسي.",
+        "DUPLICATE_EMAIL": "عنوان البريد الإلكتروني هذا مرتبط بالفعل بهذا الحساب.",
+        "EMAIL_PASSWORD_MISMATCH": "البريد الإلكتروني و/أو كلمة المرور غير صحيحة.",
+        "EMAIL_TAKEN": "يوجد مستخدم مسجّل بهذا البريد الإلكتروني بالفعل.",
+        "INVALID": "يرجى التحقق من المدخلات والمحاولة مرة أخرى.",
+        "INVALID_CREDENTIALS": "البريد الإلكتروني و/أو كلمة المرور غير صحيحة.",
+        "PASSWORD_MISMATCH": "كلمتا المرور غير متطابقتين.",
+        "PHONE_PASSWORD_MISMATCH": "رقم الهاتف و/أو كلمة المرور غير صحيحة.",
+        "REQUIRED": "يرجى ملء جميع الحقول المطلوبة.",
+        "TOO_MANY_LOGIN_ATTEMPTS": "محاولات تسجيل دخول فاشلة كثيرة. حاول لاحقاً.",
+        "UNVERIFIED_EMAIL": "يرجى التحقق من بريدك الإلكتروني قبل المتابعة.",
+        "USERNAME_PASSWORD_MISMATCH": "اسم المستخدم و/أو كلمة المرور غير صحيحة."
+      }
+    },
+    "COMMON": {
+      "BACK_TO_LOGIN": "العودة لتسجيل الدخول",
+      "BACK_TO_SIGNUP": "العودة لإنشاء الحساب",
+      "BACK_TO_GALLERY": "العودة إلى المعرض"
+    },
     "LOGIN": {
       "TITLE": "مرحباً بعودتك",
       "SUBTITLE": "سجّل دخولك للمتابعة إلى إتقان",
@@ -84,6 +119,7 @@
       "SETUP_SUCCESS": "تمت إضافة مفتاح المرور بنجاح.",
       "SIGNUP_SESSION_MISSING": "تعذر بدء التسجيل بمفتاح المرور (لا توجد جلسة من الخادم). أغلق التبويبات الأخرى، حدّث الصفحة، وحاول مرة أخرى.",
       "WEBAUTHN_STATE_ERROR": "انتهت خطوة مفتاح المرور أو انقطعت. عُد وابدأ من جديد.",
+      "WEBAUTHN_VERIFICATION_FAILED": "تعذّر التحقق من مفتاح المرور هذا. حاول مرة أخرى أو سجّل الدخول بطريقة أخرى.",
       "SETUP_REAUTH_REQUIRED": "للأمان، أكّد كلمة المرور قبل إضافة مفتاح المرور.",
       "SETUP_REAUTH_LINK": "تأكيد كلمة المرور للمتابعة",
       "BACK": "العودة لتسجيل الدخول",
@@ -130,11 +166,14 @@
       "NEW_PASSWORD": "كلمة المرور الجديدة",
       "SUBMIT": "تحديث كلمة المرور",
       "ERROR": "تعذر إعادة التعيين. قد يكون الرابط أو الرمز منتهي الصلاحية.",
+      "EXPIRED": "انتهت صلاحية رابط إعادة التعيين. يرجى طلب رابط جديد.",
       "BACK": "العودة لتسجيل الدخول"
     },
     "CHANGE_PASSWORD": {
       "SUBTITLE": "قم بتحديث كلمة المرور الخاصة بك للحفاظ على أمان حسابك.",
-      "CURRENT_PASSWORD": "كلمة المرور الحالية"
+      "CURRENT_PASSWORD": "كلمة المرور الحالية",
+      "SUCCESS": "تم تغيير كلمة المرور بنجاح.",
+      "ERROR": "تعذر تغيير كلمة المرور. يرجى المحاولة مرة أخرى."
     },
     "MFA": {
       "TITLE": "المصادقة الثنائية",
@@ -144,7 +183,9 @@
       "SUBMIT": "تحقق",
       "BACK": "العودة لتسجيل الدخول",
       "ERROR": "رمز غير صحيح. حاول مرة أخرى.",
-      "USE_SECURITY_KEY": "استخدام مفتاح الأمان / مفتاح المرور"
+      "INCORRECT_CODE": "رمز غير صحيح. حاول مرة أخرى.",
+      "USE_SECURITY_KEY": "استخدام مفتاح الأمان / مفتاح المرور",
+      "USE_PASSKEY": "تسجيل الدخول بمفتاح المرور"
     },
     "SECURITY": {
       "TITLE": "أمان الحساب",
@@ -190,10 +231,18 @@
       "PASSKEY_DELETE_CONFIRM": "إزالة مفتاح المرور هذا من حسابك؟",
       "PASSKEY_DELETE_ERROR": "تعذر إزالة مفتاح المرور.",
       "PASSKEY_RENAME_ERROR": "تعذر تحديث اسم مفتاح المرور.",
-      "PASSKEY_EMPTY": "لا توجد مفاتيح مرور مسجّلة بعد."
+      "PASSKEY_EMPTY": "لا توجد مفاتيح مرور مسجّلة بعد.",
+      "AUTHENTICATOR_TYPE": {
+        "totp": "تطبيق المصادقة",
+        "recovery_codes": "رموز الاسترداد",
+        "webauthn": "مفتاح المرور"
+      }
     },
     "ACCOUNT": {
       "BACK_PROFILE": "العودة إلى الحساب"
+    },
+    "LOGOUT": {
+      "SIGNING_OUT": "جاري تسجيل الخروج…"
     },
     "EMAIL": {
       "TITLE": "عناوين البريد",
@@ -286,7 +335,8 @@
       "LOAD_ERROR": "تعذر تحميل الحسابات المرتبطة.",
       "ACTION_ERROR": "تعذر فصل المزوّد.",
       "CONNECT_ERROR": "تعذر بدء ربط {{provider}}.",
-      "CONNECT_CROSS_ORIGIN_ERROR": "ربط المزوّد يتطلب أن يكون الـ API والتطبيق على نفس الأصل في هذه البيئة. استخدم نطاق CMS الخاص بالـ staging أو فعّل reverse proxy."
+      "CONNECT_CROSS_ORIGIN_ERROR": "ربط المزوّد يتطلب أن يكون الـ API والتطبيق على نفس الأصل في هذه البيئة. استخدم نطاق CMS الخاص بالـ staging أو فعّل reverse proxy.",
+      "SESSION_TOKEN_REQUIRED": "ربط مزوّد يتطلب رمز جلسة التطبيق؛ يرجى تسجيل الدخول مرة أخرى."
     },
     "PROFILE": {
       "TITLE": "حسابك",
@@ -320,8 +370,16 @@
       "USE_PASSKEY": "استخدام مفتاح المرور",
       "CANCEL": "إلغاء",
       "ERROR": "كلمة مرور غير صحيحة.",
+      "INCORRECT_PASSWORD": "كلمة مرور غير صحيحة.",
       "PASSKEY_ERROR": "فشل التحقق بمفتاح المرور.",
       "MFA_ERROR": "رمز مصادقة غير صحيح."
+    },
+    "TRUST": {
+      "TITLE": "هل تثق بهذا المتصفح؟",
+      "SUBTITLE": "يمكنك تخطي المصادقة الثنائية على هذا الجهاز لفترة إذا كنت تثق به.",
+      "TRUST_BUTTON": "الوثوق بهذا المتصفح",
+      "DO_NOT_TRUST_BUTTON": "عدم الوثوق",
+      "ERROR": "تعذر تحديث إعدادات الوثوق بالمتصفح. يرجى المحاولة مرة أخرى."
     },
     "OAUTH": {
       "PROCESSING": "جاري معالجة المصادقة...",
@@ -366,7 +424,25 @@
     "SUBMIT": "إرسال",
     "CLOSE": "إغلاق",
     "REFRESH": "تحديث",
-    "REDIRECT_TO_LIBRARY_IN": "سنوصلك إلى المكتبة خلال {{seconds}} ثانية…"
+    "REDIRECT_TO_LIBRARY_IN": "سنوصلك إلى المكتبة خلال {{seconds}} ثانية…",
+    "HOME_ARIA": "الصفحة الرئيسية",
+    "OPEN_MENU_ARIA": "فتح القائمة",
+    "LANG_SWITCH_TO_EN": "English",
+    "LANG_SWITCH_TO_AR": "العربية",
+    "LOGO_ALT": "إتقان",
+    "LOGO_ALT_CMS": "إتقان لإدارة المحتوى",
+    "USER_AVATAR_ALT": "صورة المستخدم",
+    "USER_AVATAR_INITIAL": "م",
+    "EM_DASH": "—",
+    "LANG_NAMES": {
+      "AR": "العربية",
+      "EN": "الإنجليزية"
+    },
+    "EMPTY_PLACEHOLDER": {
+      "COMING_SOON": "قريباً: إدارة {{title}}",
+      "DEFAULT_TITLE": "المحتوى"
+    },
+    "MOCK_PUBLISHER_LABEL": "الناشر"
   },
   "FORMS": {
     "PLACEHOLDERS": {
@@ -377,7 +453,10 @@
       "LAST_NAME": "أدخل اسم العائلة",
       "PHONE_NUMBER": "أدخل رقم هاتفك",
       "TITLE": "مثل: مهندس برمجيات، باحث",
-      "PROJECT_LINK": "https://example.com"
+      "PROJECT_LINK": "https://example.com",
+      "URL_EXAMPLE": "https://example.com",
+      "URL_TAFSIR_EXAMPLE": "https://example.com/tafsir",
+      "EMAIL_EXAMPLE": "info@example.com"
     },
     "VALIDATION": {
       "REQUIRED": "هذا الحقل مطلوب",
@@ -395,9 +474,17 @@
     "UNAUTHORIZED_TITLE": "تم رفض الوصول",
     "UNAUTHORIZED": "غير مخول للقيام بهذا الإجراء.",
     "FORBIDDEN": "الوصول محظور.",
-    "NOT_FOUND": "المورد المطلوب غير موجود."
+    "NOT_FOUND": "المورد المطلوب غير موجود.",
+    "NOT_FOUND_PAGE": {
+      "TITLE": "الصفحة غير موجودة",
+      "MESSAGE": "الصفحة التي تبحث عنها غير موجودة أو ربما تم نقلها.",
+      "CTA": "العودة إلى المكتبة"
+    },
+    "RESTRICTED_FOR_TENANT_CONFLICT": "يوجد طلبات وصول معلقة لهذا الأصل. يرجى معالجتها قبل تفعيل تقييد المستأجر.",
+    "TENANT_REQUIRED": "يرجى اختيار ناشر قبل المتابعة."
   },
   "PROFILE": {
+    "HUB_ARIA": "إدارة الحساب",
     "COMPLETE_PROFILE_TITLE": "أكمل ملفك الشخصي",
     "COMPLETE_PROFILE_DESCRIPTION": "ساعدنا في فهم المزيد عنك وعن مشروعك",
     "PROJECT_QUESTION": "ما الذي تعمل عليه؟ أخبرنا عن مشروعك؟",
@@ -463,6 +550,15 @@
     "VIEW": "عرض",
     "VIEW_DETAILS": "عرض التفاصيل",
     "VIEW_LICENSE": "عرض الترخيص",
+    "OPEN_ACCESS_BADGE": "وصول مفتوح",
+    "OPEN_ACCESS_HINT": "لا يلزم طلب وصول لهذا المورد.",
+    "REQUEST_ACCESS_BUTTON": "طلب الوصول",
+    "ACCESS_PENDING_HINT": "طلب الوصول الخاص بك قيد المراجعة. ستتمكن من التنزيل بعد الموافقة عليه.",
+    "ACCESS_PENDING_TOAST": "طلب الوصول الخاص بك لا يزال قيد الموافقة.",
+    "ACCESS_REJECTED_HINT": "لم تتم الموافقة على الوصول إلى هذا المورد. يرجى التواصل مع إتقان للمساعدة.",
+    "ACCESS_REJECTED_TOAST": "لم تتم الموافقة على الوصول إلى هذا المورد. يرجى التواصل مع إتقان للمساعدة.",
+    "ACCESS_REQUEST_SUBMITTED_PENDING": "تم إرسال طلب الوصول وهو بانتظار الموافقة.",
+    "ACCESS_REQUEST_APPROVED": "تمت الموافقة على الوصول. جارٍ بدء التنزيل.",
     "DETAILS_TITLE": "تفاصيل الأصل",
     "ASSET_ID": "معرّف الأصل",
     "DETAILS_DESC": "نص مؤقت لتفاصيل الأصل.",
@@ -470,6 +566,18 @@
       "RIWAYAS": "رواية متاحة",
       "RECITERS": "قارئ متاح",
       "RECITATIONS": "قراءة متاحة"
+    },
+    "REPORT_ISSUE": {
+      "BUTTON": "الإبلاغ عن مشكلة",
+      "TITLE": "الإبلاغ عن مشكلة",
+      "DESCRIPTION_LABEL": "الوصف",
+      "DESCRIPTION_PLACEHOLDER": "صف المشكلة…",
+      "ERR_DESCRIPTION": "أدخل وصفًا (10 أحرف على الأقل)",
+      "SUBMIT": "إرسال البلاغ",
+      "SUCCESS": "تم إرسال بلاغ المشكلة",
+      "ERROR": "تعذّر إرسال بلاغ المشكلة",
+      "FORBIDDEN": "ليس لديك صلاحية لإرسال هذا البلاغ",
+      "LOGIN_REQUIRED": "يرجى تسجيل الدخول للإبلاغ عن مشكلة"
     }
   },
   "UI": {
@@ -517,9 +625,11 @@
     "CREATED": "تاريخ الإنشاء"
   },
   "CATEGORIES": {
-    "mushaf": "المصحف",
     "tafsir": "التفسير",
-    "recitation": "التلاوات"
+    "translation": "الترجمات",
+    "recitation": "التلاوات",
+    "font": "الخطوط",
+    "program": "البرامج"
   },
   "LICENSES": {
     "CC0": "CC0",
@@ -531,6 +641,9 @@
     "CC-BY-NC-ND": "CC BY-NC-ND"
   },
   "LICENSES_LABELS": {
+    "INFO_ARIA": "معلومات الترخيص",
+    "DETAILS_ARIA": "تفاصيل الترخيص",
+    "LEARN_MORE_ARIA": "معرفة المزيد عن {{license}}",
     "CC0": "مفتوح بالكامل",
     "CC-BY": "مع إسناد",
     "CC-BY-SA": "إسناد ومشاركة بالمثل",
@@ -584,9 +697,15 @@
     "LICENSE_INFO": "معلومات الترخيص",
     "CONFIRM": "تأكيد",
     "SCROLL_HINT": "يرجى التمرير لأسفل لقراءة المحتوى كاملاً",
+    "LICENSE_TERMS": {
+      "BODY": "اتفاقية الترخيص لـ {{name}}\n\nنوع الترخيص: {{license}}\n\nالشروط والأحكام\n\n1. منح الترخيص\nبتحميل هذا المورد، فإنك توافق على الالتزام بشروط ترخيص {{license}}.\n\n2. الاستخدامات المسموحة\n- يمكنك استخدام هذا المورد للمشاريع الشخصية والتجارية\n- يمكنك تعديل وتكييف المورد لاحتياجاتك\n- يجب عليك تقديم الإسناد المناسب عند الحاجة\n\n3. القيود\n- لا يمكنك إعادة توزيع الملفات الأصلية دون إذن\n- لا يمكنك المطالبة بملكية العمل الأصلي\n- قد يتطلب الاستخدام التجاري أذونات إضافية\n\n4. الضمانات والمسؤولية\nيتم توفير هذا المورد \"كما هو\" دون ضمانات من أي نوع.\nالناشر غير مسؤول عن أي أضرار ناتجة عن استخدام هذا المورد.\n\n5. الإنهاء\nينتهي هذا الترخيص تلقائياً إذا انتهكت أي شروط.\nعند الإنهاء، يجب عليك التوقف عن جميع الاستخدامات وحذف جميع النسخ.\n\nبالنقر على \"تأكيد\"، فإنك تقر بأنك قد قرأت ووافقت على هذه الشروط."
+    },
     "USAGE_OPTIONS": {
       "commercial": "تجاري",
       "non-commercial": "غير تجاري"
+    },
+    "ERRORS": {
+      "SUBMISSION_FAILED": "تعذّر إرسال طلب الوصول. يرجى المحاولة مرة أخرى."
     }
   },
   "CONTENT_STANDARDS": {
@@ -662,6 +781,11 @@
       "GO_BACK_LIST": "العودة للقائمة",
       "DOWNLOAD": "تحميل",
       "TAG_EXTERNAL": "خارجي",
+      "TAG_OPEN_ACCESS": "وصول مفتوح",
+      "TAG_API_ONLY": "API فقط",
+      "FILTER_OPEN_ACCESS": "الوصول المفتوح",
+      "FILTER_OPEN_ACCESS_YES": "نعم",
+      "FILTER_OPEN_ACCESS_NO": "لا",
       "SAVE": "حفظ",
       "CANCEL": "إلغاء",
       "COMING_SOON": "قريباً",
@@ -674,7 +798,8 @@
       "DESCRIPTION_AR": "الوصف بالعربية",
       "PLACEHOLDER_EG": "مثال:",
       "EM_DASH": "—",
-      "HIJRI_YEAR_SUFFIX": "هـ"
+      "HIJRI_YEAR_SUFFIX": "هـ",
+      "COLUMN_ACCESS": "الوصول"
     },
     "TENANT": {
       "ARIA_LABEL": "محدد نطاق الناشر",
@@ -693,12 +818,14 @@
       "TRANSLATIONS": "الترجمات",
       "RECITATIONS": "التلاوات",
       "RECITERS": "القرّاء",
-      "PUBLISHERS": "الناشرون",
+      "PUBLISHERS": "تفاصيل الناشر",
       "AUDIO": "الصوتيات",
       "MANAGE_PROFILE": "إدارة الملف",
       "BACK_TO_GALLERY": "العودة إلى المعرض",
       "USAGE": "إحصائيات API",
-      "ISSUES": "إدارة البلاغات"
+      "ISSUES": "إدارة البلاغات",
+      "MEMBERS": "إدارة الأعضاء",
+      "ACCESS_REQUESTS": "طلبات الوصول"
     },
     "PROFILE": {
       "TITLE": "ملف الناشر",
@@ -777,6 +904,10 @@
         "PLACEHOLDER_LONG_AR": "وصف تفصيلي…",
         "LABEL_EXTERNAL": "تفسير خارجي؟",
         "LABEL_EXTERNAL_URL": "رابط خارجي",
+        "LABEL_OPEN_ACCESS": "وصول مفتوح",
+        "HELP_OPEN_ACCESS": "يمكن لأي شخص استخدام هذا الأصل مباشرة دون تقديم طلب وصول.",
+        "LABEL_API_ONLY": "التسجيل في API (للناشر فقط)",
+        "HELP_API_ONLY": "متاح عبر واجهة برمجة تطبيقات الناشر ومخفي من معرض CMS العام.",
         "UPLOAD_TITLE": "الصورة المصغّرة",
         "UPLOAD_DRAG": "انقر أو اسحب الصورة هنا",
         "UPLOAD_HINT": "PNG, JPG, WEBP — بحد أقصى 5MB",
@@ -920,6 +1051,10 @@
         "PLACEHOLDER_LONG_AR": "وصف تفصيلي…",
         "LABEL_EXTERNAL": "ترجمة خارجية؟",
         "LABEL_EXTERNAL_URL": "رابط خارجي",
+        "LABEL_OPEN_ACCESS": "وصول مفتوح",
+        "HELP_OPEN_ACCESS": "يمكن لأي شخص استخدام هذا الأصل مباشرة دون تقديم طلب وصول.",
+        "LABEL_API_ONLY": "التسجيل في API (للناشر فقط)",
+        "HELP_API_ONLY": "متاح عبر واجهة برمجة تطبيقات الناشر ومخفي من معرض CMS العام.",
         "UPLOAD_TITLE": "الصورة المصغّرة",
         "UPLOAD_DRAG": "انقر أو اسحب الصورة هنا",
         "UPLOAD_HINT": "PNG, JPG, WEBP — بحد أقصى 5MB",
@@ -1061,6 +1196,7 @@
         "SECTION_NAME": "الاسم",
         "SECTION_DESC": "الوصف",
         "SECTION_LINKS": "الربط والخصائص",
+        "SECTION_ACCESS_API": "الوصول وواجهة API",
         "ERR_NAME_AR": "الاسم بالعربية مطلوب",
         "ERR_DESC_AR": "الوصف بالعربية مطلوب",
         "ERR_DESC_EN": "الوصف بالإنجليزية مطلوب",
@@ -1083,6 +1219,10 @@
         "LABEL_YEAR": "السنة",
         "PLACEHOLDER_YEAR_HIJRI": "السنة (هجري)",
         "LABEL_LICENSE": "الترخيص",
+        "LABEL_OPEN_ACCESS": "وصول مفتوح",
+        "HELP_OPEN_ACCESS": "يمكن لأي شخص استخدام هذا الأصل مباشرة دون تقديم طلب وصول.",
+        "LABEL_API_ONLY": "التسجيل في API (للناشر فقط)",
+        "HELP_API_ONLY": "متاح عبر واجهة برمجة تطبيقات الناشر ومخفي من معرض CMS العام.",
         "MEEM_WASL_LONG": "وصل (صلّة)",
         "SUBMIT_CREATE": "إضافة التلاوة",
         "SUBMIT_EDIT": "حفظ التعديلات",
@@ -1095,6 +1235,8 @@
         "LABEL_RIWAYAH": "الرواية",
         "LABEL_PUBLISHER": "الناشر",
         "DOWNLOAD_AYAH_TIMING": "تحميل ملف التزمين",
+        "VIEW_ON_GALLERY": "عرض في المكتبة",
+        "VIEW_RECITER": "عرض القارئ",
         "DESC_AR": "الوصف (عربي)",
         "DESC_EN": "الوصف (إنجليزي)"
       },
@@ -1154,6 +1296,12 @@
           "DONE": "تم",
           "FAILED": "فشل",
           "CANCELLED": "تم الإلغاء"
+        },
+        "UPLOAD_ERRORS": {
+          "R2_RESPONSE": "فشل رفع الملف إلى التخزين (HTTP {{status}}).",
+          "MISSING_ETAG": "اكتمل الرفع دون استجابة صالحة من التخزين.",
+          "CANCELLED": "تم إلغاء الرفع.",
+          "GENERIC": "فشل الرفع. يرجى المحاولة مرة أخرى."
         },
         "NAV_LEAVE_TITLE": "هناك رفع جارٍ",
         "NAV_LEAVE_CONTENT": "إذا غادرت هذه الصفحة، سيتم إيقاف أي عمليات رفع قيد التنفيذ وتنظيف البيانات المؤقتة للرفع متعدد الأجزاء. الملفات الصوتية التي اكتمل رفعها ستبقى كما هي.",
@@ -1336,7 +1484,171 @@
         "ERR_STATUS": "يرجى اختيار الحالة",
         "DESCRIPTION_LABEL": "الوصف",
         "DESCRIPTION_PLACEHOLDER": "صف المشكلة…",
-        "ERR_DESCRIPTION": "أدخل وصفاً لا يقل عن 3 أحرف"
+        "ERR_DESCRIPTION": "أدخل وصفاً لا يقل عن 10 أحرف"
+      }
+    },
+    "MEMBERS": {
+      "TITLE": "إدارة الأعضاء",
+      "SUBTITLE": "عرض ودعوة وإدارة أعضاء الناشر",
+      "EMPTY_TITLE": "لا يوجد أعضاء",
+      "INVITE_BUTTON": "دعوة عضو",
+      "SEARCH_PLACEHOLDER": "ابحث بالاسم أو البريد…",
+      "LIST_ERROR_TITLE": "تعذر تحميل الأعضاء",
+      "LIST_ERROR_DESC": "تحقق من الاتصال وحاول مرة أخرى.",
+      "EXPIRES_IN_DAYS": "ينتهي خلال {{days}} أيام",
+      "EXPIRES_TODAY": "ينتهي اليوم",
+      "TOOLTIP_RESEND": "إعادة إرسال الدعوة",
+      "TOOLTIP_CANCEL": "إلغاء الدعوة",
+      "TOOLTIP_REMOVE": "إزالة العضو",
+      "COLUMNS": {
+        "NAME": "الاسم",
+        "EMAIL": "البريد الإلكتروني",
+        "ROLE": "الدور",
+        "STATUS": "الحالة",
+        "CREATED_AT": "تاريخ الإضافة",
+        "ACTIONS": "الإجراءات"
+      },
+      "FILTERS": {
+        "STATUS": "الحالة"
+      },
+      "ROLE": {
+        "ADMIN": "مدير",
+        "STAFF": "موظف"
+      },
+      "STATUS": {
+        "PENDING": "قيد الانتظار",
+        "ACTIVE": "نشط"
+      },
+      "FORM": {
+        "TITLE_INVITE": "دعوة عضو",
+        "TITLE_EDIT": "تعديل العضو",
+        "NAME_LABEL": "الاسم",
+        "NAME_PLACEHOLDER": "اسم العضو",
+        "EMAIL_LABEL": "البريد الإلكتروني",
+        "EMAIL_PLACEHOLDER": "email@example.com",
+        "ROLE_LABEL": "الدور",
+        "INVITE_INFO": "سيتم إرسال رسالة دعوة إلى هذا البريد الإلكتروني.",
+        "SUBMIT_INVITE": "إرسال الدعوة",
+        "SUBMIT_EDIT": "حفظ",
+        "CANCEL": "إلغاء",
+        "CONFIRM_OK": "تأكيد",
+        "CONFIRM_CANCEL": "إلغاء",
+        "ERR_NAME": "يرجى إدخال الاسم",
+        "ERR_EMAIL": "يرجى إدخال بريد إلكتروني صالح"
+      },
+      "PROMOTE": {
+        "CONFIRM_TITLE": "ترقية إلى مدير؟",
+        "CONFIRM_BODY": "{{name}} — سيتمكن من إدارة الأعضاء."
+      },
+      "DEMOTE": {
+        "CONFIRM_TITLE": "تخفيض إلى موظف؟",
+        "CONFIRM_BODY": "{{name}} — لن يتمكن من إدارة الأعضاء."
+      },
+      "REMOVE": {
+        "CONFIRM_TITLE": "إزالة هذا العضو؟",
+        "CONFIRM_BODY": "{{name}} — سيتم إلغاء وصوله إلى البوابة.",
+        "CONFIRM_OK": "نعم، أزل"
+      },
+      "CANCEL": {
+        "CONFIRM_TITLE": "إلغاء هذه الدعوة؟",
+        "CONFIRM_BODY": "{{name}} — سيتوقف رابط الدعوة عن العمل.",
+        "CONFIRM_OK": "نعم، ألغِ"
+      },
+      "RESEND": {
+        "CONFIRM_TITLE": "إعادة إرسال الدعوة؟",
+        "CONFIRM_BODY": "{{name}} — سيتوقف الرابط السابق عن العمل فوراً.",
+        "CONFIRM_OK": "إعادة الإرسال"
+      },
+      "MESSAGES": {
+        "INVITE_SUCCESS": "تم إرسال الدعوة",
+        "INVITE_ERROR": "تعذر إرسال الدعوة",
+        "UPDATE_SUCCESS": "تم تحديث العضو",
+        "UPDATE_ERROR": "تعذر تحديث العضو",
+        "PROMOTE_SUCCESS": "تمت ترقية العضو إلى مدير",
+        "DEMOTE_SUCCESS": "تم تخفيض العضو إلى موظف",
+        "REMOVE_SUCCESS": "تمت إزالة العضو",
+        "REMOVE_ERROR": "تعذر إزالة العضو",
+        "CANCEL_SUCCESS": "تم إلغاء الدعوة",
+        "RESEND_SUCCESS": "تمت إعادة إرسال الدعوة",
+        "RESEND_ERROR": "تعذر إعادة إرسال الدعوة",
+        "NO_PUBLISHER": "يرجى اختيار ناشر"
+      }
+    },
+    "ACCESS_REQUESTS": {
+      "TITLE": "طلبات الوصول",
+      "SUBTITLE": "مراجعة وإدارة طلبات المطورين للوصول إلى أصولك",
+      "EMPTY_TITLE": "لا توجد طلبات وصول بعد",
+      "SEARCH_PLACEHOLDER": "ابحث بالمطور أو الأصل…",
+      "LIST_ERROR_TITLE": "تعذر تحميل طلبات الوصول",
+      "LIST_ERROR_DESC": "تحقق من الاتصال وحاول مرة أخرى.",
+      "TOOLTIP_VIEW": "عرض التفاصيل",
+      "TOOLTIP_ACCEPT": "قبول الطلب",
+      "TOOLTIP_REJECT": "رفض الطلب",
+      "COLUMNS": {
+        "DEVELOPER": "المطور",
+        "ASSET": "الأصل",
+        "INTENDED_USE": "نوع الاستخدام",
+        "STATUS": "الحالة",
+        "CREATED_AT": "تاريخ الطلب",
+        "ACTIONS": "إجراءات"
+      },
+      "FILTERS": {
+        "STATUS": "الحالة"
+      },
+      "STATUS": {
+        "PENDING": "قيد الانتظار",
+        "APPROVED": "مقبول",
+        "REJECTED": "مرفوض"
+      },
+      "INTENDED_USE": {
+        "COMMERCIAL": "تجاري",
+        "NON_COMMERCIAL": "غير تجاري"
+      },
+      "TOGGLE": {
+        "LABEL": "قبول الطلبات تلقائياً",
+        "ON_HINT": "تُمنح الطلبات الجديدة تلقائياً",
+        "OFF_HINT": "تراجع كل طلب يدوياً",
+        "CONFIRM_OFF_TITLE": "إيقاف القبول التلقائي؟",
+        "CONFIRM_OFF_BODY": "ستحتاج إلى قبول أو رفض كل طلب وصول يدوياً من الآن فصاعداً.",
+        "CONFIRM_OFF_OK": "إيقاف"
+      },
+      "ACCEPT": {
+        "CONFIRM_TITLE": "قبول هذا الطلب؟",
+        "CONFIRM_BODY": "منح {{name}} وصولاً إلى {{asset}}.",
+        "CONFIRM_OK": "قبول"
+      },
+      "REJECT": {
+        "TITLE": "رفض طلب الوصول",
+        "REASON_LABEL": "سبب الرفض",
+        "REASON_PLACEHOLDER": "اشرح سبب رفض الوصول — سيراه المطور",
+        "SUBMIT": "رفض الطلب",
+        "ERR_REASON": "يرجى إدخال سبب الرفض"
+      },
+      "FORM": {
+        "CANCEL": "إلغاء"
+      },
+      "DRAWER": {
+        "TITLE": "تفاصيل طلب الوصول",
+        "LOAD_ERROR": "تعذر تحميل تفاصيل الطلب.",
+        "STATUS": "الحالة",
+        "REASON": "سبب المطور",
+        "APPROVED_AT": "تاريخ القبول",
+        "APPROVED_BY": "قُبل بواسطة",
+        "AUTO_ACCEPTED": "قُبل تلقائياً",
+        "REJECTED_AT": "تاريخ الرفض",
+        "REJECTED_BY": "رُفض بواسطة",
+        "REJECTION_REASON": "سبب الرفض"
+      },
+      "MESSAGES": {
+        "ACCEPT_SUCCESS": "تم قبول الطلب",
+        "ACCEPT_ERROR": "تعذر قبول الطلب",
+        "REJECT_SUCCESS": "تم رفض الطلب",
+        "REJECT_ERROR": "تعذر رفض الطلب",
+        "ALREADY_DECIDED": "تم البت في هذا الطلب مسبقاً — جاري تحديث القائمة",
+        "TOGGLE_ON_SUCCESS": "تم تفعيل القبول التلقائي",
+        "TOGGLE_OFF_SUCCESS": "تم إيقاف القبول التلقائي",
+        "TOGGLE_ERROR": "تعذر تحديث إعداد القبول التلقائي",
+        "NO_PUBLISHER": "يرجى اختيار ناشر"
       }
     },
     "PUBLISHERS": {

@@ -52,3 +52,50 @@ export function shouldOmitHeadlessSessionTokenForRequest(url: string, method: st
 export function isHeadlessAppAuthUrl(url: string): boolean {
   return url.includes(HEADLESS_APP_AUTH_PATH_FRAGMENT);
 }
+
+/** `GET|DELETE …/auth/app/v1/auth/session` — anonymous calls must not send a stale `X-Session-Token`. */
+export function isHeadlessAppSessionUrl(url: string): boolean {
+  return isHeadlessAppAuthUrl(url) && url.includes('/auth/session');
+}
+
+/** True when a headless session GET returned the normal anonymous 401 envelope (not logged in). */
+export function isAnonymousHeadlessSessionProbe(
+  url: string,
+  method: string,
+  error: { error?: unknown }
+): boolean {
+  if (!isHeadlessAppSessionUrl(url) || method !== 'GET') {
+    return false;
+  }
+  const body = error.error;
+  if (!body || typeof body !== 'object') {
+    return false;
+  }
+  const meta = (body as { meta?: { is_authenticated?: boolean } }).meta;
+  return meta?.is_authenticated === false;
+}
+
+/**
+ * Public CMS reads that must work without login (gallery, asset detail, publisher detail).
+ * Used by {@link authErrorInterceptor} to avoid forced re-login on stale tokens.
+ */
+export function isPublicAnonymousCmsRead(url: string, method: string): boolean {
+  if (method !== 'GET') {
+    return false;
+  }
+  const base = environment.API_BASE_URL;
+  if (!base || !url.startsWith(base)) {
+    return false;
+  }
+  const path = (url.slice(base.length).split('?')[0] ?? '').replace(/\/$/, '') || '/';
+  if (path === '/assets') {
+    return true;
+  }
+  if (/^\/assets\/[^/]+$/.test(path)) {
+    return true;
+  }
+  if (/^\/publishers\/[^/]+$/.test(path)) {
+    return true;
+  }
+  return false;
+}

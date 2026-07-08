@@ -2,11 +2,13 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgIcon } from '@ng-icons/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import { AuthBackLinkComponent } from '../../components/auth-back-link/auth-back-link.component';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
 import type { AuthenticationResponse, Flow } from '../../headless/headless-api.types';
 import {
   isPasswordResetByCodePending,
@@ -17,7 +19,14 @@ import { AuthService } from '../../services/auth.service';
 @Component({
   selector: 'app-forgot-password-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, LangSwitchComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TranslateModule,
+    LangSwitchComponent,
+    AuthBackLinkComponent,
+    NgIcon,
+  ],
   styleUrls: ['./forgot-password.page.less'],
   templateUrl: './forgot-password.page.html',
 })
@@ -67,7 +76,11 @@ export class ForgotPasswordPage {
         return;
       }
       this.errorMessage.set(
-        getErrorMessage(e) || this.translate.instant('AUTH.FORGOT_PASSWORD.ERROR')
+        resolveAuthErrorMessage(
+          e,
+          { fallbackKey: 'AUTH.FORGOT_PASSWORD.ERROR', context: 'forgot_password' },
+          this.translate
+        )
       );
     }
   }

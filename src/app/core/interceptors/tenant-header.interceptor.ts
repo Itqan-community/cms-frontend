@@ -16,6 +16,19 @@ function isPublishersMeRequest(url: string, adminApi: string): boolean {
   return url.startsWith(`${adminApi}/publishers/me`);
 }
 
+function isInvitationRequest(url: string, adminApi: string): boolean {
+  return url.startsWith(`${adminApi}/invitations/`);
+}
+
+/** Consumer issue reports from gallery — no admin tenant context. */
+function isConsumerIssueReportCreate(url: string, method: string, adminApi: string): boolean {
+  if (method !== 'POST') {
+    return false;
+  }
+  const base = `${adminApi}/issue-reports`;
+  return url === base || url === `${base}/`;
+}
+
 export function tenantHeaderInterceptor(
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
@@ -29,6 +42,14 @@ export function tenantHeaderInterceptor(
     return next(req);
   }
 
+  if (isInvitationRequest(req.url, adminApi)) {
+    return next(req);
+  }
+
+  if (isConsumerIssueReportCreate(req.url, req.method, adminApi)) {
+    return next(req);
+  }
+
   const tenantService = inject(AdminTenantService);
   const tenantId = tenantService.getSelectedPublisherId() ?? getStoredAdminTenantId();
   if (tenantId == null) {
@@ -38,11 +59,10 @@ export function tenantHeaderInterceptor(
       () =>
         new HttpErrorResponse({
           status: 403,
-          statusText: 'Missing tenant selection',
+          statusText: 'Forbidden',
           url: req.url,
           error: {
             error_name: 'tenant_required',
-            message: 'No selected publisher tenant was found for this request',
             extra: null,
           },
         })

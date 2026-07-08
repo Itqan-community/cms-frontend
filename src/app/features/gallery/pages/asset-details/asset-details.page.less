@@ -151,6 +151,28 @@
   }
 }
 
+.open-access-hint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-neutral-400);
+  text-align: center;
+}
+
+.access-status-hint {
+  margin: 0;
+  font-size: 0.875rem;
+  text-align: center;
+  line-height: 1.5;
+
+  &--pending {
+    color: var(--color-primary-700);
+  }
+
+  &--rejected {
+    color: var(--color-warning-600, #d48806);
+  }
+}
+
 .action-button {
   display: flex;
   align-items: center;
@@ -198,6 +220,11 @@
   i {
     font-size: 1rem;
     margin-inline-start: 0.5rem;
+  }
+
+  &:disabled,
+  &.ant-btn-disabled {
+    cursor: not-allowed;
   }
 }
 

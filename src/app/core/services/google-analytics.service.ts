@@ -53,6 +53,20 @@ export class GoogleAnalyticsService {
     this.document.head.appendChild(inlineScript);
   }
 
+  trackEvent(name: string, params?: Record<string, unknown>): void {
+    if (!environment.production) return;
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    const trackingId = (environment as { gaTrackingId?: string }).gaTrackingId;
+    if (!trackingId) return;
+
+    const gtag = (this.document.defaultView as Window & { gtag?: (...args: unknown[]) => void })
+      ?.gtag;
+    if (typeof gtag !== 'function') return;
+
+    gtag('event', name, params);
+  }
+
   /**
    * Retrieves CSP nonce from meta tag if available.
    * The nonce should be set by the server in a meta tag: <meta name="csp-nonce" content="...">

@@ -1,6 +1,7 @@
 import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { TranslateService } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { environment } from '../../../environments/environment';
 import { errorInterceptor } from './error.interceptor';
@@ -18,6 +19,13 @@ describe('errorInterceptor', () => {
         provideHttpClient(withInterceptors([errorInterceptor])),
         provideHttpClientTesting(),
         { provide: NzMessageService, useValue: messageSpy },
+        {
+          provide: TranslateService,
+          useValue: {
+            currentLang: 'en',
+            instant: (key: string) => key,
+          },
+        },
       ],
     });
     httpMock = TestBed.inject(HttpTestingController);
@@ -69,6 +77,28 @@ describe('errorInterceptor', () => {
     });
     const req = httpMock.expectOne(url);
     req.flush(null, { status: 404, statusText: 'Not Found' });
+  });
+
+  it('does not show global toast for headless webauthn login 400', (done) => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    const url = `${api}/auth/app/v1/auth/webauthn/login`;
+    http.post(url, {}).subscribe({
+      error: () => {
+        expect(messageSpy.error).not.toHaveBeenCalled();
+        done();
+      },
+    });
+    const req = httpMock.expectOne(url);
+    req.flush(
+      {
+        status: 400,
+        errors: [{ code: 'incorrect_code', message: 'Invalid credential' }],
+      },
+      { status: 400, statusText: 'Bad Request' }
+    );
   });
 
   it('shows global toast for other server errors', (done) => {

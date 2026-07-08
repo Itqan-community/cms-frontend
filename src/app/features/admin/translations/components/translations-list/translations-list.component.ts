@@ -60,6 +60,7 @@ export class TranslationsListComponent extends AdminListBase<TranslationItem, Tr
   readonly translationTableStorageKey = 'admin-list-translations';
   readonly translationTableColumns: AdminTableColumnOption[] = [
     { key: 'name', label: 'ADMIN.TRANSLATIONS.COLUMNS.NAME' },
+    { key: 'access', label: 'ADMIN.COMMON.COLUMN_ACCESS' },
     { key: 'description', label: 'ADMIN.TRANSLATIONS.COLUMNS.DESCRIPTION' },
     { key: 'publisher', label: 'ADMIN.TRANSLATIONS.COLUMNS.PUBLISHER' },
     { key: 'license', label: 'ADMIN.TRANSLATIONS.COLUMNS.LICENSE' },
@@ -100,7 +101,7 @@ export class TranslationsListComponent extends AdminListBase<TranslationItem, Tr
 
   truncate(text: string | null | undefined, max = 120): string {
     if (text == null || text === '') {
-      return '—';
+      return this.translate.instant('COMMON.EM_DASH');
     }
     const t = text.trim();
     if (t.length <= max) {

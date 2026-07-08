@@ -5,7 +5,7 @@ import { Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
 import {
   ConnectedProviderAccountRow,
   parseProviderAccountsEnvelope,
@@ -81,7 +81,11 @@ export class ManageProvidersPage implements OnInit {
       }
       this.pageError.set(
         e instanceof HttpErrorResponse
-          ? getErrorMessage(e) || this.translate.instant('AUTH.PROVIDERS.LOAD_ERROR')
+          ? resolveAuthErrorMessage(
+              e,
+              { fallbackKey: 'AUTH.PROVIDERS.LOAD_ERROR', context: 'providers' },
+              this.translate
+            )
           : this.translate.instant('AUTH.PROVIDERS.LOAD_ERROR')
       );
     } finally {
@@ -108,7 +112,11 @@ export class ManageProvidersPage implements OnInit {
       }
       this.pageError.set(
         e instanceof HttpErrorResponse
-          ? getErrorMessage(e) || this.translate.instant('AUTH.PROVIDERS.ACTION_ERROR')
+          ? resolveAuthErrorMessage(
+              e,
+              { fallbackKey: 'AUTH.PROVIDERS.ACTION_ERROR', context: 'providers' },
+              this.translate
+            )
           : this.translate.instant('AUTH.PROVIDERS.ACTION_ERROR')
       );
     } finally {

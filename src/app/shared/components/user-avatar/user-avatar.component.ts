@@ -1,4 +1,5 @@
-import { Component, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 
 export interface UserAvatarData {
   avatar_url?: string;
@@ -12,21 +13,22 @@ export interface UserAvatarData {
   styleUrls: ['./user-avatar.component.less'],
   template: `
     @if (user()?.avatar_url) {
-      <img
-        [src]="user()?.avatar_url"
-        [alt]="user()?.name || 'User Avatar'"
-        [class]="avatarClasses()"
-      />
+      <img [src]="user()?.avatar_url" [alt]="user()?.name || avatarAlt" [class]="avatarClasses()" />
     } @else {
       <div [class]="fallbackClasses()">
-        {{ getInitials(user()?.name || user()?.first_name || 'U') }}
+        {{ getInitials(user()?.name || user()?.first_name || avatarInitial) }}
       </div>
     }
   `,
 })
 export class UserAvatarComponent {
+  private readonly translate = inject(TranslateService);
+
   user = input.required<UserAvatarData | null>();
   size = input<'sm' | 'md' | 'lg'>('md');
+
+  readonly avatarAlt = this.translate.instant('COMMON.USER_AVATAR_ALT');
+  readonly avatarInitial = this.translate.instant('COMMON.USER_AVATAR_INITIAL');
 
   avatarClasses(): string {
     const sizeClasses = {

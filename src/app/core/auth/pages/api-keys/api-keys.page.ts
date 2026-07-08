@@ -6,7 +6,7 @@ import { Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import type { ManagedApiKey } from '../../models/api-keys.model';
 import { AuthService } from '../../services/auth.service';
@@ -66,7 +66,11 @@ export class ApiKeysPage implements OnInit {
       }
       this.pageError.set(
         e instanceof HttpErrorResponse
-          ? getErrorMessage(e) || this.translate.instant('AUTH.API_KEYS.LOAD_ERROR')
+          ? resolveAuthErrorMessage(
+              e,
+              { fallbackKey: 'AUTH.API_KEYS.LOAD_ERROR', context: 'api_keys' },
+              this.translate
+            )
           : this.translate.instant('AUTH.API_KEYS.LOAD_ERROR')
       );
     } finally {
@@ -103,7 +107,11 @@ export class ApiKeysPage implements OnInit {
       }
       this.pageError.set(
         e instanceof HttpErrorResponse
-          ? getErrorMessage(e) || this.translate.instant('AUTH.API_KEYS.ACTION_ERROR')
+          ? resolveAuthErrorMessage(
+              e,
+              { fallbackKey: 'AUTH.API_KEYS.ACTION_ERROR', context: 'api_keys' },
+              this.translate
+            )
           : this.translate.instant('AUTH.API_KEYS.ACTION_ERROR')
       );
     } finally {
@@ -121,7 +129,11 @@ export class ApiKeysPage implements OnInit {
       if (!(e instanceof HttpErrorResponse && tryNavigateForAuth401(this.router, e))) {
         this.pageError.set(
           e instanceof HttpErrorResponse
-            ? getErrorMessage(e) || this.translate.instant('AUTH.API_KEYS.LOAD_ERROR')
+            ? resolveAuthErrorMessage(
+                e,
+                { fallbackKey: 'AUTH.API_KEYS.LOAD_ERROR', context: 'api_keys' },
+                this.translate
+              )
             : this.translate.instant('AUTH.API_KEYS.LOAD_ERROR')
         );
       }
@@ -186,7 +198,11 @@ export class ApiKeysPage implements OnInit {
       }
       this.pageError.set(
         e instanceof HttpErrorResponse
-          ? getErrorMessage(e) || this.translate.instant('AUTH.API_KEYS.ACTION_ERROR')
+          ? resolveAuthErrorMessage(
+              e,
+              { fallbackKey: 'AUTH.API_KEYS.ACTION_ERROR', context: 'api_keys' },
+              this.translate
+            )
           : this.translate.instant('AUTH.API_KEYS.ACTION_ERROR')
       );
     } finally {
@@ -211,7 +227,11 @@ export class ApiKeysPage implements OnInit {
       }
       this.pageError.set(
         e instanceof HttpErrorResponse
-          ? getErrorMessage(e) || this.translate.instant('AUTH.API_KEYS.ACTION_ERROR')
+          ? resolveAuthErrorMessage(
+              e,
+              { fallbackKey: 'AUTH.API_KEYS.ACTION_ERROR', context: 'api_keys' },
+              this.translate
+            )
           : this.translate.instant('AUTH.API_KEYS.ACTION_ERROR')
       );
     } finally {
@@ -236,7 +256,11 @@ export class ApiKeysPage implements OnInit {
       }
       this.pageError.set(
         e instanceof HttpErrorResponse
-          ? getErrorMessage(e) || this.translate.instant('AUTH.API_KEYS.ACTION_ERROR')
+          ? resolveAuthErrorMessage(
+              e,
+              { fallbackKey: 'AUTH.API_KEYS.ACTION_ERROR', context: 'api_keys' },
+              this.translate
+            )
           : this.translate.instant('AUTH.API_KEYS.ACTION_ERROR')
       );
     } finally {

@@ -2,15 +2,14 @@ import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgIcon } from '@ng-icons/core';
 import { firstValueFrom, TimeoutError, timeout } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import {
-  getErrorMessage,
-  isIncorrectCodeError,
-  parseRetryAfterSeconds,
-} from '../../../../shared/utils/error.utils';
+import { AuthBackLinkComponent } from '../../components/auth-back-link/auth-back-link.component';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
+import { parseRetryAfterSeconds } from '../../../../shared/utils/error.utils';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { AuthService } from '../../services/auth.service';
 import { readContinueUrl } from '../../utils/auth-route-query.util';
@@ -18,7 +17,14 @@ import { readContinueUrl } from '../../utils/auth-route-query.util';
 @Component({
   selector: 'app-login-by-code-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, LangSwitchComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TranslateModule,
+    LangSwitchComponent,
+    AuthBackLinkComponent,
+    NgIcon,
+  ],
   styleUrls: ['./login-by-code.page.less'],
   templateUrl: './login-by-code.page.html',
 })
@@ -176,7 +182,11 @@ export class LoginByCodePage implements OnInit, OnDestroy {
           return;
         }
         this.errorMessage.set(
-          getErrorMessage(e) || this.translate.instant('AUTH.LOGIN_BY_CODE.REQUEST_ERROR')
+          resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.LOGIN_BY_CODE.REQUEST_ERROR', context: 'login_by_code' },
+            this.translate
+          )
         );
         return;
       }
@@ -185,7 +195,11 @@ export class LoginByCodePage implements OnInit, OnDestroy {
         return;
       }
       this.errorMessage.set(
-        getErrorMessage(e) || this.translate.instant('AUTH.LOGIN_BY_CODE.REQUEST_ERROR')
+        resolveAuthErrorMessage(
+          e,
+          { fallbackKey: 'AUTH.LOGIN_BY_CODE.REQUEST_ERROR', context: 'login_by_code' },
+          this.translate
+        )
       );
     }
   }
@@ -222,17 +236,21 @@ export class LoginByCodePage implements OnInit, OnDestroy {
           return;
         }
         if (e.status === 400) {
-          if (isIncorrectCodeError(e)) {
-            this.errorMessage.set(this.translate.instant('AUTH.LOGIN_BY_CODE.INCORRECT_CODE'));
-          } else {
-            this.errorMessage.set(
-              getErrorMessage(e) || this.translate.instant('AUTH.LOGIN_BY_CODE.CONFIRM_ERROR')
-            );
-          }
+          this.errorMessage.set(
+            resolveAuthErrorMessage(
+              e,
+              { fallbackKey: 'AUTH.LOGIN_BY_CODE.CONFIRM_ERROR', context: 'login_by_code' },
+              this.translate
+            )
+          );
           return;
         }
         this.errorMessage.set(
-          getErrorMessage(e) || this.translate.instant('AUTH.LOGIN_BY_CODE.CONFIRM_ERROR')
+          resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.LOGIN_BY_CODE.CONFIRM_ERROR', context: 'login_by_code' },
+            this.translate
+          )
         );
         return;
       }

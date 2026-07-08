@@ -4,7 +4,7 @@ import { Title } from '@angular/platform-browser';
 import { ActivatedRouteSnapshot, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ar_EG, en_US, NzI18nService } from 'ng-zorro-antd/i18n';
-import { filter } from 'rxjs';
+import { filter, firstValueFrom } from 'rxjs';
 import { GoogleAnalyticsService } from './core/services/google-analytics.service';
 import { WebVitalsService } from './core/services/web-vitals.service';
 import { HeaderComponent } from './shared/components/header/header.component';
@@ -55,9 +55,6 @@ export class App {
       .subscribe(syncShellFromRoute);
 
     const currentLang = localStorage.getItem('lang') || 'ar';
-    this.translate.addLangs(['ar', 'en']);
-    this.translate.setFallbackLang('ar');
-    this.translate.use(currentLang);
 
     const applyLanguageShell = (lang: string): void => {
       const isAr = lang === 'ar';
@@ -68,11 +65,11 @@ export class App {
     applyLanguageShell(currentLang);
 
     // Set initial document title by language
-    this.setAppTitle(currentLang);
+    this.setAppTitle();
 
     // Keep shell + ng-zorro i18n aligned when language changes (e.g. future non-reload switches)
     this.translate.onLangChange.subscribe((e) => {
-      this.setAppTitle(e.lang);
+      this.setAppTitle();
       applyLanguageShell(e.lang);
     });
   }
@@ -81,20 +78,14 @@ export class App {
     const currentLang = localStorage.getItem('lang') || 'ar';
     const newLang = currentLang === 'ar' ? 'en' : 'ar';
     localStorage.setItem('lang', newLang);
-    this.translate.use(newLang);
-    document.documentElement.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr');
-
-    // Keep <html> attributes in sync
-    document.documentElement.setAttribute('lang', newLang);
-    document.documentElement.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr');
-
-    // Also update the document title after switching
-    this.setAppTitle(newLang);
+    void firstValueFrom(this.translate.use(newLang)).then(() => {
+      document.documentElement.setAttribute('lang', newLang);
+      document.documentElement.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr');
+      this.setAppTitle();
+    });
   }
 
-  private setAppTitle(lang: string) {
-    const title =
-      lang === 'ar' ? 'إتقان | نظام إدارة المحتوى' : 'ITQAN | Content Management System';
-    this.titleService.setTitle(title);
+  private setAppTitle(): void {
+    this.titleService.setTitle(this.translate.instant('APP_TITLE'));
   }
 }

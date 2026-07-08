@@ -7,8 +7,11 @@ import { ALLAUTH_REAUTHENTICATE_URL } from '../auth/headless/allauth-auth.hooks'
 import { AllauthAuthChangeBus } from '../auth/headless/allauth-auth-change.bus';
 import { applyAllauthEnvelopeSideEffects } from '../auth/headless/allauth-envelope.util';
 import {
+  isAnonymousHeadlessSessionProbe,
   isHeadlessAppAuthUrl,
   isHeadlessAccountWebAuthnAuthenticatorsUrl,
+  isHeadlessAppSessionUrl,
+  isPublicAnonymousCmsRead,
 } from '../auth/headless/headless-api-path.util';
 import {
   isReauthenticationBody,
@@ -18,6 +21,16 @@ import { HeadlessAppTokenService } from '../auth/headless/headless-app-token.ser
 import { AuthService } from '../auth/services/auth.service';
 import { shouldSuppressSentryForHeadlessHttpError } from './auth-error-sentry-suppress.util';
 import { environment } from '../../../environments/environment';
+
+function retryWithoutSessionToken(
+  req: HttpRequest<unknown>,
+  next: HttpHandlerFn
+): Observable<HttpEvent<unknown>> {
+  const retryReq = req.headers.has('X-Session-Token')
+    ? req.clone({ headers: req.headers.delete('X-Session-Token') })
+    : req;
+  return next(retryReq);
+}
 
 /**
  * App-mode headless: sync envelope side-effects from JSON bodies.
@@ -32,14 +45,36 @@ export function authErrorInterceptor(
   const apiBase = environment.API_BASE_URL;
   const tokenStore = inject(HeadlessAppTokenService);
   const authBus = inject(AllauthAuthChangeBus);
+  const hadSessionToken = !!tokenStore.getSessionToken();
+  const wasLoggedIn = authService.isLoggedIn();
+
+  const clearStaleAndMaybeRetry = (err: HttpErrorResponse): Observable<HttpEvent<unknown>> => {
+    authService.clearStaleClientSession();
+    if (isPublicAnonymousCmsRead(req.url, req.method)) {
+      return retryWithoutSessionToken(req, next);
+    }
+    return throwError(() => err);
+  };
 
   const runCmsSessionRecheck = (err: HttpErrorResponse): Observable<HttpEvent<unknown>> => {
+    if (!hadSessionToken) {
+      return throwError(() => err);
+    }
+
+    // Stale token without an established login — clear and retry public reads only.
+    if (!wasLoggedIn) {
+      return clearStaleAndMaybeRetry(err);
+    }
+
     return authService.sessionRecheckAfter401().pipe(
       switchMap((stillAuthenticated) => {
         if (stillAuthenticated) {
           return next(req);
         }
-        authService.invalidateClientAuthAndGoLogin();
+        if (isPublicAnonymousCmsRead(req.url, req.method)) {
+          return clearStaleAndMaybeRetry(err);
+        }
+        authService.invalidateClientAuthAndGoLogin({ sessionExpired: true });
         return throwError(() => err);
       })
     );
@@ -61,13 +96,20 @@ export function authErrorInterceptor(
       }
 
       if (error.status === 410 && isHeadlessAppAuthUrl(req.url)) {
-        authService.invalidateClientAuthAndGoLogin();
+        if (tokenStore.getSessionToken()) {
+          authService.clearStaleClientSession();
+        } else if (isHeadlessAppSessionUrl(req.url) && req.method === 'GET') {
+          tokenStore.clearSessionToken();
+        }
         return throwError(() => error);
       }
 
       if (error.status === 401 || error.status === 403) {
         if (isHeadlessAppAuthUrl(req.url)) {
-          if (error.status === 401) {
+          if (
+            error.status === 401 &&
+            !isAnonymousHeadlessSessionProbe(req.url, req.method, error)
+          ) {
             tryNavigateForAuth401(router, error);
           }
           return throwError(() => error);

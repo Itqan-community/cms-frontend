@@ -132,12 +132,8 @@ export class BreadcrumbComponent implements OnInit {
       return `#${segment}`;
     }
 
-    // Replace hyphens and underscores with spaces, capitalize words
-    return segment
-      .replace(/[-_]/g, ' ')
-      .split(' ')
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+    // Fallback: show segment without forced English title-casing
+    return segment.replace(/[-_]/g, ' ');
   }
 
   private isId(segment: string): boolean {

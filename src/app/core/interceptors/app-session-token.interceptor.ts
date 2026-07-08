@@ -9,7 +9,7 @@ import { HeadlessAppTokenService } from '../auth/headless/headless-app-token.ser
 
 /**
  * Backend API calls (`API_BASE_URL` / `ADMIN_API_BASE_URL`): attach `X-Session-Token`
- * from session store (sessionStorage, with `sessionid` cookie fallback — see {@link HeadlessAppTokenService#getSessionToken}).
+ * from session store (localStorage, with `sessionid` cookie fallback — see {@link HeadlessAppTokenService#getSessionToken}).
  * Omits the header only for anonymous passkey-signup initiate POST — see `shouldOmitHeadlessSessionTokenForRequest`.
  */
 export function appSessionTokenInterceptor(

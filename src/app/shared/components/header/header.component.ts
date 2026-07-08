@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslateModule } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { NAV_LINKS } from '../../../core/constants/nav-links';
@@ -24,6 +25,7 @@ import { UserActionsComponent } from '../user-actions/user-actions.component';
     UserActionsComponent,
     MobileMenuComponent,
     NgIcon,
+    TranslateModule,
   ],
   styleUrls: ['./header.component.less'],
   templateUrl: './header.component.html',

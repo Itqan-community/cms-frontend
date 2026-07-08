@@ -1,10 +1,15 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { firstValueFrom, of, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
 import { HeadlessAuthApiService } from '../headless/headless-auth-api.service';
-import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
+import {
+  ALLAUTH_SESSION_TOKEN_STORAGE_KEY,
+  HeadlessAppTokenService,
+} from '../headless/headless-app-token.service';
 import type { AuthenticatedResponse, ConfigurationResponse } from '../headless/headless-api.types';
 
 const mockUser = {
@@ -70,6 +75,7 @@ describe('AuthService (app / headless)', () => {
       'login',
       'signup',
       'deleteSession',
+      'deleteBrowserSession',
       'verifyEmail',
       'redirectToProvider',
     ]);
@@ -120,6 +126,8 @@ describe('AuthService (app / headless)', () => {
       } as ConfigurationResponse)
     );
     headless.redirectToProvider.and.returnValue(Promise.resolve({ kind: 'form_submitted' }));
+    headless.deleteSession.and.returnValue(of(null));
+    headless.deleteBrowserSession.and.returnValue(of(null));
     routerMock = {
       url: '/account/login?next=%2Faccount%2Fproviders',
       navigate: jasmine.createSpy('navigate'),
@@ -143,6 +151,23 @@ describe('AuthService (app / headless)', () => {
         { provide: HttpClient, useValue: httpClientMock },
         { provide: Router, useValue: routerMock },
         { provide: HeadlessAuthApiService, useValue: headless },
+        {
+          provide: TranslateService,
+          useValue: {
+            instant: (key: string) => key,
+            getCurrentLang: () => 'en',
+            onLangChange: of({ lang: 'en' }),
+          },
+        },
+        {
+          provide: NzMessageService,
+          useValue: jasmine.createSpyObj<NzMessageService>('NzMessageService', [
+            'success',
+            'error',
+            'warning',
+            'info',
+          ]),
+        },
       ],
     });
     service = TestBed.inject(AuthService);
@@ -153,6 +178,61 @@ describe('AuthService (app / headless)', () => {
     await service.bootstrapOnce();
     expect(httpClientMock.get).toHaveBeenCalled();
     expect(service.getCurrentUser()?.permissions).toEqual(['portal_access']);
+  });
+
+  it('bootstrapOnce authenticates when session token exists in localStorage (new tab)', async () => {
+    localStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'shared-tab-token');
+    headless.getAuth.and.returnValue(of(authedResponse()));
+    await service.bootstrapOnce();
+    expect(service.isAuthenticated()).toBe(true);
+    expect(headless.getAuth).toHaveBeenCalled();
+  });
+
+  it('bootstrapOnce falls back to browser session when app session is not established', async () => {
+    const anonymous = {
+      status: 200,
+      data: { methods: [] },
+      meta: { is_authenticated: false },
+    } as unknown as AuthenticatedResponse;
+    headless.getAuth.and.returnValue(of(anonymous));
+    headless.getBrowserSession.and.returnValue(of(authedResponse()));
+    headless.getBrowserSession.calls.reset();
+    await service.bootstrapOnce();
+    expect(headless.getBrowserSession).toHaveBeenCalled();
+    expect(service.isAuthenticated()).toBe(true);
+  });
+
+  it('handleCrossTabSessionTokenChange logs out when token cleared in another tab', () => {
+    tokenStore.setSessionToken('shared');
+    const fn = (
+      service as unknown as { handleCrossTabSessionTokenChange: (e: StorageEvent) => void }
+    ).handleCrossTabSessionTokenChange;
+    fn.call(service, {
+      key: ALLAUTH_SESSION_TOKEN_STORAGE_KEY,
+      storageArea: localStorage,
+      oldValue: 'shared',
+      newValue: null,
+    } as StorageEvent);
+    expect(tokenStore.getSessionToken()).toBeNull();
+    expect(routerMock.navigate).toHaveBeenCalled();
+  });
+
+  it('handleCrossTabSessionTokenChange syncs auth when token set in another tab', (done) => {
+    const fn = (
+      service as unknown as { handleCrossTabSessionTokenChange: (e: StorageEvent) => void }
+    ).handleCrossTabSessionTokenChange;
+    headless.getSession.and.returnValue(of(authedResponse()));
+    fn.call(service, {
+      key: ALLAUTH_SESSION_TOKEN_STORAGE_KEY,
+      storageArea: localStorage,
+      oldValue: null,
+      newValue: 'new-shared-token',
+    } as StorageEvent);
+    setTimeout(() => {
+      expect(headless.getSession).toHaveBeenCalled();
+      expect(service.isAuthenticated()).toBe(true);
+      done();
+    }, 0);
   });
 
   it('applyMetaTokens persists session_token, access_token and refresh_token', () => {
@@ -202,6 +282,7 @@ describe('AuthService (app / headless)', () => {
   });
 
   it('sessionRecheckAfter401 returns true and updates state when getSession is authenticated', (done) => {
+    tokenStore.setSessionToken('recheck-token');
     headless.getSession.and.returnValue(of(authedResponse()));
     service.sessionRecheckAfter401().subscribe((ok) => {
       expect(ok).toBe(true);
@@ -211,6 +292,7 @@ describe('AuthService (app / headless)', () => {
   });
 
   it('sessionRecheckAfter401 returns false on getSession error', (done) => {
+    tokenStore.setSessionToken('recheck-token');
     headless.getSession.and.returnValue(throwError(() => new Error('net')));
     service.sessionRecheckAfter401().subscribe((ok) => {
       expect(ok).toBe(false);
@@ -218,13 +300,38 @@ describe('AuthService (app / headless)', () => {
     });
   });
 
-  it('startGoogleOAuth with login clears stale session token before redirect', async () => {
+  it('sessionRecheckAfter401 skips getSession when no session or refresh token', (done) => {
+    headless.getSession.calls.reset();
+    service.sessionRecheckAfter401().subscribe((ok) => {
+      expect(ok).toBe(false);
+      expect(headless.getSession).not.toHaveBeenCalled();
+      done();
+    });
+  });
+
+  it('logout clears client auth before server session delete', async () => {
+    tokenStore.setSessionToken('stale');
+    spyOnProperty(document, 'cookie', 'get').and.returnValue('sessionid=stale-cookie; Path=/');
+    headless.deleteSession.and.callFake(() => {
+      expect(tokenStore.getSessionToken()).toBeNull();
+      return of({ status: 200 });
+    });
+    headless.deleteBrowserSession.and.returnValue(of({ status: 200 }));
+    await firstValueFrom(service.logout());
+    expect(headless.deleteSession).toHaveBeenCalled();
+    expect(headless.deleteBrowserSession).toHaveBeenCalled();
+    expect(tokenStore.isSessionCookieFallbackBlocked()).toBeTrue();
+  });
+
+  it('startGoogleOAuth with login clears stale auth state and browser session before redirect', async () => {
     tokenStore.setSessionToken('stale-token');
+    localStorage.setItem('headless_access_token', 'stale-access');
     headless.redirectToProvider.and.returnValue(
       Promise.resolve({ kind: 'error', message: 'backend refused' })
     );
     await service.startGoogleOAuth('http://localhost/cb', 'login');
     expect(tokenStore.getSessionToken()).toBeNull();
+    expect(headless.deleteBrowserSession).toHaveBeenCalled();
     expect(headless.redirectToProvider).toHaveBeenCalled();
   });
 

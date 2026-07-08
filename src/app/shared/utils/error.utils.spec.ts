@@ -2,6 +2,7 @@ import { HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import {
   extractAllauthErrorsMessages,
   getErrorMessage,
+  isAngularHttpFailureMessage,
   isIncorrectCodeError,
   isUnverifiedEmailError,
   isWebAuthnIncorrectCodeError,
@@ -48,6 +49,17 @@ describe('error.utils', () => {
         },
       });
       expect(getErrorMessage(err)).toBe('يجب تأكيد البريد أولاً.');
+    });
+
+    it('does not return Angular HttpClient failure boilerplate', () => {
+      const err = new HttpErrorResponse({
+        status: 400,
+        statusText: 'Bad Request',
+        url: 'https://example.com/auth/app/v1/auth/webauthn/login',
+        error: null,
+      });
+      expect(isAngularHttpFailureMessage(err.message)).toBe(true);
+      expect(getErrorMessage(err)).toBeNull();
     });
   });
 

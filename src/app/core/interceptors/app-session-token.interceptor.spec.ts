@@ -20,7 +20,7 @@ describe('appSessionTokenInterceptor', () => {
       pending('API_BASE_URL');
       return;
     }
-    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-99');
+    localStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-99');
     TestBed.configureTestingModule({
       providers: [
         provideHttpClient(withInterceptors([credentialsInterceptor, appSessionTokenInterceptor])),
@@ -41,7 +41,7 @@ describe('appSessionTokenInterceptor', () => {
       pending('API_BASE_URL');
       return;
     }
-    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-99');
+    localStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-99');
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -65,7 +65,7 @@ describe('appSessionTokenInterceptor', () => {
       pending('ADMIN_API_BASE_URL');
       return;
     }
-    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-admin');
+    localStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-admin');
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -83,7 +83,7 @@ describe('appSessionTokenInterceptor', () => {
     httpMock.verify();
   });
 
-  it('adds X-Session-Token from sessionid cookie when sessionStorage empty', () => {
+  it('adds X-Session-Token from sessionid cookie when localStorage empty', () => {
     if (!api) {
       pending('API_BASE_URL');
       return;
@@ -103,15 +103,15 @@ describe('appSessionTokenInterceptor', () => {
     expect(req.request.headers.get('X-Session-Token')).toBe('cookie-sid-only');
     req.flush({});
     httpMock.verify();
-    expect(sessionStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY)).toBe('cookie-sid-only');
+    expect(localStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY)).toBe('cookie-sid-only');
   });
 
-  it('prefers sessionStorage token over sessionid cookie', () => {
+  it('prefers localStorage token over sessionid cookie', () => {
     if (!api) {
       pending('API_BASE_URL');
       return;
     }
-    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'from-storage');
+    localStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'from-storage');
     spyOnProperty(document, 'cookie', 'get').and.returnValue('sessionid=from-cookie; Path=/');
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
@@ -138,7 +138,7 @@ describe('appSessionTokenInterceptor', () => {
       pending('API_BASE_URL');
       return;
     }
-    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-stale');
+    localStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-stale');
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -163,7 +163,7 @@ describe('appSessionTokenInterceptor', () => {
       pending('API_BASE_URL');
       return;
     }
-    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-after-init');
+    localStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-after-init');
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -186,7 +186,7 @@ describe('appSessionTokenInterceptor', () => {
       pending('API_BASE_URL');
       return;
     }
-    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-after-login-options');
+    localStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-after-login-options');
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
@@ -205,7 +205,7 @@ describe('appSessionTokenInterceptor', () => {
       data: { request_options: { publicKey: {} } },
       meta: { session_token: 'tok-2' },
     });
-    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-2');
+    localStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-2');
     http.post(loginUrl, { credential: { type: 'public-key' } }).subscribe();
     req = httpMock.expectOne(loginUrl);
     expect(req.request.headers.get('X-Session-Token')).toBe('tok-2');
@@ -240,7 +240,7 @@ describe('appSessionTokenInterceptor', () => {
       pending('API_BASE_URL');
       return;
     }
-    sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-stale');
+    localStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, 'tok-stale');
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       providers: [
