@@ -36,10 +36,10 @@ describe('authErrorInterceptor', () => {
       'sessionRecheckAfter401',
       'invalidateClientAuthAndGoLogin',
       'clearStaleClientSession',
-      'isLoggedIn',
+      'canActivateAsLoggedIn',
     ]);
     authMock.sessionRecheckAfter401.and.returnValue(of(true));
-    authMock.isLoggedIn.and.returnValue(false);
+    authMock.canActivateAsLoggedIn.and.returnValue(false);
     authMock.clearStaleClientSession.and.callFake(() => {
       TestBed.inject(HeadlessAppTokenService).blockSessionCookieFallback();
     });
@@ -74,7 +74,7 @@ describe('authErrorInterceptor', () => {
   });
 
   it('on 401 to API profile with session token while logged in, rechecks session and retries', (done) => {
-    authMock.isLoggedIn.and.returnValue(true);
+    authMock.canActivateAsLoggedIn.and.returnValue(true);
     localStorage.setItem('sessionToken', 'session-x');
 
     http.get(profileUrl).subscribe({
@@ -164,7 +164,7 @@ describe('authErrorInterceptor', () => {
   });
 
   it('on 401 to API profile with token and failed recheck while logged in, forces login', (done) => {
-    authMock.isLoggedIn.and.returnValue(true);
+    authMock.canActivateAsLoggedIn.and.returnValue(true);
     localStorage.setItem('sessionToken', 'session-x');
     authMock.sessionRecheckAfter401.and.returnValue(of(false));
 

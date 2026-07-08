@@ -56,15 +56,19 @@ User Browser
 ### Authentication Flow (django-allauth headless SPA)
 
 ```
-1. App bootstrap: GET app `/auth/session` (with `localStorage` token if present); if not authenticated, GET browser `/auth/session` (credentials). Parallel GET `/config`. `storage` event syncs login/logout across tabs. If authenticated, GET `/auth/profile/` merges portal `permissions`.
-2. Login: POST /auth/login -> receive session_token + access_token + refresh_token
-3. Interceptor attaches: X-Session-Token on every `API_BASE_URL` / `ADMIN_API_BASE_URL` request when a token is resolved (localStorage `sessionToken` first; else readable `sessionid` cookie, persisted into localStorage). Exception: omit header on `POST …/auth/app/v1/auth/webauthn/signup` (anonymous initiate).
-                                 headersInterceptor: X-CSRFToken (unsafe methods), Accept-Language (unchanged policy)
-                                 withCredentials: false for `/auth/app/v1/`, true for other CMS/API routes (cookies)
-4. 401 recovery: try refresh token -> recheck session -> force re-login
-5. OAuth: Navigational form POST to provider; OauthCallback runs `bootstrapSessionAfterOAuthRedirect`
-   → **GET browser `/auth/.../session` first** (cookie credentials), then app `/auth/app/.../session` if needed;
-   `X-Session-Token` comes from `meta.session_token` / same-origin readable `sessionid`, not cross-origin cookies
+1. APP_INITIALIZER fires AuthService.bootstrapOnce() without awaiting (public pages paint immediately).
+2. Hydrate: if sessionToken + localStorage.user exist, set provisional currentUser (incl. permissions)
+   so admin guards can allow access without unauthorized flash (authReady = provisional OR bootstrapDone).
+3. Background validate: GET app `/auth/session` (token if present); if not established, GET browser
+   `/auth/session` (credentials). Parallel GET `/config`. On success merge GET `/auth/profile/`
+   permissions; on profile failure keep cached permissions. Invalid session with provisional cache
+   → clear + login + SESSION_EXPIRED when applicable. `storage` event syncs login/logout across tabs.
+4. Public routes never wait; authGuard / portalAccessGuard / permissionGuard wait on authReady.
+5. Login: POST /auth/login -> session_token (+ optional JWTs). Interceptor attaches X-Session-Token
+   (localStorage first; else readable `sessionid` cookie). Exception: omit on anonymous WebAuthn signup.
+6. 401 recovery: if was logged in → recheck then SESSION_EXPIRED login; if anonymous/stale →
+   clearStaleClientSession (+ retry public CMS GETs without token). No login redirect for guests.
+7. OAuth: OauthCallback runs bootstrapSessionAfterOAuthRedirect (browser session then app session).
 ```
 
 ### Content Access Flow (Gallery)

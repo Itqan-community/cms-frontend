@@ -65,7 +65,7 @@ export const appConfig: ApplicationConfig = {
       ])
     ),
     provideAppInitializer(() => initializeAppTranslations()),
-    // Non-blocking: public gallery must paint before session probe finishes.
+    // Fire-and-forget: public pages paint immediately; protected routes wait on authReady.
     provideAppInitializer(() => {
       void inject(AuthService).bootstrapOnce();
     }),

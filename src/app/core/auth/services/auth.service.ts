@@ -98,8 +98,17 @@ export class AuthService {
   readonly authBootstrapFailed = signal(false);
   readonly configSnapshot = signal<ConfigurationResponse | undefined>(undefined);
 
+  /** True while using cached user+token before server session confirmation. */
+  private readonly provisionalSession = signal(false);
+
   /** Mirrors official `authInfo(auth).isAuthenticated`. */
   readonly isAuthenticated = computed(() => authInfo(this.authSnapshot()).isAuthenticated);
+
+  /**
+   * Protected-route readiness: provisional cache is enough to avoid unauthorized flash;
+   * otherwise wait until bootstrap validation finishes.
+   */
+  readonly authReady = computed(() => this.bootstrapDone() || this.hasProvisionalSession());
 
   public currentUser = signal<User | null>(null);
   public isLoading = signal(false);
@@ -122,6 +131,7 @@ export class AuthService {
   private loggingOut = false;
 
   constructor() {
+    this.hydrateProvisionalSession();
     this.authBus.changes$.subscribe((msg) => {
       const prev = this.prevAuthForRedirect;
       this.authSnapshot.set(msg);
@@ -144,9 +154,13 @@ export class AuthService {
 
   /**
    * Parallel `GET /auth/session` + `GET /config` — mirrors official `AuthContextProvider` bootstrap.
-   * Called from `APP_INITIALIZER`.
+   * Called from `APP_INITIALIZER` (fire-and-forget). Hydrates cache first so public pages paint
+   * immediately and admin guards can use last-good permissions before network confirms.
    */
   bootstrapOnce(): Promise<void> {
+    this.hydrateProvisionalSession();
+    const hadProvisional = this.hasProvisionalSession();
+
     return firstValueFrom(
       forkJoin({
         auth: this.resolveBootstrapSession().pipe(
@@ -182,22 +196,22 @@ export class AuthService {
         }),
         switchMap(({ auth }) => {
           if (auth === false || !this.isOauthReturnSessionEstablished(auth)) {
+            if (hadProvisional) {
+              this.invalidateClientAuthAndGoLogin({ sessionExpired: true });
+            } else {
+              this.clearStaleClientSession();
+            }
             return of(void 0);
           }
+          this.provisionalSession.set(false);
           return this.getProfile().pipe(
             tap((p) => {
-              const cur = this.currentUser();
-              if (!cur) return;
-              const merged: User = {
-                ...cur,
-                ...p,
-                id: String(p.id ?? cur.id),
-                permissions: normalizeProfilePermissionCodes(p.permissions),
-              };
-              this.currentUser.set(merged);
-              localStorage.setItem(this.USER_KEY, JSON.stringify(merged));
+              this.applyProfileFromApi(p);
             }),
-            catchError(() => of(void 0))
+            catchError(() => {
+              // Keep provisional/cached portal fields; do not wipe to empty permissions.
+              return of(void 0);
+            })
           );
         }),
         tap(() => {
@@ -270,18 +284,7 @@ export class AuthService {
           }
           return this.getProfile().pipe(
             tap((p) => {
-              const cur = this.currentUser();
-              if (!cur) {
-                return;
-              }
-              const merged: User = {
-                ...cur,
-                ...p,
-                id: String(p.id ?? cur.id),
-                permissions: normalizeProfilePermissionCodes(p.permissions),
-              };
-              this.currentUser.set(merged);
-              localStorage.setItem(this.USER_KEY, JSON.stringify(merged));
+              this.applyProfileFromApi(p);
             }),
             catchError(() => of(void 0))
           );
@@ -291,12 +294,52 @@ export class AuthService {
       .subscribe();
   }
 
+  /** Restore last-good user from localStorage when a session token still exists. */
+  private hydrateProvisionalSession(): void {
+    if (this.currentUser()) {
+      return;
+    }
+    if (!this.tokenStore.getSessionToken()) {
+      return;
+    }
+    const stored = this.getStoredUser();
+    if (!stored?.id) {
+      return;
+    }
+    this.currentUser.set(stored);
+    this.authStateSubject.next(true);
+    this.provisionalSession.set(true);
+  }
+
+  /** Cached token+user before (or without) a confirmed headless snapshot. */
+  hasProvisionalSession(): boolean {
+    return this.provisionalSession() && !!this.tokenStore.getSessionToken() && !!this.currentUser();
+  }
+
+  /** Guards: allow while provisional or after confirmed login. */
+  canActivateAsLoggedIn(): boolean {
+    return this.isLoggedIn() || this.hasProvisionalSession();
+  }
+
   private syncUserFromSnapshot(msg: unknown): void {
     const info = authInfo(msg);
     if (info.isAuthenticated && info.user) {
-      const u = this.mapHeadlessToUser(info.user);
-      this.currentUser.set(u);
-      localStorage.setItem(this.USER_KEY, JSON.stringify(u));
+      const mapped = this.mapHeadlessToUser(info.user);
+      const prev = this.currentUser();
+      // Headless user has no portal permissions — preserve cache until profile merge.
+      const merged: User = {
+        ...mapped,
+        permissions: prev?.permissions?.length ? prev.permissions : mapped.permissions,
+        is_admin: prev?.is_admin ?? mapped.is_admin,
+        publisher_id:
+          prev?.publisher_id !== undefined && prev?.publisher_id !== null
+            ? prev.publisher_id
+            : mapped.publisher_id,
+        is_profile_completed: prev?.is_profile_completed ?? mapped.is_profile_completed,
+        phone: prev?.phone || mapped.phone,
+      };
+      this.currentUser.set(merged);
+      localStorage.setItem(this.USER_KEY, JSON.stringify(merged));
       this.authStateSubject.next(true);
       return;
     }
@@ -310,8 +353,14 @@ export class AuthService {
       return;
     }
     if (!info.isAuthenticated) {
+      // During bootstrap, an anonymous 401 envelope must not wipe cached portal permissions
+      // before `bootstrapOnce` decides clear vs invalidate.
+      if (this.provisionalSession() && !this.bootstrapDone()) {
+        return;
+      }
       localStorage.removeItem(this.USER_KEY);
       this.currentUser.set(null);
+      this.provisionalSession.set(false);
       this.authStateSubject.next(false);
     }
   }
@@ -325,6 +374,15 @@ export class AuthService {
     }
     this.authStateSubject.next(false);
     this.currentUser.set(null);
+    this.provisionalSession.set(false);
+  }
+
+  /** Clears stale client auth without login redirect or session-expired toast (public browsing). */
+  clearStaleClientSession(): void {
+    this.tokenStore.blockSessionCookieFallback();
+    this.clearLocalAuthUi({ preserveSessionStorageToken: false });
+    this.authSnapshot.set(undefined);
+    this.prevAuthForRedirect = undefined;
   }
 
   /** CMS API recovery — mirrors session recheck intent from earlier interceptor behaviour. */
@@ -386,16 +444,10 @@ export class AuthService {
     );
   }
 
-  /** Clears stale client auth without login redirect or session-expired toast (public browsing). */
-  clearStaleClientSession(): void {
-    this.tokenStore.blockSessionCookieFallback();
-    this.clearLocalAuthUi({ preserveSessionStorageToken: false });
-    this.authSnapshot.set(undefined);
-    this.prevAuthForRedirect = undefined;
-  }
-
   invalidateClientAuthAndGoLogin(options?: { sessionExpired?: boolean }): void {
-    if (!this.isLoggedIn() && !this.currentUser()) {
+    const shouldRedirect =
+      this.isLoggedIn() || this.hasProvisionalSession() || !!this.currentUser();
+    if (!shouldRedirect) {
       this.clearStaleClientSession();
       return;
     }
@@ -763,8 +815,12 @@ export class AuthService {
   }
 
   getStoredUser(): User | null {
-    const userStr = localStorage.getItem(this.USER_KEY);
-    return userStr ? (JSON.parse(userStr) as User) : null;
+    try {
+      const userStr = localStorage.getItem(this.USER_KEY);
+      return userStr ? (JSON.parse(userStr) as User) : null;
+    } catch {
+      return null;
+    }
   }
 
   isLoggedIn(): boolean {
