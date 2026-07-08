@@ -1,5 +1,6 @@
 import { isPlatformServer } from '@angular/common';
-import { Component, inject, OnDestroy, OnInit, PLATFORM_ID, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnDestroy, OnInit, PLATFORM_ID, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
@@ -37,6 +38,7 @@ export class PublisherDetailsPage implements OnInit, OnDestroy {
   private readonly viewportService = inject(ViewportService);
   private readonly seo = inject(SeoService);
   private readonly jsonLd = inject(JsonLdService);
+  private readonly destroyRef = inject(DestroyRef);
 
   isServer = isPlatformServer(this.platformId);
 
@@ -70,14 +72,17 @@ export class PublisherDetailsPage implements OnInit, OnDestroy {
 
   getPublisherDetails() {
     this.publisherLoading.set(true);
-    this.publisherService.getPublisher(this.id).subscribe({
-      next: (publisher) => {
-        this.publisher.set(publisher);
-        this.setSeoFromPublisher(publisher);
-      },
-      complete: () => this.publisherLoading.set(false),
-      error: () => this.publisherLoading.set(false),
-    });
+    this.publisherService
+      .getPublisher(this.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (publisher) => {
+          this.publisher.set(publisher);
+          this.setSeoFromPublisher(publisher);
+        },
+        complete: () => this.publisherLoading.set(false),
+        error: () => this.publisherLoading.set(false),
+      });
   }
 
   ngOnDestroy(): void {
@@ -112,6 +117,7 @@ export class PublisherDetailsPage implements OnInit, OnDestroy {
         this.page(),
         this.pageSize()
       )
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           this.assets.set(response.results);
