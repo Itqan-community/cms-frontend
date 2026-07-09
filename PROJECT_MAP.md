@@ -402,8 +402,10 @@ success.
 - **Persistence:** `localStorage.getItem('lang')`
 - **Switch:** Full page reload on language toggle (`LangSwitchComponent`)
 - **RTL:** `<html dir="rtl">` with logical CSS properties (`margin-inline`, `padding-inline`)
-- **Keys:** 1483 per language (parity verified); domains include auth, navigation, gallery, admin,
+- **Keys:** 1486 per language (parity verified); domains include auth, navigation, gallery, admin,
   content standards, licenses, errors, forms, access-request license terms
+- **CI gate:** `npm run check:i18n` validates every key in the union of `en.json` + `ar.json` has a
+  non-empty Arabic value in `ar.json` (runs in CI `lint-and-test` and via lint-staged on i18n edits)
 - **API errors:** Hybrid resolver in `shared/utils/api-error-resolver.util.ts` — maps `error_name` /
   known codes to i18n, shows backend `message` when language matches UI, else fallback key; global
   `error.interceptor.ts` uses it; component-level handlers dedupe via

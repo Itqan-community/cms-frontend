@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Check Arabic translations
+        run: npm run check:i18n
+
       - name: Check code formatting
         run: npm run format:check
 
