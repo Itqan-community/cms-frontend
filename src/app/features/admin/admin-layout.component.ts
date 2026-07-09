@@ -20,6 +20,7 @@ import {
   buildSelectedPublisherDetailCommands,
 } from './utils/admin-tenant-navigation.util';
 import { AdminTenantNavigationService } from './services/admin-tenant-navigation.service';
+import { environment } from '../../../environments/environment';
 
 interface CmsTab {
   id: string;
@@ -30,13 +31,12 @@ interface CmsTab {
   disabled?: boolean;
 }
 
-// const TAB_MUSHAFS: CmsTab = {
-//   id: 'mushafs',
-//   path: 'mushafs',
-//   label: 'ADMIN.MENU.MUSHAFS',
-//   icon: 'lucideBookOpen',
-//   disabled: true,
-// };
+const TAB_MUSHAFS: CmsTab = {
+  id: 'mushafs',
+  path: 'mushafs',
+  label: 'ADMIN.MENU.MUSHAFS',
+  icon: 'lucideBookOpen',
+};
 const TAB_TAFSIRS: CmsTab = {
   id: 'tafsirs',
   path: 'tafsirs',
@@ -140,6 +140,14 @@ export class AdminLayoutComponent implements OnInit {
     }
     if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_TRANSLATION)) {
       tabs.push(TAB_TRANSLATIONS);
+    }
+    // TODO(backend-permissions): gate with PORTAL_READ_MUSHAF only once seeded
+    if (
+      environment.useMushafsMockApi ||
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_MUSHAF) ||
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS)
+    ) {
+      tabs.push(TAB_MUSHAFS);
     }
     if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_RECITATION)) {
       tabs.push(TAB_RECITATIONS);

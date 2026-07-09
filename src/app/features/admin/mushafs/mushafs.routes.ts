@@ -1,32 +1,48 @@
 import { Routes } from '@angular/router';
+// import { PORTAL_PERMISSIONS } from '../constants/portal-permission.constants';
+// import { permissionGuard } from '../guards/permission.guard';
 import { MushafsLayoutComponent } from './mushafs-layout.component';
 
-export const mushafsRoutes: Routes = [
+/**
+ * Mushafs portal assets — route guards commented until backend seeds portal_*_mushaf permissions.
+ * TODO(backend-permissions): enable {@link permissionGuard} per child using PORTAL_PERMISSIONS.
+ */
+export const mushafRoutes: Routes = [
   {
     path: '',
     component: MushafsLayoutComponent,
     children: [
-      { path: '', redirectTo: 'pages', pathMatch: 'full' },
       {
-        path: 'pages',
-        loadComponent: () => import('./pages/mushaf-pages.page').then((m) => m.MushafPagesPage),
-      },
-      {
-        path: 'words',
-        loadComponent: () => import('./words/mushaf-words.page').then((m) => m.MushafWordsPage),
-        data: { icon: 'lucideBookmark' },
-      },
-      {
-        path: 'ayahs',
-        loadComponent: () => import('./ayahs/ayahs.page').then((m) => m.AyahsPage),
-      },
-      {
-        path: 'surahs',
+        path: '',
+        // canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_READ_MUSHAF] })],
         loadComponent: () =>
-          import('../components/coming-soon/coming-soon.component').then(
-            (m) => m.ComingSoonComponent
+          import('./components/mushafs-list/mushafs-list.component').then(
+            (m) => m.MushafsListComponent
           ),
-        data: { icon: 'lucideGraduationCap' },
+      },
+      {
+        path: 'create',
+        // canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_CREATE_MUSHAF] })],
+        loadComponent: () =>
+          import('./components/mushaf-form/mushaf-form.component').then(
+            (m) => m.MushafFormComponent
+          ),
+      },
+      {
+        path: ':slug/edit',
+        // canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_UPDATE_MUSHAF] })],
+        loadComponent: () =>
+          import('./components/mushaf-form/mushaf-form.component').then(
+            (m) => m.MushafFormComponent
+          ),
+      },
+      {
+        path: ':slug',
+        // canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_READ_MUSHAF] })],
+        loadComponent: () =>
+          import('./components/mushaf-detail/mushaf-detail.component').then(
+            (m) => m.MushafDetailComponent
+          ),
       },
     ],
   },

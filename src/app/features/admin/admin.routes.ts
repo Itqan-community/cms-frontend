@@ -2,7 +2,6 @@ import { Routes } from '@angular/router';
 
 export const adminRoutes: Routes = [
   { path: 'search', redirectTo: 'publishers', pathMatch: 'full' },
-  { path: 'mushafs', redirectTo: 'publishers', pathMatch: 'prefix' },
   {
     path: 'fonts',
     loadComponent: () =>

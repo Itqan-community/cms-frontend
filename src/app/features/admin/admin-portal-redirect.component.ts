@@ -39,6 +39,7 @@ export class AdminPortalRedirectComponent implements OnInit {
     const candidates: { segment: string; permission: string }[] = [
       { segment: 'tafsirs', permission: PORTAL_PERMISSIONS.PORTAL_READ_TAFSIR },
       { segment: 'translations', permission: PORTAL_PERMISSIONS.PORTAL_READ_TRANSLATION },
+      { segment: 'mushafs', permission: PORTAL_PERMISSIONS.PORTAL_READ_MUSHAF },
       { segment: 'recitations', permission: PORTAL_PERMISSIONS.PORTAL_READ_RECITATION },
       { segment: 'reciters', permission: PORTAL_PERMISSIONS.PORTAL_READ_RECITER },
       // Shown in sidebar for all portal users during permission rollout; redirect only when READ is granted.

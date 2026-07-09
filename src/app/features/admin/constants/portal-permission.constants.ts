@@ -24,6 +24,12 @@ export const PORTAL_PERMISSIONS = {
   PORTAL_UPDATE_TRANSLATION: 'portal_update_translation',
   PORTAL_DELETE_TRANSLATION: 'portal_delete_translation',
 
+  /** Mushafs (portal) — pending backend `PermissionChoice` seeds. */
+  PORTAL_READ_MUSHAF: 'portal_read_mushaf',
+  PORTAL_CREATE_MUSHAF: 'portal_create_mushaf',
+  PORTAL_UPDATE_MUSHAF: 'portal_update_mushaf',
+  PORTAL_DELETE_MUSHAF: 'portal_delete_mushaf',
+
   PORTAL_READ_PUBLISHER: 'portal_read_publisher',
   PORTAL_CREATE_PUBLISHER: 'portal_create_publisher',
   PORTAL_UPDATE_PUBLISHER: 'portal_update_publisher',

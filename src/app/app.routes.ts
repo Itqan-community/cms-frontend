@@ -57,6 +57,11 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'mushafs',
+        loadChildren: () =>
+          import('./features/admin/mushafs/mushafs.routes').then((m) => m.mushafRoutes),
+      },
+      {
         path: 'recitations',
         loadChildren: () =>
           import('./features/admin/recitations/recitations.routes').then((m) => m.recitationRoutes),
