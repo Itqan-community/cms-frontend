@@ -270,6 +270,17 @@ Release 1.4.3.
 
 ---
 
+## [1.4.4] - 2026-07-09
+
+Release 1.4.4.
+
+## Changes
+
+- fix(auth): hydrate provisional session to avoid admin reload flash
+- Public Gallery Render - Stop blocking public page render on auth session check
+
+---
+
 ## [Unreleased]
 
 ### Added
