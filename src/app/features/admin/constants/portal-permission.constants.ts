@@ -30,6 +30,18 @@ export const PORTAL_PERMISSIONS = {
   PORTAL_UPDATE_MUSHAF: 'portal_update_mushaf',
   PORTAL_DELETE_MUSHAF: 'portal_delete_mushaf',
 
+  /** Fonts (portal) — pending backend `PermissionChoice` seeds. */
+  PORTAL_READ_FONT: 'portal_read_font',
+  PORTAL_CREATE_FONT: 'portal_create_font',
+  PORTAL_UPDATE_FONT: 'portal_update_font',
+  PORTAL_DELETE_FONT: 'portal_delete_font',
+
+  /** Programs (portal) — pending backend `PermissionChoice` seeds. */
+  PORTAL_READ_PROGRAM: 'portal_read_program',
+  PORTAL_CREATE_PROGRAM: 'portal_create_program',
+  PORTAL_UPDATE_PROGRAM: 'portal_update_program',
+  PORTAL_DELETE_PROGRAM: 'portal_delete_program',
+
   PORTAL_READ_PUBLISHER: 'portal_read_publisher',
   PORTAL_CREATE_PUBLISHER: 'portal_create_publisher',
   PORTAL_UPDATE_PUBLISHER: 'portal_update_publisher',

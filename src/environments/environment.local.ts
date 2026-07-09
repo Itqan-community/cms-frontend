@@ -12,4 +12,6 @@ export const environment = {
   /** Set `true` only if this API issues WebAuthn with `rp.id` / `rpId` equal to `location.hostname`. */
   webauthnReplaceRpIdWithHostname: false,
   useMushafsMockApi: true,
+  useFontsMockApi: true,
+  useProgramsMockApi: true,
 };

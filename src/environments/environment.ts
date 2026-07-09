@@ -11,4 +11,6 @@ export const environment = {
   webauthnReplaceRpIdWithHostname: false,
   /** In-memory mushafs CRUD until portal mushafs API is live. */
   useMushafsMockApi: true,
+  useFontsMockApi: true,
+  useProgramsMockApi: true,
 };

@@ -1,0 +1,318 @@
+<div class="program-form">
+  <div class="admin-page-header">
+    <div class="admin-page-header__text">
+      <h2 class="admin-page-header__title">
+        {{
+          (isEditMode() ? 'ADMIN.PROGRAMS.FORM.EDIT_TITLE' : 'ADMIN.PROGRAMS.FORM.CREATE_TITLE')
+            | translate
+        }}
+      </h2>
+      <p class="admin-page-header__subtitle">
+        {{
+          (isEditMode()
+            ? 'ADMIN.PROGRAMS.FORM.SUBTITLE_EDIT'
+            : 'ADMIN.PROGRAMS.FORM.SUBTITLE_CREATE'
+          ) | translate
+        }}
+      </p>
+    </div>
+    <a routerLink="/admin/programs">
+      <button nz-button nzType="default">
+        <ng-icon name="lucideArrowRight" />
+        {{ 'ADMIN.PROGRAMS.FORM.BACK_LIST' | translate }}
+      </button>
+    </a>
+  </div>
+
+  @if (loadingDetail()) {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 10 }"></nz-skeleton>
+  } @else {
+    <form nz-form [formGroup]="form" nzLayout="vertical" (ngSubmit)="onSubmit()">
+      <div class="admin-form-card">
+        <h3 class="admin-form-card__title">
+          <ng-icon name="lucideSquarePen" /> {{ 'ADMIN.PROGRAMS.FORM.SECTION_NAME' | translate }}
+        </h3>
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>{{
+                'ADMIN.PROGRAMS.FORM.NAME_AR' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.PROGRAMS.FORM.ERR_NAME_AR' | translate">
+                <input
+                  nz-input
+                  formControlName="name_ar"
+                  [placeholder]="'ADMIN.PROGRAMS.FORM.PLACEHOLDER_NAME_AR' | translate"
+                />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label>{{ 'ADMIN.PROGRAMS.FORM.NAME_EN' | translate }}</nz-form-label>
+              <nz-form-control>
+                <input
+                  nz-input
+                  formControlName="name_en"
+                  [placeholder]="'ADMIN.PROGRAMS.FORM.PLACEHOLDER_NAME_EN' | translate"
+                  dir="ltr"
+                />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-form-card">
+        <h3 class="admin-form-card__title">
+          <ng-icon name="lucideFileText" />
+          {{ 'ADMIN.PROGRAMS.FORM.SECTION_SHORT_DESC' | translate }}
+        </h3>
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>{{
+                'ADMIN.PROGRAMS.FORM.DESCRIPTION_AR' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.PROGRAMS.FORM.ERR_DESC_AR' | translate">
+                <textarea
+                  nz-input
+                  formControlName="description_ar"
+                  [placeholder]="'ADMIN.PROGRAMS.FORM.PLACEHOLDER_DESC_AR' | translate"
+                  [nzAutosize]="{ minRows: 3, maxRows: 5 }"
+                ></textarea>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>{{
+                'ADMIN.PROGRAMS.FORM.DESCRIPTION_EN' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.PROGRAMS.FORM.ERR_DESC_EN' | translate">
+                <textarea
+                  nz-input
+                  formControlName="description_en"
+                  [placeholder]="'ADMIN.PROGRAMS.FORM.PLACEHOLDER_DESC_EN_SHORT' | translate"
+                  dir="ltr"
+                  [nzAutosize]="{ minRows: 3, maxRows: 5 }"
+                ></textarea>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-form-card">
+        <h3 class="admin-form-card__title">
+          <ng-icon name="lucideAlignRight" />
+          {{ 'ADMIN.PROGRAMS.FORM.SECTION_LONG_DESC' | translate }}
+        </h3>
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>{{
+                'ADMIN.PROGRAMS.FORM.LONG_DESCRIPTION_AR' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.PROGRAMS.FORM.ERR_LONG_AR' | translate">
+                <textarea
+                  nz-input
+                  formControlName="long_description_ar"
+                  [placeholder]="'ADMIN.PROGRAMS.FORM.PLACEHOLDER_LONG_AR' | translate"
+                  [nzAutosize]="{ minRows: 5, maxRows: 10 }"
+                ></textarea>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label nzRequired>{{
+                'ADMIN.PROGRAMS.FORM.LONG_DESCRIPTION_EN' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.PROGRAMS.FORM.ERR_LONG_EN' | translate">
+                <textarea
+                  nz-input
+                  formControlName="long_description_en"
+                  [placeholder]="'ADMIN.PROGRAMS.FORM.PLACEHOLDER_LONG_EN' | translate"
+                  dir="ltr"
+                  [nzAutosize]="{ minRows: 5, maxRows: 10 }"
+                ></textarea>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-form-card">
+        <h3 class="admin-form-card__title">
+          <ng-icon name="lucideSettings" /> {{ 'ADMIN.PROGRAMS.FORM.SECTION_META' | translate }}
+        </h3>
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+            <nz-form-item>
+              <nz-form-label nzRequired>{{
+                'ADMIN.PROGRAMS.FORM.LICENSE' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.PROGRAMS.FORM.ERR_LICENSE' | translate">
+                <nz-select
+                  formControlName="license"
+                  [nzPlaceHolder]="'ADMIN.PROGRAMS.FORM.PLACEHOLDER_LICENSE' | translate"
+                  nzAllowClear
+                >
+                  @for (l of licenseOptions; track l) {
+                    <nz-option [nzValue]="l" [nzLabel]="l"></nz-option>
+                  }
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+            <nz-form-item>
+              <nz-form-label nzRequired>{{
+                'ADMIN.PROGRAMS.FORM.LANGUAGE' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.PROGRAMS.FORM.ERR_LANGUAGE' | translate">
+                <nz-select
+                  formControlName="language"
+                  [nzPlaceHolder]="'ADMIN.PROGRAMS.FORM.PLACEHOLDER_LANGUAGE' | translate"
+                  nzAllowClear
+                >
+                  <nz-option nzValue="ar" [nzLabel]="languageLabel('ar')"></nz-option>
+                  <nz-option nzValue="en" [nzLabel]="languageLabel('en')"></nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+
+          <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+            <nz-form-item>
+              <nz-form-label nzRequired>{{
+                'ADMIN.PROGRAMS.FORM.PUBLISHER' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzErrorTip]="'ADMIN.PROGRAMS.FORM.ERR_PUBLISHER' | translate">
+                <nz-select
+                  formControlName="publisher_id"
+                  [nzPlaceHolder]="'ADMIN.PROGRAMS.FORM.PLACEHOLDER_PUBLISHER' | translate"
+                  nzAllowClear
+                  nzShowSearch
+                  nzServerSearch
+                  [nzLoading]="publishersLoading()"
+                  (nzOnSearch)="onPublisherSearch($event)"
+                >
+                  @for (pub of publisherOptions(); track pub.id) {
+                    <nz-option [nzValue]="pub.id" [nzLabel]="pub.name"></nz-option>
+                  }
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+            <nz-form-item>
+              <nz-form-label>{{ 'ADMIN.PROGRAMS.FORM.LABEL_EXTERNAL' | translate }}</nz-form-label>
+              <nz-form-control>
+                <nz-switch formControlName="is_external"></nz-switch>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="16" [nzXs]="24" [nzSm]="16">
+            <nz-form-item>
+              <nz-form-label>{{
+                'ADMIN.PROGRAMS.FORM.LABEL_EXTERNAL_URL' | translate
+              }}</nz-form-label>
+              <nz-form-control>
+                <input
+                  nz-input
+                  formControlName="external_url"
+                  placeholder="{{ 'FORMS.PLACEHOLDERS.URL_TAFSIR_EXAMPLE' | translate }}"
+                  dir="ltr"
+                />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label>{{
+                'ADMIN.PROGRAMS.FORM.LABEL_OPEN_ACCESS' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzExtra]="'ADMIN.PROGRAMS.FORM.HELP_OPEN_ACCESS' | translate">
+                <nz-switch formControlName="is_open_access"></nz-switch>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label>{{ 'ADMIN.PROGRAMS.FORM.LABEL_API_ONLY' | translate }}</nz-form-label>
+              <nz-form-control [nzExtra]="'ADMIN.PROGRAMS.FORM.HELP_API_ONLY' | translate">
+                <nz-switch formControlName="restricted_for_tenant"></nz-switch>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+
+        <nz-form-item>
+          <nz-form-label>{{ 'ADMIN.PROGRAMS.FORM.UPLOAD_TITLE' | translate }}</nz-form-label>
+          <nz-form-control>
+            <div class="program-form__thumbnail-area">
+              @if (thumbnailPreview()) {
+                <div class="program-form__thumbnail-preview">
+                  <img [src]="thumbnailPreview()!" alt="" />
+                  <button
+                    type="button"
+                    class="program-form__thumbnail-remove"
+                    (click)="removeThumbnail()"
+                    nz-tooltip
+                    [nzTooltipTitle]="'ADMIN.PROGRAMS.FORM.REMOVE_IMAGE' | translate"
+                  >
+                    <ng-icon name="lucideCircleX" />
+                  </button>
+                </div>
+              } @else {
+                <nz-upload
+                  nzType="drag"
+                  [nzFileList]="fileList()"
+                  [nzBeforeUpload]="beforeUpload"
+                  nzAccept="image/*"
+                  [nzMultiple]="false"
+                  [nzShowUploadList]="false"
+                >
+                  <p class="ant-upload-drag-icon">
+                    <ng-icon name="lucideInbox" />
+                  </p>
+                  <p class="ant-upload-text">{{ 'ADMIN.PROGRAMS.FORM.UPLOAD_DRAG' | translate }}</p>
+                  <p class="ant-upload-hint">{{ 'ADMIN.PROGRAMS.FORM.UPLOAD_HINT' | translate }}</p>
+                </nz-upload>
+              }
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+
+      <div class="admin-form-footer">
+        <a routerLink="/admin/programs">
+          <button type="button" nz-button nzType="default">
+            {{ 'ADMIN.PROGRAMS.FORM.CANCEL' | translate }}
+          </button>
+        </a>
+        <button
+          nz-button
+          nzType="primary"
+          [nzLoading]="submitting()"
+          [disabled]="form.invalid"
+          type="submit"
+        >
+          {{
+            (isEditMode() ? 'ADMIN.PROGRAMS.FORM.SUBMIT_EDIT' : 'ADMIN.PROGRAMS.FORM.SUBMIT_CREATE')
+              | translate
+          }}
+        </button>
+      </div>
+    </form>
+  }
+</div>

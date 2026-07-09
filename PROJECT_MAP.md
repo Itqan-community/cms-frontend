@@ -279,6 +279,8 @@ success.
 | `members/`         | Publisher members     | `MemberOut`                         | List/invite/update/remove/resend via `/portal/members/`; scoped by `AdminTenantService.selectedPublisherId()`                                                                    |
 | `access-requests/` | Asset access requests | `AccessRequestOut`                  | List/accept/reject + publisher settings (`/portal/publishers/{id}/access-requests-settings/`); detail drawer; permission-gated actions                                           |
 | `mushafs/`         | Mushaf portal assets  | `MushafItem`, `MushafDetails`       | List/detail/create/edit/delete + versions; mock API via `environment.useMushafsMockApi` until `/portal/mushafs/` is live                                                         |
+| `fonts/`           | Font portal assets    | `FontItem`, `FontDetails`           | Same CRUD pattern; mock via `environment.useFontsMockApi` until `/portal/fonts/` is live                                                                                         |
+| `programs/`        | Program portal assets | `ProgramItem`, `ProgramDetails`     | Same CRUD pattern; mock via `environment.useProgramsMockApi` until `/portal/programs/` is live                                                                                   |
 | `usage/`           | API Usage analytics   | Request logs                        | Charts, top endpoints, top entities                                                                                                                                              |
 | `audio/`           | Audio management      | —                                   | Routes defined                                                                                                                                                                   |
 | `software/`        | Software management   | —                                   | Routes defined                                                                                                                                                                   |
@@ -437,7 +439,8 @@ Full CRUD for: publishers, tafsirs (versions), translations (versions), recitati
 reciters, issue reports (`/portal/issue-reports/`), publisher members (`/portal/members/`), asset
 access requests (`/portal/access-requests/` — list, detail, accept, reject;
 `/portal/publishers/{id}/access-requests-settings/` — auto-acceptance), mushafs (`/portal/mushafs/`
-— CRUD + versions; FE mock when `useMushafsMockApi`), usage analytics
+— CRUD + versions; FE mock when `useMushafsMockApi`), fonts (`/portal/fonts/`), programs
+(`/portal/programs/` — FE mocks when flags enabled), usage analytics
 
 ---
 
@@ -465,6 +468,8 @@ access requests (`/portal/access-requests/` — list, detail, accept, reject;
 | `features/admin/` guards                | Implemented        | `portal-access`, `permission`, `itqan-admin` guards active on admin routes.                                                       |
 | `shared/directives/`                    | Empty              | Directory exists with no files.                                                                                                   |
 | `features/admin/mushafs/`               | Implemented (mock) | Portal asset CRUD (list/detail/form/versions). Pending BE: `portal_*_mushaf` permissions + live API (`useMushafsMockApi: false`). |
+| `features/admin/fonts/`                 | Implemented (mock) | Portal font CRUD; pending BE permissions + live API (`useFontsMockApi: false`).                                                   |
+| `features/admin/programs/`              | Implemented (mock) | Portal program CRUD; pending BE permissions + live API (`useProgramsMockApi: false`).                                             |
 | `features/admin/audio/`                 | Partial            | Routes defined but implementation details need verification.                                                                      |
 | `features/admin/software/`              | Partial            | Routes defined but implementation details need verification.                                                                      |
 | Sentry `tracesSampleRate`               | Staging overrides  | 1.0 (100%) in staging — may be too high for non-production.                                                                       |

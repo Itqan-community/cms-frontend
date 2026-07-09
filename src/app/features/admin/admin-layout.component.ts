@@ -31,6 +31,18 @@ interface CmsTab {
   disabled?: boolean;
 }
 
+const TAB_FONTS: CmsTab = {
+  id: 'fonts',
+  path: 'fonts',
+  label: 'ADMIN.MENU.FONTS',
+  icon: 'lucideType',
+};
+const TAB_PROGRAMS: CmsTab = {
+  id: 'programs',
+  path: 'programs',
+  label: 'ADMIN.MENU.PROGRAMS',
+  icon: 'lucideLayers',
+};
 const TAB_MUSHAFS: CmsTab = {
   id: 'mushafs',
   path: 'mushafs',
@@ -148,6 +160,20 @@ export class AdminLayoutComponent implements OnInit {
       this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS)
     ) {
       tabs.push(TAB_MUSHAFS);
+    }
+    if (
+      environment.useFontsMockApi ||
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_FONT) ||
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS)
+    ) {
+      tabs.push(TAB_FONTS);
+    }
+    if (
+      environment.useProgramsMockApi ||
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_PROGRAM) ||
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS)
+    ) {
+      tabs.push(TAB_PROGRAMS);
     }
     if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_RECITATION)) {
       tabs.push(TAB_RECITATIONS);
