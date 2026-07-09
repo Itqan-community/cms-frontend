@@ -1,5 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
+import { filter, firstValueFrom, take } from 'rxjs';
+import { AuthService } from '../../core/auth/services/auth.service';
 import { PORTAL_PERMISSIONS } from './constants/portal-permission.constants';
 import { AdminAuthService } from './services/admin-auth.service';
 import { AdminTenantService } from './services/admin-tenant.service';
@@ -18,8 +21,11 @@ export class AdminPortalRedirectComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly adminAuth = inject(AdminAuthService);
   private readonly tenantService = inject(AdminTenantService);
+  private readonly authService = inject(AuthService);
 
-  ngOnInit(): void {
+  async ngOnInit(): Promise<void> {
+    await firstValueFrom(toObservable(this.authService.authReady).pipe(filter(Boolean), take(1)));
+
     if (this.adminAuth.isItqanAdmin()) {
       this.tenantService.ensureReady().subscribe(() => {
         const commands = buildSelectedPublisherDetailCommands(

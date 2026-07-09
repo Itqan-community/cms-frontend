@@ -65,7 +65,10 @@ export const appConfig: ApplicationConfig = {
       ])
     ),
     provideAppInitializer(() => initializeAppTranslations()),
-    provideAppInitializer(() => inject(AuthService).bootstrapOnce()),
+    // Fire-and-forget: public pages paint immediately; protected routes wait on authReady.
+    provideAppInitializer(() => {
+      void inject(AuthService).bootstrapOnce();
+    }),
     // ngx-translate setup
     provideTranslateService({
       loader: provideTranslateHttpLoader({

@@ -34,7 +34,7 @@ function retryWithoutSessionToken(
 
 /**
  * App-mode headless: sync envelope side-effects from JSON bodies.
- * CMS APIs: one `AuthService.sessionRecheckAfter401()` (allauth session) then logout; CMS calls use Bearer per `headersInterceptor`.
+ * CMS APIs: session recheck when user was logged in; anonymous/stale tokens clear without login redirect.
  */
 export function authErrorInterceptor(
   req: HttpRequest<unknown>,
@@ -46,7 +46,7 @@ export function authErrorInterceptor(
   const tokenStore = inject(HeadlessAppTokenService);
   const authBus = inject(AllauthAuthChangeBus);
   const hadSessionToken = !!tokenStore.getSessionToken();
-  const wasLoggedIn = authService.isLoggedIn();
+  const wasLoggedIn = authService.canActivateAsLoggedIn();
 
   const clearStaleAndMaybeRetry = (err: HttpErrorResponse): Observable<HttpEvent<unknown>> => {
     authService.clearStaleClientSession();
@@ -96,8 +96,12 @@ export function authErrorInterceptor(
       }
 
       if (error.status === 410 && isHeadlessAppAuthUrl(req.url)) {
-        if (tokenStore.getSessionToken()) {
-          authService.clearStaleClientSession();
+        if (tokenStore.getSessionToken() || wasLoggedIn) {
+          if (wasLoggedIn) {
+            authService.invalidateClientAuthAndGoLogin({ sessionExpired: true });
+          } else {
+            authService.clearStaleClientSession();
+          }
         } else if (isHeadlessAppSessionUrl(req.url) && req.method === 'GET') {
           tokenStore.clearSessionToken();
         }

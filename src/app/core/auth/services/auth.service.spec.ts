@@ -174,10 +174,107 @@ describe('AuthService (app / headless)', () => {
     tokenStore = TestBed.inject(HeadlessAppTokenService);
   });
 
+  it('hydrates provisional user from localStorage when session token exists', () => {
+    localStorage.setItem('sessionToken', 'tok');
+    localStorage.setItem(
+      'user',
+      JSON.stringify({
+        id: '1',
+        name: 'Cached',
+        email: 'c@example.com',
+        phone: '',
+        is_active: true,
+        is_profile_completed: true,
+        permissions: ['portal_access'],
+        is_admin: true,
+      })
+    );
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        AuthService,
+        { provide: HttpClient, useValue: httpClientMock },
+        { provide: Router, useValue: routerMock },
+        { provide: HeadlessAuthApiService, useValue: headless },
+        {
+          provide: TranslateService,
+          useValue: {
+            instant: (key: string) => key,
+            getCurrentLang: () => 'en',
+            onLangChange: of({ lang: 'en' }),
+          },
+        },
+        {
+          provide: NzMessageService,
+          useValue: jasmine.createSpyObj<NzMessageService>('NzMessageService', [
+            'warning',
+            'error',
+            'success',
+            'info',
+          ]),
+        },
+      ],
+    });
+    const hydrated = TestBed.inject(AuthService);
+    expect(hydrated.hasProvisionalSession()).toBe(true);
+    expect(hydrated.authReady()).toBe(true);
+    expect(hydrated.getCurrentUser()?.permissions).toEqual(['portal_access']);
+    expect(hydrated.canActivateAsLoggedIn()).toBe(true);
+  });
+
   it('bootstrapOnce merges normalized permissions from profile when authenticated', async () => {
     await service.bootstrapOnce();
     expect(httpClientMock.get).toHaveBeenCalled();
     expect(service.getCurrentUser()?.permissions).toEqual(['portal_access']);
+  });
+
+  it('bootstrapOnce keeps cached permissions when profile fetch fails', async () => {
+    localStorage.setItem('sessionToken', 'tok');
+    localStorage.setItem(
+      'user',
+      JSON.stringify({
+        id: '1',
+        name: 'Cached',
+        email: 'c@example.com',
+        phone: '',
+        is_active: true,
+        is_profile_completed: true,
+        permissions: ['portal_access'],
+        is_admin: true,
+      })
+    );
+    TestBed.resetTestingModule();
+    httpClientMock.get.and.returnValue(throwError(() => new HttpErrorResponse({ status: 500 })));
+    headless.getAuth.and.returnValue(of(authedResponse()));
+    TestBed.configureTestingModule({
+      providers: [
+        AuthService,
+        { provide: HttpClient, useValue: httpClientMock },
+        { provide: Router, useValue: routerMock },
+        { provide: HeadlessAuthApiService, useValue: headless },
+        {
+          provide: TranslateService,
+          useValue: {
+            instant: (key: string) => key,
+            getCurrentLang: () => 'en',
+            onLangChange: of({ lang: 'en' }),
+          },
+        },
+        {
+          provide: NzMessageService,
+          useValue: jasmine.createSpyObj<NzMessageService>('NzMessageService', [
+            'warning',
+            'error',
+            'success',
+            'info',
+          ]),
+        },
+      ],
+    });
+    const svc = TestBed.inject(AuthService);
+    await svc.bootstrapOnce();
+    expect(svc.getCurrentUser()?.permissions).toEqual(['portal_access']);
+    expect(svc.bootstrapDone()).toBe(true);
   });
 
   it('bootstrapOnce authenticates when session token exists in localStorage (new tab)', async () => {
