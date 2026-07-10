@@ -206,29 +206,32 @@ Trust, Profile, CompleteProfile
 
 ### Route Map
 
-| Path                     | Component                      | Guards                           | Notes                                                                                                                                      |
-| ------------------------ | ------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/gallery`               | `GalleryPage`                  | —                                | Main listing                                                                                                                               |
-| `/gallery/asset/:id`     | `AssetDetailsPage`             | —                                | Detail + access request + download + report issue modal                                                                                    |
-| `/publishers`            | `PublishersPage`               | `publisherHostGuard`             | Stub                                                                                                                                       |
-| `/publisher/:id`         | `PublisherDetailsPage`         | `publisherHostGuard`             | Detail + filtered assets                                                                                                                   |
-| `/license/:id`           | `LicenseDetailsPage`           | —                                | License detail                                                                                                                             |
-| `/content-standards`     | `UsageStandardsPage`           | `publisherHostGuard`             | Content guidelines                                                                                                                         |
-| `/unauthorized`          | `UnauthorizedPage`             | —                                | Card UX; CTA + 5s countdown auto-redirect to `/gallery`; `hideHeader`; dir name typo `unautorized/`                                        |
-| `/complete-profile`      | `CompleteProfilePage`          | `authGuard`                      | Profile completion                                                                                                                         |
-| `/account/*`             | (22 auth pages)                | guestGuard/authGuard             | Auth & account management                                                                                                                  |
-| `/admin`                 | `AdminLayoutComponent`         | `authGuard`, `portalAccessGuard` | Permission-based admin shell                                                                                                               |
-| `/admin` (default)       | `AdminPortalRedirectComponent` | —                                | Redirects to first allowed module (`publishers` for Itqan admin, else by read permission)                                                  |
-| `/admin/publishers`      | (lazy routes)                  | `itqanAdminGuard`                | Publisher CRUD (staff)                                                                                                                     |
-| `/admin/tafsirs`         | (lazy routes)                  | per-route `permissionGuard`      | Tafsir CRUD                                                                                                                                |
-| `/admin/translations`    | (lazy routes)                  | per-route `permissionGuard`      | Translation CRUD                                                                                                                           |
-| `/admin/recitations`     | (lazy routes)                  | per-route `permissionGuard`      | Recitation CRUD                                                                                                                            |
-| `/admin/reciters`        | (lazy routes)                  | per-route `permissionGuard`      | Reciter CRUD                                                                                                                               |
-| `/admin/issues`          | (lazy routes)                  | _(permission guards commented)_  | Issue reports (list/detail/create/edit/delete); TODO enable `portal_*_issue_report` guards                                                 |
-| `/admin/members`         | (lazy routes)                  | `membersAccessGuard`             | Publisher member list/invite/edit/remove/resend via `/portal/members/` (modal UX on single list)                                           |
-| `/admin/access-requests` | (lazy routes)                  | `accessRequestsAccessGuard`      | Asset access requests list/accept/reject + settings via `/portal/access-requests/` and `/portal/publishers/{id}/access-requests-settings/` |
-| `/admin/usage`           | (lazy routes)                  | `portal_access`                  | API usage analytics                                                                                                                        |
-| `**`                     | redirect -> /gallery           | —                                | Wildcard                                                                                                                                   |
+| Path                          | Component                      | Guards                           | Notes                                                                                                                                      |
+| ----------------------------- | ------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/gallery`                    | `GalleryPage`                  | —                                | Main listing                                                                                                                               |
+| `/gallery/asset/:id`          | `AssetDetailsPage`             | —                                | Detail + access request + download + report issue modal                                                                                    |
+| `/publishers`                 | `PublishersPage`               | `publisherHostGuard`             | Stub                                                                                                                                       |
+| `/publisher/:id`              | `PublisherDetailsPage`         | `publisherHostGuard`             | Detail + filtered assets                                                                                                                   |
+| `/license/:id`                | `LicenseDetailsPage`           | —                                | License detail                                                                                                                             |
+| `/mushaf`                     | `SuraIndexPage`                | `authGuard`                      | Mushaf reader — sura index                                                                                                                 |
+| `/mushaf/:suraId`             | `SuraViewPage`                 | `authGuard`                      | Full-sura ayah-by-ayah view                                                                                                                |
+| `/mushaf/:suraId/:ayahNumber` | `AyahFocusPage`                | `authGuard`                      | Single-ayah focus + word-by-word                                                                                                           |
+| `/content-standards`          | `UsageStandardsPage`           | `publisherHostGuard`             | Content guidelines                                                                                                                         |
+| `/unauthorized`               | `UnauthorizedPage`             | —                                | Card UX; CTA + 5s countdown auto-redirect to `/gallery`; `hideHeader`; dir name typo `unautorized/`                                        |
+| `/complete-profile`           | `CompleteProfilePage`          | `authGuard`                      | Profile completion                                                                                                                         |
+| `/account/*`                  | (22 auth pages)                | guestGuard/authGuard             | Auth & account management                                                                                                                  |
+| `/admin`                      | `AdminLayoutComponent`         | `authGuard`, `portalAccessGuard` | Permission-based admin shell                                                                                                               |
+| `/admin` (default)            | `AdminPortalRedirectComponent` | —                                | Redirects to first allowed module (`publishers` for Itqan admin, else by read permission)                                                  |
+| `/admin/publishers`           | (lazy routes)                  | `itqanAdminGuard`                | Publisher CRUD (staff)                                                                                                                     |
+| `/admin/tafsirs`              | (lazy routes)                  | per-route `permissionGuard`      | Tafsir CRUD                                                                                                                                |
+| `/admin/translations`         | (lazy routes)                  | per-route `permissionGuard`      | Translation CRUD                                                                                                                           |
+| `/admin/recitations`          | (lazy routes)                  | per-route `permissionGuard`      | Recitation CRUD                                                                                                                            |
+| `/admin/reciters`             | (lazy routes)                  | per-route `permissionGuard`      | Reciter CRUD                                                                                                                               |
+| `/admin/issues`               | (lazy routes)                  | _(permission guards commented)_  | Issue reports (list/detail/create/edit/delete); TODO enable `portal_*_issue_report` guards                                                 |
+| `/admin/members`              | (lazy routes)                  | `membersAccessGuard`             | Publisher member list/invite/edit/remove/resend via `/portal/members/` (modal UX on single list)                                           |
+| `/admin/access-requests`      | (lazy routes)                  | `accessRequestsAccessGuard`      | Asset access requests list/accept/reject + settings via `/portal/access-requests/` and `/portal/publishers/{id}/access-requests-settings/` |
+| `/admin/usage`                | (lazy routes)                  | `portal_access`                  | API usage analytics                                                                                                                        |
+| `**`                          | redirect -> /gallery           | —                                | Wildcard                                                                                                                                   |
 
 ---
 
@@ -328,6 +331,32 @@ success.
 | File                 | Type | Purpose                     |
 | -------------------- | ---- | --------------------------- |
 | `LicenseDetailsPage` | Page | License information display |
+
+### 5b. Mushaf Reader (`src/app/features/mushaf/`)
+
+**Purpose:** Public (auth-gated) SVG mushaf reader, modeled on `quranpedia.net/surah/7/3`. Renders
+quranpedia **quran-svg** vector pages (mushaf fonts baked into glyph paths) with clickable ayah
+polygons, fetched **directly from the jsDelivr CDN** (`cdn.jsdelivr.net/gh/quranpedia/quran-svg`). 6
+editions (qiraat) with a switcher. All routes behind `authGuard`; no backend calls.
+
+| File                                   | Type       | Purpose                                                                                |
+| -------------------------------------- | ---------- | -------------------------------------------------------------------------------------- |
+| `models/mushaf.model.ts`               | Interfaces | `MushafEdition`, `MushafSurahMeta`, `AyahMarker` (+ legacy Sura/Ayah/Word)             |
+| `data/mushaf-editions.ts`              | Data       | The 6 editions registry (qiraa/publisher/slug/names/default)                           |
+| `services/mushaf-svg.service.ts`       | Service    | jsDelivr fetchers: `getSurahs`, `getMarkers`, `getPageSvg`, `resolvePage`              |
+| `services/mushaf-selection.service.ts` | Service    | Selected-edition signal (localStorage + `?mushaf=` URL)                                |
+| `utils/arabic-digits.util.ts`          | Util       | `toArabicDigits()` for number labels                                                   |
+| `pages/sura-index/`                    | Page       | Grid of 114 suras (from edition surah.json) + switcher                                 |
+| `pages/sura-view/`                     | Page       | Renders the surah's start page SVG; ayah click → focus                                 |
+| `pages/ayah-focus/`                    | Page       | Renders the page for `:suraId/:ayahNumber`, highlights + scrolls; prev/next + switcher |
+| `components/mushaf-page/`              | Component  | Inlines page SVG, wires `.ayahPolygon` hover/click, single highlight, scroll-to-ayah   |
+| `components/mushaf-switcher/`          | Component  | Edition (qiraa) dropdown → updates state + URL                                         |
+| `components/sura-card/`                | Component  | Sura tile (number, Arabic + English name, ayah count)                                  |
+
+**Data source:** jsDelivr CDN (quranpedia/quran-svg). **Editions:** hafs/warsh/qalon
+(×2)/douri/shubah. **States:** loading (skeleton), error (retry), not-found (404). **i18n:**
+`MUSHAF.*` + `NAV.MUSHAF` (en/ar). **Attribution:** quranpedia quran-svg (to be surfaced in UI
+footer).
 
 ### 6. Error (`src/app/features/error/`)
 

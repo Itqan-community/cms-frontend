@@ -10,6 +10,11 @@ export const NAV_LINKS = [
     link: '/gallery',
   },
   {
+    label: 'NAV.MUSHAF',
+    link: '/mushaf',
+    hidden: isPublisher, // Hide mushaf reader for publisher hosts
+  },
+  {
     label: 'NAV.ADMIN_PORTAL',
     link: '/admin',
   },

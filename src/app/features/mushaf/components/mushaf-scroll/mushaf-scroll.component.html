@@ -1,0 +1,16 @@
+<div class="mushaf-scroll">
+  @for (page of pages(); track page) {
+    <app-mushaf-page
+      class="mushaf-scroll__page"
+      [slug]="slug()"
+      [page]="page"
+      [highlightAyah]="page === highlightPage() ? highlightAyah() : null"
+      (ayahClick)="ayahClick.emit($event)"
+    />
+  }
+  <div
+    #sentinel
+    class="mushaf-scroll__sentinel"
+    [class.mushaf-scroll__sentinel--done]="!hasMore()"
+  ></div>
+</div>
