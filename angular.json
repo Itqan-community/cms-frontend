@@ -111,11 +111,6 @@
                   "glob": "_redirects",
                   "input": "deploy/netlify/staging",
                   "output": "."
-                },
-                {
-                  "glob": "robots.txt",
-                  "input": "deploy/robots/staging",
-                  "output": "."
                 }
               ]
             },
@@ -142,18 +137,6 @@
                   "replace": "src/environments/environment.ts",
                   "with": "src/environments/environment.local.ts"
                 }
-              ],
-              "assets": [
-                {
-                  "glob": "**/*",
-                  "input": "public",
-                  "output": "."
-                },
-                {
-                  "glob": "robots.txt",
-                  "input": "deploy/robots/local",
-                  "output": "."
-                }
               ]
             },
             "publisher": {
@@ -175,11 +158,6 @@
                 {
                   "glob": "_redirects",
                   "input": "deploy/netlify/production",
-                  "output": "."
-                },
-                {
-                  "glob": "robots.txt",
-                  "input": "deploy/robots/publisher",
                   "output": "."
                 }
               ]
