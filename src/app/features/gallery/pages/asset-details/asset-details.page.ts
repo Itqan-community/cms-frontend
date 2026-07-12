@@ -130,9 +130,11 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
   }
 
   private setSeoFromAsset(asset: AssetDetails): void {
+    const description =
+      asset.description || asset.long_description || `${asset.name} - available on ITQAN.`;
     this.seo.setSeo({
       title: `${asset.name} | ITQAN`,
-      description: asset.description || asset.long_description,
+      description,
       path: `/gallery/asset/${asset.id}`,
       image: asset.thumbnail_url || undefined,
     });
@@ -140,7 +142,7 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
       '@context': 'https://schema.org',
       '@type': 'CreativeWork',
       name: asset.name,
-      description: asset.description || asset.long_description,
+      description,
       image: asset.thumbnail_url || undefined,
       creator: {
         '@type': 'Organization',
