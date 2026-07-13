@@ -24,19 +24,17 @@ export const PORTAL_PERMISSIONS = {
   PORTAL_UPDATE_TRANSLATION: 'portal_update_translation',
   PORTAL_DELETE_TRANSLATION: 'portal_delete_translation',
 
-  /** Mushafs (portal) — pending backend `PermissionChoice` seeds. */
   PORTAL_READ_MUSHAF: 'portal_read_mushaf',
   PORTAL_CREATE_MUSHAF: 'portal_create_mushaf',
   PORTAL_UPDATE_MUSHAF: 'portal_update_mushaf',
   PORTAL_DELETE_MUSHAF: 'portal_delete_mushaf',
 
-  /** Fonts (portal) — pending backend `PermissionChoice` seeds. */
   PORTAL_READ_FONT: 'portal_read_font',
   PORTAL_CREATE_FONT: 'portal_create_font',
   PORTAL_UPDATE_FONT: 'portal_update_font',
   PORTAL_DELETE_FONT: 'portal_delete_font',
 
-  /** Programs (portal) — pending backend `PermissionChoice` seeds. */
+  /** Programs (portal) — dormant until BE API ships. */
   PORTAL_READ_PROGRAM: 'portal_read_program',
   PORTAL_CREATE_PROGRAM: 'portal_create_program',
   PORTAL_UPDATE_PROGRAM: 'portal_update_program',

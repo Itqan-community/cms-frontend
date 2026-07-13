@@ -3,7 +3,6 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { FontDetails, FontFilters, FontFormValue, FontsList } from '../models/fonts.models';
-import { mockCreate, mockDelete, mockGetDetail, mockGetList, mockPatch } from './fonts.mock-store';
 
 @Injectable({
   providedIn: 'root',
@@ -13,10 +12,6 @@ export class FontsService {
   private readonly apiUrl = `${environment.ADMIN_API_BASE_URL}/fonts/`;
 
   getList(filters: FontFilters): Observable<FontsList> {
-    if (environment.useFontsMockApi) {
-      return mockGetList(filters);
-    }
-
     let params = new HttpParams()
       .set('page', filters.page.toString())
       .set('page_size', filters.page_size.toString());
@@ -28,45 +23,28 @@ export class FontsService {
     if (filters.language) params = params.set('language', filters.language);
     if (filters.is_external != null)
       params = params.set('is_external', filters.is_external.toString());
-    if (filters.is_open_access != null)
-      params = params.set('is_open_access', filters.is_open_access.toString());
     if (filters.ordering) params = params.set('ordering', filters.ordering);
 
     return this.http.get<FontsList>(this.apiUrl, { params });
   }
 
   getDetail(slug: string): Observable<FontDetails> {
-    if (environment.useFontsMockApi) {
-      return mockGetDetail(slug);
-    }
     return this.http.get<FontDetails>(`${this.apiUrl}${slug}/`);
   }
 
   create(body: FontFormValue): Observable<FontDetails> {
-    if (environment.useFontsMockApi) {
-      return mockCreate(body);
-    }
     return this.http.post<FontDetails>(this.apiUrl, this.toFormData(body));
   }
 
   update(slug: string, body: FontFormValue): Observable<FontDetails> {
-    if (environment.useFontsMockApi) {
-      return mockPatch(slug, body);
-    }
     return this.http.put<FontDetails>(`${this.apiUrl}${slug}/`, this.toFormData(body));
   }
 
   patch(slug: string, body: Partial<FontFormValue>): Observable<FontDetails> {
-    if (environment.useFontsMockApi) {
-      return mockPatch(slug, body);
-    }
     return this.http.patch<FontDetails>(`${this.apiUrl}${slug}/`, this.toFormData(body));
   }
 
   delete(slug: string): Observable<void> {
-    if (environment.useFontsMockApi) {
-      return mockDelete(slug);
-    }
     return this.http.delete<void>(`${this.apiUrl}${slug}/`);
   }
 

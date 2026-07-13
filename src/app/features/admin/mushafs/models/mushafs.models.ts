@@ -41,6 +41,7 @@ export interface MushafItem {
   is_external: boolean;
   is_open_access: boolean;
   restricted_for_tenant: boolean;
+  thumbnail_url?: string | null;
   created_at: string;
 }
 

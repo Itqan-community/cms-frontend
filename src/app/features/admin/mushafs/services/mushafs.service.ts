@@ -8,13 +8,6 @@ import {
   MushafFormValue,
   MushafsList,
 } from '../models/mushafs.models';
-import {
-  mockCreate,
-  mockDelete,
-  mockGetDetail,
-  mockGetList,
-  mockPatch,
-} from './mushafs.mock-store';
 
 @Injectable({
   providedIn: 'root',
@@ -24,10 +17,6 @@ export class MushafsService {
   private readonly apiUrl = `${environment.ADMIN_API_BASE_URL}/mushafs/`;
 
   getList(filters: MushafFilters): Observable<MushafsList> {
-    if (environment.useMushafsMockApi) {
-      return mockGetList(filters);
-    }
-
     let params = new HttpParams()
       .set('page', filters.page.toString())
       .set('page_size', filters.page_size.toString());
@@ -39,45 +28,28 @@ export class MushafsService {
     if (filters.language) params = params.set('language', filters.language);
     if (filters.is_external != null)
       params = params.set('is_external', filters.is_external.toString());
-    if (filters.is_open_access != null)
-      params = params.set('is_open_access', filters.is_open_access.toString());
     if (filters.ordering) params = params.set('ordering', filters.ordering);
 
     return this.http.get<MushafsList>(this.apiUrl, { params });
   }
 
   getDetail(slug: string): Observable<MushafDetails> {
-    if (environment.useMushafsMockApi) {
-      return mockGetDetail(slug);
-    }
     return this.http.get<MushafDetails>(`${this.apiUrl}${slug}/`);
   }
 
   create(body: MushafFormValue): Observable<MushafDetails> {
-    if (environment.useMushafsMockApi) {
-      return mockCreate(body);
-    }
     return this.http.post<MushafDetails>(this.apiUrl, this.toFormData(body));
   }
 
   update(slug: string, body: MushafFormValue): Observable<MushafDetails> {
-    if (environment.useMushafsMockApi) {
-      return mockPatch(slug, body);
-    }
     return this.http.put<MushafDetails>(`${this.apiUrl}${slug}/`, this.toFormData(body));
   }
 
   patch(slug: string, body: Partial<MushafFormValue>): Observable<MushafDetails> {
-    if (environment.useMushafsMockApi) {
-      return mockPatch(slug, body);
-    }
     return this.http.patch<MushafDetails>(`${this.apiUrl}${slug}/`, this.toFormData(body));
   }
 
   delete(slug: string): Observable<void> {
-    if (environment.useMushafsMockApi) {
-      return mockDelete(slug);
-    }
     return this.http.delete<void>(`${this.apiUrl}${slug}/`);
   }
 

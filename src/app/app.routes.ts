@@ -65,11 +65,12 @@ export const routes: Routes = [
         path: 'fonts',
         loadChildren: () => import('./features/admin/fonts/fonts.routes').then((m) => m.fontRoutes),
       },
-      {
-        path: 'programs',
-        loadChildren: () =>
-          import('./features/admin/programs/programs.routes').then((m) => m.programRoutes),
-      },
+      // Programs portal hidden until backend API is ready.
+      // {
+      //   path: 'programs',
+      //   loadChildren: () =>
+      //     import('./features/admin/programs/programs.routes').then((m) => m.programRoutes),
+      // },
       {
         path: 'recitations',
         loadChildren: () =>

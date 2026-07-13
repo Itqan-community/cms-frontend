@@ -20,7 +20,6 @@ import {
   buildSelectedPublisherDetailCommands,
 } from './utils/admin-tenant-navigation.util';
 import { AdminTenantNavigationService } from './services/admin-tenant-navigation.service';
-import { environment } from '../../../environments/environment';
 
 interface CmsTab {
   id: string;
@@ -36,12 +35,6 @@ const TAB_FONTS: CmsTab = {
   path: 'fonts',
   label: 'ADMIN.MENU.FONTS',
   icon: 'lucideType',
-};
-const TAB_PROGRAMS: CmsTab = {
-  id: 'programs',
-  path: 'programs',
-  label: 'ADMIN.MENU.PROGRAMS',
-  icon: 'lucideLayers',
 };
 const TAB_MUSHAFS: CmsTab = {
   id: 'mushafs',
@@ -153,27 +146,11 @@ export class AdminLayoutComponent implements OnInit {
     if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_TRANSLATION)) {
       tabs.push(TAB_TRANSLATIONS);
     }
-    // TODO(backend-permissions): gate with PORTAL_READ_MUSHAF only once seeded
-    if (
-      environment.useMushafsMockApi ||
-      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_MUSHAF) ||
-      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS)
-    ) {
+    if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_MUSHAF)) {
       tabs.push(TAB_MUSHAFS);
     }
-    if (
-      environment.useFontsMockApi ||
-      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_FONT) ||
-      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS)
-    ) {
+    if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_FONT)) {
       tabs.push(TAB_FONTS);
-    }
-    if (
-      environment.useProgramsMockApi ||
-      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_PROGRAM) ||
-      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS)
-    ) {
-      tabs.push(TAB_PROGRAMS);
     }
     if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_RECITATION)) {
       tabs.push(TAB_RECITATIONS);

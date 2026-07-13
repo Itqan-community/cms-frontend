@@ -9,8 +9,6 @@ export const environment = {
    * (e.g. `localhost`). Replacing RP ID here without a matching server config will fail verification.
    */
   webauthnReplaceRpIdWithHostname: false,
-  /** In-memory mushafs CRUD until portal mushafs API is live. */
-  useMushafsMockApi: true,
-  useFontsMockApi: true,
+  /** In-memory programs CRUD until portal programs API is live. */
   useProgramsMockApi: true,
 };
