@@ -67,6 +67,10 @@ export class AssetVersionsService {
         return 'fonts';
       case 'program':
         return 'programs';
+      default: {
+        const _exhaustive: never = kind;
+        throw new Error(`Unsupported asset version kind: ${_exhaustive}`);
+      }
     }
   }
 

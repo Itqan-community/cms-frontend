@@ -23,6 +23,8 @@ export class FontsService {
     if (filters.language) params = params.set('language', filters.language);
     if (filters.is_external != null)
       params = params.set('is_external', filters.is_external.toString());
+    if (filters.is_open_access != null)
+      params = params.set('is_open_access', filters.is_open_access.toString());
     if (filters.ordering) params = params.set('ordering', filters.ordering);
 
     return this.http.get<FontsList>(this.apiUrl, { params });
