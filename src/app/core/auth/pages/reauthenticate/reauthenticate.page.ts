@@ -4,15 +4,14 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgIcon } from '@ng-icons/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import {
-  getErrorMessage,
-  isWebAuthnIncorrectCodeError,
-} from '../../../../shared/utils/error.utils';
+import { AuthBackLinkComponent } from '../../components/auth-back-link/auth-back-link.component';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
+import { resolvePasskeyFlowError } from '../../headless/passkey-error.util';
 import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
-import { WebAuthnRpIdMismatchError } from '../../headless/webauthn-rp-id.util';
 import { getWebAuthnRequestOptions, publicKeyCredentialToJson } from '../../headless/webauthn.util';
 import type { WebAuthnCredentialRequestData } from '../../headless/headless-api.types';
 import { AuthService } from '../../services/auth.service';
@@ -25,7 +24,14 @@ import { readContinueUrl } from '../../utils/auth-route-query.util';
 @Component({
   selector: 'app-reauthenticate-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, TranslateModule, LangSwitchComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    TranslateModule,
+    LangSwitchComponent,
+    AuthBackLinkComponent,
+    NgIcon,
+  ],
   styleUrls: ['./reauthenticate.page.less'],
   templateUrl: './reauthenticate.page.html',
 })
@@ -41,6 +47,7 @@ export class ReauthenticatePage implements OnInit {
   errorMessage = signal<string>('');
   isLoading = signal(false);
   passkeyAvailable = signal(true);
+  passwordVisible = signal(false);
 
   constructor() {
     this.form = this.fb.group({ password: ['', [Validators.required, Validators.minLength(1)]] });
@@ -49,6 +56,10 @@ export class ReauthenticatePage implements OnInit {
 
   ngOnInit(): void {
     this.passkeyAvailable.set(isPasskeyClientEnvironmentSupported());
+  }
+
+  togglePasswordVisibility(): void {
+    this.passwordVisible.set(!this.passwordVisible());
   }
 
   get returnUrl(): string {
@@ -76,15 +87,17 @@ export class ReauthenticatePage implements OnInit {
     } catch (e) {
       this.isLoading.set(false);
       if (e instanceof HttpErrorResponse) {
-        if (isWebAuthnIncorrectCodeError(e)) {
-          this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.WEBAUTHN_STATE_ERROR'));
-          return;
-        }
         if (tryNavigateForAuth401(this.router, e)) {
           return;
         }
       }
-      this.errorMessage.set(getErrorMessage(e) || this.translate.instant('AUTH.REAUTH.ERROR'));
+      this.errorMessage.set(
+        resolveAuthErrorMessage(
+          e,
+          { fallbackKey: 'AUTH.REAUTH.ERROR', context: 'reauth_password' },
+          this.translate
+        )
+      );
     }
   }
 
@@ -108,7 +121,13 @@ export class ReauthenticatePage implements OnInit {
           return;
         }
       }
-      this.errorMessage.set(getErrorMessage(e) || this.translate.instant('AUTH.REAUTH.MFA_ERROR'));
+      this.errorMessage.set(
+        resolveAuthErrorMessage(
+          e,
+          { fallbackKey: 'AUTH.REAUTH.MFA_ERROR', context: 'reauth_mfa' },
+          this.translate
+        )
+      );
     }
   }
 
@@ -125,6 +144,7 @@ export class ReauthenticatePage implements OnInit {
       const cred = (await navigator.credentials.get({ publicKey })) as PublicKeyCredential | null;
       if (!cred) {
         this.isLoading.set(false);
+        this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.CANCELLED'));
         return;
       }
       const body = publicKeyCredentialToJson(cred);
@@ -134,37 +154,10 @@ export class ReauthenticatePage implements OnInit {
       void this.router.navigateByUrl(this.returnUrl);
     } catch (e) {
       this.isLoading.set(false);
-      if (e instanceof WebAuthnRpIdMismatchError) {
-        this.errorMessage.set(
-          this.translate.instant('AUTH.PASSKEY.RP_ID_ORIGIN_MISMATCH', {
-            rpId: e.rpId,
-            host: e.hostname,
-          })
-        );
-        return;
+      const resolution = resolvePasskeyFlowError(e, this.translate, this.router, 'reauth');
+      if (resolution.kind === 'message') {
+        this.errorMessage.set(resolution.message);
       }
-      if (
-        e instanceof DOMException &&
-        e.name === 'SecurityError' &&
-        /relying party|webauthn|well-known/i.test(e.message)
-      ) {
-        this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.RP_ID_BROWSER_REJECT'));
-        return;
-      }
-      if (e instanceof HttpErrorResponse) {
-        if (isWebAuthnIncorrectCodeError(e)) {
-          this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.WEBAUTHN_STATE_ERROR'));
-          return;
-        }
-        if (tryNavigateForAuth401(this.router, e)) {
-          return;
-        }
-        this.errorMessage.set(
-          getErrorMessage(e) || this.translate.instant('AUTH.REAUTH.PASSKEY_ERROR')
-        );
-        return;
-      }
-      this.errorMessage.set(this.translate.instant('AUTH.REAUTH.PASSKEY_ERROR'));
     }
   }
 }

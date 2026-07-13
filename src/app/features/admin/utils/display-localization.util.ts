@@ -1,22 +1,34 @@
-const FALLBACK_LANGUAGE_LABELS: Record<string, { ar: string; en: string }> = {
-  ar: { ar: 'العربية', en: 'Arabic' },
-  en: { ar: 'الإنجليزية', en: 'English' },
-};
+export interface DisplayLocalizationLabels {
+  empty: string;
+  languageAr: string;
+  languageEn: string;
+}
 
 function normalizedUiLocale(lang: string | null | undefined): 'ar' | 'en' {
   return (lang ?? '').toLowerCase().startsWith('ar') ? 'ar' : 'en';
 }
 
+export function createDisplayLocalizationLabels(translate: {
+  instant(key: string): string;
+}): DisplayLocalizationLabels {
+  return {
+    empty: translate.instant('COMMON.EM_DASH'),
+    languageAr: translate.instant('COMMON.LANG_NAMES.AR'),
+    languageEn: translate.instant('COMMON.LANG_NAMES.EN'),
+  };
+}
+
 export function localizeLanguageCode(
   code: string | null | undefined,
-  uiLang: string | null | undefined
+  uiLang: string | null | undefined,
+  labels: DisplayLocalizationLabels
 ): string {
-  if (!code) return '—';
+  if (!code) return labels.empty;
 
   const normalized = code.toLowerCase();
   const locale = normalizedUiLocale(uiLang);
-  const fallback = FALLBACK_LANGUAGE_LABELS[normalized];
-  if (fallback) return fallback[locale];
+  if (normalized === 'ar') return labels.languageAr;
+  if (normalized === 'en') return labels.languageEn;
 
   try {
     const label = new Intl.DisplayNames([locale], { type: 'language' }).of(normalized);
@@ -28,12 +40,13 @@ export function localizeLanguageCode(
 
 export function localizeCountryCodeOrName(
   value: string | null | undefined,
-  uiLang: string | null | undefined
+  uiLang: string | null | undefined,
+  labels: Pick<DisplayLocalizationLabels, 'empty'>
 ): string {
-  if (!value) return '—';
+  if (!value) return labels.empty;
 
   const trimmed = value.trim();
-  if (!trimmed) return '—';
+  if (!trimmed) return labels.empty;
 
   // If backend sends a full country name already, keep it.
   if (!/^[a-zA-Z]{2}$/.test(trimmed)) return trimmed;

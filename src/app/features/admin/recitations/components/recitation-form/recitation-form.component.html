@@ -249,6 +249,35 @@
         </div>
       </div>
 
+      <div class="admin-form-card">
+        <h3 class="admin-form-card__title">
+          <ng-icon name="lucideShield" />
+          {{ 'ADMIN.RECITATIONS.FORM.SECTION_ACCESS_API' | translate }}
+        </h3>
+        <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label>{{
+                'ADMIN.RECITATIONS.FORM.LABEL_OPEN_ACCESS' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzExtra]="'ADMIN.RECITATIONS.FORM.HELP_OPEN_ACCESS' | translate">
+                <nz-switch formControlName="is_open_access"></nz-switch>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label>{{
+                'ADMIN.RECITATIONS.FORM.LABEL_API_ONLY' | translate
+              }}</nz-form-label>
+              <nz-form-control [nzExtra]="'ADMIN.RECITATIONS.FORM.HELP_API_ONLY' | translate">
+                <nz-switch formControlName="restricted_for_tenant"></nz-switch>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+      </div>
+
       <div class="admin-form-footer">
         <a routerLink="/admin/recitations">
           <button nz-button type="button">{{ 'ADMIN.RECITATIONS.FORM.CANCEL' | translate }}</button>

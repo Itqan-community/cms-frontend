@@ -14,9 +14,17 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
 import { NATIONALITY } from '../../nationality.enum';
-import { ReciterDetails, ReciterFormValue, ReciterListItem } from '../../models/reciters.models';
+import {
+  ReciterDetails,
+  ReciterFormValue,
+  ReciterListItem,
+  ReciterPatchValue,
+} from '../../models/reciters.models';
 import { RecitersAdminService } from '../../services/reciters.service';
-import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
+import {
+  createDisplayLocalizationLabels,
+  localizeCountryCodeOrName,
+} from '../../../utils/display-localization.util';
 
 @Component({
   selector: 'app-reciter-form',
@@ -65,6 +73,7 @@ export class ReciterFormComponent implements OnInit {
   });
 
   private editSlug: string | null = null;
+  private originalSnapshot: ReciterFormValue | null = null;
 
   ngOnInit(): void {
     const slugParam = this.route.snapshot.params['slug'];
@@ -95,11 +104,17 @@ export class ReciterFormComponent implements OnInit {
       image: this.imageFile() ?? undefined,
     };
 
-    this.submitting.set(true);
-
     if (this.isEditMode() && this.editSlug != null) {
+      const patch = this.buildPatchPayload(body);
+      if (Object.keys(patch).length === 0) {
+        void this.router.navigate(['/admin/reciters', this.editSlug]);
+        return;
+      }
+
+      this.submitting.set(true);
+
       this.recitersService
-        .patch(this.editSlug, body)
+        .patch(this.editSlug, patch)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (res: ReciterDetails) => {
@@ -113,6 +128,8 @@ export class ReciterFormComponent implements OnInit {
         });
       return;
     }
+
+    this.submitting.set(true);
 
     this.recitersService
       .create(body)
@@ -137,6 +154,14 @@ export class ReciterFormComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
+          this.originalSnapshot = {
+            name_ar: data.name_ar,
+            name_en: data.name_en ?? '',
+            bio_ar: data.bio_ar ?? '',
+            bio_en: data.bio_en ?? '',
+            nationality: data.nationality ?? '',
+            date_of_death: data.date_of_death ?? null,
+          };
           this.form.patchValue({
             name_ar: data.name_ar,
             name_en: data.name_en,
@@ -156,6 +181,30 @@ export class ReciterFormComponent implements OnInit {
       });
   }
 
+  private buildPatchPayload(current: ReciterFormValue): ReciterPatchValue {
+    const original = this.originalSnapshot;
+    if (!original) return current;
+
+    const patch: ReciterPatchValue = {};
+    if (current.name_ar !== original.name_ar) patch.name_ar = current.name_ar;
+    if (current.name_en !== original.name_en) patch.name_en = current.name_en;
+    if (current.bio_ar !== original.bio_ar) patch.bio_ar = current.bio_ar;
+    if (current.bio_en !== original.bio_en) patch.bio_en = current.bio_en;
+
+    const nationality = current.nationality ?? '';
+    if (nationality !== (original.nationality ?? '')) {
+      patch.nationality = nationality || null;
+    }
+
+    const dateOfDeath = current.date_of_death ?? null;
+    if (dateOfDeath !== (original.date_of_death ?? null)) {
+      patch.date_of_death = dateOfDeath;
+    }
+
+    if (current.image) patch.image = current.image;
+    return patch;
+  }
+
   private formatDate(value: Date | null | undefined): string | null {
     if (!value) return null;
     const year = value.getFullYear();
@@ -165,7 +214,11 @@ export class ReciterFormComponent implements OnInit {
   }
 
   countryLabel(countryCode: string): string {
-    return localizeCountryCodeOrName(countryCode, this.translate.currentLang);
+    return localizeCountryCodeOrName(
+      countryCode,
+      this.translate.currentLang,
+      createDisplayLocalizationLabels(this.translate)
+    );
   }
 
   beforeImageUpload = (file: NzUploadFile): boolean => {

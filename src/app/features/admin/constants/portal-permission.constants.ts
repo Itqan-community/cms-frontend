@@ -34,6 +34,15 @@ export const PORTAL_PERMISSIONS = {
   PORTAL_CREATE_ISSUE_REPORT: 'portal_create_issue_report',
   PORTAL_UPDATE_ISSUE_REPORT: 'portal_update_issue_report',
   PORTAL_DELETE_ISSUE_REPORT: 'portal_delete_issue_report',
+
+  PORTAL_VIEW_PUBLISHER_MEMBERS: 'portal_view_publisher_members',
+  PORTAL_INVITE_PUBLISHER_MEMBERS: 'portal_invite_publisher_members',
+  PORTAL_UPDATE_PUBLISHER_MEMBERS: 'portal_update_publisher_members',
+  PORTAL_DELETE_PUBLISHER_MEMBERS: 'portal_delete_publisher_members',
+
+  PORTAL_VIEW_ACCESS_REQUESTS: 'portal_view_access_requests',
+  PORTAL_ACCEPT_OR_REJECT_ACCESS_REQUESTS: 'portal_accept_or_reject_access_requests',
+  PORTAL_MANAGE_ACCESS_REQUESTS_SETTINGS: 'portal_manage_access_requests_settings',
 } as const;
 
 export type PortalPermissionCode = (typeof PORTAL_PERMISSIONS)[keyof typeof PORTAL_PERMISSIONS];

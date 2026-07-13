@@ -4,7 +4,7 @@
       <h2 class="admin-list-header__title">{{ 'ADMIN.PUBLISHERS.TITLE' | translate }}</h2>
       <p class="admin-list-header__subtitle">{{ 'ADMIN.PUBLISHERS.SUBTITLE' | translate }}</p>
     </div>
-    @if (canManagePublishers()) {
+    @if (canCreatePublishers()) {
       <a routerLink="/admin/publishers/create">
         <button nz-button nzType="primary" class="admin-add-btn">
           <ng-icon name="lucidePlus" aria-hidden="true" />
@@ -77,7 +77,7 @@
               @if (showCol('name')) {
                 <td class="admin-list-name">
                   <a class="hoverable-link" [routerLink]="['/admin/publishers', p.id]">
-                    {{ p.name || p.name_ar || p.name_en || '—' }}
+                    {{ p.name || p.name_ar || p.name_en || ('COMMON.EM_DASH' | translate) }}
                   </a>
                 </td>
               }
@@ -111,7 +111,7 @@
                   >
                     <ng-icon name="lucideEye" aria-hidden="true" />
                   </a>
-                  @if (canManagePublishers()) {
+                  @if (canEditPublishers()) {
                     <a
                       nz-button
                       nzType="text"

@@ -51,7 +51,7 @@ describe('ReauthenticatePage', () => {
     expect(navigateByUrl).toHaveBeenCalledWith('/settings');
   });
 
-  it('onSubmitPassword maps incorrect_code to passkey state message', async () => {
+  it('onSubmitPassword maps incorrect_code to incorrect password message', async () => {
     TestBed.resetTestingModule();
     const reauth = jasmine.createSpy('reauthenticate').and.returnValue(
       throwError(
@@ -92,6 +92,6 @@ describe('ReauthenticatePage', () => {
     page.form.patchValue({ password: 'x' });
     await page.onSubmitPassword();
     expect(reauth).toHaveBeenCalled();
-    expect(page.errorMessage().toLowerCase()).toContain('passkey');
+    expect(page.errorMessage().toLowerCase()).toContain('password');
   });
 });

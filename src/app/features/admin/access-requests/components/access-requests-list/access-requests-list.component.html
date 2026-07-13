@@ -1,0 +1,210 @@
+<div class="access-requests-list admin-list-page">
+  <div class="admin-list-header">
+    <div class="admin-list-header__text">
+      <h2 class="admin-list-header__title">{{ 'ADMIN.ACCESS_REQUESTS.TITLE' | translate }}</h2>
+      <p class="admin-list-header__subtitle">{{ 'ADMIN.ACCESS_REQUESTS.SUBTITLE' | translate }}</p>
+    </div>
+    <div class="access-requests-list__toggle">
+      <span class="access-requests-list__toggle-label">
+        {{ 'ADMIN.ACCESS_REQUESTS.TOGGLE.LABEL' | translate }}
+      </span>
+      <span
+        class="access-requests-list__toggle-switch"
+        [class.access-requests-list__toggle-switch--disabled]="
+          !canManageSettings() || autoAcceptLoading() || autoAcceptSaving()
+        "
+        role="button"
+        tabindex="0"
+        [attr.aria-pressed]="autoAccept()"
+        [attr.aria-disabled]="!canManageSettings() || autoAcceptLoading() || autoAcceptSaving()"
+        (click)="onAutoAcceptClick()"
+        (keydown.enter)="onAutoAcceptClick()"
+        (keydown.space)="$event.preventDefault(); onAutoAcceptClick()"
+      >
+        <nz-switch
+          [ngModel]="autoAccept()"
+          [nzLoading]="autoAcceptLoading() || autoAcceptSaving()"
+          class="access-requests-list__toggle-switch-control"
+        />
+      </span>
+      <span class="access-requests-list__toggle-hint">
+        {{
+          (autoAccept()
+            ? 'ADMIN.ACCESS_REQUESTS.TOGGLE.ON_HINT'
+            : 'ADMIN.ACCESS_REQUESTS.TOGGLE.OFF_HINT'
+          ) | translate
+        }}
+      </span>
+    </div>
+  </div>
+
+  @if (loadFailed()) {
+    <nz-alert
+      nzType="error"
+      [nzMessage]="'ADMIN.ACCESS_REQUESTS.LIST_ERROR_TITLE' | translate"
+      [nzDescription]="'ADMIN.ACCESS_REQUESTS.LIST_ERROR_DESC' | translate"
+      nzShowIcon
+      class="access-requests-list__alert"
+    />
+  }
+
+  <app-access-request-filters
+    [initialFilters]="activeFilters"
+    (filtersChange)="onAccessRequestFiltersChange($event)"
+  />
+
+  <div class="admin-table-wrap">
+    <nz-spin [nzSpinning]="loading()">
+      <nz-table
+        #accessRequestTable
+        [nzData]="items()"
+        [nzFrontPagination]="false"
+        [nzShowPagination]="false"
+        nzSize="middle"
+        [nzNoResult]="emptyTpl"
+      >
+        <thead>
+          <tr>
+            <th nzWidth="200px">{{ 'ADMIN.ACCESS_REQUESTS.COLUMNS.DEVELOPER' | translate }}</th>
+            <th nzWidth="180px">{{ 'ADMIN.ACCESS_REQUESTS.COLUMNS.ASSET' | translate }}</th>
+            <th nzWidth="140px">{{ 'ADMIN.ACCESS_REQUESTS.COLUMNS.INTENDED_USE' | translate }}</th>
+            <th nzWidth="120px">{{ 'ADMIN.ACCESS_REQUESTS.COLUMNS.STATUS' | translate }}</th>
+            <th
+              nzWidth="130px"
+              [nzSortFn]="true"
+              [nzSortOrder]="getSortOrder('created_at')"
+              (nzSortOrderChange)="
+                onSortChange(accessRequestsTableStorageKey, 'created_at', $event)
+              "
+            >
+              {{ 'ADMIN.ACCESS_REQUESTS.COLUMNS.CREATED_AT' | translate }}
+            </th>
+            <th nzWidth="160px">{{ 'ADMIN.ACCESS_REQUESTS.COLUMNS.ACTIONS' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of accessRequestTable.data; track row.id) {
+            <tr class="admin-list-row">
+              <td>
+                <span class="access-requests-list__developer-name">{{ row.developer.name }}</span>
+                <span class="access-requests-list__developer-email">{{ row.developer.email }}</span>
+              </td>
+              <td class="admin-list-name">{{ row.asset.name }}</td>
+              <td>
+                <nz-tag>{{ intendedUseLabel(row.intended_use) }}</nz-tag>
+              </td>
+              <td>
+                <nz-tag [nzColor]="statusTagColor(row.status)">{{
+                  statusLabel(row.status)
+                }}</nz-tag>
+              </td>
+              <td>{{ row.created_at | date: 'dd/MM/yyyy' }}</td>
+              <td (click)="$event.stopPropagation()">
+                <div class="admin-list-actions">
+                  <button
+                    nz-button
+                    nzType="text"
+                    type="button"
+                    class="action-icon action-icon--view"
+                    nz-tooltip
+                    [nzTooltipTitle]="'ADMIN.ACCESS_REQUESTS.TOOLTIP_VIEW' | translate"
+                    (click)="openDetailDrawer(row)"
+                  >
+                    <ng-icon name="lucideEye" aria-hidden="true" />
+                  </button>
+                  @if (canAcceptOrReject() && row.status === 'pending') {
+                    <button
+                      nz-button
+                      nzType="text"
+                      type="button"
+                      class="action-icon action-icon--accept"
+                      nz-tooltip
+                      [nzTooltipTitle]="'ADMIN.ACCESS_REQUESTS.TOOLTIP_ACCEPT' | translate"
+                      (click)="onAccept(row)"
+                    >
+                      <ng-icon name="lucideCheck" aria-hidden="true" />
+                    </button>
+                    <button
+                      nz-button
+                      nzType="text"
+                      type="button"
+                      class="action-icon action-icon--reject"
+                      nz-tooltip
+                      [nzTooltipTitle]="'ADMIN.ACCESS_REQUESTS.TOOLTIP_REJECT' | translate"
+                      (click)="openRejectModal(row)"
+                    >
+                      <ng-icon name="lucideX" aria-hidden="true" />
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-spin>
+  </div>
+
+  <ng-template #emptyTpl>
+    <div class="admin-empty-state">
+      <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
+      <p class="admin-empty-state__title">{{ 'ADMIN.ACCESS_REQUESTS.EMPTY_TITLE' | translate }}</p>
+      <p class="admin-empty-state__subtitle">{{ 'ADMIN.COMMON.EMPTY_SUBTITLE' | translate }}</p>
+    </div>
+  </ng-template>
+
+  @if (!loading() && total() > 0) {
+    <div class="admin-pagination">
+      <nz-pagination
+        [nzPageIndex]="page()"
+        [nzTotal]="total()"
+        [nzPageSize]="pageSize()"
+        [nzShowSizeChanger]="true"
+        [nzPageSizeOptions]="[10, 25, 50]"
+        nzShowQuickJumper
+        (nzPageIndexChange)="onPageChange($event)"
+        (nzPageSizeChange)="onPageSizeChange($event)"
+      ></nz-pagination>
+    </div>
+  }
+
+  <app-access-request-detail-drawer
+    [visible]="drawerVisible()"
+    [requestId]="drawerRequestId()"
+    (closed)="closeDetailDrawer()"
+  />
+
+  <nz-modal
+    [nzVisible]="rejectModalVisible()"
+    (nzVisibleChange)="onRejectModalVisibleChange($event)"
+    (nzOnCancel)="closeRejectModal()"
+    [nzTitle]="'ADMIN.ACCESS_REQUESTS.REJECT.TITLE' | translate"
+    [nzWidth]="'min(520px, 92vw)'"
+    nzCentered
+    [nzOkLoading]="rejectSubmitting()"
+    [nzOkText]="'ADMIN.ACCESS_REQUESTS.REJECT.SUBMIT' | translate"
+    [nzCancelText]="'ADMIN.ACCESS_REQUESTS.FORM.CANCEL' | translate"
+    (nzOnOk)="submitRejectModal()"
+  >
+    <ng-container *nzModalContent>
+      <form nz-form [formGroup]="rejectForm" class="access-requests-list__reject-form">
+        <nz-form-item>
+          <nz-form-label [nzSpan]="24" nzRequired>{{
+            'ADMIN.ACCESS_REQUESTS.REJECT.REASON_LABEL' | translate
+          }}</nz-form-label>
+          <nz-form-control
+            [nzSpan]="24"
+            [nzErrorTip]="'ADMIN.ACCESS_REQUESTS.REJECT.ERR_REASON' | translate"
+          >
+            <textarea
+              nz-input
+              formControlName="rejection_reason"
+              [placeholder]="'ADMIN.ACCESS_REQUESTS.REJECT.REASON_PLACEHOLDER' | translate"
+              [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+            ></textarea>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+    </ng-container>
+  </nz-modal>
+</div>

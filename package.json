@@ -1,6 +1,6 @@
 {
   "name": "@itqan/cms-frontend",
-  "version": "1.0.4",
+  "version": "1.4.4",
   "description": "Quranic Content Management System - Frontend application for managing and distributing Quranic assets",
   "author": "Itqan Community",
   "license": "MIT",
@@ -40,12 +40,17 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "type-check": "tsc --noEmit",
+    "check:i18n": "node scripts/check-arabic-translations.js",
     "release": "semantic-release"
   },
   "lint-staged": {
     "*.{ts,js}": [
       "eslint --fix --cache --concurrency=auto",
       "prettier --write"
+    ],
+    "public/i18n/*.json": [
+      "prettier --write",
+      "node scripts/check-arabic-translations.js"
     ],
     "*.{json,html,css,less,md}": ["prettier --write"]
   },
@@ -76,7 +81,7 @@
     "@angular/cli": "^20.3.7",
     "@angular/compiler-cli": "^20.3.7",
     "@commitlint/cli": "^19.0.0",
-    "@commitlint/config-conventional": "^19.0.0",
+    "@commitlint/config-conventional": "^21.0.2",
     "@sentry/cli": "^3.3.5",
     "@types/jasmine": "~5.1.0",
     "@types/qrcode": "^1.5.6",

@@ -1,60 +1,47 @@
 import { CommonModule } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { NgIcon } from '@ng-icons/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import {
-  getErrorMessage,
-  isWebAuthnIncorrectCodeError,
-} from '../../../../shared/utils/error.utils';
+import { AuthBackLinkComponent } from '../../components/auth-back-link/auth-back-link.component';
 import type {
-  AuthenticatedResponse,
   AuthenticationMeta,
   WebAuthnCredentialCreationData,
-  WebAuthnCredentialRequestData,
 } from '../../headless/headless-api.types';
-import {
-  isReauthenticationBody,
-  tryNavigateForAuth401,
-} from '../../headless/headless-auth-flow.util';
+import { isPasskeyAutoPromptCancellation } from '../../headless/passkey-auto-prompt.util';
+import { PasskeyAuthFlowService } from '../../headless/passkey-auth.flow';
+import { resolvePasskeyFlowError } from '../../headless/passkey-error.util';
 import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
-import { WebAuthnRpIdMismatchError } from '../../headless/webauthn-rp-id.util';
 import {
   getWebAuthnCreationOptions,
-  getWebAuthnRequestOptions,
   publicKeyCredentialCreationToJson,
-  publicKeyCredentialToJson,
 } from '../../headless/webauthn.util';
-import { HeadlessAppTokenService } from '../../headless/headless-app-token.service';
 import { AuthService } from '../../services/auth.service';
 import { readContinueUrl } from '../../utils/auth-route-query.util';
 
 type PasskeyMode = 'login' | 'signup' | 'setup';
 
-function isAuthenticatedResponseBody(b: unknown): b is AuthenticatedResponse {
-  return (
-    b !== null &&
-    typeof b === 'object' &&
-    'status' in b &&
-    (b as { status: unknown }).status === 200 &&
-    'meta' in b &&
-    typeof (b as { meta: unknown }).meta === 'object'
-  );
-}
-
 @Component({
   selector: 'app-passkey-page',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterLink, TranslateModule, LangSwitchComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    RouterLink,
+    TranslateModule,
+    LangSwitchComponent,
+    AuthBackLinkComponent,
+    NgIcon,
+  ],
   styleUrls: ['./passkey.page.less'],
   templateUrl: './passkey.page.html',
 })
 export class PasskeyPage implements OnInit {
   readonly authService = inject(AuthService);
-  private readonly tokenStore = inject(HeadlessAppTokenService);
+  private readonly passkeyFlow = inject(PasskeyAuthFlowService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly translate = inject(TranslateService);
@@ -66,12 +53,14 @@ export class PasskeyPage implements OnInit {
 
   errorMessage = signal<string>('');
   infoMessage = signal<string>('');
-  /** Setup flow: server returned reauthentication required instead of creation options. */
   setupNeedsReauthenticate = signal(false);
   isLoading = signal(false);
   passkeyAvailable = signal(true);
   mode = signal<PasskeyMode>('login');
   backRoute = signal<string>('/account/login');
+  backLabelKey = signal<string>('AUTH.COMMON.BACK_TO_LOGIN');
+
+  private autoPasskeyAttempted = false;
 
   ngOnInit(): void {
     this.passkeyAvailable.set(isPasskeyClientEnvironmentSupported());
@@ -90,9 +79,16 @@ export class PasskeyPage implements OnInit {
             ? 'login'
             : 'login';
     this.mode.set(mode);
-    this.backRoute.set(
-      mode === 'setup' ? '/gallery' : mode === 'signup' ? '/account/signup' : '/account/login'
-    );
+    if (mode === 'setup') {
+      this.backRoute.set('/gallery');
+      this.backLabelKey.set('AUTH.COMMON.BACK_TO_GALLERY');
+    } else if (mode === 'signup') {
+      this.backRoute.set('/account/signup');
+      this.backLabelKey.set('AUTH.COMMON.BACK_TO_SIGNUP');
+    } else {
+      this.backRoute.set('/account/login');
+      this.backLabelKey.set('AUTH.COMMON.BACK_TO_LOGIN');
+    }
 
     const emailQ = this.route.snapshot.queryParamMap.get('email');
     if (emailQ) {
@@ -101,6 +97,11 @@ export class PasskeyPage implements OnInit {
 
     if (this.mode() === 'login' && this.authService.isLoggedIn()) {
       void this.router.navigateByUrl('/gallery');
+      return;
+    }
+
+    if (this.mode() === 'login' && this.passkeyAvailable() && queryFlow === 'login') {
+      void this.submitPasskey({ auto: true });
     }
   }
 
@@ -134,9 +135,16 @@ export class PasskeyPage implements OnInit {
     return 'AUTH.PASSKEY.BUTTON';
   }
 
-  async submitPasskey(): Promise<void> {
+  async submitPasskey(options?: { auto?: boolean }): Promise<void> {
+    const isAuto = options?.auto === true;
     if (!this.passkeyAvailable()) {
       return;
+    }
+    if (isAuto && this.autoPasskeyAttempted) {
+      return;
+    }
+    if (isAuto) {
+      this.autoPasskeyAttempted = true;
     }
     if (this.mode() === 'signup') {
       this.signupForm.markAllAsTouched();
@@ -149,122 +157,60 @@ export class PasskeyPage implements OnInit {
     this.setupNeedsReauthenticate.set(false);
     this.isLoading.set(true);
     try {
+      const continueUrl = readContinueUrl(this.route.snapshot.queryParamMap);
       if (this.mode() === 'signup') {
-        await this.signupWithPasskey();
+        const email = (this.signupForm.value['email'] as string).trim();
+        const result = await this.passkeyFlow.signupWithPasskey(email, continueUrl);
+        if (!result.ok) {
+          this.isLoading.set(false);
+          if (result.reason === 'cancelled') {
+            if (!isAuto) {
+              this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.CANCELLED'));
+            }
+          } else {
+            this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.SIGNUP_SESSION_MISSING'));
+          }
+          return;
+        }
+        this.isLoading.set(false);
+        void this.router.navigateByUrl(result.nextUrl);
       } else if (this.mode() === 'setup') {
         await this.setupPasskeyAuthenticator();
       } else {
-        await this.loginWithPasskey();
+        const result = await this.passkeyFlow.loginWithPasskey(continueUrl);
+        if (!result.ok) {
+          this.isLoading.set(false);
+          if (!isAuto || !isPasskeyAutoPromptCancellation(result)) {
+            this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.CANCELLED'));
+          }
+          return;
+        }
+        this.isLoading.set(false);
+        void this.router.navigateByUrl(result.nextUrl);
       }
     } catch (e) {
       this.isLoading.set(false);
-      if (e instanceof WebAuthnRpIdMismatchError) {
-        this.errorMessage.set(
-          this.translate.instant('AUTH.PASSKEY.RP_ID_ORIGIN_MISMATCH', {
-            rpId: e.rpId,
-            host: e.hostname,
-          })
-        );
+      if (isAuto && isPasskeyAutoPromptCancellation(e)) {
         return;
       }
-      if (
-        e instanceof DOMException &&
-        e.name === 'SecurityError' &&
-        /relying party|webauthn|well-known/i.test(e.message)
-      ) {
-        this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.RP_ID_BROWSER_REJECT'));
-        return;
-      }
-      if (e instanceof HttpErrorResponse) {
-        if (isWebAuthnIncorrectCodeError(e)) {
-          this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.WEBAUTHN_STATE_ERROR'));
-          return;
-        }
-        if (this.mode() === 'setup' && isReauthenticationBody(e.error)) {
-          this.setupNeedsReauthenticate.set(true);
-          this.infoMessage.set(this.translate.instant('AUTH.PASSKEY.SETUP_REAUTH_REQUIRED'));
-          return;
-        }
-        if (tryNavigateForAuth401(this.router, e)) {
-          return;
-        }
-        this.errorMessage.set(getErrorMessage(e) || this.translate.instant('AUTH.PASSKEY.ERROR'));
-        return;
-      }
-      this.errorMessage.set(getErrorMessage(e) || this.translate.instant('AUTH.PASSKEY.ERROR'));
-    }
-  }
-
-  private async loginWithPasskey(): Promise<void> {
-    /** Same as passkey signup: drop stale app session so GET options establish a fresh stage token; POST must send it. */
-    if (!this.authService.isLoggedIn()) {
-      this.tokenStore.clearSessionToken();
-    }
-    const res = await firstValueFrom(this.authService.headlessAuth.getWebauthnLoginOptions());
-    const data = res.data as WebAuthnCredentialRequestData;
-    const publicKey = await getWebAuthnRequestOptions(data);
-    const cred = (await navigator.credentials.get({
-      publicKey,
-    })) as PublicKeyCredential | null;
-    if (!cred) {
-      this.isLoading.set(false);
-      this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.CANCELLED'));
-      return;
-    }
-    const body = publicKeyCredentialToJson(cred);
-    const r = await firstValueFrom(this.authService.headlessAuth.postWebauthnLogin(body));
-    await firstValueFrom(this.authService.applyHeadlessSuccess(r, { fetchProfile: true }));
-    this.isLoading.set(false);
-    const nextUrl = readContinueUrl(this.route.snapshot.queryParamMap);
-    void this.router.navigateByUrl(nextUrl);
-  }
-
-  /**
-   * OpenAPI: POST `{ email }` → (optional session) → GET assertion options →
-   * `credentials.get` → PUT `{ credential }`.
-   */
-  private async signupWithPasskey(): Promise<void> {
-    const email = (this.signupForm.value['email'] as string).trim();
-    /** Anonymous passkey signup: drop stale app session so GET/PUT use the new `meta.session_token` only. */
-    if (!this.authService.isLoggedIn()) {
-      this.tokenStore.clearSessionToken();
-    }
-
-    const initResp = await firstValueFrom(
-      this.authService.headlessAuth.initiatePasskeySignup(email)
-    );
-    const initBody = initResp.body;
-    if (initResp.ok && initBody && isAuthenticatedResponseBody(initBody)) {
-      await firstValueFrom(
-        this.authService.applyHeadlessSuccess(initBody, { fetchProfile: false })
+      const resolution = resolvePasskeyFlowError(
+        e,
+        this.translate,
+        this.router,
+        this.mode() === 'setup' ? 'setup' : this.mode() === 'signup' ? 'signup' : 'login'
       );
-    } else if (initResp.ok && initBody) {
-      this.applyMetaFromHeadlessBody(initBody);
+      if (resolution.kind === 'navigated') {
+        return;
+      }
+      if (resolution.kind === 'reauth_required') {
+        this.setupNeedsReauthenticate.set(true);
+        this.infoMessage.set(resolution.message);
+        return;
+      }
+      if (resolution.kind === 'message') {
+        this.errorMessage.set(resolution.message);
+      }
     }
-
-    if (initResp.ok && !this.tokenStore.getSessionToken()) {
-      this.isLoading.set(false);
-      this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.SIGNUP_SESSION_MISSING'));
-      return;
-    }
-
-    const res = await firstValueFrom(this.authService.headlessAuth.getWebauthnSignupOptions());
-    const data = res.data as WebAuthnCredentialRequestData;
-    const publicKey = await getWebAuthnRequestOptions(data);
-    const cred = (await navigator.credentials.get({
-      publicKey,
-    })) as PublicKeyCredential | null;
-    if (!cred) {
-      this.isLoading.set(false);
-      this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.CANCELLED'));
-      return;
-    }
-    const body = publicKeyCredentialToJson(cred);
-    const r = await firstValueFrom(this.authService.headlessAuth.completePasskeySignup(body));
-    await firstValueFrom(this.authService.applyHeadlessSuccess(r, { fetchProfile: true }));
-    this.isLoading.set(false);
-    const nextUrl = readContinueUrl(this.route.snapshot.queryParamMap);
-    void this.router.navigateByUrl(nextUrl);
   }
 
   private async setupPasskeyAuthenticator(): Promise<void> {
@@ -291,16 +237,5 @@ export class PasskeyPage implements OnInit {
     this.isLoading.set(false);
     this.infoMessage.set(this.translate.instant('AUTH.PASSKEY.SETUP_SUCCESS'));
     this.setupNeedsReauthenticate.set(false);
-  }
-
-  /** Persist tokens from non-`AuthenticatedResponse` initiate bodies (e.g. partial headless envelopes). */
-  private applyMetaFromHeadlessBody(body: unknown): void {
-    if (!body || typeof body !== 'object') {
-      return;
-    }
-    const meta = (body as { meta?: AuthenticationMeta }).meta;
-    if (meta && typeof meta === 'object') {
-      this.authService.applyMetaTokens(meta);
-    }
   }
 }

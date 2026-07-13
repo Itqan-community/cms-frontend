@@ -1,8 +1,43 @@
 {
   "APP_TITLE": "Itqan CMS",
   "WELCOME": "Welcome to the Store",
+  "INVITATION": {
+    "ACCEPT": {
+      "TITLE": "Accept invitation",
+      "BACK": "Back to home",
+      "LOADING": "Activating your account…",
+      "SUCCESS_TITLE": "Invitation accepted",
+      "SUCCESS_BODY": "Your membership is now active. You can sign in to the portal.",
+      "GO_TO_LOGIN": "Go to sign in",
+      "ERROR": "Could not accept this invitation. It may be expired or invalid.",
+      "NO_TOKEN": "Invalid invitation link: no token provided."
+    }
+  },
   "AUTH": {
     "MUST_LOGIN_TO_VIEW": "You must be logged in to view this page.",
+    "SESSION_EXPIRED": "Your session has expired. Please sign in again.",
+    "ERRORS": {
+      "CODES": {
+        "ACCOUNT_INACTIVE": "This account is currently inactive.",
+        "CANNOT_REMOVE_PRIMARY_EMAIL": "You cannot remove your primary email address.",
+        "DUPLICATE_EMAIL": "This email address is already associated with this account.",
+        "EMAIL_PASSWORD_MISMATCH": "The email address and/or password you specified are not correct.",
+        "EMAIL_TAKEN": "A user is already registered with this email address.",
+        "INVALID": "Please check your input and try again.",
+        "INVALID_CREDENTIALS": "The email address and/or password you specified are not correct.",
+        "PASSWORD_MISMATCH": "Passwords do not match.",
+        "PHONE_PASSWORD_MISMATCH": "The phone number and/or password you specified are not correct.",
+        "REQUIRED": "Please fill in all required fields.",
+        "TOO_MANY_LOGIN_ATTEMPTS": "Too many failed login attempts. Try again later.",
+        "UNVERIFIED_EMAIL": "Please verify your email address before continuing.",
+        "USERNAME_PASSWORD_MISMATCH": "The username and/or password you specified are not correct."
+      }
+    },
+    "COMMON": {
+      "BACK_TO_LOGIN": "Back to sign in",
+      "BACK_TO_SIGNUP": "Back to sign up",
+      "BACK_TO_GALLERY": "Back to gallery"
+    },
     "LOGIN": {
       "TITLE": "Welcome back",
       "SUBTITLE": "Sign in to continue to Itqan",
@@ -84,6 +119,7 @@
       "SETUP_SUCCESS": "Passkey added successfully.",
       "SIGNUP_SESSION_MISSING": "Could not start passkey sign-up (no session from server). Close other tabs, refresh, and try again.",
       "WEBAUTHN_STATE_ERROR": "This passkey step expired or was interrupted. Go back and try again from the start.",
+      "WEBAUTHN_VERIFICATION_FAILED": "This passkey could not be verified. Try again or sign in another way.",
       "SETUP_REAUTH_REQUIRED": "For security, confirm your password before adding a passkey.",
       "SETUP_REAUTH_LINK": "Confirm password to continue",
       "BACK": "Back to sign in",
@@ -130,11 +166,14 @@
       "NEW_PASSWORD": "New password",
       "SUBMIT": "Update password",
       "ERROR": "Could not reset password. The link or code may have expired.",
-      "EXPIRED": "The reset link has expired. Please request a new one."
+      "EXPIRED": "The reset link has expired. Please request a new one.",
+      "BACK": "Back to sign in"
     },
     "CHANGE_PASSWORD": {
       "SUBTITLE": "Update your password to keep your account secure.",
-      "CURRENT_PASSWORD": "Current password"
+      "CURRENT_PASSWORD": "Current password",
+      "SUCCESS": "Password changed successfully.",
+      "ERROR": "Failed to change password. Please try again."
     },
     "MFA": {
       "TITLE": "Two-factor authentication",
@@ -144,7 +183,9 @@
       "SUBMIT": "Verify",
       "BACK": "Back to sign in",
       "ERROR": "Invalid code. Please try again.",
-      "USE_SECURITY_KEY": "Use security key / passkey"
+      "INCORRECT_CODE": "Invalid code. Please try again.",
+      "USE_SECURITY_KEY": "Use security key / passkey",
+      "USE_PASSKEY": "Sign in with passkey"
     },
     "SECURITY": {
       "TITLE": "Account security",
@@ -190,10 +231,18 @@
       "PASSKEY_DELETE_CONFIRM": "Remove this passkey from your account?",
       "PASSKEY_DELETE_ERROR": "Could not remove the passkey.",
       "PASSKEY_RENAME_ERROR": "Could not update the passkey name.",
-      "PASSKEY_EMPTY": "No passkeys registered yet."
+      "PASSKEY_EMPTY": "No passkeys registered yet.",
+      "AUTHENTICATOR_TYPE": {
+        "totp": "Authenticator app",
+        "recovery_codes": "Recovery codes",
+        "webauthn": "Passkey"
+      }
     },
     "ACCOUNT": {
       "BACK_PROFILE": "Back to account"
+    },
+    "LOGOUT": {
+      "SIGNING_OUT": "Signing out…"
     },
     "EMAIL": {
       "TITLE": "Email addresses",
@@ -286,7 +335,8 @@
       "LOAD_ERROR": "Could not load connected accounts.",
       "ACTION_ERROR": "Could not disconnect the provider.",
       "CONNECT_ERROR": "Could not start {{provider}} connection.",
-      "CONNECT_CROSS_ORIGIN_ERROR": "Connect requires same-origin API and app in this environment. Use the staging CMS domain or configure a reverse proxy."
+      "CONNECT_CROSS_ORIGIN_ERROR": "Connect requires same-origin API and app in this environment. Use the staging CMS domain or configure a reverse proxy.",
+      "SESSION_TOKEN_REQUIRED": "Connecting a provider requires an app session token; sign in again."
     },
     "PROFILE": {
       "TITLE": "Your account",
@@ -320,8 +370,16 @@
       "USE_PASSKEY": "Use passkey",
       "CANCEL": "Cancel",
       "ERROR": "Incorrect password.",
+      "INCORRECT_PASSWORD": "Incorrect password.",
       "PASSKEY_ERROR": "Passkey verification failed.",
       "MFA_ERROR": "Invalid authenticator code."
+    },
+    "TRUST": {
+      "TITLE": "Trust this browser?",
+      "SUBTITLE": "You can skip two-factor authentication on this device for a while if you trust it.",
+      "TRUST_BUTTON": "Trust this browser",
+      "DO_NOT_TRUST_BUTTON": "Do not trust",
+      "ERROR": "Could not update browser trust settings. Please try again."
     },
     "OAUTH": {
       "PROCESSING": "Processing authentication...",
@@ -366,7 +424,25 @@
     "SUBMIT": "Submit",
     "CLOSE": "Close",
     "REFRESH": "Refresh",
-    "REDIRECT_TO_LIBRARY_IN": "Taking you to the library in {{seconds}} seconds…"
+    "REDIRECT_TO_LIBRARY_IN": "Taking you to the library in {{seconds}} seconds…",
+    "HOME_ARIA": "Home page",
+    "OPEN_MENU_ARIA": "Open menu",
+    "LANG_SWITCH_TO_EN": "English",
+    "LANG_SWITCH_TO_AR": "العربية",
+    "LOGO_ALT": "Itqan",
+    "LOGO_ALT_CMS": "Itqan CMS",
+    "USER_AVATAR_ALT": "User avatar",
+    "USER_AVATAR_INITIAL": "U",
+    "EM_DASH": "—",
+    "LANG_NAMES": {
+      "AR": "Arabic",
+      "EN": "English"
+    },
+    "EMPTY_PLACEHOLDER": {
+      "COMING_SOON": "Coming soon: {{title}} management",
+      "DEFAULT_TITLE": "Content"
+    },
+    "MOCK_PUBLISHER_LABEL": "Publisher"
   },
   "FORMS": {
     "PLACEHOLDERS": {
@@ -377,7 +453,10 @@
       "LAST_NAME": "Enter your last name",
       "PHONE_NUMBER": "Enter your phone number",
       "TITLE": "e.g., Software Engineer, Researcher",
-      "PROJECT_LINK": "https://example.com"
+      "PROJECT_LINK": "https://example.com",
+      "URL_EXAMPLE": "https://example.com",
+      "URL_TAFSIR_EXAMPLE": "https://example.com/tafsir",
+      "EMAIL_EXAMPLE": "info@example.com"
     },
     "VALIDATION": {
       "REQUIRED": "This field is required",
@@ -395,9 +474,17 @@
     "UNAUTHORIZED_TITLE": "Access denied",
     "UNAUTHORIZED": "You are not authorized to perform this action.",
     "FORBIDDEN": "Access forbidden.",
-    "NOT_FOUND": "The requested resource was not found."
+    "NOT_FOUND": "The requested resource was not found.",
+    "NOT_FOUND_PAGE": {
+      "TITLE": "Page not found",
+      "MESSAGE": "The page you are looking for does not exist or may have been moved.",
+      "CTA": "Back to library"
+    },
+    "RESTRICTED_FOR_TENANT_CONFLICT": "This asset has pending access requests. Resolve them before enabling tenant restriction.",
+    "TENANT_REQUIRED": "Select a publisher before continuing."
   },
   "PROFILE": {
+    "HUB_ARIA": "Account management",
     "COMPLETE_PROFILE_TITLE": "Complete Your Profile",
     "COMPLETE_PROFILE_DESCRIPTION": "Help us understand more about you and your project",
     "PROJECT_QUESTION": "What are you working on? Tell us about your project?",
@@ -463,6 +550,15 @@
     "VIEW": "View",
     "VIEW_DETAILS": "View Details",
     "VIEW_LICENSE": "View License",
+    "OPEN_ACCESS_BADGE": "Open access",
+    "OPEN_ACCESS_HINT": "No access request required for this resource.",
+    "REQUEST_ACCESS_BUTTON": "Request Access",
+    "ACCESS_PENDING_HINT": "Your access request is being reviewed. You will be able to download once it is approved.",
+    "ACCESS_PENDING_TOAST": "Your access request is still pending approval.",
+    "ACCESS_REJECTED_HINT": "Access to this resource was not approved. Please contact Itqan for assistance.",
+    "ACCESS_REJECTED_TOAST": "Access to this resource was not approved. Please contact Itqan for assistance.",
+    "ACCESS_REQUEST_SUBMITTED_PENDING": "Your access request was submitted and is awaiting approval.",
+    "ACCESS_REQUEST_APPROVED": "Access approved. Starting download.",
     "DETAILS_TITLE": "Asset Details",
     "ASSET_ID": "Asset ID",
     "DETAILS_DESC": "This is a placeholder for asset details.",
@@ -470,6 +566,18 @@
       "RIWAYAS": "Riwayas",
       "RECITERS": "Reciters",
       "RECITATIONS": "Recitations"
+    },
+    "REPORT_ISSUE": {
+      "BUTTON": "Report issue",
+      "TITLE": "Report an issue",
+      "DESCRIPTION_LABEL": "Description",
+      "DESCRIPTION_PLACEHOLDER": "Describe the issue…",
+      "ERR_DESCRIPTION": "Enter a description (at least 10 characters)",
+      "SUBMIT": "Submit report",
+      "SUCCESS": "Your issue report was submitted",
+      "ERROR": "Could not submit issue report",
+      "FORBIDDEN": "You do not have permission to submit this report",
+      "LOGIN_REQUIRED": "Please log in to report an issue"
     }
   },
   "UI": {
@@ -517,9 +625,11 @@
     "CREATED": "Created"
   },
   "CATEGORIES": {
-    "mushaf": "Mushaf",
     "tafsir": "Tafsir",
-    "recitation": "Recitation"
+    "translation": "Translation",
+    "recitation": "Recitation",
+    "font": "Font",
+    "program": "Program"
   },
   "LICENSES": {
     "CC0": "CC0",
@@ -531,6 +641,9 @@
     "CC-BY-NC-ND": "CC BY-NC-ND"
   },
   "LICENSES_LABELS": {
+    "INFO_ARIA": "License info",
+    "DETAILS_ARIA": "License details",
+    "LEARN_MORE_ARIA": "Learn more about {{license}}",
     "CC0": "Fully Open",
     "CC-BY": "Attribution",
     "CC-BY-SA": "Attribution ShareAlike",
@@ -584,9 +697,15 @@
     "LICENSE_INFO": "License Information",
     "CONFIRM": "Confirm",
     "SCROLL_HINT": "Please scroll down to read the full content",
+    "LICENSE_TERMS": {
+      "BODY": "License Agreement for {{name}}\n\nLicense type: {{license}}\n\nTerms and Conditions\n\n1. Grant of License\nBy downloading this resource, you agree to comply with the terms of the {{license}} license.\n\n2. Permitted Uses\n- You may use this resource for personal and commercial projects\n- You may modify and adapt the resource for your needs\n- You must provide appropriate attribution when required\n\n3. Restrictions\n- You may not redistribute original files without permission\n- You may not claim ownership of the original work\n- Commercial use may require additional permissions\n\n4. Warranties and Liability\nThis resource is provided \"as is\" without warranties of any kind.\nThe publisher is not liable for any damages resulting from use of this resource.\n\n5. Termination\nThis license terminates automatically if you violate any terms.\nUpon termination, you must cease all use and delete all copies.\n\nBy clicking \"Confirm\", you acknowledge that you have read and agree to these terms."
+    },
     "USAGE_OPTIONS": {
       "commercial": "Commercial",
       "non-commercial": "Non-Commercial"
+    },
+    "ERRORS": {
+      "SUBMISSION_FAILED": "Could not submit access request. Please try again."
     }
   },
   "CONTENT_STANDARDS": {
@@ -662,6 +781,11 @@
       "GO_BACK_LIST": "Back to list",
       "DOWNLOAD": "Download",
       "TAG_EXTERNAL": "External",
+      "TAG_OPEN_ACCESS": "Open access",
+      "TAG_API_ONLY": "API only",
+      "FILTER_OPEN_ACCESS": "Open access",
+      "FILTER_OPEN_ACCESS_YES": "Yes",
+      "FILTER_OPEN_ACCESS_NO": "No",
       "SAVE": "Save",
       "CANCEL": "Cancel",
       "COMING_SOON": "Coming soon",
@@ -674,7 +798,8 @@
       "DESCRIPTION_AR": "Description (Arabic)",
       "PLACEHOLDER_EG": "e.g.",
       "EM_DASH": "—",
-      "HIJRI_YEAR_SUFFIX": "AH"
+      "HIJRI_YEAR_SUFFIX": "AH",
+      "COLUMN_ACCESS": "Access"
     },
     "TENANT": {
       "ARIA_LABEL": "Publisher scope selector",
@@ -693,12 +818,14 @@
       "TRANSLATIONS": "Translations",
       "RECITATIONS": "Recitations",
       "RECITERS": "Reciters",
-      "PUBLISHERS": "Publishers",
+      "PUBLISHERS": "Publisher Details",
       "AUDIO": "Audio",
       "MANAGE_PROFILE": "Manage profile",
       "BACK_TO_GALLERY": "Back to gallery",
       "USAGE": "API Usage",
-      "ISSUES": "Issue Management"
+      "ISSUES": "Issue Management",
+      "MEMBERS": "Members",
+      "ACCESS_REQUESTS": "Access Requests"
     },
     "PROFILE": {
       "TITLE": "Publisher profile",
@@ -777,6 +904,10 @@
         "PLACEHOLDER_LONG_AR": "Detailed description…",
         "LABEL_EXTERNAL": "External tafsir?",
         "LABEL_EXTERNAL_URL": "External URL",
+        "LABEL_OPEN_ACCESS": "Open access",
+        "HELP_OPEN_ACCESS": "Anyone can use this asset directly without submitting an access request.",
+        "LABEL_API_ONLY": "API enrollment (tenant-only)",
+        "HELP_API_ONLY": "Available via the publisher API and hidden from the public CMS gallery.",
         "UPLOAD_TITLE": "Thumbnail",
         "UPLOAD_DRAG": "Click or drag image here",
         "UPLOAD_HINT": "PNG, JPG, WEBP — max 5MB",
@@ -920,6 +1051,10 @@
         "PLACEHOLDER_LONG_AR": "Detailed description…",
         "LABEL_EXTERNAL": "External translation?",
         "LABEL_EXTERNAL_URL": "External URL",
+        "LABEL_OPEN_ACCESS": "Open access",
+        "HELP_OPEN_ACCESS": "Anyone can use this asset directly without submitting an access request.",
+        "LABEL_API_ONLY": "API enrollment (tenant-only)",
+        "HELP_API_ONLY": "Available via the publisher API and hidden from the public CMS gallery.",
         "UPLOAD_TITLE": "Thumbnail",
         "UPLOAD_DRAG": "Click or drag image here",
         "UPLOAD_HINT": "PNG, JPG, WEBP — max 5MB",
@@ -1061,6 +1196,7 @@
         "SECTION_NAME": "Name",
         "SECTION_DESC": "Description",
         "SECTION_LINKS": "Links & properties",
+        "SECTION_ACCESS_API": "Access & API",
         "ERR_NAME_AR": "Arabic name is required",
         "ERR_DESC_AR": "Arabic description is required",
         "ERR_DESC_EN": "English description is required",
@@ -1083,6 +1219,10 @@
         "LABEL_YEAR": "Year",
         "PLACEHOLDER_YEAR_HIJRI": "Year (Hijri)",
         "LABEL_LICENSE": "License",
+        "LABEL_OPEN_ACCESS": "Open access",
+        "HELP_OPEN_ACCESS": "Anyone can use this asset directly without submitting an access request.",
+        "LABEL_API_ONLY": "API enrollment (tenant-only)",
+        "HELP_API_ONLY": "Available via the publisher API and hidden from the public CMS gallery.",
         "MEEM_WASL_LONG": "Wasl (silah)",
         "SUBMIT_CREATE": "Add recitation",
         "SUBMIT_EDIT": "Save changes",
@@ -1095,6 +1235,8 @@
         "LABEL_RIWAYAH": "Riwayah",
         "LABEL_PUBLISHER": "Publisher",
         "DOWNLOAD_AYAH_TIMING": "Download timing file",
+        "VIEW_ON_GALLERY": "View on Gallery",
+        "VIEW_RECITER": "View Reciter",
         "DESC_AR": "Description (Arabic)",
         "DESC_EN": "Description (EN)"
       },
@@ -1143,6 +1285,12 @@
           "DONE": "Done",
           "FAILED": "Failed",
           "CANCELLED": "Cancelled"
+        },
+        "UPLOAD_ERRORS": {
+          "R2_RESPONSE": "Storage upload failed (HTTP {{status}}).",
+          "MISSING_ETAG": "Storage upload completed without a valid response.",
+          "CANCELLED": "Upload cancelled.",
+          "GENERIC": "Upload failed. Please try again."
         },
         "NAV_LEAVE_TITLE": "Uploads in progress",
         "NAV_LEAVE_CONTENT": "If you leave this page, any in-progress uploads will stop and their temporary multipart data will be cleaned up. Successfully uploaded audio will remain.",
@@ -1337,7 +1485,171 @@
         "ERR_STATUS": "Select a status",
         "DESCRIPTION_LABEL": "Description",
         "DESCRIPTION_PLACEHOLDER": "Describe the issue…",
-        "ERR_DESCRIPTION": "Enter a description (at least 3 characters)"
+        "ERR_DESCRIPTION": "Enter a description (at least 10 characters)"
+      }
+    },
+    "MEMBERS": {
+      "TITLE": "Members",
+      "SUBTITLE": "View, invite, and manage publisher members",
+      "EMPTY_TITLE": "No members",
+      "INVITE_BUTTON": "Invite member",
+      "SEARCH_PLACEHOLDER": "Search by name or email…",
+      "LIST_ERROR_TITLE": "Could not load members",
+      "LIST_ERROR_DESC": "Check your connection and try again.",
+      "EXPIRES_IN_DAYS": "Expires in {{days}} days",
+      "EXPIRES_TODAY": "Expires today",
+      "TOOLTIP_RESEND": "Resend invitation",
+      "TOOLTIP_CANCEL": "Cancel invitation",
+      "TOOLTIP_REMOVE": "Remove member",
+      "COLUMNS": {
+        "NAME": "Name",
+        "EMAIL": "Email",
+        "ROLE": "Role",
+        "STATUS": "Status",
+        "CREATED_AT": "Added",
+        "ACTIONS": "Actions"
+      },
+      "FILTERS": {
+        "STATUS": "Status"
+      },
+      "ROLE": {
+        "ADMIN": "Admin",
+        "STAFF": "Staff"
+      },
+      "STATUS": {
+        "PENDING": "Pending",
+        "ACTIVE": "Active"
+      },
+      "FORM": {
+        "TITLE_INVITE": "Invite member",
+        "TITLE_EDIT": "Edit member",
+        "NAME_LABEL": "Name",
+        "NAME_PLACEHOLDER": "Member name",
+        "EMAIL_LABEL": "Email",
+        "EMAIL_PLACEHOLDER": "email@example.com",
+        "ROLE_LABEL": "Role",
+        "INVITE_INFO": "An invitation email will be sent to this address.",
+        "SUBMIT_INVITE": "Send invitation",
+        "SUBMIT_EDIT": "Save",
+        "CANCEL": "Cancel",
+        "CONFIRM_OK": "Confirm",
+        "CONFIRM_CANCEL": "Cancel",
+        "ERR_NAME": "Please enter a name",
+        "ERR_EMAIL": "Please enter a valid email"
+      },
+      "PROMOTE": {
+        "CONFIRM_TITLE": "Promote to admin?",
+        "CONFIRM_BODY": "{{name}} — they will be able to manage members."
+      },
+      "DEMOTE": {
+        "CONFIRM_TITLE": "Demote to staff?",
+        "CONFIRM_BODY": "{{name}} — they will no longer manage members."
+      },
+      "REMOVE": {
+        "CONFIRM_TITLE": "Remove this member?",
+        "CONFIRM_BODY": "{{name}} — their portal access will be revoked.",
+        "CONFIRM_OK": "Yes, remove"
+      },
+      "CANCEL": {
+        "CONFIRM_TITLE": "Cancel this invitation?",
+        "CONFIRM_BODY": "{{name}} — the invitation link will stop working.",
+        "CONFIRM_OK": "Yes, cancel"
+      },
+      "RESEND": {
+        "CONFIRM_TITLE": "Resend invitation?",
+        "CONFIRM_BODY": "{{name}} — the previous link will stop working immediately.",
+        "CONFIRM_OK": "Resend"
+      },
+      "MESSAGES": {
+        "INVITE_SUCCESS": "Invitation sent",
+        "INVITE_ERROR": "Could not send invitation",
+        "UPDATE_SUCCESS": "Member updated",
+        "UPDATE_ERROR": "Could not update member",
+        "PROMOTE_SUCCESS": "Member promoted to admin",
+        "DEMOTE_SUCCESS": "Member demoted to staff",
+        "REMOVE_SUCCESS": "Member removed",
+        "REMOVE_ERROR": "Could not remove member",
+        "CANCEL_SUCCESS": "Invitation cancelled",
+        "RESEND_SUCCESS": "Invitation resent",
+        "RESEND_ERROR": "Could not resend invitation",
+        "NO_PUBLISHER": "Please select a publisher"
+      }
+    },
+    "ACCESS_REQUESTS": {
+      "TITLE": "Access Requests",
+      "SUBTITLE": "Review and manage developer requests for your assets",
+      "EMPTY_TITLE": "No access requests yet",
+      "SEARCH_PLACEHOLDER": "Search by developer or asset…",
+      "LIST_ERROR_TITLE": "Could not load access requests",
+      "LIST_ERROR_DESC": "Check your connection and try again.",
+      "TOOLTIP_VIEW": "View details",
+      "TOOLTIP_ACCEPT": "Accept request",
+      "TOOLTIP_REJECT": "Reject request",
+      "COLUMNS": {
+        "DEVELOPER": "Developer",
+        "ASSET": "Asset",
+        "INTENDED_USE": "Intended use",
+        "STATUS": "Status",
+        "CREATED_AT": "Requested",
+        "ACTIONS": "Actions"
+      },
+      "FILTERS": {
+        "STATUS": "Status"
+      },
+      "STATUS": {
+        "PENDING": "Pending",
+        "APPROVED": "Accepted",
+        "REJECTED": "Rejected"
+      },
+      "INTENDED_USE": {
+        "COMMERCIAL": "Commercial",
+        "NON_COMMERCIAL": "Non-commercial"
+      },
+      "TOGGLE": {
+        "LABEL": "Auto-accept requests",
+        "ON_HINT": "New requests are granted automatically",
+        "OFF_HINT": "You review each request manually",
+        "CONFIRM_OFF_TITLE": "Turn off auto-acceptance?",
+        "CONFIRM_OFF_BODY": "You'll need to manually accept or reject every access request from now on.",
+        "CONFIRM_OFF_OK": "Turn off"
+      },
+      "ACCEPT": {
+        "CONFIRM_TITLE": "Accept this request?",
+        "CONFIRM_BODY": "Grant {{name}} access to {{asset}}.",
+        "CONFIRM_OK": "Accept"
+      },
+      "REJECT": {
+        "TITLE": "Reject access request",
+        "REASON_LABEL": "Rejection reason",
+        "REASON_PLACEHOLDER": "Explain why access was denied — the developer will see this reason",
+        "SUBMIT": "Reject request",
+        "ERR_REASON": "Please enter a rejection reason"
+      },
+      "FORM": {
+        "CANCEL": "Cancel"
+      },
+      "DRAWER": {
+        "TITLE": "Access request details",
+        "LOAD_ERROR": "Could not load request details.",
+        "STATUS": "Status",
+        "REASON": "Developer reason",
+        "APPROVED_AT": "Accepted at",
+        "APPROVED_BY": "Accepted by",
+        "AUTO_ACCEPTED": "Auto-accepted",
+        "REJECTED_AT": "Rejected at",
+        "REJECTED_BY": "Rejected by",
+        "REJECTION_REASON": "Rejection reason"
+      },
+      "MESSAGES": {
+        "ACCEPT_SUCCESS": "Request accepted",
+        "ACCEPT_ERROR": "Could not accept request",
+        "REJECT_SUCCESS": "Request rejected",
+        "REJECT_ERROR": "Could not reject request",
+        "ALREADY_DECIDED": "This request was already decided — refreshing the list",
+        "TOGGLE_ON_SUCCESS": "Auto-acceptance enabled",
+        "TOGGLE_OFF_SUCCESS": "Auto-acceptance disabled",
+        "TOGGLE_ERROR": "Could not update auto-acceptance setting",
+        "NO_PUBLISHER": "Please select a publisher"
       }
     },
     "PUBLISHERS": {

@@ -1,6 +1,8 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Router } from '@angular/router';
+import { TranslateService } from '@ngx-translate/core';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import {
   BehaviorSubject,
   Observable,
@@ -15,6 +17,7 @@ import {
   take,
   tap,
   throwError,
+  timeout,
 } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
@@ -44,7 +47,10 @@ import {
   AuthenticatedOrChallenge,
   HeadlessAuthApiService,
 } from '../headless/headless-auth-api.service';
-import { HeadlessAppTokenService } from '../headless/headless-app-token.service';
+import {
+  ALLAUTH_SESSION_TOKEN_STORAGE_KEY,
+  HeadlessAppTokenService,
+} from '../headless/headless-app-token.service';
 import type {
   ApiKeyCreateIn,
   ApiKeyCreateResult,
@@ -60,7 +66,15 @@ import {
   User,
 } from '../models/auth.model';
 import { normalizeApiKeyRow, parseApiKeyCreated, parseApiKeysList } from '../utils/api-keys.util';
-import { getCookie, getDjangoCsrfTokenForRequest } from '../../utils/csrf.util';
+import {
+  clearReadableDjangoAuthCookies,
+  getCookie,
+  getDjangoCsrfTokenForRequest,
+  setCrossOriginDjangoCsrfToken,
+} from '../../utils/csrf.util';
+
+/** Bound on the initial session/config calls so a hung backend can't stall bootstrapDone forever. */
+const AUTH_BOOTSTRAP_TIMEOUT_MS = 15000;
 
 @Injectable({
   providedIn: 'root',
@@ -71,6 +85,8 @@ export class AuthService {
   private readonly headless = inject(HeadlessAuthApiService);
   private readonly tokenStore = inject(HeadlessAppTokenService);
   private readonly authBus = inject(AllauthAuthChangeBus);
+  private readonly translate = inject(TranslateService);
+  private readonly message = inject(NzMessageService);
 
   private readonly API_BASE_URL = environment.API_BASE_URL;
   private readonly USER_KEY = 'user';
@@ -82,8 +98,17 @@ export class AuthService {
   readonly authBootstrapFailed = signal(false);
   readonly configSnapshot = signal<ConfigurationResponse | undefined>(undefined);
 
+  /** True while using cached user+token before server session confirmation. */
+  private readonly provisionalSession = signal(false);
+
   /** Mirrors official `authInfo(auth).isAuthenticated`. */
   readonly isAuthenticated = computed(() => authInfo(this.authSnapshot()).isAuthenticated);
+
+  /**
+   * Protected-route readiness: provisional cache is enough to avoid unauthorized flash;
+   * otherwise wait until bootstrap validation finishes.
+   */
+  readonly authReady = computed(() => this.bootstrapDone() || this.hasProvisionalSession());
 
   public currentUser = signal<User | null>(null);
   public isLoading = signal(false);
@@ -102,13 +127,16 @@ export class AuthService {
 
   private isRefreshing = false;
   private refreshTokenSubject = new BehaviorSubject<boolean | null>(null);
+  /** Suppresses auth-bus redirect side-effects while an explicit logout is in flight. */
+  private loggingOut = false;
 
   constructor() {
+    this.hydrateProvisionalSession();
     this.authBus.changes$.subscribe((msg) => {
       const prev = this.prevAuthForRedirect;
       this.authSnapshot.set(msg);
       this.syncUserFromSnapshot(msg);
-      if (this.redirectPrimed && prev !== undefined) {
+      if (this.redirectPrimed && prev !== undefined && !this.loggingOut) {
         const evt = determineAuthChangeEvent(prev, msg);
         if (evt) {
           void this.handleAuthChangeEvent(evt as AuthChangeEventType, msg);
@@ -116,22 +144,36 @@ export class AuthService {
       }
       this.prevAuthForRedirect = msg;
     });
+
+    if (typeof window !== 'undefined') {
+      window.addEventListener('storage', (event) => {
+        this.handleCrossTabSessionTokenChange(event);
+      });
+    }
   }
 
   /**
    * Parallel `GET /auth/session` + `GET /config` — mirrors official `AuthContextProvider` bootstrap.
-   * Called from `APP_INITIALIZER`.
+   * Called from `APP_INITIALIZER` (fire-and-forget). Hydrates cache first so public pages paint
+   * immediately and admin guards can use last-good permissions before network confirms.
    */
   bootstrapOnce(): Promise<void> {
+    this.hydrateProvisionalSession();
+    const hadProvisional = this.hasProvisionalSession();
+
     return firstValueFrom(
       forkJoin({
-        auth: this.headless.getAuth().pipe(
+        auth: this.resolveBootstrapSession().pipe(
+          timeout(AUTH_BOOTSTRAP_TIMEOUT_MS),
           catchError(() => {
             this.authBootstrapFailed.set(true);
             return of(false as const);
           })
         ),
-        config: this.headless.getConfig().pipe(catchError(() => of(undefined))),
+        config: this.headless.getConfig().pipe(
+          timeout(AUTH_BOOTSTRAP_TIMEOUT_MS),
+          catchError(() => of(undefined))
+        ),
       }).pipe(
         tap(({ auth, config }) => {
           if (auth !== false) {
@@ -153,23 +195,23 @@ export class AuthService {
           }
         }),
         switchMap(({ auth }) => {
-          if (auth === false || !authInfo(auth).isAuthenticated) {
+          if (auth === false || !this.isOauthReturnSessionEstablished(auth)) {
+            if (hadProvisional) {
+              this.invalidateClientAuthAndGoLogin({ sessionExpired: true });
+            } else {
+              this.clearStaleClientSession();
+            }
             return of(void 0);
           }
+          this.provisionalSession.set(false);
           return this.getProfile().pipe(
             tap((p) => {
-              const cur = this.currentUser();
-              if (!cur) return;
-              const merged: User = {
-                ...cur,
-                ...p,
-                id: String(p.id ?? cur.id),
-                permissions: normalizeProfilePermissionCodes(p.permissions),
-              };
-              this.currentUser.set(merged);
-              localStorage.setItem(this.USER_KEY, JSON.stringify(merged));
+              this.applyProfileFromApi(p);
             }),
-            catchError(() => of(void 0))
+            catchError(() => {
+              // Keep provisional/cached portal fields; do not wipe to empty permissions.
+              return of(void 0);
+            })
           );
         }),
         tap(() => {
@@ -181,12 +223,123 @@ export class AuthService {
     );
   }
 
+  /**
+   * App session first (fast path when `localStorage` token exists); browser session with
+   * credentials when app session is not established (split-host cookie-backed auth).
+   */
+  private resolveBootstrapSession(): Observable<AuthenticatedOrChallenge | false> {
+    return this.headless.getAuth().pipe(
+      catchError(() => {
+        this.authBootstrapFailed.set(true);
+        return of(false as const);
+      }),
+      switchMap((appRes) => {
+        if (appRes !== false && this.isOauthReturnSessionEstablished(appRes)) {
+          return of(appRes);
+        }
+        return this.headless.getBrowserSession().pipe(
+          catchError((err) => this.observableHeadlessEnvelopeFromSessionHttpFailure(err)),
+          map((browserRes) => {
+            if (this.isOauthReturnSessionEstablished(browserRes)) {
+              return browserRes;
+            }
+            return appRes !== false ? appRes : browserRes;
+          })
+        );
+      })
+    );
+  }
+
+  /** Sync auth state when another tab sets or clears the shared session token. */
+  private handleCrossTabSessionTokenChange(event: StorageEvent): void {
+    if (event.storageArea !== localStorage || event.key !== ALLAUTH_SESSION_TOKEN_STORAGE_KEY) {
+      return;
+    }
+    if (this.loggingOut) {
+      return;
+    }
+    if (!event.newValue) {
+      this.tokenStore.blockSessionCookieFallback();
+      this.clearLocalAuthUi({ preserveSessionStorageToken: false });
+      this.authSnapshot.set(undefined);
+      this.prevAuthForRedirect = undefined;
+      void this.router.navigate([ALLAUTH_LOGIN_URL]);
+      return;
+    }
+    if (event.oldValue === event.newValue) {
+      return;
+    }
+    this.headless
+      .getSession()
+      .pipe(
+        tap((res) => {
+          this.authSnapshot.set(res);
+          this.tokenStore.setFromMeta(res.meta);
+          this.syncUserFromSnapshot(res);
+          this.prevAuthForRedirect = res;
+        }),
+        switchMap((res) => {
+          if (!this.isOauthReturnSessionEstablished(res)) {
+            return of(void 0);
+          }
+          return this.getProfile().pipe(
+            tap((p) => {
+              this.applyProfileFromApi(p);
+            }),
+            catchError(() => of(void 0))
+          );
+        }),
+        catchError(() => of(void 0))
+      )
+      .subscribe();
+  }
+
+  /** Restore last-good user from localStorage when a session token still exists. */
+  private hydrateProvisionalSession(): void {
+    if (this.currentUser()) {
+      return;
+    }
+    if (!this.tokenStore.getSessionToken()) {
+      return;
+    }
+    const stored = this.getStoredUser();
+    if (!stored?.id) {
+      return;
+    }
+    this.currentUser.set(stored);
+    this.authStateSubject.next(true);
+    this.provisionalSession.set(true);
+  }
+
+  /** Cached token+user before (or without) a confirmed headless snapshot. */
+  hasProvisionalSession(): boolean {
+    return this.provisionalSession() && !!this.tokenStore.getSessionToken() && !!this.currentUser();
+  }
+
+  /** Guards: allow while provisional or after confirmed login. */
+  canActivateAsLoggedIn(): boolean {
+    return this.isLoggedIn() || this.hasProvisionalSession();
+  }
+
   private syncUserFromSnapshot(msg: unknown): void {
     const info = authInfo(msg);
     if (info.isAuthenticated && info.user) {
-      const u = this.mapHeadlessToUser(info.user);
-      this.currentUser.set(u);
-      localStorage.setItem(this.USER_KEY, JSON.stringify(u));
+      const mapped = this.mapHeadlessToUser(info.user);
+      const prev = this.currentUser();
+      // Headless user has no portal permissions — preserve cache until profile merge.
+      const merged: User = {
+        ...mapped,
+        permissions: prev?.permissions?.length ? prev.permissions : mapped.permissions,
+        is_admin: prev?.is_admin ?? mapped.is_admin,
+        publisher_id:
+          prev?.publisher_id !== undefined && prev?.publisher_id !== null
+            ? prev.publisher_id
+            : mapped.publisher_id,
+        is_profile_completed: prev?.is_profile_completed ?? mapped.is_profile_completed,
+        phone: prev?.phone || mapped.phone,
+      };
+      this.currentUser.set(merged);
+      localStorage.setItem(this.USER_KEY, JSON.stringify(merged));
       this.authStateSubject.next(true);
       return;
     }
@@ -200,8 +353,14 @@ export class AuthService {
       return;
     }
     if (!info.isAuthenticated) {
+      // During bootstrap, an anonymous 401 envelope must not wipe cached portal permissions
+      // before `bootstrapOnce` decides clear vs invalidate.
+      if (this.provisionalSession() && !this.bootstrapDone()) {
+        return;
+      }
       localStorage.removeItem(this.USER_KEY);
       this.currentUser.set(null);
+      this.provisionalSession.set(false);
       this.authStateSubject.next(false);
     }
   }
@@ -210,9 +369,20 @@ export class AuthService {
     localStorage.removeItem(this.USER_KEY);
     if (!opts?.preserveSessionStorageToken) {
       this.tokenStore.clear();
+      setCrossOriginDjangoCsrfToken(null);
+      clearReadableDjangoAuthCookies();
     }
     this.authStateSubject.next(false);
     this.currentUser.set(null);
+    this.provisionalSession.set(false);
+  }
+
+  /** Clears stale client auth without login redirect or session-expired toast (public browsing). */
+  clearStaleClientSession(): void {
+    this.tokenStore.blockSessionCookieFallback();
+    this.clearLocalAuthUi({ preserveSessionStorageToken: false });
+    this.authSnapshot.set(undefined);
+    this.prevAuthForRedirect = undefined;
   }
 
   /** CMS API recovery — mirrors session recheck intent from earlier interceptor behaviour. */
@@ -244,6 +414,12 @@ export class AuthService {
       );
     }
 
+    if (!this.tokenStore.getSessionToken()) {
+      this.isRefreshing = false;
+      this.refreshTokenSubject.next(false);
+      return of(false);
+    }
+
     return this.headless.getSession().pipe(
       map((res) => {
         const info = authInfo(res);
@@ -252,6 +428,7 @@ export class AuthService {
           this.refreshTokenSubject.next(false);
           return false;
         }
+        this.tokenStore.unblockSessionCookieFallback();
         this.authSnapshot.set(res);
         this.tokenStore.setFromMeta(res.meta);
         this.syncUserFromSnapshot(res);
@@ -267,7 +444,17 @@ export class AuthService {
     );
   }
 
-  invalidateClientAuthAndGoLogin(): void {
+  invalidateClientAuthAndGoLogin(options?: { sessionExpired?: boolean }): void {
+    const shouldRedirect =
+      this.isLoggedIn() || this.hasProvisionalSession() || !!this.currentUser();
+    if (!shouldRedirect) {
+      this.clearStaleClientSession();
+      return;
+    }
+    if (options?.sessionExpired) {
+      this.message.warning(this.translate.instant('AUTH.SESSION_EXPIRED'));
+    }
+    this.tokenStore.blockSessionCookieFallback();
     this.clearLocalAuthUi({ preserveSessionStorageToken: false });
     this.authSnapshot.set(undefined);
     this.prevAuthForRedirect = undefined;
@@ -303,8 +490,8 @@ export class AuthService {
   }): Observable<AuthenticatedOrChallenge> {
     const fetchProfile = options?.fetchProfile;
 
-    // Same-origin only: if Django sessionid is readable (not HttpOnly), seed app header store.
-    if (!this.tokenStore.getSessionToken()) {
+    // Same-origin only: seed from readable `sessionid` when not in post-logout blocked state.
+    if (!this.tokenStore.isSessionCookieFallbackBlocked() && !this.tokenStore.getSessionToken()) {
       const sessionId = getCookie('sessionid');
       if (sessionId) {
         this.tokenStore.setSessionToken(sessionId);
@@ -368,6 +555,9 @@ export class AuthService {
       return of(res);
     }
     this.authSnapshot.set(res);
+    if (authInfo(res).isAuthenticated && res.status === 200) {
+      this.tokenStore.unblockSessionCookieFallback();
+    }
     this.tokenStore.setFromMeta(res.meta);
     this.syncUserFromSnapshot(res);
 
@@ -449,23 +639,31 @@ export class AuthService {
   }
 
   logout(): Observable<void> {
-    return this.headless.deleteSession().pipe(
-      tap(() => {
-        this.performLogoutAfterServer();
-      }),
-      catchError(() => {
-        this.performLogoutAfterServer();
-        return of(void 0);
-      }),
-      switchMap(() => of(void 0))
-    );
-  }
-
-  private performLogoutAfterServer(): void {
+    this.loggingOut = true;
+    this.tokenStore.blockSessionCookieFallback();
     this.clearLocalAuthUi({ preserveSessionStorageToken: false });
     this.authSnapshot.set(undefined);
-    this.prevAuthForRedirect = undefined;
-    void this.router.navigate([ALLAUTH_LOGIN_URL]);
+
+    return forkJoin([
+      this.headless.deleteSession().pipe(catchError(() => of(null))),
+      this.headless.deleteBrowserSession().pipe(catchError(() => of(null))),
+    ]).pipe(
+      tap(() => {
+        this.tokenStore.clearSessionToken();
+        this.prevAuthForRedirect = undefined;
+        void this.router.navigate([ALLAUTH_LOGIN_URL]);
+      }),
+      catchError(() => {
+        this.tokenStore.clearSessionToken();
+        this.prevAuthForRedirect = undefined;
+        void this.router.navigate([ALLAUTH_LOGIN_URL]);
+        return of(void 0);
+      }),
+      finalize(() => {
+        this.loggingOut = false;
+      }),
+      map(() => void 0)
+    );
   }
 
   getProfile(): Observable<UpdateProfileResponse> {
@@ -586,12 +784,16 @@ export class AuthService {
     process: 'login' | 'connect'
   ): Promise<{ kind: 'redirecting' } | { kind: 'error'; message: string }> {
     if (process === 'login') {
-      this.tokenStore.clearSessionToken();
+      this.tokenStore.blockSessionCookieFallback();
+      this.tokenStore.clear();
+      setCrossOriginDjangoCsrfToken(null);
+      clearReadableDjangoAuthCookies();
+      await firstValueFrom(this.headless.deleteBrowserSession().pipe(catchError(() => of(null))));
     }
     if (process === 'connect' && !this.tokenStore.getSessionToken()) {
       return {
         kind: 'error',
-        message: 'Connecting a provider requires an app session token; sign in again.',
+        message: this.translate.instant('AUTH.PROVIDERS.SESSION_TOKEN_REQUIRED'),
       };
     }
     if (!getDjangoCsrfTokenForRequest()) {
@@ -613,8 +815,12 @@ export class AuthService {
   }
 
   getStoredUser(): User | null {
-    const userStr = localStorage.getItem(this.USER_KEY);
-    return userStr ? (JSON.parse(userStr) as User) : null;
+    try {
+      const userStr = localStorage.getItem(this.USER_KEY);
+      return userStr ? (JSON.parse(userStr) as User) : null;
+    } catch {
+      return null;
+    }
   }
 
   isLoggedIn(): boolean {

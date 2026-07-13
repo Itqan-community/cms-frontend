@@ -9,8 +9,8 @@ export const publishersRoutes: Routes = [
       {
         path: '',
         loadComponent: () =>
-          import('./components/publishers-list/publishers-list.component').then(
-            (m) => m.PublishersListComponent
+          import('./components/publishers-index-redirect/publishers-index-redirect.component').then(
+            (m) => m.PublishersIndexRedirectComponent
           ),
       },
       {

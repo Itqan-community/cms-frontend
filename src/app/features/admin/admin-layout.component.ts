@@ -1,7 +1,7 @@
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterOutlet } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
@@ -15,6 +15,11 @@ import { isPublisherHost } from '../../shared/utils/publisherhost.util';
 import { PORTAL_PERMISSIONS } from './constants/portal-permission.constants';
 import { AdminAuthService } from './services/admin-auth.service';
 import { AdminTenantService } from './services/admin-tenant.service';
+import {
+  resolveUrlAfterTenantChange,
+  buildSelectedPublisherDetailCommands,
+} from './utils/admin-tenant-navigation.util';
+import { AdminTenantNavigationService } from './services/admin-tenant-navigation.service';
 
 interface CmsTab {
   id: string;
@@ -68,6 +73,18 @@ const TAB_ISSUES: CmsTab = {
   label: 'ADMIN.MENU.ISSUES',
   icon: 'lucideAlertCircle',
 };
+const TAB_MEMBERS: CmsTab = {
+  id: 'members',
+  path: 'members',
+  label: 'ADMIN.MENU.MEMBERS',
+  icon: 'lucideUserCog',
+};
+const TAB_ACCESS_REQUESTS: CmsTab = {
+  id: 'access-requests',
+  path: 'access-requests',
+  label: 'ADMIN.MENU.ACCESS_REQUESTS',
+  icon: 'lucideKeyRound',
+};
 const TAB_USAGE: CmsTab = {
   id: 'usage',
   path: 'usage',
@@ -96,7 +113,9 @@ const TAB_USAGE: CmsTab = {
 })
 export class AdminLayoutComponent implements OnInit {
   private readonly modal = inject(NzModalService);
+  private readonly router = inject(Router);
   private readonly adminAuth = inject(AdminAuthService);
+  private readonly tenantNavigation = inject(AdminTenantNavigationService);
   public readonly authService = inject(AuthService);
   public readonly tenantService = inject(AdminTenantService);
   private readonly translate = inject(TranslateService);
@@ -113,9 +132,8 @@ export class AdminLayoutComponent implements OnInit {
 
   readonly tabs = computed(() => {
     const tabs: CmsTab[] = [];
-    if (this.adminAuth.isItqanAdmin()) {
+    if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_PUBLISHER)) {
       tabs.push(TAB_PUBLISHERS);
-      // tabs.push(TAB_MUSHAFS);
     }
     if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_TAFSIR)) {
       tabs.push(TAB_TAFSIRS);
@@ -133,6 +151,18 @@ export class AdminLayoutComponent implements OnInit {
     // if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_ISSUE_REPORT)) {
     tabs.push(TAB_ISSUES);
     // }
+    if (
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_VIEW_PUBLISHER_MEMBERS) ||
+      this.adminAuth.isItqanAdmin()
+    ) {
+      tabs.push(TAB_MEMBERS);
+    }
+    if (
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_VIEW_ACCESS_REQUESTS) ||
+      this.adminAuth.isItqanAdmin()
+    ) {
+      tabs.push(TAB_ACCESS_REQUESTS);
+    }
     if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS)) {
       tabs.push(TAB_USAGE);
     }
@@ -174,6 +204,18 @@ export class AdminLayoutComponent implements OnInit {
     this.closeMobileMenu();
   }
 
+  tabRouterLink(tab: CmsTab): (string | number)[] {
+    if (tab.id === 'publishers') {
+      const commands = buildSelectedPublisherDetailCommands(
+        this.tenantService.getSelectedPublisherId()
+      );
+      if (commands) {
+        return commands;
+      }
+    }
+    return ['/admin', tab.path];
+  }
+
   onLogout(): void {
     this.authService.logout().subscribe();
   }
@@ -183,7 +225,8 @@ export class AdminLayoutComponent implements OnInit {
       return;
     }
     if (this.tenantService.setSelectedPublisherId(publisherId)) {
-      window.location.reload();
+      const target = resolveUrlAfterTenantChange(this.router.url, publisherId);
+      this.tenantNavigation.assign(target);
     }
   }
 

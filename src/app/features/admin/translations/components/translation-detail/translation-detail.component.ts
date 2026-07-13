@@ -13,7 +13,10 @@ import { LicensesColors } from '../../../../../core/enums/licenses.enum';
 import { AssetVersionsManagerComponent } from '../../../components/asset-versions-manager/asset-versions-manager.component';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../../services/admin-auth.service';
-import { localizeLanguageCode } from '../../../utils/display-localization.util';
+import {
+  createDisplayLocalizationLabels,
+  localizeLanguageCode,
+} from '../../../utils/display-localization.util';
 import { TranslationDetails } from '../../models/translations.models';
 import { TranslationsService } from '../../services/translations.service';
 
@@ -109,6 +112,10 @@ export class TranslationDetailComponent implements OnInit {
   }
 
   languageLabel(code: string | null | undefined): string {
-    return localizeLanguageCode(code, this.translate.currentLang);
+    return localizeLanguageCode(
+      code,
+      this.translate.currentLang,
+      createDisplayLocalizationLabels(this.translate)
+    );
   }
 }

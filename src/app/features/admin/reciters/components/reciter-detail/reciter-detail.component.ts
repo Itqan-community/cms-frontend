@@ -10,7 +10,10 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../../services/admin-auth.service';
-import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
+import {
+  createDisplayLocalizationLabels,
+  localizeCountryCodeOrName,
+} from '../../../utils/display-localization.util';
 import { ReciterDetails } from '../../models/reciters.models';
 import { RecitersAdminService } from '../../services/reciters.service';
 
@@ -96,6 +99,10 @@ export class ReciterDetailComponent implements OnInit {
   }
 
   countryLabel(country: string | null | undefined): string {
-    return localizeCountryCodeOrName(country, this.translate.currentLang);
+    return localizeCountryCodeOrName(
+      country,
+      this.translate.currentLang,
+      createDisplayLocalizationLabels(this.translate)
+    );
   }
 }

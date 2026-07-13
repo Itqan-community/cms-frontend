@@ -1,10 +1,14 @@
 import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
 import { inject } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { catchError, Observable, throwError } from 'rxjs';
 import { isHeadlessAppAuthUrl } from '../auth/headless/headless-api-path.util';
+import {
+  resolveApiErrorMessage,
+  shouldSuppressGlobalErrorToast,
+} from '../../shared/utils/api-error-resolver.util';
 import { isExpectedTotpAuthenticatorStatusProbe404 } from './auth-error-sentry-suppress.util';
-import { isUnverifiedEmailError } from '../../shared/utils/error.utils';
 
 /**
  * Global Error Interceptor
@@ -15,6 +19,7 @@ export function errorInterceptor(
   next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> {
   const message = inject(NzMessageService);
+  const translate = inject(TranslateService);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
@@ -23,7 +28,8 @@ export function errorInterceptor(
         return throwError(() => error);
       }
 
-      if (isHeadlessAppAuthUrl(req.url) && isUnverifiedEmailError(error)) {
+      // Headless auth pages handle their own user-facing errors (400, 409, etc.).
+      if (isHeadlessAppAuthUrl(req.url)) {
         return throwError(() => error);
       }
 
@@ -31,19 +37,11 @@ export function errorInterceptor(
         return throwError(() => error);
       }
 
-      let errorMessage = '';
-
-      if (error.error instanceof ErrorEvent) {
-        // Client-side error
-        errorMessage = error.error.message;
-      } else {
-        // Server-side error
-        // Try to get message from API response if it exists
-        errorMessage = error.error?.message || error.message || 'Server Error';
+      if (!shouldSuppressGlobalErrorToast(error)) {
+        const fallbackKey = error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR';
+        const errorMessage = resolveApiErrorMessage(error, { fallbackKey }, translate);
+        message.error(errorMessage);
       }
-
-      // Show the error message using Ng-Zorro Message service
-      message.error(errorMessage);
 
       return throwError(() => error);
     })

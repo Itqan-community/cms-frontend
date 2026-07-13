@@ -6,7 +6,7 @@ import { Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import { AuthService } from '../../services/auth.service';
 
@@ -58,7 +58,11 @@ export class ProviderSignupPage implements OnInit {
         this.loadError.set(true);
         this.infoMessage.set(
           e instanceof HttpErrorResponse
-            ? getErrorMessage(e) || this.translate.instant('AUTH.PROVIDER_SIGNUP.LOAD_ERROR')
+            ? resolveAuthErrorMessage(
+                e,
+                { fallbackKey: 'AUTH.PROVIDER_SIGNUP.LOAD_ERROR', context: 'provider_signup' },
+                this.translate
+              )
             : this.translate.instant('AUTH.PROVIDER_SIGNUP.LOAD_ERROR')
         );
       },
@@ -85,7 +89,11 @@ export class ProviderSignupPage implements OnInit {
           return;
         }
         this.errorMessage.set(
-          getErrorMessage(e) || this.translate.instant('AUTH.PROVIDER_SIGNUP.ERROR')
+          resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.PROVIDER_SIGNUP.ERROR', context: 'provider_signup' },
+            this.translate
+          )
         );
         return;
       }

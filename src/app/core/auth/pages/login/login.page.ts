@@ -1,14 +1,21 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
-import { getErrorMessage, isUnverifiedEmailError } from '../../../../shared/utils/error.utils';
+import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
+import { isUnverifiedEmailError } from '../../../../shared/utils/error.utils';
+import { AuthSocialActionsComponent } from '../../components/auth-social-actions/auth-social-actions.component';
 import { AUTH_ROUTES, tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
-import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
+import {
+  isPasskeyAutoPromptCancellation,
+  shouldAttemptPasskeyAutoPrompt,
+} from '../../headless/passkey-auto-prompt.util';
+import { PasskeyAuthFlowService } from '../../headless/passkey-auth.flow';
+import { resolvePasskeyFlowError } from '../../headless/passkey-error.util';
 import { LoginRequest } from '../../models/auth.model';
 import { AuthService } from '../../services/auth.service';
 import { buildHeadlessOAuthCallbackUrl, readContinueUrl } from '../../utils/auth-route-query.util';
@@ -23,19 +30,22 @@ import { buildHeadlessOAuthCallbackUrl, readContinueUrl } from '../../utils/auth
     TranslateModule,
     LangSwitchComponent,
     NgIcon,
+    AuthSocialActionsComponent,
   ],
   styleUrls: ['./login.page.less'],
   templateUrl: './login.page.html',
 })
-export class LoginPage {
+export class LoginPage implements OnInit {
   readonly authService = inject(AuthService);
+  private readonly passkeyFlow = inject(PasskeyAuthFlowService);
   private readonly router = inject(Router);
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
   private readonly translate = inject(TranslateService);
 
+  private autoPasskeyAttempted = false;
+
   passwordVisible = signal(false);
-  passkeyAvailable = signal(false);
 
   togglePasswordVisibility(): void {
     this.passwordVisible.set(!this.passwordVisible());
@@ -43,13 +53,22 @@ export class LoginPage {
 
   loginForm: FormGroup;
   errorMessage = signal<string>('');
+  passkeyLoading = signal(false);
 
   constructor() {
-    this.passkeyAvailable.set(isPasskeyClientEnvironmentSupported());
     this.loginForm = this.fb.group({
       email: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required, Validators.minLength(6)]],
     });
+  }
+
+  ngOnInit(): void {
+    if (this.authService.isLoggedIn()) {
+      return;
+    }
+    if (shouldAttemptPasskeyAutoPrompt()) {
+      void this.onPasskeyLogin({ auto: true });
+    }
   }
 
   /** Allauth `callback_url` for provider redirect (absolute). */
@@ -70,6 +89,39 @@ export class LoginPage {
     const r = await this.authService.startGitHubOAuth(this.oauthCallbackUrl, 'login');
     if (r.kind === 'error') {
       this.errorMessage.set(r.message || this.translate.instant('AUTH.OAUTH.ERROR'));
+    }
+  }
+
+  async onPasskeyLogin(options?: { auto?: boolean }): Promise<void> {
+    const isAuto = options?.auto === true;
+    if (isAuto && this.autoPasskeyAttempted) {
+      return;
+    }
+    if (isAuto) {
+      this.autoPasskeyAttempted = true;
+    }
+    this.errorMessage.set('');
+    this.passkeyLoading.set(true);
+    try {
+      const continueUrl = readContinueUrl(this.activatedRoute.snapshot.queryParamMap);
+      const result = await this.passkeyFlow.loginWithPasskey(continueUrl);
+      if (!result.ok) {
+        if (!isAuto || !isPasskeyAutoPromptCancellation(result)) {
+          this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.CANCELLED'));
+        }
+        return;
+      }
+      void this.router.navigateByUrl(result.nextUrl);
+    } catch (e) {
+      if (isAuto && isPasskeyAutoPromptCancellation(e)) {
+        return;
+      }
+      const resolution = resolvePasskeyFlowError(e, this.translate, this.router, 'login');
+      if (resolution.kind === 'message') {
+        this.errorMessage.set(resolution.message);
+      }
+    } finally {
+      this.passkeyLoading.set(false);
     }
   }
 
@@ -100,12 +152,21 @@ export class LoginPage {
               });
               return;
             }
-            const msg = getErrorMessage(error);
-            this.errorMessage.set(msg || this.translate.instant('AUTH.LOGIN.ERRORS.LOGIN_FAILED'));
+            this.errorMessage.set(
+              resolveAuthErrorMessage(
+                error,
+                { fallbackKey: 'AUTH.LOGIN.ERRORS.LOGIN_FAILED', context: 'login' },
+                this.translate
+              )
+            );
             return;
           }
           this.errorMessage.set(
-            getErrorMessage(error) || this.translate.instant('AUTH.LOGIN.ERRORS.LOGIN_FAILED')
+            resolveAuthErrorMessage(
+              error,
+              { fallbackKey: 'AUTH.LOGIN.ERRORS.LOGIN_FAILED', context: 'login' },
+              this.translate
+            )
           );
         },
       });

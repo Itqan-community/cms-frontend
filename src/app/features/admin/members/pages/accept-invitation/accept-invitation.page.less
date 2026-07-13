@@ -1,0 +1,125 @@
+.accept-invite {
+  min-height: 100vh;
+  background-color: var(--color-bg);
+
+  &__header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+  }
+
+  &__header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+  }
+
+  &__back {
+    display: inline-flex;
+    font-size: 14px;
+    color: var(--color-primary-800);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  &__container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 16px;
+  }
+
+  &__card {
+    max-width: 448px;
+    width: 100%;
+  }
+
+  &__logo {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  &__title {
+    text-align: center;
+    font-weight: 700;
+    color: #333333;
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  &__subtitle {
+    text-align: center;
+    color: #333333;
+    font-size: 16px;
+    margin-bottom: 24px;
+  }
+
+  &__spinner-wrap {
+    display: flex;
+    justify-content: center;
+    padding: 16px 0;
+  }
+
+  &__spinner {
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+    border: 3px solid rgba(0, 0, 0, 0.1);
+    border-top-color: var(--color-primary-700);
+    animation: accept-invite-spinner 0.8s linear infinite;
+  }
+
+  &__alert {
+    padding: 12px;
+    border-radius: var(--radius-lg);
+    border: 1px solid #fecaca;
+    background-color: #fef2f2;
+    color: #dc2626;
+    font-size: 14px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+
+  &__submit {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 48px;
+    background-color: var(--color-primary-700);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-lg);
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  &__secondary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 40px;
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: var(--radius-lg);
+    font-size: 14px;
+    text-decoration: none;
+    color: #333333;
+  }
+}
+
+@keyframes accept-invite-spinner {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

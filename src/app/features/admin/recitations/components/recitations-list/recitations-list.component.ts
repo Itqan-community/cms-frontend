@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -52,7 +52,6 @@ export class RecitationsListComponent extends AdminListBase<
   RecitationListFilters
 > {
   private readonly recitationsService = inject(RecitationsService);
-  private readonly translate = inject(TranslateService);
   private readonly adminAuth = inject(AdminAuthService);
 
   readonly canCreateRecitation = computed(() =>
@@ -66,6 +65,7 @@ export class RecitationsListComponent extends AdminListBase<
   readonly recitationTableStorageKey = 'admin-list-recitations';
   readonly recitationTableColumns: AdminTableColumnOption[] = [
     { key: 'name', label: 'ADMIN.RECITATIONS.COLUMNS.NAME' },
+    { key: 'access', label: 'ADMIN.COMMON.COLUMN_ACCESS' },
     { key: 'description', label: 'ADMIN.RECITATIONS.COLUMNS.DESCRIPTION' },
     { key: 'publisher', label: 'ADMIN.RECITATIONS.COLUMNS.PUBLISHER' },
     { key: 'reciter', label: 'ADMIN.RECITATIONS.COLUMNS.RECITER' },
@@ -109,7 +109,7 @@ export class RecitationsListComponent extends AdminListBase<
 
   truncate(text: string | null | undefined, max = 120): string {
     if (text == null || text === '') {
-      return '—';
+      return this.translate.instant('COMMON.EM_DASH');
     }
     const t = text.trim();
     if (t.length <= max) {

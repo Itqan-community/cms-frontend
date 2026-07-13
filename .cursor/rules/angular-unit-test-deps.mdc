@@ -1,0 +1,57 @@
+---
+description: Angular unit tests must provide every injected dependency
+globs: **/*.spec.ts
+alwaysApply: false
+---
+
+# Angular Unit Test Dependencies
+
+When creating or editing `*.spec.ts` files, every `inject()` / constructor dependency of the unit under test must be satisfied in `TestBed.configureTestingModule`.
+
+## Checklist before finishing a spec
+
+1. Read the service/component constructor and `inject()` calls in the source file.
+2. Add a provider (real, mock, or spy) for **each** dependency — not only the ones used by the test case.
+3. Run `npm run test -- --browsers=ChromeHeadless --watch=false` for the affected spec when feasible.
+
+## Common project mocks
+
+```typescript
+import { TranslateService } from '@ngx-translate/core';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { of } from 'rxjs';
+
+// TranslateService (services/components that call translate.instant)
+{
+  provide: TranslateService,
+  useValue: {
+    instant: (key: string) => key,
+    getCurrentLang: () => 'en',
+    onLangChange: of({ lang: 'en' }),
+  },
+}
+
+// NzMessageService (toast notifications)
+{
+  provide: NzMessageService,
+  useValue: jasmine.createSpyObj<NzMessageService>('NzMessageService', [
+    'success',
+    'error',
+    'warning',
+    'info',
+  ]),
+}
+
+// Standalone components with templates using translate pipe
+imports: [ComponentUnderTest, TranslateModule.forRoot()]
+```
+
+## Failure pattern to avoid
+
+`NG0201: No provider found for _TranslateService` (or any other token) means a new `inject()` was added to production code but the spec was not updated. Fix the spec — do not weaken production DI.
+
+## Prefer
+
+- Lightweight `useValue` mocks for services not under test.
+- `jasmine.createSpyObj` when verifying calls.
+- `TranslateModule.forRoot()` only when the template/pipe is under test.

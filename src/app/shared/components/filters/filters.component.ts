@@ -1,13 +1,13 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { Component, OnDestroy, inject, output, signal } from '@angular/core';
+import { Component, OnDestroy, computed, inject, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCheckboxComponent, NzCheckboxGroupComponent } from 'ng-zorro-antd/checkbox';
 import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
-import { Categories } from '../../../core/enums/categories.enum';
+import { Subject, debounceTime, distinctUntilChanged, merge, of, takeUntil } from 'rxjs';
+import { GALLERY_CATEGORY_ORDER } from '../../../core/enums/categories.enum';
 import { Licenses } from '../../../core/enums/licenses.enum';
 import { NgIcon } from '@ng-icons/core';
 import { LicenseTagComponent } from '../license-tag/license-tag.component';
@@ -37,35 +37,36 @@ export class FiltersComponent implements OnDestroy {
   private readonly destroy$ = new Subject<void>();
   private readonly searchSubject$ = new Subject<string>();
 
-  readonly categoriesOptions = [
-    { label: this.translate.instant(`CATEGORIES.${Categories.MUSHAF}`), value: Categories.MUSHAF },
-    { label: this.translate.instant(`CATEGORIES.${Categories.TAFSIR}`), value: Categories.TAFSIR },
-    {
-      label: this.translate.instant(`CATEGORIES.${Categories.RECITATION}`),
-      value: Categories.RECITATION,
-    },
-  ];
+  private readonly translationTick = signal(0);
+
+  readonly categoriesOptions = computed(() => {
+    this.translationTick();
+    return GALLERY_CATEGORY_ORDER.map((value) => ({
+      label: this.translate.instant(`CATEGORIES.${value}`),
+      value,
+    }));
+  });
   readonly licensesOptions = [
-    { label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC0}`), value: Licenses.CC0 },
-    { label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC_BY}`), value: Licenses.CC_BY },
+    { label: `LICENSES_LABELS.${Licenses.CC0}`, value: Licenses.CC0 },
+    { label: `LICENSES_LABELS.${Licenses.CC_BY}`, value: Licenses.CC_BY },
     {
-      label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC_BY_SA}`),
+      label: `LICENSES_LABELS.${Licenses.CC_BY_SA}`,
       value: Licenses.CC_BY_SA,
     },
     {
-      label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC_BY_ND}`),
+      label: `LICENSES_LABELS.${Licenses.CC_BY_ND}`,
       value: Licenses.CC_BY_ND,
     },
     {
-      label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC_BY_NC}`),
+      label: `LICENSES_LABELS.${Licenses.CC_BY_NC}`,
       value: Licenses.CC_BY_NC,
     },
     {
-      label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC_BY_NC_SA}`),
+      label: `LICENSES_LABELS.${Licenses.CC_BY_NC_SA}`,
       value: Licenses.CC_BY_NC_SA,
     },
     {
-      label: this.translate.instant(`LICENSES_LABELS.${Licenses.CC_BY_NC_ND}`),
+      label: `LICENSES_LABELS.${Licenses.CC_BY_NC_ND}`,
       value: Licenses.CC_BY_NC_ND,
     },
   ];
@@ -83,6 +84,12 @@ export class FiltersComponent implements OnDestroy {
   showFiltersDrawer = signal(false);
 
   constructor() {
+    merge(this.translate.onLangChange, this.translate.onTranslationChange, of(null))
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.translationTick.update((n) => n + 1);
+      });
+
     // Set up debounced search with 300ms delay
     this.searchSubject$
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntil(this.destroy$))

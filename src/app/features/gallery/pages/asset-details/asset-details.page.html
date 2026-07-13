@@ -36,6 +36,9 @@
               <ng-icon [name]="getCategoryIcon(asset()!.category)" />
               <span>{{ 'CATEGORIES.' + asset()!.category | translate }}</span>
             </nz-tag>
+            @if (asset()!.is_open_access) {
+              <nz-tag nzColor="green">{{ 'GALLERY.OPEN_ACCESS_BADGE' | translate }}</nz-tag>
+            }
           </div>
           <p class="asset-description">{{ asset()!.description }}</p>
         </div>
@@ -75,6 +78,10 @@
                   {{ 'GALLERY.VIEW_LICENSE' | translate }}
                 </button>
               </a>
+              <button nz-button nzBlock class="action-button" (click)="openReportIssueModal()">
+                <ng-icon name="lucideAlertTriangle" />
+                {{ 'GALLERY.REPORT_ISSUE.BUTTON' | translate }}
+              </button>
               <button
                 nz-button
                 nzType="primary"
@@ -82,11 +89,22 @@
                 class="download-button-primary"
                 (click)="downloadResource()"
                 [nzLoading]="isDownloading()"
-                [disabled]="isDownloading()"
+                [disabled]="isDownloading() || isDownloadBlocked()"
               >
-                {{ (isDownloading() ? 'UI.DOWNLOADING' : 'UI.DOWNLOAD_RESOURCE') | translate }}
-                <ng-icon name="lucideDownloadCloud" />
+                {{ primaryActionLabelKey() | translate }}
+                <ng-icon [name]="primaryActionIcon()" />
               </button>
+              @if (asset()!.is_open_access) {
+                <p class="open-access-hint">{{ 'GALLERY.OPEN_ACCESS_HINT' | translate }}</p>
+              } @else if (asset()!.access_status === 'pending') {
+                <p class="access-status-hint access-status-hint--pending">
+                  {{ 'GALLERY.ACCESS_PENDING_HINT' | translate }}
+                </p>
+              } @else if (asset()!.access_status === 'rejected') {
+                <p class="access-status-hint access-status-hint--rejected">
+                  {{ 'GALLERY.ACCESS_REJECTED_HINT' | translate }}
+                </p>
+              }
             </div>
           </div>
         </div>
@@ -188,6 +206,49 @@
     </div>
   </nz-modal>
 
+  <!-- Report Issue Modal -->
+  <nz-modal
+    [nzVisible]="isReportIssueModalVisible()"
+    [nzTitle]="'GALLERY.REPORT_ISSUE.TITLE' | translate"
+    [nzOkText]="'GALLERY.REPORT_ISSUE.SUBMIT' | translate"
+    [nzCancelText]="'COMMON.CANCEL' | translate"
+    [nzOkLoading]="isSubmittingReportIssue()"
+    [nzOkDisabled]="isSubmittingReportIssue()"
+    (nzOnCancel)="handleReportIssueModalCancel()"
+    (nzOnOk)="handleReportIssueModalOk()"
+  >
+    <div *nzModalContent>
+      <p class="modal-caption">{{ asset()?.name }}</p>
+
+      <form [formGroup]="reportIssueForm" nz-form>
+        <nz-form-item>
+          <nz-form-label [nzRequired]="true">
+            {{ 'GALLERY.REPORT_ISSUE.DESCRIPTION_LABEL' | translate }}
+          </nz-form-label>
+          <nz-form-control
+            [nzErrorTip]="
+              reportIssueForm.get('description')?.hasError('required') &&
+              reportIssueForm.get('description')?.touched
+                ? ('FORMS.VALIDATION.REQUIRED' | translate)
+                : reportIssueForm.get('description')?.hasError('minlength') &&
+                    reportIssueForm.get('description')?.touched
+                  ? ('GALLERY.REPORT_ISSUE.ERR_DESCRIPTION' | translate)
+                  : ''
+            "
+          >
+            <textarea
+              nz-input
+              formControlName="description"
+              [nzAutosize]="{ minRows: 4, maxRows: 6 }"
+              [placeholder]="'GALLERY.REPORT_ISSUE.DESCRIPTION_PLACEHOLDER' | translate"
+            >
+            </textarea>
+          </nz-form-control>
+        </nz-form-item>
+      </form>
+    </div>
+  </nz-modal>
+
   <!-- License Terms Modal -->
   <nz-modal
     [nzVisible]="isLicenseModalVisible()"
@@ -209,36 +270,10 @@
 
         <div class="license-card">
           <div class="license-terms-scroll" (scroll)="handleLicenseScroll($event)">
-            <pre class="license-text">
-اتفاقية الترخيص لـ {{ asset()?.name }}
-
-نوع الترخيص: {{ asset()?.license }}
-
-الشروط والأحكام
-
-1. منح الترخيص
-بتحميل هذا المورد، فإنك توافق على الالتزام بشروط ترخيص {{ asset()?.license }}.
-
-2. الاستخدامات المسموحة
-- يمكنك استخدام هذا المورد للمشاريع الشخصية والتجارية
-- يمكنك تعديل وتكييف المورد لاحتياجاتك
-- يجب عليك تقديم الإسناد المناسب عند الحاجة
-
-3. القيود
-- لا يمكنك إعادة توزيع الملفات الأصلية دون إذن
-- لا يمكنك المطالبة بملكية العمل الأصلي
-- قد يتطلب الاستخدام التجاري أذونات إضافية
-
-4. الضمانات والمسؤولية
-يتم توفير هذا المورد "كما هو" دون ضمانات من أي نوع.
-الناشر غير مسؤول عن أي أضرار ناتجة عن استخدام هذا المورد.
-
-5. الإنهاء
-ينتهي هذا الترخيص تلقائياً إذا انتهكت أي شروط.
-عند الإنهاء، يجب عليك التوقف عن جميع الاستخدامات وحذف جميع النسخ.
-
-بالنقر على "تأكيد"، فإنك تقر بأنك قد قرأت ووافقت على هذه الشروط.</pre
-            >
+            <pre class="license-text">{{
+              'ACCESS_REQUEST.LICENSE_TERMS.BODY'
+                | translate: { name: asset()?.name, license: asset()?.license }
+            }}</pre>
           </div>
           @if (showScrollHint) {
             <div class="license-scroll-hint">
