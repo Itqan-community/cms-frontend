@@ -24,6 +24,11 @@ export function isExpectedTotpAuthenticatorStatusProbe404(
   );
 }
 
+/** Aborted / offline / unreachable XHR (Angular status 0) — not an application bug. */
+export function isNetworkAbortHttpError(error: HttpErrorResponse): boolean {
+  return error.status === 0;
+}
+
 /** Expected business responses that should not be reported as unexpected errors. */
 export function shouldSuppressSentryForHeadlessHttpError(
   reqUrl: string,
@@ -31,6 +36,7 @@ export function shouldSuppressSentryForHeadlessHttpError(
   error: HttpErrorResponse
 ): boolean {
   return (
+    isNetworkAbortHttpError(error) ||
     (isHeadlessAppAuthUrl(reqUrl) && isUnverifiedEmailError(error)) ||
     (isHeadlessAppAuthUrl(reqUrl) && isWebAuthnIncorrectCodeError(error)) ||
     isExpectedTotpAuthenticatorStatusProbe404(reqUrl, reqMethod, error)

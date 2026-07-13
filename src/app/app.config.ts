@@ -28,6 +28,7 @@ import { appSessionTokenInterceptor } from './core/interceptors/app-session-toke
 import { tenantHeaderInterceptor } from './core/interceptors/tenant-header.interceptor';
 import { AuthService } from './core/auth/services/auth.service';
 import { initializeAppTranslations } from './core/i18n/translate-app.initializer';
+import { createAppSentryErrorHandler } from './core/sentry/sentry-error-handler';
 registerLocaleData(ar);
 
 export const appConfig: ApplicationConfig = {
@@ -39,7 +40,7 @@ export const appConfig: ApplicationConfig = {
       ? [
           {
             provide: ErrorHandler,
-            useValue: Sentry.createErrorHandler(),
+            useFactory: createAppSentryErrorHandler,
           },
           {
             provide: Sentry.TraceService,
