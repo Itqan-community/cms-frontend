@@ -133,7 +133,7 @@ export class AssetDetailsPage implements OnInit {
       case 'recitation':
         return 'lucideMic';
       case 'font':
-        return 'lucidePalette';
+        return 'lucideType';
       case 'program':
         return 'lucideLayers';
       default:

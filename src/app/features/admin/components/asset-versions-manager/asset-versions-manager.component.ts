@@ -136,17 +136,35 @@ export class AssetVersionsManagerComponent implements OnInit {
   }
 
   canMutateVersions(): boolean {
-    if (this.kind === 'tafsir') {
-      return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR);
+    switch (this.kind) {
+      case 'tafsir':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR);
+      case 'mushaf':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_MUSHAF);
+      case 'font':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_FONT);
+      case 'program':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_PROGRAM);
+      case 'translation':
+      default:
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION);
     }
-    return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION);
   }
 
   canDeleteVersions(): boolean {
-    if (this.kind === 'tafsir') {
-      return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TAFSIR);
+    switch (this.kind) {
+      case 'tafsir':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TAFSIR);
+      case 'mushaf':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_MUSHAF);
+      case 'font':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_FONT);
+      case 'program':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_PROGRAM);
+      case 'translation':
+      default:
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TRANSLATION);
     }
-    return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TRANSLATION);
   }
 
   openCreateModal(): void {

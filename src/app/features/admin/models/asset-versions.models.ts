@@ -28,4 +28,4 @@ export interface AssetVersionFormPayload {
   file?: File | null;
 }
 
-export type AssetVersionParentKind = 'tafsir' | 'translation';
+export type AssetVersionParentKind = 'tafsir' | 'translation' | 'mushaf' | 'font' | 'program';

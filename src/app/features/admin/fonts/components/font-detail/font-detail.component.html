@@ -1,0 +1,129 @@
+<div class="font-detail admin-list-page">
+  <div class="admin-breadcrumb">
+    <a routerLink="/admin/fonts" class="admin-breadcrumb__link">{{
+      'ADMIN.FONTS.DETAIL.BREADCRUMB' | translate
+    }}</a>
+    <ng-icon name="lucideChevronLeft" class="admin-breadcrumb__sep" />
+    @if (loading()) {
+      <span class="admin-breadcrumb__current">{{ 'ADMIN.COMMON.LOADING' | translate }}</span>
+    } @else {
+      <span class="admin-breadcrumb__current">{{ font()?.name_ar }}</span>
+    }
+  </div>
+
+  @if (loading()) {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 8 }"></nz-skeleton>
+  } @else if (font()) {
+    <div class="admin-hero">
+      @if (font()!.thumbnail_url) {
+        <img [src]="font()!.thumbnail_url!" alt="" class="admin-hero-thumbnail" />
+      } @else {
+        <div class="admin-hero-placeholder">
+          <ng-icon name="lucideType" />
+        </div>
+      }
+
+      <div class="admin-hero-info">
+        <div class="admin-hero-names">
+          <h1 class="admin-hero-name-ar">{{ font()!.name_ar }}</h1>
+          <p class="admin-hero-name-en">{{ font()!.name_en }}</p>
+        </div>
+
+        <div class="admin-hero-meta">
+          <nz-tag [nzColor]="getLicenseColor(font()!.license)">{{ font()!.license }}</nz-tag>
+          @if (font()!.language) {
+            <nz-tag>{{ languageLabel(font()!.language) }}</nz-tag>
+          }
+          @if (font()!.is_external) {
+            <nz-tag nzColor="orange">{{ 'ADMIN.COMMON.TAG_EXTERNAL' | translate }}</nz-tag>
+          }
+          @if (font()!.is_open_access) {
+            <nz-tag nzColor="green">{{ 'ADMIN.COMMON.TAG_OPEN_ACCESS' | translate }}</nz-tag>
+          }
+          @if (font()!.restricted_for_tenant) {
+            <nz-tag nzColor="orange">{{ 'ADMIN.COMMON.TAG_API_ONLY' | translate }}</nz-tag>
+          }
+          <span class="admin-hero-meta__date">
+            <ng-icon name="lucideCalendar" />
+            {{ font()!.created_at | date: 'dd/MM/yyyy' }}
+          </span>
+        </div>
+
+        <div class="admin-publisher-row">
+          <ng-icon name="lucideStore" />
+          <span>{{ font()!.publisher.name }}</span>
+        </div>
+
+        @if (font()!.external_url) {
+          <div class="admin-external-url">
+            <ng-icon name="lucideLink" />
+            <a [href]="font()!.external_url!" target="_blank" rel="noopener">{{
+              font()!.external_url
+            }}</a>
+          </div>
+        }
+      </div>
+
+      <div class="admin-hero-actions">
+        @if (canUpdateFont()) {
+          <button nz-button nzType="primary" (click)="onEdit()">
+            <ng-icon name="lucideSquarePen" />
+            {{ 'ADMIN.COMMON.EDIT' | translate }}
+          </button>
+        }
+        @if (canDeleteFont()) {
+          <button nz-button nzDanger (click)="onDelete()">
+            <ng-icon name="lucideTrash2" />
+            {{ 'ADMIN.COMMON.DELETE' | translate }}
+          </button>
+        }
+      </div>
+    </div>
+
+    <div class="admin-descriptions">
+      <div class="admin-desc-col">
+        <h3 class="admin-desc-title">
+          <ng-icon name="lucideFileText" /> {{ 'ADMIN.FONTS.DETAIL.DESC_AR_TITLE' | translate }}
+        </h3>
+        <p class="admin-desc-text">{{ font()!.description_ar }}</p>
+        <h3 class="admin-desc-title">
+          <ng-icon name="lucideAlignRight" /> {{ 'ADMIN.FONTS.DETAIL.LONG_AR_TITLE' | translate }}
+        </h3>
+        <p class="admin-desc-text">{{ font()!.long_description_ar }}</p>
+      </div>
+      <div class="admin-desc-col">
+        <h3 class="admin-desc-title" dir="ltr">
+          <ng-icon name="lucideFileText" /> {{ 'ADMIN.FONTS.DETAIL.DESC_EN_TITLE' | translate }}
+        </h3>
+        <p class="admin-desc-text" dir="ltr">{{ font()!.description_en }}</p>
+        <h3 class="admin-desc-title" dir="ltr">
+          <ng-icon name="lucideAlignLeft" /> {{ 'ADMIN.FONTS.DETAIL.LONG_EN_TITLE' | translate }}
+        </h3>
+        <p class="admin-desc-text" dir="ltr">{{ font()!.long_description_en }}</p>
+      </div>
+    </div>
+
+    <app-asset-versions-manager
+      kind="font"
+      [slug]="font()!.slug"
+      [assetId]="font()!.id"
+      i18nPrefix="ADMIN.FONTS.DETAIL.VERSIONS"
+      sectionTitleKey="ADMIN.FONTS.DETAIL.VERSIONS_TITLE"
+    />
+
+    <div class="admin-back">
+      <a routerLink="/admin/fonts">
+        <button nz-button nzType="default">
+          <ng-icon name="lucideArrowRight" />
+          {{ 'ADMIN.COMMON.BACK_TO_LIST' | translate }}
+        </button>
+      </a>
+    </div>
+  } @else {
+    <div class="admin-not-found">
+      <ng-icon name="lucideAlertTriangle" class="admin-not-found__icon" />
+      <p>{{ 'ADMIN.COMMON.NOT_FOUND' | translate }}</p>
+      <a routerLink="/admin/fonts">{{ 'ADMIN.COMMON.GO_BACK_LIST' | translate }}</a>
+    </div>
+  }
+</div>

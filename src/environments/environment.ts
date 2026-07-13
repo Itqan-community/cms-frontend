@@ -9,4 +9,6 @@ export const environment = {
    * (e.g. `localhost`). Replacing RP ID here without a matching server config will fail verification.
    */
   webauthnReplaceRpIdWithHostname: false,
+  /** In-memory programs CRUD until portal programs API is live. */
+  useProgramsMockApi: true,
 };
