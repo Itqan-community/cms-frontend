@@ -281,6 +281,22 @@ Release 1.4.4.
 
 ---
 
+## [1.5.0] - 2026-07-14
+
+Release 1.5.0.
+
+## Changes
+
+- fix(ci): use admin PAT for semantic-release push to master
+- style: fix prettier formatting on publisher-details.page.ts
+- fix(seo): key robots.txt on Netlify CONTEXT instead of per-config assets
+- fix(seo): address PR review — per-env robots.txt, twitter:card, description fallbacks
+- fix(seo): guard publisher-details fetches with takeUntilDestroyed
+- feat(seo): add SeoService/JsonLdService and wire SEO tags into public pages
+- fix(sentry): recover chunk/i18n network failures and drop status-0 noise
+
+---
+
 ## [Unreleased]
 
 ### Added
