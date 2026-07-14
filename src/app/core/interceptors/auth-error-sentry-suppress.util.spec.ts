@@ -1,9 +1,22 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { shouldSuppressSentryForHeadlessHttpError } from './auth-error-sentry-suppress.util';
+import {
+  isNetworkAbortHttpError,
+  shouldSuppressSentryForHeadlessHttpError,
+} from './auth-error-sentry-suppress.util';
 
 describe('shouldSuppressSentryForHeadlessHttpError', () => {
   const api = environment.API_BASE_URL;
+
+  it('is true for status 0 network abort on any URL', () => {
+    const err = new HttpErrorResponse({
+      status: 0,
+      statusText: 'Unknown Error',
+      url: '/i18n/ar.json',
+    });
+    expect(isNetworkAbortHttpError(err)).toBe(true);
+    expect(shouldSuppressSentryForHeadlessHttpError('/i18n/ar.json', 'GET', err)).toBe(true);
+  });
 
   it('is true for 409 unverified_email on headless app URL', () => {
     if (!api) {

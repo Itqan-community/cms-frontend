@@ -147,16 +147,17 @@ cms-frontend/
 
 ### Core Layer (`src/app/core/`)
 
-| Subdirectory     | Contents                                                                                                                       | Purpose                                                    |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
-| `auth/`          | 21 pages + 1 service + 3 guards + headless API module (20+ files)                                                              | Full django-allauth headless SPA integration               |
-| `auth/headless/` | `HeadlessAuthApiService` (~60 methods), `HeadlessAppTokenService`, types, hooks, WebAuthn utils, CSRF utils, provider redirect | allauth headless contract implementation                   |
-| `constants/`     | `BREAKPOINTS`, `NAV_LINKS`                                                                                                     | Responsive breakpoints + navigation link definitions       |
-| `enums/`         | `Categories` (tafsir/translation/recitation), `Licenses` (CC0-CC-BY-NC-ND + colors)                                            | Content categorization and licensing                       |
-| `guards/`        | `publisherHostGuard`                                                                                                           | Blocks publisher subdomain visitors from CMS routes        |
-| `interceptors/`  | 6 interceptors (credentials, CSRF response, app-session-token, headers/global, auth-error, error)                              | HTTP pipeline: session token, CSRF, error handling, Sentry |
-| `services/`      | `GoogleAnalyticsService`, `WebVitalsService`, `ViewportService`                                                                | Analytics, Core Web Vitals, responsive viewport detection  |
-| `utils/`         | `csrf.util.ts`                                                                                                                 | Django CSRF (same-origin cookies + cross-origin override)  |
+| Subdirectory     | Contents                                                                                                                       | Purpose                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `auth/`          | 21 pages + 1 service + 3 guards + headless API module (20+ files)                                                              | Full django-allauth headless SPA integration                      |
+| `auth/headless/` | `HeadlessAuthApiService` (~60 methods), `HeadlessAppTokenService`, types, hooks, WebAuthn utils, CSRF utils, provider redirect | allauth headless contract implementation                          |
+| `constants/`     | `BREAKPOINTS`, `NAV_LINKS`                                                                                                     | Responsive breakpoints + navigation link definitions              |
+| `enums/`         | `Categories` (tafsir/translation/recitation), `Licenses` (CC0-CC-BY-NC-ND + colors)                                            | Content categorization and licensing                              |
+| `guards/`        | `publisherHostGuard`                                                                                                           | Blocks publisher subdomain visitors from CMS routes               |
+| `interceptors/`  | 6 interceptors (credentials, CSRF response, app-session-token, headers/global, auth-error, error)                              | HTTP pipeline: session token, CSRF, error handling, Sentry        |
+| `sentry/`        | chunk-load recovery, `beforeSend` noise filter, app ErrorHandler wrapper                                                       | Benign network/chunk failures: one-time reload + drop from Sentry |
+| `services/`      | `GoogleAnalyticsService`, `WebVitalsService`, `ViewportService`                                                                | Analytics, Core Web Vitals, responsive viewport detection         |
+| `utils/`         | `csrf.util.ts`                                                                                                                 | Django CSRF (same-origin cookies + cross-origin override)         |
 
 ### Interceptor Pipeline (order matters)
 
@@ -169,6 +170,17 @@ Response: authErrorInterceptor -> errorInterceptor
 `409` + `unverified_email` on `/auth/app/v1/*`: no global error toast, no Sentry; pages redirect to
 `/account/verify-email?reason=unverified_email` (login/register/security settings) with copy on
 verify-email.
+
+HTTP `status === 0` (network abort / offline): suppressed from Sentry in `authErrorInterceptor`;
+user toast still via `error.interceptor` (`ERRORS.NETWORK_ERROR`).
+
+### Sentry (noise + recovery)
+
+- Init: `main.ts` — `beforeSend` drops chunk/module-import failures and status-0 HTTP noise
+  (`core/sentry/sentry-before-send.util.ts`).
+- ErrorHandler: `createAppSentryErrorHandler()` — one-time `location.reload()` on lazy chunk /
+  module-import failure (`sessionStorage` flag), then delegates to Sentry.
+- Successful bootstrap clears the chunk-recovery flag so a later deploy mismatch can recover once.
 
 ### Auth Architecture (django-allauth headless SPA)
 
@@ -402,7 +414,10 @@ success.
 - **Languages:** English (`en`), Arabic (`ar`)
 - **Default:** Arabic (`ar`) — set in both `index.html` and `app.config.ts`
 - **Persistence:** `localStorage.getItem('lang')`
-- **Switch:** Full page reload on language toggle (`LangSwitchComponent`)
+- **Bootstrap:** `initializeAppTranslations()` retries once; on final failure boots anyway (no
+  unhandled ErrorHandler) so flaky mobile loads of `/i18n/*.json` do not crash the app
+- **Switch:** Full page reload on language toggle (`LangSwitchComponent`); `App.switchLang` catches
+  failed `translate.use`
 - **RTL:** `<html dir="rtl">` with logical CSS properties (`margin-inline`, `padding-inline`)
 - **Keys:** 1486 per language (parity verified); domains include auth, navigation, gallery, admin,
   content standards, licenses, errors, forms, access-request license terms
