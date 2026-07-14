@@ -278,7 +278,9 @@ success.
 | `issues/`          | Issue reports         | `IssueReportOut`                    | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions                                                                                |
 | `members/`         | Publisher members     | `MemberOut`                         | List/invite/update/remove/resend via `/portal/members/`; scoped by `AdminTenantService.selectedPublisherId()`                                                                    |
 | `access-requests/` | Asset access requests | `AccessRequestOut`                  | List/accept/reject + publisher settings (`/portal/publishers/{id}/access-requests-settings/`); detail drawer; permission-gated actions                                           |
-| `mushafs/`         | Mushaf (Quran pages)  | Pages, Surahs, Ayahs, Words         | Complex nested UI with tabs and search                                                                                                                                           |
+| `mushafs/`         | Mushaf portal assets  | `MushafItem`, `MushafDetails`       | List/detail/create/edit/delete + versions via live `/portal/mushafs/`; permission-gated (`portal_*_mushaf`)                                                                      |
+| `fonts/`           | Font portal assets    | `FontItem`, `FontDetails`           | Same CRUD pattern via live `/portal/fonts/`; permission-gated (`portal_*_font`)                                                                                                  |
+| `programs/`        | Program portal assets | `ProgramItem`, `ProgramDetails`     | Feature code present; route/sidebar/redirect hidden until BE `/portal/programs/` ships; mock via `useProgramsMockApi`                                                            |
 | `usage/`           | API Usage analytics   | Request logs                        | Charts, top endpoints, top entities                                                                                                                                              |
 | `audio/`           | Audio management      | —                                   | Routes defined                                                                                                                                                                   |
 | `software/`        | Software management   | —                                   | Routes defined                                                                                                                                                                   |
@@ -286,7 +288,7 @@ success.
 **Shared admin components:**
 
 - `admin-column-picker/` — Column visibility toggles for tables
-- `asset-versions-manager/` — Version CRUD (tafsir/translation)
+- `asset-versions-manager/` — Version CRUD (tafsir/translation/mushaf/font; program when re-enabled)
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`
 - `search-panel/` — Search UI
@@ -436,8 +438,9 @@ success.
 Full CRUD for: publishers, tafsirs (versions), translations (versions), recitations (with tracks),
 reciters, issue reports (`/portal/issue-reports/`), publisher members (`/portal/members/`), asset
 access requests (`/portal/access-requests/` — list, detail, accept, reject;
-`/portal/publishers/{id}/access-requests-settings/` — auto-acceptance), mushafs
-(pages/surahs/ayahs/words), usage analytics
+`/portal/publishers/{id}/access-requests-settings/` — auto-acceptance), mushafs (`/portal/mushafs/`
+— CRUD + versions), fonts (`/portal/fonts/` — CRUD + versions), usage analytics. Programs portal
+module is dormant (route/nav hidden) until BE ships `/portal/programs/`.
 
 ---
 
@@ -464,7 +467,9 @@ access requests (`/portal/access-requests/` — list, detail, accept, reject;
 | `features/dashify/`                     | Unknown           | Minimal implementation, purpose unclear.                                                                            |
 | `features/admin/` guards                | Implemented       | `portal-access`, `permission`, `itqan-admin` guards active on admin routes.                                         |
 | `shared/directives/`                    | Empty             | Directory exists with no files.                                                                                     |
-| `features/admin/mushafs/`               | In progress       | Complex UI with multiple tabs (Pages, Surahs, Ayahs, Words) — may be incomplete.                                    |
+| `features/admin/mushafs/`               | Implemented       | Portal mushaf CRUD wired to live `/portal/mushafs/` + `permissionGuard` (`portal_*_mushaf`).                        |
+| `features/admin/fonts/`                 | Implemented       | Portal font CRUD wired to live `/portal/fonts/` + `permissionGuard` (`portal_*_font`).                              |
+| `features/admin/programs/`              | Hidden (dormant)  | Module kept; `/admin/programs` route, sidebar tab, and redirect candidate removed until BE API is ready.            |
 | `features/admin/audio/`                 | Partial           | Routes defined but implementation details need verification.                                                        |
 | `features/admin/software/`              | Partial           | Routes defined but implementation details need verification.                                                        |
 | Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                         |

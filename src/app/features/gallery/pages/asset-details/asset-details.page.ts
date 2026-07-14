@@ -164,7 +164,7 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
       case 'recitation':
         return 'lucideMic';
       case 'font':
-        return 'lucidePalette';
+        return 'lucideType';
       case 'program':
         return 'lucideLayers';
       default:

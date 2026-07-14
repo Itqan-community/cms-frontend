@@ -55,13 +55,32 @@ export class AssetVersionsService {
     return this.http.delete<void>(this.versionItemUrl(kind, slug, versionId));
   }
 
+  private segmentForKind(kind: AssetVersionParentKind): string {
+    switch (kind) {
+      case 'tafsir':
+        return 'tafsirs';
+      case 'translation':
+        return 'translations';
+      case 'mushaf':
+        return 'mushafs';
+      case 'font':
+        return 'fonts';
+      case 'program':
+        return 'programs';
+      default: {
+        const _exhaustive: never = kind;
+        throw new Error(`Unsupported asset version kind: ${_exhaustive}`);
+      }
+    }
+  }
+
   private listUrl(kind: AssetVersionParentKind, slug: string): string {
-    const segment = kind === 'tafsir' ? 'tafsirs' : 'translations';
+    const segment = this.segmentForKind(kind);
     return `${this.base}/${segment}/${encodeURIComponent(slug)}/versions/`;
   }
 
   private versionItemUrl(kind: AssetVersionParentKind, slug: string, versionId: number): string {
-    const segment = kind === 'tafsir' ? 'tafsirs' : 'translations';
+    const segment = this.segmentForKind(kind);
     return `${this.base}/${segment}/${encodeURIComponent(slug)}/versions/${versionId}/`;
   }
 

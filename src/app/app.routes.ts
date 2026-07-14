@@ -57,6 +57,21 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'mushafs',
+        loadChildren: () =>
+          import('./features/admin/mushafs/mushafs.routes').then((m) => m.mushafRoutes),
+      },
+      {
+        path: 'fonts',
+        loadChildren: () => import('./features/admin/fonts/fonts.routes').then((m) => m.fontRoutes),
+      },
+      // Programs portal hidden until backend API is ready.
+      // {
+      //   path: 'programs',
+      //   loadChildren: () =>
+      //     import('./features/admin/programs/programs.routes').then((m) => m.programRoutes),
+      // },
+      {
         path: 'recitations',
         loadChildren: () =>
           import('./features/admin/recitations/recitations.routes').then((m) => m.recitationRoutes),
