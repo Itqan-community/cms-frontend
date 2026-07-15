@@ -38,6 +38,24 @@ export function localizeLanguageCode(
   }
 }
 
+// `Intl.DisplayNames` construction is comparatively expensive; callers that render many
+// codes per change-detection cycle (e.g. a nationality filter list, a grid of cards) would
+// otherwise rebuild it on every read. One instance per locale is reused across calls.
+const regionDisplayNamesByLocale = new Map<string, Intl.DisplayNames>();
+
+function getRegionDisplayNames(locale: 'ar' | 'en'): Intl.DisplayNames | null {
+  const cached = regionDisplayNamesByLocale.get(locale);
+  if (cached) return cached;
+
+  try {
+    const instance = new Intl.DisplayNames([locale], { type: 'region' });
+    regionDisplayNamesByLocale.set(locale, instance);
+    return instance;
+  } catch {
+    return null;
+  }
+}
+
 export function localizeCountryCodeOrName(
   value: string | null | undefined,
   uiLang: string | null | undefined,
@@ -53,12 +71,10 @@ export function localizeCountryCodeOrName(
 
   const locale = normalizedUiLocale(uiLang);
   const code = trimmed.toUpperCase();
-  try {
-    const label = new Intl.DisplayNames([locale], { type: 'region' }).of(code);
-    return label ?? code;
-  } catch {
-    return code;
-  }
+  const displayNames = getRegionDisplayNames(locale);
+  if (!displayNames) return code;
+
+  return displayNames.of(code) ?? code;
 }
 
 /** Hijri year in admin tables, e.g. `1444 هـ` / `1444 AH`. */
