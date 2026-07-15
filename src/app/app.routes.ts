@@ -190,6 +190,18 @@ export const routes: Routes = [
     canActivate: [publisherHostGuard], // Restrict access for publisher hosts
   },
   {
+    path: 'reciters',
+    loadComponent: () =>
+      import('./features/reciters/pages/reciters/reciters.page').then((m) => m.RecitersPage),
+  },
+  {
+    path: 'reciters/:slug',
+    loadComponent: () =>
+      import('./features/reciters/pages/reciter-details/reciter-details.page').then(
+        (m) => m.ReciterDetailsPage
+      ),
+  },
+  {
     path: 'license/:id',
     loadComponent: () =>
       import('./features/license/pages/license-details/license-details.page').then(
