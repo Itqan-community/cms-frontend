@@ -509,7 +509,8 @@
     "API_DOCS": "API Docs",
     "PUBLISHER_DASHBOARD": "Publisher Dashboard",
     "ASSET_REQUEST_FORM": "Add Quranic Content to ITQAN",
-    "ADMIN_PORTAL": "Admin Portal"
+    "ADMIN_PORTAL": "Admin Portal",
+    "RECITERS": "Reciters"
   },
   "HOME": {
     "WELCOME": "Welcome to Itqan CMS",
@@ -1799,5 +1800,24 @@
     "TOP_ENTITIES": "Top entities",
     "NO_DATA": "No data for the selected period",
     "ERROR_UNAVAILABLE": "Usage stats are temporarily unavailable. Please try again later."
+  },
+  "RECITERS": {
+    "PAGE_TITLE": "Quran Reciters",
+    "PAGE_SUBTITLE": "Browse and search Quran reciters on ITQAN.",
+    "SEARCH_PLACEHOLDER": "Search reciters by name...",
+    "NATIONALITY_FILTER_PLACEHOLDER": "Nationality",
+    "NO_RESULTS_TITLE": "No reciters found",
+    "NO_RESULTS_MESSAGE": "Try adjusting your search or filters to find what you're looking for.",
+    "LOAD_ERROR": "Could not load reciters. Please try again.",
+    "RECITATIONS_COUNT": "{{count}} recitations",
+    "RECITATIONS": "Recitations",
+    "NO_RECITATIONS_TITLE": "No recitations yet",
+    "NO_RECITATIONS_MESSAGE": "This reciter has no published recitations at the moment.",
+    "NATIONALITY_LABEL": "Nationality",
+    "BIO_LABEL": "Biography",
+    "DATE_OF_DEATH": "Date of death",
+    "NOT_FOUND_TITLE": "Reciter not found",
+    "NOT_FOUND_MESSAGE": "The reciter you're looking for doesn't exist or is no longer available.",
+    "BACK_TO_RECITERS": "Back to Reciters"
   }
 }
