@@ -297,6 +297,16 @@ Release 1.5.0.
 
 ---
 
+## [1.6.0] - 2026-07-22
+
+Release 1.6.0.
+
+## Changes
+
+- feat(reciters): add public reciters SEO pages, API, and sitemap generation
+
+---
+
 ## [Unreleased]
 
 ### Added
