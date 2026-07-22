@@ -17,6 +17,7 @@ import { NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
 import { isRestrictedForTenantConflictError } from '../../../../../shared/utils/error.utils';
+import { AssetInitialVersionFieldsComponent } from '../../../components/asset-initial-version-fields/asset-initial-version-fields.component';
 import { PublisherFilterItem } from '../../../tafsirs/models/tafsirs.models';
 import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
 import {
@@ -43,6 +44,7 @@ import { MushafsService } from '../../services/mushafs.service';
     NzUploadModule,
     NzToolTipModule,
     TranslateModule,
+    AssetInitialVersionFieldsComponent,
   ],
   templateUrl: './mushaf-form.component.html',
   styleUrl: './mushaf-form.component.less',
@@ -65,6 +67,7 @@ export class MushafFormComponent implements OnInit {
   readonly thumbnailFile = signal<File | null>(null);
   readonly thumbnailPreview = signal<string | null>(null);
   readonly fileList = signal<NzUploadFile[]>([]);
+  readonly versionFile = signal<File | null>(null);
 
   readonly licenseOptions = Object.values(Licenses);
 
@@ -82,6 +85,8 @@ export class MushafFormComponent implements OnInit {
     external_url: [''],
     is_open_access: [false],
     restricted_for_tenant: [false],
+    version_name: [''],
+    version_summary: [''],
   });
 
   private editSlug: string | null = null;
@@ -92,6 +97,14 @@ export class MushafFormComponent implements OnInit {
       this.isEditMode.set(true);
       this.editSlug = slugParam;
       this.loadForEdit();
+    } else {
+      this.form.controls.version_name.setValidators([
+        Validators.required,
+        Validators.maxLength(255),
+      ]);
+      this.form.controls.version_summary.setValidators([Validators.required]);
+      this.form.controls.version_name.updateValueAndValidity();
+      this.form.controls.version_summary.updateValueAndValidity();
     }
     this.loadPublishers();
   }
@@ -120,12 +133,25 @@ export class MushafFormComponent implements OnInit {
     this.fileList.set([]);
   }
 
+  canSubmit(): boolean {
+    if (this.form.invalid) return false;
+    if (!this.isEditMode() && !this.versionFile()) return false;
+    return true;
+  }
+
   onSubmit(): void {
     if (this.form.invalid) {
       Object.values(this.form.controls).forEach((c) => {
         c.markAsDirty();
         c.updateValueAndValidity({ onlySelf: true });
       });
+      return;
+    }
+
+    if (!this.isEditMode() && !this.versionFile()) {
+      this.message.warning(
+        this.translate.instant('ADMIN.COMMON.INITIAL_VERSION.MESSAGES.FILE_REQUIRED')
+      );
       return;
     }
 
@@ -165,8 +191,8 @@ export class MushafFormComponent implements OnInit {
   }
 
   private buildBody(): MushafFormValue {
-    const v = this.form.value;
-    return {
+    const v = this.form.getRawValue();
+    const body: MushafFormValue = {
       name_ar: v.name_ar ?? '',
       name_en: v.name_en ?? '',
       description_ar: v.description_ar ?? '',
@@ -182,6 +208,14 @@ export class MushafFormComponent implements OnInit {
       external_url: v.external_url || null,
       thumbnail: this.thumbnailFile() ?? undefined,
     };
+
+    if (!this.isEditMode()) {
+      body.version_name = v.version_name ?? '';
+      body.version_summary = v.version_summary ?? '';
+      body.file = this.versionFile() ?? undefined;
+    }
+
+    return body;
   }
 
   private loadForEdit(): void {

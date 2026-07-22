@@ -79,6 +79,11 @@ export class FontsService {
     if (payload.thumbnail) {
       data.append('thumbnail', payload.thumbnail);
     }
+    append('version_name', payload.version_name);
+    append('version_summary', payload.version_summary);
+    if (payload.file) {
+      data.append('file', payload.file);
+    }
 
     return data;
   }

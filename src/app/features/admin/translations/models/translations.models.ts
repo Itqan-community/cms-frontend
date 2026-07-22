@@ -98,6 +98,10 @@ export interface TranslationFormValue {
   is_open_access: boolean;
   restricted_for_tenant: boolean;
   external_url?: string | null;
+  /** Create-only: first version metadata + content file. */
+  version_name?: string;
+  version_summary?: string;
+  file?: File;
 }
 
 export interface PublisherFilterItem {

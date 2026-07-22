@@ -24,6 +24,7 @@ import {
 } from '../../../utils/display-localization.util';
 import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
 import { isRestrictedForTenantConflictError } from '../../../../../shared/utils/error.utils';
+import { AssetInitialVersionFieldsComponent } from '../../../components/asset-initial-version-fields/asset-initial-version-fields.component';
 
 @Component({
   selector: 'app-translation-form',
@@ -42,6 +43,7 @@ import { isRestrictedForTenantConflictError } from '../../../../../shared/utils/
     NzToolTipModule,
     NzUploadModule,
     TranslateModule,
+    AssetInitialVersionFieldsComponent,
   ],
   templateUrl: './translation-form.component.html',
   styleUrl: './translation-form.component.less',
@@ -64,6 +66,7 @@ export class TranslationFormComponent implements OnInit {
   readonly thumbnailFile = signal<File | null>(null);
   readonly thumbnailPreview = signal<string | null>(null);
   readonly fileList = signal<NzUploadFile[]>([]);
+  readonly versionFile = signal<File | null>(null);
 
   readonly licenseOptions = Object.values(Licenses);
 
@@ -81,6 +84,8 @@ export class TranslationFormComponent implements OnInit {
     external_url: [''],
     is_open_access: [false],
     restricted_for_tenant: [false],
+    version_name: [''],
+    version_summary: [''],
   });
 
   private editSlug: string | null = null;
@@ -91,6 +96,14 @@ export class TranslationFormComponent implements OnInit {
       this.isEditMode.set(true);
       this.editSlug = slugParam;
       this.loadForEdit();
+    } else {
+      this.form.controls.version_name.setValidators([
+        Validators.required,
+        Validators.maxLength(255),
+      ]);
+      this.form.controls.version_summary.setValidators([Validators.required]);
+      this.form.controls.version_name.updateValueAndValidity();
+      this.form.controls.version_summary.updateValueAndValidity();
     }
     this.loadPublishers();
   }
@@ -119,12 +132,25 @@ export class TranslationFormComponent implements OnInit {
     this.fileList.set([]);
   }
 
+  canSubmit(): boolean {
+    if (this.form.invalid) return false;
+    if (!this.isEditMode() && !this.versionFile()) return false;
+    return true;
+  }
+
   onSubmit(): void {
     if (this.form.invalid) {
       Object.values(this.form.controls).forEach((c) => {
         c.markAsDirty();
         c.updateValueAndValidity({ onlySelf: true });
       });
+      return;
+    }
+
+    if (!this.isEditMode() && !this.versionFile()) {
+      this.message.warning(
+        this.translate.instant('ADMIN.COMMON.INITIAL_VERSION.MESSAGES.FILE_REQUIRED')
+      );
       return;
     }
 
@@ -164,8 +190,8 @@ export class TranslationFormComponent implements OnInit {
   }
 
   private buildBody(): TranslationFormValue {
-    const v = this.form.value;
-    return {
+    const v = this.form.getRawValue();
+    const body: TranslationFormValue = {
       name_ar: v.name_ar ?? '',
       name_en: v.name_en ?? '',
       description_ar: v.description_ar ?? '',
@@ -180,6 +206,14 @@ export class TranslationFormComponent implements OnInit {
       restricted_for_tenant: v.restricted_for_tenant ?? false,
       external_url: v.external_url || null,
     };
+
+    if (!this.isEditMode()) {
+      body.version_name = v.version_name ?? '';
+      body.version_summary = v.version_summary ?? '';
+      body.file = this.versionFile() ?? undefined;
+    }
+
+    return body;
   }
 
   private loadForEdit(): void {

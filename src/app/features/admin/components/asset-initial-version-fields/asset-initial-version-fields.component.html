@@ -1,0 +1,61 @@
+<div class="admin-form-card asset-initial-version-fields">
+  <h3 class="admin-form-card__title">
+    <ng-icon name="lucideRotateCw" />
+    {{ i18n + '.SECTION_TITLE' | translate }}
+  </h3>
+  <p class="asset-initial-version-fields__hint">{{ i18n + '.SECTION_HINT' | translate }}</p>
+
+  <nz-form-item>
+    <nz-form-label nzRequired>{{ i18n + '.FORM_NAME' | translate }}</nz-form-label>
+    <nz-form-control [nzErrorTip]="i18n + '.ERR_NAME' | translate">
+      <input
+        nz-input
+        formControlName="version_name"
+        [placeholder]="i18n + '.PLACEHOLDER_NAME' | translate"
+      />
+    </nz-form-control>
+  </nz-form-item>
+
+  <nz-form-item>
+    <nz-form-label nzRequired>{{ i18n + '.FORM_SUMMARY' | translate }}</nz-form-label>
+    <nz-form-control [nzErrorTip]="i18n + '.ERR_SUMMARY' | translate">
+      <textarea
+        nz-input
+        formControlName="version_summary"
+        [placeholder]="i18n + '.PLACEHOLDER_SUMMARY' | translate"
+        [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+      ></textarea>
+    </nz-form-control>
+  </nz-form-item>
+
+  <div class="asset-initial-version-fields__upload">
+    <nz-form-label nzRequired>{{ i18n + '.FORM_FILE' | translate }}</nz-form-label>
+    <input
+      #versionFileInput
+      type="file"
+      class="asset-initial-version-fields__file-input"
+      (change)="onPickFile($event)"
+    />
+    <div class="asset-initial-version-fields__upload-actions">
+      <button nz-button nzType="default" type="button" (click)="versionFileInput.click()">
+        <ng-icon name="lucideFolderOpen" />
+        {{ i18n + '.CHOOSE_FILE' | translate }}
+      </button>
+      @if (selectedFileName()) {
+        <button nz-button nzType="default" nzDanger type="button" (click)="clearFile()">
+          <ng-icon name="lucideX" />
+          {{ i18n + '.CLEAR_FILE' | translate }}
+        </button>
+      }
+    </div>
+    @if (selectedFileName()) {
+      <p class="asset-initial-version-fields__file-preview">
+        <span class="admin-mono">{{ selectedFileName() }}</span>
+      </p>
+    } @else {
+      <p class="asset-initial-version-fields__file-hint">
+        {{ i18n + '.FILE_REQUIRED_HINT' | translate }}
+      </p>
+    }
+  </div>
+</div>

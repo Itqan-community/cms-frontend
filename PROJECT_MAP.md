@@ -104,12 +104,16 @@ listings by the backend.
 ```
 List  -> GET    /portal/{entity}/
 Detail -> GET   /portal/{entity}/{id}/
-Create -> POST  /portal/{entity}/
+Create -> POST  /portal/{entity}/  (multipart; font/mushaf/tafsir/translation create requires
+               initial version: version_name + version_summary + file)
 Update -> PUT   /portal/{entity}/{id}/
 Delete -> DELETE /portal/{entity}/{id}/
 
 Each entity has: ListComponent, FormComponent (create+edit), DetailComponent
 Base class: AdminListBase (src/app/features/admin/utils/admin-list-base.ts)
+Create forms for font/mushaf/tafsir/translation include shared
+`asset-initial-version-fields` (required on create only). Additional versions on detail via
+`asset-versions-manager`.
 ```
 
 ---
@@ -271,15 +275,15 @@ success.
 | Module             | Entity                | Key Models                          | Notes                                                                                                                                                                            |
 | ------------------ | --------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `publishers/`      | Publisher admin       | `Publisher`                         | CRUD + image upload                                                                                                                                                              |
-| `tafsirs/`         | Tafsir (exegesis)     | `Tafsir`, `TafsirVersion`           | CRUD + version management                                                                                                                                                        |
-| `translations/`    | Translation           | `Translation`, `TranslationVersion` | CRUD + version management                                                                                                                                                        |
+| `tafsirs/`         | Tafsir (exegesis)     | `Tafsir`, `TafsirVersion`           | CRUD + required initial version on create + version management on detail                                                                                                         |
+| `translations/`    | Translation           | `Translation`, `TranslationVersion` | CRUD; create is multipart FormData with required initial version; update/patch remain JSON; version management on detail                                                         |
 | `recitations/`     | Recitation (audio)    | `Recitation`                        | CRUD + track upload with progress + timings; full bulk upload success redirects to `/gallery/asset/{id}`; partial failure clears validate banner and keeps failed rows for retry |
 | `reciters/`        | Reciter               | `Reciter`                           | CRUD + image upload + death info                                                                                                                                                 |
 | `issues/`          | Issue reports         | `IssueReportOut`                    | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions                                                                                |
 | `members/`         | Publisher members     | `MemberOut`                         | List/invite/update/remove/resend via `/portal/members/`; scoped by `AdminTenantService.selectedPublisherId()`                                                                    |
 | `access-requests/` | Asset access requests | `AccessRequestOut`                  | List/accept/reject + publisher settings (`/portal/publishers/{id}/access-requests-settings/`); detail drawer; permission-gated actions                                           |
-| `mushafs/`         | Mushaf portal assets  | `MushafItem`, `MushafDetails`       | List/detail/create/edit/delete + versions via live `/portal/mushafs/`; permission-gated (`portal_*_mushaf`)                                                                      |
-| `fonts/`           | Font portal assets    | `FontItem`, `FontDetails`           | Same CRUD pattern via live `/portal/fonts/`; permission-gated (`portal_*_font`)                                                                                                  |
+| `mushafs/`         | Mushaf portal assets  | `MushafItem`, `MushafDetails`       | List/detail/create/edit/delete; create requires initial version; further versions via live `/portal/mushafs/`; permission-gated (`portal_*_mushaf`)                              |
+| `fonts/`           | Font portal assets    | `FontItem`, `FontDetails`           | Same CRUD pattern via live `/portal/fonts/` (required initial version on create); permission-gated (`portal_*_font`)                                                             |
 | `programs/`        | Program portal assets | `ProgramItem`, `ProgramDetails`     | Feature code present; route/sidebar/redirect hidden until BE `/portal/programs/` ships; mock via `useProgramsMockApi`                                                            |
 | `usage/`           | API Usage analytics   | Request logs                        | Charts, top endpoints, top entities                                                                                                                                              |
 | `audio/`           | Audio management      | —                                   | Routes defined                                                                                                                                                                   |
@@ -288,6 +292,8 @@ success.
 **Shared admin components:**
 
 - `admin-column-picker/` — Column visibility toggles for tables
+- `asset-initial-version-fields/` — Required first version (name/summary/file) on asset create forms
+  (font/mushaf/tafsir/translation)
 - `asset-versions-manager/` — Version CRUD (tafsir/translation/mushaf/font; program when re-enabled)
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`

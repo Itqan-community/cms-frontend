@@ -292,6 +292,13 @@
         </nz-form-item>
       </div>
 
+      @if (!isEditMode()) {
+        <app-asset-initial-version-fields
+          [versionFile]="versionFile()"
+          (versionFileChange)="versionFile.set($event)"
+        />
+      }
+
       <div class="admin-form-footer">
         <a routerLink="/admin/tafsirs">
           <button type="button" nz-button nzType="default">
@@ -302,7 +309,7 @@
           nz-button
           nzType="primary"
           [nzLoading]="submitting()"
-          [disabled]="form.invalid"
+          [disabled]="!canSubmit()"
           type="submit"
         >
           {{

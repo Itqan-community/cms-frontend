@@ -800,7 +800,24 @@
       "PLACEHOLDER_EG": "e.g.",
       "EM_DASH": "—",
       "HIJRI_YEAR_SUFFIX": "AH",
-      "COLUMN_ACCESS": "Access"
+      "COLUMN_ACCESS": "Access",
+      "INITIAL_VERSION": {
+        "SECTION_TITLE": "Initial version",
+        "SECTION_HINT": "Upload the first file version for this asset. Required when creating.",
+        "FORM_NAME": "Version name",
+        "FORM_SUMMARY": "Summary",
+        "FORM_FILE": "File",
+        "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
+        "PLACEHOLDER_SUMMARY": "Short notes about this file…",
+        "ERR_NAME": "Version name is required",
+        "ERR_SUMMARY": "Summary is required",
+        "CHOOSE_FILE": "Choose file",
+        "CLEAR_FILE": "Remove file",
+        "FILE_REQUIRED_HINT": "Select a file to upload.",
+        "MESSAGES": {
+          "FILE_REQUIRED": "Choose a file to upload."
+        }
+      }
     },
     "TENANT": {
       "ARIA_LABEL": "Publisher scope selector",

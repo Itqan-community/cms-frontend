@@ -800,7 +800,24 @@
       "PLACEHOLDER_EG": "مثال:",
       "EM_DASH": "—",
       "HIJRI_YEAR_SUFFIX": "هـ",
-      "COLUMN_ACCESS": "الوصول"
+      "COLUMN_ACCESS": "الوصول",
+      "INITIAL_VERSION": {
+        "SECTION_TITLE": "الإصدار الأولي",
+        "SECTION_HINT": "ارفع ملف الإصدار الأول لهذا الأصل. مطلوب عند الإنشاء.",
+        "FORM_NAME": "اسم الإصدار",
+        "FORM_SUMMARY": "الملخص",
+        "FORM_FILE": "الملف",
+        "PLACEHOLDER_NAME": "مثال: v1.0 — النص الكامل",
+        "PLACEHOLDER_SUMMARY": "ملاحظات قصيرة عن هذا الملف…",
+        "ERR_NAME": "اسم الإصدار مطلوب",
+        "ERR_SUMMARY": "الملخص مطلوب",
+        "CHOOSE_FILE": "اختر ملفًا",
+        "CLEAR_FILE": "إزالة الملف",
+        "FILE_REQUIRED_HINT": "اختر ملفًا للرفع.",
+        "MESSAGES": {
+          "FILE_REQUIRED": "اختر ملفًا للرفع."
+        }
+      }
     },
     "TENANT": {
       "ARIA_LABEL": "محدد نطاق الناشر",
