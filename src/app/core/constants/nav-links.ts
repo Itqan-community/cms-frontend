@@ -13,6 +13,10 @@ export const NAV_LINKS = [
     label: 'NAV.ADMIN_PORTAL',
     link: '/admin',
   },
+  {
+    label: 'NAV.RECITERS',
+    link: '/reciters',
+  },
   // {
   //   label: 'NAV.PUBLISHERS',
   //   link: '/publishers',

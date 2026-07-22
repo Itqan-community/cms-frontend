@@ -509,7 +509,8 @@
     "API_DOCS": "وثائق الواجهات البرمجية (API)",
     "PUBLISHER_DASHBOARD": "لوحة التحكم للناشر",
     "ASSET_REQUEST_FORM": "أضف محتوى قرآني في إتقان",
-    "ADMIN_PORTAL": "لوحة الإدارة"
+    "ADMIN_PORTAL": "لوحة الإدارة",
+    "RECITERS": "القراء"
   },
   "HOME": {
     "WELCOME": "مرحبًا بك في إتقان CMS",
@@ -1798,5 +1799,24 @@
     "TOP_ENTITIES": "أكثر الكيانات طلبا",
     "NO_DATA": "لا توجد بيانات للفترة المحددة",
     "ERROR_UNAVAILABLE": "إحصائيات الاستخدام غير متاحة مؤقتا. يرجى المحاولة لاحقا."
+  },
+  "RECITERS": {
+    "PAGE_TITLE": "قراء القرآن الكريم",
+    "PAGE_SUBTITLE": "تصفح وابحث في قراء القرآن الكريم على منصة إتقان.",
+    "SEARCH_PLACEHOLDER": "ابحث عن قارئ بالاسم...",
+    "NATIONALITY_FILTER_PLACEHOLDER": "الجنسية",
+    "NO_RESULTS_TITLE": "لم يتم العثور على قراء",
+    "NO_RESULTS_MESSAGE": "حاول تعديل البحث أو عوامل التصفية للعثور على ما تبحث عنه.",
+    "LOAD_ERROR": "تعذر تحميل قائمة القراء. الرجاء المحاولة مرة أخرى.",
+    "RECITATIONS_COUNT": "{{count}} تلاوة",
+    "RECITATIONS": "التلاوات",
+    "NO_RECITATIONS_TITLE": "لا توجد تلاوات بعد",
+    "NO_RECITATIONS_MESSAGE": "لا يوجد لدى هذا القارئ تلاوات منشورة حالياً.",
+    "NATIONALITY_LABEL": "الجنسية",
+    "BIO_LABEL": "نبذة",
+    "DATE_OF_DEATH": "تاريخ الوفاة",
+    "NOT_FOUND_TITLE": "القارئ غير موجود",
+    "NOT_FOUND_MESSAGE": "القارئ الذي تبحث عنه غير موجود أو لم يعد متاحاً.",
+    "BACK_TO_RECITERS": "العودة إلى القراء"
   }
 }
