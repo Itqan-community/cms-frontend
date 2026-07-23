@@ -209,7 +209,7 @@ export class AuthService {
               this.applyProfileFromApi(p);
             }),
             catchError(() => {
-              // Keep provisional/cached portal fields; do not wipe to empty permissions.
+              // Keep provisional/cached portal fields; do not wipe to empty permissions
               return of(void 0);
             })
           );
