@@ -21,6 +21,13 @@ import {
 } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
+  clearReadableDjangoAuthCookies,
+  getCookie,
+  getDjangoCsrfTokenForRequest,
+  setCrossOriginDjangoCsrfToken,
+} from '../../utils/csrf.util';
+import { AllauthAuthChangeBus } from '../headless/allauth-auth-change.bus';
+import {
   ALLAUTH_LOGIN_REDIRECT_URL,
   ALLAUTH_LOGIN_URL,
   ALLAUTH_LOGOUT_REDIRECT_URL,
@@ -35,7 +42,6 @@ import {
   ALLAUTH_SOCIAL_PROVIDER_GITHUB,
   ALLAUTH_SOCIAL_PROVIDER_GOOGLE,
 } from '../headless/allauth-urls';
-import { AllauthAuthChangeBus } from '../headless/allauth-auth-change.bus';
 import type {
   AuthenticationMeta,
   AuthenticationResponse,
@@ -44,13 +50,13 @@ import type {
   HeadlessUser,
 } from '../headless/headless-api.types';
 import {
-  AuthenticatedOrChallenge,
-  HeadlessAuthApiService,
-} from '../headless/headless-auth-api.service';
-import {
   ALLAUTH_SESSION_TOKEN_STORAGE_KEY,
   HeadlessAppTokenService,
 } from '../headless/headless-app-token.service';
+import {
+  AuthenticatedOrChallenge,
+  HeadlessAuthApiService,
+} from '../headless/headless-auth-api.service';
 import type {
   ApiKeyCreateIn,
   ApiKeyCreateResult,
@@ -59,19 +65,13 @@ import type {
 } from '../models/api-keys.model';
 import {
   LoginRequest,
-  normalizeProfilePermissionCodes,
   RegisterRequest,
   UpdateProfileRequest,
   UpdateProfileResponse,
   User,
+  normalizeProfilePermissionCodes,
 } from '../models/auth.model';
 import { normalizeApiKeyRow, parseApiKeyCreated, parseApiKeysList } from '../utils/api-keys.util';
-import {
-  clearReadableDjangoAuthCookies,
-  getCookie,
-  getDjangoCsrfTokenForRequest,
-  setCrossOriginDjangoCsrfToken,
-} from '../../utils/csrf.util';
 
 /** Bound on the initial session/config calls so a hung backend can't stall bootstrapDone forever. */
 const AUTH_BOOTSTRAP_TIMEOUT_MS = 15000;
@@ -209,7 +209,7 @@ export class AuthService {
               this.applyProfileFromApi(p);
             }),
             catchError(() => {
-              // Keep provisional/cached portal fields; do not wipe to empty permissions.
+              // Keep provisional/cached portal fields; do not wipe to empty permissions
               return of(void 0);
             })
           );
