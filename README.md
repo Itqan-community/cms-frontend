@@ -213,10 +213,26 @@ This project uses Git hooks to maintain code quality:
 
 These hooks are automatically installed when you run `npm install`.
 
+## 🗺️ Roadmap
+
+Planned work for Hijri 1448 Q1–Q2 is tracked on the
+**[Fanar board](https://github.com/orgs/Itqan-community/projects/12)**, with full context in the
+[roadmap document](https://github.com/Itqan-community/cms-backend/blob/main/docs/ROADMAP.md).
+Frontend work in this period covers:
+
+- **API key as a public identifier** — present the key as safe to embed in client apps
+- **Recitation folder switcher** — manage clear/echo/bitrate variants under one asset
+- **Per-ayah slice preview** — admin QA tooling for generated ayah audio
+- **Developer-ready data views** — structure and live samples per entity
+- **Usage insight dashboards** — publisher and developer facing
+
 ## 🤝 Contributing
 
 We welcome contributions from the community! Please read our [Contributing Guide](CONTRIBUTING.md)
 to get started.
+
+Open issues are on the [Fanar board](https://github.com/orgs/Itqan-community/projects/12) — filter
+by `Good First Issue` if you're new, and skip anything labelled `blocked` or `Not Ready`.
 
 ### Development Workflow
 
@@ -228,6 +244,9 @@ to get started.
 6. Submit a Pull Request to `staging` branch
 
 Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before contributing.
+
+> **Using an AI assistant?** That's welcome — but you must understand, run, and test the code
+> you submit. See [Using AI Assistants](CONTRIBUTING.md#using-ai-assistants).
 
 ## 📝 License
 
