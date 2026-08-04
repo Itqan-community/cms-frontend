@@ -1,0 +1,49 @@
+<div class="content-grid" [attr.dir]="rtl() ? 'rtl' : 'ltr'">
+  <div class="content-grid__toolbar">
+    <div class="content-grid__status">
+      @if (saving()) {
+        <span class="content-grid__saving">
+          <ng-icon name="lucideRotateCw" />
+          {{ 'ADMIN.CONTENT_EDITOR.SAVING' | translate }}
+        </span>
+      } @else if (dirty()) {
+        <span class="content-grid__unsaved">
+          {{ 'ADMIN.CONTENT_EDITOR.UNSAVED' | translate }}
+        </span>
+      } @else if (draftId() !== null) {
+        <span class="content-grid__saved">
+          {{ 'ADMIN.CONTENT_EDITOR.ALL_SAVED' | translate }}
+        </span>
+      }
+    </div>
+
+    <div class="content-grid__actions">
+      <button nz-button nzType="default" (click)="discardAndLeave()" [disabled]="publishing()">
+        {{ 'ADMIN.CONTENT_EDITOR.DISCARD' | translate }}
+      </button>
+      <button
+        nz-button
+        nzType="primary"
+        [nzLoading]="publishing()"
+        [disabled]="draftId() === null"
+        (click)="publish()"
+      >
+        {{ 'ADMIN.CONTENT_EDITOR.SAVE' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <nz-spin [nzSpinning]="loading()">
+    <ag-grid-angular
+      class="content-grid__table"
+      [theme]="theme"
+      [rowData]="rows()"
+      [columnDefs]="columnDefs"
+      [defaultColDef]="defaultColDef"
+      [enableRtl]="rtl()"
+      [stopEditingWhenCellsLoseFocus]="true"
+      (gridReady)="onGridReady($event)"
+      (cellValueChanged)="onCellValueChanged($event)"
+    ></ag-grid-angular>
+  </nz-spin>
+</div>

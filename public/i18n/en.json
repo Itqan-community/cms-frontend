@@ -720,6 +720,33 @@
   },
   "ADMIN": {
     "HOME": "Home",
+    "CONTENT_EDITOR": {
+      "TITLE": "Edit content",
+      "HINT": "Edit the text ayah by ayah. Changes autosave to a draft; publish to create a new version.",
+      "BACK": "Back to details",
+      "SAVE": "Save & publish",
+      "DISCARD": "Discard",
+      "SAVING": "Saving…",
+      "UNSAVED": "Unsaved changes",
+      "ALL_SAVED": "All changes saved to draft",
+      "OPEN_BUTTON": "Edit content",
+      "MESSAGES": {
+        "PUBLISHED": "New version published"
+      },
+      "LEAVE": {
+        "CONFIRM_TITLE": "Discard unsaved changes?",
+        "CONFIRM_BODY": "Your draft edits will be discarded and no new version will be created.",
+        "OK": "Discard changes",
+        "CANCEL": "Keep editing"
+      },
+      "ERRORS": {
+        "GENERIC": "Something went wrong. Please try again.",
+        "VERSION_NOT_EDITABLE": "This version can no longer be edited.",
+        "TRANSLATION_NOT_FOUND": "Translation not found.",
+        "TAFSIR_NOT_FOUND": "Tafsir not found.",
+        "CONTENT_FILE_UNPARSEABLE": "The uploaded file could not be parsed."
+      }
+    },
     "COMMON": {
       "TOOLTIP_VIEW": "View",
       "TOOLTIP_EDIT": "Edit",

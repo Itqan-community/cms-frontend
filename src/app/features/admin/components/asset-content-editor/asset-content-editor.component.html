@@ -1,0 +1,15 @@
+<section class="content-editor">
+  <header class="content-editor__header">
+    <a class="content-editor__back" [routerLink]="['/admin', listSegment, slug()]">
+      &larr; {{ 'ADMIN.CONTENT_EDITOR.BACK' | translate }}
+    </a>
+    <h1 class="content-editor__title">
+      {{ 'ADMIN.CONTENT_EDITOR.TITLE' | translate }}
+    </h1>
+    <p class="content-editor__hint">
+      {{ 'ADMIN.CONTENT_EDITOR.HINT' | translate }}
+    </p>
+  </header>
+
+  <app-asset-content-grid [kind]="kind()" [slug]="slug()" />
+</section>
