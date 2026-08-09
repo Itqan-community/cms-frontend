@@ -6,7 +6,7 @@
   <p class="asset-initial-version-fields__hint">{{ i18n + '.SECTION_HINT' | translate }}</p>
 
   <nz-form-item>
-    <nz-form-label nzRequired>{{ i18n + '.FORM_NAME' | translate }}</nz-form-label>
+    <nz-form-label>{{ i18n + '.FORM_NAME' | translate }}</nz-form-label>
     <nz-form-control [nzErrorTip]="i18n + '.ERR_NAME' | translate">
       <input
         nz-input
@@ -17,7 +17,7 @@
   </nz-form-item>
 
   <nz-form-item>
-    <nz-form-label nzRequired>{{ i18n + '.FORM_SUMMARY' | translate }}</nz-form-label>
+    <nz-form-label>{{ i18n + '.FORM_SUMMARY' | translate }}</nz-form-label>
     <nz-form-control [nzErrorTip]="i18n + '.ERR_SUMMARY' | translate">
       <textarea
         nz-input
@@ -29,7 +29,7 @@
   </nz-form-item>
 
   <div class="asset-initial-version-fields__upload">
-    <nz-form-label nzRequired>{{ i18n + '.FORM_FILE' | translate }}</nz-form-label>
+    <nz-form-label>{{ i18n + '.FORM_FILE' | translate }}</nz-form-label>
     <input
       #versionFileInput
       type="file"
@@ -54,7 +54,7 @@
       </p>
     } @else {
       <p class="asset-initial-version-fields__file-hint">
-        {{ i18n + '.FILE_REQUIRED_HINT' | translate }}
+        {{ i18n + '.FILE_OPTIONAL_HINT' | translate }}
       </p>
     }
   </div>

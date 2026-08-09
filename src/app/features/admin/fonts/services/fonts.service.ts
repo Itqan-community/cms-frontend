@@ -50,6 +50,7 @@ export class FontsService {
     return this.http.delete<void>(`${this.apiUrl}${slug}/`);
   }
 
+  /** Multipart create/update (backend expects form data even when no version file is attached). */
   private toFormData(payload: Partial<FontFormValue>): FormData {
     const data = new FormData();
     const append = (key: string, value: string | number | boolean | null | undefined): void => {

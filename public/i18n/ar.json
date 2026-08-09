@@ -803,20 +803,17 @@
       "COLUMN_ACCESS": "الوصول",
       "INITIAL_VERSION": {
         "SECTION_TITLE": "الإصدار الأولي",
-        "SECTION_HINT": "ارفع ملف الإصدار الأول لهذا الأصل. مطلوب عند الإنشاء.",
+        "SECTION_HINT": "يمكنك إرفاق ملف الإصدار الأول الآن اختياريًا. يمكنك إضافة الإصدارات لاحقًا من صفحة تفاصيل الأصل.",
         "FORM_NAME": "اسم الإصدار",
         "FORM_SUMMARY": "الملخص",
         "FORM_FILE": "الملف",
         "PLACEHOLDER_NAME": "مثال: v1.0 — النص الكامل",
         "PLACEHOLDER_SUMMARY": "ملاحظات قصيرة عن هذا الملف…",
-        "ERR_NAME": "اسم الإصدار مطلوب",
-        "ERR_SUMMARY": "الملخص مطلوب",
+        "ERR_NAME": "يجب ألا يتجاوز اسم الإصدار 255 حرفًا",
+        "ERR_SUMMARY": "الملخص غير صالح",
         "CHOOSE_FILE": "اختر ملفًا",
         "CLEAR_FILE": "إزالة الملف",
-        "FILE_REQUIRED_HINT": "اختر ملفًا للرفع.",
-        "MESSAGES": {
-          "FILE_REQUIRED": "اختر ملفًا للرفع."
-        }
+        "FILE_OPTIONAL_HINT": "اختياري — اختر ملفًا لرفعه مع هذا الأصل."
       }
     },
     "TENANT": {

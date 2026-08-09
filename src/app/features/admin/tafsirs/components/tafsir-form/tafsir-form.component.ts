@@ -97,13 +97,8 @@ export class TafsirFormComponent implements OnInit {
       this.editSlug = slugParam;
       this.loadForEdit();
     } else {
-      this.form.controls.version_name.setValidators([
-        Validators.required,
-        Validators.maxLength(255),
-      ]);
-      this.form.controls.version_summary.setValidators([Validators.required]);
+      this.form.controls.version_name.setValidators([Validators.maxLength(255)]);
       this.form.controls.version_name.updateValueAndValidity();
-      this.form.controls.version_summary.updateValueAndValidity();
     }
     this.loadPublishers();
   }
@@ -133,9 +128,7 @@ export class TafsirFormComponent implements OnInit {
   }
 
   canSubmit(): boolean {
-    if (this.form.invalid) return false;
-    if (!this.isEditMode() && !this.versionFile()) return false;
-    return true;
+    return this.form.valid;
   }
 
   onSubmit(): void {
@@ -144,13 +137,6 @@ export class TafsirFormComponent implements OnInit {
         c.markAsDirty();
         c.updateValueAndValidity({ onlySelf: true });
       });
-      return;
-    }
-
-    if (!this.isEditMode() && !this.versionFile()) {
-      this.message.warning(
-        this.translate.instant('ADMIN.COMMON.INITIAL_VERSION.MESSAGES.FILE_REQUIRED')
-      );
       return;
     }
 
@@ -209,9 +195,11 @@ export class TafsirFormComponent implements OnInit {
     };
 
     if (!this.isEditMode()) {
-      body.version_name = v.version_name ?? '';
-      body.version_summary = v.version_summary ?? '';
-      body.file = this.versionFile() ?? undefined;
+      const versionName = v.version_name?.trim();
+      const versionSummary = v.version_summary?.trim();
+      if (versionName) body.version_name = versionName;
+      if (versionSummary) body.version_summary = versionSummary;
+      if (this.versionFile()) body.file = this.versionFile()!;
     }
 
     return body;

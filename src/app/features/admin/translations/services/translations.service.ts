@@ -55,7 +55,7 @@ export class TranslationsService {
     return this.http.delete<void>(`${this.apiUrl}${slug}/`);
   }
 
-  /** Multipart create (backend requires Form data when attaching an initial version file). */
+  /** Multipart create (backend expects form data even when no version file is attached). */
   private toCreateFormData(payload: TranslationFormValue): FormData {
     const data = new FormData();
     const append = (key: string, value: string | number | boolean | null | undefined): void => {

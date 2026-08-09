@@ -803,20 +803,17 @@
       "COLUMN_ACCESS": "Access",
       "INITIAL_VERSION": {
         "SECTION_TITLE": "Initial version",
-        "SECTION_HINT": "Upload the first file version for this asset. Required when creating.",
+        "SECTION_HINT": "Optionally attach the first file version now. You can add versions later from the asset detail page.",
         "FORM_NAME": "Version name",
         "FORM_SUMMARY": "Summary",
         "FORM_FILE": "File",
         "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
         "PLACEHOLDER_SUMMARY": "Short notes about this file…",
-        "ERR_NAME": "Version name is required",
-        "ERR_SUMMARY": "Summary is required",
+        "ERR_NAME": "Version name must be at most 255 characters",
+        "ERR_SUMMARY": "Summary is invalid",
         "CHOOSE_FILE": "Choose file",
         "CLEAR_FILE": "Remove file",
-        "FILE_REQUIRED_HINT": "Select a file to upload.",
-        "MESSAGES": {
-          "FILE_REQUIRED": "Choose a file to upload."
-        }
+        "FILE_OPTIONAL_HINT": "Optional — select a file to upload with this asset."
       }
     },
     "TENANT": {
