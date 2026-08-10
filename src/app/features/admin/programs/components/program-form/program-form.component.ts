@@ -17,8 +17,7 @@ import { NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
 import { isRestrictedForTenantConflictError } from '../../../../../shared/utils/error.utils';
-import { PublisherFilterItem } from '../../../tafsirs/models/tafsirs.models';
-import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
+import { AdminTenantService } from '../../../services/admin-tenant.service';
 import {
   createDisplayLocalizationLabels,
   localizeLanguageCode,
@@ -52,7 +51,7 @@ export class ProgramFormComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
   private readonly programsService = inject(ProgramsService);
-  private readonly publishersFilterService = inject(PublishersFilterService);
+  private readonly tenantService = inject(AdminTenantService);
   private readonly message = inject(NzMessageService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
@@ -60,8 +59,7 @@ export class ProgramFormComponent implements OnInit {
   readonly isEditMode = signal(false);
   readonly loadingDetail = signal(false);
   readonly submitting = signal(false);
-  readonly publisherOptions = signal<PublisherFilterItem[]>([]);
-  readonly publishersLoading = signal(false);
+  readonly publisherDisplayName = signal('');
   readonly thumbnailFile = signal<File | null>(null);
   readonly thumbnailPreview = signal<string | null>(null);
   readonly fileList = signal<NzUploadFile[]>([]);
@@ -92,12 +90,9 @@ export class ProgramFormComponent implements OnInit {
       this.isEditMode.set(true);
       this.editSlug = slugParam;
       this.loadForEdit();
+    } else {
+      this.bindTenantPublisher();
     }
-    this.loadPublishers();
-  }
-
-  onPublisherSearch(query: string): void {
-    this.loadPublishers(query);
   }
 
   beforeUpload = (file: NzUploadFile): boolean => {
@@ -165,7 +160,7 @@ export class ProgramFormComponent implements OnInit {
   }
 
   private buildBody(): ProgramFormValue {
-    const v = this.form.value;
+    const v = this.form.getRawValue();
     return {
       name_ar: v.name_ar ?? '',
       name_en: v.name_en ?? '',
@@ -207,6 +202,7 @@ export class ProgramFormComponent implements OnInit {
             restricted_for_tenant: data.restricted_for_tenant,
             external_url: data.external_url ?? '',
           });
+          this.publisherDisplayName.set(data.publisher.name);
 
           if (data.thumbnail_url) {
             this.thumbnailPreview.set(data.thumbnail_url);
@@ -220,20 +216,11 @@ export class ProgramFormComponent implements OnInit {
       });
   }
 
-  private loadPublishers(query = ''): void {
-    this.publishersLoading.set(true);
-    this.publishersFilterService
-      .search(query)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          this.publisherOptions.set(res.results);
-          this.publishersLoading.set(false);
-        },
-        error: () => {
-          this.publishersLoading.set(false);
-        },
-      });
+  private bindTenantPublisher(): void {
+    const publisherId = this.tenantService.selectedPublisherId();
+    this.form.controls.publisher_id.setValue(publisherId);
+    const publisher = this.tenantService.publishers().find((item) => item.id === publisherId);
+    this.publisherDisplayName.set(publisher?.name ?? '');
   }
 
   languageLabel(code: string): string {

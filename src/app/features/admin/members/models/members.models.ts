@@ -1,11 +1,11 @@
-export type MemberRole = 'admin' | 'staff';
 export type MemberStatus = 'pending' | 'active';
 
 export interface MemberOut {
   id: number;
   name: string;
   email: string;
-  role: MemberRole;
+  /** Group name returned by the API. */
+  role: string;
   status: MemberStatus;
   publisher_id: number;
   expires_at: string | null;
@@ -30,12 +30,12 @@ export interface MemberInviteIn {
   publisher_id: number;
   name: string;
   email: string;
-  role?: MemberRole;
+  group_id: number;
 }
 
 export interface MemberUpdateIn {
   name?: string;
-  role?: MemberRole;
+  group_id?: number;
 }
 
 export interface MemberUiFilters {

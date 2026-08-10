@@ -1520,17 +1520,13 @@
       "COLUMNS": {
         "NAME": "Name",
         "EMAIL": "Email",
-        "ROLE": "Role",
+        "GROUP": "Group",
         "STATUS": "Status",
         "CREATED_AT": "Added",
         "ACTIONS": "Actions"
       },
       "FILTERS": {
         "STATUS": "Status"
-      },
-      "ROLE": {
-        "ADMIN": "Admin",
-        "STAFF": "Staff"
       },
       "STATUS": {
         "PENDING": "Pending",
@@ -1543,7 +1539,8 @@
         "NAME_PLACEHOLDER": "Member name",
         "EMAIL_LABEL": "Email",
         "EMAIL_PLACEHOLDER": "email@example.com",
-        "ROLE_LABEL": "Role",
+        "GROUP_LABEL": "Group",
+        "GROUP_PLACEHOLDER": "Select a group",
         "INVITE_INFO": "An invitation email will be sent to this address.",
         "SUBMIT_INVITE": "Send invitation",
         "SUBMIT_EDIT": "Save",
@@ -1551,15 +1548,12 @@
         "CONFIRM_OK": "Confirm",
         "CONFIRM_CANCEL": "Cancel",
         "ERR_NAME": "Please enter a name",
-        "ERR_EMAIL": "Please enter a valid email"
+        "ERR_EMAIL": "Please enter a valid email",
+        "ERR_GROUP": "Please select a group"
       },
-      "PROMOTE": {
-        "CONFIRM_TITLE": "Promote to admin?",
-        "CONFIRM_BODY": "{{name}} — they will be able to manage members."
-      },
-      "DEMOTE": {
-        "CONFIRM_TITLE": "Demote to staff?",
-        "CONFIRM_BODY": "{{name}} — they will no longer manage members."
+      "CHANGE_GROUP": {
+        "CONFIRM_TITLE": "Change group?",
+        "CONFIRM_BODY": "{{name}} — assign them to \"{{group}}\"."
       },
       "REMOVE": {
         "CONFIRM_TITLE": "Remove this member?",
@@ -1581,14 +1575,14 @@
         "INVITE_ERROR": "Could not send invitation",
         "UPDATE_SUCCESS": "Member updated",
         "UPDATE_ERROR": "Could not update member",
-        "PROMOTE_SUCCESS": "Member promoted to admin",
-        "DEMOTE_SUCCESS": "Member demoted to staff",
+        "CHANGE_GROUP_SUCCESS": "Member group updated",
         "REMOVE_SUCCESS": "Member removed",
         "REMOVE_ERROR": "Could not remove member",
         "CANCEL_SUCCESS": "Invitation cancelled",
         "RESEND_SUCCESS": "Invitation resent",
         "RESEND_ERROR": "Could not resend invitation",
-        "NO_PUBLISHER": "Please select a publisher"
+        "NO_PUBLISHER": "Please select a publisher",
+        "GROUPS_LOAD_ERROR": "Could not load groups"
       }
     },
     "ACCESS_REQUESTS": {

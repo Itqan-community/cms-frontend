@@ -194,19 +194,7 @@
                 'ADMIN.TRANSLATIONS.FORM.PUBLISHER' | translate
               }}</nz-form-label>
               <nz-form-control [nzErrorTip]="'ADMIN.TRANSLATIONS.FORM.ERR_PUBLISHER' | translate">
-                <nz-select
-                  formControlName="publisher_id"
-                  [nzPlaceHolder]="'ADMIN.TRANSLATIONS.FORM.PLACEHOLDER_PUBLISHER' | translate"
-                  nzAllowClear
-                  nzShowSearch
-                  nzServerSearch
-                  [nzLoading]="publishersLoading()"
-                  (nzOnSearch)="onPublisherSearch($event)"
-                >
-                  @for (pub of publisherOptions(); track pub.id) {
-                    <nz-option [nzValue]="pub.id" [nzLabel]="pub.name"></nz-option>
-                  }
-                </nz-select>
+                <input nz-input [value]="publisherDisplayName()" disabled />
               </nz-form-control>
             </nz-form-item>
           </div>

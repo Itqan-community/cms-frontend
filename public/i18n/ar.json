@@ -1520,17 +1520,13 @@
       "COLUMNS": {
         "NAME": "الاسم",
         "EMAIL": "البريد الإلكتروني",
-        "ROLE": "الدور",
+        "GROUP": "المجموعة",
         "STATUS": "الحالة",
         "CREATED_AT": "تاريخ الإضافة",
         "ACTIONS": "الإجراءات"
       },
       "FILTERS": {
         "STATUS": "الحالة"
-      },
-      "ROLE": {
-        "ADMIN": "مدير",
-        "STAFF": "موظف"
       },
       "STATUS": {
         "PENDING": "قيد الانتظار",
@@ -1543,7 +1539,8 @@
         "NAME_PLACEHOLDER": "اسم العضو",
         "EMAIL_LABEL": "البريد الإلكتروني",
         "EMAIL_PLACEHOLDER": "email@example.com",
-        "ROLE_LABEL": "الدور",
+        "GROUP_LABEL": "المجموعة",
+        "GROUP_PLACEHOLDER": "اختر مجموعة",
         "INVITE_INFO": "سيتم إرسال رسالة دعوة إلى هذا البريد الإلكتروني.",
         "SUBMIT_INVITE": "إرسال الدعوة",
         "SUBMIT_EDIT": "حفظ",
@@ -1551,15 +1548,12 @@
         "CONFIRM_OK": "تأكيد",
         "CONFIRM_CANCEL": "إلغاء",
         "ERR_NAME": "يرجى إدخال الاسم",
-        "ERR_EMAIL": "يرجى إدخال بريد إلكتروني صالح"
+        "ERR_EMAIL": "يرجى إدخال بريد إلكتروني صالح",
+        "ERR_GROUP": "يرجى اختيار مجموعة"
       },
-      "PROMOTE": {
-        "CONFIRM_TITLE": "ترقية إلى مدير؟",
-        "CONFIRM_BODY": "{{name}} — سيتمكن من إدارة الأعضاء."
-      },
-      "DEMOTE": {
-        "CONFIRM_TITLE": "تخفيض إلى موظف؟",
-        "CONFIRM_BODY": "{{name}} — لن يتمكن من إدارة الأعضاء."
+      "CHANGE_GROUP": {
+        "CONFIRM_TITLE": "تغيير المجموعة؟",
+        "CONFIRM_BODY": "{{name}} — تعيينهم إلى \"{{group}}\"."
       },
       "REMOVE": {
         "CONFIRM_TITLE": "إزالة هذا العضو؟",
@@ -1581,14 +1575,14 @@
         "INVITE_ERROR": "تعذر إرسال الدعوة",
         "UPDATE_SUCCESS": "تم تحديث العضو",
         "UPDATE_ERROR": "تعذر تحديث العضو",
-        "PROMOTE_SUCCESS": "تمت ترقية العضو إلى مدير",
-        "DEMOTE_SUCCESS": "تم تخفيض العضو إلى موظف",
+        "CHANGE_GROUP_SUCCESS": "تم تحديث مجموعة العضو",
         "REMOVE_SUCCESS": "تمت إزالة العضو",
         "REMOVE_ERROR": "تعذر إزالة العضو",
         "CANCEL_SUCCESS": "تم إلغاء الدعوة",
         "RESEND_SUCCESS": "تمت إعادة إرسال الدعوة",
         "RESEND_ERROR": "تعذر إعادة إرسال الدعوة",
-        "NO_PUBLISHER": "يرجى اختيار ناشر"
+        "NO_PUBLISHER": "يرجى اختيار ناشر",
+        "GROUPS_LOAD_ERROR": "تعذر تحميل المجموعات"
       }
     },
     "ACCESS_REQUESTS": {

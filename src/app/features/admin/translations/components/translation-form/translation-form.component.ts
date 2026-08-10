@@ -15,9 +15,9 @@ import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
-import { PublisherFilterItem, TranslationFormValue } from '../../models/translations.models';
-import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
+import { TranslationFormValue } from '../../models/translations.models';
 import { TranslationsService } from '../../services/translations.service';
+import { AdminTenantService } from '../../../services/admin-tenant.service';
 import {
   createDisplayLocalizationLabels,
   localizeLanguageCode,
@@ -53,7 +53,7 @@ export class TranslationFormComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
   private readonly translationsService = inject(TranslationsService);
-  private readonly publishersFilterService = inject(PublishersFilterService);
+  private readonly tenantService = inject(AdminTenantService);
   private readonly message = inject(NzMessageService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
@@ -61,8 +61,7 @@ export class TranslationFormComponent implements OnInit {
   readonly isEditMode = signal(false);
   readonly loadingDetail = signal(false);
   readonly submitting = signal(false);
-  readonly publisherOptions = signal<PublisherFilterItem[]>([]);
-  readonly publishersLoading = signal(false);
+  readonly publisherDisplayName = signal('');
   readonly thumbnailFile = signal<File | null>(null);
   readonly thumbnailPreview = signal<string | null>(null);
   readonly fileList = signal<NzUploadFile[]>([]);
@@ -99,12 +98,8 @@ export class TranslationFormComponent implements OnInit {
     } else {
       this.form.controls.version_name.setValidators([Validators.maxLength(255)]);
       this.form.controls.version_name.updateValueAndValidity();
+      this.bindTenantPublisher();
     }
-    this.loadPublishers();
-  }
-
-  onPublisherSearch(query: string): void {
-    this.loadPublishers(query);
   }
 
   beforeUpload = (file: NzUploadFile): boolean => {
@@ -227,6 +222,7 @@ export class TranslationFormComponent implements OnInit {
             restricted_for_tenant: data.restricted_for_tenant,
             external_url: data.external_url ?? '',
           });
+          this.publisherDisplayName.set(data.publisher.name);
 
           if (data.thumbnail_url) {
             this.thumbnailPreview.set(data.thumbnail_url);
@@ -240,20 +236,11 @@ export class TranslationFormComponent implements OnInit {
       });
   }
 
-  private loadPublishers(query = ''): void {
-    this.publishersLoading.set(true);
-    this.publishersFilterService
-      .search(query)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          this.publisherOptions.set(res.results);
-          this.publishersLoading.set(false);
-        },
-        error: () => {
-          this.publishersLoading.set(false);
-        },
-      });
+  private bindTenantPublisher(): void {
+    const publisherId = this.tenantService.selectedPublisherId();
+    this.form.controls.publisher_id.setValue(publisherId);
+    const publisher = this.tenantService.publishers().find((item) => item.id === publisherId);
+    this.publisherDisplayName.set(publisher?.name ?? '');
   }
 
   languageLabel(code: string): string {
