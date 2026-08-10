@@ -78,11 +78,15 @@ export class App {
     const currentLang = localStorage.getItem('lang') || 'ar';
     const newLang = currentLang === 'ar' ? 'en' : 'ar';
     localStorage.setItem('lang', newLang);
-    void firstValueFrom(this.translate.use(newLang)).then(() => {
-      document.documentElement.setAttribute('lang', newLang);
-      document.documentElement.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr');
-      this.setAppTitle();
-    });
+    void firstValueFrom(this.translate.use(newLang))
+      .then(() => {
+        document.documentElement.setAttribute('lang', newLang);
+        document.documentElement.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr');
+        this.setAppTitle();
+      })
+      .catch((err: unknown) => {
+        console.error('Failed to switch UI language', err);
+      });
   }
 
   private setAppTitle(): void {
