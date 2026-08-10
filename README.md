@@ -245,8 +245,8 @@ by `Good First Issue` if you're new, and skip anything labelled `blocked` or `No
 
 Please read [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) before contributing.
 
-> **Using an AI assistant?** That's welcome — but you must understand, run, and test the code
-> you submit. See [Using AI Assistants](CONTRIBUTING.md#using-ai-assistants).
+> **Using an AI assistant?** That's welcome — but you must understand, run, and test the code you
+> submit. See [Using AI Assistants](CONTRIBUTING.md#using-ai-assistants).
 
 ## 📝 License
 

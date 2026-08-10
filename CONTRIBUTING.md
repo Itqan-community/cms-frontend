@@ -53,18 +53,18 @@ Planned work lives on the **[Fanar board](https://github.com/orgs/Itqan-communit
 the execution view of our
 [1448 Q1 & Q2 roadmap](https://github.com/Itqan-community/cms-backend/blob/main/docs/ROADMAP.md).
 Frontend issues live in this repo; backend and infra work sits in
-[`cms-backend`](https://github.com/Itqan-community/cms-backend/issues), and the board
-aggregates both so you can see how a feature fits together.
+[`cms-backend`](https://github.com/Itqan-community/cms-backend/issues), and the board aggregates
+both so you can see how a feature fits together.
 
-| Label                                                                                                                                | What it means                                                       |
-| ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
-| [`Good First Issue`](https://github.com/Itqan-community/cms-frontend/issues?q=is%3Aissue+is%3Aopen+label%3A%22Good+First+Issue%22)     | Small and well-bounded — start here                                 |
-| [`Help Wanted`](https://github.com/Itqan-community/cms-frontend/issues?q=is%3Aissue+is%3Aopen+label%3A%22Help+Wanted%22)               | Substantial work we'd genuinely like help with                      |
-| `epic: *`                                                                                                                             | Groups issues by objective, so you can follow one thread end to end |
-| `blocked` / `Not Ready`                                                                                                               | Waiting on a decision or prerequisite — **don't pick these up yet**  |
+| Label                                                                                                                              | What it means                                                       |
+| ---------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| [`Good First Issue`](https://github.com/Itqan-community/cms-frontend/issues?q=is%3Aissue+is%3Aopen+label%3A%22Good+First+Issue%22) | Small and well-bounded — start here                                 |
+| [`Help Wanted`](https://github.com/Itqan-community/cms-frontend/issues?q=is%3Aissue+is%3Aopen+label%3A%22Help+Wanted%22)           | Substantial work we'd genuinely like help with                      |
+| `epic: *`                                                                                                                          | Groups issues by objective, so you can follow one thread end to end |
+| `blocked` / `Not Ready`                                                                                                            | Waiting on a decision or prerequisite — **don't pick these up yet** |
 
-Comment on an issue before you start so two people don't build the same thing. If you
-stall partway, say so — that's useful information, not a failure.
+Comment on an issue before you start so two people don't build the same thing. If you stall partway,
+say so — that's useful information, not a failure.
 
 ## Getting Started
 
@@ -164,13 +164,12 @@ The project uses multiple environments:
 
 ## Using AI Assistants
 
-This is an open-source, community-maintained project. For it to outlive any one of us, the
-people contributing need to genuinely understand how it works internally — that
-understanding is the thing we're actually building.
+This is an open-source, community-maintained project. For it to outlive any one of us, the people
+contributing need to genuinely understand how it works internally — that understanding is the thing
+we're actually building.
 
-**Using AI to help you work is welcome and expected.** We all have subscriptions. What we
-ask is that you stay the author of your contribution, not a middleman between the
-maintainer and a model.
+**Using AI to help you work is welcome and expected.** We all have subscriptions. What we ask is
+that you stay the author of your contribution, not a middleman between the maintainer and a model.
 
 Before you open a PR, make sure you:
 
@@ -178,14 +177,13 @@ Before you open a PR, make sure you:
 - **ran** it on your own machine and saw it behave correctly
 - **tested** it — including the cases you expect to fail
 
-Reviewing code that its own author never read or ran costs the maintainers more than
-writing it would have. If you copy an issue into an agent, paste back whatever it
-produces, and open a PR you haven't read, you're taking more from this project than you're
-giving it.
+Reviewing code that its own author never read or ran costs the maintainers more than writing it
+would have. If you copy an issue into an agent, paste back whatever it produces, and open a PR you
+haven't read, you're taking more from this project than you're giving it.
 
-If you're not planning to work that way on a given issue, please leave it for someone who
-will. And if you're stuck partway, say so in the comments — a half-finished PR you
-understand is far more welcome than a complete one you don't.
+If you're not planning to work that way on a given issue, please leave it for someone who will. And
+if you're stuck partway, say so in the comments — a half-finished PR you understand is far more
+welcome than a complete one you don't.
 
 ## Pull Request Process
 
