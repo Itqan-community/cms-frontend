@@ -1,6 +1,6 @@
 # PROJECT_MAP — Itqan CMS Frontend
 
-> Last updated: 2026-05-14 Generated for AI-assisted development. Provide this doc to any LLM to
+> Last updated: 2026-08-09 Generated for AI-assisted development. Provide this doc to any LLM to
 > give full project context.
 
 ---
@@ -104,12 +104,16 @@ listings by the backend.
 ```
 List  -> GET    /portal/{entity}/
 Detail -> GET   /portal/{entity}/{id}/
-Create -> POST  /portal/{entity}/
+Create -> POST  /portal/{entity}/  (multipart FormData always for font/mushaf/tafsir/translation;
+               optional initial version fields: version_name + version_summary + file)
 Update -> PUT   /portal/{entity}/{id}/
 Delete -> DELETE /portal/{entity}/{id}/
 
 Each entity has: ListComponent, FormComponent (create+edit), DetailComponent
 Base class: AdminListBase (src/app/features/admin/utils/admin-list-base.ts)
+Create forms for font/mushaf/tafsir/translation include shared
+`asset-initial-version-fields` (optional on create). Additional versions on detail via
+`asset-versions-manager`.
 ```
 
 ---
@@ -280,25 +284,29 @@ success.
 
 **Modules (each follows identical CRUD pattern):**
 
-| Module             | Entity                | Key Models                          | Notes                                                                                                                                                                            |
-| ------------------ | --------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `publishers/`      | Publisher admin       | `Publisher`                         | CRUD + image upload                                                                                                                                                              |
-| `tafsirs/`         | Tafsir (exegesis)     | `Tafsir`, `TafsirVersion`           | CRUD + version management                                                                                                                                                        |
-| `translations/`    | Translation           | `Translation`, `TranslationVersion` | CRUD + version management                                                                                                                                                        |
-| `recitations/`     | Recitation (audio)    | `Recitation`                        | CRUD + track upload with progress + timings; full bulk upload success redirects to `/gallery/asset/{id}`; partial failure clears validate banner and keeps failed rows for retry |
-| `reciters/`        | Reciter               | `Reciter`                           | CRUD + image upload + death info                                                                                                                                                 |
-| `issues/`          | Issue reports         | `IssueReportOut`                    | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions                                                                                |
-| `members/`         | Publisher members     | `MemberOut`                         | List/invite/update/remove/resend via `/portal/members/`; scoped by `AdminTenantService.selectedPublisherId()`                                                                    |
-| `access-requests/` | Asset access requests | `AccessRequestOut`                  | List/accept/reject + publisher settings (`/portal/publishers/{id}/access-requests-settings/`); detail drawer; permission-gated actions                                           |
-| `mushafs/`         | Mushaf (Quran pages)  | Pages, Surahs, Ayahs, Words         | Complex nested UI with tabs and search                                                                                                                                           |
-| `usage/`           | API Usage analytics   | Request logs                        | Charts, top endpoints, top entities                                                                                                                                              |
-| `audio/`           | Audio management      | —                                   | Routes defined                                                                                                                                                                   |
-| `software/`        | Software management   | —                                   | Routes defined                                                                                                                                                                   |
+| Module             | Entity                | Key Models                          | Notes                                                                                                                                                                                            |
+| ------------------ | --------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `publishers/`      | Publisher admin       | `Publisher`                         | CRUD + image upload                                                                                                                                                                              |
+| `tafsirs/`         | Tafsir (exegesis)     | `Tafsir`, `TafsirVersion`           | CRUD + optional initial version on create (always multipart) + version management on detail                                                                                                      |
+| `translations/`    | Translation           | `Translation`, `TranslationVersion` | CRUD; create always multipart FormData with optional initial version; update/patch remain JSON; version management on detail                                                                     |
+| `recitations/`     | Recitation (audio)    | `Recitation`                        | CRUD + track upload with progress + timings; full bulk upload success redirects to `/gallery/asset/{id}`; partial failure clears validate banner and keeps failed rows for retry                 |
+| `reciters/`        | Reciter               | `Reciter`                           | CRUD + image upload + death info                                                                                                                                                                 |
+| `issues/`          | Issue reports         | `IssueReportOut`                    | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions                                                                                                |
+| `members/`         | Publisher members     | `MemberOut`, `GroupListOut`         | List/invite/update/remove/resend via `/portal/members/`; list shows `group_name`; invite/edit submit `group_id` from `GET /portal/groups/`; scoped by `AdminTenantService.selectedPublisherId()` |
+| `access-requests/` | Asset access requests | `AccessRequestOut`                  | List/accept/reject + publisher settings (`/portal/publishers/{id}/access-requests-settings/`); detail drawer; permission-gated actions                                                           |
+| `mushafs/`         | Mushaf portal assets  | `MushafItem`, `MushafDetails`       | List/detail/create/edit/delete; optional initial version on create; further versions via live `/portal/mushafs/`; permission-gated (`portal_*_mushaf`)                                           |
+| `fonts/`           | Font portal assets    | `FontItem`, `FontDetails`           | Same CRUD pattern via live `/portal/fonts/` (optional initial version on create); permission-gated (`portal_*_font`)                                                                             |
+| `programs/`        | Program portal assets | `ProgramItem`, `ProgramDetails`     | Feature code present; route/sidebar/redirect hidden until BE `/portal/programs/` ships; mock via `useProgramsMockApi`                                                                            |
+| `usage/`           | API Usage analytics   | Request logs                        | Charts, top endpoints, top entities                                                                                                                                                              |
+| `audio/`           | Audio management      | —                                   | Routes defined                                                                                                                                                                                   |
+| `software/`        | Software management   | —                                   | Routes defined                                                                                                                                                                                   |
 
 **Shared admin components:**
 
 - `admin-column-picker/` — Column visibility toggles for tables
-- `asset-versions-manager/` — Version CRUD (tafsir/translation)
+- `asset-initial-version-fields/` — Optional first version (name/summary/file) on asset create forms
+  (font/mushaf/tafsir/translation)
+- `asset-versions-manager/` — Version CRUD (tafsir/translation/mushaf/font; program when re-enabled)
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`
 - `search-panel/` — Search UI
@@ -417,8 +425,10 @@ success.
 - **Switch:** Full page reload on language toggle (`LangSwitchComponent`); `App.switchLang` catches
   failed `translate.use`
 - **RTL:** `<html dir="rtl">` with logical CSS properties (`margin-inline`, `padding-inline`)
-- **Keys:** 1483 per language (parity verified); domains include auth, navigation, gallery, admin,
+- **Keys:** 1486 per language (parity verified); domains include auth, navigation, gallery, admin,
   content standards, licenses, errors, forms, access-request license terms
+- **CI gate:** `npm run check:i18n` validates every key in the union of `en.json` + `ar.json` has a
+  non-empty Arabic value in `ar.json` (runs in CI `lint-and-test` and via lint-staged on i18n edits)
 - **API errors:** Hybrid resolver in `shared/utils/api-error-resolver.util.ts` — maps `error_name` /
   known codes to i18n, shows backend `message` when language matches UI, else fallback key; global
   `error.interceptor.ts` uses it; component-level handlers dedupe via
@@ -447,10 +457,15 @@ success.
 ### Admin Portal (`/portal/`)
 
 Full CRUD for: publishers, tafsirs (versions), translations (versions), recitations (with tracks),
-reciters, issue reports (`/portal/issue-reports/`), publisher members (`/portal/members/`), asset
-access requests (`/portal/access-requests/` — list, detail, accept, reject;
-`/portal/publishers/{id}/access-requests-settings/` — auto-acceptance), mushafs
-(pages/surahs/ayahs/words), usage analytics
+reciters, issue reports (`/portal/issue-reports/`), publisher members (`/portal/members/`), groups
+(`GET /portal/groups/` for member invite/edit options), asset access requests
+(`/portal/access-requests/` — list, detail, accept, reject;
+`/portal/publishers/{id}/access-requests-settings/` — auto-acceptance), mushafs (`/portal/mushafs/`
+— CRUD + versions), fonts (`/portal/fonts/` — CRUD + versions), usage analytics. Programs portal
+module is dormant (route/nav hidden) until BE ships `/portal/programs/`.
+
+Asset create/edit forms (tafsir, translation, mushaf, font, program, recitation): publisher field is
+view-only — create binds `AdminTenantService.selectedPublisherId()`; edit shows the asset publisher.
 
 ---
 
@@ -477,7 +492,9 @@ access requests (`/portal/access-requests/` — list, detail, accept, reject;
 | `features/dashify/`                     | Unknown           | Minimal implementation, purpose unclear.                                                                            |
 | `features/admin/` guards                | Implemented       | `portal-access`, `permission`, `itqan-admin` guards active on admin routes.                                         |
 | `shared/directives/`                    | Empty             | Directory exists with no files.                                                                                     |
-| `features/admin/mushafs/`               | In progress       | Complex UI with multiple tabs (Pages, Surahs, Ayahs, Words) — may be incomplete.                                    |
+| `features/admin/mushafs/`               | Implemented       | Portal mushaf CRUD wired to live `/portal/mushafs/` + `permissionGuard` (`portal_*_mushaf`).                        |
+| `features/admin/fonts/`                 | Implemented       | Portal font CRUD wired to live `/portal/fonts/` + `permissionGuard` (`portal_*_font`).                              |
+| `features/admin/programs/`              | Hidden (dormant)  | Module kept; `/admin/programs` route, sidebar tab, and redirect candidate removed until BE API is ready.            |
 | `features/admin/audio/`                 | Partial           | Routes defined but implementation details need verification.                                                        |
 | `features/admin/software/`              | Partial           | Routes defined but implementation details need verification.                                                        |
 | Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                         |

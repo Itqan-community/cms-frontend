@@ -111,8 +111,8 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
           this.asset.set(asset);
           this.images.set(asset.snapshots.map((snapshot) => snapshot.image_url));
           this.loading.set(false);
-          this.maybeOpenReportIssueModal();
           this.setSeoFromAsset(asset);
+          this.maybeOpenReportIssueModal();
         },
         error: (err) => {
           this.loading.set(false);
@@ -164,7 +164,7 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
       case 'recitation':
         return 'lucideMic';
       case 'font':
-        return 'lucidePalette';
+        return 'lucideType';
       case 'program':
         return 'lucideLayers';
       default:
