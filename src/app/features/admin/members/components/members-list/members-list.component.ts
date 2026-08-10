@@ -174,11 +174,11 @@ export class MembersListComponent extends AdminListBase<MemberOut, MemberUiFilte
     this.memberForm.reset({
       name: member.name,
       email: member.email,
-      group_id: null,
+      group_id: member.group_id,
     });
     this.memberForm.controls.email.disable();
     this.formModalVisible.set(true);
-    this.loadGroupsForModal(member.role);
+    this.loadGroupsForModal(member.group_id);
   }
 
   closeFormModal(): void {
@@ -220,7 +220,7 @@ export class MembersListComponent extends AdminListBase<MemberOut, MemberUiFilte
       return false;
     }
 
-    const currentGroupId = this.groupOptions().find((g) => g.name === member.role)?.id ?? null;
+    const currentGroupId = member.group_id;
     const body: { name?: string; group_id?: number } = {};
     if (name.trim() !== member.name) {
       body.name = name.trim();
@@ -337,7 +337,7 @@ export class MembersListComponent extends AdminListBase<MemberOut, MemberUiFilte
     return this.translate.instant('ADMIN.MEMBERS.EXPIRES_IN_DAYS', { days });
   }
 
-  private loadGroupsForModal(matchRoleName?: string): void {
+  private loadGroupsForModal(selectedGroupId?: number): void {
     this.groupsLoading.set(true);
     this.groupsLoadFailed.set(false);
     this.groupsService.list({ page: 1, page_size: 100, ordering: 'name' }).subscribe({
@@ -345,10 +345,10 @@ export class MembersListComponent extends AdminListBase<MemberOut, MemberUiFilte
         this.groupOptions.set(res.results);
         this.groupsLoading.set(false);
 
-        if (matchRoleName != null) {
-          const matched = res.results.find((g) => g.name === matchRoleName);
+        if (selectedGroupId != null) {
+          const matched = res.results.some((g) => g.id === selectedGroupId);
           if (matched) {
-            this.memberForm.controls.group_id.setValue(matched.id);
+            this.memberForm.controls.group_id.setValue(selectedGroupId);
           } else {
             this.memberForm.controls.group_id.setValue(null);
             this.memberForm.controls.group_id.markAsTouched();
