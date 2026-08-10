@@ -208,10 +208,7 @@
           <nz-form-label [nzSpan]="24" nzRequired>{{
             'ADMIN.MEMBERS.FORM.GROUP_LABEL' | translate
           }}</nz-form-label>
-          <nz-form-control
-            [nzSpan]="24"
-            [nzErrorTip]="'ADMIN.MEMBERS.FORM.ERR_GROUP' | translate"
-          >
+          <nz-form-control [nzSpan]="24" [nzErrorTip]="'ADMIN.MEMBERS.FORM.ERR_GROUP' | translate">
             <nz-select
               formControlName="group_id"
               [nzLoading]="groupsLoading()"
