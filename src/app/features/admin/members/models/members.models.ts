@@ -4,8 +4,8 @@ export interface MemberOut {
   id: number;
   name: string;
   email: string;
-  /** Group name returned by the API. */
-  role: string;
+  group_id: number;
+  group_name: string;
   status: MemberStatus;
   publisher_id: number;
   expires_at: string | null;
