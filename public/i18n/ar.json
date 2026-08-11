@@ -762,7 +762,9 @@
     }
   },
   "ADMIN": {
-    "HOME": "الرئيسية",
+    "HOME": {
+      "LABEL": "الرئيسية"
+    },
     "COMMON": {
       "TOOLTIP_VIEW": "عرض",
       "TOOLTIP_EDIT": "تعديل",
