@@ -94,6 +94,7 @@ const TAB_USAGE: CmsTab = {
 @Component({
   selector: 'app-admin-sidebar',
   standalone: true,
+  host: { style: 'display: contents' },
   imports: [RouterLink, NzLayoutModule, NzMenuModule, NgIcon, TranslateModule],
   templateUrl: './admin-sidebar.component.html',
   styleUrls: ['./admin-sidebar.component.less'],
