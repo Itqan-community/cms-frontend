@@ -52,12 +52,12 @@ flow2path[`mfa_reauthenticate:${AuthenticatorType.RECOVERY_CODES}`] =
 flow2path[`mfa_reauthenticate:${AuthenticatorType.WEBAUTHN}`] = '/account/reauthenticate/webauthn';
 flow2path['mfa_signup_webauthn'] = '/account/signup/passkey/create';
 
-export type AuthInfo = {
+export interface AuthInfo {
   isAuthenticated: boolean;
   requiresReauthentication: boolean;
   pendingFlow: Flow | undefined;
   user: HeadlessUser | null;
-};
+}
 
 /** Mirrors official `hooks.js` `authInfo`. */
 export function authInfo(auth: unknown): AuthInfo {
@@ -96,7 +96,6 @@ export function pathForFlow(flow: Flow, typ?: string): string {
 }
 
 export function pathForPendingFlow(auth: unknown): string | null {
-  const info = authInfo(auth);
   const flows = (auth as { data?: { flows?: Flow[] } })?.data?.flows;
   if (!flows?.length) {
     return null;
