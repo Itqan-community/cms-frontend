@@ -762,7 +762,19 @@
     }
   },
   "ADMIN": {
-    "HOME": "الرئيسية",
+    "HOME": {
+      "LABEL": "الرئيسية",
+      "TITLE": "نظرة عامة",
+      "SUBTITLE": "إدارة محتوى المنصة والإعدادات",
+      "SECTION_RECITATIONS": "التلاوات",
+      "SECTION_RECITATIONS_DESC": "إدارة مسارات الصوت",
+      "SECTION_ASSETS": "الأصول",
+      "SECTION_ASSETS_DESC": "إدارة الأصول والناشرين",
+      "SECTION_AUDIO": "الصوتيات",
+      "SECTION_AUDIO_DESC": "تقطيع ومعالجة الصوت",
+      "SECTION_ANALYTICS": "التحليلات",
+      "SECTION_ANALYTICS_DESC": "مراقبة تحليلات المنصة"
+    },
     "COMMON": {
       "TOOLTIP_VIEW": "عرض",
       "TOOLTIP_EDIT": "تعديل",

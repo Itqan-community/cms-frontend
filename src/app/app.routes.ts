@@ -29,8 +29,8 @@ export const routes: Routes = [
         path: '',
         pathMatch: 'full',
         loadComponent: () =>
-          import('./features/admin/admin-portal-redirect.component').then(
-            (m) => m.AdminPortalRedirectComponent
+          import('./features/admin/pages/admin-home/admin-home.component').then(
+            (m) => m.AdminHomeComponent
           ),
       },
       {

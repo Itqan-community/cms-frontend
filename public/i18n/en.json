@@ -762,7 +762,19 @@
     }
   },
   "ADMIN": {
-    "HOME": "Home",
+    "HOME": {
+      "LABEL": "Home",
+      "TITLE": "Overview",
+      "SUBTITLE": "Manage platform content and settings",
+      "SECTION_RECITATIONS": "Recitations",
+      "SECTION_RECITATIONS_DESC": "Manage audio pipelines",
+      "SECTION_ASSETS": "Assets",
+      "SECTION_ASSETS_DESC": "Manage assets and publishers",
+      "SECTION_AUDIO": "Audio",
+      "SECTION_AUDIO_DESC": "Audio slicing and processing",
+      "SECTION_ANALYTICS": "Analytics",
+      "SECTION_ANALYTICS_DESC": "Monitor platform analytics"
+    },
     "COMMON": {
       "TOOLTIP_VIEW": "View",
       "TOOLTIP_EDIT": "Edit",
