@@ -32,7 +32,7 @@ import type {
   RecitationTrackValidateUploadOut,
 } from '../../models/recitation-tracks.models';
 import type { RecitationTimingUploadOut } from '../../models/recitation-timings.models';
-import { MaddLevel, MeemBehavior, RecitationDetails } from '../../models/recitations.models';
+import { MaddLevel, MeemBehavior, RecitationDetails, RecitationFolder } from '../../models/recitations.models';
 import { RecitationTracksUploadOrchestratorService } from '../../services/recitation-tracks-upload.orchestrator';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../../services/admin-auth.service';
@@ -41,6 +41,7 @@ import {
   buildTimingUploadExtraMessage,
   buildTimingUploadSuccessDescription,
 } from '../../utils/timing-upload-result.format';
+import { FolderSwitcherComponent } from '../folder-switcher/folder-switcher.component';
 
 const TRACKS_PAGE_SIZE = 10;
 const MAX_MP3_FILES = 114;
@@ -61,6 +62,7 @@ const MAX_MP3_FILES = 114;
     NzPaginationModule,
     NzProgressModule,
     NzAlertModule,
+    FolderSwitcherComponent,
   ],
   templateUrl: './recitation-detail.component.html',
   styleUrl: './recitation-detail.component.less',
@@ -103,6 +105,10 @@ export class RecitationDetailComponent implements OnInit {
   readonly licensesColors = LicensesColors;
   readonly maddLevel = MaddLevel;
   readonly meemBehavior = MeemBehavior;
+
+  readonly folders = signal<RecitationFolder[]>([]);
+  readonly activeFolderId = signal<string | null>(null);
+  readonly foldersLoading = signal(false);
 
   readonly tracksList = signal<RecitationSurahTrackListItem[]>([]);
   readonly tracksTotal = signal(0);
@@ -275,10 +281,122 @@ export class RecitationDetailComponent implements OnInit {
       next: (data) => {
         this.recitation.set(data);
         this.loading.set(false);
-        this.loadTracksPage();
+        this.loadFolders();
       },
       error: () => {
         this.loading.set(false);
+      },
+    });
+  }
+
+  loadFolders(): void {
+    this.foldersLoading.set(true);
+    this.recitationsService.getFolders(this.slug).subscribe({
+      next: (list) => {
+        this.folders.set(list);
+        const currentActive = this.activeFolderId();
+        if (!currentActive || !list.some((f) => f.id === currentActive)) {
+          const def = list.find((f) => f.isDefault) ?? list[0];
+          if (def) {
+            this.activeFolderId.set(def.id);
+          }
+        }
+        this.foldersLoading.set(false);
+        this.loadTracksPage();
+      },
+      error: () => {
+        this.foldersLoading.set(false);
+        this.loadTracksPage();
+      },
+    });
+  }
+
+  onFolderSelect(folderId: string): void {
+    if (this.hasInFlightUploadRows()) {
+      this.message.warning(
+        this.translate.instant('ADMIN.RECITATIONS.TRACKS.NAV_LEAVE_CONTENT')
+      );
+      return;
+    }
+    this.activeFolderId.set(folderId);
+    this.clearUploadSelection();
+    this.clearTimingsSelection();
+    this.tracksPage.set(1);
+    this.loadTracksPage();
+  }
+
+  onSetDefaultFolder(folderId: string): void {
+    this.recitationsService.setDefaultFolder(this.slug, folderId).subscribe({
+      next: () => {
+        this.message.success(
+          this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.SET_DEFAULT_SUCCESS')
+        );
+        this.loadFolders();
+      },
+      error: () => {
+        this.message.error(
+          this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.ERROR')
+        );
+      },
+    });
+  }
+
+  onCreateFolder(name: string): void {
+    this.recitationsService.createFolder(this.slug, name).subscribe({
+      next: (created) => {
+        this.message.success(
+          this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.CREATE_SUCCESS')
+        );
+        this.activeFolderId.set(created.id);
+        this.loadFolders();
+      },
+      error: () => {
+        this.message.error(
+          this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.ERROR')
+        );
+      },
+    });
+  }
+
+  onRenameFolder(payload: { id: string; name: string }): void {
+    this.recitationsService
+      .updateFolder(this.slug, payload.id, { name: payload.name })
+      .subscribe({
+        next: () => {
+          this.message.success(
+            this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.RENAME_SUCCESS')
+          );
+          this.loadFolders();
+        },
+        error: () => {
+          this.message.error(
+            this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.ERROR')
+          );
+        },
+      });
+  }
+
+  onDeleteFolder(folderId: string): void {
+    if (this.folders().length <= 1) {
+      this.message.warning(
+        this.translate.instant('ADMIN.RECITATIONS.FOLDERS.CANNOT_DELETE_LAST')
+      );
+      return;
+    }
+    this.recitationsService.deleteFolder(this.slug, folderId).subscribe({
+      next: () => {
+        this.message.success(
+          this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.DELETE_SUCCESS')
+        );
+        if (this.activeFolderId() === folderId) {
+          this.activeFolderId.set(null);
+        }
+        this.loadFolders();
+      },
+      error: () => {
+        this.message.error(
+          this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.ERROR')
+        );
       },
     });
   }
@@ -291,6 +409,7 @@ export class RecitationDetailComponent implements OnInit {
       .recitationTracksList({
         recitation_slug: rec.slug ?? this.slug,
         asset_id: rec.id,
+        folder_id: this.activeFolderId() ?? undefined,
         page: this.tracksPage(),
         page_size: this.tracksPageSize,
       })
@@ -334,7 +453,7 @@ export class RecitationDetailComponent implements OnInit {
 
     this.timingsUploadLoading.set(true);
     this.timingsUploadResult.set(null);
-    this.recitationsService.recitationTimingUpload(rec.id, files).subscribe({
+    this.recitationsService.recitationTimingUpload(rec.id, files, this.activeFolderId()).subscribe({
       next: (res: RecitationTimingUploadOut) => {
         this.timingsUploadResult.set(res);
         this.timingsFiles.set([]);
@@ -426,6 +545,7 @@ export class RecitationDetailComponent implements OnInit {
     this.recitationsService
       .recitationTracksValidateUpload({
         asset_id: rec.id,
+        folder_id: this.activeFolderId() ?? undefined,
         filenames: rows.map((r) => r.filename),
       })
       .subscribe({
@@ -520,6 +640,7 @@ export class RecitationDetailComponent implements OnInit {
       const res = await firstValueFrom(
         this.recitationsService.recitationTracksValidateUpload({
           asset_id: rec.id,
+          folder_id: this.activeFolderId() ?? undefined,
           filenames: candidates.map((r) => r.filename),
         })
       );
@@ -557,7 +678,8 @@ export class RecitationDetailComponent implements OnInit {
         onRowPatch: (filename, patch) => {
           this.patchUploadRow(filename, patch);
         },
-      }
+      },
+      this.activeFolderId() ?? undefined
     );
     this.trackUploadTask(task);
 
@@ -635,6 +757,7 @@ export class RecitationDetailComponent implements OnInit {
       const res = await firstValueFrom(
         this.recitationsService.recitationTracksValidateUpload({
           asset_id: rec.id,
+          folder_id: this.activeFolderId() ?? undefined,
           filenames: [fn],
         })
       );
@@ -668,7 +791,8 @@ export class RecitationDetailComponent implements OnInit {
         onRowPatch: (filename, patch) => {
           this.patchUploadRow(filename, patch);
         },
-      }
+      },
+      this.activeFolderId() ?? undefined
     );
     this.trackUploadTask(task);
     void task.then(() => {
@@ -697,7 +821,11 @@ export class RecitationDetailComponent implements OnInit {
       nzOnOk: () =>
         new Promise<void>((resolve, reject) => {
           this.recitationsService
-            .recitationTracksDelete({ asset_id: rec.id, track_ids: [track.id] })
+            .recitationTracksDelete({
+              asset_id: rec.id,
+              folder_id: this.activeFolderId() ?? undefined,
+              track_ids: [track.id],
+            })
             .subscribe({
               next: () => {
                 this.message.success(

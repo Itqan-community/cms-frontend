@@ -119,6 +119,23 @@
       </div>
     </div>
 
+    <section class="admin-panel recitation-detail__folders-section">
+      <h2 class="admin-panel__title">
+        <ng-icon name="lucideFolderOpen" />
+        {{ 'ADMIN.RECITATIONS.FOLDERS.TITLE' | translate }}
+      </h2>
+      <app-folder-switcher
+        [folders]="folders()"
+        [activeFolderId]="activeFolderId()"
+        [canManage]="canUpdateRecitation()"
+        (folderSelect)="onFolderSelect($event)"
+        (setDefault)="onSetDefaultFolder($event)"
+        (createFolder)="onCreateFolder($event)"
+        (renameFolder)="onRenameFolder($event)"
+        (deleteFolder)="onDeleteFolder($event)"
+      />
+    </section>
+
     <section class="admin-panel recitation-detail__timings-section">
       <h2 class="admin-panel__title">
         <ng-icon name="lucideClock" />

@@ -121,4 +121,61 @@ describe('RecitationsService', () => {
       ],
     });
   });
+
+  it('getFolders should request folders list from API and map rows', (done) => {
+    service.getFolders('my-recitation').subscribe((folders) => {
+      expect(folders.length).toBe(2);
+      expect(folders[0].id).toBe('10');
+      expect(folders[0].name).toBe('Main');
+      expect(folders[0].isDefault).toBeTrue();
+      expect(folders[1].name).toBe('Variant 2');
+      done();
+    });
+
+    const req = httpMock.expectOne((r) =>
+      r.url.includes('/portal/recitations/my-recitation/folders/')
+    );
+    expect(req.request.method).toBe('GET');
+    req.flush({
+      results: [
+        { id: 10, name: 'Main', is_default: true, track_count: 114 },
+        { id: 11, name: 'Variant 2', is_default: false, track_count: 30 },
+      ],
+    });
+  });
+
+  it('createFolder should POST new folder data', (done) => {
+    service.createFolder('my-recitation', 'Variant 3').subscribe((folder) => {
+      expect(folder.id).toBe('12');
+      expect(folder.name).toBe('Variant 3');
+      done();
+    });
+
+    const req = httpMock.expectOne((r) =>
+      r.url.includes('/portal/recitations/my-recitation/folders/') && r.method === 'POST'
+    );
+    expect(req.request.body).toEqual({ name: 'Variant 3', is_default: false });
+    req.flush({ id: 12, name: 'Variant 3', is_default: false, track_count: 0 });
+  });
+
+  it('setDefaultFolder should POST set-default endpoint', (done) => {
+    service.setDefaultFolder('my-recitation', '11').subscribe((folder) => {
+      expect(folder.isDefault).toBeTrue();
+      done();
+    });
+
+    const req = httpMock.expectOne((r) =>
+      r.url.includes('/portal/recitations/my-recitation/folders/11/set-default/') &&
+      r.method === 'POST'
+    );
+    req.flush({ id: 11, name: 'Variant 2', is_default: true, track_count: 30 });
+  });
+
+  it('deleteFolder should send DELETE request', (done) => {
+    service.deleteFolder('my-recitation', '11').subscribe(() => done());
+    const req = httpMock.expectOne((r) =>
+      r.url.includes('/portal/recitations/my-recitation/folders/11/') && r.method === 'DELETE'
+    );
+    req.flush(null);
+  });
 });
