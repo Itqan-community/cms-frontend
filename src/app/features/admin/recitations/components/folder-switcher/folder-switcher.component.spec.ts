@@ -75,4 +75,27 @@ describe('FolderSwitcherComponent', () => {
     expect(component.createFolder.emit).toHaveBeenCalledWith('New Variant');
     expect(component.isCreateModalVisible()).toBeFalse();
   });
+
+  it('should not emit deleteFolder when the folder is no longer in the current collection', () => {
+    spyOn(component.deleteFolder, 'emit');
+    component.deletingFolder.set({ id: 'missing', name: 'Missing', isDefault: false, trackCount: 0 });
+    component.isDeleteConfirmVisible.set(true);
+
+    component.submitDelete();
+
+    expect(component.deleteFolder.emit).not.toHaveBeenCalled();
+    expect(component.isDeleteConfirmVisible()).toBeTrue();
+  });
+
+  it('should not emit deleteFolder when the folder list is already at the minimum count', () => {
+    spyOn(component.deleteFolder, 'emit');
+    component.deletingFolder.set(mockFolders[1]);
+    fixture.componentRef.setInput('folders', [mockFolders[1]]);
+    component.isDeleteConfirmVisible.set(true);
+
+    component.submitDelete();
+
+    expect(component.deleteFolder.emit).not.toHaveBeenCalled();
+    expect(component.isDeleteConfirmVisible()).toBeTrue();
+  });
 });

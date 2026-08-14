@@ -194,7 +194,17 @@ export class FolderSwitcherComponent {
 
   submitDelete(): void {
     const folder = this.deletingFolder();
+    const currentFolders = this.folders();
+
     if (!folder) return;
+
+    const folderStillExists = currentFolders.some((currentFolder) => currentFolder.id === folder.id);
+    const isMinimumFolderCount = currentFolders.length <= 1;
+
+    if (!folderStillExists || isMinimumFolderCount) {
+      return;
+    }
+
     this.deleteFolder.emit(folder.id);
     this.closeDeleteConfirm();
   }
