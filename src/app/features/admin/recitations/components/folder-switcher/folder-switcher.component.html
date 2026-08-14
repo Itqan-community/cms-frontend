@@ -1,18 +1,23 @@
 <div class="folder-switcher">
   <div class="folder-switcher__tab-bar" role="tablist">
-    @for (folder of folders(); track folder.id) {
+    @for (folder of folders(); track folder.id; let idx = $index) {
       <div
         class="folder-switcher__tab"
         [class.folder-switcher__tab--active]="folder.id === activeFolderId()"
         [class.folder-switcher__tab--default]="folder.isDefault"
-        role="tab"
-        tabindex="0"
-        [attr.aria-selected]="folder.id === activeFolderId()"
-        (click)="onSelectTab(folder.id)"
-        (keyup.enter)="onSelectTab(folder.id)"
-        (keyup.space)="onSelectTab(folder.id)"
+        role="presentation"
       >
-        <div class="folder-switcher__tab-main">
+        <button
+          #tabButton
+          type="button"
+          class="folder-switcher__tab-main"
+          role="tab"
+          [tabindex]="folder.id === rovingFolderId() ? 0 : -1"
+          [attr.aria-selected]="folder.id === activeFolderId()"
+          (click)="onSelectTab(folder.id)"
+          (focus)="onTabFocus(folder.id)"
+          (keydown)="onTabKeydown($event, idx)"
+        >
           @if (folder.isDefault) {
             <span
               class="folder-switcher__star-wrapper"
@@ -25,7 +30,7 @@
           }
           <span class="folder-switcher__tab-title">{{ folder.name }}</span>
           <span class="folder-switcher__tab-badge">({{ folder.trackCount }})</span>
-        </div>
+        </button>
 
         @if (canManage()) {
           <div class="folder-switcher__tab-actions">
@@ -38,7 +43,6 @@
               nzSize="small"
               class="folder-switcher__more-btn"
               [attr.aria-label]="'ADMIN.RECITATIONS.FOLDERS.ACTIONS' | translate"
-              (click)="$event.stopPropagation()"
             >
               <ng-icon name="lucideSettings" />
             </button>

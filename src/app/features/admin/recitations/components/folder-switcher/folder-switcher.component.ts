@@ -1,4 +1,12 @@
-import { Component, input, output, signal } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  computed,
+  input,
+  output,
+  signal,
+  viewChildren,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule } from '@ngx-translate/core';
@@ -52,10 +60,84 @@ export class FolderSwitcherComponent {
   readonly isDeleteConfirmVisible = signal(false);
   readonly deletingFolder = signal<RecitationFolder | null>(null);
 
+  /** Tab buttons, in render order, used to move DOM focus for the roving tabindex. */
+  private readonly tabButtons = viewChildren<ElementRef<HTMLButtonElement>>('tabButton');
+
+  /** Folder whose tab last received keyboard focus; null until the tablist is entered. */
+  private readonly focusedFolderId = signal<string | null>(null);
+
+  /**
+   * The single tab that is reachable with Tab (roving tabindex): the focused one when it
+   * still exists, otherwise the active folder, otherwise the first tab.
+   */
+  readonly rovingFolderId = computed<string | null>(() => {
+    const list = this.folders();
+    const focused = this.focusedFolderId();
+    if (focused && list.some((f) => f.id === focused)) return focused;
+    const active = this.activeFolderId();
+    if (active && list.some((f) => f.id === active)) return active;
+    return list[0]?.id ?? null;
+  });
+
   onSelectTab(folderId: string): void {
+    this.focusedFolderId.set(folderId);
     if (folderId !== this.activeFolderId()) {
       this.folderSelect.emit(folderId);
     }
+  }
+
+  onTabFocus(folderId: string): void {
+    this.focusedFolderId.set(folderId);
+  }
+
+  /**
+   * Arrow keys move focus between tabs (wrapping at both ends), Home/End jump to the edges.
+   * Activation stays manual — Enter/Space/click — because selecting a folder triggers a
+   * request and may be refused while uploads are in flight.
+   */
+  onTabKeydown(event: KeyboardEvent, index: number): void {
+    const buttons = this.tabButtons();
+    if (buttons.length === 0) return;
+
+    const rtl = this.isRtl(buttons[index]?.nativeElement);
+    const forwardKey = rtl ? 'ArrowLeft' : 'ArrowRight';
+    const backwardKey = rtl ? 'ArrowRight' : 'ArrowLeft';
+
+    let targetIndex: number;
+    switch (event.key) {
+      case forwardKey:
+        targetIndex = (index + 1) % buttons.length;
+        break;
+      case backwardKey:
+        targetIndex = (index - 1 + buttons.length) % buttons.length;
+        break;
+      case 'Home':
+        targetIndex = 0;
+        break;
+      case 'End':
+        targetIndex = buttons.length - 1;
+        break;
+      default:
+        return;
+    }
+
+    event.preventDefault();
+    this.focusTabAt(targetIndex);
+  }
+
+  private focusTabAt(index: number): void {
+    const element = this.tabButtons()[index]?.nativeElement;
+    if (!element) return;
+    const folder = this.folders()[index];
+    if (folder) {
+      this.focusedFolderId.set(folder.id);
+    }
+    element.focus();
+  }
+
+  private isRtl(element: HTMLElement | undefined): boolean {
+    if (!element) return false;
+    return getComputedStyle(element).direction === 'rtl';
   }
 
   onSetDefault(folderId: string): void {

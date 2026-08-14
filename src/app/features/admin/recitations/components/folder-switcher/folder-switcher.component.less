@@ -18,8 +18,8 @@
   &__tab {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    padding: 8px 14px;
+    gap: 0;
+    padding: 0;
     font-size: 14px;
     font-weight: 500;
     color: var(--color-text-secondary, #6b7280);
@@ -45,9 +45,12 @@
       background-color: var(--color-bg-container, #ffffff);
       border-color: var(--color-border-subtle, #e5e7eb);
       border-top: 3px solid var(--color-primary, #047857);
-      padding-top: 6px;
       z-index: 2;
       box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.04);
+
+      .folder-switcher__tab-main {
+        padding-top: 6px;
+      }
     }
 
     &--default {
@@ -61,6 +64,19 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    padding: 8px 14px;
+    margin: 0;
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: 0;
+    border-radius: 8px 8px 0 0;
+    cursor: pointer;
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary, #047857);
+      outline-offset: -2px;
+    }
   }
 
   &__folder-icon {
@@ -104,6 +120,7 @@
   &__tab-actions {
     display: inline-flex;
     align-items: center;
+    padding-inline-end: 10px;
     opacity: 0.6;
     transition: opacity 0.15s ease;
 
