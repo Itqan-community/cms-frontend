@@ -18,12 +18,7 @@ export interface CmsTab {
   disabled?: boolean;
 }
 
-const TAB_HOME: CmsTab = {
-  id: 'home',
-  path: '',
-  label: 'ADMIN.HOME.LABEL',
-  icon: 'lucideLayoutGrid',
-};
+
 const TAB_FONTS: CmsTab = {
   id: 'fonts',
   path: 'fonts',
@@ -107,7 +102,7 @@ export class AdminSidebarComponent {
   readonly isMobileMenuOpen = model.required<boolean>();
 
   readonly tabs = computed(() => {
-    const tabs: CmsTab[] = [TAB_HOME];
+    const tabs: CmsTab[] = [];
     if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_PUBLISHER)) {
       tabs.push(TAB_PUBLISHERS);
     }
