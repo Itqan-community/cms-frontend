@@ -840,6 +840,8 @@
       "CANCEL": "Cancel"
     },
     "MENU": {
+      "HOME": "Home",
+      "HOME_DESC": "Main Dashboard Overview",
       "MUSHAFS": "Mushafs",
       "MUSHAFS_DESC": "Manage Quranic Mushaf versions and layouts",
       "TAFSIRS": "Tafsirs",

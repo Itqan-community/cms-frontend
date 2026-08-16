@@ -31,6 +31,14 @@ export interface CmsTab {
   disabled?: boolean;
 }
 
+export const TAB_HOME: CmsTab = {
+  id: 'home',
+  path: '',
+  label: 'ADMIN.MENU.HOME',
+  description: 'ADMIN.MENU.HOME_DESC',
+  icon: 'lucideLayoutGrid',
+};
+
 export const TAB_FONTS: CmsTab = {
   id: 'fonts',
   path: 'fonts',
@@ -148,7 +156,7 @@ export class AdminLayoutComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   readonly tabs = computed(() => {
-    const tabs: CmsTab[] = [];
+    const tabs: CmsTab[] = [TAB_HOME];
     if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_PUBLISHER)) {
       tabs.push(TAB_PUBLISHERS);
     }
@@ -235,6 +243,9 @@ export class AdminLayoutComponent implements OnInit {
       if (commands) {
         return commands;
       }
+    }
+    if (!tab.path) {
+      return ['/admin'];
     }
     return ['/admin', tab.path];
   }
