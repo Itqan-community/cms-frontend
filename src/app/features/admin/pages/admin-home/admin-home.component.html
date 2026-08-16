@@ -5,7 +5,7 @@
   </div>
 
   <div nz-row [nzGutter]="[24, 24]">
-    @for (section of sections; track section.route) {
+    @for (section of sections(); track section.route) {
       <div nz-col [nzXs]="24" [nzSm]="12" [nzLg]="12" [nzXl]="6">
         <a [routerLink]="section.route" class="admin-home__card-link">
           <nz-card class="admin-home__card" [nzHoverable]="true">

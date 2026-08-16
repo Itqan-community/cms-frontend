@@ -21,79 +21,91 @@ import {
 } from './utils/admin-tenant-navigation.util';
 import { AdminTenantNavigationService } from './services/admin-tenant-navigation.service';
 
-interface CmsTab {
+export interface CmsTab {
   id: string;
   path: string;
   label: string;
   icon: string;
+  description: string;
   /** Visible in sidebar but not navigable; route redirects away. */
   disabled?: boolean;
 }
 
-const TAB_FONTS: CmsTab = {
+export const TAB_FONTS: CmsTab = {
   id: 'fonts',
   path: 'fonts',
   label: 'ADMIN.MENU.FONTS',
+  description: 'ADMIN.MENU.FONTS_DESC',
   icon: 'lucideType',
 };
-const TAB_MUSHAFS: CmsTab = {
+export const TAB_MUSHAFS: CmsTab = {
   id: 'mushafs',
   path: 'mushafs',
   label: 'ADMIN.MENU.MUSHAFS',
+  description: 'ADMIN.MENU.MUSHAFS_DESC',
   icon: 'lucideBookOpen',
 };
-const TAB_TAFSIRS: CmsTab = {
+export const TAB_TAFSIRS: CmsTab = {
   id: 'tafsirs',
   path: 'tafsirs',
   label: 'ADMIN.MENU.TAFSIRS',
+  description: 'ADMIN.MENU.TAFSIRS_DESC',
   icon: 'lucideGraduationCap',
 };
-const TAB_TRANSLATIONS: CmsTab = {
+export const TAB_TRANSLATIONS: CmsTab = {
   id: 'translations',
   path: 'translations',
   label: 'ADMIN.MENU.TRANSLATIONS',
+  description: 'ADMIN.MENU.TRANSLATIONS_DESC',
   icon: 'lucideGlobe',
 };
-const TAB_PUBLISHERS: CmsTab = {
+export const TAB_PUBLISHERS: CmsTab = {
   id: 'publishers',
   path: 'publishers',
   label: 'ADMIN.MENU.PUBLISHERS',
+  description: 'ADMIN.MENU.PUBLISHERS_DESC',
   icon: 'lucideUsers',
 };
-const TAB_RECITATIONS: CmsTab = {
+export const TAB_RECITATIONS: CmsTab = {
   id: 'recitations',
   path: 'recitations',
   label: 'ADMIN.MENU.RECITATIONS',
+  description: 'ADMIN.MENU.RECITATIONS_DESC',
   icon: 'lucideVolume2',
 };
-const TAB_RECITERS: CmsTab = {
+export const TAB_RECITERS: CmsTab = {
   id: 'reciters',
   path: 'reciters',
   label: 'ADMIN.MENU.RECITERS',
+  description: 'ADMIN.MENU.RECITERS_DESC',
   icon: 'lucideMic',
 };
-const TAB_ISSUES: CmsTab = {
+export const TAB_ISSUES: CmsTab = {
   id: 'issues',
   path: 'issues',
   label: 'ADMIN.MENU.ISSUES',
+  description: 'ADMIN.MENU.ISSUES_DESC',
   icon: 'lucideAlertCircle',
 };
-const TAB_MEMBERS: CmsTab = {
+export const TAB_MEMBERS: CmsTab = {
   id: 'members',
   path: 'members',
   label: 'ADMIN.MENU.MEMBERS',
+  description: 'ADMIN.MENU.MEMBERS_DESC',
   icon: 'lucideUserCog',
 };
-const TAB_ACCESS_REQUESTS: CmsTab = {
+export const TAB_ACCESS_REQUESTS: CmsTab = {
   id: 'access-requests',
   path: 'access-requests',
   label: 'ADMIN.MENU.ACCESS_REQUESTS',
+  description: 'ADMIN.MENU.ACCESS_REQUESTS_DESC',
   icon: 'lucideKeyRound',
 };
-const TAB_USAGE: CmsTab = {
+export const TAB_USAGE: CmsTab = {
   id: 'usage',
   path: 'usage',
   label: 'ADMIN.MENU.USAGE',
+  description: 'ADMIN.MENU.USAGE_DESC',
   icon: 'lucideBarChart2',
 };
 
