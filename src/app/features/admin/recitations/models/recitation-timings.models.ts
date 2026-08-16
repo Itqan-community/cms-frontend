@@ -5,6 +5,7 @@
  */
 export interface RecitationTimingUploadOut {
   asset_id: number;
+  folder_id?: number;
   created_total: number;
   updated_total: number;
   skipped_total: number;

@@ -21,6 +21,9 @@ const CMS_ERROR_NAME_I18N: Record<string, string> = {
   invalid_status: 'ADMIN.ACCESS_REQUESTS.MESSAGES.ALREADY_DECIDED',
   restricted_for_tenant_conflict: 'ERRORS.RESTRICTED_FOR_TENANT_CONFLICT',
   tenant_required: 'ERRORS.TENANT_REQUIRED',
+  folder_name_required: 'ADMIN.RECITATIONS.FOLDERS.ERR_NAME_REQUIRED',
+  cannot_delete_default_folder: 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.CANNOT_DELETE_DEFAULT',
+  folder_not_found: 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.NOT_FOUND',
 };
 
 /** django-allauth `errors[].code` values reused on CMS endpoints. */

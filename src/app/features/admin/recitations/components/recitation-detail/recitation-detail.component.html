@@ -119,6 +119,75 @@
       </div>
     </div>
 
+    @if (folderTabsEpoch()) {
+      <div class="recitation-detail__folders">
+        <nz-tabset
+          [nzSelectedIndex]="selectedFolderIndex()"
+          (nzSelectedIndexChange)="onFolderTabChange($event)"
+          [nzTabBarExtraContent]="folderExtraTpl"
+        >
+          @for (folder of folders(); track folder.slug) {
+            <nz-tab [nzTitle]="folderTabTitle">
+              <ng-template #folderTabTitle>
+                <span class="recitation-detail__folder-tab">
+                  <span class="recitation-detail__folder-tab-name">{{ folderLabel(folder) }}</span>
+                  @if (folder.is_default) {
+                    <nz-tag nzColor="default" class="recitation-detail__folder-default-tag">{{
+                      'ADMIN.RECITATIONS.FOLDERS.DEFAULT_BADGE' | translate
+                    }}</nz-tag>
+                  }
+                  <span class="recitation-detail__folder-count">{{ folder.tracks_count }}</span>
+                  @if (canUpdateRecitation()) {
+                    <button
+                      nz-button
+                      nzType="text"
+                      nzSize="small"
+                      type="button"
+                      class="recitation-detail__folder-tab-action recitation-detail__folder-tab-action--edit"
+                      [attr.aria-label]="'ADMIN.RECITATIONS.FOLDERS.RENAME' | translate"
+                      [attr.title]="'ADMIN.RECITATIONS.FOLDERS.RENAME' | translate"
+                      (click)="openRenameFolderModal(folder, $event)"
+                    >
+                      <ng-icon name="lucideSquarePen" />
+                    </button>
+                  }
+                  @if (canDeleteRecitation() && !folder.is_default) {
+                    <button
+                      nz-button
+                      nzType="text"
+                      nzDanger
+                      nzSize="small"
+                      type="button"
+                      class="recitation-detail__folder-tab-action recitation-detail__folder-tab-action--delete"
+                      [attr.aria-label]="'ADMIN.RECITATIONS.FOLDERS.DELETE.OK' | translate"
+                      [attr.title]="'ADMIN.RECITATIONS.FOLDERS.DELETE.OK' | translate"
+                      (click)="confirmDeleteFolder(folder, $event)"
+                    >
+                      <ng-icon name="lucideTrash2" />
+                    </button>
+                  }
+                </span>
+              </ng-template>
+            </nz-tab>
+          }
+        </nz-tabset>
+        <ng-template #folderExtraTpl>
+          @if (canCreateFolder()) {
+            <button
+              nz-button
+              nzType="dashed"
+              nzSize="small"
+              type="button"
+              (click)="openCreateFolderModal()"
+            >
+              <ng-icon name="lucidePlus" />
+              {{ 'ADMIN.RECITATIONS.FOLDERS.ADD' | translate }}
+            </button>
+          }
+        </ng-template>
+      </div>
+    }
+
     <section class="admin-panel recitation-detail__timings-section">
       <h2 class="admin-panel__title">
         <ng-icon name="lucideClock" />
@@ -126,12 +195,12 @@
       </h2>
 
       <div class="recitation-detail__timings-panel">
-        @if (recitation()!.ayah_timings_url) {
+        @if (timingDownloadUrl()) {
           <div class="recitation-detail__timings-row">
             <a
               nz-button
               nzType="default"
-              [href]="recitation()!.ayah_timings_url!"
+              [href]="timingDownloadUrl()!"
               target="_blank"
               rel="noopener noreferrer"
               download
@@ -562,4 +631,69 @@
       <a routerLink="/admin/recitations">{{ 'ADMIN.COMMON.BACK_TO_LIST' | translate }}</a>
     </div>
   }
+
+  <nz-modal
+    [nzVisible]="folderFormModalVisible()"
+    (nzVisibleChange)="onFolderFormVisibleChange($event)"
+    (nzOnCancel)="onFolderFormVisibleChange(false)"
+    [nzTitle]="
+      (folderFormMode() === 'create'
+        ? 'ADMIN.RECITATIONS.FOLDERS.MODAL.TITLE_CREATE'
+        : 'ADMIN.RECITATIONS.FOLDERS.MODAL.TITLE_RENAME'
+      ) | translate
+    "
+    [nzWidth]="'min(520px, 92vw)'"
+    nzCentered
+    [nzOkLoading]="folderFormSubmitting()"
+    [nzOkText]="
+      (folderFormMode() === 'create'
+        ? 'ADMIN.RECITATIONS.FOLDERS.MODAL.SUBMIT_CREATE'
+        : 'ADMIN.RECITATIONS.FOLDERS.MODAL.SUBMIT_RENAME'
+      ) | translate
+    "
+    [nzCancelText]="'ADMIN.COMMON.CANCEL' | translate"
+    [nzOkDisabled]="folderForm.invalid"
+    (nzOnOk)="submitFolderForm()"
+  >
+    <ng-container *nzModalContent>
+      <form nz-form [formGroup]="folderForm" nzLayout="vertical">
+        <div nz-row [nzGutter]="16">
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label>{{
+                'ADMIN.RECITATIONS.FOLDERS.MODAL.NAME_AR' | translate
+              }}</nz-form-label>
+              <nz-form-control>
+                <input
+                  nz-input
+                  formControlName="name_ar"
+                  [placeholder]="'ADMIN.RECITATIONS.FOLDERS.MODAL.PLACEHOLDER_NAME_AR' | translate"
+                />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label>{{
+                'ADMIN.RECITATIONS.FOLDERS.MODAL.NAME_EN' | translate
+              }}</nz-form-label>
+              <nz-form-control>
+                <input
+                  nz-input
+                  formControlName="name_en"
+                  [placeholder]="'ADMIN.RECITATIONS.FOLDERS.MODAL.PLACEHOLDER_NAME_EN' | translate"
+                  dir="ltr"
+                />
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+        @if (folderForm.hasError('folderNameRequired') && folderForm.touched) {
+          <p class="recitation-detail__folder-form-error">
+            {{ 'ADMIN.RECITATIONS.FOLDERS.ERR_NAME_REQUIRED' | translate }}
+          </p>
+        }
+      </form>
+    </ng-container>
+  </nz-modal>
 </div>

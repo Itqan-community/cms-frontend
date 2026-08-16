@@ -99,7 +99,8 @@ export class RecitationTracksUploadOrchestratorService {
   async uploadAllFiles(
     assetId: number,
     files: { filename: string; blob: File }[],
-    cbs: UploadOrchestratorCallbacks
+    cbs: UploadOrchestratorCallbacks,
+    folderId?: number | null
   ): Promise<void> {
     const ac = new AbortController();
     this.activeRunControllers.add(ac);
@@ -108,7 +109,7 @@ export class RecitationTracksUploadOrchestratorService {
     try {
       const queue = [...files];
       const workers = Array.from({ length: RECITATION_TRACKS_FILE_CONCURRENCY }, () =>
-        this.worker(assetId, queue, cbs, signal)
+        this.worker(assetId, queue, cbs, signal, folderId)
       );
       await Promise.all(workers);
     } finally {
@@ -120,14 +121,15 @@ export class RecitationTracksUploadOrchestratorService {
     assetId: number,
     queue: { filename: string; blob: File }[],
     cbs: UploadOrchestratorCallbacks,
-    signal: AbortSignal
+    signal: AbortSignal,
+    folderId?: number | null
   ): Promise<void> {
     while (queue.length > 0) {
       if (signal.aborted) return;
       const item = queue.shift();
       if (!item) return;
       try {
-        await this.uploadOneFile(assetId, item, cbs, signal);
+        await this.uploadOneFile(assetId, item, cbs, signal, folderId);
       } catch (err) {
         if (err instanceof DOMException && err.name === 'AbortError') {
           continue;
@@ -145,13 +147,14 @@ export class RecitationTracksUploadOrchestratorService {
     assetId: number,
     file: { filename: string; blob: File },
     cbs: UploadOrchestratorCallbacks,
-    globalSignal: AbortSignal
+    globalSignal: AbortSignal,
+    folderId?: number | null
   ): Promise<void> {
     const { filename } = file;
     const previous = this.perFileUploadChain.get(filename);
     const run = (async (): Promise<void> => {
       if (previous) await previous.catch(() => undefined);
-      await this.runSingleFileUpload(assetId, file, cbs, globalSignal);
+      await this.runSingleFileUpload(assetId, file, cbs, globalSignal, folderId);
     })();
     this.perFileUploadChain.set(filename, run);
     try {
@@ -167,7 +170,8 @@ export class RecitationTracksUploadOrchestratorService {
     assetId: number,
     file: { filename: string; blob: File },
     cbs: UploadOrchestratorCallbacks,
-    globalSignal: AbortSignal
+    globalSignal: AbortSignal,
+    folderId?: number | null
   ): Promise<void> {
     const { filename, blob } = file;
 
@@ -202,6 +206,7 @@ export class RecitationTracksUploadOrchestratorService {
           filename,
           duration_ms: durationMs,
           size_bytes: blob.size,
+          ...(folderId != null ? { folder_id: folderId } : {}),
         })
       );
 
@@ -307,6 +312,7 @@ export class RecitationTracksUploadOrchestratorService {
             parts,
             duration_ms: durationMs,
             size_bytes: blob.size,
+            ...(folderId != null ? { folder_id: folderId } : {}),
           })
         );
 

@@ -11,6 +11,87 @@
     min-width: 240px;
   }
 
+  &__folders {
+    margin-block: 8px 16px;
+  }
+
+  &__folder-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__folder-tab-name {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__folder-default-tag {
+    margin-inline: 0;
+  }
+
+  &__folder-count {
+    font-size: 11px;
+    line-height: 1;
+    color: var(--admin-text-400);
+  }
+
+  &__folder-tab-action {
+    &.ant-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      min-width: 22px;
+      min-height: 22px;
+      padding: 0;
+      border: 0;
+      border-radius: var(--radius-md);
+      color: var(--admin-text-400);
+      background: transparent;
+      line-height: 1;
+      box-shadow: none;
+
+      ng-icon {
+        width: 14px;
+        height: 14px;
+      }
+
+      &:hover,
+      &:focus {
+        color: var(--admin-text-400);
+        background: var(--admin-surface-100);
+        border-color: transparent;
+      }
+
+      &:focus-visible {
+        outline: 2px solid var(--color-primary-400);
+        outline-offset: 1px;
+      }
+    }
+
+    &--edit.ant-btn:hover,
+    &--edit.ant-btn:focus {
+      background: var(--color-action-edit-bg);
+      color: var(--color-action-edit);
+    }
+
+    &--delete.ant-btn:hover,
+    &--delete.ant-btn:focus {
+      background: var(--color-action-delete-bg);
+      color: var(--color-action-delete);
+    }
+  }
+
+  &__folder-form-error {
+    margin: 0;
+    color: var(--admin-danger, #cf1322);
+    font-size: 0.875rem;
+  }
+
   &__timings-section {
     margin-top: 8px;
   }

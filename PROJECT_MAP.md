@@ -1,6 +1,6 @@
 # PROJECT_MAP — Itqan CMS Frontend
 
-> Last updated: 2026-08-09 Generated for AI-assisted development. Provide this doc to any LLM to
+> Last updated: 2026-08-16 Generated for AI-assisted development. Provide this doc to any LLM to
 > give full project context.
 
 ---
@@ -110,6 +110,16 @@ Update -> PUT   /portal/{entity}/{id}/
 Delete -> DELETE /portal/{entity}/{id}/
 
 Each entity has: ListComponent, FormComponent (create+edit), DetailComponent
+(with delete confirmation modal), FilterComponent.
+
+Recitation folders (admin detail variants of the same recitation):
+1. GET /portal/recitations/{slug}/ then GET /portal/recitations/{slug}/folders/
+2. Tabs above timings/tracks; selection persisted as ?folder={slug}
+3. GET /portal/recitations/{slug}/recitation-tracks/?folder={slug}
+4. Validate/start/finish track upload and POST /portal/timing/upload/ send folder_id
+5. Folder CRUD: POST/PATCH/DELETE /portal/recitations/{slug}/folders/{folder_slug}/
+   (create needs portal_create_recitation; default folder cannot be deleted)
+
 Base class: AdminListBase (src/app/features/admin/utils/admin-list-base.ts)
 Create forms for font/mushaf/tafsir/translation include shared
 `asset-initial-version-fields` (optional on create). Additional versions on detail via
@@ -284,22 +294,22 @@ success.
 
 **Modules (each follows identical CRUD pattern):**
 
-| Module             | Entity                | Key Models                          | Notes                                                                                                                                                                                            |
-| ------------------ | --------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `publishers/`      | Publisher admin       | `Publisher`                         | CRUD + image upload                                                                                                                                                                              |
-| `tafsirs/`         | Tafsir (exegesis)     | `Tafsir`, `TafsirVersion`           | CRUD + optional initial version on create (always multipart) + version management on detail                                                                                                      |
-| `translations/`    | Translation           | `Translation`, `TranslationVersion` | CRUD; create always multipart FormData with optional initial version; update/patch remain JSON; version management on detail                                                                     |
-| `recitations/`     | Recitation (audio)    | `Recitation`                        | CRUD + track upload with progress + timings; full bulk upload success redirects to `/gallery/asset/{id}`; partial failure clears validate banner and keeps failed rows for retry                 |
-| `reciters/`        | Reciter               | `Reciter`                           | CRUD + image upload + death info                                                                                                                                                                 |
-| `issues/`          | Issue reports         | `IssueReportOut`                    | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions                                                                                                |
-| `members/`         | Publisher members     | `MemberOut`, `GroupListOut`         | List/invite/update/remove/resend via `/portal/members/`; list shows `group_name`; invite/edit submit `group_id` from `GET /portal/groups/`; scoped by `AdminTenantService.selectedPublisherId()` |
-| `access-requests/` | Asset access requests | `AccessRequestOut`                  | List/accept/reject + publisher settings (`/portal/publishers/{id}/access-requests-settings/`); detail drawer; permission-gated actions                                                           |
-| `mushafs/`         | Mushaf portal assets  | `MushafItem`, `MushafDetails`       | List/detail/create/edit/delete; optional initial version on create; further versions via live `/portal/mushafs/`; permission-gated (`portal_*_mushaf`)                                           |
-| `fonts/`           | Font portal assets    | `FontItem`, `FontDetails`           | Same CRUD pattern via live `/portal/fonts/` (optional initial version on create); permission-gated (`portal_*_font`)                                                                             |
-| `programs/`        | Program portal assets | `ProgramItem`, `ProgramDetails`     | Feature code present; route/sidebar/redirect hidden until BE `/portal/programs/` ships; mock via `useProgramsMockApi`                                                                            |
-| `usage/`           | API Usage analytics   | Request logs                        | Charts, top endpoints, top entities                                                                                                                                                              |
-| `audio/`           | Audio management      | —                                   | Routes defined                                                                                                                                                                                   |
-| `software/`        | Software management   | —                                   | Routes defined                                                                                                                                                                                   |
+| Module             | Entity                | Key Models                          | Notes                                                                                                                                                                                                                    |
+| ------------------ | --------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `publishers/`      | Publisher admin       | `Publisher`                         | CRUD + image upload                                                                                                                                                                                                      |
+| `tafsirs/`         | Tafsir (exegesis)     | `Tafsir`, `TafsirVersion`           | CRUD + optional initial version on create (always multipart) + version management on detail                                                                                                                              |
+| `translations/`    | Translation           | `Translation`, `TranslationVersion` | CRUD; create always multipart FormData with optional initial version; update/patch remain JSON; version management on detail                                                                                             |
+| `recitations/`     | Recitation (audio)    | `Recitation`                        | CRUD + folder variants (tabs on detail) + track/timing upload scoped by `folder_id`; full bulk upload success redirects to `/gallery/asset/{id}`; partial failure clears validate banner and keeps failed rows for retry |
+| `reciters/`        | Reciter               | `Reciter`                           | CRUD + image upload + death info                                                                                                                                                                                         |
+| `issues/`          | Issue reports         | `IssueReportOut`                    | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions                                                                                                                        |
+| `members/`         | Publisher members     | `MemberOut`, `GroupListOut`         | List/invite/update/remove/resend via `/portal/members/`; list shows `group_name`; invite/edit submit `group_id` from `GET /portal/groups/`; scoped by `AdminTenantService.selectedPublisherId()`                         |
+| `access-requests/` | Asset access requests | `AccessRequestOut`                  | List/accept/reject + publisher settings (`/portal/publishers/{id}/access-requests-settings/`); detail drawer; permission-gated actions                                                                                   |
+| `mushafs/`         | Mushaf portal assets  | `MushafItem`, `MushafDetails`       | List/detail/create/edit/delete; optional initial version on create; further versions via live `/portal/mushafs/`; permission-gated (`portal_*_mushaf`)                                                                   |
+| `fonts/`           | Font portal assets    | `FontItem`, `FontDetails`           | Same CRUD pattern via live `/portal/fonts/` (optional initial version on create); permission-gated (`portal_*_font`)                                                                                                     |
+| `programs/`        | Program portal assets | `ProgramItem`, `ProgramDetails`     | Feature code present; route/sidebar/redirect hidden until BE `/portal/programs/` ships; mock via `useProgramsMockApi`                                                                                                    |
+| `usage/`           | API Usage analytics   | Request logs                        | Charts, top endpoints, top entities                                                                                                                                                                                      |
+| `audio/`           | Audio management      | —                                   | Routes defined                                                                                                                                                                                                           |
+| `software/`        | Software management   | —                                   | Routes defined                                                                                                                                                                                                           |
 
 **Shared admin components:**
 

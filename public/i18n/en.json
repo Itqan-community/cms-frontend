@@ -1257,6 +1257,36 @@
         "DESC_AR": "Description (Arabic)",
         "DESC_EN": "Description (EN)"
       },
+      "FOLDERS": {
+        "ADD": "Add folder",
+        "RENAME": "Rename folder",
+        "DEFAULT_BADGE": "Default",
+        "ERR_NAME_REQUIRED": "Enter an Arabic or English folder name.",
+        "MODAL": {
+          "TITLE_CREATE": "Add folder",
+          "TITLE_RENAME": "Rename folder",
+          "SUBMIT_CREATE": "Add",
+          "SUBMIT_RENAME": "Save",
+          "NAME_AR": "Name (Arabic)",
+          "NAME_EN": "Name (English)",
+          "PLACEHOLDER_NAME_AR": "e.g. Clear",
+          "PLACEHOLDER_NAME_EN": "e.g. With echo"
+        },
+        "DELETE": {
+          "CONFIRM_TITLE": "Delete this folder?",
+          "CONFIRM_BODY": "This deletes “{{name}}” and all of its audio tracks and ayah timings ({{count}} track(s)). This cannot be undone.",
+          "OK": "Delete folder"
+        },
+        "MESSAGES": {
+          "CREATE_OK": "Folder created.",
+          "RENAME_OK": "Folder renamed.",
+          "DELETE_OK": "Folder deleted.",
+          "SAVE_ERROR": "Could not save the folder. Try again.",
+          "DELETE_ERROR": "Could not delete the folder. Try again.",
+          "CANNOT_DELETE_DEFAULT": "The default folder cannot be deleted.",
+          "NOT_FOUND": "Folder not found."
+        }
+      },
       "TRACKS": {
         "SECTION_TITLE": "Surah audio tracks",
         "CHOOSE_FILES": "Choose MP3 files",

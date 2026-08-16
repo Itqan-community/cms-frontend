@@ -281,6 +281,57 @@ a.ant-btn {
   }
 }
 
+.ant-tabs {
+  .ant-tabs-nav {
+    margin-bottom: 0;
+
+    &::before {
+      border-bottom-color: var(--admin-border-200);
+    }
+  }
+
+  .ant-tabs-nav-wrap {
+    min-height: var(--admin-input-height); // 32px
+  }
+
+  .ant-tabs-tab {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--admin-text-600);
+    background: transparent;
+    transition:
+      background 0.15s,
+      color 0.15s;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+
+    &:hover {
+      color: var(--admin-accent-600);
+      background: var(--admin-accent-50);
+    }
+
+    &-active .ant-tabs-tab-btn {
+      color: var(--admin-accent-600);
+      font-weight: 700;
+    }
+  }
+
+  .ant-tabs-tab-btn {
+    color: inherit;
+  }
+
+  .ant-tabs-ink-bar {
+    background: var(--admin-accent-600);
+    height: 2px;
+  }
+
+  .ant-tabs-extra-content {
+    display: flex;
+    align-items: center;
+    margin-inline-start: 8px;
+  }
+}
+
 .ant-carousel {
   overflow: unset !important;
   margin-inline: 52px !important;
