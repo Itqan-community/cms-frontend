@@ -307,6 +307,34 @@ Release 1.6.0.
 
 ---
 
+## [1.7.0] - 2026-08-10
+
+Release 1.7.0.
+
+## Changes
+
+- style: apply Prettier fixes for format:check
+- fix(admin): show member group_name from list API response
+- feat(admin): load member groups dynamically and lock asset publisher fields
+- feat(admin): make initial asset version optional on create
+- docs(README): add roadmap, issue labels, and AI assistant guidelines
+- feat(none): empty commit
+- feat(none): empty commit
+- feat(admin): require initial version on asset create forms
+- feat(reciters): add public reciters SEO pages, API, and sitemap generation
+- fix(admin): address CodeRabbit feedback for mushafs and fonts
+- feat(admin): wire mushafs and fonts to live portal APIs
+- style: fix prettier formatting on publisher-details.page.ts
+- fix(seo): key robots.txt on Netlify CONTEXT instead of per-config assets
+- fix(seo): address PR review — per-env robots.txt, twitter:card, description fallbacks
+- feat(admin): add fonts and programs portal CRUD with mock APIs
+- feat(admin): add mushafs portal CRUD with mock API
+- ci(i18n): fail build when Arabic translations are missing
+- fix(seo): guard publisher-details fetches with takeUntilDestroyed
+- feat(seo): add SeoService/JsonLdService and wire SEO tags into public pages
+
+---
+
 ## [Unreleased]
 
 ### Added
