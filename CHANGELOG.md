@@ -335,6 +335,16 @@ Release 1.7.0.
 
 ---
 
+## [1.8.0] - 2026-08-17
+
+Release 1.8.0.
+
+## Changes
+
+- feat(admin): add recitation folder variants on detail
+
+---
+
 ## [Unreleased]
 
 ### Added
