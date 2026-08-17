@@ -1,4 +1,5 @@
 import { PublisherRef } from '../../tafsirs/models/tafsirs.models';
+import type { RecitationDetailFolderRef } from './recitation-folders.models';
 
 export enum MaddLevel {
   TWASSUT = 'twassut',
@@ -64,6 +65,8 @@ export interface RecitationDetails {
   year: number | null;
   license: string;
   ayah_timings_url?: string | null;
+  /** Default-folder export only; per-folder URLs are not on this field. */
+  folders?: RecitationDetailFolderRef[];
   is_open_access: boolean;
   restricted_for_tenant: boolean;
   created_at: string;

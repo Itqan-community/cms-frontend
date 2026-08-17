@@ -11,6 +11,7 @@ export type RecitationTrackValidateUploadStatus = 'valid' | 'invalid';
 export interface RecitationTrackValidateUploadIn {
   asset_id: number;
   filenames: string[];
+  folder_id?: number | null;
 }
 
 export interface RecitationTrackValidateFileOut {
@@ -20,6 +21,7 @@ export interface RecitationTrackValidateFileOut {
 
 export interface RecitationTrackValidateUploadOut {
   asset_id: number;
+  folder_id?: number;
   status: RecitationTrackValidateUploadStatus;
   message: string;
   files: RecitationTrackValidateFileOut[];
@@ -37,6 +39,7 @@ export interface RecitationTrackUploadStartIn {
   filename: string;
   duration_ms?: number | null;
   size_bytes?: number | null;
+  folder_id?: number | null;
 }
 
 export interface RecitationTrackUploadStartOut {
@@ -44,6 +47,7 @@ export interface RecitationTrackUploadStartOut {
   upload_id: string;
   content_type: string;
   surah_number: number;
+  folder_id?: number;
 }
 
 /** POST /portal/recitation-tracks/uploads/sign-part/ */
@@ -72,11 +76,13 @@ export interface RecitationTrackUploadFinishIn {
   parts: RecitationTrackUploadFinishPart[];
   duration_ms?: number | null;
   size_bytes?: number | null;
+  folder_id?: number | null;
 }
 
 export interface RecitationTrackUploadFinishOut {
   track_id: number;
   asset_id: number;
+  folder_id?: number;
   surah_number: number;
   size_bytes: number;
   finished_at: string;

@@ -1257,6 +1257,36 @@
         "DESC_AR": "الوصف (عربي)",
         "DESC_EN": "الوصف (إنجليزي)"
       },
+      "FOLDERS": {
+        "ADD": "إضافة مجلد",
+        "RENAME": "إعادة تسمية المجلد",
+        "DEFAULT_BADGE": "افتراضي",
+        "ERR_NAME_REQUIRED": "أدخل اسم المجلد بالعربية أو الإنجليزية.",
+        "MODAL": {
+          "TITLE_CREATE": "إضافة مجلد",
+          "TITLE_RENAME": "إعادة تسمية المجلد",
+          "SUBMIT_CREATE": "إضافة",
+          "SUBMIT_RENAME": "حفظ",
+          "NAME_AR": "الاسم (عربي)",
+          "NAME_EN": "الاسم (إنجليزي)",
+          "PLACEHOLDER_NAME_AR": "مثال: واضح",
+          "PLACEHOLDER_NAME_EN": "e.g. With echo"
+        },
+        "DELETE": {
+          "CONFIRM_TITLE": "حذف هذا المجلد؟",
+          "CONFIRM_BODY": "سيُحذف «{{name}}» وجميع ملفات الصوت والتزمين التابعة له ({{count}} مقطعًا). لا يمكن التراجع عن هذا الإجراء.",
+          "OK": "حذف المجلد"
+        },
+        "MESSAGES": {
+          "CREATE_OK": "تم إنشاء المجلد.",
+          "RENAME_OK": "تم تغيير اسم المجلد.",
+          "DELETE_OK": "تم حذف المجلد.",
+          "SAVE_ERROR": "تعذر حفظ المجلد. حاول مرة أخرى.",
+          "DELETE_ERROR": "تعذر حذف المجلد. حاول مرة أخرى.",
+          "CANNOT_DELETE_DEFAULT": "لا يمكن حذف المجلد الافتراضي.",
+          "NOT_FOUND": "المجلد غير موجود."
+        }
+      },
       "DELETE": {
         "CONFIRM_TITLE": "حذف هذه التلاوة؟",
         "CONFIRM_BODY": "<b>{{name}}</b> — هذا الإجراء لا يمكن التراجع عنه.",
