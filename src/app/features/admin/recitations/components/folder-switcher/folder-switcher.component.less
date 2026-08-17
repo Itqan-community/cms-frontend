@@ -3,15 +3,24 @@
 
   &__tab-bar {
     display: flex;
-    align-items: center;
+    align-items: flex-end;
     gap: 4px;
-    border-bottom: 2px solid var(--color-border-subtle, #e5e7eb);
+    border-bottom: 2px solid var(--admin-border-200, #e5e7eb);
     padding-inline: 4px;
+    padding-top: 4px;
+    padding-bottom: 0;
     overflow-x: auto;
+    overflow-y: hidden;
     scrollbar-width: thin;
+    white-space: nowrap;
 
     &::-webkit-scrollbar {
       height: 4px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background-color: var(--admin-border-300, #cbd5e1);
+      border-radius: 2px;
     }
   }
 
@@ -20,36 +29,37 @@
     align-items: center;
     gap: 0;
     padding: 0;
+    height: 38px;
     font-size: 14px;
     font-weight: 500;
-    color: var(--color-text-secondary, #6b7280);
-    background-color: var(--color-bg-muted, #f3f4f6);
-    border: 1px solid var(--color-border-subtle, #e5e7eb);
+    color: var(--admin-text-600, #4b5563);
+    background-color: var(--admin-surface-100, #f1f5f9);
+    border: 1px solid var(--admin-border-200, #e2e8f0);
     border-bottom: none;
     border-radius: 8px 8px 0 0;
     cursor: pointer;
     user-select: none;
-    transition: all 0.2s ease-in-out;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
     margin-bottom: -2px;
     position: relative;
     z-index: 1;
+    flex-shrink: 0;
 
     &:hover {
-      color: var(--color-text-primary, #111827);
-      background-color: var(--color-bg-hover, #eaedea);
+      color: var(--admin-text-900, #0f172a);
+      background-color: var(--admin-surface-200, #e2e8f0);
     }
 
     &--active {
       color: var(--color-primary, #047857);
       font-weight: 600;
-      background-color: var(--color-bg-container, #ffffff);
-      border-color: var(--color-border-subtle, #e5e7eb);
+      background-color: var(--admin-surface-white, #ffffff);
+      border-color: var(--admin-border-200, #e2e8f0);
       border-top: 3px solid var(--color-primary, #047857);
       z-index: 2;
-      box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.04);
 
       .folder-switcher__tab-main {
-        padding-top: 6px;
+        padding-top: 0;
       }
     }
 
@@ -64,7 +74,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 14px;
+    height: 100%;
+    padding: 0 12px;
     margin: 0;
     font: inherit;
     color: inherit;
@@ -120,8 +131,8 @@
   &__tab-actions {
     display: inline-flex;
     align-items: center;
-    padding-inline-end: 10px;
-    opacity: 0.6;
+    padding-inline-end: 8px;
+    opacity: 0.7;
     transition: opacity 0.15s ease;
 
     .folder-switcher__tab:hover &,
@@ -131,35 +142,52 @@
   }
 
   &__more-btn {
+    border: none !important;
+    box-shadow: none !important;
+    background: transparent !important;
     padding: 2px 4px !important;
-    height: 22px !important;
-    line-height: 22px !important;
+    height: 24px !important;
+    width: 24px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
     border-radius: 4px;
-    color: var(--color-text-secondary, #6b7280);
+    color: var(--admin-text-500, #6b7280) !important;
 
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.06);
-      color: var(--color-text-primary, #111827);
+    &:hover,
+    &:focus-visible {
+      background-color: var(--admin-surface-200, rgba(0, 0, 0, 0.06)) !important;
+      color: var(--admin-text-900, #111827) !important;
     }
   }
 
   &__add-tab {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 6px 12px;
+    gap: 6px;
+    height: 36px;
+    padding: 0 12px;
     font-size: 13px;
     font-weight: 500;
     color: var(--color-primary, #047857);
     background-color: transparent;
-    border: 1px dashed var(--color-primary-light, #a7f3d0);
+    border: 1px dashed var(--color-primary-300, #a7f3d0);
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s ease;
+    margin-bottom: 2px;
+    margin-inline-start: 4px;
+    flex-shrink: 0;
 
     &:hover {
-      background-color: var(--color-primary-bg, #ecfdf5);
+      background-color: var(--color-primary-50, #ecfdf5);
       border-color: var(--color-primary, #047857);
+      color: var(--color-primary-700, #047857);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary-400);
+      outline-offset: 2px;
     }
   }
 

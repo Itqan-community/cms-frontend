@@ -764,6 +764,7 @@
   "ADMIN": {
     "HOME": "الرئيسية",
     "COMMON": {
+      "ADD": "إضافة",
       "TOOLTIP_VIEW": "عرض",
       "TOOLTIP_EDIT": "تعديل",
       "EMPTY_SUBTITLE": "لم يتم العثور على نتائج. حاول تعديل معايير البحث.",

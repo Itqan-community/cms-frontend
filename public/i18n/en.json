@@ -764,6 +764,7 @@
   "ADMIN": {
     "HOME": "Home",
     "COMMON": {
+      "ADD": "Add",
       "TOOLTIP_VIEW": "View",
       "TOOLTIP_EDIT": "Edit",
       "EMPTY_SUBTITLE": "No matching results. Try adjusting your search.",
