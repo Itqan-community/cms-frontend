@@ -198,7 +198,9 @@ export class FolderSwitcherComponent {
 
     if (!folder) return;
 
-    const folderStillExists = currentFolders.some((currentFolder) => currentFolder.id === folder.id);
+    const folderStillExists = currentFolders.some(
+      (currentFolder) => currentFolder.id === folder.id
+    );
     const isMinimumFolderCount = currentFolders.length <= 1;
 
     if (!folderStillExists || isMinimumFolderCount) {

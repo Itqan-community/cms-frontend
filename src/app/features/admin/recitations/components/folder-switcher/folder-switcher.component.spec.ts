@@ -78,7 +78,12 @@ describe('FolderSwitcherComponent', () => {
 
   it('should not emit deleteFolder when the folder is no longer in the current collection', () => {
     spyOn(component.deleteFolder, 'emit');
-    component.deletingFolder.set({ id: 'missing', name: 'Missing', isDefault: false, trackCount: 0 });
+    component.deletingFolder.set({
+      id: 'missing',
+      name: 'Missing',
+      isDefault: false,
+      trackCount: 0,
+    });
     component.isDeleteConfirmVisible.set(true);
 
     component.submitDelete();

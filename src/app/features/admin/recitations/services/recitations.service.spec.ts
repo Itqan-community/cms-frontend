@@ -151,8 +151,8 @@ describe('RecitationsService', () => {
       done();
     });
 
-    const req = httpMock.expectOne((r) =>
-      r.url.includes('/portal/recitations/my-recitation/folders/') && r.method === 'POST'
+    const req = httpMock.expectOne(
+      (r) => r.url.includes('/portal/recitations/my-recitation/folders/') && r.method === 'POST'
     );
     expect(req.request.body).toEqual({ name: 'Variant 3', is_default: false });
     req.flush({ id: 12, name: 'Variant 3', is_default: false, track_count: 0 });
@@ -164,17 +164,19 @@ describe('RecitationsService', () => {
       done();
     });
 
-    const req = httpMock.expectOne((r) =>
-      r.url.includes('/portal/recitations/my-recitation/folders/11/set-default/') &&
-      r.method === 'POST'
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url.includes('/portal/recitations/my-recitation/folders/11/set-default/') &&
+        r.method === 'POST'
     );
     req.flush({ id: 11, name: 'Variant 2', is_default: true, track_count: 30 });
   });
 
   it('deleteFolder should send DELETE request', (done) => {
     service.deleteFolder('my-recitation', '11').subscribe(() => done());
-    const req = httpMock.expectOne((r) =>
-      r.url.includes('/portal/recitations/my-recitation/folders/11/') && r.method === 'DELETE'
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url.includes('/portal/recitations/my-recitation/folders/11/') && r.method === 'DELETE'
     );
     req.flush(null);
   });

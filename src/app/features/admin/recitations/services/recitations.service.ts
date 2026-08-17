@@ -126,9 +126,7 @@ export class RecitationsService {
           }
           return rows.map((row) => this.mapFolderRow(row));
         }),
-        catchError(() =>
-          of([{ id: 'default', name: 'Main', isDefault: true, trackCount: 0 }])
-        )
+        catchError(() => of([{ id: 'default', name: 'Main', isDefault: true, trackCount: 0 }]))
       );
   }
 
