@@ -89,7 +89,6 @@ describe('AdminLayoutComponent', () => {
     expect(tenantNavigationMock.assign).toHaveBeenCalledWith('/admin/publishers/456');
   });
 
-
   it('does nothing when the selected tenant is unchanged', () => {
     component.onTenantChange(123);
 

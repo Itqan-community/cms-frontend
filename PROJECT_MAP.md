@@ -222,29 +222,29 @@ Trust, Profile, CompleteProfile
 
 ### Route Map
 
-| Path                     | Component                      | Guards                           | Notes                                                                                                                                      |
-| ------------------------ | ------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/gallery`               | `GalleryPage`                  | —                                | Main listing                                                                                                                               |
-| `/gallery/asset/:id`     | `AssetDetailsPage`             | —                                | Detail + access request + download + report issue modal                                                                                    |
-| `/publishers`            | `PublishersPage`               | `publisherHostGuard`             | Stub                                                                                                                                       |
-| `/publisher/:id`         | `PublisherDetailsPage`         | `publisherHostGuard`             | Detail + filtered assets                                                                                                                   |
-| `/license/:id`           | `LicenseDetailsPage`           | —                                | License detail                                                                                                                             |
-| `/content-standards`     | `UsageStandardsPage`           | `publisherHostGuard`             | Content guidelines                                                                                                                         |
-| `/unauthorized`          | `UnauthorizedPage`             | —                                | Card UX; CTA + 5s countdown auto-redirect to `/gallery`; `hideHeader`; dir name typo `unautorized/`                                        |
-| `/complete-profile`      | `CompleteProfilePage`          | `authGuard`                      | Profile completion                                                                                                                         |
-| `/account/*`             | (22 auth pages)                | guestGuard/authGuard             | Auth & account management                                                                                                                  |
-| `/admin`                 | `AdminLayoutComponent`         | `authGuard`, `portalAccessGuard` | Permission-based admin shell (`layout/` header + sidebar)                                                                                  |
-| `/admin` (default)       | `AdminHomeComponent`           | —                                | Landing grid of the same permission-filtered sidebar modules (no portal redirect)                                                          |
-| `/admin/publishers`      | (lazy routes)                  | `itqanAdminGuard`                | Publisher CRUD (staff)                                                                                                                     |
-| `/admin/tafsirs`         | (lazy routes)                  | per-route `permissionGuard`      | Tafsir CRUD                                                                                                                                |
-| `/admin/translations`    | (lazy routes)                  | per-route `permissionGuard`      | Translation CRUD                                                                                                                           |
-| `/admin/recitations`     | (lazy routes)                  | per-route `permissionGuard`      | Recitation CRUD                                                                                                                            |
-| `/admin/reciters`        | (lazy routes)                  | per-route `permissionGuard`      | Reciter CRUD                                                                                                                               |
-| `/admin/issues`          | (lazy routes)                  | _(permission guards commented)_  | Issue reports (list/detail/create/edit/delete); TODO enable `portal_*_issue_report` guards                                                 |
-| `/admin/members`         | (lazy routes)                  | `membersAccessGuard`             | Publisher member list/invite/edit/remove/resend via `/portal/members/` (modal UX on single list)                                           |
-| `/admin/access-requests` | (lazy routes)                  | `accessRequestsAccessGuard`      | Asset access requests list/accept/reject + settings via `/portal/access-requests/` and `/portal/publishers/{id}/access-requests-settings/` |
-| `/admin/usage`           | (lazy routes)                  | `portal_access`                  | API usage analytics                                                                                                                        |
-| `**`                     | redirect -> /gallery           | —                                | Wildcard                                                                                                                                   |
+| Path                     | Component              | Guards                           | Notes                                                                                                                                      |
+| ------------------------ | ---------------------- | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/gallery`               | `GalleryPage`          | —                                | Main listing                                                                                                                               |
+| `/gallery/asset/:id`     | `AssetDetailsPage`     | —                                | Detail + access request + download + report issue modal                                                                                    |
+| `/publishers`            | `PublishersPage`       | `publisherHostGuard`             | Stub                                                                                                                                       |
+| `/publisher/:id`         | `PublisherDetailsPage` | `publisherHostGuard`             | Detail + filtered assets                                                                                                                   |
+| `/license/:id`           | `LicenseDetailsPage`   | —                                | License detail                                                                                                                             |
+| `/content-standards`     | `UsageStandardsPage`   | `publisherHostGuard`             | Content guidelines                                                                                                                         |
+| `/unauthorized`          | `UnauthorizedPage`     | —                                | Card UX; CTA + 5s countdown auto-redirect to `/gallery`; `hideHeader`; dir name typo `unautorized/`                                        |
+| `/complete-profile`      | `CompleteProfilePage`  | `authGuard`                      | Profile completion                                                                                                                         |
+| `/account/*`             | (22 auth pages)        | guestGuard/authGuard             | Auth & account management                                                                                                                  |
+| `/admin`                 | `AdminLayoutComponent` | `authGuard`, `portalAccessGuard` | Permission-based admin shell (`layout/` header + sidebar)                                                                                  |
+| `/admin` (default)       | `AdminHomeComponent`   | —                                | Landing grid of the same permission-filtered sidebar modules (no portal redirect)                                                          |
+| `/admin/publishers`      | (lazy routes)          | `itqanAdminGuard`                | Publisher CRUD (staff)                                                                                                                     |
+| `/admin/tafsirs`         | (lazy routes)          | per-route `permissionGuard`      | Tafsir CRUD                                                                                                                                |
+| `/admin/translations`    | (lazy routes)          | per-route `permissionGuard`      | Translation CRUD                                                                                                                           |
+| `/admin/recitations`     | (lazy routes)          | per-route `permissionGuard`      | Recitation CRUD                                                                                                                            |
+| `/admin/reciters`        | (lazy routes)          | per-route `permissionGuard`      | Reciter CRUD                                                                                                                               |
+| `/admin/issues`          | (lazy routes)          | _(permission guards commented)_  | Issue reports (list/detail/create/edit/delete); TODO enable `portal_*_issue_report` guards                                                 |
+| `/admin/members`         | (lazy routes)          | `membersAccessGuard`             | Publisher member list/invite/edit/remove/resend via `/portal/members/` (modal UX on single list)                                           |
+| `/admin/access-requests` | (lazy routes)          | `accessRequestsAccessGuard`      | Asset access requests list/accept/reject + settings via `/portal/access-requests/` and `/portal/publishers/{id}/access-requests-settings/` |
+| `/admin/usage`           | (lazy routes)          | `portal_access`                  | API usage analytics                                                                                                                        |
+| `**`                     | redirect -> /gallery   | —                                | Wildcard                                                                                                                                   |
 
 ---
 
@@ -280,7 +280,9 @@ success.
 
 **Purpose:** Full CRUD management portal for all Quranic content entities.
 
-**Layout:** `layout/AdminLayoutComponent` + `AdminSidebarComponent` (shell, hideHeader, fullWidth). `/admin` renders `pages/admin-home/AdminHomeComponent` with the same permission-filtered module cards as the sidebar.
+**Layout:** `layout/AdminLayoutComponent` + `AdminSidebarComponent` (shell, hideHeader, fullWidth).
+`/admin` renders `pages/admin-home/AdminHomeComponent` with the same permission-filtered module
+cards as the sidebar.
 
 **Modules (each follows identical CRUD pattern):**
 
