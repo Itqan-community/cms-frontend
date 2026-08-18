@@ -10,6 +10,26 @@ export enum MeemBehavior {
   SKOUN = 'skoun',
 }
 
+export interface RecitationFolder {
+  id: string;
+  name: string;
+  isDefault: boolean;
+  trackCount: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface RecitationFolderApiRow {
+  id: string | number;
+  name: string;
+  is_default?: boolean;
+  isDefault?: boolean;
+  track_count?: number;
+  trackCount?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface MinimalReciter {
   id: number;
   slug: string;

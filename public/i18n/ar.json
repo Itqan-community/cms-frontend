@@ -766,6 +766,7 @@
       "LABEL": "الرئيسية"
     },
     "COMMON": {
+      "ADD": "إضافة",
       "TOOLTIP_VIEW": "عرض",
       "TOOLTIP_EDIT": "تعديل",
       "EMPTY_SUBTITLE": "لم يتم العثور على نتائج. حاول تعديل معايير البحث.",
@@ -1270,6 +1271,30 @@
         "CREATE_SUCCESS": "تم إضافة التلاوة بنجاح",
         "UPDATE_SUCCESS": "تم تحديث التلاوة بنجاح",
         "DELETE_SUCCESS": "تم حذف التلاوة بنجاح"
+      },
+      "FOLDERS": {
+        "TITLE": "المجلدات",
+        "ADD_FOLDER": "إضافة مجلد جديد",
+        "RENAME_FOLDER": "إعادة تسمية المجلد",
+        "DELETE_FOLDER": "حذف المجلد",
+        "SET_DEFAULT": "تعيين كافتراضي",
+        "DEFAULT_TAG": "المجلد الافتراضي",
+        "ACTIONS": "إجراءات المجلد",
+        "CREATE_TITLE": "إضافة مجلد جديد",
+        "CREATE_LABEL": "اسم المجلد",
+        "CREATE_PLACEHOLDER": "أدخل اسم المجلد (مثال: حفص 1442)",
+        "RENAME_TITLE": "تعديل اسم المجلد",
+        "RENAME_LABEL": "اسم المجلد الجديد",
+        "DELETE_CONFIRM_TITLE": "حذف المجلد",
+        "DELETE_CONFIRM_BODY": "هل أنت متأكد من حذف المجلد \"{{name}}\"؟ سيتم حذف جميع السور والتوقيتات التابعة له.",
+        "CANNOT_DELETE_LAST": "لا يمكن حذف المجلد الوحيد للرواية.",
+        "MESSAGES": {
+          "CREATE_SUCCESS": "تمت إضافة المجلد بنجاح",
+          "RENAME_SUCCESS": "تم تعديل اسم المجلد بنجاح",
+          "DELETE_SUCCESS": "تم حذف المجلد بنجاح",
+          "SET_DEFAULT_SUCCESS": "تم تعيين المجلد كافتراضي بنجاح",
+          "ERROR": "حدث خطأ أثناء تنفيذ العملية"
+        }
       },
       "TRACKS": {
         "SECTION_TITLE": "الملفات الصوتية للسور",
