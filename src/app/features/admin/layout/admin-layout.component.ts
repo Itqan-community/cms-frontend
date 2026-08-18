@@ -13,12 +13,9 @@ import { LangSwitchComponent } from '../../../shared/components/lang-switch/lang
 import { UserActionsComponent } from '../../../shared/components/user-actions/user-actions.component';
 import { isPublisherHost } from '../../../shared/utils/publisherhost.util';
 import { AdminTenantService } from '../services/admin-tenant.service';
-import {
-  resolveUrlAfterTenantChange,
-} from '../utils/admin-tenant-navigation.util';
+import { resolveUrlAfterTenantChange } from '../utils/admin-tenant-navigation.util';
 import { AdminTenantNavigationService } from '../services/admin-tenant-navigation.service';
 import { AdminSidebarComponent } from './admin-sidebar.component';
-
 
 @Component({
   selector: 'app-admin-layout',
@@ -57,7 +54,6 @@ export class AdminLayoutComponent implements OnInit {
   );
 
   private readonly destroyRef = inject(DestroyRef);
-
 
   constructor() {
     this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
@@ -106,6 +102,4 @@ export class AdminLayoutComponent implements OnInit {
       },
     });
   }
-
-
 }

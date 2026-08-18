@@ -55,23 +55,47 @@ describe('AdminSidebarComponent', () => {
 
     const fixture = TestBed.createComponent(AdminSidebarComponent);
     component = fixture.componentInstance;
-    
+
     // Set required model inputs
     fixture.componentRef.setInput('isCollapsed', false);
     fixture.componentRef.setInput('isMobileMenuOpen', false);
-    
+
     fixture.detectChanges();
   });
 
   it('links the publishers menu item to the selected publisher detail', () => {
     expect(
-      component.tabRouterLink({ id: 'publishers', path: 'publishers', label: '', icon: '' })
+      component.tabRouterLink({
+        id: 'publishers',
+        path: 'publishers',
+        label: '',
+        icon: '',
+        description: '',
+      })
     ).toEqual(['/admin', 'publishers', 123]);
   });
 
   it('keeps non-publisher menu items on their module routes', () => {
     expect(
-      component.tabRouterLink({ id: 'members', path: 'members', label: '', icon: '' })
+      component.tabRouterLink({
+        id: 'members',
+        path: 'members',
+        label: '',
+        icon: '',
+        description: '',
+      })
     ).toEqual(['/admin', 'members']);
+  });
+
+  it('links the home tab to the admin root', () => {
+    expect(
+      component.tabRouterLink({
+        id: 'home',
+        path: '',
+        label: '',
+        icon: '',
+        description: '',
+      })
+    ).toEqual(['/admin']);
   });
 });

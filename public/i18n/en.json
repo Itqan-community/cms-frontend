@@ -763,7 +763,9 @@
   },
   "ADMIN": {
     "HOME": {
-      "LABEL": "Home"
+      "LABEL": "Home",
+      "TITLE": "Overview",
+      "SUBTITLE": "Manage platform content and settings"
     },
     "COMMON": {
       "ADD": "Add",
@@ -831,20 +833,33 @@
       "CANCEL": "Cancel"
     },
     "MENU": {
+      "HOME": "Home",
+      "HOME_DESC": "Main Dashboard Overview",
       "MUSHAFS": "Mushafs",
+      "MUSHAFS_DESC": "Manage Quranic Mushaf versions and layouts",
       "TAFSIRS": "Tafsirs",
+      "TAFSIRS_DESC": "Manage Quranic Tafsirs and explanations",
       "TRANSLATIONS": "Translations",
+      "TRANSLATIONS_DESC": "Manage Quran translations in different languages",
       "RECITATIONS": "Recitations",
+      "RECITATIONS_DESC": "Manage Quranic recitations and audio tracks",
       "RECITERS": "Reciters",
+      "RECITERS_DESC": "Manage profiles of Quran reciters",
       "PUBLISHERS": "Publisher Details",
+      "PUBLISHERS_DESC": "Manage publisher accounts and details",
       "AUDIO": "Audio",
       "MANAGE_PROFILE": "Manage profile",
       "BACK_TO_GALLERY": "Back to gallery",
       "USAGE": "API Usage",
+      "USAGE_DESC": "Monitor platform and API usage statistics",
       "ISSUES": "Issue Management",
+      "ISSUES_DESC": "Review and resolve reported issues",
       "MEMBERS": "Members",
+      "MEMBERS_DESC": "Manage team members and their roles",
       "ACCESS_REQUESTS": "Access Requests",
+      "ACCESS_REQUESTS_DESC": "Manage incoming requests for platform access",
       "FONTS": "Fonts",
+      "FONTS_DESC": "Manage and upload custom fonts used in your app",
       "PROGRAMS": "Programs"
     },
     "PROFILE": {

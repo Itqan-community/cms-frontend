@@ -1,0 +1,24 @@
+<div class="admin-home">
+  <div class="admin-home__header">
+    <h1 class="admin-home__title">{{ 'ADMIN.HOME.TITLE' | translate }}</h1>
+    <p class="admin-home__subtitle">{{ 'ADMIN.HOME.SUBTITLE' | translate }}</p>
+  </div>
+
+  <div nz-row [nzGutter]="[24, 24]">
+    @for (section of sections(); track section.route) {
+      <div nz-col [nzXs]="24" [nzSm]="12" [nzLg]="12" [nzXl]="6">
+        <a [routerLink]="section.route" class="admin-home__card-link">
+          <nz-card class="admin-home__card" [nzHoverable]="true">
+            <div class="admin-home__card-body">
+              <div class="admin-home__icon-wrap">
+                <ng-icon [name]="section.icon" class="admin-home__icon" aria-hidden="true" />
+              </div>
+              <h3 class="admin-home__card-title">{{ section.titleKey | translate }}</h3>
+              <p class="admin-home__card-desc">{{ section.descriptionKey | translate }}</p>
+            </div>
+          </nz-card>
+        </a>
+      </div>
+    }
+  </div>
+</div>
