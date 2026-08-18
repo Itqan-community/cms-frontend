@@ -764,6 +764,7 @@
   "ADMIN": {
     "HOME": "Home",
     "COMMON": {
+      "ADD": "Add",
       "TOOLTIP_VIEW": "View",
       "TOOLTIP_EDIT": "Edit",
       "EMPTY_SUBTITLE": "No matching results. Try adjusting your search.",
@@ -1360,6 +1361,30 @@
         "CREATE_SUCCESS": "Recitation added successfully",
         "UPDATE_SUCCESS": "Recitation updated successfully",
         "DELETE_SUCCESS": "Recitation deleted successfully"
+      },
+      "FOLDERS": {
+        "TITLE": "Folders",
+        "ADD_FOLDER": "Add New Folder",
+        "RENAME_FOLDER": "Rename Folder",
+        "DELETE_FOLDER": "Delete Folder",
+        "SET_DEFAULT": "Set as Default",
+        "DEFAULT_TAG": "Default Folder",
+        "ACTIONS": "Folder Actions",
+        "CREATE_TITLE": "Add New Folder",
+        "CREATE_LABEL": "Folder Name",
+        "CREATE_PLACEHOLDER": "Enter folder name (e.g. Hafs 1442)",
+        "RENAME_TITLE": "Rename Folder",
+        "RENAME_LABEL": "New Folder Name",
+        "DELETE_CONFIRM_TITLE": "Delete Folder",
+        "DELETE_CONFIRM_BODY": "Are you sure you want to delete folder \"{{name}}\"? All tracks and timings in this folder will be deleted.",
+        "CANNOT_DELETE_LAST": "Cannot delete the last remaining folder.",
+        "MESSAGES": {
+          "CREATE_SUCCESS": "Folder added successfully",
+          "RENAME_SUCCESS": "Folder renamed successfully",
+          "DELETE_SUCCESS": "Folder deleted successfully",
+          "SET_DEFAULT_SUCCESS": "Folder set as default successfully",
+          "ERROR": "An error occurred while performing the operation"
+        }
       }
     },
     "RECITERS": {
