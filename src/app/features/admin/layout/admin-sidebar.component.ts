@@ -1,27 +1,15 @@
-import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormsModule } from '@angular/forms';
-import { Router, RouterLink, RouterOutlet } from '@angular/router';
+import { Component, computed, inject, model } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
-import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { NzSelectModule } from 'ng-zorro-antd/select';
-import { AuthService } from '../../core/auth/services/auth.service';
-import { LangSwitchComponent } from '../../shared/components/lang-switch/lang-switch.component';
-import { UserActionsComponent } from '../../shared/components/user-actions/user-actions.component';
-import { isPublisherHost } from '../../shared/utils/publisherhost.util';
-import { PORTAL_PERMISSIONS } from './constants/portal-permission.constants';
-import { AdminAuthService } from './services/admin-auth.service';
-import { AdminTenantService } from './services/admin-tenant.service';
-import {
-  resolveUrlAfterTenantChange,
-  buildSelectedPublisherDetailCommands,
-} from './utils/admin-tenant-navigation.util';
-import { AdminTenantNavigationService } from './services/admin-tenant-navigation.service';
+import { PORTAL_PERMISSIONS } from '../constants/portal-permission.constants';
+import { AdminAuthService } from '../services/admin-auth.service';
+import { AdminTenantService } from '../services/admin-tenant.service';
+import { buildSelectedPublisherDetailCommands } from '../utils/admin-tenant-navigation.util';
 
-interface CmsTab {
+export interface CmsTab {
   id: string;
   path: string;
   label: string;
@@ -29,6 +17,7 @@ interface CmsTab {
   /** Visible in sidebar but not navigable; route redirects away. */
   disabled?: boolean;
 }
+
 
 const TAB_FONTS: CmsTab = {
   id: 'fonts',
@@ -98,42 +87,19 @@ const TAB_USAGE: CmsTab = {
 };
 
 @Component({
-  selector: 'app-admin-layout',
+  selector: 'app-admin-sidebar',
   standalone: true,
-  imports: [
-    NzModalModule,
-    RouterLink,
-    RouterOutlet,
-    NzLayoutModule,
-    NzMenuModule,
-    NgIcon,
-    FormsModule,
-    NzSelectModule,
-    LangSwitchComponent,
-    UserActionsComponent,
-    TranslateModule,
-  ],
-  templateUrl: './admin-layout.component.html',
-  styleUrls: ['./admin-layout.component.less'],
+  host: { style: 'display: contents' },
+  imports: [RouterLink, NzLayoutModule, NzMenuModule, NgIcon, TranslateModule],
+  templateUrl: './admin-sidebar.component.html',
+  styleUrls: ['./admin-sidebar.component.less'],
 })
-export class AdminLayoutComponent implements OnInit {
-  private readonly modal = inject(NzModalService);
-  private readonly router = inject(Router);
+export class AdminSidebarComponent {
   private readonly adminAuth = inject(AdminAuthService);
-  private readonly tenantNavigation = inject(AdminTenantNavigationService);
-  public readonly authService = inject(AuthService);
   public readonly tenantService = inject(AdminTenantService);
-  private readonly translate = inject(TranslateService);
-  readonly isPublisherHost = isPublisherHost();
 
-  isCollapsed = signal(false);
-  readonly isMobileMenuOpen = signal(false);
-
-  readonly layoutDir = signal<'rtl' | 'ltr'>(
-    this.translate.getCurrentLang() === 'ar' ? 'rtl' : 'ltr'
-  );
-
-  private readonly destroyRef = inject(DestroyRef);
+  readonly isCollapsed = model.required<boolean>();
+  readonly isMobileMenuOpen = model.required<boolean>();
 
   readonly tabs = computed(() => {
     const tabs: CmsTab[] = [];
@@ -159,9 +125,7 @@ export class AdminLayoutComponent implements OnInit {
       tabs.push(TAB_RECITERS);
     }
     // TODO(backend-permissions): gate with PORTAL_PERMISSIONS.PORTAL_READ_ISSUE_REPORT once seeded
-    // if (this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_ISSUE_REPORT)) {
     tabs.push(TAB_ISSUES);
-    // }
     if (
       this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_VIEW_PUBLISHER_MEMBERS) ||
       this.adminAuth.isItqanAdmin()
@@ -180,21 +144,11 @@ export class AdminLayoutComponent implements OnInit {
     return tabs;
   });
 
-  constructor() {
-    this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
-      this.layoutDir.set(e.lang === 'ar' ? 'rtl' : 'ltr');
-    });
-  }
-
-  ngOnInit(): void {
-    this.tenantService.ensureReady().pipe(takeUntilDestroyed(this.destroyRef)).subscribe();
-  }
-
-  onMobileMenuToggle(): void {
-    if (!this.isMobileViewport()) return;
-    const open = !this.isMobileMenuOpen();
-    this.isMobileMenuOpen.set(open);
-    this.isCollapsed.set(!open);
+  onSiderCollapsedChange(collapsed: boolean): void {
+    this.isCollapsed.set(collapsed);
+    if (this.isMobileViewport()) {
+      this.isMobileMenuOpen.set(!collapsed);
+    }
   }
 
   closeMobileMenu(): void {
@@ -204,18 +158,14 @@ export class AdminLayoutComponent implements OnInit {
     }
   }
 
-  onSiderCollapsedChange(collapsed: boolean): void {
-    this.isCollapsed.set(collapsed);
-    if (this.isMobileViewport()) {
-      this.isMobileMenuOpen.set(!collapsed);
-    }
-  }
-
   onMenuItemClick(): void {
     this.closeMobileMenu();
   }
 
   tabRouterLink(tab: CmsTab): (string | number)[] {
+    if (tab.id === 'home') {
+      return ['/admin'];
+    }
     if (tab.id === 'publishers') {
       const commands = buildSelectedPublisherDetailCommands(
         this.tenantService.getSelectedPublisherId()
@@ -225,33 +175,6 @@ export class AdminLayoutComponent implements OnInit {
       }
     }
     return ['/admin', tab.path];
-  }
-
-  onLogout(): void {
-    this.authService.logout().subscribe();
-  }
-
-  onTenantChange(publisherId: number): void {
-    if (publisherId === this.tenantService.getSelectedPublisherId()) {
-      return;
-    }
-    if (this.tenantService.setSelectedPublisherId(publisherId)) {
-      const target = resolveUrlAfterTenantChange(this.router.url, publisherId);
-      this.tenantNavigation.assign(target);
-    }
-  }
-
-  onRefresh(): void {
-    this.modal.confirm({
-      nzTitle: this.translate.instant('ADMIN.REFRESH_PROMPT.TITLE'),
-      nzContent: this.translate.instant('ADMIN.REFRESH_PROMPT.CONTENT'),
-      nzOkText: this.translate.instant('ADMIN.REFRESH_PROMPT.OK'),
-      nzCancelText: this.translate.instant('ADMIN.REFRESH_PROMPT.CANCEL'),
-      nzDirection: this.translate.currentLang === 'ar' ? 'rtl' : 'ltr',
-      nzOnOk: () => {
-        // Refresh logic here
-      },
-    });
   }
 
   private isMobileViewport(): boolean {

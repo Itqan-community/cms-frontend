@@ -1,0 +1,75 @@
+<nz-sider
+  class="admin-sider"
+  [class.admin-sider--mobile-open]="isMobileMenuOpen()"
+  nzCollapsible
+  [nzCollapsed]="isCollapsed()"
+  (nzCollapsedChange)="onSiderCollapsedChange($event)"
+  [nzWidth]="260"
+  [nzCollapsedWidth]="0"
+  [nzTrigger]="null"
+  nzBreakpoint="lg"
+  [nzReverseArrow]="true"
+  nzTheme="light"
+>
+  <div class="admin-mobile-sider-head">
+    <div class="admin-mobile-sider-logo" aria-hidden="true">
+      <img
+        [alt]="'COMMON.LOGO_ALT_CMS' | translate"
+        loading="lazy"
+        width="98"
+        height="32"
+        decoding="async"
+        src="assets/images/logo.svg"
+      />
+    </div>
+    <button
+      type="button"
+      class="admin-mobile-sider-close"
+      [attr.aria-label]="'ADMIN.COMMON.CLOSE_MENU' | translate"
+      (click)="closeMobileMenu()"
+    >
+      <ng-icon name="lucideX" aria-hidden="true" />
+    </button>
+  </div>
+  <ul nz-menu nzMode="inline" class="admin-sidenav-menu" nzTheme="light">
+    @for (tab of tabs(); track tab.id) {
+      <li nz-menu-item [nzDisabled]="!!tab.disabled" [nzMatchRouter]="!tab.disabled">
+        @if (tab.disabled) {
+          <span
+            class="admin-sidenav-link"
+            role="presentation"
+            tabindex="-1"
+            aria-disabled="true"
+          >
+            <ng-icon [name]="tab.icon" class="admin-sidenav-icon" />
+            <span>{{ tab.label | translate }}</span>
+          </span>
+        } @else {
+          <a
+            [routerLink]="tabRouterLink(tab)"
+            class="admin-sidenav-link"
+            (click)="onMenuItemClick()"
+          >
+            <ng-icon [name]="tab.icon" class="admin-sidenav-icon" />
+            <span>{{ tab.label | translate }}</span>
+          </a>
+        }
+      </li>
+    }
+    <li nz-menu-item>
+      <a [routerLink]="['/gallery']" class="admin-sidenav-link" (click)="onMenuItemClick()">
+        <ng-icon name="lucideHouse" class="admin-sidenav-icon" />
+        <span>{{ 'ADMIN.MENU.BACK_TO_GALLERY' | translate }}</span>
+      </a>
+    </li>
+  </ul>
+</nz-sider>
+
+@if (isMobileMenuOpen()) {
+  <button
+    type="button"
+    class="admin-mobile-backdrop"
+    [attr.aria-label]="'ADMIN.COMMON.CLOSE_MENU' | translate"
+    (click)="closeMobileMenu()"
+  ></button>
+}

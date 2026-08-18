@@ -96,15 +96,11 @@ export function pathForFlow(flow: Flow, typ?: string): string {
 }
 
 export function pathForPendingFlow(auth: unknown): string | null {
-  const flows = (auth as { data?: { flows?: Flow[] } })?.data?.flows;
-  if (!flows?.length) {
+  const info = authInfo(auth);
+  if (!info.pendingFlow) {
     return null;
   }
-  const pending = flows.find((flow) => flow.is_pending);
-  if (!pending) {
-    return null;
-  }
-  return pathForFlow(pending);
+  return pathForFlow(info.pendingFlow);
 }
 
 /** Mirrors official `determineAuthChangeEvent(fromAuth, toAuth)`. */

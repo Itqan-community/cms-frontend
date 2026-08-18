@@ -21,7 +21,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     loadComponent: () =>
-      import('./features/admin/admin-layout.component').then((m) => m.AdminLayoutComponent),
+      import('./features/admin/layout/admin-layout.component').then((m) => m.AdminLayoutComponent),
     canActivate: [authGuard, portalAccessGuard, tenantReadyGuard],
     data: { hideHeader: true, fullWidth: true },
     children: [
