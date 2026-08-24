@@ -29,13 +29,6 @@ export const MUSHAF_EDITIONS: MushafEdition[] = [
     nameEn: 'Qalun ʿan Nafiʿ',
   },
   {
-    slug: 'qalon-libya-awqaf',
-    qiraa: 'qalon',
-    publisher: 'libya-awqaf',
-    nameAr: 'قالون عن نافع (أوقاف ليبيا)',
-    nameEn: 'Qalun ʿan Nafiʿ (Libyan Awqaf)',
-  },
-  {
     slug: 'douri-kfqc',
     qiraa: 'douri',
     publisher: 'kfqc',

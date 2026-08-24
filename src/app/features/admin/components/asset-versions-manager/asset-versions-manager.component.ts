@@ -330,18 +330,28 @@ export class AssetVersionsManagerComponent implements OnInit {
       .subscribe({
         next: (blob) => {
           const url = URL.createObjectURL(blob);
-          const anchor = document.createElement('a');
-          anchor.href = url;
-          anchor.download = `${this.slug}-${row.name}.csv`.replace(/\s+/g, '_');
-          anchor.click();
+          this.triggerDownload(url, `${this.slug}-${row.name}.csv`.replace(/\s+/g, '_'));
           URL.revokeObjectURL(url);
           this.downloadingId.set(null);
         },
         error: () => {
+          if (row.file_url) {
+            this.triggerDownload(row.file_url, `${this.slug}-${row.name}`.replace(/\s+/g, '_'));
+            this.downloadingId.set(null);
+            return;
+          }
           this.message.error(this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC'));
           this.downloadingId.set(null);
         },
       });
+  }
+
+  private triggerDownload(href: string, filename: string): void {
+    const anchor = document.createElement('a');
+    anchor.href = href;
+    anchor.download = filename;
+    anchor.rel = 'noopener';
+    anchor.click();
   }
 
   formatBytes(n: number | null | undefined): string {

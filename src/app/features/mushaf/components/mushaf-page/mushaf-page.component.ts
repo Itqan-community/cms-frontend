@@ -52,7 +52,7 @@ export class MushafPageComponent implements AfterViewInit {
   protected readonly loading = signal(true);
   protected readonly errorState = signal(false);
   protected readonly svgMarkup = signal<string>('');
-  /** Sanitized SVG for [innerHTML]; trusted because the origin is the fixed jsDelivr CDN. */
+  /** Inlined SVG; trusted because the origin is a pinned jsDelivr commit SHA. */
   protected readonly safeSvg = computed<SafeHtml>(() =>
     this.sanitizer.bypassSecurityTrustHtml(this.svgMarkup())
   );

@@ -31,6 +31,11 @@ export function errorInterceptor(
         return throwError(() => error);
       }
 
+      // Mushaf pages already show retry UI for CDN failures.
+      if (req.url.includes('cdn.jsdelivr.net')) {
+        return throwError(() => error);
+      }
+
       let errorMessage = '';
 
       if (error.error instanceof ErrorEvent) {

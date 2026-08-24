@@ -1,13 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import {
-  Component,
-  DestroyRef,
-  Input,
-  OnInit,
-  computed,
-  inject,
-  signal,
-} from '@angular/core';
+import { Component, DestroyRef, Input, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
@@ -34,10 +26,7 @@ import type {
 } from '../../models/asset-content.models';
 import { AssetContentService } from '../../services/asset-content.service';
 import { parseClipboardTable, serializeCsv } from '../../utils/clipboard-table.util';
-import {
-  SurahFloatingFilterComponent,
-  type SurahOption,
-} from './surah-floating-filter.component';
+import { SurahFloatingFilterComponent, type SurahOption } from './surah-floating-filter.component';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -111,69 +100,7 @@ export class AssetContentGridComponent implements OnInit {
     filter: false,
   };
 
-  readonly columnDefs: ColDef<ContentEntry>[] = [
-    {
-      field: 'sura',
-      headerName: 'Sura',
-      width: 110,
-      editable: false,
-      filter: 'agNumberColumnFilter',
-      floatingFilter: true,
-    },
-    {
-      field: 'aya',
-      headerName: 'Aya',
-      width: 110,
-      editable: false,
-      filter: 'agNumberColumnFilter',
-      floatingFilter: true,
-    },
-    {
-      field: 'surah_name',
-      headerName: 'Surah',
-      width: 170,
-      editable: false,
-      filter: 'agTextColumnFilter',
-      floatingFilter: true,
-      floatingFilterComponent: SurahFloatingFilterComponent,
-      floatingFilterComponentParams: {
-        optionsProvider: () => this.surahOptions(),
-      },
-    },
-    {
-      field: 'uthmani',
-      headerName: 'Ayah (Uthmani)',
-      flex: 1,
-      editable: false,
-      cellStyle: { direction: 'rtl', fontFamily: 'serif' },
-      wrapText: true,
-      autoHeight: true,
-    },
-    {
-      field: 'text',
-      headerName: 'Text',
-      flex: 2,
-      editable: true,
-      cellEditor: 'agLargeTextCellEditor',
-      cellEditorPopup: true,
-      // agLargeTextCellEditor defaults to maxLength 200; ayah text is far longer,
-      // so raise the cap and enlarge the popup textarea.
-      cellEditorParams: { maxLength: 100000, rows: 12, cols: 60 },
-      wrapText: true,
-      autoHeight: true,
-    },
-    {
-      field: 'footnotes',
-      headerName: 'Footnotes',
-      flex: 1,
-      editable: true,
-      cellEditor: 'agLargeTextCellEditor',
-      cellEditorPopup: true,
-      cellEditorParams: { maxLength: 100000, rows: 10, cols: 50 },
-      wrapText: true,
-      autoHeight: true,
-    },
-  ];
+  readonly columnDefs: ColDef<ContentEntry>[] = this.buildColumnDefs();
 
   ngOnInit(): void {
     this.autosave$
@@ -260,9 +187,7 @@ export class AssetContentGridComponent implements OnInit {
     event.preventDefault();
 
     const displayedCols = api.getAllDisplayedColumns();
-    const startColIdx = displayedCols.findIndex(
-      (c) => c.getColId() === focused.column.getColId()
-    );
+    const startColIdx = displayedCols.findIndex((c) => c.getColId() === focused.column.getColId());
     if (startColIdx < 0) return;
 
     let changed = 0;
@@ -305,12 +230,7 @@ export class AssetContentGridComponent implements OnInit {
     selected.sort((a, b) => a.order - b.order || a.ayah_id - b.ayah_id);
     const table: string[][] = [
       ['sura', 'aya', 'text', 'footnotes'],
-      ...selected.map((r) => [
-        String(r.sura),
-        String(r.aya),
-        r.text ?? '',
-        r.footnotes ?? '',
-      ]),
+      ...selected.map((r) => [String(r.sura), String(r.aya), r.text ?? '', r.footnotes ?? '']),
     ];
     const csv = serializeCsv(table);
     navigator.clipboard.writeText(csv).then(
@@ -365,16 +285,16 @@ export class AssetContentGridComponent implements OnInit {
       });
   }
 
-  /** Persist any pending edits to the draft. Resolves when the save settles. */
-  private flushPending(): Promise<void> {
+  /** Persist any pending edits to the draft. `true` on success/nothing to save. */
+  private flushPending(): Promise<boolean> {
     const versionId = this.draftId();
     if (versionId === null || this.pendingRows.size === 0) {
-      return Promise.resolve();
+      return Promise.resolve(true);
     }
     const batch = Array.from(this.pendingRows.values());
     this.pendingRows.clear();
     this.saving.set(true);
-    return new Promise<void>((resolve) => {
+    return new Promise<boolean>((resolve) => {
       this.contentService
         .patchEntries(this.kind, this.slug, versionId, batch)
         .pipe(takeUntilDestroyed(this.destroyRef))
@@ -384,7 +304,7 @@ export class AssetContentGridComponent implements OnInit {
             if (this.pendingRows.size === 0) {
               this.dirty.set(false);
             }
-            resolve();
+            resolve(true);
           },
           error: (err: HttpErrorResponse) => {
             // Re-queue the failed batch so nothing is silently lost.
@@ -395,7 +315,7 @@ export class AssetContentGridComponent implements OnInit {
             }
             this.saving.set(false);
             this.showError(err);
-            resolve();
+            resolve(false);
           },
         });
     });
@@ -406,45 +326,47 @@ export class AssetContentGridComponent implements OnInit {
   saveDraft(): void {
     if (this.draftId() === null) return;
     this.savingDraft.set(true);
-    void this.flushPending().then(() => {
+    void this.flushPending().then((ok) => {
       this.savingDraft.set(false);
-      this.message.success(
-        this.translate.instant('ADMIN.CONTENT_EDITOR.MESSAGES.DRAFT_SAVED')
-      );
+      if (!ok) return;
+      this.message.success(this.translate.instant('ADMIN.CONTENT_EDITOR.MESSAGES.DRAFT_SAVED'));
       void this.router.navigate(['/admin', this.listSegment(), this.slug]);
     });
   }
 
   /** Guard hook: flush pending edits and allow leaving, keeping the draft. */
   keepDraftOnLeave(): Promise<boolean> {
-    return this.flushPending().then(() => true);
+    return this.flushPending();
   }
 
   /** Save = publish the draft as a new version. Flushes pending edits first. */
   publish(): void {
     const versionId = this.draftId();
     if (versionId === null) return;
-    void this.flushPending();
     this.publishing.set(true);
-    this.contentService
-      .publish(this.kind, this.slug, versionId)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.publishing.set(false);
-          this.dirty.set(false);
-          this.pendingRows.clear();
-          this.draftId.set(null);
-          this.message.success(
-            this.translate.instant('ADMIN.CONTENT_EDITOR.MESSAGES.PUBLISHED')
-          );
-          void this.router.navigate(['/admin', this.listSegment(), this.slug]);
-        },
-        error: (err: HttpErrorResponse) => {
-          this.publishing.set(false);
-          this.showError(err);
-        },
-      });
+    void this.flushPending().then((ok) => {
+      if (!ok) {
+        this.publishing.set(false);
+        return;
+      }
+      this.contentService
+        .publish(this.kind, this.slug, versionId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.publishing.set(false);
+            this.dirty.set(false);
+            this.pendingRows.clear();
+            this.draftId.set(null);
+            this.message.success(this.translate.instant('ADMIN.CONTENT_EDITOR.MESSAGES.PUBLISHED'));
+            void this.router.navigate(['/admin', this.listSegment(), this.slug]);
+          },
+          error: (err: HttpErrorResponse) => {
+            this.publishing.set(false);
+            this.showError(err);
+          },
+        });
+    });
   }
 
   /** Confirm, then discard the draft and leave. */
@@ -462,9 +384,12 @@ export class AssetContentGridComponent implements OnInit {
       nzCancelText: this.translate.instant('ADMIN.CONTENT_EDITOR.LEAVE.CANCEL'),
       nzDirection: dir,
       nzOnOk: () =>
-        this.discardAndLeave().then(() =>
-          this.router.navigate(['/admin', this.listSegment(), this.slug])
-        ),
+        this.discardAndLeave().then((ok) => {
+          if (!ok) {
+            return Promise.resolve(false);
+          }
+          return this.router.navigate(['/admin', this.listSegment(), this.slug]);
+        }),
     });
   }
 
@@ -485,13 +410,86 @@ export class AssetContentGridComponent implements OnInit {
             this.pendingRows.clear();
             resolve(true);
           },
-          error: () => resolve(true),
+          error: (err: HttpErrorResponse) => {
+            this.showError(err);
+            resolve(false);
+          },
         });
     });
   }
 
   private listSegment(): string {
     return this.kind === 'tafsir' ? 'tafsirs' : 'translations';
+  }
+
+  private colHeader(key: string): string {
+    return this.translate.instant(`ADMIN.CONTENT_EDITOR.COLUMNS.${key}`);
+  }
+
+  private buildColumnDefs(): ColDef<ContentEntry>[] {
+    return [
+      {
+        field: 'sura',
+        headerName: this.colHeader('SURA'),
+        width: 110,
+        editable: false,
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'aya',
+        headerName: this.colHeader('AYA'),
+        width: 110,
+        editable: false,
+        filter: 'agNumberColumnFilter',
+        floatingFilter: true,
+      },
+      {
+        field: 'surah_name',
+        headerName: this.colHeader('SURAH'),
+        width: 170,
+        editable: false,
+        filter: 'agTextColumnFilter',
+        floatingFilter: true,
+        floatingFilterComponent: SurahFloatingFilterComponent,
+        floatingFilterComponentParams: {
+          optionsProvider: () => this.surahOptions(),
+        },
+      },
+      {
+        field: 'uthmani',
+        headerName: this.colHeader('UTHMANI'),
+        flex: 1,
+        editable: false,
+        cellStyle: { direction: 'rtl', fontFamily: 'serif' },
+        wrapText: true,
+        autoHeight: true,
+      },
+      {
+        field: 'text',
+        headerName: this.colHeader('TEXT'),
+        flex: 2,
+        editable: true,
+        cellEditor: 'agLargeTextCellEditor',
+        cellEditorPopup: true,
+        // agLargeTextCellEditor defaults to maxLength 200; ayah text is far longer,
+        // so raise the cap and enlarge the popup textarea.
+        cellEditorParams: { maxLength: 100000, rows: 12, cols: 60 },
+        wrapText: true,
+        autoHeight: true,
+      },
+      {
+        field: 'footnotes',
+        headerName: this.colHeader('FOOTNOTES'),
+        flex: 1,
+        editable: true,
+        cellEditor: 'agLargeTextCellEditor',
+        cellEditorPopup: true,
+        cellEditorParams: { maxLength: 100000, rows: 10, cols: 50 },
+        wrapText: true,
+        autoHeight: true,
+      },
+    ];
   }
 
   private showError(err: HttpErrorResponse): void {

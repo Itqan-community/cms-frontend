@@ -734,6 +734,14 @@
       "UNSAVED": "تغييرات غير محفوظة",
       "ALL_SAVED": "تم حفظ جميع التغييرات في المسودة",
       "OPEN_BUTTON": "تحرير المحتوى",
+      "COLUMNS": {
+        "SURA": "السورة",
+        "AYA": "الآية",
+        "SURAH": "السورة",
+        "UTHMANI": "الآية (عثماني)",
+        "TEXT": "النص",
+        "FOOTNOTES": "الحواشي"
+      },
       "MESSAGES": {
         "PUBLISHED": "تم نشر نسخة جديدة",
         "DRAFT_SAVED": "تم حفظ المسودة"
@@ -1793,13 +1801,12 @@
   },
   "MUSHAF": {
     "TITLE": "القرآن الكريم",
-    "INDEX_SUBTITLE": "تصفح السور واقرأ آية آية",
+    "INDEX_SUBTITLE": "تصفح السور واقرأ المصحف صفحة بصفحة",
     "AYAHS": "آية",
     "AYAH": "آية",
     "MECCAN": "مكية",
     "MEDINAN": "مدنية",
     "BACK_TO_INDEX": "العودة إلى السور",
-    "WORD_BY_WORD": "كلمة بكلمة",
     "SURA_NOT_FOUND": "السورة غير موجودة",
     "AYAH_NOT_FOUND": "الآية غير موجودة",
     "EDITION": "الرواية",

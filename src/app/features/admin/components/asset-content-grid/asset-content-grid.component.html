@@ -63,7 +63,7 @@
         nz-button
         nzType="default"
         [nzLoading]="savingDraft()"
-        [disabled]="draftId() === null || publishing()"
+        [disabled]="draftId() === null || publishing() || saving()"
         (click)="saveDraft()"
       >
         {{ 'ADMIN.CONTENT_EDITOR.SAVE_DRAFT' | translate }}
@@ -72,7 +72,7 @@
         nz-button
         nzType="primary"
         [nzLoading]="publishing()"
-        [disabled]="draftId() === null || savingDraft()"
+        [disabled]="draftId() === null || savingDraft() || saving()"
         (click)="publish()"
       >
         {{ 'ADMIN.CONTENT_EDITOR.SAVE' | translate }}

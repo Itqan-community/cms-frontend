@@ -2,9 +2,12 @@ import {
   AfterViewInit,
   Component,
   ElementRef,
+  Injector,
   OnDestroy,
+  afterNextRender,
   computed,
   effect,
+  inject,
   input,
   output,
   signal,
@@ -14,8 +17,8 @@ import { AyahRef, MushafPageComponent } from '../mushaf-page/mushaf-page.compone
 
 /**
  * Infinite-scrolls a surah as a vertical stack of mushaf pages. Starts at
- * `initialPage` (defaulting to the surah's first page) and lazily appends the
- * next page as a bottom sentinel enters the viewport, up to `endPage`.
+ * `initialPage` (defaulting to the surah's first page) and lazily prepends /
+ * appends pages as top/bottom sentinels enter the viewport.
  */
 @Component({
   selector: 'app-mushaf-scroll',
@@ -25,6 +28,8 @@ import { AyahRef, MushafPageComponent } from '../mushaf-page/mushaf-page.compone
   styleUrl: './mushaf-scroll.component.less',
 })
 export class MushafScrollComponent implements AfterViewInit, OnDestroy {
+  private readonly injector = inject(Injector);
+
   slug = input.required<string>();
   startPage = input.required<number>();
   endPage = input.required<number>();
@@ -38,13 +43,20 @@ export class MushafScrollComponent implements AfterViewInit, OnDestroy {
   /** Pages currently rendered (contiguous, ascending). */
   protected readonly pages = signal<number[]>([]);
 
-  private readonly sentinel = viewChild<ElementRef<HTMLDivElement>>('sentinel');
+  private readonly topSentinel = viewChild<ElementRef<HTMLDivElement>>('topSentinel');
+  private readonly bottomSentinel = viewChild<ElementRef<HTMLDivElement>>('bottomSentinel');
   private observer?: IntersectionObserver;
+  private prependPending = false;
 
+  protected readonly firstRendered = computed(() => {
+    const list = this.pages();
+    return list.length ? list[0] : this.first();
+  });
   protected readonly lastPage = computed(() => {
     const list = this.pages();
     return list.length ? list[list.length - 1] : this.first();
   });
+  protected readonly hasPrev = computed(() => this.firstRendered() > this.startPage());
   protected readonly hasMore = computed(() => this.lastPage() < this.endPage());
   /** The page the highlighted ayah sits on (the initial page), or null. */
   protected readonly highlightPage = computed(() => (this.highlightAyah() ? this.first() : null));
@@ -60,7 +72,6 @@ export class MushafScrollComponent implements AfterViewInit, OnDestroy {
   constructor() {
     // (Re)initialise the page list whenever the surah/edition/target changes.
     effect(() => {
-      // Track inputs so the effect re-runs on change.
       this.slug();
       this.startPage();
       this.endPage();
@@ -70,19 +81,42 @@ export class MushafScrollComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    const el = this.sentinel()?.nativeElement;
-    if (!el) return;
     this.observer = new IntersectionObserver(
       (entries) => {
-        if (entries.some((e) => e.isIntersecting)) this.loadNext();
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          if (entry.target === this.topSentinel()?.nativeElement) {
+            this.loadPrev();
+          } else if (entry.target === this.bottomSentinel()?.nativeElement) {
+            this.loadNext();
+          }
+        }
       },
       { rootMargin: '600px 0px' }
     );
-    this.observer.observe(el);
+    const top = this.topSentinel()?.nativeElement;
+    const bottom = this.bottomSentinel()?.nativeElement;
+    if (top) this.observer.observe(top);
+    if (bottom) this.observer.observe(bottom);
   }
 
   ngOnDestroy(): void {
     this.observer?.disconnect();
+  }
+
+  private loadPrev(): void {
+    if (!this.hasPrev() || this.prependPending) return;
+    this.prependPending = true;
+    const scroller = document.documentElement;
+    const before = scroller.scrollHeight;
+    this.pages.update((list) => [list[0] - 1, ...list]);
+    afterNextRender(
+      () => {
+        scroller.scrollTop += document.documentElement.scrollHeight - before;
+        this.prependPending = false;
+      },
+      { injector: this.injector }
+    );
   }
 
   private loadNext(): void {

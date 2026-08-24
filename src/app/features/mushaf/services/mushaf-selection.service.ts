@@ -18,17 +18,35 @@ export class MushafSelectionService {
   readonly selected = this.selectedSignal.asReadonly();
 
   private readInitial(): MushafEdition {
-    const stored = typeof localStorage !== 'undefined' ? localStorage.getItem(STORAGE_KEY) : null;
-    return findMushafEdition(stored) ?? DEFAULT_MUSHAF_EDITION;
+    return findMushafEdition(this.readStoredSlug()) ?? DEFAULT_MUSHAF_EDITION;
   }
 
-  /** Select by slug; falls back to the default for an unknown slug. */
-  select(slug: string | null | undefined): MushafEdition {
-    const edition = findMushafEdition(slug) ?? DEFAULT_MUSHAF_EDITION;
-    this.selectedSignal.set(edition);
-    if (typeof localStorage !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, edition.slug);
+  private readStoredSlug(): string | null {
+    try {
+      if (typeof localStorage === 'undefined') return null;
+      return localStorage.getItem(STORAGE_KEY);
+    } catch {
+      return null;
     }
-    return edition;
+  }
+
+  /**
+   * Select by slug. Missing/unknown slugs keep the current edition and do not
+   * overwrite localStorage (so `/mushaf` without `?mushaf=` keeps the stored qiraa).
+   */
+  select(slug: string | null | undefined): MushafEdition {
+    const found = findMushafEdition(slug);
+    if (!found) {
+      return this.selectedSignal();
+    }
+    this.selectedSignal.set(found);
+    try {
+      if (typeof localStorage !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY, found.slug);
+      }
+    } catch {
+      // Private mode / blocked storage — in-memory selection still applies.
+    }
+    return found;
   }
 }

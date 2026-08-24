@@ -4,7 +4,8 @@ import { Observable, combineLatest, map, shareReplay } from 'rxjs';
 import { findMushafEdition } from '../data/mushaf-editions';
 import { AyahMarker, MushafSurahMeta } from '../models/mushaf.model';
 
-const CDN_ROOT = 'https://cdn.jsdelivr.net/gh/quranpedia/quran-svg@main/mushafs';
+const CDN_ROOT =
+  'https://cdn.jsdelivr.net/gh/quranpedia/quran-svg@5fbcb1d4d92b5a2972ab51472fe991b6066bb6e2/mushafs';
 
 /**
  * Fetches quranpedia quran-svg assets (per-page SVG + surah index) directly
@@ -97,22 +98,25 @@ export class MushafSvgService {
   }
 
   /**
-   * The inclusive page range a surah spans in an edition: from its own start
-   * page to the page just before the next surah starts (the last surah runs to
-   * the final mushaf page).
+   * Inclusive page range a surah spans: start page through the page of its last
+   * ayah (often the same page the next surah starts on).
    */
   getSurahPageRange(
     slug: string,
     suraId: number
   ): Observable<{ startPage: number; endPage: number } | null> {
-    return combineLatest([this.getSurahs(slug), this.getPageCount(slug)]).pipe(
-      map(([surahs, totalPages]) => {
+    return combineLatest([this.getSurahs(slug), this.getMarkers(slug)]).pipe(
+      map(([surahs, markers]) => {
         const ordered = [...surahs].sort((a, b) => a.number - b.number);
         const idx = ordered.findIndex((s) => s.number === suraId);
         if (idx === -1) return null;
         const startPage = ordered[idx].pageNumber;
-        const next = ordered[idx + 1];
-        const endPage = next ? Math.max(startPage, next.pageNumber - 1) : totalPages;
+        let globalIndex = 0;
+        for (let i = 0; i <= idx; i++) {
+          globalIndex += ordered[i].ayahCount;
+        }
+        const lastPage = markers.find((m) => m.ayah === globalIndex)?.page;
+        const endPage = lastPage != null ? Math.max(startPage, lastPage) : startPage;
         return { startPage, endPage };
       })
     );

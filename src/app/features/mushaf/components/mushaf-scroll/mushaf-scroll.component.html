@@ -1,4 +1,9 @@
 <div class="mushaf-scroll">
+  <div
+    #topSentinel
+    class="mushaf-scroll__sentinel"
+    [class.mushaf-scroll__sentinel--done]="!hasPrev()"
+  ></div>
   @for (page of pages(); track page) {
     <app-mushaf-page
       class="mushaf-scroll__page"
@@ -9,7 +14,7 @@
     />
   }
   <div
-    #sentinel
+    #bottomSentinel
     class="mushaf-scroll__sentinel"
     [class.mushaf-scroll__sentinel--done]="!hasMore()"
   ></div>

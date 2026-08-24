@@ -6,7 +6,8 @@ import { MushafSvgService } from './mushaf-svg.service';
 
 /** Base CDN path for the default edition (hafs/kfqc) used in these tests. */
 const SLUG = 'hafs-kfqc';
-const BASE = 'https://cdn.jsdelivr.net/gh/quranpedia/quran-svg@main/mushafs/hafs/kfqc';
+const BASE =
+  'https://cdn.jsdelivr.net/gh/quranpedia/quran-svg@5fbcb1d4d92b5a2972ab51472fe991b6066bb6e2/mushafs/hafs/kfqc';
 const SURAH_URL = `${BASE}/json/surah.json`;
 const MARKERS_URL = `${BASE}/json/markers.json`;
 
@@ -65,56 +66,67 @@ describe('MushafSvgService', () => {
   });
 
   describe('getSurahPageRange', () => {
-    it('spans from the surah start to the page before the next surah', (done) => {
-      // Surah 1 starts on page 1, surah 2 on page 2 -> surah 1 ends on page 1.
+    // Global last-ayah indices: surah1=5, surah2=10, surah3=15 (ayahCount 5 each).
+    const threeSurahs = [surah(1, 1), surah(2, 2), surah(3, 50)];
+    const lastAyahMarkers = [marker(2, 5), marker(50, 10), marker(604, 15)];
+
+    it('includes the page of the last ayah even when the next surah starts there', (done) => {
       service.getSurahPageRange(SLUG, 1).subscribe((range) => {
-        expect(range).toEqual({ startPage: 1, endPage: 1 });
+        expect(range).toEqual({ startPage: 1, endPage: 2 });
         done();
       });
 
-      httpMock.expectOne(SURAH_URL).flush([surah(1, 1), surah(2, 2), surah(3, 50)]);
-      httpMock.expectOne(MARKERS_URL).flush([marker(604, 6236)]);
+      httpMock.expectOne(SURAH_URL).flush(threeSurahs);
+      httpMock.expectOne(MARKERS_URL).flush(lastAyahMarkers);
     });
 
-    it('spans multiple pages up to just before the next surah', (done) => {
+    it('spans through the last ayah page of a mid surah', (done) => {
       service.getSurahPageRange(SLUG, 2).subscribe((range) => {
-        expect(range).toEqual({ startPage: 2, endPage: 49 });
+        expect(range).toEqual({ startPage: 2, endPage: 50 });
         done();
       });
 
-      httpMock.expectOne(SURAH_URL).flush([surah(1, 1), surah(2, 2), surah(3, 50)]);
-      httpMock.expectOne(MARKERS_URL).flush([marker(604, 6236)]);
+      httpMock.expectOne(SURAH_URL).flush(threeSurahs);
+      httpMock.expectOne(MARKERS_URL).flush(lastAyahMarkers);
     });
 
-    it('runs the last surah to the final mushaf page (from markers)', (done) => {
+    it('runs the last surah to the page of its last ayah', (done) => {
       service.getSurahPageRange(SLUG, 3).subscribe((range) => {
         expect(range).toEqual({ startPage: 50, endPage: 604 });
         done();
       });
 
-      httpMock.expectOne(SURAH_URL).flush([surah(1, 1), surah(2, 2), surah(3, 50)]);
-      httpMock.expectOne(MARKERS_URL).flush([marker(300, 3000), marker(604, 6236)]);
+      httpMock.expectOne(SURAH_URL).flush(threeSurahs);
+      httpMock.expectOne(MARKERS_URL).flush(lastAyahMarkers);
     });
 
     it('orders surahs by number before computing the range', (done) => {
-      // Provide surahs out of order; the range for surah 2 must still be 2..49.
       service.getSurahPageRange(SLUG, 2).subscribe((range) => {
-        expect(range).toEqual({ startPage: 2, endPage: 49 });
+        expect(range).toEqual({ startPage: 2, endPage: 50 });
         done();
       });
 
       httpMock.expectOne(SURAH_URL).flush([surah(3, 50), surah(1, 1), surah(2, 2)]);
-      httpMock.expectOne(MARKERS_URL).flush([marker(604, 6236)]);
+      httpMock.expectOne(MARKERS_URL).flush(lastAyahMarkers);
     });
 
     it('never returns an endPage before the startPage when the next surah shares a page', (done) => {
-      // Surah 2 and 3 both start on page 5 -> endPage clamps to startPage (5).
       service.getSurahPageRange(SLUG, 2).subscribe((range) => {
         expect(range).toEqual({ startPage: 5, endPage: 5 });
         done();
       });
 
       httpMock.expectOne(SURAH_URL).flush([surah(1, 1), surah(2, 5), surah(3, 5)]);
+      httpMock.expectOne(MARKERS_URL).flush([marker(1, 5), marker(5, 10), marker(5, 15)]);
+    });
+
+    it('falls back to the start page when the last-ayah marker is missing', (done) => {
+      service.getSurahPageRange(SLUG, 1).subscribe((range) => {
+        expect(range).toEqual({ startPage: 1, endPage: 1 });
+        done();
+      });
+
+      httpMock.expectOne(SURAH_URL).flush(threeSurahs);
       httpMock.expectOne(MARKERS_URL).flush([marker(604, 6236)]);
     });
 
