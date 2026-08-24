@@ -157,6 +157,19 @@
               </td>
               <td>
                 <div class="admin-list-actions">
+                  <button
+                    type="button"
+                    nz-button
+                    nzType="text"
+                    class="action-icon"
+                    nz-tooltip
+                    [nzTooltipTitle]="'ADMIN.COMMON.DOWNLOAD' | translate"
+                    [nzLoading]="downloadingId() === ver.id"
+                    [disabled]="downloadingId() !== null"
+                    (click)="downloadVersion(ver)"
+                  >
+                    <ng-icon name="lucideDownload" aria-hidden="true" />
+                  </button>
                   @if (canMutateVersions()) {
                     <button
                       type="button"

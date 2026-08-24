@@ -39,7 +39,7 @@ export class AssetContentEditorComponent implements OnInit, HasUnsavedContent {
     return this.grid()?.hasUnsavedWork() ?? false;
   }
 
-  discardAndLeave(): Promise<boolean> {
-    return this.grid()?.discardAndLeave() ?? Promise.resolve(true);
+  keepDraftOnLeave(): Promise<boolean> {
+    return this.grid()?.keepDraftOnLeave() ?? Promise.resolve(true);
   }
 }

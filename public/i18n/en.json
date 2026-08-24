@@ -722,16 +722,31 @@
     "HOME": "Home",
     "CONTENT_EDITOR": {
       "TITLE": "Edit content",
-      "HINT": "Edit the text ayah by ayah. Changes autosave to a draft; publish to create a new version.",
+      "HINT": "Edit the text ayah by ayah. Changes autosave to a draft; publish to create a new version. Tip: select a Text or Footnotes cell and paste (Ctrl+V) CSV/spreadsheet rows to fill cells downward.",
       "BACK": "Back to details",
       "SAVE": "Save & publish",
+      "SAVE_DRAFT": "Save draft",
       "DISCARD": "Discard",
+      "UNDO": "Undo",
+      "REDO": "Redo",
+      "FILTER_ALL": "All surahs",
       "SAVING": "Saving…",
       "UNSAVED": "Unsaved changes",
       "ALL_SAVED": "All changes saved to draft",
       "OPEN_BUTTON": "Edit content",
       "MESSAGES": {
-        "PUBLISHED": "New version published"
+        "PUBLISHED": "New version published",
+        "DRAFT_SAVED": "Draft saved"
+      },
+      "PASTE": {
+        "SELECT_EDITABLE": "Select a Text or Footnotes cell first, then paste.",
+        "APPLIED": "Pasted into {{count}} cell(s)."
+      },
+      "COPY": {
+        "BUTTON": "Copy to CSV",
+        "COPIED": "Copied {{count}} row(s) to the clipboard as CSV.",
+        "NONE_SELECTED": "Select one or more rows first.",
+        "FAILED": "Could not copy to the clipboard."
       },
       "LEAVE": {
         "CONFIRM_TITLE": "Discard unsaved changes?",

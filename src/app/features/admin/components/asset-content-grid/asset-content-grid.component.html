@@ -18,14 +18,61 @@
     </div>
 
     <div class="content-grid__actions">
-      <button nz-button nzType="default" (click)="discardAndLeave()" [disabled]="publishing()">
+      <button
+        nz-button
+        nzType="default"
+        nz-tooltip
+        [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.UNDO' | translate"
+        [disabled]="!canUndo()"
+        (click)="undo()"
+      >
+        <ng-icon name="lucideUndo2" />
+      </button>
+      <button
+        nz-button
+        nzType="default"
+        nz-tooltip
+        [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.REDO' | translate"
+        [disabled]="!canRedo()"
+        (click)="redo()"
+      >
+        <ng-icon name="lucideRedo2" />
+      </button>
+      <button
+        nz-button
+        nzType="default"
+        [disabled]="selectedCount() === 0"
+        (click)="copySelectedToCsv()"
+      >
+        <ng-icon name="lucideCopy" />
+        {{ 'ADMIN.CONTENT_EDITOR.COPY.BUTTON' | translate }}
+        @if (selectedCount() > 0) {
+          ({{ selectedCount() }})
+        }
+      </button>
+      <button
+        nz-button
+        nzType="default"
+        nzDanger
+        (click)="confirmDiscard()"
+        [disabled]="publishing() || savingDraft()"
+      >
         {{ 'ADMIN.CONTENT_EDITOR.DISCARD' | translate }}
+      </button>
+      <button
+        nz-button
+        nzType="default"
+        [nzLoading]="savingDraft()"
+        [disabled]="draftId() === null || publishing()"
+        (click)="saveDraft()"
+      >
+        {{ 'ADMIN.CONTENT_EDITOR.SAVE_DRAFT' | translate }}
       </button>
       <button
         nz-button
         nzType="primary"
         [nzLoading]="publishing()"
-        [disabled]="draftId() === null"
+        [disabled]="draftId() === null || savingDraft()"
         (click)="publish()"
       >
         {{ 'ADMIN.CONTENT_EDITOR.SAVE' | translate }}
@@ -33,7 +80,7 @@
     </div>
   </div>
 
-  <nz-spin [nzSpinning]="loading()">
+  <nz-spin [nzSpinning]="loading()" (paste)="onPaste($event)">
     <ag-grid-angular
       class="content-grid__table"
       [theme]="theme"
@@ -42,8 +89,12 @@
       [defaultColDef]="defaultColDef"
       [enableRtl]="rtl()"
       [stopEditingWhenCellsLoseFocus]="true"
+      [rowSelection]="rowSelection"
+      [undoRedoCellEditing]="true"
+      [undoRedoCellEditingLimit]="50"
       (gridReady)="onGridReady($event)"
       (cellValueChanged)="onCellValueChanged($event)"
+      (selectionChanged)="onSelectionChanged()"
     ></ag-grid-angular>
   </nz-spin>
 </div>

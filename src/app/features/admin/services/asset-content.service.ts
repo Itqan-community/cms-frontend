@@ -77,6 +77,17 @@ export class AssetContentService {
     return this.http.delete<void>(this.versionBase(kind, slug, versionId));
   }
 
+  /** Download a version's content as a CSV blob (auth token added by interceptor). */
+  exportVersion(
+    kind: AssetVersionParentKind,
+    slug: string,
+    versionId: number
+  ): Observable<Blob> {
+    return this.http.get(`${this.versionBase(kind, slug, versionId)}export/`, {
+      responseType: 'blob',
+    });
+  }
+
   private segment(kind: AssetVersionParentKind): string {
     return kind === 'tafsir' ? 'tafsirs' : 'translations';
   }
