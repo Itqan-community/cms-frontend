@@ -24,6 +24,7 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
+import { GoogleAnalyticsService } from '../../../../../core/services/google-analytics.service';
 import type {
   RecitationSurahTrackListItem,
   RecitationTrackUploadRowState,
@@ -31,7 +32,12 @@ import type {
   RecitationTrackValidateUploadOut,
 } from '../../models/recitation-tracks.models';
 import type { RecitationTimingUploadOut } from '../../models/recitation-timings.models';
-import { MaddLevel, MeemBehavior, RecitationDetails } from '../../models/recitations.models';
+import {
+  MaddLevel,
+  MeemBehavior,
+  RecitationDetails,
+  RecitationFolder,
+} from '../../models/recitations.models';
 import { RecitationTracksUploadOrchestratorService } from '../../services/recitation-tracks-upload.orchestrator';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../../services/admin-auth.service';
@@ -40,6 +46,7 @@ import {
   buildTimingUploadExtraMessage,
   buildTimingUploadSuccessDescription,
 } from '../../utils/timing-upload-result.format';
+import { FolderSwitcherComponent } from '../folder-switcher/folder-switcher.component';
 
 const TRACKS_PAGE_SIZE = 10;
 const MAX_MP3_FILES = 114;
@@ -60,6 +67,7 @@ const MAX_MP3_FILES = 114;
     NzPaginationModule,
     NzProgressModule,
     NzAlertModule,
+    FolderSwitcherComponent,
   ],
   templateUrl: './recitation-detail.component.html',
   styleUrl: './recitation-detail.component.less',
@@ -73,6 +81,7 @@ export class RecitationDetailComponent implements OnInit {
   private readonly message = inject(NzMessageService);
   private readonly translate = inject(TranslateService);
   private readonly adminAuth = inject(AdminAuthService);
+  private readonly ga = inject(GoogleAnalyticsService);
 
   readonly canUpdateRecitation = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_RECITATION)
@@ -86,17 +95,33 @@ export class RecitationDetailComponent implements OnInit {
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPLOAD_TIMING)
   );
 
+  readonly canViewOnGallery = computed(() => {
+    const rec = this.recitation();
+    return !!rec?.id && !rec.restricted_for_tenant;
+  });
+
+  readonly canViewReciter = computed(() => {
+    const rec = this.recitation();
+    return !!rec?.reciter?.slug;
+  });
+
   readonly recitation = signal<RecitationDetails | null>(null);
   readonly loading = signal(true);
   readonly licensesColors = LicensesColors;
   readonly maddLevel = MaddLevel;
   readonly meemBehavior = MeemBehavior;
 
+  readonly folders = signal<RecitationFolder[]>([]);
+  readonly activeFolderId = signal<string | null>(null);
+  readonly foldersLoading = signal(false);
+
   readonly tracksList = signal<RecitationSurahTrackListItem[]>([]);
   readonly tracksTotal = signal(0);
   readonly tracksLoading = signal(false);
   readonly tracksPage = signal(1);
   readonly tracksPageSize = TRACKS_PAGE_SIZE;
+  /** Sequence for folder-scoped track requests; guards against out-of-order responses. */
+  private tracksRequestId = 0;
 
   readonly uploadRows = signal<RecitationTrackUploadRowState[]>([]);
   readonly validateMessage = signal<string | null>(null);
@@ -263,7 +288,7 @@ export class RecitationDetailComponent implements OnInit {
       next: (data) => {
         this.recitation.set(data);
         this.loading.set(false);
-        this.loadTracksPage();
+        this.loadFolders();
       },
       error: () => {
         this.loading.set(false);
@@ -271,24 +296,149 @@ export class RecitationDetailComponent implements OnInit {
     });
   }
 
+  /** Uploads queued/uploading or a validation round-trip in flight: the active folder must stay put. */
+  private hasBlockingFolderWork(): boolean {
+    return this.hasInFlightUploadRows() || this.validateLoading();
+  }
+
+  /** Same check as `hasBlockingFolderWork`, plus the warning shown for direct user actions. */
+  private warnIfBlockingFolderWork(): boolean {
+    if (!this.hasBlockingFolderWork()) return false;
+    this.message.warning(this.translate.instant('ADMIN.RECITATIONS.TRACKS.NAV_LEAVE_CONTENT'));
+    return true;
+  }
+
+  /** Switches the active folder and rewinds paging so the new folder opens on its first page. */
+  private setActiveFolder(folderId: string | null): void {
+    this.activeFolderId.set(folderId);
+    this.tracksPage.set(1);
+  }
+
+  loadFolders(): void {
+    this.foldersLoading.set(true);
+    this.recitationsService.getFolders(this.slug).subscribe({
+      next: (list) => {
+        this.folders.set(list);
+        const currentActive = this.activeFolderId();
+        const activeStillExists = !!currentActive && list.some((f) => f.id === currentActive);
+        // Never swap the folder out from under queued/uploading rows or a pending validation.
+        const canSwitch = !currentActive || !this.hasBlockingFolderWork();
+        if (!activeStillExists && canSwitch) {
+          const def = list.find((f) => f.isDefault) ?? list[0];
+          if (def) {
+            this.setActiveFolder(def.id);
+          }
+        }
+        this.foldersLoading.set(false);
+        this.loadTracksPage();
+      },
+      error: () => {
+        this.foldersLoading.set(false);
+        this.loadTracksPage();
+      },
+    });
+  }
+
+  onFolderSelect(folderId: string): void {
+    if (this.warnIfBlockingFolderWork()) return;
+    this.setActiveFolder(folderId);
+    this.clearUploadSelection();
+    this.clearTimingsSelection();
+    this.loadTracksPage();
+  }
+
+  onSetDefaultFolder(folderId: string): void {
+    this.recitationsService.setDefaultFolder(this.slug, folderId).subscribe({
+      next: () => {
+        this.message.success(
+          this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.SET_DEFAULT_SUCCESS')
+        );
+        this.loadFolders();
+      },
+      error: () => {
+        this.message.error(this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.ERROR'));
+      },
+    });
+  }
+
+  onCreateFolder(name: string): void {
+    if (this.warnIfBlockingFolderWork()) return;
+    this.recitationsService.createFolder(this.slug, name).subscribe({
+      next: (created) => {
+        this.message.success(
+          this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.CREATE_SUCCESS')
+        );
+        this.setActiveFolder(created.id);
+        this.loadFolders();
+      },
+      error: () => {
+        this.message.error(this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.ERROR'));
+      },
+    });
+  }
+
+  onRenameFolder(payload: { id: string; name: string }): void {
+    this.recitationsService.updateFolder(this.slug, payload.id, { name: payload.name }).subscribe({
+      next: () => {
+        this.message.success(
+          this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.RENAME_SUCCESS')
+        );
+        this.loadFolders();
+      },
+      error: () => {
+        this.message.error(this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.ERROR'));
+      },
+    });
+  }
+
+  onDeleteFolder(folderId: string): void {
+    if (this.folders().length <= 1) {
+      this.message.warning(this.translate.instant('ADMIN.RECITATIONS.FOLDERS.CANNOT_DELETE_LAST'));
+      return;
+    }
+    if (this.warnIfBlockingFolderWork()) return;
+    this.recitationsService.deleteFolder(this.slug, folderId).subscribe({
+      next: () => {
+        this.message.success(
+          this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.DELETE_SUCCESS')
+        );
+        if (this.activeFolderId() === folderId) {
+          this.setActiveFolder(null);
+        }
+        this.loadFolders();
+      },
+      error: () => {
+        this.message.error(this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.ERROR'));
+      },
+    });
+  }
+
   loadTracksPage(): void {
     const rec = this.recitation();
     if (!rec) return;
+    // Monotonic id: only the newest request may write the list, so responses for a
+    // previously selected folder/page that land late are dropped.
+    const requestId = ++this.tracksRequestId;
     this.tracksLoading.set(true);
     this.recitationsService
       .recitationTracksList({
         recitation_slug: rec.slug ?? this.slug,
         asset_id: rec.id,
+        folder_id: this.activeFolderId() ?? undefined,
         page: this.tracksPage(),
         page_size: this.tracksPageSize,
       })
       .subscribe({
         next: (res) => {
+          if (requestId !== this.tracksRequestId) return;
           this.tracksList.set(res.results);
           this.tracksTotal.set(res.count);
           this.tracksLoading.set(false);
         },
-        error: () => this.tracksLoading.set(false),
+        error: () => {
+          if (requestId !== this.tracksRequestId) return;
+          this.tracksLoading.set(false);
+        },
       });
   }
 
@@ -322,7 +472,7 @@ export class RecitationDetailComponent implements OnInit {
 
     this.timingsUploadLoading.set(true);
     this.timingsUploadResult.set(null);
-    this.recitationsService.recitationTimingUpload(rec.id, files).subscribe({
+    this.recitationsService.recitationTimingUpload(rec.id, files, this.activeFolderId()).subscribe({
       next: (res: RecitationTimingUploadOut) => {
         this.timingsUploadResult.set(res);
         this.timingsFiles.set([]);
@@ -381,16 +531,26 @@ export class RecitationDetailComponent implements OnInit {
       totalBytes: file.size,
     }));
     this.uploadRows.set(rows);
-    this.validateMessage.set(null);
-    this.validateTopStatus.set('idle');
+    this.clearValidateUi();
     this.runValidate();
     input.value = '';
   }
 
   clearUploadSelection(): void {
     this.uploadRows.set([]);
+    this.clearValidateUi();
+  }
+
+  private clearValidateUi(): void {
     this.validateMessage.set(null);
     this.validateTopStatus.set('idle');
+  }
+
+  /** Keep only rows the user can retry after a batch upload. */
+  private pruneActionableUploadRows(): void {
+    this.uploadRows.update((rows) =>
+      rows.filter((r) => r.phase === 'failed' || r.phase === 'cancelled')
+    );
   }
 
   private runValidate(): void {
@@ -404,6 +564,7 @@ export class RecitationDetailComponent implements OnInit {
     this.recitationsService
       .recitationTracksValidateUpload({
         asset_id: rec.id,
+        folder_id: this.activeFolderId() ?? undefined,
         filenames: rows.map((r) => r.filename),
       })
       .subscribe({
@@ -462,8 +623,7 @@ export class RecitationDetailComponent implements OnInit {
     if (!this.canRemoveUploadRow(row)) return;
     this.uploadRows.update((rows) => rows.filter((r) => r.filename !== row.filename));
     if (!this.uploadRows().length) {
-      this.validateMessage.set(null);
-      this.validateTopStatus.set('idle');
+      this.clearValidateUi();
       return;
     }
     this.runValidate();
@@ -474,7 +634,7 @@ export class RecitationDetailComponent implements OnInit {
     this.uploadRows.update((rows) =>
       rows.filter((r) => r.validateStatus !== 'invalid' && r.validateStatus !== 'skip')
     );
-    this.validateMessage.set(null);
+    this.clearValidateUi();
     const remaining = this.uploadRows();
     if (!remaining.length) {
       this.validateTopStatus.set('idle');
@@ -499,6 +659,7 @@ export class RecitationDetailComponent implements OnInit {
       const res = await firstValueFrom(
         this.recitationsService.recitationTracksValidateUpload({
           asset_id: rec.id,
+          folder_id: this.activeFolderId() ?? undefined,
           filenames: candidates.map((r) => r.filename),
         })
       );
@@ -517,6 +678,8 @@ export class RecitationDetailComponent implements OnInit {
     );
     if (!toUpload.length) return;
 
+    this.clearValidateUi();
+
     const batchFilenames = new Set(toUpload.map((r) => r.filename));
     toUpload.forEach((r) => {
       this.patchUploadRow(r.filename, {
@@ -534,7 +697,8 @@ export class RecitationDetailComponent implements OnInit {
         onRowPatch: (filename, patch) => {
           this.patchUploadRow(filename, patch);
         },
-      }
+      },
+      this.activeFolderId() ?? undefined
     );
     this.trackUploadTask(task);
 
@@ -551,6 +715,7 @@ export class RecitationDetailComponent implements OnInit {
         this.message.success(
           this.translate.instant('ADMIN.RECITATIONS.TRACKS.MESSAGES.UPLOAD_ALL_OK', { count: ok })
         );
+        void this.router.navigate(['/gallery/asset', rec.id]);
       } else {
         this.message.warning(
           this.translate.instant('ADMIN.RECITATIONS.TRACKS.MESSAGES.UPLOAD_PARTIAL', {
@@ -558,8 +723,10 @@ export class RecitationDetailComponent implements OnInit {
             failed,
           })
         );
+        this.clearValidateUi();
+        this.pruneActionableUploadRows();
+        this.loadTracksPage();
       }
-      this.loadTracksPage();
     } finally {
       this.markBatchQueuedAsCancelled(batchFilenames);
     }
@@ -609,6 +776,7 @@ export class RecitationDetailComponent implements OnInit {
       const res = await firstValueFrom(
         this.recitationsService.recitationTracksValidateUpload({
           asset_id: rec.id,
+          folder_id: this.activeFolderId() ?? undefined,
           filenames: [fn],
         })
       );
@@ -627,6 +795,8 @@ export class RecitationDetailComponent implements OnInit {
       return;
     }
 
+    this.clearValidateUi();
+
     this.patchUploadRow(fn, {
       phase: 'queued',
       progress: 0,
@@ -640,10 +810,18 @@ export class RecitationDetailComponent implements OnInit {
         onRowPatch: (filename, patch) => {
           this.patchUploadRow(filename, patch);
         },
-      }
+      },
+      this.activeFolderId() ?? undefined
     );
     this.trackUploadTask(task);
-    void task.then(() => this.loadTracksPage());
+    void task.then(() => {
+      const row = this.uploadRows().find((r) => r.filename === fn);
+      if (row?.phase === 'success') {
+        this.clearValidateUi();
+        this.pruneActionableUploadRows();
+      }
+      this.loadTracksPage();
+    });
   }
 
   deleteTrack(track: RecitationSurahTrackListItem): void {
@@ -662,7 +840,11 @@ export class RecitationDetailComponent implements OnInit {
       nzOnOk: () =>
         new Promise<void>((resolve, reject) => {
           this.recitationsService
-            .recitationTracksDelete({ asset_id: rec.id, track_ids: [track.id] })
+            .recitationTracksDelete({
+              asset_id: rec.id,
+              folder_id: this.activeFolderId() ?? undefined,
+              track_ids: [track.id],
+            })
             .subscribe({
               next: () => {
                 this.message.success(
@@ -719,6 +901,22 @@ export class RecitationDetailComponent implements OnInit {
     return '';
   }
 
+  galleryAssetUrl(): string {
+    const id = this.recitation()?.id;
+    return id ? `/gallery/asset/${id}` : '';
+  }
+
+  onViewOnGalleryClick(): void {
+    const rec = this.recitation();
+    if (!rec?.id) return;
+    this.ga.trackEvent('view_on_gallery', { asset_id: rec.id, source: 'recitation_detail' });
+  }
+
+  reciterRouterLink(): string[] {
+    const reciterSlug = this.recitation()?.reciter?.slug;
+    return reciterSlug ? ['/admin/reciters', reciterSlug] : [];
+  }
+
   onEdit(): void {
     void this.router.navigate(['/admin/recitations', this.slug, 'edit']);
   }
@@ -771,7 +969,7 @@ export class RecitationDetailComponent implements OnInit {
   }
 
   formatDurationMs(ms: number | null | undefined): string {
-    if (ms == null || ms <= 0) return '—';
+    if (ms == null || ms <= 0) return this.translate.instant('COMMON.EM_DASH');
     const totalSec = Math.round(ms / 1000);
     const h = Math.floor(totalSec / 3600);
     const m = Math.floor((totalSec % 3600) / 60);
@@ -781,7 +979,7 @@ export class RecitationDetailComponent implements OnInit {
   }
 
   formatBytes(n: number | null | undefined): string {
-    if (n == null || n <= 0) return '—';
+    if (n == null || n <= 0) return this.translate.instant('COMMON.EM_DASH');
     if (n < 1024) return `${n} B`;
     if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
     return `${(n / (1024 * 1024)).toFixed(2)} MB`;

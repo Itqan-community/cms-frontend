@@ -21,7 +21,10 @@ import {
   ReciterPatchValue,
 } from '../../models/reciters.models';
 import { RecitersAdminService } from '../../services/reciters.service';
-import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
+import {
+  createDisplayLocalizationLabels,
+  localizeCountryCodeOrName,
+} from '../../../utils/display-localization.util';
 
 @Component({
   selector: 'app-reciter-form',
@@ -211,7 +214,11 @@ export class ReciterFormComponent implements OnInit {
   }
 
   countryLabel(countryCode: string): string {
-    return localizeCountryCodeOrName(countryCode, this.translate.currentLang);
+    return localizeCountryCodeOrName(
+      countryCode,
+      this.translate.currentLang,
+      createDisplayLocalizationLabels(this.translate)
+    );
   }
 
   beforeImageUpload = (file: NzUploadFile): boolean => {

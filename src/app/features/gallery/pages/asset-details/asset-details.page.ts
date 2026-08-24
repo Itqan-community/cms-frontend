@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -16,13 +16,15 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { Licenses } from '../../../../core/enums/licenses.enum';
+import { JsonLdService } from '../../../../core/services/json-ld.service';
+import { SeoService } from '../../../../core/services/seo.service';
 import { AssetDetailSkeletonComponent } from '../../../../shared/components/asset-detail-skeleton/asset-detail-skeleton.component';
 import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/breadcrumb.component';
 import { ImageCarouselComponent } from '../../../../shared/components/image-carousel/image-carousel.component';
 import { LicenseTagComponent } from '../../../../shared/components/license-tag/license-tag.component';
 import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
 import { IssuesService } from '../../../admin/issues/services/issues.service';
-import { getErrorMessage } from '../../../../shared/utils/error.utils';
+import { resolveApiErrorMessage } from '../../../../shared/utils/api-error-resolver.util';
 import { AssetDetails } from '../../models/assets.model';
 import { AssetsService } from '../../services/assets.service';
 import { AssetLicenseAcceptanceService } from '../../services/asset-license-acceptance.service';
@@ -49,7 +51,7 @@ import { AssetLicenseAcceptanceService } from '../../services/asset-license-acce
   templateUrl: './asset-details.page.html',
   styleUrl: './asset-details.page.less',
 })
-export class AssetDetailsPage implements OnInit {
+export class AssetDetailsPage implements OnInit, OnDestroy {
   private readonly assetsService = inject(AssetsService);
   private readonly licenseAcceptance = inject(AssetLicenseAcceptanceService);
   private readonly issuesService = inject(IssuesService);
@@ -61,6 +63,8 @@ export class AssetDetailsPage implements OnInit {
   private readonly message = inject(NzMessageService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly seo = inject(SeoService);
+  private readonly jsonLd = inject(JsonLdService);
 
   readonly id = this.route.snapshot.params['id'];
   asset = signal<AssetDetails | null>(null);
@@ -107,6 +111,7 @@ export class AssetDetailsPage implements OnInit {
           this.asset.set(asset);
           this.images.set(asset.snapshots.map((snapshot) => snapshot.image_url));
           this.loading.set(false);
+          this.setSeoFromAsset(asset);
           this.maybeOpenReportIssueModal();
         },
         error: (err) => {
@@ -118,6 +123,32 @@ export class AssetDetailsPage implements OnInit {
           }
         },
       });
+  }
+
+  ngOnDestroy(): void {
+    this.jsonLd.remove();
+  }
+
+  private setSeoFromAsset(asset: AssetDetails): void {
+    const description =
+      asset.description || asset.long_description || `${asset.name} - available on ITQAN.`;
+    this.seo.setSeo({
+      title: `${asset.name} | ITQAN`,
+      description,
+      path: `/gallery/asset/${asset.id}`,
+      image: asset.thumbnail_url || undefined,
+    });
+    this.jsonLd.setSchema({
+      '@context': 'https://schema.org',
+      '@type': 'CreativeWork',
+      name: asset.name,
+      description,
+      image: asset.thumbnail_url || undefined,
+      creator: {
+        '@type': 'Organization',
+        name: asset.publisher?.name,
+      },
+    });
   }
 
   retryLoad() {
@@ -133,7 +164,7 @@ export class AssetDetailsPage implements OnInit {
       case 'recitation':
         return 'lucideMic';
       case 'font':
-        return 'lucidePalette';
+        return 'lucideType';
       case 'program':
         return 'lucideLayers';
       default:
@@ -366,22 +397,32 @@ export class AssetDetailsPage implements OnInit {
                   this.handleAccessStatusAfterRequest(refreshed.access_status);
                 },
                 error: (error) => {
-                  const defaultKey =
-                    error.status === 0
-                      ? 'ERRORS.NETWORK_ERROR'
-                      : 'ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED';
-                  const errorMessage = getErrorMessage(error) ?? this.translate.instant(defaultKey);
+                  const errorMessage = resolveApiErrorMessage(
+                    error,
+                    {
+                      fallbackKey:
+                        error.status === 0
+                          ? 'ERRORS.NETWORK_ERROR'
+                          : 'ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED',
+                    },
+                    this.translate
+                  );
                   this.message.error(errorMessage);
                 },
               });
           },
           error: (error) => {
             this.isSubmittingRequest.set(false);
-            const defaultKey =
-              error.status === 0
-                ? 'ERRORS.NETWORK_ERROR'
-                : 'ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED';
-            const errorMessage = getErrorMessage(error) ?? this.translate.instant(defaultKey);
+            const errorMessage = resolveApiErrorMessage(
+              error,
+              {
+                fallbackKey:
+                  error.status === 0
+                    ? 'ERRORS.NETWORK_ERROR'
+                    : 'ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED',
+              },
+              this.translate
+            );
             this.message.error(errorMessage);
           },
         });
@@ -462,9 +503,13 @@ export class AssetDetailsPage implements OnInit {
         },
         error: (error) => {
           this.isDownloading.set(false);
-          const defaultErrorKey =
-            error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR';
-          const errorMessage = error.error?.message || this.translate.instant(defaultErrorKey);
+          const errorMessage = resolveApiErrorMessage(
+            error,
+            {
+              fallbackKey: error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR',
+            },
+            this.translate
+          );
           this.message.error(errorMessage);
         },
       });
@@ -489,9 +534,13 @@ export class AssetDetailsPage implements OnInit {
         },
         error: (error) => {
           this.isDownloading.set(false);
-          const defaultErrorKey =
-            error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR';
-          const errorMessage = error.error?.message || this.translate.instant(defaultErrorKey);
+          const errorMessage = resolveApiErrorMessage(
+            error,
+            {
+              fallbackKey: error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR',
+            },
+            this.translate
+          );
           this.message.error(errorMessage);
         },
       });

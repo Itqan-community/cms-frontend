@@ -5,10 +5,12 @@
  */
 export const environment = {
   production: false,
+  SITE_URL: 'http://localhost:4200',
   API_BASE_URL: 'http://127.0.0.1:8000/cms-api',
   API_DOCS_URL: 'http://127.0.0.1:8000/docs',
   ADMIN_API_BASE_URL: 'http://127.0.0.1:8000/portal',
   sentryDsn: '',
   /** Set `true` only if this API issues WebAuthn with `rp.id` / `rpId` equal to `location.hostname`. */
   webauthnReplaceRpIdWithHostname: false,
+  useProgramsMockApi: true,
 };

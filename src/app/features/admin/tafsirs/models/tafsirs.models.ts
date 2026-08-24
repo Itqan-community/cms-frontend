@@ -101,6 +101,10 @@ export interface TafsirFormValue {
   restricted_for_tenant: boolean;
   external_url?: string | null;
   thumbnail?: File;
+  /** Create-only: first version metadata + content file. */
+  version_name?: string;
+  version_summary?: string;
+  file?: File;
 }
 
 /** Publisher option returned by /portal/filters/publishers/ */

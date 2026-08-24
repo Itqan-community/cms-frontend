@@ -55,6 +55,7 @@ export class TafsirsService {
     return this.http.delete<void>(`${this.apiUrl}${slug}/`);
   }
 
+  /** Multipart create/update (backend expects form data even when no version file is attached). */
   private toFormData(payload: Partial<TafsirFormValue>): FormData {
     const data = new FormData();
     const append = (key: string, value: string | number | boolean | null | undefined): void => {
@@ -83,6 +84,11 @@ export class TafsirsService {
     append('external_url', payload.external_url);
     if (payload.thumbnail) {
       data.append('thumbnail', payload.thumbnail);
+    }
+    append('version_name', payload.version_name);
+    append('version_summary', payload.version_summary);
+    if (payload.file) {
+      data.append('file', payload.file);
     }
 
     return data;

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -10,6 +10,7 @@ import { LangSwitchComponent } from '../../../../shared/components/lang-switch/l
 import { AuthBackLinkComponent } from '../../components/auth-back-link/auth-back-link.component';
 import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
+import { isPasskeyAutoPromptCancellation } from '../../headless/passkey-auto-prompt.util';
 import { resolvePasskeyFlowError } from '../../headless/passkey-error.util';
 import { isPasskeyClientEnvironmentSupported } from '../../headless/webauthn-capability.util';
 import { getWebAuthnRequestOptions, publicKeyCredentialToJson } from '../../headless/webauthn.util';
@@ -31,12 +32,14 @@ import { readContinueUrl } from '../../utils/auth-route-query.util';
   styleUrls: ['./mfa.page.less'],
   templateUrl: './mfa.page.html',
 })
-export class MfaPage {
+export class MfaPage implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly fb = inject(FormBuilder);
   private readonly translate = inject(TranslateService);
+
+  private autoPasskeyAttempted = false;
 
   form: FormGroup;
   errorMessage = signal<string>('');
@@ -46,6 +49,12 @@ export class MfaPage {
   constructor() {
     this.form = this.fb.group({ code: ['', [Validators.required, Validators.minLength(4)]] });
     this.passkeyAvailable.set(isPasskeyClientEnvironmentSupported());
+  }
+
+  ngOnInit(): void {
+    if (this.passkeyAvailable()) {
+      void this.onWebAuthn({ auto: true });
+    }
   }
 
   async onSubmit(): Promise<void> {
@@ -81,9 +90,16 @@ export class MfaPage {
     }
   }
 
-  async onWebAuthn(): Promise<void> {
+  async onWebAuthn(options?: { auto?: boolean }): Promise<void> {
+    const isAuto = options?.auto === true;
     if (!this.passkeyAvailable()) {
       return;
+    }
+    if (isAuto && this.autoPasskeyAttempted) {
+      return;
+    }
+    if (isAuto) {
+      this.autoPasskeyAttempted = true;
     }
     this.errorMessage.set('');
     this.isLoading.set(true);
@@ -96,7 +112,9 @@ export class MfaPage {
       })) as PublicKeyCredential | null;
       if (!cred) {
         this.isLoading.set(false);
-        this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.CANCELLED'));
+        if (!isAuto) {
+          this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.CANCELLED'));
+        }
         return;
       }
       const body = publicKeyCredentialToJson(cred);
@@ -107,6 +125,9 @@ export class MfaPage {
       void this.router.navigateByUrl(nextUrl);
     } catch (e) {
       this.isLoading.set(false);
+      if (isAuto && isPasskeyAutoPromptCancellation(e)) {
+        return;
+      }
       const resolution = resolvePasskeyFlowError(e, this.translate, this.router, 'mfa');
       if (resolution.kind === 'message') {
         this.errorMessage.set(resolution.message);

@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
-import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { TranslateModule } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -13,6 +13,7 @@ import {
   AdminTableColumnOption,
 } from '../../../components/admin-column-picker/admin-column-picker.component';
 import {
+  createDisplayLocalizationLabels,
   formatHijriYearForAdminListing,
   localizeCountryCodeOrName,
 } from '../../../utils/display-localization.util';
@@ -45,7 +46,6 @@ import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constan
 })
 export class PublishersListComponent extends AdminListBase<Publisher, PublisherUiFilters> {
   private readonly publishersService = inject(PublishersService);
-  private readonly translate = inject(TranslateService);
   private readonly adminAuth = inject(AdminAuthService);
   private readonly tenantService = inject(AdminTenantService);
 
@@ -112,7 +112,11 @@ export class PublishersListComponent extends AdminListBase<Publisher, PublisherU
   }
 
   countryLabel(country: string | null | undefined): string {
-    return localizeCountryCodeOrName(country, this.translate.currentLang);
+    return localizeCountryCodeOrName(
+      country,
+      this.translate.currentLang,
+      createDisplayLocalizationLabels(this.translate)
+    );
   }
 
   foundationYearDisplay(year: number | null | undefined): string {

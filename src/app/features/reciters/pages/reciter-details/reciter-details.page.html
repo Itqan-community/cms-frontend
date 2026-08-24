@@ -1,0 +1,110 @@
+<div class="reciter-details-container">
+  <app-breadcrumb />
+
+  @if (notFound()) {
+    <app-state-message
+      icon="lucideCircleX"
+      iconVariant="error"
+      [title]="'RECITERS.NOT_FOUND_TITLE' | translate"
+      [message]="'RECITERS.NOT_FOUND_MESSAGE' | translate"
+      [secondaryActionLabel]="'RECITERS.BACK_TO_RECITERS' | translate"
+      secondaryRouterLink="/reciters"
+    />
+  } @else {
+    <div class="reciter-details-grid">
+      <!-- Reciter Info Card -->
+      @if (reciter()) {
+        <div class="card reciter-info-card">
+          <div class="reciter-info-content">
+            <div class="reciter-avatar">
+              @if (reciter()!.image_url) {
+                <img [src]="reciter()!.image_url" [alt]="getReciterName()" />
+              } @else {
+                <ng-icon name="lucideMic" aria-hidden="true" />
+              }
+            </div>
+            <div class="reciter-details">
+              <h1 class="reciter-name">{{ getReciterName() }}</h1>
+              @if (getReciterBio()) {
+                <p class="reciter-bio">{{ getReciterBio() }}</p>
+              }
+              <div class="reciter-meta">
+                @if (reciter()!.nationality) {
+                  <div class="meta-item">
+                    <ng-icon name="lucideMapPin" aria-hidden="true" />
+                    <span>{{ nationalityLabel }}</span>
+                  </div>
+                }
+                <div class="meta-item">
+                  <ng-icon name="lucideMic" aria-hidden="true" />
+                  <span>{{
+                    'RECITERS.RECITATIONS_COUNT'
+                      | translate: { count: reciter()!.recitations_count }
+                  }}</span>
+                </div>
+                @if (reciter()!.date_of_death) {
+                  <div class="meta-item">
+                    <ng-icon name="lucideCalendar" aria-hidden="true" />
+                    <span
+                      >{{ 'RECITERS.DATE_OF_DEATH' | translate }}:
+                      {{ reciter()!.date_of_death }}</span
+                    >
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      } @else if (reciterLoading()) {
+        <div class="skeleton-container" aria-hidden="true">
+          <div class="skeleton-element"></div>
+        </div>
+      }
+
+      <!-- Recitations Listing -->
+      <div class="assets-section">
+        <h2 class="assets-title">
+          {{ 'RECITERS.RECITATIONS' | translate }}
+          @if (!assetsLoading()) {
+            ({{ assetsTotal() }})
+          }
+        </h2>
+        <div class="assets-section__inner">
+          @if (!assetsLoading() && assets().length === 0) {
+            <app-state-message
+              icon="lucideMic"
+              [title]="'RECITERS.NO_RECITATIONS_TITLE' | translate"
+              [message]="'RECITERS.NO_RECITATIONS_MESSAGE' | translate"
+            />
+          } @else {
+            <div class="assets-grid" [attr.aria-busy]="assetsLoading()">
+              @if (!isServer && assetsLoading()) {
+                @for (item of getSkeletonArray(); track item) {
+                  <app-asset-card-skeleton />
+                }
+              } @else {
+                @for (asset of assets(); track asset.id) {
+                  <app-asset-card [asset]="asset" />
+                }
+              }
+            </div>
+          }
+          @if (!assetsLoading() && assetsTotal() > 0) {
+            <div class="admin-pagination assets-section__pagination">
+              <nz-pagination
+                [nzPageIndex]="page()"
+                [nzTotal]="assetsTotal()"
+                [nzPageSize]="pageSize()"
+                [nzShowSizeChanger]="true"
+                [nzPageSizeOptions]="pageSizeOptions"
+                nzShowQuickJumper
+                (nzPageIndexChange)="onPageChange($event)"
+                (nzPageSizeChange)="onPageSizeChange($event)"
+              />
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+</div>

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { DJANGO_SESSIONID_COOKIE_NAME, getCookie } from '../../utils/csrf.util';
 import type { AppTokenRefreshResponse, AuthenticationMeta } from './headless-api.types';
 
-/** Official SPA stores session continuity under this `sessionStorage` key. */
+/** App session token key — stored in `localStorage` so auth is shared across tabs. */
 export const ALLAUTH_SESSION_TOKEN_STORAGE_KEY = 'sessionToken';
 
 const LEGACY_SESSION_KEY = 'headless_session_token';
@@ -29,27 +29,34 @@ export class HeadlessAppTokenService {
     this.legacyMigrated = true;
     try {
       const oldSession = localStorage.getItem(LEGACY_SESSION_KEY);
-      if (
-        oldSession &&
-        typeof sessionStorage !== 'undefined' &&
-        !sessionStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY)
-      ) {
-        sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, oldSession);
+      if (oldSession && !localStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY)) {
+        localStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, oldSession);
       }
       localStorage.removeItem(LEGACY_SESSION_KEY);
+
+      if (
+        typeof sessionStorage !== 'undefined' &&
+        !localStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY)
+      ) {
+        const fromSessionStorage = sessionStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY);
+        if (fromSessionStorage) {
+          localStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, fromSessionStorage);
+          sessionStorage.removeItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY);
+        }
+      }
     } catch {
       /* storage unavailable */
     }
   }
 
   /**
-   * Resolved value for `X-Session-Token`: **sessionStorage first**, then readable `sessionid` cookie.
-   * Cookie fallback is persisted into sessionStorage so subsequent reads stay consistent.
+   * Resolved value for `X-Session-Token`: **localStorage first**, then readable `sessionid` cookie.
+   * Cookie fallback is persisted into localStorage so subsequent reads stay consistent.
    */
   getSessionToken(): string | null {
     this.migrateLegacyOnce();
     try {
-      const fromStorage = sessionStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY);
+      const fromStorage = localStorage.getItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY);
       if (fromStorage) {
         return fromStorage;
       }
@@ -69,8 +76,11 @@ export class HeadlessAppTokenService {
 
   setSessionToken(token: string): void {
     try {
-      sessionStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, token);
+      localStorage.setItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY, token);
       localStorage.removeItem(LEGACY_SESSION_KEY);
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY);
+      }
     } catch {
       /* ignore */
     }
@@ -78,7 +88,10 @@ export class HeadlessAppTokenService {
 
   clearSessionToken(): void {
     try {
-      sessionStorage.removeItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY);
+      localStorage.removeItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY);
+      if (typeof sessionStorage !== 'undefined') {
+        sessionStorage.removeItem(ALLAUTH_SESSION_TOKEN_STORAGE_KEY);
+      }
     } catch {
       /* ignore */
     }

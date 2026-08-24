@@ -4,7 +4,7 @@ import { Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { LangSwitchComponent } from '../../../../../shared/components/lang-switch/lang-switch.component';
-import { getErrorMessage } from '../../../../../shared/utils/error.utils';
+import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
 import { MembersService } from '../../services/members.service';
 
 type AcceptState = 'loading' | 'success' | 'error';
@@ -40,7 +40,7 @@ export class AcceptInvitationPage implements OnInit {
         this.state.set('error');
         if (err instanceof HttpErrorResponse) {
           this.errorMessage.set(
-            getErrorMessage(err) || this.translate.instant('INVITATION.ACCEPT.ERROR')
+            resolveApiErrorMessage(err, { fallbackKey: 'INVITATION.ACCEPT.ERROR' }, this.translate)
           );
         } else {
           this.errorMessage.set(this.translate.instant('INVITATION.ACCEPT.ERROR'));

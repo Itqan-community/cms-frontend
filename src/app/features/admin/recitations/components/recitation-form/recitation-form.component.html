@@ -113,18 +113,7 @@
                 'ADMIN.RECITATIONS.COLUMNS.PUBLISHER' | translate
               }}</nz-form-label>
               <nz-form-control [nzErrorTip]="'ADMIN.RECITATIONS.FORM.ERR_PUBLISHER' | translate">
-                <nz-select
-                  formControlName="publisher_id"
-                  nzShowSearch
-                  nzServerSearch
-                  nzAllowClear
-                  [nzLoading]="publishersLoading()"
-                  (nzOnSearch)="onPublisherSearch($event)"
-                >
-                  @for (p of publisherOptions(); track p.id) {
-                    <nz-option [nzValue]="p.id" [nzLabel]="p.name"></nz-option>
-                  }
-                </nz-select>
+                <input nz-input [value]="publisherDisplayName()" disabled />
               </nz-form-control>
             </nz-form-item>
           </div>

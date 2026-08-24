@@ -10,6 +10,7 @@ export type RecitationTrackValidateUploadStatus = 'valid' | 'invalid';
 /** POST /portal/recitation-tracks/validate-upload/ */
 export interface RecitationTrackValidateUploadIn {
   asset_id: number;
+  folder_id?: string | number;
   filenames: string[];
 }
 
@@ -28,12 +29,14 @@ export interface RecitationTrackValidateUploadOut {
 /** DELETE /portal/recitation-tracks/ */
 export interface RecitationTrackDeleteTracksIn {
   asset_id: number;
+  folder_id?: string | number;
   track_ids: number[];
 }
 
 /** POST /portal/recitation-tracks/uploads/start/ */
 export interface RecitationTrackUploadStartIn {
   asset_id: number;
+  folder_id?: string | number;
   filename: string;
   duration_ms?: number | null;
   size_bytes?: number | null;
@@ -66,6 +69,7 @@ export interface RecitationTrackUploadFinishPart {
 /** POST /portal/recitation-tracks/uploads/finish/ */
 export interface RecitationTrackUploadFinishIn {
   asset_id: number;
+  folder_id?: string | number;
   filename: string;
   key: string;
   upload_id: string;

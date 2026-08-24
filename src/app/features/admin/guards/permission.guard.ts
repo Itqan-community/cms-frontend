@@ -1,5 +1,7 @@
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
+import { map } from 'rxjs';
+import { waitUntilAuthReady } from '../../../core/auth/guards/wait-until-auth-ready';
 import { AdminAuthService } from '../services/admin-auth.service';
 
 export type PermissionGuardMode = 'any' | 'all';
@@ -17,13 +19,19 @@ export function permissionGuard(options: PermissionGuardOptions): CanActivateFn 
     const adminAuth = inject(AdminAuthService);
     const router = inject(Router);
 
-    const ok =
-      mode === 'any' ? adminAuth.hasAnyPermission(required) : adminAuth.hasAllPermissions(required);
+    return waitUntilAuthReady().pipe(
+      map(() => {
+        const ok =
+          mode === 'any'
+            ? adminAuth.hasAnyPermission(required)
+            : adminAuth.hasAllPermissions(required);
 
-    if (ok) {
-      return true;
-    }
+        if (ok) {
+          return true;
+        }
 
-    return router.createUrlTree(['/unauthorized']);
+        return router.createUrlTree(['/unauthorized']);
+      })
+    );
   };
 }

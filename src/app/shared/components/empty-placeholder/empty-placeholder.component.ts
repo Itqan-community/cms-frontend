@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 
 @Component({
   selector: 'app-empty-placeholder',
   standalone: true,
-  imports: [NzEmptyModule],
+  imports: [NzEmptyModule, TranslateModule],
   template: `
     <div class="placeholder-container">
       <nz-empty
@@ -13,7 +14,9 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
         nzNotFoundImage="https://gw.alipayobjects.com/zos/antfincdn/ZHrcdLPrvN/empty.svg"
       >
         <ng-template #content>
-          <span>قريباً: إدارة {{ title }}</span>
+          <span>{{
+            'COMMON.EMPTY_PLACEHOLDER.COMING_SOON' | translate: { title: titleLabel }
+          }}</span>
         </ng-template>
       </nz-empty>
     </div>
@@ -34,5 +37,9 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
 })
 export class EmptyPlaceholderComponent {
   private route = inject(ActivatedRoute);
-  title = this.route.snapshot.data['title'] || 'المحتوى';
+  private translate = inject(TranslateService);
+
+  readonly titleLabel =
+    this.route.snapshot.data['title'] ||
+    this.translate.instant('COMMON.EMPTY_PLACEHOLDER.DEFAULT_TITLE');
 }

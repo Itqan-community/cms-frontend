@@ -22,16 +22,13 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
-import { PublisherFilterItem } from '../../../tafsirs/models/tafsirs.models';
-import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
 import { ReciterListItem } from '../../../reciters/models/reciters.models';
 import { RecitersAdminService } from '../../../reciters/services/reciters.service';
+import { AdminTenantService } from '../../../services/admin-tenant.service';
 import { MaddLevel, MeemBehavior, NamedId } from '../../models/recitations.models';
 import { RecitationsService } from '../../services/recitations.service';
-import {
-  getErrorMessage,
-  isRestrictedForTenantConflictError,
-} from '../../../../../shared/utils/error.utils';
+import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
+import { isRestrictedForTenantConflictError } from '../../../../../shared/utils/error.utils';
 
 /** Hijri year optional: empty is valid; if set, must be within range */
 function optionalHijriYearRange(minY: number, maxY: number) {
@@ -71,7 +68,7 @@ export class RecitationFormComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
   private readonly recitationsService = inject(RecitationsService);
-  private readonly publishersFilterService = inject(PublishersFilterService);
+  private readonly tenantService = inject(AdminTenantService);
   private readonly recitersService = inject(RecitersAdminService);
   private readonly message = inject(NzMessageService);
   private readonly translate = inject(TranslateService);
@@ -82,8 +79,7 @@ export class RecitationFormComponent implements OnInit {
   readonly loadingOptions = signal(true);
   readonly submitting = signal(false);
 
-  readonly publisherOptions = signal<PublisherFilterItem[]>([]);
-  readonly publishersLoading = signal(false);
+  readonly publisherDisplayName = signal('');
   readonly reciterOptions = signal<ReciterListItem[]>([]);
   readonly qiraahOptions = signal<NamedId[]>([]);
   readonly riwayahOptions = signal<NamedId[]>([]);
@@ -138,18 +134,15 @@ export class RecitationFormComponent implements OnInit {
       });
 
     this.loadReciters();
-    this.loadPublishers();
 
     const slugParam = this.route.snapshot.params['slug'];
     if (slugParam) {
       this.isEditMode.set(true);
       this.editSlug = slugParam;
       this.loadForEdit();
+    } else {
+      this.bindTenantPublisher();
     }
-  }
-
-  onPublisherSearch(query: string): void {
-    this.loadPublishers(query);
   }
 
   onSubmit(): void {
@@ -161,7 +154,7 @@ export class RecitationFormComponent implements OnInit {
       return;
     }
 
-    const v = this.form.value;
+    const v = this.form.getRawValue();
     const body = {
       name_ar: v.name_ar ?? '',
       name_en: v.name_en ?? '',
@@ -200,10 +193,13 @@ export class RecitationFormComponent implements OnInit {
       error: (error) => {
         this.submitting.set(false);
         if (isRestrictedForTenantConflictError(error)) {
-          const msg = getErrorMessage(error);
-          if (msg) {
-            this.message.error(msg);
-          }
+          this.message.error(
+            resolveApiErrorMessage(
+              error,
+              { fallbackKey: 'ERRORS.RESTRICTED_FOR_TENANT_CONFLICT' },
+              this.translate
+            )
+          );
         }
       },
     });
@@ -251,6 +247,7 @@ export class RecitationFormComponent implements OnInit {
             is_open_access: data.is_open_access,
             restricted_for_tenant: data.restricted_for_tenant,
           });
+          this.publisherDisplayName.set(data.publisher.name);
           this.loadRiwayahs(data.qiraah.id, data.riwayah?.id ?? null);
           this.selectedHijriDate.set(
             data.year ? new Date(data.year, 0, 1) : this.hijriDefaultPickerDate
@@ -263,18 +260,11 @@ export class RecitationFormComponent implements OnInit {
       });
   }
 
-  private loadPublishers(query = ''): void {
-    this.publishersLoading.set(true);
-    this.publishersFilterService
-      .search(query)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          this.publisherOptions.set(res.results);
-          this.publishersLoading.set(false);
-        },
-        error: () => this.publishersLoading.set(false),
-      });
+  private bindTenantPublisher(): void {
+    const publisherId = this.tenantService.selectedPublisherId();
+    this.form.controls.publisher_id.setValue(publisherId);
+    const publisher = this.tenantService.publishers().find((item) => item.id === publisherId);
+    this.publisherDisplayName.set(publisher?.name ?? '');
   }
 
   private loadReciters(): void {

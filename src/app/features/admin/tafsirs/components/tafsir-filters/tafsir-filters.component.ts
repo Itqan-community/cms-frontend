@@ -22,7 +22,10 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NgIcon } from '@ng-icons/core';
 import { PublishersFilterService } from '../../services/publishers-filter.service';
 import { PublisherFilterItem, TafsirFilters } from '../../models/tafsirs.models';
-import { localizeLanguageCode } from '../../../utils/display-localization.util';
+import {
+  createDisplayLocalizationLabels,
+  localizeLanguageCode,
+} from '../../../utils/display-localization.util';
 
 @Component({
   selector: 'app-tafsir-filters',
@@ -306,6 +309,10 @@ export class TafsirFiltersComponent implements OnInit {
   }
 
   languageLabel(code: string): string {
-    return localizeLanguageCode(code, this.translate.currentLang);
+    return localizeLanguageCode(
+      code,
+      this.translate.currentLang,
+      createDisplayLocalizationLabels(this.translate)
+    );
   }
 }

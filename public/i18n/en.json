@@ -231,10 +231,18 @@
       "PASSKEY_DELETE_CONFIRM": "Remove this passkey from your account?",
       "PASSKEY_DELETE_ERROR": "Could not remove the passkey.",
       "PASSKEY_RENAME_ERROR": "Could not update the passkey name.",
-      "PASSKEY_EMPTY": "No passkeys registered yet."
+      "PASSKEY_EMPTY": "No passkeys registered yet.",
+      "AUTHENTICATOR_TYPE": {
+        "totp": "Authenticator app",
+        "recovery_codes": "Recovery codes",
+        "webauthn": "Passkey"
+      }
     },
     "ACCOUNT": {
       "BACK_PROFILE": "Back to account"
+    },
+    "LOGOUT": {
+      "SIGNING_OUT": "Signing out…"
     },
     "EMAIL": {
       "TITLE": "Email addresses",
@@ -416,7 +424,25 @@
     "SUBMIT": "Submit",
     "CLOSE": "Close",
     "REFRESH": "Refresh",
-    "REDIRECT_TO_LIBRARY_IN": "Taking you to the library in {{seconds}} seconds…"
+    "REDIRECT_TO_LIBRARY_IN": "Taking you to the library in {{seconds}} seconds…",
+    "HOME_ARIA": "Home page",
+    "OPEN_MENU_ARIA": "Open menu",
+    "LANG_SWITCH_TO_EN": "English",
+    "LANG_SWITCH_TO_AR": "العربية",
+    "LOGO_ALT": "Itqan",
+    "LOGO_ALT_CMS": "Itqan CMS",
+    "USER_AVATAR_ALT": "User avatar",
+    "USER_AVATAR_INITIAL": "U",
+    "EM_DASH": "—",
+    "LANG_NAMES": {
+      "AR": "Arabic",
+      "EN": "English"
+    },
+    "EMPTY_PLACEHOLDER": {
+      "COMING_SOON": "Coming soon: {{title}} management",
+      "DEFAULT_TITLE": "Content"
+    },
+    "MOCK_PUBLISHER_LABEL": "Publisher"
   },
   "FORMS": {
     "PLACEHOLDERS": {
@@ -427,7 +453,10 @@
       "LAST_NAME": "Enter your last name",
       "PHONE_NUMBER": "Enter your phone number",
       "TITLE": "e.g., Software Engineer, Researcher",
-      "PROJECT_LINK": "https://example.com"
+      "PROJECT_LINK": "https://example.com",
+      "URL_EXAMPLE": "https://example.com",
+      "URL_TAFSIR_EXAMPLE": "https://example.com/tafsir",
+      "EMAIL_EXAMPLE": "info@example.com"
     },
     "VALIDATION": {
       "REQUIRED": "This field is required",
@@ -445,9 +474,17 @@
     "UNAUTHORIZED_TITLE": "Access denied",
     "UNAUTHORIZED": "You are not authorized to perform this action.",
     "FORBIDDEN": "Access forbidden.",
-    "NOT_FOUND": "The requested resource was not found."
+    "NOT_FOUND": "The requested resource was not found.",
+    "NOT_FOUND_PAGE": {
+      "TITLE": "Page not found",
+      "MESSAGE": "The page you are looking for does not exist or may have been moved.",
+      "CTA": "Back to library"
+    },
+    "RESTRICTED_FOR_TENANT_CONFLICT": "This asset has pending access requests. Resolve them before enabling tenant restriction.",
+    "TENANT_REQUIRED": "Select a publisher before continuing."
   },
   "PROFILE": {
+    "HUB_ARIA": "Account management",
     "COMPLETE_PROFILE_TITLE": "Complete Your Profile",
     "COMPLETE_PROFILE_DESCRIPTION": "Help us understand more about you and your project",
     "PROJECT_QUESTION": "What are you working on? Tell us about your project?",
@@ -473,7 +510,8 @@
     "PUBLISHER_DASHBOARD": "Publisher Dashboard",
     "ASSET_REQUEST_FORM": "Add Quranic Content to ITQAN",
     "ADMIN_PORTAL": "Admin Portal",
-    "MUSHAF": "Quran"
+    "MUSHAF": "Quran",
+    "RECITERS": "Reciters"
   },
   "HOME": {
     "WELCOME": "Welcome to Itqan CMS",
@@ -605,6 +643,9 @@
     "CC-BY-NC-ND": "CC BY-NC-ND"
   },
   "LICENSES_LABELS": {
+    "INFO_ARIA": "License info",
+    "DETAILS_ARIA": "License details",
+    "LEARN_MORE_ARIA": "Learn more about {{license}}",
     "CC0": "Fully Open",
     "CC-BY": "Attribution",
     "CC-BY-SA": "Attribution ShareAlike",
@@ -658,6 +699,9 @@
     "LICENSE_INFO": "License Information",
     "CONFIRM": "Confirm",
     "SCROLL_HINT": "Please scroll down to read the full content",
+    "LICENSE_TERMS": {
+      "BODY": "License Agreement for {{name}}\n\nLicense type: {{license}}\n\nTerms and Conditions\n\n1. Grant of License\nBy downloading this resource, you agree to comply with the terms of the {{license}} license.\n\n2. Permitted Uses\n- You may use this resource for personal and commercial projects\n- You may modify and adapt the resource for your needs\n- You must provide appropriate attribution when required\n\n3. Restrictions\n- You may not redistribute original files without permission\n- You may not claim ownership of the original work\n- Commercial use may require additional permissions\n\n4. Warranties and Liability\nThis resource is provided \"as is\" without warranties of any kind.\nThe publisher is not liable for any damages resulting from use of this resource.\n\n5. Termination\nThis license terminates automatically if you violate any terms.\nUpon termination, you must cease all use and delete all copies.\n\nBy clicking \"Confirm\", you acknowledge that you have read and agree to these terms."
+    },
     "USAGE_OPTIONS": {
       "commercial": "Commercial",
       "non-commercial": "Non-Commercial"
@@ -719,7 +763,11 @@
     }
   },
   "ADMIN": {
-    "HOME": "Home",
+    "HOME": {
+      "LABEL": "Home",
+      "TITLE": "Overview",
+      "SUBTITLE": "Manage platform content and settings"
+    },
     "CONTENT_EDITOR": {
       "TITLE": "Edit content",
       "HINT": "Edit the text ayah by ayah. Changes autosave to a draft; publish to create a new version. Tip: select a Text or Footnotes cell and paste (Ctrl+V) CSV/spreadsheet rows to fill cells downward.",
@@ -771,6 +819,7 @@
       }
     },
     "COMMON": {
+      "ADD": "Add",
       "TOOLTIP_VIEW": "View",
       "TOOLTIP_EDIT": "Edit",
       "EMPTY_SUBTITLE": "No matching results. Try adjusting your search.",
@@ -807,7 +856,21 @@
       "PLACEHOLDER_EG": "e.g.",
       "EM_DASH": "—",
       "HIJRI_YEAR_SUFFIX": "AH",
-      "COLUMN_ACCESS": "Access"
+      "COLUMN_ACCESS": "Access",
+      "INITIAL_VERSION": {
+        "SECTION_TITLE": "Initial version",
+        "SECTION_HINT": "Optionally attach the first file version now. You can add versions later from the asset detail page.",
+        "FORM_NAME": "Version name",
+        "FORM_SUMMARY": "Summary",
+        "FORM_FILE": "File",
+        "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
+        "PLACEHOLDER_SUMMARY": "Short notes about this file…",
+        "ERR_NAME": "Version name must be at most 255 characters",
+        "ERR_SUMMARY": "Summary is invalid",
+        "CHOOSE_FILE": "Choose file",
+        "CLEAR_FILE": "Remove file",
+        "FILE_OPTIONAL_HINT": "Optional — select a file to upload with this asset."
+      }
     },
     "TENANT": {
       "ARIA_LABEL": "Publisher scope selector",
@@ -821,19 +884,34 @@
       "CANCEL": "Cancel"
     },
     "MENU": {
+      "HOME": "Home",
+      "HOME_DESC": "Main Dashboard Overview",
       "MUSHAFS": "Mushafs",
+      "MUSHAFS_DESC": "Manage Quranic Mushaf versions and layouts",
       "TAFSIRS": "Tafsirs",
+      "TAFSIRS_DESC": "Manage Quranic Tafsirs and explanations",
       "TRANSLATIONS": "Translations",
+      "TRANSLATIONS_DESC": "Manage Quran translations in different languages",
       "RECITATIONS": "Recitations",
+      "RECITATIONS_DESC": "Manage Quranic recitations and audio tracks",
       "RECITERS": "Reciters",
+      "RECITERS_DESC": "Manage profiles of Quran reciters",
       "PUBLISHERS": "Publisher Details",
+      "PUBLISHERS_DESC": "Manage publisher accounts and details",
       "AUDIO": "Audio",
       "MANAGE_PROFILE": "Manage profile",
       "BACK_TO_GALLERY": "Back to gallery",
       "USAGE": "API Usage",
+      "USAGE_DESC": "Monitor platform and API usage statistics",
       "ISSUES": "Issue Management",
+      "ISSUES_DESC": "Review and resolve reported issues",
       "MEMBERS": "Members",
-      "ACCESS_REQUESTS": "Access Requests"
+      "MEMBERS_DESC": "Manage team members and their roles",
+      "ACCESS_REQUESTS": "Access Requests",
+      "ACCESS_REQUESTS_DESC": "Manage incoming requests for platform access",
+      "FONTS": "Fonts",
+      "FONTS_DESC": "Manage and upload custom fonts used in your app",
+      "PROGRAMS": "Programs"
     },
     "PROFILE": {
       "TITLE": "Publisher profile",
@@ -1243,6 +1321,8 @@
         "LABEL_RIWAYAH": "Riwayah",
         "LABEL_PUBLISHER": "Publisher",
         "DOWNLOAD_AYAH_TIMING": "Download timing file",
+        "VIEW_ON_GALLERY": "View on Gallery",
+        "VIEW_RECITER": "View Reciter",
         "DESC_AR": "Description (Arabic)",
         "DESC_EN": "Description (EN)"
       },
@@ -1290,6 +1370,12 @@
           "DONE": "Done",
           "FAILED": "Failed",
           "CANCELLED": "Cancelled"
+        },
+        "UPLOAD_ERRORS": {
+          "R2_RESPONSE": "Storage upload failed (HTTP {{status}}).",
+          "MISSING_ETAG": "Storage upload completed without a valid response.",
+          "CANCELLED": "Upload cancelled.",
+          "GENERIC": "Upload failed. Please try again."
         },
         "NAV_LEAVE_TITLE": "Uploads in progress",
         "NAV_LEAVE_CONTENT": "If you leave this page, any in-progress uploads will stop and their temporary multipart data will be cleaned up. Successfully uploaded audio will remain.",
@@ -1343,6 +1429,30 @@
         "CREATE_SUCCESS": "Recitation added successfully",
         "UPDATE_SUCCESS": "Recitation updated successfully",
         "DELETE_SUCCESS": "Recitation deleted successfully"
+      },
+      "FOLDERS": {
+        "TITLE": "Folders",
+        "ADD_FOLDER": "Add New Folder",
+        "RENAME_FOLDER": "Rename Folder",
+        "DELETE_FOLDER": "Delete Folder",
+        "SET_DEFAULT": "Set as Default",
+        "DEFAULT_TAG": "Default Folder",
+        "ACTIONS": "Folder Actions",
+        "CREATE_TITLE": "Add New Folder",
+        "CREATE_LABEL": "Folder Name",
+        "CREATE_PLACEHOLDER": "Enter folder name (e.g. Hafs 1442)",
+        "RENAME_TITLE": "Rename Folder",
+        "RENAME_LABEL": "New Folder Name",
+        "DELETE_CONFIRM_TITLE": "Delete Folder",
+        "DELETE_CONFIRM_BODY": "Are you sure you want to delete folder \"{{name}}\"? All tracks and timings in this folder will be deleted.",
+        "CANNOT_DELETE_LAST": "Cannot delete the last remaining folder.",
+        "MESSAGES": {
+          "CREATE_SUCCESS": "Folder added successfully",
+          "RENAME_SUCCESS": "Folder renamed successfully",
+          "DELETE_SUCCESS": "Folder deleted successfully",
+          "SET_DEFAULT_SUCCESS": "Folder set as default successfully",
+          "ERROR": "An error occurred while performing the operation"
+        }
       }
     },
     "RECITERS": {
@@ -1503,17 +1613,13 @@
       "COLUMNS": {
         "NAME": "Name",
         "EMAIL": "Email",
-        "ROLE": "Role",
+        "GROUP": "Group",
         "STATUS": "Status",
         "CREATED_AT": "Added",
         "ACTIONS": "Actions"
       },
       "FILTERS": {
         "STATUS": "Status"
-      },
-      "ROLE": {
-        "ADMIN": "Admin",
-        "STAFF": "Staff"
       },
       "STATUS": {
         "PENDING": "Pending",
@@ -1526,7 +1632,8 @@
         "NAME_PLACEHOLDER": "Member name",
         "EMAIL_LABEL": "Email",
         "EMAIL_PLACEHOLDER": "email@example.com",
-        "ROLE_LABEL": "Role",
+        "GROUP_LABEL": "Group",
+        "GROUP_PLACEHOLDER": "Select a group",
         "INVITE_INFO": "An invitation email will be sent to this address.",
         "SUBMIT_INVITE": "Send invitation",
         "SUBMIT_EDIT": "Save",
@@ -1534,15 +1641,12 @@
         "CONFIRM_OK": "Confirm",
         "CONFIRM_CANCEL": "Cancel",
         "ERR_NAME": "Please enter a name",
-        "ERR_EMAIL": "Please enter a valid email"
+        "ERR_EMAIL": "Please enter a valid email",
+        "ERR_GROUP": "Please select a group"
       },
-      "PROMOTE": {
-        "CONFIRM_TITLE": "Promote to admin?",
-        "CONFIRM_BODY": "{{name}} — they will be able to manage members."
-      },
-      "DEMOTE": {
-        "CONFIRM_TITLE": "Demote to staff?",
-        "CONFIRM_BODY": "{{name}} — they will no longer manage members."
+      "CHANGE_GROUP": {
+        "CONFIRM_TITLE": "Change group?",
+        "CONFIRM_BODY": "{{name}} — assign them to \"{{group}}\"."
       },
       "REMOVE": {
         "CONFIRM_TITLE": "Remove this member?",
@@ -1564,14 +1668,14 @@
         "INVITE_ERROR": "Could not send invitation",
         "UPDATE_SUCCESS": "Member updated",
         "UPDATE_ERROR": "Could not update member",
-        "PROMOTE_SUCCESS": "Member promoted to admin",
-        "DEMOTE_SUCCESS": "Member demoted to staff",
+        "CHANGE_GROUP_SUCCESS": "Member group updated",
         "REMOVE_SUCCESS": "Member removed",
         "REMOVE_ERROR": "Could not remove member",
         "CANCEL_SUCCESS": "Invitation cancelled",
         "RESEND_SUCCESS": "Invitation resent",
         "RESEND_ERROR": "Could not resend invitation",
-        "NO_PUBLISHER": "Please select a publisher"
+        "NO_PUBLISHER": "Please select a publisher",
+        "GROUPS_LOAD_ERROR": "Could not load groups"
       }
     },
     "ACCESS_REQUESTS": {
@@ -1722,55 +1826,150 @@
     },
     "MUSHAFS": {
       "TITLE": "Mushafs",
-      "DESCRIPTION": "Manage Quranic text at three levels: full surahs, individual ayahs, and words",
-      "TAB_PAGES": "Pages",
-      "TAB_SURAHS": "Surahs",
-      "TAB_AYAHS": "Ayahs",
-      "TAB_WORDS": "Words",
-      "MUSHAF_MEDINA": "Madinah Mushaf",
-      "SELECT_OPTION_LABEL": "{{name}} — {{count}} pages",
-      "PAGES_CHOOSE_TYPE": "Choose mushaf type",
-      "PAGES_MUSHAF_TYPE": "Mushaf type",
-      "PAGES_HINT": "{{name}} — {{count}} pages",
-      "PAGES_EMPTY": "No pages available for this mushaf",
-      "PAGES_TAG": "Mushaf: {{name}}",
-      "PAGES_TABLE_TITLE": "{{name}} pages ({{count}} pages)",
-      "COL_PAGE_NUMBER": "Page #",
-      "COL_JUZ": "Juz",
-      "COL_SURAHS": "Surahs",
-      "COL_ACTIONS": "Actions",
-      "VIEW_DETAILS": "View details",
-      "JUZ_TAG": "Juz {{n}}",
-      "SURAH_LIST_JOINER": ", ",
-      "SURAH_FALLBACK": "Surah {{n}}",
-      "AYAHS_BANNER_TITLE": "Quranic verses",
-      "AYAHS_BANNER_DESC": "Browse all verses with search and surah filter",
-      "AYAH_COUNT": "{{count}} verses",
-      "AYAHS_SEARCH_PLACEHOLDER": "Search in verse text…",
-      "ALL_SURAHS": "All surahs",
-      "AYAHS_EMPTY_TITLE": "No verses",
-      "AYAHS_EMPTY_SUBTITLE": "No results. Try another search or surah.",
-      "COL_AYAH_NUMBER": "Verse #",
-      "COL_SURAH_NUMBER": "Surah #",
-      "COL_SURAH_NAME": "Surah name",
-      "COL_AYAH_TEXT": "Verse text",
-      "COL_PAGE": "Page",
-      "WORDS_TABLE_TITLE": "Words table",
-      "WORDS_HINT": "Click a word for morphology, meanings, and related projects",
-      "FILTER_BY_SURAH": "Filter by surah",
-      "SEARCH_WORD_LABEL": "Search word",
-      "SEARCH_WORD_PLACEHOLDER": "Search for a word…",
-      "RESULTS_LABEL": "Results:",
-      "WORDS_UNIT": "words",
-      "CLEAR_ALL_FILTERS": "Clear all filters",
-      "WORDS_EMPTY": "No matching words",
-      "COL_WORD_ID": "Word #",
-      "COL_UTHMANI": "Uthmani script",
-      "COL_SPELLING": "Spelling",
-      "COL_WORD_SURAH_NAME": "Surah name",
-      "COL_WORD_SURAH_ID": "Surah #",
-      "COL_WORD_AYAH_ID": "Verse #",
-      "COL_WORD_POSITION": "Word index in verse"
+      "SUBTITLE": "Manage Quranic mushaf editions and scripts",
+      "EMPTY_TITLE": "No mushafs",
+      "ADD_BUTTON": "Add Mushaf",
+      "SEARCH_PLACEHOLDER": "Search mushafs...",
+      "COLUMNS": {
+        "NAME": "Name",
+        "DESCRIPTION": "Description",
+        "PUBLISHER": "Publisher",
+        "LICENSE": "License",
+        "CREATED_AT": "Date Added",
+        "ACTIONS": "Actions"
+      },
+      "FILTERS": {
+        "PUBLISHER": "Publisher",
+        "LICENSE": "License",
+        "LANGUAGE": "Language",
+        "IS_EXTERNAL": "Type",
+        "BUTTON": "Filters",
+        "MODAL_TITLE": "Mushaf filters",
+        "CLEAR": "Clear filters",
+        "DONE": "Done",
+        "TYPE_INTERNAL": "Internal",
+        "TYPE_EXTERNAL": "External"
+      },
+      "FORM": {
+        "SUBTITLE_CREATE": "Enter the new mushaf details",
+        "SUBTITLE_EDIT": "Update the mushaf details",
+        "BACK_LIST": "Back to list",
+        "SECTION_NAME": "Name",
+        "SECTION_SHORT_DESC": "Short description",
+        "SECTION_LONG_DESC": "Long description",
+        "SECTION_META": "Metadata",
+        "ERR_NAME_AR": "Arabic name is required",
+        "ERR_DESC_AR": "Arabic description is required",
+        "ERR_DESC_EN": "English description is required",
+        "ERR_LONG_AR": "Arabic long description is required",
+        "ERR_LONG_EN": "English long description is required",
+        "ERR_LICENSE": "License is required",
+        "ERR_LANGUAGE": "Language is required",
+        "ERR_PUBLISHER": "Publisher is required",
+        "PLACEHOLDER_NAME_AR": "e.g. Madinah Mushaf — Hafs",
+        "PLACEHOLDER_DESC_AR": "Short description…",
+        "PLACEHOLDER_LONG_AR": "Detailed description…",
+        "LABEL_EXTERNAL": "External mushaf?",
+        "LABEL_EXTERNAL_URL": "External URL",
+        "LABEL_OPEN_ACCESS": "Open access",
+        "HELP_OPEN_ACCESS": "Anyone can use this asset directly without submitting an access request.",
+        "LABEL_API_ONLY": "API enrollment (tenant-only)",
+        "HELP_API_ONLY": "Available via the publisher API and hidden from the public CMS gallery.",
+        "UPLOAD_TITLE": "Thumbnail",
+        "UPLOAD_DRAG": "Click or drag image here",
+        "UPLOAD_HINT": "PNG, JPG, WEBP — max 5MB",
+        "REMOVE_IMAGE": "Remove image",
+        "PLACEHOLDER_NAME_EN": "e.g. Madinah Mushaf — Hafs",
+        "PLACEHOLDER_DESC_EN_SHORT": "Brief description of the mushaf…",
+        "PLACEHOLDER_LONG_EN": "Detailed description…",
+        "PLACEHOLDER_LICENSE": "Select license",
+        "PLACEHOLDER_LANGUAGE": "Select language",
+        "PLACEHOLDER_PUBLISHER": "Search publisher…",
+        "CREATE_TITLE": "Add New Mushaf",
+        "EDIT_TITLE": "Edit Mushaf",
+        "SUBMIT_CREATE": "Add Mushaf",
+        "SUBMIT_EDIT": "Save Changes",
+        "CANCEL": "Cancel",
+        "NAME_AR": "Name (Arabic)",
+        "NAME_EN": "Name (English)",
+        "DESCRIPTION_AR": "Description (Arabic)",
+        "DESCRIPTION_EN": "Description (English)",
+        "LONG_DESCRIPTION_AR": "Long Description (Arabic)",
+        "LONG_DESCRIPTION_EN": "Long Description (English)",
+        "THUMBNAIL": "Thumbnail",
+        "LICENSE": "License",
+        "LANGUAGE": "Language",
+        "PUBLISHER": "Publisher"
+      },
+      "DELETE": {
+        "CONFIRM_TITLE": "Delete this mushaf?",
+        "CONFIRM_CONTENT": "This action cannot be undone.",
+        "CONFIRM_BODY": "<b>{{name}}</b> — This action cannot be undone.",
+        "OK": "Yes, Delete",
+        "CANCEL": "Cancel"
+      },
+      "DETAIL": {
+        "VERSIONS_TITLE": "Versions",
+        "EDIT": "Edit",
+        "DELETE": "Delete",
+        "BREADCRUMB": "Mushafs",
+        "DESC_AR_TITLE": "Description (Arabic)",
+        "LONG_AR_TITLE": "Long description (Arabic)",
+        "DESC_EN_TITLE": "Description (EN)",
+        "LONG_EN_TITLE": "Long description (EN)",
+        "VERSION_COL_NAME": "Version name",
+        "VERSION_COL_SIZE": "Size",
+        "VERSION_COL_DATE": "Date added",
+        "VERSION_COL_FILE": "File",
+        "VERSIONS": {
+          "ADD_BUTTON": "Add new version",
+          "MODAL_TITLE_CREATE": "Add new version",
+          "MODAL_TITLE_EDIT": "Edit version",
+          "FORM_NAME": "Version name",
+          "FORM_SUMMARY": "Summary",
+          "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
+          "PLACEHOLDER_SUMMARY": "Short notes about this file…",
+          "ERR_NAME": "Version name is required",
+          "ERR_SUMMARY": "Summary is required",
+          "CHOOSE_FILE": "Choose file",
+          "SUBMIT_CREATE": "Upload version",
+          "SUBMIT_UPDATE": "Save changes",
+          "CANCEL_EDIT": "Cancel",
+          "CLEAR_FILE": "Remove file",
+          "EDIT_FILE_HINT": "Optional: choose a new file to replace the current one.",
+          "FILE_REQUIRED_HINT": "Select a file to upload.",
+          "LIST_TITLE": "Published versions",
+          "SEARCH_PLACEHOLDER": "Search versions…",
+          "COL_NAME": "Version name",
+          "COL_SUMMARY": "Summary",
+          "COL_SIZE": "Size",
+          "COL_DATE": "Date added",
+          "COL_FILE": "File",
+          "COL_ACTIONS": "Actions",
+          "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_DELETE": "Delete",
+          "EMPTY_TITLE": "No versions yet",
+          "EMPTY_SUBTITLE": "Use “Add new version” to upload a file.",
+          "DELETE_CONFIRM_TITLE": "Delete this version?",
+          "DELETE_CONFIRM_BODY": "<b>{{name}}</b> — This cannot be undone.",
+          "DELETE_OK": "Delete",
+          "MESSAGES": {
+            "LOAD_ERROR": "Could not load versions.",
+            "SAVE_ERROR": "Could not save version. Try again.",
+            "CREATE_SUCCESS": "Version added.",
+            "UPDATE_SUCCESS": "Version updated.",
+            "DELETE_SUCCESS": "Version deleted.",
+            "DELETE_ERROR": "Could not delete version.",
+            "FILE_REQUIRED": "Choose a file to upload."
+          }
+        }
+      },
+      "MESSAGES": {
+        "CREATE_SUCCESS": "Mushaf added successfully",
+        "UPDATE_SUCCESS": "Mushaf updated successfully",
+        "DELETE_SUCCESS": "Mushaf deleted successfully",
+        "ERROR": "An error occurred. Please try again."
+      }
     },
     "SEARCH_PANEL": {
       "TITLE": "Search the Quran",
@@ -1787,6 +1986,300 @@
       "TAB_RESOURCES": "Developer resources",
       "TAB_BACKEND": "Backend",
       "TAB_IMPORT": "Data import"
+    },
+    "FONTS": {
+      "TITLE": "Fonts",
+      "SUBTITLE": "Manage Quranic Arabic typefaces and downloadable font files",
+      "EMPTY_TITLE": "No fonts",
+      "ADD_BUTTON": "Add Font",
+      "SEARCH_PLACEHOLDER": "Search fonts...",
+      "COLUMNS": {
+        "NAME": "Name",
+        "DESCRIPTION": "Description",
+        "PUBLISHER": "Publisher",
+        "LICENSE": "License",
+        "CREATED_AT": "Date Added",
+        "ACTIONS": "Actions"
+      },
+      "FILTERS": {
+        "PUBLISHER": "Publisher",
+        "LICENSE": "License",
+        "LANGUAGE": "Language",
+        "IS_EXTERNAL": "Type",
+        "BUTTON": "Filters",
+        "MODAL_TITLE": "Font filters",
+        "CLEAR": "Clear filters",
+        "DONE": "Done",
+        "TYPE_INTERNAL": "Internal",
+        "TYPE_EXTERNAL": "External"
+      },
+      "FORM": {
+        "SUBTITLE_CREATE": "Enter the new font details",
+        "SUBTITLE_EDIT": "Update the font details",
+        "BACK_LIST": "Back to list",
+        "SECTION_NAME": "Name",
+        "SECTION_SHORT_DESC": "Short description",
+        "SECTION_LONG_DESC": "Long description",
+        "SECTION_META": "Metadata",
+        "ERR_NAME_AR": "Arabic name is required",
+        "ERR_DESC_AR": "Arabic description is required",
+        "ERR_DESC_EN": "English description is required",
+        "ERR_LONG_AR": "Arabic long description is required",
+        "ERR_LONG_EN": "English long description is required",
+        "ERR_LICENSE": "License is required",
+        "ERR_LANGUAGE": "Language is required",
+        "ERR_PUBLISHER": "Publisher is required",
+        "PLACEHOLDER_NAME_AR": "e.g. خط عثماني",
+        "PLACEHOLDER_DESC_AR": "Short description…",
+        "PLACEHOLDER_LONG_AR": "Detailed description…",
+        "LABEL_EXTERNAL": "External font?",
+        "LABEL_EXTERNAL_URL": "External URL",
+        "LABEL_OPEN_ACCESS": "Open access",
+        "HELP_OPEN_ACCESS": "Anyone can use this asset directly without submitting an access request.",
+        "LABEL_API_ONLY": "API enrollment (tenant-only)",
+        "HELP_API_ONLY": "Available via the publisher API and hidden from the public CMS gallery.",
+        "UPLOAD_TITLE": "Thumbnail",
+        "UPLOAD_DRAG": "Click or drag image here",
+        "UPLOAD_HINT": "PNG, JPG, WEBP — max 5MB",
+        "REMOVE_IMAGE": "Remove image",
+        "PLACEHOLDER_NAME_EN": "e.g. Uthmani Quran Font",
+        "PLACEHOLDER_DESC_EN_SHORT": "Brief description of the typeface…",
+        "PLACEHOLDER_LONG_EN": "Detailed description…",
+        "PLACEHOLDER_LICENSE": "Select license",
+        "PLACEHOLDER_LANGUAGE": "Select language",
+        "PLACEHOLDER_PUBLISHER": "Search publisher…",
+        "CREATE_TITLE": "Add New Font",
+        "EDIT_TITLE": "Edit Font",
+        "SUBMIT_CREATE": "Add Font",
+        "SUBMIT_EDIT": "Save Changes",
+        "CANCEL": "Cancel",
+        "NAME_AR": "Name (Arabic)",
+        "NAME_EN": "Name (English)",
+        "DESCRIPTION_AR": "Description (Arabic)",
+        "DESCRIPTION_EN": "Description (English)",
+        "LONG_DESCRIPTION_AR": "Long Description (Arabic)",
+        "LONG_DESCRIPTION_EN": "Long Description (English)",
+        "THUMBNAIL": "Thumbnail",
+        "LICENSE": "License",
+        "LANGUAGE": "Script language",
+        "PUBLISHER": "Publisher"
+      },
+      "DELETE": {
+        "CONFIRM_TITLE": "Delete this font?",
+        "CONFIRM_CONTENT": "This action cannot be undone.",
+        "CONFIRM_BODY": "<b>{{name}}</b> — This action cannot be undone.",
+        "OK": "Yes, Delete",
+        "CANCEL": "Cancel"
+      },
+      "DETAIL": {
+        "VERSIONS_TITLE": "Versions",
+        "EDIT": "Edit",
+        "DELETE": "Delete",
+        "BREADCRUMB": "Fonts",
+        "DESC_AR_TITLE": "Description (Arabic)",
+        "LONG_AR_TITLE": "Long description (Arabic)",
+        "DESC_EN_TITLE": "Description (EN)",
+        "LONG_EN_TITLE": "Long description (EN)",
+        "VERSION_COL_NAME": "Version name",
+        "VERSION_COL_SIZE": "Size",
+        "VERSION_COL_DATE": "Date added",
+        "VERSION_COL_FILE": "File",
+        "VERSIONS": {
+          "ADD_BUTTON": "Add new version",
+          "MODAL_TITLE_CREATE": "Add new version",
+          "MODAL_TITLE_EDIT": "Edit version",
+          "FORM_NAME": "Version name",
+          "FORM_SUMMARY": "Summary",
+          "PLACEHOLDER_NAME": "e.g. v1.0 — Regular WOFF2",
+          "PLACEHOLDER_SUMMARY": "Short notes about this font file…",
+          "ERR_NAME": "Version name is required",
+          "ERR_SUMMARY": "Summary is required",
+          "CHOOSE_FILE": "Choose file",
+          "SUBMIT_CREATE": "Upload version",
+          "SUBMIT_UPDATE": "Save changes",
+          "CANCEL_EDIT": "Cancel",
+          "CLEAR_FILE": "Remove file",
+          "EDIT_FILE_HINT": "Optional: choose a new file to replace the current one.",
+          "FILE_REQUIRED_HINT": "Select a file to upload.",
+          "LIST_TITLE": "Published versions",
+          "SEARCH_PLACEHOLDER": "Search versions…",
+          "COL_NAME": "Version name",
+          "COL_SUMMARY": "Summary",
+          "COL_SIZE": "Size",
+          "COL_DATE": "Date added",
+          "COL_FILE": "File",
+          "COL_ACTIONS": "Actions",
+          "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_DELETE": "Delete",
+          "EMPTY_TITLE": "No versions yet",
+          "EMPTY_SUBTITLE": "Use “Add new version” to upload a font file.",
+          "DELETE_CONFIRM_TITLE": "Delete this version?",
+          "DELETE_CONFIRM_BODY": "<b>{{name}}</b> — This cannot be undone.",
+          "DELETE_OK": "Delete",
+          "MESSAGES": {
+            "LOAD_ERROR": "Could not load versions.",
+            "SAVE_ERROR": "Could not save version. Try again.",
+            "CREATE_SUCCESS": "Version added.",
+            "UPDATE_SUCCESS": "Version updated.",
+            "DELETE_SUCCESS": "Version deleted.",
+            "DELETE_ERROR": "Could not delete version.",
+            "FILE_REQUIRED": "Choose a font file to upload."
+          }
+        }
+      },
+      "MESSAGES": {
+        "CREATE_SUCCESS": "Font added successfully",
+        "UPDATE_SUCCESS": "Font updated successfully",
+        "DELETE_SUCCESS": "Font deleted successfully",
+        "ERROR": "An error occurred. Please try again."
+      }
+    },
+    "PROGRAMS": {
+      "TITLE": "Programs",
+      "SUBTITLE": "Manage Quranic software, applications, and developer tools",
+      "EMPTY_TITLE": "No programs",
+      "ADD_BUTTON": "Add Program",
+      "SEARCH_PLACEHOLDER": "Search programs...",
+      "COLUMNS": {
+        "NAME": "Name",
+        "DESCRIPTION": "Description",
+        "PUBLISHER": "Publisher",
+        "LICENSE": "License",
+        "CREATED_AT": "Date Added",
+        "ACTIONS": "Actions"
+      },
+      "FILTERS": {
+        "PUBLISHER": "Publisher",
+        "LICENSE": "License",
+        "LANGUAGE": "Language",
+        "IS_EXTERNAL": "Type",
+        "BUTTON": "Filters",
+        "MODAL_TITLE": "Program filters",
+        "CLEAR": "Clear filters",
+        "DONE": "Done",
+        "TYPE_INTERNAL": "Internal",
+        "TYPE_EXTERNAL": "External"
+      },
+      "FORM": {
+        "SUBTITLE_CREATE": "Enter the new program details",
+        "SUBTITLE_EDIT": "Update the program details",
+        "BACK_LIST": "Back to list",
+        "SECTION_NAME": "Name",
+        "SECTION_SHORT_DESC": "Short description",
+        "SECTION_LONG_DESC": "Long description",
+        "SECTION_META": "Metadata",
+        "ERR_NAME_AR": "Arabic name is required",
+        "ERR_DESC_AR": "Arabic description is required",
+        "ERR_DESC_EN": "English description is required",
+        "ERR_LONG_AR": "Arabic long description is required",
+        "ERR_LONG_EN": "English long description is required",
+        "ERR_LICENSE": "License is required",
+        "ERR_LANGUAGE": "Language is required",
+        "ERR_PUBLISHER": "Publisher is required",
+        "PLACEHOLDER_NAME_AR": "e.g. تطبيق قارئ القرآن",
+        "PLACEHOLDER_DESC_AR": "Short description…",
+        "PLACEHOLDER_LONG_AR": "Detailed description…",
+        "LABEL_EXTERNAL": "External program?",
+        "LABEL_EXTERNAL_URL": "External URL",
+        "LABEL_OPEN_ACCESS": "Open access",
+        "HELP_OPEN_ACCESS": "Anyone can use this asset directly without submitting an access request.",
+        "LABEL_API_ONLY": "API enrollment (tenant-only)",
+        "HELP_API_ONLY": "Available via the publisher API and hidden from the public CMS gallery.",
+        "UPLOAD_TITLE": "Thumbnail",
+        "UPLOAD_DRAG": "Click or drag image here",
+        "UPLOAD_HINT": "PNG, JPG, WEBP — max 5MB",
+        "REMOVE_IMAGE": "Remove image",
+        "PLACEHOLDER_NAME_EN": "e.g. Quran Reader App",
+        "PLACEHOLDER_DESC_EN_SHORT": "Brief description of the software…",
+        "PLACEHOLDER_LONG_EN": "Detailed description…",
+        "PLACEHOLDER_LICENSE": "Select license",
+        "PLACEHOLDER_LANGUAGE": "Select language",
+        "PLACEHOLDER_PUBLISHER": "Search publisher…",
+        "CREATE_TITLE": "Add New Program",
+        "EDIT_TITLE": "Edit Program",
+        "SUBMIT_CREATE": "Add Program",
+        "SUBMIT_EDIT": "Save Changes",
+        "CANCEL": "Cancel",
+        "NAME_AR": "Name (Arabic)",
+        "NAME_EN": "Name (English)",
+        "DESCRIPTION_AR": "Description (Arabic)",
+        "DESCRIPTION_EN": "Description (English)",
+        "LONG_DESCRIPTION_AR": "Long Description (Arabic)",
+        "LONG_DESCRIPTION_EN": "Long Description (English)",
+        "THUMBNAIL": "Thumbnail",
+        "LICENSE": "License",
+        "LANGUAGE": "Interface language",
+        "PUBLISHER": "Publisher"
+      },
+      "DELETE": {
+        "CONFIRM_TITLE": "Delete this program?",
+        "CONFIRM_CONTENT": "This action cannot be undone.",
+        "CONFIRM_BODY": "<b>{{name}}</b> — This action cannot be undone.",
+        "OK": "Yes, Delete",
+        "CANCEL": "Cancel"
+      },
+      "DETAIL": {
+        "VERSIONS_TITLE": "Versions",
+        "EDIT": "Edit",
+        "DELETE": "Delete",
+        "BREADCRUMB": "Programs",
+        "DESC_AR_TITLE": "Description (Arabic)",
+        "LONG_AR_TITLE": "Long description (Arabic)",
+        "DESC_EN_TITLE": "Description (EN)",
+        "LONG_EN_TITLE": "Long description (EN)",
+        "VERSION_COL_NAME": "Version name",
+        "VERSION_COL_SIZE": "Size",
+        "VERSION_COL_DATE": "Date added",
+        "VERSION_COL_FILE": "File",
+        "VERSIONS": {
+          "ADD_BUTTON": "Add new version",
+          "MODAL_TITLE_CREATE": "Add new version",
+          "MODAL_TITLE_EDIT": "Edit version",
+          "FORM_NAME": "Version name",
+          "FORM_SUMMARY": "Summary",
+          "PLACEHOLDER_NAME": "e.g. v3.2 — Android release",
+          "PLACEHOLDER_SUMMARY": "Short release notes for this build…",
+          "ERR_NAME": "Version name is required",
+          "ERR_SUMMARY": "Summary is required",
+          "CHOOSE_FILE": "Choose file",
+          "SUBMIT_CREATE": "Upload version",
+          "SUBMIT_UPDATE": "Save changes",
+          "CANCEL_EDIT": "Cancel",
+          "CLEAR_FILE": "Remove file",
+          "EDIT_FILE_HINT": "Optional: choose a new file to replace the current one.",
+          "FILE_REQUIRED_HINT": "Select a file to upload.",
+          "LIST_TITLE": "Published versions",
+          "SEARCH_PLACEHOLDER": "Search versions…",
+          "COL_NAME": "Version name",
+          "COL_SUMMARY": "Summary",
+          "COL_SIZE": "Size",
+          "COL_DATE": "Date added",
+          "COL_FILE": "File",
+          "COL_ACTIONS": "Actions",
+          "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_DELETE": "Delete",
+          "EMPTY_TITLE": "No versions yet",
+          "EMPTY_SUBTITLE": "Use “Add new version” to upload a release package.",
+          "DELETE_CONFIRM_TITLE": "Delete this version?",
+          "DELETE_CONFIRM_BODY": "<b>{{name}}</b> — This cannot be undone.",
+          "DELETE_OK": "Delete",
+          "MESSAGES": {
+            "LOAD_ERROR": "Could not load versions.",
+            "SAVE_ERROR": "Could not save version. Try again.",
+            "CREATE_SUCCESS": "Version added.",
+            "UPDATE_SUCCESS": "Version updated.",
+            "DELETE_SUCCESS": "Version deleted.",
+            "DELETE_ERROR": "Could not delete version.",
+            "FILE_REQUIRED": "Choose a release file to upload."
+          }
+        }
+      },
+      "MESSAGES": {
+        "CREATE_SUCCESS": "Program added successfully",
+        "UPDATE_SUCCESS": "Program updated successfully",
+        "DELETE_SUCCESS": "Program deleted successfully",
+        "ERROR": "An error occurred. Please try again."
+      }
     }
   },
   "USAGE": {
@@ -1811,5 +2304,24 @@
     "AYAH_NOT_FOUND": "Ayah not found",
     "EDITION": "Edition",
     "ATTRIBUTION": "Mushaf rendering by Quranpedia (quran-svg)"
+  },
+  "RECITERS": {
+    "PAGE_TITLE": "Quran Reciters",
+    "PAGE_SUBTITLE": "Browse and search Quran reciters on ITQAN.",
+    "SEARCH_PLACEHOLDER": "Search reciters by name...",
+    "NATIONALITY_FILTER_PLACEHOLDER": "Nationality",
+    "NO_RESULTS_TITLE": "No reciters found",
+    "NO_RESULTS_MESSAGE": "Try adjusting your search or filters to find what you're looking for.",
+    "LOAD_ERROR": "Could not load reciters. Please try again.",
+    "RECITATIONS_COUNT": "{{count}} recitations",
+    "RECITATIONS": "Recitations",
+    "NO_RECITATIONS_TITLE": "No recitations yet",
+    "NO_RECITATIONS_MESSAGE": "This reciter has no published recitations at the moment.",
+    "NATIONALITY_LABEL": "Nationality",
+    "BIO_LABEL": "Biography",
+    "DATE_OF_DEATH": "Date of death",
+    "NOT_FOUND_TITLE": "Reciter not found",
+    "NOT_FOUND_MESSAGE": "The reciter you're looking for doesn't exist or is no longer available.",
+    "BACK_TO_RECITERS": "Back to Reciters"
   }
 }

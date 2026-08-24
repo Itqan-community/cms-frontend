@@ -44,7 +44,7 @@
       <section class="account-manage__section">
         <h2 class="account-manage__h2">{{ 'AUTH.PROFILE.ACCOUNT_TITLE' | translate }}</h2>
         <p class="account-manage__hint">{{ 'AUTH.PROFILE.ACCOUNT_HINT' | translate }}</p>
-        <nav class="profile-hub__grid" aria-label="Account management">
+        <nav class="profile-hub__grid" [attr.aria-label]="'PROFILE.HUB_ARIA' | translate">
           <!--
           <a class="profile-hub__link-card" [routerLink]="['/account/email']">
             <span>{{ 'AUTH.PROFILE.LINK_EMAILS' | translate }}</span>

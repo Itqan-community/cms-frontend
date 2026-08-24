@@ -1,5 +1,6 @@
 export const environment = {
   production: true,
+  SITE_URL: 'https://cms.itqan.dev',
   API_BASE_URL: 'https://api.cms.itqan.dev/cms-api',
   API_DOCS_URL: 'https://docs.cms.itqan.dev',
   gaTrackingId: 'G-Y38325E2JX',
@@ -7,4 +8,5 @@ export const environment = {
   sentryDsn:
     'https://1a5c2f7445e8a4e690c9c3c86cfb4e4a@o4510669335232512.ingest.de.sentry.io/4511143600586832',
   webauthnReplaceRpIdWithHostname: false,
+  useProgramsMockApi: false,
 };

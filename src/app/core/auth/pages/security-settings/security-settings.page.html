@@ -25,7 +25,7 @@
         <ul class="security__list">
           @for (a of otherAuthenticators(); track $index) {
             <li class="security__li">
-              <span class="security__badge">{{ a.type }}</span>
+              <span class="security__badge">{{ authenticatorTypeLabel(a.type) }}</span>
               @if (a.type === 'recovery_codes') {
                 <span>{{
                   'AUTH.SECURITY.RECOVERY_COUNT'

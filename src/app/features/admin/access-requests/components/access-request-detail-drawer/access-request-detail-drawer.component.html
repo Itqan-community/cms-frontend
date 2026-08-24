@@ -85,7 +85,9 @@
             </div>
             <div class="access-request-detail-drawer__row">
               <dt>{{ 'ADMIN.ACCESS_REQUESTS.DRAWER.REJECTION_REASON' | translate }}</dt>
-              <dd class="access-request-detail-drawer__reason">{{ d.rejection_reason ?? '—' }}</dd>
+              <dd class="access-request-detail-drawer__reason">
+                {{ d.rejection_reason ?? ('COMMON.EM_DASH' | translate) }}
+              </dd>
             </div>
           }
         </dl>

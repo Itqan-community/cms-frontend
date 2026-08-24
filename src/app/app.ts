@@ -65,11 +65,11 @@ export class App {
     applyLanguageShell(currentLang);
 
     // Set initial document title by language
-    this.setAppTitle(currentLang);
+    this.setAppTitle();
 
     // Keep shell + ng-zorro i18n aligned when language changes (e.g. future non-reload switches)
     this.translate.onLangChange.subscribe((e) => {
-      this.setAppTitle(e.lang);
+      this.setAppTitle();
       applyLanguageShell(e.lang);
     });
   }
@@ -78,16 +78,18 @@ export class App {
     const currentLang = localStorage.getItem('lang') || 'ar';
     const newLang = currentLang === 'ar' ? 'en' : 'ar';
     localStorage.setItem('lang', newLang);
-    void firstValueFrom(this.translate.use(newLang)).then(() => {
-      document.documentElement.setAttribute('lang', newLang);
-      document.documentElement.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr');
-      this.setAppTitle(newLang);
-    });
+    void firstValueFrom(this.translate.use(newLang))
+      .then(() => {
+        document.documentElement.setAttribute('lang', newLang);
+        document.documentElement.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr');
+        this.setAppTitle();
+      })
+      .catch((err: unknown) => {
+        console.error('Failed to switch UI language', err);
+      });
   }
 
-  private setAppTitle(lang: string) {
-    const title =
-      lang === 'ar' ? 'إتقان | نظام إدارة المحتوى' : 'ITQAN | Content Management System';
-    this.titleService.setTitle(title);
+  private setAppTitle(): void {
+    this.titleService.setTitle(this.translate.instant('APP_TITLE'));
   }
 }

@@ -1,6 +1,7 @@
 import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { TranslateService } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { environment } from '../../../environments/environment';
 import { errorInterceptor } from './error.interceptor';
@@ -18,6 +19,13 @@ describe('errorInterceptor', () => {
         provideHttpClient(withInterceptors([errorInterceptor])),
         provideHttpClientTesting(),
         { provide: NzMessageService, useValue: messageSpy },
+        {
+          provide: TranslateService,
+          useValue: {
+            currentLang: 'en',
+            instant: (key: string) => key,
+          },
+        },
       ],
     });
     httpMock = TestBed.inject(HttpTestingController);

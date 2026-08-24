@@ -8,7 +8,12 @@
   <div class="auth-guest__container">
     <div class="auth-guest__card">
       <div class="auth-guest__logo">
-        <img src="/assets/images/logo.svg" alt="Itqan" width="50" height="50" />
+        <img
+          src="/assets/images/logo.svg"
+          [alt]="'COMMON.LOGO_ALT' | translate"
+          width="50"
+          height="50"
+        />
       </div>
       <h1 class="auth-guest__title">{{ titleKey | translate }}</h1>
       <p class="auth-guest__subtitle">{{ subtitleKey | translate }}</p>

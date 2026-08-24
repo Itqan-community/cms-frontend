@@ -21,7 +21,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     loadComponent: () =>
-      import('./features/admin/admin-layout.component').then((m) => m.AdminLayoutComponent),
+      import('./features/admin/layout/admin-layout.component').then((m) => m.AdminLayoutComponent),
     canActivate: [authGuard, portalAccessGuard, tenantReadyGuard],
     data: { hideHeader: true, fullWidth: true },
     children: [
@@ -29,8 +29,8 @@ export const routes: Routes = [
         path: '',
         pathMatch: 'full',
         loadComponent: () =>
-          import('./features/admin/admin-portal-redirect.component').then(
-            (m) => m.AdminPortalRedirectComponent
+          import('./features/admin/pages/admin-home/admin-home.component').then(
+            (m) => m.AdminHomeComponent
           ),
       },
       {
@@ -56,6 +56,21 @@ export const routes: Routes = [
             (m) => m.translationRoutes
           ),
       },
+      {
+        path: 'mushafs',
+        loadChildren: () =>
+          import('./features/admin/mushafs/mushafs.routes').then((m) => m.mushafRoutes),
+      },
+      {
+        path: 'fonts',
+        loadChildren: () => import('./features/admin/fonts/fonts.routes').then((m) => m.fontRoutes),
+      },
+      // Programs portal hidden until backend API is ready.
+      // {
+      //   path: 'programs',
+      //   loadChildren: () =>
+      //     import('./features/admin/programs/programs.routes').then((m) => m.programRoutes),
+      // },
       {
         path: 'recitations',
         loadChildren: () =>
@@ -173,6 +188,18 @@ export const routes: Routes = [
         (m) => m.PublisherDetailsPage
       ),
     canActivate: [publisherHostGuard], // Restrict access for publisher hosts
+  },
+  {
+    path: 'reciters',
+    loadComponent: () =>
+      import('./features/reciters/pages/reciters/reciters.page').then((m) => m.RecitersPage),
+  },
+  {
+    path: 'reciters/:slug',
+    loadComponent: () =>
+      import('./features/reciters/pages/reciter-details/reciter-details.page').then(
+        (m) => m.ReciterDetailsPage
+      ),
   },
   {
     path: 'license/:id',

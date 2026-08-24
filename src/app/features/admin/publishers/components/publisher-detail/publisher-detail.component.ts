@@ -17,7 +17,10 @@ import {
   resolvePublisherDetailRecoveryId,
   buildSelectedPublisherDetailCommands,
 } from '../../../utils/admin-tenant-navigation.util';
-import { localizeCountryCodeOrName } from '../../../utils/display-localization.util';
+import {
+  createDisplayLocalizationLabels,
+  localizeCountryCodeOrName,
+} from '../../../utils/display-localization.util';
 import { Publisher } from '../../models/publishers-stats.models';
 import { PublishersService } from '../../services/publishers.service';
 
@@ -129,7 +132,11 @@ export class PublisherDetailComponent implements OnInit {
   }
 
   countryLabel(country: string | null | undefined): string {
-    return localizeCountryCodeOrName(country, this.translate.currentLang);
+    return localizeCountryCodeOrName(
+      country,
+      this.translate.currentLang,
+      createDisplayLocalizationLabels(this.translate)
+    );
   }
 
   iconSrc(icon: string | File | null | undefined): string | undefined {

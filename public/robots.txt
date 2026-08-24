@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /accounts/
+Disallow: /complete-profile
+Disallow: /unauthorized
+
+Sitemap: https://cms.itqan.dev/sitemap.xml

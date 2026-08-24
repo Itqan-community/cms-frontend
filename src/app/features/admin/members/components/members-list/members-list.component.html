@@ -47,7 +47,7 @@
           <tr>
             <th nzWidth="160px">{{ 'ADMIN.MEMBERS.COLUMNS.NAME' | translate }}</th>
             <th nzWidth="220px">{{ 'ADMIN.MEMBERS.COLUMNS.EMAIL' | translate }}</th>
-            <th nzWidth="100px">{{ 'ADMIN.MEMBERS.COLUMNS.ROLE' | translate }}</th>
+            <th nzWidth="120px">{{ 'ADMIN.MEMBERS.COLUMNS.GROUP' | translate }}</th>
             <th nzWidth="180px">{{ 'ADMIN.MEMBERS.COLUMNS.STATUS' | translate }}</th>
             <th
               nzWidth="130px"
@@ -66,7 +66,7 @@
               <td class="admin-list-name">{{ row.name }}</td>
               <td>{{ row.email }}</td>
               <td>
-                <nz-tag [nzColor]="roleTagColor(row.role)">{{ roleLabel(row.role) }}</nz-tag>
+                <nz-tag nzColor="default">{{ row.group_name }}</nz-tag>
               </td>
               <td>
                 <div class="members-list__status-cell">
@@ -205,13 +205,18 @@
         </nz-form-item>
 
         <nz-form-item>
-          <nz-form-label [nzSpan]="24">{{
-            'ADMIN.MEMBERS.FORM.ROLE_LABEL' | translate
+          <nz-form-label [nzSpan]="24" nzRequired>{{
+            'ADMIN.MEMBERS.FORM.GROUP_LABEL' | translate
           }}</nz-form-label>
-          <nz-form-control [nzSpan]="24">
-            <nz-select formControlName="role">
-              @for (r of roleOptions; track r) {
-                <nz-option [nzValue]="r" [nzLabel]="roleLabel(r)"></nz-option>
+          <nz-form-control [nzSpan]="24" [nzErrorTip]="'ADMIN.MEMBERS.FORM.ERR_GROUP' | translate">
+            <nz-select
+              formControlName="group_id"
+              [nzLoading]="groupsLoading()"
+              [nzPlaceHolder]="'ADMIN.MEMBERS.FORM.GROUP_PLACEHOLDER' | translate"
+              [nzDisabled]="groupsLoading() || groupsLoadFailed()"
+            >
+              @for (g of groupOptions(); track g.id) {
+                <nz-option [nzValue]="g.id" [nzLabel]="g.name"></nz-option>
               }
             </nz-select>
           </nz-form-control>

@@ -16,7 +16,9 @@ import { Asset } from '../../models/assets.model';
     <div class="asset-card">
       <div class="asset-card__header">
         <ng-icon [name]="categoryIconName" />
-        <app-license-tag [license]="asset().license" [muted]="true" />
+        <div class="asset-card__header-license">
+          <app-license-tag [license]="asset().license" [muted]="true" />
+        </div>
       </div>
       <div class="asset-card__content">
         <div class="content-wrapper">

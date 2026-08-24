@@ -143,6 +143,170 @@ Release 1.2.0.
 
 ---
 
+## [1.3.0] - 2026-07-05
+
+Release 1.3.0.
+
+## Changes
+
+- feat(gallery): add font and program category filters
+- chore(release): 1.2.0 [skip ci]
+- fix(admin): route publishers nav to selected tenant detail
+- feat(auth): unify guest auth UI and streamline passkey flows
+- chore(release): 1.1.4 [skip ci]
+- fix(auth): restore passkey stage tokens and fix CI test hang
+- fix(auth): block sessionid cookie fallback after logout
+- fix(admin): redirect single-scope users to publisher detail and enhance permissions
+- fix(auth): prevent stale session GET after logout
+- fix(auth): clear browser session on logout and before OAuth login
+- chore(release): 1.1.3 [skip ci]
+- fix(admin): send only changed reciter fields on patch
+- chore(release): 1.1.2 [skip ci]
+- fix(admin): always submit reciter forms as multipart
+- fix(admin): reintroduce granular permissions for publisher management
+- chore(release): 1.1.1 [skip ci]
+- fix(deps): remove stale pnpm-lock.yaml so Netlify uses npm
+
+---
+
+## [1.3.1] - 2026-07-05
+
+Release 1.3.1.
+
+## Changes
+
+- chore: fix PROJECT_MAP.md prettier formatting for CI
+- fix(auth): persist session across tabs for split-host deployments
+
+---
+
+## [1.4.0] - 2026-07-06
+
+Release 1.4.0.
+
+## Changes
+
+- fix(test): replace ESM spyOn with passkey env helpers in auth specs
+- fix(ci): restore npm bin-links so CI can resolve prettier and ng
+- feat(auth): auto-prompt passkey on login and MFA pages
+- chore: disable npm bin-links for NTFS dev environments
+- feat(recitations): add gallery and reciter links on detail page
+- fix(recitations): redirect to gallery after successful bulk track upload
+- fix(i18n): complete localization audit with hybrid API error resolver
+- chore: fix PROJECT_MAP.md prettier formatting for CI
+- fix(auth): persist session across tabs for split-host deployments
+- fix(access-requests): defer auto-accept toggle until backend confirms
+- feat(gallery): integrate access_status for asset downloads
+- feat(gallery): add font and program category filters
+- feat(gallery): persist global license acceptance per user
+- feat(assets): add open access and tenant API enrollment toggles
+- feat(gallery): add report issue modal on asset details page
+- fix(test): provide TranslateService and NzMessageService in AuthService specs
+- fix(gallery): align category filters with API asset categories
+- fix(i18n): load Arabic translations before app bootstrap
+- fix(auth): improve passkey/WebAuthn error handling and messages
+- fix(auth): centralize error messages with localized fallbacks
+- chore(deps-dev): bump @commitlint/config-conventional
+- chore(deps): bump actions/setup-node from 4 to 6
+- chore(deps): bump codecov/codecov-action from 3 to 6
+
+---
+
+## [1.4.1] - 2026-07-06
+
+Release 1.4.1.
+
+## Changes
+
+- fix(gallery): stabilize card height and open-access badge
+- chore(release): 1.4.0 [skip ci]
+- fix(test): replace ESM spyOn with passkey env helpers in auth specs
+- fix(ci): restore npm bin-links so CI can resolve prettier and ng
+- feat(auth): auto-prompt passkey on login and MFA pages
+- chore: disable npm bin-links for NTFS dev environments
+- feat(recitations): add gallery and reciter links on detail page
+- fix(recitations): redirect to gallery after successful bulk track upload
+- fix(i18n): complete localization audit with hybrid API error resolver
+- chore: fix PROJECT_MAP.md prettier formatting for CI
+- fix(auth): persist session across tabs for split-host deployments
+- fix(access-requests): defer auto-accept toggle until backend confirms
+- feat(gallery): integrate access_status for asset downloads
+- feat(gallery): add font and program category filters
+- feat(gallery): persist global license acceptance per user
+- feat(assets): add open access and tenant API enrollment toggles
+- feat(gallery): add report issue modal on asset details page
+- fix(test): provide TranslateService and NzMessageService in AuthService specs
+- fix(gallery): align category filters with API asset categories
+- fix(i18n): load Arabic translations before app bootstrap
+- fix(auth): improve passkey/WebAuthn error handling and messages
+- fix(auth): centralize error messages with localized fallbacks
+- chore(deps-dev): bump @commitlint/config-conventional
+- chore(deps): bump actions/setup-node from 4 to 6
+- chore(deps): bump codecov/codecov-action from 3 to 6
+
+---
+
+## [1.4.2] - 2026-07-06
+
+Release 1.4.2.
+
+## Changes
+
+- fix(gallery): keep RTL cards equal width
+- chore(release): 1.4.1 [skip ci]
+- fix(gallery): stabilize card height and open-access badge
+
+---
+
+## [1.4.3] - 2026-07-06
+
+Release 1.4.3.
+
+## Changes
+
+- fix(auth): keep public browsing anonymous
+- chore(release): 1.4.2 [skip ci]
+- fix(gallery): keep RTL cards equal width
+
+---
+
+## [1.4.4] - 2026-07-09
+
+Release 1.4.4.
+
+## Changes
+
+- fix(auth): hydrate provisional session to avoid admin reload flash
+- Public Gallery Render - Stop blocking public page render on auth session check
+
+---
+
+## [1.5.0] - 2026-07-14
+
+Release 1.5.0.
+
+## Changes
+
+- fix(ci): use admin PAT for semantic-release push to master
+- style: fix prettier formatting on publisher-details.page.ts
+- fix(seo): key robots.txt on Netlify CONTEXT instead of per-config assets
+- fix(seo): address PR review — per-env robots.txt, twitter:card, description fallbacks
+- fix(seo): guard publisher-details fetches with takeUntilDestroyed
+- feat(seo): add SeoService/JsonLdService and wire SEO tags into public pages
+- fix(sentry): recover chunk/i18n network failures and drop status-0 noise
+
+---
+
+## [1.6.0] - 2026-07-22
+
+Release 1.6.0.
+
+## Changes
+
+- feat(reciters): add public reciters SEO pages, API, and sitemap generation
+
+---
+
 ## [Unreleased]
 
 ### Added

@@ -15,14 +15,16 @@ import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
-import { PublisherFilterItem, TafsirFormValue } from '../../models/tafsirs.models';
-import { PublishersFilterService } from '../../services/publishers-filter.service';
+import { TafsirFormValue } from '../../models/tafsirs.models';
 import { TafsirsService } from '../../services/tafsirs.service';
-import { localizeLanguageCode } from '../../../utils/display-localization.util';
+import { AdminTenantService } from '../../../services/admin-tenant.service';
 import {
-  getErrorMessage,
-  isRestrictedForTenantConflictError,
-} from '../../../../../shared/utils/error.utils';
+  createDisplayLocalizationLabels,
+  localizeLanguageCode,
+} from '../../../utils/display-localization.util';
+import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
+import { isRestrictedForTenantConflictError } from '../../../../../shared/utils/error.utils';
+import { AssetInitialVersionFieldsComponent } from '../../../components/asset-initial-version-fields/asset-initial-version-fields.component';
 
 @Component({
   selector: 'app-tafsir-form',
@@ -41,6 +43,7 @@ import {
     NzUploadModule,
     NzToolTipModule,
     TranslateModule,
+    AssetInitialVersionFieldsComponent,
   ],
   templateUrl: './tafsir-form.component.html',
   styleUrl: './tafsir-form.component.less',
@@ -50,7 +53,7 @@ export class TafsirFormComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
   private readonly tafsirsService = inject(TafsirsService);
-  private readonly publishersFilterService = inject(PublishersFilterService);
+  private readonly tenantService = inject(AdminTenantService);
   private readonly message = inject(NzMessageService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
@@ -58,11 +61,11 @@ export class TafsirFormComponent implements OnInit {
   readonly isEditMode = signal(false);
   readonly loadingDetail = signal(false);
   readonly submitting = signal(false);
-  readonly publisherOptions = signal<PublisherFilterItem[]>([]);
-  readonly publishersLoading = signal(false);
+  readonly publisherDisplayName = signal('');
   readonly thumbnailFile = signal<File | null>(null);
   readonly thumbnailPreview = signal<string | null>(null);
   readonly fileList = signal<NzUploadFile[]>([]);
+  readonly versionFile = signal<File | null>(null);
 
   readonly licenseOptions = Object.values(Licenses);
 
@@ -80,6 +83,8 @@ export class TafsirFormComponent implements OnInit {
     external_url: [''],
     is_open_access: [false],
     restricted_for_tenant: [false],
+    version_name: [''],
+    version_summary: [''],
   });
 
   private editSlug: string | null = null;
@@ -90,12 +95,11 @@ export class TafsirFormComponent implements OnInit {
       this.isEditMode.set(true);
       this.editSlug = slugParam;
       this.loadForEdit();
+    } else {
+      this.form.controls.version_name.setValidators([Validators.maxLength(255)]);
+      this.form.controls.version_name.updateValueAndValidity();
+      this.bindTenantPublisher();
     }
-    this.loadPublishers();
-  }
-
-  onPublisherSearch(query: string): void {
-    this.loadPublishers(query);
   }
 
   beforeUpload = (file: NzUploadFile): boolean => {
@@ -116,6 +120,10 @@ export class TafsirFormComponent implements OnInit {
     this.thumbnailFile.set(null);
     this.thumbnailPreview.set(null);
     this.fileList.set([]);
+  }
+
+  canSubmit(): boolean {
+    return this.form.valid;
   }
 
   onSubmit(): void {
@@ -150,18 +158,21 @@ export class TafsirFormComponent implements OnInit {
       error: (error) => {
         this.submitting.set(false);
         if (isRestrictedForTenantConflictError(error)) {
-          const msg = getErrorMessage(error);
-          if (msg) {
-            this.message.error(msg);
-          }
+          this.message.error(
+            resolveApiErrorMessage(
+              error,
+              { fallbackKey: 'ERRORS.RESTRICTED_FOR_TENANT_CONFLICT' },
+              this.translate
+            )
+          );
         }
       },
     });
   }
 
   private buildBody(): TafsirFormValue {
-    const v = this.form.value;
-    return {
+    const v = this.form.getRawValue();
+    const body: TafsirFormValue = {
       name_ar: v.name_ar ?? '',
       name_en: v.name_en ?? '',
       description_ar: v.description_ar ?? '',
@@ -177,6 +188,23 @@ export class TafsirFormComponent implements OnInit {
       external_url: v.external_url || null,
       thumbnail: this.thumbnailFile() ?? undefined,
     };
+
+    if (!this.isEditMode()) {
+      const versionName = v.version_name?.trim();
+      const versionSummary = v.version_summary?.trim();
+      if (versionName) body.version_name = versionName;
+      if (versionSummary) body.version_summary = versionSummary;
+      if (this.versionFile()) body.file = this.versionFile()!;
+    }
+
+    return body;
+  }
+
+  private bindTenantPublisher(): void {
+    const publisherId = this.tenantService.selectedPublisherId();
+    const publisher = this.tenantService.publishers().find((p) => p.id === publisherId);
+    this.form.controls.publisher_id.setValue(publisherId);
+    this.publisherDisplayName.set(publisher?.name ?? '');
   }
 
   private loadForEdit(): void {
@@ -202,6 +230,7 @@ export class TafsirFormComponent implements OnInit {
             restricted_for_tenant: data.restricted_for_tenant,
             external_url: data.external_url ?? '',
           });
+          this.publisherDisplayName.set(data.publisher.name);
 
           if (data.thumbnail_url) {
             this.thumbnailPreview.set(data.thumbnail_url);
@@ -215,23 +244,11 @@ export class TafsirFormComponent implements OnInit {
       });
   }
 
-  private loadPublishers(query = ''): void {
-    this.publishersLoading.set(true);
-    this.publishersFilterService
-      .search(query)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (res) => {
-          this.publisherOptions.set(res.results);
-          this.publishersLoading.set(false);
-        },
-        error: () => {
-          this.publishersLoading.set(false);
-        },
-      });
-  }
-
   languageLabel(code: string): string {
-    return localizeLanguageCode(code, this.translate.currentLang);
+    return localizeLanguageCode(
+      code,
+      this.translate.currentLang,
+      createDisplayLocalizationLabels(this.translate)
+    );
   }
 }

@@ -3,6 +3,8 @@ import {
   shouldOmitHeadlessSessionTokenForRequest,
   isHeadlessWebauthnLoginUrl,
   isBackendApiRequestUrl,
+  isPublicAnonymousCmsRead,
+  isAnonymousHeadlessSessionProbe,
 } from './headless-api-path.util';
 
 describe('headless-api-path.util', () => {
@@ -45,5 +47,41 @@ describe('headless-api-path.util', () => {
     expect(shouldOmitHeadlessSessionTokenForRequest(signup, 'GET')).toBe(false);
     expect(shouldOmitHeadlessSessionTokenForRequest(signup, 'PUT')).toBe(false);
     expect(shouldOmitHeadlessSessionTokenForRequest(session, 'GET')).toBe(false);
+  });
+
+  it('isPublicAnonymousCmsRead matches gallery and publisher GET reads only', () => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    expect(isPublicAnonymousCmsRead(`${api}/assets/`, 'GET')).toBe(true);
+    expect(isPublicAnonymousCmsRead(`${api}/assets/?page=1`, 'GET')).toBe(true);
+    expect(isPublicAnonymousCmsRead(`${api}/assets/42/`, 'GET')).toBe(true);
+    expect(isPublicAnonymousCmsRead(`${api}/publishers/7/`, 'GET')).toBe(true);
+    expect(isPublicAnonymousCmsRead(`${api}/assets/42/download/`, 'GET')).toBe(false);
+    expect(isPublicAnonymousCmsRead(`${api}/assets/`, 'POST')).toBe(false);
+    expect(isPublicAnonymousCmsRead(`${api}/auth/profile/`, 'GET')).toBe(false);
+  });
+
+  it('isAnonymousHeadlessSessionProbe matches anonymous session GET envelopes only', () => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    const session = `${api}/auth/app/v1/auth/session`;
+    const anonymousBody = {
+      status: 401,
+      meta: { is_authenticated: false },
+      data: { flows: [{ id: 'login' }] },
+    };
+    expect(isAnonymousHeadlessSessionProbe(session, 'GET', { error: anonymousBody })).toBe(true);
+    expect(
+      isAnonymousHeadlessSessionProbe(session, 'GET', {
+        error: { status: 401, meta: { is_authenticated: true }, data: { flows: [] } },
+      })
+    ).toBe(false);
+    expect(
+      isAnonymousHeadlessSessionProbe(`${api}/auth/app/v1/config`, 'GET', { error: anonymousBody })
+    ).toBe(false);
   });
 });

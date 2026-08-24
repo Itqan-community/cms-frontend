@@ -32,11 +32,13 @@ export class LangSwitchComponent {
   fullWidth = input(false);
 
   get langTooltip() {
-    return this.translate.getCurrentLang() === 'ar' ? 'English' : 'العربية';
+    return this.translate.getCurrentLang() === 'ar'
+      ? this.translate.instant('COMMON.LANG_SWITCH_TO_EN')
+      : this.translate.instant('COMMON.LANG_SWITCH_TO_AR');
   }
 
   get label() {
-    return this.translate.getCurrentLang() === 'ar' ? 'English' : 'العربية';
+    return this.langTooltip;
   }
 
   toggleLang() {

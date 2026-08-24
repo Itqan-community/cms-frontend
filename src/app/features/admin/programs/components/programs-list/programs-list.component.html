@@ -1,0 +1,179 @@
+<div class="programs-list admin-list-page">
+  <div class="admin-list-header">
+    <div class="admin-list-header__text">
+      <h2 class="admin-list-header__title">{{ 'ADMIN.PROGRAMS.TITLE' | translate }}</h2>
+      <p class="admin-list-header__subtitle">{{ 'ADMIN.PROGRAMS.SUBTITLE' | translate }}</p>
+    </div>
+    @if (canCreateProgram()) {
+      <a routerLink="/admin/programs/create">
+        <button nz-button nzType="primary" class="admin-add-btn">
+          <ng-icon name="lucidePlus" aria-hidden="true" />
+          {{ 'ADMIN.PROGRAMS.ADD_BUTTON' | translate }}
+        </button>
+      </a>
+    }
+  </div>
+
+  <app-program-filters
+    [initialFilters]="activeFilters"
+    (filtersChange)="onFiltersChange($event)"
+  ></app-program-filters>
+
+  <div class="admin-table-toolbar">
+    <app-admin-column-picker
+      [storageKey]="programTableStorageKey"
+      [columns]="programTableColumns"
+      (visibilityChange)="onColumnVisibilityChange($event)"
+    />
+  </div>
+
+  <div class="admin-table-wrap">
+    <nz-spin [nzSpinning]="loading()">
+      <nz-table
+        #programTable
+        [nzData]="items()"
+        [nzFrontPagination]="false"
+        [nzShowPagination]="false"
+        nzSize="middle"
+        [nzNoResult]="emptyTpl"
+      >
+        <thead>
+          <tr>
+            @if (showCol('name')) {
+              <th
+                nzWidth="200px"
+                [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('name')"
+                (nzSortOrderChange)="onSortChange(programTableStorageKey, 'name', $event)"
+              >
+                {{ 'ADMIN.PROGRAMS.COLUMNS.NAME' | translate }}
+              </th>
+            }
+            @if (showCol('access')) {
+              <th nzWidth="130px">{{ 'ADMIN.COMMON.COLUMN_ACCESS' | translate }}</th>
+            }
+            @if (showCol('description')) {
+              <th nzWidth="240px">{{ 'ADMIN.PROGRAMS.COLUMNS.DESCRIPTION' | translate }}</th>
+            }
+            @if (showCol('publisher')) {
+              <th nzWidth="160px">{{ 'ADMIN.PROGRAMS.COLUMNS.PUBLISHER' | translate }}</th>
+            }
+            @if (showCol('license')) {
+              <th nzWidth="120px">{{ 'ADMIN.PROGRAMS.COLUMNS.LICENSE' | translate }}</th>
+            }
+            @if (showCol('created')) {
+              <th
+                nzWidth="130px"
+                [nzSortFn]="true"
+                [nzSortOrder]="getSortOrder('created_at')"
+                (nzSortOrderChange)="onSortChange(programTableStorageKey, 'created_at', $event)"
+              >
+                {{ 'ADMIN.PROGRAMS.COLUMNS.CREATED_AT' | translate }}
+              </th>
+            }
+            <th nzWidth="120px">{{ 'ADMIN.PROGRAMS.COLUMNS.ACTIONS' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (program of programTable.data; track program.id) {
+            <tr class="admin-list-row">
+              @if (showCol('name')) {
+                <td class="admin-list-name">
+                  <a class="hoverable-link" [routerLink]="['/admin/programs', program.slug]">
+                    {{ program.name }}
+                  </a>
+                </td>
+              }
+              @if (showCol('access')) {
+                <td>
+                  @if (program.is_open_access || program.restricted_for_tenant) {
+                    <div class="admin-list-access-tags">
+                      @if (program.is_open_access) {
+                        <nz-tag nzColor="green">{{
+                          'ADMIN.COMMON.TAG_OPEN_ACCESS' | translate
+                        }}</nz-tag>
+                      }
+                      @if (program.restricted_for_tenant) {
+                        <nz-tag nzColor="orange">{{
+                          'ADMIN.COMMON.TAG_API_ONLY' | translate
+                        }}</nz-tag>
+                      }
+                    </div>
+                  } @else {
+                    <span class="admin-list-desc">{{ 'ADMIN.COMMON.EM_DASH' | translate }}</span>
+                  }
+                </td>
+              }
+
+              @if (showCol('description')) {
+                <td class="admin-list-desc">{{ truncate(program.description) }}</td>
+              }
+              @if (showCol('publisher')) {
+                <td>{{ program.publisher.name }}</td>
+              }
+              @if (showCol('license')) {
+                <td>
+                  <nz-tag [nzColor]="getLicenseColor(program.license)">{{
+                    program.license
+                  }}</nz-tag>
+                </td>
+              }
+              @if (showCol('created')) {
+                <td>{{ program.created_at | date: 'dd/MM/yyyy' }}</td>
+              }
+              <td (click)="$event.stopPropagation()">
+                <div class="admin-list-actions">
+                  <a
+                    nz-button
+                    nzType="text"
+                    class="action-icon action-icon--view"
+                    nz-tooltip
+                    [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_VIEW' | translate"
+                    [routerLink]="['/admin/programs', program.slug]"
+                  >
+                    <ng-icon name="lucideEye" aria-hidden="true" />
+                  </a>
+                  @if (canUpdateProgram()) {
+                    <a
+                      nz-button
+                      nzType="text"
+                      class="action-icon action-icon--edit"
+                      nz-tooltip
+                      [nzTooltipTitle]="'ADMIN.COMMON.TOOLTIP_EDIT' | translate"
+                      [routerLink]="['/admin/programs', program.slug, 'edit']"
+                    >
+                      <ng-icon name="lucideSquarePen" aria-hidden="true" />
+                    </a>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-spin>
+  </div>
+
+  <ng-template #emptyTpl>
+    <div class="admin-empty-state">
+      <ng-icon name="lucideInbox" class="admin-empty-state__icon" />
+      <p class="admin-empty-state__title">{{ 'ADMIN.PROGRAMS.EMPTY_TITLE' | translate }}</p>
+      <p class="admin-empty-state__subtitle">{{ 'ADMIN.COMMON.EMPTY_SUBTITLE' | translate }}</p>
+    </div>
+  </ng-template>
+
+  @if (!loading() && total() > 0) {
+    <div class="admin-pagination">
+      <nz-pagination
+        [nzPageIndex]="page()"
+        [nzTotal]="total()"
+        [nzPageSize]="pageSize()"
+        [nzShowSizeChanger]="true"
+        [nzPageSizeOptions]="[10, 25, 50]"
+        nzShowQuickJumper
+        (nzPageIndexChange)="onPageChange($event)"
+        (nzPageSizeChange)="onPageSizeChange($event)"
+      ></nz-pagination>
+    </div>
+  }
+</div>

@@ -1,6 +1,6 @@
 import { NgClass, NgTemplateOutlet } from '@angular/common';
 import { Component, inject, input, signal } from '@angular/core';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzDrawerModule } from 'ng-zorro-antd/drawer';
 import { NzPopoverModule } from 'ng-zorro-antd/popover';
 import { NgIcon } from '@ng-icons/core';
@@ -11,7 +11,15 @@ import { ViewportService } from '../../../core/services/viewport.service';
 @Component({
   selector: 'app-license-tag',
   standalone: true,
-  imports: [NgClass, NgTemplateOutlet, NzTagModule, NzPopoverModule, NzDrawerModule, NgIcon],
+  imports: [
+    NgClass,
+    NgTemplateOutlet,
+    NzTagModule,
+    NzPopoverModule,
+    NzDrawerModule,
+    NgIcon,
+    TranslateModule,
+  ],
   templateUrl: './license-tag.component.html',
   styleUrls: ['./license-tag.component.less'],
 })

@@ -59,11 +59,10 @@ export function tenantHeaderInterceptor(
       () =>
         new HttpErrorResponse({
           status: 403,
-          statusText: 'Missing tenant selection',
+          statusText: 'Forbidden',
           url: req.url,
           error: {
             error_name: 'tenant_required',
-            message: 'No selected publisher tenant was found for this request',
             extra: null,
           },
         })

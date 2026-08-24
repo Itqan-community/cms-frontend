@@ -14,23 +14,27 @@
 
   <div class="card-info-row">
     <span>{{ 'RECITATIONS.QIRAAH' | translate }}</span>
-    <strong>{{ recitation().qiraah.name || '---' }}</strong>
+    <strong>{{ recitation().qiraah.name || ('COMMON.EM_DASH' | translate) }}</strong>
   </div>
 
   <div class="card-info-row">
     <span>{{ 'RECITATIONS.RIWAYAH' | translate }}</span>
-    <strong>{{ recitation().riwayah?.name || '---' }}</strong>
+    <strong>{{ recitation().riwayah?.name || ('COMMON.EM_DASH' | translate) }}</strong>
   </div>
 
-  <div class="card-info-row" *ngIf="recitation().performance">
-    <span>{{ 'RECITATIONS.PERFORMANCE' | translate }}</span>
-    <strong>{{ recitation().performance }}</strong>
-  </div>
+  @if (recitation().performance) {
+    <div class="card-info-row">
+      <span>{{ 'RECITATIONS.PERFORMANCE' | translate }}</span>
+      <strong>{{ recitation().performance }}</strong>
+    </div>
+  }
 
-  <div class="card-info-row" *ngIf="recitation().style">
-    <span>{{ 'RECITATIONS.STYLE' | translate }}</span>
-    <strong>{{ recitation().style }}</strong>
-  </div>
+  @if (recitation().style) {
+    <div class="card-info-row">
+      <span>{{ 'RECITATIONS.STYLE' | translate }}</span>
+      <strong>{{ recitation().style }}</strong>
+    </div>
+  }
 
   <div class="card-meta">
     <div class="meta-item">

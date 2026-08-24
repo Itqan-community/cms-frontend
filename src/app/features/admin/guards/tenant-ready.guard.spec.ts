@@ -1,6 +1,8 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router, UrlTree } from '@angular/router';
 import { Observable, firstValueFrom, of, throwError } from 'rxjs';
+import { AuthService } from '../../../core/auth/services/auth.service';
 import { AdminTenantService } from '../services/admin-tenant.service';
 import { tenantReadyGuard } from './tenant-ready.guard';
 
@@ -18,6 +20,7 @@ describe('tenantReadyGuard', () => {
       providers: [
         { provide: Router, useValue: routerMock },
         { provide: AdminTenantService, useValue: tenantServiceMock },
+        { provide: AuthService, useValue: { authReady: signal(true) } },
       ],
     });
   });

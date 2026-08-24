@@ -1,6 +1,6 @@
 # PROJECT_MAP — Itqan CMS Frontend
 
-> Last updated: 2026-05-14 Generated for AI-assisted development. Provide this doc to any LLM to
+> Last updated: 2026-08-18 Generated for AI-assisted development. Provide this doc to any LLM to
 > give full project context.
 
 ---
@@ -40,7 +40,7 @@ User Browser
     |       |
     |       |-- Auth Layer (django-allauth headless)
     |       |       POST /auth/* -> Django allauth
-    |       |       Token storage: sessionStorage + localStorage
+    |       |       Token storage: localStorage (sessionToken + JWTs) + cross-tab sync
     |       |
     |       |-- CMS API Layer (HttpClient + interceptors)
     |       |       GET/POST /cms-api/* -> Django REST API
@@ -56,17 +56,19 @@ User Browser
 ### Authentication Flow (django-allauth headless SPA)
 
 ```
-1. App bootstrap: GET /auth/session (app mode) + GET /_allauth/browser/v1/config; if authenticated,
-   GET /auth/profile/ merges portal `permissions` (code_name list) into `AuthService.currentUser` and
-   localStorage user snapshot.
-2. Login: POST /auth/login -> receive session_token + access_token + refresh_token
-3. Interceptor attaches: X-Session-Token on every `API_BASE_URL` / `ADMIN_API_BASE_URL` request when a token is resolved (sessionStorage `session_token` first; else readable `sessionid` cookie, persisted into sessionStorage). Exception: omit header on `POST …/auth/app/v1/auth/webauthn/signup` (anonymous initiate).
-                                 headersInterceptor: X-CSRFToken (unsafe methods), Accept-Language (unchanged policy)
-                                 withCredentials: false for `/auth/app/v1/`, true for other CMS/API routes (cookies)
-4. 401 recovery: try refresh token -> recheck session -> force re-login
-5. OAuth: Navigational form POST to provider; OauthCallback runs `bootstrapSessionAfterOAuthRedirect`
-   → **GET browser `/auth/.../session` first** (cookie credentials), then app `/auth/app/.../session` if needed;
-   `X-Session-Token` comes from `meta.session_token` / same-origin readable `sessionid`, not cross-origin cookies
+1. APP_INITIALIZER fires AuthService.bootstrapOnce() without awaiting (public pages paint immediately).
+2. Hydrate: if sessionToken + localStorage.user exist, set provisional currentUser (incl. permissions)
+   so admin guards can allow access without unauthorized flash (authReady = provisional OR bootstrapDone).
+3. Background validate: GET app `/auth/session` (token if present); if not established, GET browser
+   `/auth/session` (credentials). Parallel GET `/config`. On success merge GET `/auth/profile/`
+   permissions; on profile failure keep cached permissions. Invalid session with provisional cache
+   → clear + login + SESSION_EXPIRED when applicable. `storage` event syncs login/logout across tabs.
+4. Public routes never wait; authGuard / portalAccessGuard / permissionGuard wait on authReady.
+5. Login: POST /auth/login -> session_token (+ optional JWTs). Interceptor attaches X-Session-Token
+   (localStorage first; else readable `sessionid` cookie). Exception: omit on anonymous WebAuthn signup.
+6. 401 recovery: if was logged in → recheck then SESSION_EXPIRED login; if anonymous/stale →
+   clearStaleClientSession (+ retry public CMS GETs without token). No login redirect for guests.
+7. OAuth: OauthCallback runs bootstrapSessionAfterOAuthRedirect (browser session then app session).
 ```
 
 ### Content Access Flow (Gallery)
@@ -102,12 +104,16 @@ listings by the backend.
 ```
 List  -> GET    /portal/{entity}/
 Detail -> GET   /portal/{entity}/{id}/
-Create -> POST  /portal/{entity}/
+Create -> POST  /portal/{entity}/  (multipart FormData always for font/mushaf/tafsir/translation;
+               optional initial version fields: version_name + version_summary + file)
 Update -> PUT   /portal/{entity}/{id}/
 Delete -> DELETE /portal/{entity}/{id}/
 
 Each entity has: ListComponent, FormComponent (create+edit), DetailComponent
 Base class: AdminListBase (src/app/features/admin/utils/admin-list-base.ts)
+Create forms for font/mushaf/tafsir/translation include shared
+`asset-initial-version-fields` (optional on create). Additional versions on detail via
+`asset-versions-manager`.
 ```
 
 ---
@@ -145,16 +151,17 @@ cms-frontend/
 
 ### Core Layer (`src/app/core/`)
 
-| Subdirectory     | Contents                                                                                                                       | Purpose                                                    |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------- |
-| `auth/`          | 21 pages + 1 service + 3 guards + headless API module (20+ files)                                                              | Full django-allauth headless SPA integration               |
-| `auth/headless/` | `HeadlessAuthApiService` (~60 methods), `HeadlessAppTokenService`, types, hooks, WebAuthn utils, CSRF utils, provider redirect | allauth headless contract implementation                   |
-| `constants/`     | `BREAKPOINTS`, `NAV_LINKS`                                                                                                     | Responsive breakpoints + navigation link definitions       |
-| `enums/`         | `Categories` (tafsir/translation/recitation), `Licenses` (CC0-CC-BY-NC-ND + colors)                                            | Content categorization and licensing                       |
-| `guards/`        | `publisherHostGuard`                                                                                                           | Blocks publisher subdomain visitors from CMS routes        |
-| `interceptors/`  | 6 interceptors (credentials, CSRF response, app-session-token, headers/global, auth-error, error)                              | HTTP pipeline: session token, CSRF, error handling, Sentry |
-| `services/`      | `GoogleAnalyticsService`, `WebVitalsService`, `ViewportService`                                                                | Analytics, Core Web Vitals, responsive viewport detection  |
-| `utils/`         | `csrf.util.ts`                                                                                                                 | Django CSRF (same-origin cookies + cross-origin override)  |
+| Subdirectory     | Contents                                                                                                                       | Purpose                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `auth/`          | 21 pages + 1 service + 3 guards + headless API module (20+ files)                                                              | Full django-allauth headless SPA integration                      |
+| `auth/headless/` | `HeadlessAuthApiService` (~60 methods), `HeadlessAppTokenService`, types, hooks, WebAuthn utils, CSRF utils, provider redirect | allauth headless contract implementation                          |
+| `constants/`     | `BREAKPOINTS`, `NAV_LINKS`                                                                                                     | Responsive breakpoints + navigation link definitions              |
+| `enums/`         | `Categories` (tafsir/translation/recitation), `Licenses` (CC0-CC-BY-NC-ND + colors)                                            | Content categorization and licensing                              |
+| `guards/`        | `publisherHostGuard`                                                                                                           | Blocks publisher subdomain visitors from CMS routes               |
+| `interceptors/`  | 6 interceptors (credentials, CSRF response, app-session-token, headers/global, auth-error, error)                              | HTTP pipeline: session token, CSRF, error handling, Sentry        |
+| `sentry/`        | chunk-load recovery, `beforeSend` noise filter, app ErrorHandler wrapper                                                       | Benign network/chunk failures: one-time reload + drop from Sentry |
+| `services/`      | `GoogleAnalyticsService`, `WebVitalsService`, `ViewportService`                                                                | Analytics, Core Web Vitals, responsive viewport detection         |
+| `utils/`         | `csrf.util.ts`                                                                                                                 | Django CSRF (same-origin cookies + cross-origin override)         |
 
 ### Interceptor Pipeline (order matters)
 
@@ -167,6 +174,17 @@ Response: authErrorInterceptor -> errorInterceptor
 `409` + `unverified_email` on `/auth/app/v1/*`: no global error toast, no Sentry; pages redirect to
 `/account/verify-email?reason=unverified_email` (login/register/security settings) with copy on
 verify-email.
+
+HTTP `status === 0` (network abort / offline): suppressed from Sentry in `authErrorInterceptor`;
+user toast still via `error.interceptor` (`ERRORS.NETWORK_ERROR`).
+
+### Sentry (noise + recovery)
+
+- Init: `main.ts` — `beforeSend` drops chunk/module-import failures and status-0 HTTP noise
+  (`core/sentry/sentry-before-send.util.ts`).
+- ErrorHandler: `createAppSentryErrorHandler()` — one-time `location.reload()` on lazy chunk /
+  module-import failure (`sessionStorage` flag), then delegates to Sentry.
+- Successful bootstrap clears the chunk-recovery flag so a later deploy mismatch can recover once.
 
 ### Auth Architecture (django-allauth headless SPA)
 
@@ -185,8 +203,8 @@ Pages   Guards    Interceptors   Utils
 **Token management:**
 
 - `session_token` / continuity: resolved via `HeadlessAppTokenService.getSessionToken()` — prefer
-  sessionStorage (`sessionToken`); if empty, readable `sessionid` cookie → copied into
-  sessionStorage on read
+  localStorage (`sessionToken`, shared across tabs); if empty, readable `sessionid` cookie → copied
+  into localStorage on read; one-time migration from legacy `sessionStorage`
 - `access_token` + `refresh_token` -> localStorage (JWT for CMS API)
 - `csrftoken` cookie (same-origin) OR in-memory override (cross-origin)
 - `AuthService` CMS API helpers: `GET/POST/PATCH/DELETE` `API_BASE_URL/api-keys/…` with the same
@@ -204,32 +222,34 @@ Trust, Profile, CompleteProfile
 
 ### Route Map
 
-| Path                          | Component                      | Guards                            | Notes                                                                                                                                      |
-| ----------------------------- | ------------------------------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/gallery`                    | `GalleryPage`                  | —                                 | Main listing                                                                                                                               |
-| `/gallery/asset/:id`          | `AssetDetailsPage`             | —                                 | Detail + access request + download + report issue modal                                                                                    |
-| `/publishers`                 | `PublishersPage`               | `publisherHostGuard`              | Stub                                                                                                                                       |
-| `/publisher/:id`              | `PublisherDetailsPage`         | `publisherHostGuard`              | Detail + filtered assets                                                                                                                   |
-| `/license/:id`                | `LicenseDetailsPage`           | —                                 | License detail                                                                                                                             |
-| `/mushaf`                     | `SuraIndexPage`                | `authGuard`, `publisherHostGuard` | Mushaf reader — sura index                                                                                                                 |
-| `/mushaf/:suraId`             | `SuraViewPage`                 | `authGuard`, `publisherHostGuard` | Infinite-scroll mushaf pages for a surah                                                                                                   |
-| `/mushaf/:suraId/:ayahNumber` | `AyahFocusPage`                | `authGuard`, `publisherHostGuard` | Same scroll, starts on the ayah’s page with highlight                                                                                      |
-| `/content-standards`          | `UsageStandardsPage`           | `publisherHostGuard`              | Content guidelines                                                                                                                         |
-| `/unauthorized`               | `UnauthorizedPage`             | —                                 | Card UX; CTA + 5s countdown auto-redirect to `/gallery`; `hideHeader`; dir name typo `unautorized/`                                        |
-| `/complete-profile`           | `CompleteProfilePage`          | `authGuard`                       | Profile completion                                                                                                                         |
-| `/account/*`                  | (22 auth pages)                | guestGuard/authGuard              | Auth & account management                                                                                                                  |
-| `/admin`                      | `AdminLayoutComponent`         | `authGuard`, `portalAccessGuard`  | Permission-based admin shell                                                                                                               |
-| `/admin` (default)            | `AdminPortalRedirectComponent` | —                                 | Redirects to first allowed module (`publishers` for Itqan admin, else by read permission)                                                  |
-| `/admin/publishers`           | (lazy routes)                  | `itqanAdminGuard`                 | Publisher CRUD (staff)                                                                                                                     |
-| `/admin/tafsirs`              | (lazy routes)                  | per-route `permissionGuard`       | Tafsir CRUD                                                                                                                                |
-| `/admin/translations`         | (lazy routes)                  | per-route `permissionGuard`       | Translation CRUD                                                                                                                           |
-| `/admin/recitations`          | (lazy routes)                  | per-route `permissionGuard`       | Recitation CRUD                                                                                                                            |
-| `/admin/reciters`             | (lazy routes)                  | per-route `permissionGuard`       | Reciter CRUD                                                                                                                               |
-| `/admin/issues`               | (lazy routes)                  | _(permission guards commented)_   | Issue reports (list/detail/create/edit/delete); TODO enable `portal_*_issue_report` guards                                                 |
-| `/admin/members`              | (lazy routes)                  | `membersAccessGuard`              | Publisher member list/invite/edit/remove/resend via `/portal/members/` (modal UX on single list)                                           |
-| `/admin/access-requests`      | (lazy routes)                  | `accessRequestsAccessGuard`       | Asset access requests list/accept/reject + settings via `/portal/access-requests/` and `/portal/publishers/{id}/access-requests-settings/` |
-| `/admin/usage`                | (lazy routes)                  | `portal_access`                   | API usage analytics                                                                                                                        |
-| `**`                          | redirect -> /gallery           | —                                 | Wildcard                                                                                                                                   |
+| Path                          | Component              | Guards                            | Notes                                                                                                                                      |
+| ----------------------------- | ---------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/gallery`                    | `GalleryPage`          | —                                 | Main listing                                                                                                                               |
+| `/gallery/asset/:id`          | `AssetDetailsPage`     | —                                 | Detail + access request + download + report issue modal                                                                                    |
+| `/publishers`                 | `PublishersPage`       | `publisherHostGuard`              | Stub                                                                                                                                       |
+| `/publisher/:id`              | `PublisherDetailsPage` | `publisherHostGuard`              | Detail + filtered assets                                                                                                                   |
+| `/license/:id`                | `LicenseDetailsPage`   | —                                 | License detail                                                                                                                             |
+| `/reciters`                   | `RecitersPage`         | —                                 | Public reciter directory                                                                                                                   |
+| `/reciters/:slug`             | `ReciterDetailsPage`   | —                                 | Reciter profile + recitations                                                                                                              |
+| `/mushaf`                     | `SuraIndexPage`        | `authGuard`, `publisherHostGuard` | Mushaf reader — sura index                                                                                                                 |
+| `/mushaf/:suraId`             | `SuraViewPage`         | `authGuard`, `publisherHostGuard` | Infinite-scroll mushaf pages for a surah                                                                                                   |
+| `/mushaf/:suraId/:ayahNumber` | `AyahFocusPage`        | `authGuard`, `publisherHostGuard` | Same scroll, starts on the ayah's page with highlight                                                                                      |
+| `/content-standards`          | `UsageStandardsPage`   | `publisherHostGuard`              | Content guidelines                                                                                                                         |
+| `/unauthorized`               | `UnauthorizedPage`     | —                                 | Card UX; CTA + 5s countdown auto-redirect to `/gallery`; `hideHeader`; dir name typo `unautorized/`                                        |
+| `/complete-profile`           | `CompleteProfilePage`  | `authGuard`                       | Profile completion                                                                                                                         |
+| `/account/*`                  | (22 auth pages)        | guestGuard/authGuard              | Auth & account management                                                                                                                  |
+| `/admin`                      | `AdminLayoutComponent` | `authGuard`, `portalAccessGuard`  | Permission-based admin shell (`layout/` header + sidebar)                                                                                  |
+| `/admin` (default)            | `AdminHomeComponent`   | —                                 | Landing grid of the same permission-filtered sidebar modules (no portal redirect)                                                          |
+| `/admin/publishers`           | (lazy routes)          | `itqanAdminGuard`                 | Publisher CRUD (staff)                                                                                                                     |
+| `/admin/tafsirs`              | (lazy routes)          | per-route `permissionGuard`       | Tafsir CRUD                                                                                                                                |
+| `/admin/translations`         | (lazy routes)          | per-route `permissionGuard`       | Translation CRUD                                                                                                                           |
+| `/admin/recitations`          | (lazy routes)          | per-route `permissionGuard`       | Recitation CRUD                                                                                                                            |
+| `/admin/reciters`             | (lazy routes)          | per-route `permissionGuard`       | Reciter CRUD                                                                                                                               |
+| `/admin/issues`               | (lazy routes)          | _(permission guards commented)_   | Issue reports (list/detail/create/edit/delete); TODO enable `portal_*_issue_report` guards                                                 |
+| `/admin/members`              | (lazy routes)          | `membersAccessGuard`              | Publisher member list/invite/edit/remove/resend via `/portal/members/` (modal UX on single list)                                           |
+| `/admin/access-requests`      | (lazy routes)          | `accessRequestsAccessGuard`       | Asset access requests list/accept/reject + settings via `/portal/access-requests/` and `/portal/publishers/{id}/access-requests-settings/` |
+| `/admin/usage`                | (lazy routes)          | `portal_access`                   | API usage analytics                                                                                                                        |
+| `**`                          | redirect -> /gallery   | —                                 | Wildcard                                                                                                                                   |
 
 ---
 
@@ -265,30 +285,36 @@ success.
 
 **Purpose:** Full CRUD management portal for all Quranic content entities.
 
-**Layout:** `AdminLayoutComponent` (shell with admin styling, hideHeader, fullWidth)
+**Layout:** `layout/AdminLayoutComponent` + `AdminSidebarComponent` (shell, hideHeader, fullWidth).
+`/admin` renders `pages/admin-home/AdminHomeComponent` with the same permission-filtered module
+cards as the sidebar.
 
 **Modules (each follows identical CRUD pattern):**
 
-| Module             | Entity                | Key Models                          | Notes                                                                                                                                  |
-| ------------------ | --------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `publishers/`      | Publisher admin       | `Publisher`                         | CRUD + image upload                                                                                                                    |
-| `tafsirs/`         | Tafsir (exegesis)     | `Tafsir`, `TafsirVersion`           | CRUD + version management                                                                                                              |
-| `translations/`    | Translation           | `Translation`, `TranslationVersion` | CRUD + version management                                                                                                              |
-| `recitations/`     | Recitation (audio)    | `Recitation`                        | CRUD + track upload with progress + timings                                                                                            |
-| `reciters/`        | Reciter               | `Reciter`                           | CRUD + image upload + death info                                                                                                       |
-| `issues/`          | Issue reports         | `IssueReportOut`                    | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions                                      |
-| `members/`         | Publisher members     | `MemberOut`                         | List/invite/update/remove/resend via `/portal/members/`; scoped by `AdminTenantService.selectedPublisherId()`                          |
-| `access-requests/` | Asset access requests | `AccessRequestOut`                  | List/accept/reject + publisher settings (`/portal/publishers/{id}/access-requests-settings/`); detail drawer; permission-gated actions |
-| `mushafs/`         | Mushaf (Quran pages)  | Pages, Surahs, Ayahs, Words         | Complex nested UI with tabs and search                                                                                                 |
-| `usage/`           | API Usage analytics   | Request logs                        | Charts, top endpoints, top entities                                                                                                    |
-| `audio/`           | Audio management      | —                                   | Routes defined                                                                                                                         |
-| `software/`        | Software management   | —                                   | Routes defined                                                                                                                         |
+| Module             | Entity                | Key Models                          | Notes                                                                                                                                                                                                                                                                                                            |
+| ------------------ | --------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `publishers/`      | Publisher admin       | `Publisher`                         | CRUD + image upload                                                                                                                                                                                                                                                                                              |
+| `tafsirs/`         | Tafsir (exegesis)     | `Tafsir`, `TafsirVersion`           | CRUD + optional initial version on create (always multipart) + version management on detail                                                                                                                                                                                                                      |
+| `translations/`    | Translation           | `Translation`, `TranslationVersion` | CRUD; create always multipart FormData with optional initial version; update/patch remain JSON; version management on detail                                                                                                                                                                                     |
+| `recitations/`     | Recitation (audio)    | `Recitation`, `RecitationFolder`    | CRUD + browser-tab folder switcher (`FolderSwitcherComponent`; create/rename/delete/set-default; gold star indicator) + folder-scoped tracks upload with progress + timings; full bulk upload success redirects to `/gallery/asset/{id}`; partial failure clears validate banner and keeps failed rows for retry |
+| `reciters/`        | Reciter               | `Reciter`                           | CRUD + image upload + death info                                                                                                                                                                                                                                                                                 |
+| `issues/`          | Issue reports         | `IssueReportOut`                    | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions                                                                                                                                                                                                                |
+| `members/`         | Publisher members     | `MemberOut`, `GroupListOut`         | List/invite/update/remove/resend via `/portal/members/`; list shows `group_name`; invite/edit submit `group_id` from `GET /portal/groups/`; scoped by `AdminTenantService.selectedPublisherId()`                                                                                                                 |
+| `access-requests/` | Asset access requests | `AccessRequestOut`                  | List/accept/reject + publisher settings (`/portal/publishers/{id}/access-requests-settings/`); detail drawer; permission-gated actions                                                                                                                                                                           |
+| `mushafs/`         | Mushaf portal assets  | `MushafItem`, `MushafDetails`       | List/detail/create/edit/delete; optional initial version on create; further versions via live `/portal/mushafs/`; permission-gated (`portal_*_mushaf`)                                                                                                                                                           |
+| `fonts/`           | Font portal assets    | `FontItem`, `FontDetails`           | Same CRUD pattern via live `/portal/fonts/` (optional initial version on create); permission-gated (`portal_*_font`)                                                                                                                                                                                             |
+| `programs/`        | Program portal assets | `ProgramItem`, `ProgramDetails`     | Feature code present; route/sidebar/redirect hidden until BE `/portal/programs/` ships; mock via `useProgramsMockApi`                                                                                                                                                                                            |
+| `usage/`           | API Usage analytics   | Request logs                        | Charts, top endpoints, top entities                                                                                                                                                                                                                                                                              |
+| `audio/`           | Audio management      | —                                   | Routes defined                                                                                                                                                                                                                                                                                                   |
+| `software/`        | Software management   | —                                   | Routes defined                                                                                                                                                                                                                                                                                                   |
 
 **Shared admin components:**
 
 - `admin-column-picker/` — Column visibility toggles for tables
-- `asset-versions-manager/` — Version CRUD (tafsir/translation); CSV `export/` then `file_url`
-  fallback
+- `asset-initial-version-fields/` — Optional first version (name/summary/file) on asset create forms
+  (font/mushaf/tafsir/translation)
+- `asset-versions-manager/` — Version CRUD (tafsir/translation/mushaf/font; program when
+  re-enabled); CSV `export/` then `file_url` fallback
 - `asset-content-editor/` + `asset-content-grid/` — Per-ayah draft editor; flush before publish;
   leave blocked if PATCH fails
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
@@ -430,10 +456,22 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 - **Languages:** English (`en`), Arabic (`ar`)
 - **Default:** Arabic (`ar`) — set in both `index.html` and `app.config.ts`
 - **Persistence:** `localStorage.getItem('lang')`
-- **Switch:** Full page reload on language toggle
+- **Bootstrap:** `initializeAppTranslations()` retries once; on final failure boots anyway (no
+  unhandled ErrorHandler) so flaky mobile loads of `/i18n/*.json` do not crash the app
+- **Switch:** Full page reload on language toggle (`LangSwitchComponent`); `App.switchLang` catches
+  failed `translate.use`
 - **RTL:** `<html dir="rtl">` with logical CSS properties (`margin-inline`, `padding-inline`)
-- **Keys:** ~1370 per language, translated across all domains (auth, navigation, gallery, admin with
-  770 keys, content standards, licenses, errors, forms)
+- **Keys:** 1486 per language (parity verified); domains include auth, navigation, gallery, admin,
+  content standards, licenses, errors, forms, access-request license terms
+- **CI gate:** `npm run check:i18n` validates every key in the union of `en.json` + `ar.json` has a
+  non-empty Arabic value in `ar.json` (runs in CI `lint-and-test` and via lint-staged on i18n edits)
+- **API errors:** Hybrid resolver in `shared/utils/api-error-resolver.util.ts` — maps `error_name` /
+  known codes to i18n, shows backend `message` when language matches UI, else fallback key; global
+  `error.interceptor.ts` uses it; component-level handlers dedupe via
+  `shouldSuppressGlobalErrorToast`
+- **Auth errors:** `shared/utils/auth-error-resolver.util.ts` (django-allauth code catalog)
+- **Backend handoff:** Portal validate-upload `message`, timing upload `file_errors[]`, and generic
+  error `message` fields should localize via `Accept-Language` (sent by `global.interceptor.ts`)
 
 ---
 
@@ -455,10 +493,15 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 ### Admin Portal (`/portal/`)
 
 Full CRUD for: publishers, tafsirs (versions), translations (versions), recitations (with tracks),
-reciters, issue reports (`/portal/issue-reports/`), publisher members (`/portal/members/`), asset
-access requests (`/portal/access-requests/` — list, detail, accept, reject;
-`/portal/publishers/{id}/access-requests-settings/` — auto-acceptance), mushafs
-(pages/surahs/ayahs/words), usage analytics
+reciters, issue reports (`/portal/issue-reports/`), publisher members (`/portal/members/`), groups
+(`GET /portal/groups/` for member invite/edit options), asset access requests
+(`/portal/access-requests/` — list, detail, accept, reject;
+`/portal/publishers/{id}/access-requests-settings/` — auto-acceptance), mushafs (`/portal/mushafs/`
+— CRUD + versions), fonts (`/portal/fonts/` — CRUD + versions), usage analytics. Programs portal
+module is dormant (route/nav hidden) until BE ships `/portal/programs/`.
+
+Asset create/edit forms (tafsir, translation, mushaf, font, program, recitation): publisher field is
+view-only — create binds `AdminTenantService.selectedPublisherId()`; edit shows the asset publisher.
 
 ---
 
@@ -485,7 +528,9 @@ access requests (`/portal/access-requests/` — list, detail, accept, reject;
 | `features/dashify/`                     | Unknown           | Minimal implementation, purpose unclear.                                                                            |
 | `features/admin/` guards                | Implemented       | `portal-access`, `permission`, `itqan-admin` guards active on admin routes.                                         |
 | `shared/directives/`                    | Empty             | Directory exists with no files.                                                                                     |
-| `features/admin/mushafs/`               | In progress       | Complex UI with multiple tabs (Pages, Surahs, Ayahs, Words) — may be incomplete.                                    |
+| `features/admin/mushafs/`               | Implemented       | Portal mushaf CRUD wired to live `/portal/mushafs/` + `permissionGuard` (`portal_*_mushaf`).                        |
+| `features/admin/fonts/`                 | Implemented       | Portal font CRUD wired to live `/portal/fonts/` + `permissionGuard` (`portal_*_font`).                              |
+| `features/admin/programs/`              | Hidden (dormant)  | Module kept; `/admin/programs` route, sidebar tab, and redirect candidate removed until BE API is ready.            |
 | `features/admin/audio/`                 | Partial           | Routes defined but implementation details need verification.                                                        |
 | `features/admin/software/`              | Partial           | Routes defined but implementation details need verification.                                                        |
 | Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                         |

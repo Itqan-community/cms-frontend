@@ -1,0 +1,21 @@
+<a class="reciter-card" [routerLink]="['/reciters', reciter().slug]">
+  <div class="reciter-card__avatar">
+    @if (reciter().image_url) {
+      <img [src]="reciter().image_url" [alt]="reciter().name" loading="lazy" />
+    } @else {
+      <ng-icon name="lucideMic" aria-hidden="true" />
+    }
+  </div>
+  <div class="reciter-card__content">
+    <h3 class="reciter-card__name">{{ reciter().name }}</h3>
+    @if (reciter().nationality) {
+      <p class="reciter-card__nationality">
+        <ng-icon name="lucideMapPin" aria-hidden="true" />
+        {{ nationalityLabel }}
+      </p>
+    }
+    <p class="reciter-card__recitations">
+      {{ 'RECITERS.RECITATIONS_COUNT' | translate: { count: reciter().recitations_count } }}
+    </p>
+  </div>
+</a>

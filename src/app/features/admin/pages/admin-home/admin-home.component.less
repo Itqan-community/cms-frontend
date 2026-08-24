@@ -1,0 +1,79 @@
+.admin-home {
+  padding: 8px 0;
+}
+
+.admin-home__header {
+  margin-bottom: 24px;
+}
+
+.admin-home__title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--color-neutral-900);
+}
+
+.admin-home__subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-neutral-500);
+}
+
+.admin-home__card-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+  height: 100%;
+}
+
+.admin-home__card {
+  height: 100%;
+  border-radius: var(--radius-lg);
+  transition: box-shadow 0.2s ease;
+}
+
+.admin-home__card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-home__icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: var(--color-primary-50);
+  color: var(--color-primary-600);
+  font-size: 22px;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.admin-home__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.admin-home__card-link:hover .admin-home__icon-wrap {
+  background: var(--color-primary-100);
+  transform: scale(1.05);
+}
+
+.admin-home__card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-neutral-900);
+}
+
+.admin-home__card-desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--color-neutral-500);
+}

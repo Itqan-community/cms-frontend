@@ -1,0 +1,94 @@
+.reciters-page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  &__header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  &__title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-neutral-600);
+    margin: 0;
+  }
+
+  &__subtitle {
+    font-size: 15px;
+    color: var(--color-neutral-400);
+    margin: 0;
+  }
+
+  &__toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+  }
+
+  &__search {
+    flex: 1 1 260px;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    position: relative;
+
+    ng-icon {
+      position: absolute;
+      inset-inline-start: 12px;
+      color: var(--color-neutral-400);
+      pointer-events: none;
+    }
+
+    input {
+      width: 100%;
+      padding-inline-start: 36px;
+    }
+  }
+
+  &__nationality-filter {
+    flex: 0 0 220px;
+    min-width: 160px;
+  }
+
+  &__pagination {
+    display: flex;
+    justify-content: center;
+    margin-top: 24px;
+  }
+}
+
+.reciters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.reciter-card-skeleton {
+  height: 220px;
+  border-radius: 20px;
+  background: linear-gradient(
+    90deg,
+    var(--color-neutral-100, #f1f5f9) 25%,
+    var(--color-neutral-50, #f8fafc) 37%,
+    var(--color-neutral-100, #f1f5f9) 63%
+  );
+  background-size: 400% 100%;
+  animation: reciter-skeleton-shimmer 1.4s ease infinite;
+}
+
+@keyframes reciter-skeleton-shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}

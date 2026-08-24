@@ -1,0 +1,78 @@
+<div class="reciters-page">
+  <app-breadcrumb />
+
+  <div class="reciters-page__header">
+    <h1 class="reciters-page__title">{{ 'RECITERS.PAGE_TITLE' | translate }}</h1>
+    <p class="reciters-page__subtitle">{{ 'RECITERS.PAGE_SUBTITLE' | translate }}</p>
+  </div>
+
+  <div class="reciters-page__toolbar">
+    <div class="reciters-page__search">
+      <ng-icon name="lucideSearch" aria-hidden="true" />
+      <input
+        nz-input
+        type="text"
+        [ngModel]="searchQuery()"
+        (ngModelChange)="onSearchQueryChange($event)"
+        [placeholder]="'RECITERS.SEARCH_PLACEHOLDER' | translate"
+      />
+    </div>
+    <nz-select
+      class="reciters-page__nationality-filter"
+      [ngModel]="nationalitySelection() || null"
+      (ngModelChange)="onNationalityChange($event)"
+      [nzAllowClear]="true"
+      [nzPlaceHolder]="'RECITERS.NATIONALITY_FILTER_PLACEHOLDER' | translate"
+    >
+      @for (option of nationalityOptions(); track option.value) {
+        <nz-option [nzValue]="option.value" [nzLabel]="option.label" />
+      }
+    </nz-select>
+  </div>
+
+  <div class="reciters-page__content" [attr.aria-busy]="loading()">
+    @if (!isServer && loading()) {
+      <div class="reciters-grid">
+        @for (item of getSkeletonArray(); track item) {
+          <div class="reciter-card-skeleton" aria-hidden="true"></div>
+        }
+      </div>
+    } @else if (errorState()) {
+      <app-state-message
+        icon="lucideAlertTriangle"
+        iconVariant="error"
+        [title]="'UI.SOMETHING_WENT_WRONG' | translate"
+        [message]="'RECITERS.LOAD_ERROR' | translate"
+        [actionLabel]="'UI.TRY_AGAIN' | translate"
+        (actionClick)="getReciters()"
+      />
+    } @else if (reciters().length === 0) {
+      <app-state-message
+        icon="lucideSearch"
+        [title]="'RECITERS.NO_RESULTS_TITLE' | translate"
+        [message]="'RECITERS.NO_RESULTS_MESSAGE' | translate"
+      />
+    } @else {
+      <div class="reciters-grid">
+        @for (reciter of reciters(); track reciter.id) {
+          <app-reciter-card [reciter]="reciter" />
+        }
+      </div>
+    }
+
+    @if (!loading() && total() > 0) {
+      <div class="admin-pagination reciters-page__pagination">
+        <nz-pagination
+          [nzPageIndex]="page()"
+          [nzTotal]="total()"
+          [nzPageSize]="pageSize()"
+          [nzShowSizeChanger]="true"
+          [nzPageSizeOptions]="pageSizeOptions"
+          nzShowQuickJumper
+          (nzPageIndexChange)="onPageChange($event)"
+          (nzPageSizeChange)="onPageSizeChange($event)"
+        />
+      </div>
+    }
+  </div>
+</div>

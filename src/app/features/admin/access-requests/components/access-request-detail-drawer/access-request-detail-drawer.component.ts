@@ -73,7 +73,7 @@ export class AccessRequestDetailDrawerComponent {
 
   formatActor(value: string | null): string {
     if (!value) {
-      return '—';
+      return this.translate.instant('COMMON.EM_DASH');
     }
     if (value === 'System') {
       return this.translate.instant('ADMIN.ACCESS_REQUESTS.DRAWER.AUTO_ACCEPTED');

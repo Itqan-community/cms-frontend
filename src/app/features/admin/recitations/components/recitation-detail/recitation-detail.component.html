@@ -71,6 +71,24 @@
       </div>
 
       <div class="admin-hero-actions">
+        @if (canViewOnGallery()) {
+          <a
+            nz-button
+            [href]="galleryAssetUrl()"
+            target="_blank"
+            rel="noopener noreferrer"
+            (click)="onViewOnGalleryClick()"
+          >
+            <ng-icon name="lucideExternalLink" />
+            {{ 'ADMIN.RECITATIONS.DETAIL.VIEW_ON_GALLERY' | translate }}
+          </a>
+        }
+        @if (canViewReciter()) {
+          <a nz-button [routerLink]="reciterRouterLink()">
+            <ng-icon name="lucideMic" />
+            {{ 'ADMIN.RECITATIONS.DETAIL.VIEW_RECITER' | translate }}
+          </a>
+        }
         @if (canUpdateRecitation()) {
           <button nz-button nzType="primary" (click)="onEdit()">
             <ng-icon name="lucideSquarePen" />
@@ -100,6 +118,23 @@
         <p class="admin-desc-text" dir="ltr">{{ recitation()!.description_en }}</p>
       </div>
     </div>
+
+    <section class="admin-panel recitation-detail__folders-section">
+      <h2 class="admin-panel__title">
+        <ng-icon name="lucideFolderOpen" />
+        {{ 'ADMIN.RECITATIONS.FOLDERS.TITLE' | translate }}
+      </h2>
+      <app-folder-switcher
+        [folders]="folders()"
+        [activeFolderId]="activeFolderId()"
+        [canManage]="canUpdateRecitation()"
+        (folderSelect)="onFolderSelect($event)"
+        (setDefault)="onSetDefaultFolder($event)"
+        (createFolder)="onCreateFolder($event)"
+        (renameFolder)="onRenameFolder($event)"
+        (deleteFolder)="onDeleteFolder($event)"
+      />
+    </section>
 
     <section class="admin-panel recitation-detail__timings-section">
       <h2 class="admin-panel__title">
@@ -261,7 +296,7 @@
           </p>
         </div>
 
-        @if (validateMessage()) {
+        @if (validateMessage() && !hasInFlightUploadRows()) {
           <nz-alert
             [nzType]="validateTopStatus() === 'valid' ? 'success' : 'error'"
             [nzMessage]="validateMessage()"
@@ -469,7 +504,9 @@
               <tr>
                 <td>{{ track.surah_number }}</td>
                 <td>
-                  <span class="admin-mono">{{ track.filename ?? '—' }}</span>
+                  <span class="admin-mono">{{
+                    track.filename ?? ('COMMON.EM_DASH' | translate)
+                  }}</span>
                 </td>
                 <td>{{ formatDurationMs(track.duration_ms) }}</td>
                 <td>{{ formatBytes(track.size_bytes) }}</td>
