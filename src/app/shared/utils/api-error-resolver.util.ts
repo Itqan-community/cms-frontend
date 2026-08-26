@@ -117,7 +117,12 @@ export function shouldSuppressGlobalErrorToast(error: unknown): boolean {
   }
 
   const errorName = extractErrorName(error);
-  if (errorName === 'invalid_status' || errorName === 'tenant_required') {
+  if (
+    errorName === 'invalid_status' ||
+    errorName === 'tenant_required' ||
+    // Handled locally by the content editor grid with a friendly popup.
+    errorName === 'no_changes_to_publish'
+  ) {
     return true;
   }
 

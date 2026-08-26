@@ -812,6 +812,9 @@
       },
       "ERRORS": {
         "GENERIC": "Something went wrong. Please try again.",
+        "OK": "Got it",
+        "NO_CHANGES_TO_PUBLISH_TITLE": "No changes to publish",
+        "NO_CHANGES_TO_PUBLISH": "You haven't edited anything in this draft yet. Make a change first, then save and publish a new version.",
         "VERSION_NOT_EDITABLE": "This version can no longer be edited.",
         "TRANSLATION_NOT_FOUND": "Translation not found.",
         "TAFSIR_NOT_FOUND": "Tafsir not found.",

@@ -493,12 +493,25 @@ export class AssetContentGridComponent implements OnInit {
   }
 
   private showError(err: HttpErrorResponse): void {
-    const name = err?.error?.error_name;
+    const name: string | undefined = err?.error?.error_name;
+
+    // "Nothing changed" isn't really a failure — show it as a friendly popup
+    // rather than a red error toast.
+    if (name === 'no_changes_to_publish') {
+      this.modal.info({
+        nzTitle: this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.NO_CHANGES_TO_PUBLISH_TITLE'),
+        nzContent: this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.NO_CHANGES_TO_PUBLISH'),
+        nzOkText: this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.OK'),
+        nzDirection: this.translate.currentLang === 'ar' ? 'rtl' : 'ltr',
+      });
+      return;
+    }
+
+    const key = name ? `ADMIN.CONTENT_EDITOR.ERRORS.${name.toUpperCase()}` : '';
+    const translated = key ? this.translate.instant(key) : '';
     this.message.error(
-      name
-        ? this.translate.instant(`ADMIN.CONTENT_EDITOR.ERRORS.${name.toUpperCase()}`, {
-            default: this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC'),
-          })
+      translated && translated !== key
+        ? translated
         : this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC')
     );
   }
