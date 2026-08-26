@@ -1,0 +1,16 @@
+<div class="mushaf-switcher">
+  <span class="mushaf-switcher__label" id="mushaf-switcher-label">
+    {{ 'MUSHAF.EDITION' | translate }}
+  </span>
+  <nz-select
+    class="mushaf-switcher__select"
+    [ngModel]="selectedSlug().slug"
+    (ngModelChange)="onChange($event)"
+    nzSize="large"
+    aria-labelledby="mushaf-switcher-label"
+  >
+    @for (edition of editions; track edition.slug) {
+      <nz-option [nzValue]="edition.slug" [nzLabel]="edition.nameAr"></nz-option>
+    }
+  </nz-select>
+</div>

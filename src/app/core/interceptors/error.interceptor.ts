@@ -37,6 +37,11 @@ export function errorInterceptor(
         return throwError(() => error);
       }
 
+      // Mushaf pages already show retry UI for CDN failures.
+      if (req.url.includes('cdn.jsdelivr.net')) {
+        return throwError(() => error);
+      }
+
       if (!shouldSuppressGlobalErrorToast(error)) {
         const fallbackKey = error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR';
         const errorMessage = resolveApiErrorMessage(error, { fallbackKey }, translate);

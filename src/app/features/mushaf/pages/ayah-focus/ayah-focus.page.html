@@ -1,0 +1,46 @@
+<section class="ayah-focus">
+  @if (loading()) {
+    <div class="ayah-focus__skeleton ayah-focus__skeleton--header"></div>
+    <div class="ayah-focus__skeleton ayah-focus__skeleton--body"></div>
+  } @else if (notFound()) {
+    <app-state-message
+      icon="lucideSearch"
+      iconVariant="default"
+      [title]="'MUSHAF.AYAH_NOT_FOUND' | translate"
+      [message]="'ERRORS.NOT_FOUND' | translate"
+      [secondaryActionLabel]="'MUSHAF.BACK_TO_INDEX' | translate"
+      secondaryRouterLink="/mushaf"
+    />
+  } @else if (errorState()) {
+    <app-state-message
+      icon="lucideAlertCircle"
+      iconVariant="error"
+      [title]="'UI.SOMETHING_WENT_WRONG' | translate"
+      [message]="'ERRORS.SERVER_ERROR' | translate"
+      [actionLabel]="'UI.TRY_AGAIN' | translate"
+      actionIcon="lucideRotateCw"
+      (actionClick)="retry()"
+    />
+  } @else if (surahMeta() && targetPage() && startPage() && endPage()) {
+    <header class="ayah-focus__header">
+      <a class="ayah-focus__sura-link" [routerLink]="suraLink()" [queryParams]="mushafQuery()">
+        {{ surahMeta()!.nameArabic }}
+      </a>
+      <span class="ayah-focus__divider">·</span>
+      <span class="ayah-focus__ayah-no">
+        {{ 'MUSHAF.AYAH' | translate }} {{ ayahNumberLabel() }}
+      </span>
+    </header>
+
+    <div class="ayah-focus__toolbar"><app-mushaf-switcher /></div>
+
+    <app-mushaf-scroll
+      [slug]="selected().slug"
+      [startPage]="startPage()!"
+      [endPage]="endPage()!"
+      [initialPage]="targetPage()!"
+      [highlightAyah]="highlight()"
+      (ayahClick)="onAyahClick($event)"
+    />
+  }
+</section>

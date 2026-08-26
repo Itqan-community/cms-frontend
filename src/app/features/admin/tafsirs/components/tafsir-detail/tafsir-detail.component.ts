@@ -83,6 +83,10 @@ export class TafsirDetailComponent implements OnInit {
     void this.router.navigate(['/admin/tafsirs', this.slug, 'edit']);
   }
 
+  onEditContent(): void {
+    void this.router.navigate(['/admin/tafsirs', this.slug, 'edit-content']);
+  }
+
   onDelete(): void {
     const name = this.tafsir()?.name_ar ?? this.translate.instant('ADMIN.TAFSIRS.TITLE');
     const dir = this.translate.currentLang === 'ar' ? 'rtl' : 'ltr';

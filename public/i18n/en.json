@@ -510,6 +510,7 @@
     "PUBLISHER_DASHBOARD": "Publisher Dashboard",
     "ASSET_REQUEST_FORM": "Add Quranic Content to ITQAN",
     "ADMIN_PORTAL": "Admin Portal",
+    "MUSHAF": "Quran",
     "RECITERS": "Reciters"
   },
   "HOME": {
@@ -766,6 +767,56 @@
       "LABEL": "Home",
       "TITLE": "Overview",
       "SUBTITLE": "Manage platform content and settings"
+    },
+    "CONTENT_EDITOR": {
+      "TITLE": "Edit content",
+      "HINT": "Edit the text ayah by ayah. Changes autosave to a draft; publish to create a new version. Tip: select a Text or Footnotes cell and paste (Ctrl+V) CSV/spreadsheet rows to fill cells downward.",
+      "BACK": "Back to details",
+      "SAVE": "Save & publish",
+      "SAVE_DRAFT": "Save draft",
+      "DISCARD": "Discard",
+      "UNDO": "Undo",
+      "REDO": "Redo",
+      "FILTER_ALL": "All surahs",
+      "SAVING": "Saving…",
+      "UNSAVED": "Unsaved changes",
+      "ALL_SAVED": "All changes saved to draft",
+      "OPEN_BUTTON": "Edit content",
+      "COLUMNS": {
+        "SURA": "Sura",
+        "AYA": "Aya",
+        "SURAH": "Surah",
+        "UTHMANI": "Ayah (Uthmani)",
+        "TEXT": "Text",
+        "FOOTNOTES": "Footnotes"
+      },
+      "MESSAGES": {
+        "PUBLISHED": "New version published",
+        "DRAFT_SAVED": "Draft saved"
+      },
+      "PASTE": {
+        "SELECT_EDITABLE": "Select a Text or Footnotes cell first, then paste.",
+        "APPLIED": "Pasted into {{count}} cell(s)."
+      },
+      "COPY": {
+        "BUTTON": "Copy to CSV",
+        "COPIED": "Copied {{count}} row(s) to the clipboard as CSV.",
+        "NONE_SELECTED": "Select one or more rows first.",
+        "FAILED": "Could not copy to the clipboard."
+      },
+      "LEAVE": {
+        "CONFIRM_TITLE": "Discard unsaved changes?",
+        "CONFIRM_BODY": "Your draft edits will be discarded and no new version will be created.",
+        "OK": "Discard changes",
+        "CANCEL": "Keep editing"
+      },
+      "ERRORS": {
+        "GENERIC": "Something went wrong. Please try again.",
+        "VERSION_NOT_EDITABLE": "This version can no longer be edited.",
+        "TRANSLATION_NOT_FOUND": "Translation not found.",
+        "TAFSIR_NOT_FOUND": "Tafsir not found.",
+        "CONTENT_FILE_UNPARSEABLE": "The uploaded file could not be parsed."
+      }
     },
     "COMMON": {
       "ADD": "Add",
@@ -2240,6 +2291,19 @@
     "TOP_ENTITIES": "Top entities",
     "NO_DATA": "No data for the selected period",
     "ERROR_UNAVAILABLE": "Usage stats are temporarily unavailable. Please try again later."
+  },
+  "MUSHAF": {
+    "TITLE": "The Noble Quran",
+    "INDEX_SUBTITLE": "Browse the suras and read the mushaf page by page",
+    "AYAHS": "ayahs",
+    "AYAH": "Ayah",
+    "MECCAN": "Meccan",
+    "MEDINAN": "Medinan",
+    "BACK_TO_INDEX": "Back to suras",
+    "SURA_NOT_FOUND": "Sura not found",
+    "AYAH_NOT_FOUND": "Ayah not found",
+    "EDITION": "Edition",
+    "ATTRIBUTION": "Mushaf rendering by Quranpedia (quran-svg)"
   },
   "RECITERS": {
     "PAGE_TITLE": "Quran Reciters",

@@ -61,11 +61,14 @@
   display: none;
 }
 
-// Adjust brand gap and toggle button for admin panel
+// Adjust brand gap and toggle button for admin panel.
+// Desktop collapse vs mobile drawer: mutually exclusive by breakpoint
+// (beat .app-header__menu-btn display via chained class specificity).
 .admin-header-shell .app-header__brand {
   column-gap: 16px;
 
-  .admin-desktop-toggle {
+  .admin-desktop-toggle.app-header__menu-btn {
+    display: inline-flex;
     font-size: 24px;
     color: var(--color-neutral-600);
     transition: color 0.3s;
@@ -74,7 +77,7 @@
     }
   }
 
-  .admin-mobile-toggle {
+  .admin-mobile-toggle.app-header__menu-btn {
     display: none;
     font-size: 24px;
     color: var(--color-neutral-600);
@@ -116,11 +119,11 @@
   }
 
   .admin-header-shell .app-header__brand {
-    .admin-desktop-toggle {
+    .admin-desktop-toggle.app-header__menu-btn {
       display: none;
     }
 
-    .admin-mobile-toggle {
+    .admin-mobile-toggle.app-header__menu-btn {
       display: inline-flex;
     }
   }
