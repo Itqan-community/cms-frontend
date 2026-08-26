@@ -49,10 +49,9 @@ export class AssetContentService {
     versionId: number,
     rows: ContentEntryPatch[]
   ): Observable<ContentEntry[]> {
-    return this.http.patch<ContentEntry[]>(
-      `${this.versionBase(kind, slug, versionId)}entries/`,
-      { rows }
-    );
+    return this.http.patch<ContentEntry[]>(`${this.versionBase(kind, slug, versionId)}entries/`, {
+      rows,
+    });
   }
 
   /** Publish the draft: it becomes the latest published version. */
@@ -69,20 +68,12 @@ export class AssetContentService {
   }
 
   /** Discard the draft and all its unsaved entries. */
-  discardDraft(
-    kind: AssetVersionParentKind,
-    slug: string,
-    versionId: number
-  ): Observable<void> {
+  discardDraft(kind: AssetVersionParentKind, slug: string, versionId: number): Observable<void> {
     return this.http.delete<void>(this.versionBase(kind, slug, versionId));
   }
 
   /** Download a version's content as a CSV blob (auth token added by interceptor). */
-  exportVersion(
-    kind: AssetVersionParentKind,
-    slug: string,
-    versionId: number
-  ): Observable<Blob> {
+  exportVersion(kind: AssetVersionParentKind, slug: string, versionId: number): Observable<Blob> {
     return this.http.get(`${this.versionBase(kind, slug, versionId)}export/`, {
       responseType: 'blob',
     });

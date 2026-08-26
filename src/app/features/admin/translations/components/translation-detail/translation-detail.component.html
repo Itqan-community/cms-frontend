@@ -72,7 +72,11 @@
             <ng-icon name="lucideSquarePen" />
             {{ 'ADMIN.COMMON.EDIT' | translate }}
           </button>
-          <button nz-button nzType="default" [routerLink]="['/admin/translations', routeSlug, 'edit-content']">
+          <button
+            nz-button
+            nzType="default"
+            [routerLink]="['/admin/translations', routeSlug, 'edit-content']"
+          >
             <ng-icon name="lucideLayoutGrid" />
             {{ 'ADMIN.CONTENT_EDITOR.OPEN_BUTTON' | translate }}
           </button>
