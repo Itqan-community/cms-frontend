@@ -91,6 +91,9 @@ export class AssetContentGridComponent implements OnInit {
   readonly selectedCount = signal(0);
   readonly canUndo = signal(false);
   readonly canRedo = signal(false);
+  /** Whether the draft differs from the latest published version (server-tracked,
+   *  plus any edit made this session). Publishing an unchanged draft is disabled. */
+  readonly hasChanges = signal(false);
   /** Distinct surahs present in the data, for the Surah dropdown filter. */
   readonly surahOptions = signal<SurahOption[]>([]);
 
@@ -199,6 +202,7 @@ export class AssetContentGridComponent implements OnInit {
       footnotes: row.footnotes ?? '',
     });
     this.dirty.set(true);
+    this.hasChanges.set(true);
     this.autosave$.next();
     this.refreshUndoState();
   }
@@ -332,6 +336,7 @@ export class AssetContentGridComponent implements OnInit {
       .subscribe({
         next: (draft) => {
           this.draftId.set(draft.id);
+          this.hasChanges.set(draft.has_changes);
           this.loadAllEntries(1);
         },
         error: (err: HttpErrorResponse) => {

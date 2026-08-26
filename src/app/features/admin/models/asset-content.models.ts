@@ -8,6 +8,8 @@ export interface ContentDraftVersion {
   summary: string;
   state: 'draft' | 'published';
   entries_count: number;
+  /** True once the draft's entries have been edited after seeding. */
+  has_changes: boolean;
   created_at: string;
 }
 

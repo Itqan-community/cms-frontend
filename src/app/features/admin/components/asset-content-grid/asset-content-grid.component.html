@@ -63,7 +63,7 @@
         nz-button
         nzType="default"
         [nzLoading]="savingDraft()"
-        [disabled]="draftId() === null || publishing()"
+        [disabled]="draftId() === null || publishing() || !hasChanges()"
         (click)="saveDraft()"
       >
         {{ 'ADMIN.CONTENT_EDITOR.SAVE_DRAFT' | translate }}
@@ -71,8 +71,10 @@
       <button
         nz-button
         nzType="primary"
+        nz-tooltip
+        [nzTooltipTitle]="!hasChanges() ? ('ADMIN.CONTENT_EDITOR.NO_CHANGES_HINT' | translate) : ''"
         [nzLoading]="publishing()"
-        [disabled]="draftId() === null || savingDraft()"
+        [disabled]="draftId() === null || savingDraft() || !hasChanges()"
         (click)="publish()"
       >
         {{ 'ADMIN.CONTENT_EDITOR.SAVE' | translate }}

@@ -730,6 +730,7 @@
       "UNDO": "Undo",
       "REDO": "Redo",
       "FILTER_ALL": "All surahs",
+      "NO_CHANGES_HINT": "No changes to publish yet.",
       "SAVING": "Saving…",
       "UNSAVED": "Unsaved changes",
       "ALL_SAVED": "All changes saved to draft",
@@ -757,6 +758,7 @@
       "ERRORS": {
         "GENERIC": "Something went wrong. Please try again.",
         "VERSION_NOT_EDITABLE": "This version can no longer be edited.",
+        "NO_CHANGES_TO_PUBLISH": "There are no changes to publish.",
         "TRANSLATION_NOT_FOUND": "Translation not found.",
         "TAFSIR_NOT_FOUND": "Tafsir not found.",
         "CONTENT_FILE_UNPARSEABLE": "The uploaded file could not be parsed."

@@ -730,6 +730,7 @@
       "UNDO": "تراجع",
       "REDO": "إعادة",
       "FILTER_ALL": "كل السور",
+      "NO_CHANGES_HINT": "لا توجد تغييرات للنشر بعد.",
       "SAVING": "جارٍ الحفظ…",
       "UNSAVED": "تغييرات غير محفوظة",
       "ALL_SAVED": "تم حفظ جميع التغييرات في المسودة",
@@ -757,6 +758,7 @@
       "ERRORS": {
         "GENERIC": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
         "VERSION_NOT_EDITABLE": "لم يعد بالإمكان تحرير هذه النسخة.",
+        "NO_CHANGES_TO_PUBLISH": "لا توجد تغييرات للنشر.",
         "TRANSLATION_NOT_FOUND": "الترجمة غير موجودة.",
         "TAFSIR_NOT_FOUND": "التفسير غير موجود.",
         "CONTENT_FILE_UNPARSEABLE": "تعذّر تحليل الملف المرفوع."
