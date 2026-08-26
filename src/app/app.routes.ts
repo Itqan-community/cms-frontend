@@ -208,10 +208,11 @@ export const routes: Routes = [
         (m) => m.LicenseDetailsPage
       ),
   },
-  {
-    path: 'mushaf',
-    loadChildren: () => import('./features/mushaf/mushaf.routes').then((m) => m.mushafRoutes),
-  },
+  // Mushaf reader temporarily hidden — restore by uncommenting.
+  // {
+  //   path: 'mushaf',
+  //   loadChildren: () => import('./features/mushaf/mushaf.routes').then((m) => m.mushafRoutes),
+  // },
 
   { path: '**', redirectTo: 'gallery' },
 ];

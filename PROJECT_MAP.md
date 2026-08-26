@@ -231,9 +231,9 @@ Trust, Profile, CompleteProfile
 | `/license/:id`                | `LicenseDetailsPage`   | —                                 | License detail                                                                                                                             |
 | `/reciters`                   | `RecitersPage`         | —                                 | Public reciter directory                                                                                                                   |
 | `/reciters/:slug`             | `ReciterDetailsPage`   | —                                 | Reciter profile + recitations                                                                                                              |
-| `/mushaf`                     | `SuraIndexPage`        | `authGuard`, `publisherHostGuard` | Mushaf reader — sura index                                                                                                                 |
-| `/mushaf/:suraId`             | `SuraViewPage`         | `authGuard`, `publisherHostGuard` | Infinite-scroll mushaf pages for a surah                                                                                                   |
-| `/mushaf/:suraId/:ayahNumber` | `AyahFocusPage`        | `authGuard`, `publisherHostGuard` | Same scroll, starts on the ayah's page with highlight                                                                                      |
+| `/mushaf`                     | `SuraIndexPage`        | `authGuard`, `publisherHostGuard` | **Temporarily hidden** — route + `NAV.MUSHAF` commented out; code kept in `features/mushaf/`                                               |
+| `/mushaf/:suraId`             | `SuraViewPage`         | `authGuard`, `publisherHostGuard` | **Temporarily hidden** (same as `/mushaf`)                                                                                                 |
+| `/mushaf/:suraId/:ayahNumber` | `AyahFocusPage`        | `authGuard`, `publisherHostGuard` | **Temporarily hidden** (same as `/mushaf`)                                                                                                 |
 | `/content-standards`          | `UsageStandardsPage`   | `publisherHostGuard`              | Content guidelines                                                                                                                         |
 | `/unauthorized`               | `UnauthorizedPage`     | —                                 | Card UX; CTA + 5s countdown auto-redirect to `/gallery`; `hideHeader`; dir name typo `unautorized/`                                        |
 | `/complete-profile`           | `CompleteProfilePage`  | `authGuard`                       | Profile completion                                                                                                                         |
@@ -359,7 +359,10 @@ cards as the sidebar.
 | -------------------- | ---- | --------------------------- |
 | `LicenseDetailsPage` | Page | License information display |
 
-### 5b. Mushaf Reader (`src/app/features/mushaf/`)
+### 5b. Mushaf Reader (`src/app/features/mushaf/`) — TEMPORARILY HIDDEN
+
+**Status:** Public route (`/mushaf`) and `NAV.MUSHAF` commented out in `app.routes.ts` /
+`nav-links.ts`. Feature module kept for restore. Direct URLs fall through to gallery via `**`.
 
 **Purpose:** Auth-gated SVG mushaf reader. Renders quranpedia **quran-svg** vector pages (mushaf
 fonts baked into glyph paths) with clickable ayah polygons, fetched from the jsDelivr CDN **pinned
@@ -521,20 +524,21 @@ view-only — create binds `AdminTenantService.selectedPublisherId()`; edit show
 
 ## [ORPHANS & PENDING]
 
-| Item                                    | Status            | Notes                                                                                                               |
-| --------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `features/error/pages/unautorized/`     | Partial           | `UnauthorizedPage`: full UX + countdown redirect (directory spelling still misses `h`). `not-found` page unchanged. |
-| `features/publishers/pages/publishers/` | Stub              | Publishers directory listing page is empty.                                                                         |
-| `features/dashify/`                     | Unknown           | Minimal implementation, purpose unclear.                                                                            |
-| `features/admin/` guards                | Implemented       | `portal-access`, `permission`, `itqan-admin` guards active on admin routes.                                         |
-| `shared/directives/`                    | Empty             | Directory exists with no files.                                                                                     |
-| `features/admin/mushafs/`               | Implemented       | Portal mushaf CRUD wired to live `/portal/mushafs/` + `permissionGuard` (`portal_*_mushaf`).                        |
-| `features/admin/fonts/`                 | Implemented       | Portal font CRUD wired to live `/portal/fonts/` + `permissionGuard` (`portal_*_font`).                              |
-| `features/admin/programs/`              | Hidden (dormant)  | Module kept; `/admin/programs` route, sidebar tab, and redirect candidate removed until BE API is ready.            |
-| `features/admin/audio/`                 | Partial           | Routes defined but implementation details need verification.                                                        |
-| `features/admin/software/`              | Partial           | Routes defined but implementation details need verification.                                                        |
-| Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                         |
-| WebAuthn RP ID                          | Development mode  | `webauthnReplaceRpIdWithHostname` env flag allows RP ID patching in dev.                                            |
+| Item                                    | Status            | Notes                                                                                                                                  |
+| --------------------------------------- | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `features/error/pages/unautorized/`     | Partial           | `UnauthorizedPage`: full UX + countdown redirect (directory spelling still misses `h`). `not-found` page unchanged.                    |
+| `features/publishers/pages/publishers/` | Stub              | Publishers directory listing page is empty.                                                                                            |
+| `features/dashify/`                     | Unknown           | Minimal implementation, purpose unclear.                                                                                               |
+| `features/admin/` guards                | Implemented       | `portal-access`, `permission`, `itqan-admin` guards active on admin routes.                                                            |
+| `shared/directives/`                    | Empty             | Directory exists with no files.                                                                                                        |
+| `features/admin/mushafs/`               | Implemented       | Portal mushaf CRUD wired to live `/portal/mushafs/` + `permissionGuard` (`portal_*_mushaf`).                                           |
+| `features/admin/fonts/`                 | Implemented       | Portal font CRUD wired to live `/portal/fonts/` + `permissionGuard` (`portal_*_font`).                                                 |
+| `features/admin/programs/`              | Hidden (dormant)  | Module kept; `/admin/programs` route, sidebar tab, and redirect candidate removed until BE API is ready.                               |
+| `features/mushaf/` (reader)             | Hidden (dormant)  | Module kept; `/mushaf` route + `NAV.MUSHAF` commented out. Mobile menu now respects `hidden`. Admin small-MQ toggle exclusivity fixed. |
+| `features/admin/audio/`                 | Partial           | Routes defined but implementation details need verification.                                                                           |
+| `features/admin/software/`              | Partial           | Routes defined but implementation details need verification.                                                                           |
+| Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                                            |
+| WebAuthn RP ID                          | Development mode  | `webauthnReplaceRpIdWithHostname` env flag allows RP ID patching in dev.                                                               |
 
 ---
 
