@@ -7,25 +7,25 @@
 
 ## [TECH_STACK]
 
-| Layer        | Technology                                              | Version  |
-| ------------ | ------------------------------------------------------- | -------- |
-| Framework    | Angular (standalone components)                         | ^20.3.7  |
-| Language     | TypeScript                                              | ~5.9.2   |
-| UI Library   | NG-ZORRO (Ant Design for Angular)                       | ^20.3.1  |
-| Icons        | @ng-icons/lucide                                        | ^32.5.0  |
-| i18n         | @ngx-translate/core                                     | ^17.0.0  |
-| Styling      | LESS                                                    | ^4.2.0   |
-| Auth Backend | django-allauth (headless SPA mode)                      | —        |
-| Monitoring   | Sentry                                                  | ^10.47.0 |
-| Analytics    | Google Analytics (gtag)                                 | —        |
-| Web Vitals   | web-vitals                                              | ^5.1.0   |
-| QR Codes     | qrcode                                                  | ^1.5.4   |
-| State Mgmt   | RxJS + Angular Signals                                  | ~7.8.0   |
-| Testing      | Karma + Jasmine                                         | —        |
-| Linting      | ESLint (flat config) + Prettier                         | —        |
-| Commit       | Commitlint (conventional commits) + Husky + lint-staged | —        |
-| Package Mgr  | npm / pnpm                                              | —        |
-| Deployment   | Netlify                                                 | —        |
+| Layer        | Technology                                                 | Version  |
+| ------------ | ---------------------------------------------------------- | -------- |
+| Framework    | Angular (standalone components)                            | ^20.3.7  |
+| Language     | TypeScript                                                 | ~5.9.2   |
+| UI Library   | NG-ZORRO (Ant Design for Angular)                          | ^20.3.1  |
+| Icons        | @ng-icons/lucide                                           | ^32.5.0  |
+| i18n         | @ngx-translate/core                                        | ^17.0.0  |
+| Styling      | LESS                                                       | ^4.2.0   |
+| Auth Backend | django-allauth (headless SPA mode)                         | —        |
+| Monitoring   | Sentry                                                     | ^10.47.0 |
+| Analytics    | Google Analytics (gtag)                                    | —        |
+| Web Vitals   | web-vitals                                                 | ^5.1.0   |
+| QR Codes     | qrcode                                                     | ^1.5.4   |
+| State Mgmt   | RxJS + Angular Signals                                     | ~7.8.0   |
+| Testing      | Karma + Jasmine                                            | —        |
+| Linting      | ESLint (flat config) + Prettier                            | —        |
+| Commit       | Commitlint (conventional commits) + Husky + lint-staged    | —        |
+| Package Mgr  | npm / pnpm                                                 | —        |
+| Deployment   | Cloudflare Pages (+ Pages Functions for staging API proxy) | —        |
 
 ---
 
@@ -50,7 +50,7 @@ User Browser
     |
     |-- Sentry (error monitoring)
     |-- Google Analytics (usage tracking)
-    |-- Netlify (hosting, CD, edge redirects)
+    |-- Cloudflare Pages (hosting, CD; staging API proxy via `functions/`)
 ```
 
 ### Authentication Flow (django-allauth headless SPA)
@@ -510,15 +510,20 @@ view-only — create binds `AdminTenantService.selectedPublisherId()`; edit show
 
 ## [DEPLOYMENT]
 
-| Platform         | Netlify                                                                                                       |
-| ---------------- | ------------------------------------------------------------------------------------------------------------- | -------------------- |
-| Production       | `https://cms.itqan.dev` (master branch)                                                                       |
-| Staging          | `https://staging.cms.itqan.dev` (staging branch)                                                              |
-| Build cmd        | `npm run build:{env}`                                                                                         |
-| Publish dir      | `dist/browser`                                                                                                |
-| SPA fallback     | Deploy `netlify/production                                                                                    | staging/\_redirects` |
-| Security headers | X-Frame-Options: DENY, X-Content-Type-Options: nosniff, X-XSS-Protection, Referrer-Policy, Permissions-Policy |
-| Cache            | Static assets under `/assets/` — 1 year immutable                                                             |
+| Platform          | Cloudflare Pages                                                                                                |
+| ----------------- | --------------------------------------------------------------------------------------------------------------- |
+| Production        | `https://cms.itqan.dev` / `cms-frontend-bdh.pages.dev` (master branch)                                          |
+| Staging           | `https://staging.cms.itqan.dev` / `cms-frontend-staging.pages.dev` (staging branch)                             |
+| Build cmd         | `npm run build:{env}`                                                                                           |
+| Publish dir       | `dist/browser`                                                                                                  |
+| SPA fallback      | `deploy/cloudflare/staging/_redirects` (staging); `deploy/netlify/production/_redirects` (production)           |
+| Staging API proxy | Pages Functions in `functions/` → `https://staging.api.cms.itqan.dev` (same-origin cookies on staging hosts)    |
+| OAuth callbacks   | Allow `https://staging.cms.itqan.dev/accounts/.../callback` and preview URL on `cms-frontend-staging.pages.dev` |
+| Security headers  | X-Frame-Options: DENY, X-Content-Type-Options: nosniff, X-XSS-Protection, Referrer-Policy, Permissions-Policy   |
+| Cache             | Static assets under `/assets/` — 1 year immutable                                                               |
+
+Legacy Netlify config remains in `netlify.toml` and `deploy/netlify/*` for reference; staging deploy
+uses Cloudflare Pages Functions instead of Netlify external redirects.
 
 ---
 

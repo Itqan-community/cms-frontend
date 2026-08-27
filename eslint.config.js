@@ -31,6 +31,18 @@ module.exports = defineConfig([
     'Thumbs.db',
   ]),
 
+  // Cloudflare Pages Functions (Workers runtime, not Angular)
+  {
+    files: ['functions/**/*.ts'],
+    extends: [eslint.configs.recommended, tseslint.configs.recommended, tseslint.configs.stylistic],
+    languageOptions: {
+      parserOptions: {
+        projectService: false,
+      },
+    },
+    rules: {},
+  },
+
   // TypeScript + Angular
   {
     files: ['**/*.ts'],

@@ -1,15 +1,20 @@
 /**
- * On Netlify `staging.cms.itqan.dev`, API traffic is same-origin via `deploy/netlify/staging/_redirects`
- * so Django session cookies from `/accounts/.../callback` are visible to `/cms-api/...` XHR (split-host + SameSite=Lax fix).
- * Google/GitHub console + Django must allow `https://staging.cms.itqan.dev/accounts/.../callback` (see deploy/netlify/staging/_redirects).
+ * On Cloudflare Pages staging (`staging.cms.itqan.dev`, `cms-frontend-staging.pages.dev`),
+ * API traffic is same-origin via repo-root `functions/` proxies so Django session cookies from
+ * `/accounts/.../callback` are visible to `/cms-api/...` XHR (split-host + SameSite=Lax fix).
+ * Google/GitHub console + Django must allow `https://<staging-host>/accounts/.../callback`.
  */
-const STAGING_CMS_HOST = 'staging.cms.itqan.dev';
+const STAGING_CMS_HOSTS = ['staging.cms.itqan.dev', 'cms-frontend-staging.pages.dev'] as const;
+const STAGING_CMS_HOST = STAGING_CMS_HOSTS[0];
 
 function stagingCmsOrigin(): string | undefined {
   if (typeof window === 'undefined' || !window.location?.hostname) {
     return undefined;
   }
-  return window.location.hostname === STAGING_CMS_HOST ? window.location.origin : undefined;
+
+  return (STAGING_CMS_HOSTS as readonly string[]).includes(window.location.hostname)
+    ? window.location.origin
+    : undefined;
 }
 
 const cmsOrigin = stagingCmsOrigin();
