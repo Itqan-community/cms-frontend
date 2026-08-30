@@ -1326,6 +1326,52 @@
         "DESC_AR": "الوصف (عربي)",
         "DESC_EN": "الوصف (إنجليزي)"
       },
+      "FOLDERS": {
+        "ADD": "إضافة مجلد",
+        "SET_VARIANT": "تحديد الجودة والمؤثرات",
+        "CHANGE_VARIANT": "تغيير الجودة والمؤثرات",
+        "ACTIONS": "إجراءات المجلد",
+        "DEFAULT_BADGE": "افتراضي",
+        "FX_BADGE": "مؤثرات",
+        "HIDDEN_BADGE": "مخفي",
+        "HIDDEN_HINT": "مخفي عن الواجهة العامة — لا يظهر ولا يُتاح للتحميل.",
+        "HIDE_FROM_PUBLIC": "إخفاء عن العام",
+        "SHOW_PUBLICLY": "إظهار للعام",
+        "ERR_NAME_REQUIRED": "تعذر تحديد اسم المجلد. اختر الجودة وحاول مرة أخرى.",
+        "MODAL": {
+          "TITLE_CREATE": "إضافة مجلد",
+          "TITLE_EDIT": "الجودة والمؤثرات",
+          "SUBMIT_CREATE": "إضافة",
+          "SUBMIT_EDIT": "حفظ",
+          "HINT": "المجلد يحتوي نفس التلاوة بجودة واحدة، ويُحدَّد اسمه تلقائيًا من اختياراتك أدناه.",
+          "QUALITY_LABEL": "جودة الصوت",
+          "QUALITY_PLACEHOLDER": "اختر الجودة",
+          "QUALITY_ORIGINAL": "كما تم الرفع",
+          "QUALITY_KBPS": "‏{{kbps}} كيلوبت MP3",
+          "EFFECTS_LABEL": "الصوت",
+          "EFFECTS_OFF": "بدون مؤثرات",
+          "EFFECTS_ON": "بالمؤثرات",
+          "ALREADY_ADDED": "مضاف بالفعل",
+          "PREVIEW_LABEL": "اسم المجلد",
+          "ERR_VARIANT_TAKEN": "يوجد بالفعل مجلد بهذه الجودة والصوت لهذه التلاوة. اختر تركيبة مختلفة."
+        },
+        "DELETE": {
+          "CONFIRM_TITLE": "حذف هذا المجلد؟",
+          "CONFIRM_BODY": "سيُحذف «{{name}}» وجميع ملفات الصوت والتزمين التابعة له ({{count}} مقطعًا). لا يمكن التراجع عن هذا الإجراء.",
+          "OK": "حذف المجلد"
+        },
+        "MESSAGES": {
+          "CREATE_OK": "تم إنشاء المجلد.",
+          "RENAME_OK": "تم تحديث المجلد.",
+          "DELETE_OK": "تم حذف المجلد.",
+          "HIDDEN_OK": "تم إخفاء المجلد عن الواجهة العامة.",
+          "SHOWN_OK": "المجلد ظاهر للعام الآن.",
+          "SAVE_ERROR": "تعذر حفظ المجلد. حاول مرة أخرى.",
+          "DELETE_ERROR": "تعذر حذف المجلد. حاول مرة أخرى.",
+          "CANNOT_DELETE_DEFAULT": "لا يمكن حذف المجلد الافتراضي.",
+          "NOT_FOUND": "المجلد غير موجود."
+        }
+      },
       "DELETE": {
         "CONFIRM_TITLE": "حذف هذه التلاوة؟",
         "CONFIRM_BODY": "<b>{{name}}</b> — هذا الإجراء لا يمكن التراجع عنه.",
@@ -1337,30 +1383,6 @@
         "CREATE_SUCCESS": "تم إضافة التلاوة بنجاح",
         "UPDATE_SUCCESS": "تم تحديث التلاوة بنجاح",
         "DELETE_SUCCESS": "تم حذف التلاوة بنجاح"
-      },
-      "FOLDERS": {
-        "TITLE": "المجلدات",
-        "ADD_FOLDER": "إضافة مجلد جديد",
-        "RENAME_FOLDER": "إعادة تسمية المجلد",
-        "DELETE_FOLDER": "حذف المجلد",
-        "SET_DEFAULT": "تعيين كافتراضي",
-        "DEFAULT_TAG": "المجلد الافتراضي",
-        "ACTIONS": "إجراءات المجلد",
-        "CREATE_TITLE": "إضافة مجلد جديد",
-        "CREATE_LABEL": "اسم المجلد",
-        "CREATE_PLACEHOLDER": "أدخل اسم المجلد (مثال: حفص 1442)",
-        "RENAME_TITLE": "تعديل اسم المجلد",
-        "RENAME_LABEL": "اسم المجلد الجديد",
-        "DELETE_CONFIRM_TITLE": "حذف المجلد",
-        "DELETE_CONFIRM_BODY": "هل أنت متأكد من حذف المجلد \"{{name}}\"؟ سيتم حذف جميع السور والتوقيتات التابعة له.",
-        "CANNOT_DELETE_LAST": "لا يمكن حذف المجلد الوحيد للرواية.",
-        "MESSAGES": {
-          "CREATE_SUCCESS": "تمت إضافة المجلد بنجاح",
-          "RENAME_SUCCESS": "تم تعديل اسم المجلد بنجاح",
-          "DELETE_SUCCESS": "تم حذف المجلد بنجاح",
-          "SET_DEFAULT_SUCCESS": "تم تعيين المجلد كافتراضي بنجاح",
-          "ERROR": "حدث خطأ أثناء تنفيذ العملية"
-        }
       },
       "TRACKS": {
         "SECTION_TITLE": "الملفات الصوتية للسور",

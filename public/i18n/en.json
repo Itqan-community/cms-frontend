@@ -1326,6 +1326,52 @@
         "DESC_AR": "Description (Arabic)",
         "DESC_EN": "Description (EN)"
       },
+      "FOLDERS": {
+        "ADD": "Add folder",
+        "SET_VARIANT": "Set quality and effects",
+        "CHANGE_VARIANT": "Change quality and effects",
+        "ACTIONS": "Folder actions",
+        "DEFAULT_BADGE": "Default",
+        "FX_BADGE": "Effects",
+        "HIDDEN_BADGE": "Hidden",
+        "HIDDEN_HINT": "Hidden from the public API — not listed and not served.",
+        "HIDE_FROM_PUBLIC": "Hide from public",
+        "SHOW_PUBLICLY": "Show publicly",
+        "ERR_NAME_REQUIRED": "The folder name could not be determined. Choose a quality and try again.",
+        "MODAL": {
+          "TITLE_CREATE": "Add folder",
+          "TITLE_EDIT": "Quality and effects",
+          "SUBMIT_CREATE": "Add",
+          "SUBMIT_EDIT": "Save",
+          "HINT": "A folder holds the same recitation re-rendered at one quality. Its name is set from your choices below.",
+          "QUALITY_LABEL": "Audio quality",
+          "QUALITY_PLACEHOLDER": "Choose a quality",
+          "QUALITY_ORIGINAL": "As uploaded",
+          "QUALITY_KBPS": "{{kbps}} kbps MP3",
+          "EFFECTS_LABEL": "Sound",
+          "EFFECTS_OFF": "Plain",
+          "EFFECTS_ON": "With effects",
+          "ALREADY_ADDED": "already added",
+          "PREVIEW_LABEL": "Folder name",
+          "ERR_VARIANT_TAKEN": "This recitation already has a folder for that quality and sound. Pick a different combination."
+        },
+        "DELETE": {
+          "CONFIRM_TITLE": "Delete this folder?",
+          "CONFIRM_BODY": "This deletes “{{name}}” and all of its audio tracks and ayah timings ({{count}} track(s)). This cannot be undone.",
+          "OK": "Delete folder"
+        },
+        "MESSAGES": {
+          "CREATE_OK": "Folder created.",
+          "RENAME_OK": "Folder updated.",
+          "DELETE_OK": "Folder deleted.",
+          "HIDDEN_OK": "Folder hidden from the public API.",
+          "SHOWN_OK": "Folder is now public.",
+          "SAVE_ERROR": "Could not save the folder. Try again.",
+          "DELETE_ERROR": "Could not delete the folder. Try again.",
+          "CANNOT_DELETE_DEFAULT": "The default folder cannot be deleted.",
+          "NOT_FOUND": "Folder not found."
+        }
+      },
       "TRACKS": {
         "SECTION_TITLE": "Surah audio tracks",
         "CHOOSE_FILES": "Choose MP3 files",
@@ -1429,30 +1475,6 @@
         "CREATE_SUCCESS": "Recitation added successfully",
         "UPDATE_SUCCESS": "Recitation updated successfully",
         "DELETE_SUCCESS": "Recitation deleted successfully"
-      },
-      "FOLDERS": {
-        "TITLE": "Folders",
-        "ADD_FOLDER": "Add New Folder",
-        "RENAME_FOLDER": "Rename Folder",
-        "DELETE_FOLDER": "Delete Folder",
-        "SET_DEFAULT": "Set as Default",
-        "DEFAULT_TAG": "Default Folder",
-        "ACTIONS": "Folder Actions",
-        "CREATE_TITLE": "Add New Folder",
-        "CREATE_LABEL": "Folder Name",
-        "CREATE_PLACEHOLDER": "Enter folder name (e.g. Hafs 1442)",
-        "RENAME_TITLE": "Rename Folder",
-        "RENAME_LABEL": "New Folder Name",
-        "DELETE_CONFIRM_TITLE": "Delete Folder",
-        "DELETE_CONFIRM_BODY": "Are you sure you want to delete folder \"{{name}}\"? All tracks and timings in this folder will be deleted.",
-        "CANNOT_DELETE_LAST": "Cannot delete the last remaining folder.",
-        "MESSAGES": {
-          "CREATE_SUCCESS": "Folder added successfully",
-          "RENAME_SUCCESS": "Folder renamed successfully",
-          "DELETE_SUCCESS": "Folder deleted successfully",
-          "SET_DEFAULT_SUCCESS": "Folder set as default successfully",
-          "ERROR": "An error occurred while performing the operation"
-        }
       }
     },
     "RECITERS": {

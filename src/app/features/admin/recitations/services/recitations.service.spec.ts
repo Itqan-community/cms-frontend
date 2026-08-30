@@ -107,6 +107,7 @@ describe('RecitationsService', () => {
     );
     expect(req.request.params.get('page')).toBe('2');
     expect(req.request.params.get('page_size')).toBe('10');
+    expect(req.request.params.get('folder')).toBeNull();
     req.flush({
       count: 1,
       results: [
@@ -122,62 +123,139 @@ describe('RecitationsService', () => {
     });
   });
 
-  it('getFolders should request folders list from API and map rows', (done) => {
-    service.getFolders('my-recitation').subscribe((folders) => {
-      expect(folders.length).toBe(2);
-      expect(folders[0].id).toBe('10');
-      expect(folders[0].name).toBe('Main');
-      expect(folders[0].isDefault).toBeTrue();
-      expect(folders[1].name).toBe('Variant 2');
-      done();
-    });
+  it('recitationTracksList should pass folder query when provided', (done) => {
+    service
+      .recitationTracksList({
+        recitation_slug: 'my-recitation',
+        asset_id: 42,
+        page: 1,
+        page_size: 10,
+        folder: 'with-echo',
+      })
+      .subscribe((res) => {
+        expect(res.count).toBe(0);
+        done();
+      });
 
-    const req = httpMock.expectOne((r) =>
-      r.url.includes('/portal/recitations/my-recitation/folders/')
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url.includes('/portal/recitations/my-recitation/recitation-tracks/') && r.method === 'GET'
     );
-    expect(req.request.method).toBe('GET');
-    req.flush({
-      results: [
-        { id: 10, name: 'Main', is_default: true, track_count: 114 },
-        { id: 11, name: 'Variant 2', is_default: false, track_count: 30 },
-      ],
-    });
+    expect(req.request.params.get('folder')).toBe('with-echo');
+    req.flush({ count: 0, results: [] });
   });
 
-  it('createFolder should POST new folder data', (done) => {
-    service.createFolder('my-recitation', 'Variant 3').subscribe((folder) => {
-      expect(folder.id).toBe('12');
-      expect(folder.name).toBe('Variant 3');
+  it('should list recitation folders', (done) => {
+    service.recitationFoldersList('my-recitation').subscribe((folders) => {
+      expect(folders.length).toBe(1);
+      expect(folders[0].slug).toBe('default');
+      expect(folders[0].is_default).toBeTrue();
       done();
     });
+
+    const req = httpMock.expectOne(
+      (r) => r.url.includes('/portal/recitations/my-recitation/folders/') && r.method === 'GET'
+    );
+    req.flush([
+      {
+        id: 1,
+        name: 'Default',
+        name_ar: 'افتراضي',
+        name_en: 'Default',
+        slug: 'default',
+        is_default: true,
+        tracks_count: 2,
+        created_at: '2026-01-01T00:00:00Z',
+        updated_at: '2026-01-01T00:00:00Z',
+      },
+    ]);
+  });
+
+  it('should create a recitation folder', (done) => {
+    service
+      .recitationFolderCreate('my-recitation', { name_ar: 'صدى', name_en: 'Echo' })
+      .subscribe((folder) => {
+        expect(folder.slug).toBe('echo');
+        expect(folder.is_default).toBeFalse();
+        done();
+      });
 
     const req = httpMock.expectOne(
       (r) => r.url.includes('/portal/recitations/my-recitation/folders/') && r.method === 'POST'
     );
-    expect(req.request.body).toEqual({ name: 'Variant 3', is_default: false });
-    req.flush({ id: 12, name: 'Variant 3', is_default: false, track_count: 0 });
+    expect(req.request.body).toEqual({ name_ar: 'صدى', name_en: 'Echo' });
+    req.flush({
+      id: 2,
+      name: 'صدى',
+      name_ar: 'صدى',
+      name_en: 'Echo',
+      slug: 'echo',
+      is_default: false,
+      tracks_count: 0,
+      created_at: '2026-01-01T00:00:00Z',
+      updated_at: '2026-01-01T00:00:00Z',
+    });
   });
 
-  it('setDefaultFolder should POST set-default endpoint', (done) => {
-    service.setDefaultFolder('my-recitation', '11').subscribe((folder) => {
-      expect(folder.isDefault).toBeTrue();
+  it('should patch a recitation folder by slug', (done) => {
+    service
+      .recitationFolderPatch('my-recitation', 'echo', { name_en: 'With echo' })
+      .subscribe((folder) => {
+        expect(folder.name_en).toBe('With echo');
+        done();
+      });
+
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url.includes('/portal/recitations/my-recitation/folders/echo/') && r.method === 'PATCH'
+    );
+    expect(req.request.body).toEqual({ name_en: 'With echo' });
+    req.flush({
+      id: 2,
+      name: 'With echo',
+      name_ar: 'صدى',
+      name_en: 'With echo',
+      slug: 'echo',
+      is_default: false,
+      tracks_count: 0,
+      created_at: '2026-01-01T00:00:00Z',
+      updated_at: '2026-01-01T00:00:00Z',
+    });
+  });
+
+  it('should delete a recitation folder by slug', (done) => {
+    service.recitationFolderDelete('my-recitation', 'echo').subscribe(() => done());
+
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url.includes('/portal/recitations/my-recitation/folders/echo/') && r.method === 'DELETE'
+    );
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
+
+  it('recitationTimingUpload should append folder_id when provided', (done) => {
+    const file = new File(['{}'], '001.json', { type: 'application/json' });
+    service.recitationTimingUpload(42, [file], 9).subscribe((res) => {
+      expect(res.folder_id).toBe(9);
       done();
     });
 
-    const req = httpMock.expectOne(
-      (r) =>
-        r.url.includes('/portal/recitations/my-recitation/folders/11/set-default/') &&
-        r.method === 'POST'
-    );
-    req.flush({ id: 11, name: 'Variant 2', is_default: true, track_count: 30 });
-  });
-
-  it('deleteFolder should send DELETE request', (done) => {
-    service.deleteFolder('my-recitation', '11').subscribe(() => done());
-    const req = httpMock.expectOne(
-      (r) =>
-        r.url.includes('/portal/recitations/my-recitation/folders/11/') && r.method === 'DELETE'
-    );
-    req.flush(null);
+    const req = httpMock.expectOne((r) => r.url.includes('/portal/timing/upload/'));
+    expect(req.request.method).toBe('POST');
+    const body = req.request.body as FormData;
+    expect(body.get('asset_id')).toBe('42');
+    expect(body.get('folder_id')).toBe('9');
+    req.flush({
+      asset_id: 42,
+      folder_id: 9,
+      created_total: 1,
+      updated_total: 0,
+      skipped_total: 0,
+      missing_tracks: [],
+      file_errors: [],
+      synced_file_url: null,
+      synced_filename: '',
+    });
   });
 });

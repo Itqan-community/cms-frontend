@@ -9,4 +9,6 @@ export const environment = {
   sentryDsn: '',
   webauthnReplaceRpIdWithHostname: false,
   useProgramsMockApi: false,
+  /** Off until the portal API exposes `is_visible` on recitation folders. */
+  recitationFolderVisibility: false,
 };
