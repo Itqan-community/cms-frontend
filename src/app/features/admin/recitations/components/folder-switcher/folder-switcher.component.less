@@ -3,63 +3,90 @@
 }
 
 .folder-switcher {
-  &__tab-bar {
-    display: flex;
-    align-items: flex-end;
-    gap: 4px;
-    padding-inline: 4px;
-    padding-top: 4px;
-    border-bottom: 2px solid var(--admin-border-200);
-    overflow-x: auto;
-    overflow-y: hidden;
-    scrollbar-width: thin;
-
-    &::-webkit-scrollbar {
-      height: 4px;
+  &__tabs {
+    // ng-zorro tab bodies are unused — folder content lives below the switcher.
+    ::ng-deep .ant-tabs-content-holder {
+      display: none;
     }
 
-    &::-webkit-scrollbar-thumb {
-      background-color: var(--admin-border-300);
-      border-radius: 2px;
-    }
-  }
+    ::ng-deep .ant-tabs-nav {
+      margin-bottom: 0;
 
-  &__tab {
-    position: relative;
-    z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    flex-shrink: 0;
-    height: 38px;
-    // Overlaps the bar's bottom border so the active tab reads as connected to the panel.
-    margin-bottom: -2px;
-    color: var(--admin-text-600);
-    background: var(--admin-surface-100);
-    border: 1px solid var(--admin-border-200);
-    border-bottom: none;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    transition:
-      background 0.15s,
-      color 0.15s;
-
-    &:hover {
-      color: var(--admin-text-900);
-      background: var(--admin-surface-50);
-    }
-
-    &--active {
-      z-index: 2;
-      color: var(--admin-accent-600);
-      background: var(--admin-surface-white);
-      border-top: 2px solid var(--admin-accent-600);
-
-      &:hover {
-        color: var(--admin-accent-700);
-        background: var(--admin-surface-white);
+      &::before {
+        border-bottom-color: var(--admin-border-200);
       }
     }
 
-    // Not served publicly: muted, and striped so it reads as excluded at a glance.
+    ::ng-deep .ant-tabs-nav-wrap {
+      min-height: var(--admin-input-height);
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x;
+      overscroll-behavior-x: contain;
+      scrollbar-width: thin;
+
+      &::-webkit-scrollbar {
+        height: 4px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: var(--admin-border-300);
+        border-radius: 2px;
+      }
+    }
+
+    ::ng-deep .ant-tabs-nav-list {
+      flex-wrap: nowrap;
+    }
+
+    ::ng-deep .ant-tabs-tab {
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--admin-text-600);
+      background: transparent;
+      transition:
+        background 0.15s,
+        color 0.15s;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      flex-shrink: 0;
+      margin: 0;
+
+      &:hover {
+        color: var(--admin-accent-600);
+        background: var(--admin-accent-50);
+      }
+
+      &-active .ant-tabs-tab-btn {
+        color: var(--admin-accent-600);
+        font-weight: 700;
+      }
+    }
+
+    ::ng-deep .ant-tabs-tab-btn {
+      color: inherit;
+    }
+
+    ::ng-deep .ant-tabs-ink-bar {
+      background: var(--admin-accent-600);
+      height: 2px;
+    }
+
+    ::ng-deep .ant-tabs-extra-content {
+      display: flex;
+      align-items: center;
+      margin-inline-start: 8px;
+      flex-shrink: 0;
+    }
+  }
+
+  &__tab-title-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+
     &--hidden {
       background-image: repeating-linear-gradient(
         135deg,
@@ -67,35 +94,9 @@
         var(--admin-border-100) 6px 7px
       );
 
-      .folder-switcher__tab-title {
+      .folder-switcher__tab-name {
         color: var(--admin-text-400);
       }
-    }
-  }
-
-  &__tab-main {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    height: 100%;
-    padding-inline: 12px;
-    margin: 0;
-    font: inherit;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: inherit;
-    background: none;
-    border: 0;
-    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
-    cursor: pointer;
-
-    .folder-switcher__tab--active & {
-      font-weight: 700;
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--color-primary-400);
-      outline-offset: -2px;
     }
   }
 
@@ -104,13 +105,9 @@
     width: 16px;
     height: 16px;
     color: var(--admin-text-400);
-
-    .folder-switcher__tab--active & {
-      color: var(--admin-accent-600);
-    }
   }
 
-  &__tab-title {
+  &__tab-name {
     max-width: 180px;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -143,7 +140,7 @@
     height: 22px;
     min-width: 22px;
     padding: 0;
-    margin-inline-end: 8px;
+    margin-inline-start: 2px;
     color: var(--admin-text-400);
     background: transparent;
     border: 0;
@@ -169,36 +166,10 @@
     }
   }
 
-  &__add-tab {
+  &__add-btn {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    flex-shrink: 0;
-    height: 32px;
-    padding-inline: 12px;
-    margin-bottom: 2px;
-    margin-inline-start: 4px;
-    font-size: 0.8125rem;
-    font-weight: 500;
-    white-space: nowrap;
-    color: var(--admin-accent-600);
-    background: transparent;
-    border: 1px dashed var(--color-primary-300);
-    border-radius: var(--radius-md);
-    cursor: pointer;
-    transition:
-      background 0.15s,
-      border-color 0.15s;
-
-    &:hover {
-      background: var(--admin-accent-50);
-      border-color: var(--admin-accent-600);
-    }
-
-    &:focus-visible {
-      outline: 2px solid var(--color-primary-400);
-      outline-offset: 2px;
-    }
   }
 
   &__menu-icon {

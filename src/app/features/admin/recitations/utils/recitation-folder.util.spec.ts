@@ -115,13 +115,30 @@ describe('formatFolderVariantNames / parseFolderVariant round trip', () => {
 });
 
 describe('takenFolderVariantKeys', () => {
-  it('reserves original-without-effects for the default folder', () => {
+  it('reserves original-without-effects for an unclassified default folder', () => {
     const taken = takenFolderVariantKeys([makeFolder({ is_default: true })]);
     expect(
       taken.has(folderVariantKey({ quality: RecitationFolderQuality.ORIGINAL, hasFx: false }))
     ).toBeTrue();
     expect(
       taken.has(folderVariantKey({ quality: RecitationFolderQuality.ORIGINAL, hasFx: true }))
+    ).toBeFalse();
+  });
+
+  it('reserves the classified variant of a default folder when names match taxonomy', () => {
+    const taken = takenFolderVariantKeys([
+      makeFolder({
+        is_default: true,
+        name: '320kbps',
+        name_ar: '320 كيلوبت',
+        name_en: '320kbps',
+      }),
+    ]);
+    expect(
+      taken.has(folderVariantKey({ quality: RecitationFolderQuality.KBPS_320, hasFx: false }))
+    ).toBeTrue();
+    expect(
+      taken.has(folderVariantKey({ quality: RecitationFolderQuality.ORIGINAL, hasFx: false }))
     ).toBeFalse();
   });
 
@@ -163,8 +180,8 @@ describe('isFolderVisible / canToggleFolderVisibility', () => {
 });
 
 describe('canEditFolderVariant', () => {
-  it('never offers a variant for the default folder', () => {
-    expect(canEditFolderVariant(makeFolder({ is_default: true, tracks_count: 0 }))).toBeFalse();
+  it('always allows editing the default folder, even with tracks', () => {
+    expect(canEditFolderVariant(makeFolder({ is_default: true, tracks_count: 114 }))).toBeTrue();
   });
 
   it('always allows classifying a free-text folder', () => {

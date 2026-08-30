@@ -608,6 +608,13 @@
         <p class="recitation-detail__folder-form-hint">
           {{ 'ADMIN.RECITATIONS.FOLDERS.MODAL.HINT' | translate }}
         </p>
+        @if (folderFormTarget()?.is_default) {
+          <p
+            class="recitation-detail__folder-form-hint recitation-detail__folder-form-hint--default"
+          >
+            {{ 'ADMIN.RECITATIONS.FOLDERS.MODAL.DEFAULT_SLUG_HINT' | translate }}
+          </p>
+        }
 
         <nz-form-item>
           <nz-form-label nzRequired>{{

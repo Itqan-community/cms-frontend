@@ -9,6 +9,7 @@ import {
   lucideSquarePen,
   lucideTrash2,
 } from '@ng-icons/lucide';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import type { RecitationFolderOut } from '../../models/recitation-folders.models';
 import { FolderSwitcherComponent } from './folder-switcher.component';
@@ -47,6 +48,7 @@ describe('FolderSwitcherComponent', () => {
     await TestBed.configureTestingModule({
       imports: [FolderSwitcherComponent, TranslateModule.forRoot()],
       providers: [
+        provideNoopAnimations(),
         provideIcons({
           lucideEye,
           lucideEyeOff,
@@ -69,31 +71,30 @@ describe('FolderSwitcherComponent', () => {
     fixture.detectChanges();
   });
 
-  it('renders one tab per folder', () => {
-    const tabs = fixture.nativeElement.querySelectorAll('.folder-switcher__tab');
+  it('renders one ng-zorro tab per folder', () => {
+    const tabs = fixture.nativeElement.querySelectorAll('.ant-tabs-tab');
     expect(tabs.length).toBe(2);
     expect(tabs[0].textContent).toContain('افتراضي');
     expect(tabs[1].textContent).toContain('مع صدى');
   });
 
-  it('emits folderSelect with the slug when an inactive tab is chosen', () => {
+  it('derives selectedIndex from activeFolderSlug', () => {
+    expect(component.selectedIndex()).toBe(0);
+    fixture.componentRef.setInput('activeFolderSlug', 'with-echo');
+    fixture.detectChanges();
+    expect(component.selectedIndex()).toBe(1);
+  });
+
+  it('emits folderSelect when tab index changes to an inactive folder', () => {
     spyOn(component.folderSelect, 'emit');
-    component.onSelectTab('with-echo');
+    component.onTabIndexChange(1);
     expect(component.folderSelect.emit).toHaveBeenCalledWith('with-echo');
   });
 
-  it('does not emit folderSelect for the already active tab', () => {
+  it('does not emit folderSelect when tab index matches the active folder', () => {
     spyOn(component.folderSelect, 'emit');
-    component.onSelectTab('default');
+    component.onTabIndexChange(0);
     expect(component.folderSelect.emit).not.toHaveBeenCalled();
-  });
-
-  it('keeps exactly one tab in the roving tabindex', () => {
-    const reachable = Array.from(
-      fixture.nativeElement.querySelectorAll('.folder-switcher__tab-main')
-    ).filter((el) => (el as HTMLElement).getAttribute('tabindex') === '0');
-    expect(reachable.length).toBe(1);
-    expect(component.rovingFolderSlug()).toBe('default');
   });
 
   it('refuses to delete the default folder', () => {
@@ -123,13 +124,22 @@ describe('FolderSwitcherComponent', () => {
     expect(component.hasRowActions(echoFolder)).toBeFalse();
   });
 
-  it('offers the variant action for a free-text folder but never for the default one', () => {
+  it('offers the variant action for free-text folders and for the default folder', () => {
     expect(component.canEditVariant(echoFolder)).toBeTrue();
-    expect(component.canEditVariant(defaultFolder)).toBeFalse();
+    expect(component.canEditVariant(defaultFolder)).toBeTrue();
     expect(component.variantActionKey(echoFolder)).toContain('SET_VARIANT');
   });
 
-  it('locks the variant of a classified folder that already holds audio', () => {
+  it('allows editing the default folder even when it holds tracks', () => {
+    const busyDefault = makeFolder({ tracks_count: 114 });
+    expect(component.canEditVariant(busyDefault)).toBeTrue();
+
+    spyOn(component.renameFolder, 'emit');
+    component.onRename(busyDefault);
+    expect(component.renameFolder.emit).toHaveBeenCalledWith(busyDefault);
+  });
+
+  it('locks the variant of a classified non-default folder that already holds audio', () => {
     const classified = makeFolder({
       id: 3,
       slug: '320kbps',
@@ -181,28 +191,15 @@ describe('FolderSwitcherComponent', () => {
       expect(component.toggleVisibility.emit).toHaveBeenCalledWith(echoFolder);
     });
 
-    it('marks the tab of a hidden folder', () => {
+    it('marks the tab title of a hidden folder', () => {
       fixture.componentRef.setInput('folders', [
         defaultFolder,
         { ...echoFolder, is_visible: false },
       ]);
       fixture.detectChanges();
-      const tabs = fixture.nativeElement.querySelectorAll('.folder-switcher__tab');
-      expect(tabs[0].classList).not.toContain('folder-switcher__tab--hidden');
-      expect(tabs[1].classList).toContain('folder-switcher__tab--hidden');
+      const wraps = fixture.nativeElement.querySelectorAll('.folder-switcher__tab-title-wrap');
+      expect(wraps[0].classList).not.toContain('folder-switcher__tab-title-wrap--hidden');
+      expect(wraps[1].classList).toContain('folder-switcher__tab-title-wrap--hidden');
     });
-  });
-
-  it('tags a folder rendered with effects', () => {
-    const withFx = makeFolder({
-      id: 4,
-      slug: '192kbps-with-effects',
-      name: '192kbps with effects',
-      name_ar: '192 كيلوبت بالمؤثرات',
-      name_en: '192kbps with effects',
-      is_default: false,
-    });
-    expect(component.folderHasFx(withFx)).toBeTrue();
-    expect(component.folderHasFx(echoFolder)).toBeFalse();
   });
 });

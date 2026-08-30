@@ -103,9 +103,8 @@ export function folderVariantKey(variant: RecitationFolderVariant): string {
 /**
  * Variants already present on a recitation, so the picker can refuse duplicates.
  *
- * The default folder counts as `ORIGINAL` without effects even though its name is not
- * derived from the taxonomy: it *is* the untouched upload, and letting someone add a
- * second folder meaning the same thing is what this set exists to prevent.
+ * The default folder reserves its classified variant when parseable; otherwise it reserves
+ * `ORIGINAL` without effects. Non-default folders contribute only when their names parse.
  */
 export function takenFolderVariantKeys(
   folders: readonly RecitationFolderOut[],
@@ -115,7 +114,10 @@ export function takenFolderVariantKeys(
   for (const folder of folders) {
     if (excludeFolderSlug && folder.slug === excludeFolderSlug) continue;
     if (folder.is_default) {
-      taken.add(folderVariantKey({ quality: RecitationFolderQuality.ORIGINAL, hasFx: false }));
+      const variant = parseFolderVariant(folder);
+      taken.add(
+        folderVariantKey(variant ?? { quality: RecitationFolderQuality.ORIGINAL, hasFx: false })
+      );
       continue;
     }
     const variant = parseFolderVariant(folder);
@@ -127,14 +129,12 @@ export function takenFolderVariantKeys(
 /**
  * Whether this folder's variant may still be chosen or changed.
  *
- * The default folder is exempt: it keeps the name the backend gave it. An unclassified
- * folder can always be classified, since that only replaces a free-text name. A folder
- * already holding audio is locked, because its slug was minted from its current name and
- * is the public `?folder=` identifier — renaming it would leave that slug pointing at
- * audio it no longer describes.
+ * The default folder may always be reclassified: its slug stays `default`, so public
+ * links never break. Non-default folders lock once classified and holding audio,
+ * because their slug was minted from the name and is the public `?folder=` value.
  */
 export function canEditFolderVariant(folder: RecitationFolderOut): boolean {
-  if (folder.is_default) return false;
+  if (folder.is_default) return true;
   if (parseFolderVariant(folder) === null) return true;
   return folder.tracks_count === 0;
 }

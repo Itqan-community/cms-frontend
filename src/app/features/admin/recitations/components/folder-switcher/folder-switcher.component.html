@@ -1,120 +1,117 @@
-<div class="folder-switcher__tab-bar" role="tablist">
-  @for (folder of folders(); track folder.slug; let idx = $index) {
-    <div
-      class="folder-switcher__tab"
-      [class.folder-switcher__tab--active]="folder.slug === activeFolderSlug()"
-      [class.folder-switcher__tab--hidden]="isHidden(folder)"
-      role="presentation"
-    >
-      <button
-        #tabButton
-        type="button"
-        class="folder-switcher__tab-main"
-        role="tab"
-        [tabindex]="folder.slug === rovingFolderSlug() ? 0 : -1"
-        [attr.aria-selected]="folder.slug === activeFolderSlug()"
-        (click)="onSelectTab(folder.slug)"
-        (focus)="onTabFocus(folder.slug)"
-        (keydown)="onTabKeydown($event, idx)"
-      >
-        <ng-icon name="lucideFolder" class="folder-switcher__tab-icon" />
-        <span class="folder-switcher__tab-title">{{ folderLabel(folder) }}</span>
-        @if (folder.is_default) {
-          <nz-tag nzColor="default" class="folder-switcher__tab-tag">{{
-            'ADMIN.RECITATIONS.FOLDERS.DEFAULT_BADGE' | translate
-          }}</nz-tag>
-        }
-        @if (folderHasFx(folder)) {
-          <nz-tag nzColor="purple" class="folder-switcher__tab-tag">{{
-            'ADMIN.RECITATIONS.FOLDERS.FX_BADGE' | translate
-          }}</nz-tag>
-        }
-        @if (isHidden(folder)) {
-          <ng-icon
-            name="lucideEyeOff"
-            class="folder-switcher__tab-hidden-icon"
-            [attr.aria-label]="'ADMIN.RECITATIONS.FOLDERS.HIDDEN_BADGE' | translate"
-            [nz-tooltip]="'ADMIN.RECITATIONS.FOLDERS.HIDDEN_HINT' | translate"
-          />
-        }
-        <span class="folder-switcher__tab-count">{{ folder.tracks_count }}</span>
-      </button>
-
-      @if (hasRowActions(folder)) {
-        <button
-          nz-dropdown
-          [nzDropdownMenu]="folderMenu"
-          nzTrigger="click"
-          nz-button
-          nzType="text"
-          nzSize="small"
-          type="button"
-          class="folder-switcher__tab-menu-btn"
-          [attr.aria-label]="'ADMIN.RECITATIONS.FOLDERS.ACTIONS' | translate"
-          [nz-tooltip]="'ADMIN.RECITATIONS.FOLDERS.ACTIONS' | translate"
+<nz-tabset
+  class="folder-switcher__tabs"
+  [nzSelectedIndex]="selectedIndex()"
+  (nzSelectedIndexChange)="onTabIndexChange($event)"
+  [nzTabBarExtraContent]="canCreate() ? addFolderTpl : undefined"
+>
+  @for (folder of folders(); track folder.slug) {
+    <nz-tab [nzTitle]="folderTabTitle">
+      <ng-template #folderTabTitle>
+        <span
+          class="folder-switcher__tab-title-wrap"
+          [class.folder-switcher__tab-title-wrap--hidden]="isHidden(folder)"
         >
-          <ng-icon name="lucideSettings" />
-        </button>
-        <nz-dropdown-menu #folderMenu="nzDropdownMenu">
-          <ul nz-menu>
-            @if (canEditVariant(folder)) {
-              <li
-                nz-menu-item
-                tabindex="0"
-                (click)="onRename(folder)"
-                (keyup.enter)="onRename(folder)"
-              >
-                <ng-icon name="lucideSquarePen" class="folder-switcher__menu-icon" />
-                <span>{{ variantActionKey(folder) | translate }}</span>
-              </li>
-            }
-            @if (canHideFolder(folder)) {
-              <li
-                nz-menu-item
-                tabindex="0"
-                (click)="onToggleVisibility(folder)"
-                (keyup.enter)="onToggleVisibility(folder)"
-              >
-                <ng-icon
-                  [name]="isHidden(folder) ? 'lucideEye' : 'lucideEyeOff'"
-                  class="folder-switcher__menu-icon"
-                />
-                <span>{{
-                  (isHidden(folder)
-                    ? 'ADMIN.RECITATIONS.FOLDERS.SHOW_PUBLICLY'
-                    : 'ADMIN.RECITATIONS.FOLDERS.HIDE_FROM_PUBLIC'
-                  ) | translate
-                }}</span>
-              </li>
-            }
-            @if (canDelete()) {
-              <li
-                nz-menu-item
-                nzDanger
-                tabindex="0"
-                [nzDisabled]="folder.is_default"
-                [nz-tooltip]="
-                  folder.is_default
-                    ? ('ADMIN.RECITATIONS.FOLDERS.MESSAGES.CANNOT_DELETE_DEFAULT' | translate)
-                    : null
-                "
-                (click)="onDelete(folder)"
-                (keyup.enter)="onDelete(folder)"
-              >
-                <ng-icon name="lucideTrash2" class="folder-switcher__menu-icon" />
-                <span>{{ 'ADMIN.RECITATIONS.FOLDERS.DELETE.OK' | translate }}</span>
-              </li>
-            }
-          </ul>
-        </nz-dropdown-menu>
-      }
-    </div>
+          <ng-icon name="lucideFolder" class="folder-switcher__tab-icon" />
+          <span class="folder-switcher__tab-name">{{ folderLabel(folder) }}</span>
+          @if (folder.is_default) {
+            <nz-tag nzColor="default" class="folder-switcher__tab-tag">{{
+              'ADMIN.RECITATIONS.FOLDERS.DEFAULT_BADGE' | translate
+            }}</nz-tag>
+          }
+          @if (isHidden(folder)) {
+            <ng-icon
+              name="lucideEyeOff"
+              class="folder-switcher__tab-hidden-icon"
+              [attr.aria-label]="'ADMIN.RECITATIONS.FOLDERS.HIDDEN_BADGE' | translate"
+              [nz-tooltip]="'ADMIN.RECITATIONS.FOLDERS.HIDDEN_HINT' | translate"
+            />
+          }
+          <span class="folder-switcher__tab-count">{{ folder.tracks_count }}</span>
+          @if (hasRowActions(folder)) {
+            <button
+              nz-dropdown
+              [nzDropdownMenu]="folderMenu"
+              nzTrigger="click"
+              nz-button
+              nzType="text"
+              nzSize="small"
+              type="button"
+              class="folder-switcher__tab-menu-btn"
+              [attr.aria-label]="'ADMIN.RECITATIONS.FOLDERS.ACTIONS' | translate"
+              [nz-tooltip]="'ADMIN.RECITATIONS.FOLDERS.ACTIONS' | translate"
+              (click)="$event.stopPropagation()"
+            >
+              <ng-icon name="lucideSettings" />
+            </button>
+            <nz-dropdown-menu #folderMenu="nzDropdownMenu">
+              <ul nz-menu>
+                @if (canEditVariant(folder)) {
+                  <li
+                    nz-menu-item
+                    tabindex="0"
+                    (click)="onRename(folder)"
+                    (keyup.enter)="onRename(folder)"
+                  >
+                    <ng-icon name="lucideSquarePen" class="folder-switcher__menu-icon" />
+                    <span>{{ variantActionKey(folder) | translate }}</span>
+                  </li>
+                }
+                @if (canHideFolder(folder)) {
+                  <li
+                    nz-menu-item
+                    tabindex="0"
+                    (click)="onToggleVisibility(folder)"
+                    (keyup.enter)="onToggleVisibility(folder)"
+                  >
+                    <ng-icon
+                      [name]="isHidden(folder) ? 'lucideEye' : 'lucideEyeOff'"
+                      class="folder-switcher__menu-icon"
+                    />
+                    <span>{{
+                      (isHidden(folder)
+                        ? 'ADMIN.RECITATIONS.FOLDERS.SHOW_PUBLICLY'
+                        : 'ADMIN.RECITATIONS.FOLDERS.HIDE_FROM_PUBLIC'
+                      ) | translate
+                    }}</span>
+                  </li>
+                }
+                @if (canDelete()) {
+                  <li
+                    nz-menu-item
+                    nzDanger
+                    tabindex="0"
+                    [nzDisabled]="folder.is_default"
+                    [nz-tooltip]="
+                      folder.is_default
+                        ? ('ADMIN.RECITATIONS.FOLDERS.MESSAGES.CANNOT_DELETE_DEFAULT' | translate)
+                        : null
+                    "
+                    (click)="onDelete(folder)"
+                    (keyup.enter)="onDelete(folder)"
+                  >
+                    <ng-icon name="lucideTrash2" class="folder-switcher__menu-icon" />
+                    <span>{{ 'ADMIN.RECITATIONS.FOLDERS.DELETE.OK' | translate }}</span>
+                  </li>
+                }
+              </ul>
+            </nz-dropdown-menu>
+          }
+        </span>
+      </ng-template>
+    </nz-tab>
   }
+</nz-tabset>
 
-  @if (canCreate()) {
-    <button type="button" class="folder-switcher__add-tab" (click)="addFolder.emit()">
-      <ng-icon name="lucidePlus" />
-      <span>{{ 'ADMIN.RECITATIONS.FOLDERS.ADD' | translate }}</span>
-    </button>
-  }
-</div>
+<ng-template #addFolderTpl>
+  <button
+    nz-button
+    nzType="dashed"
+    nzSize="small"
+    type="button"
+    class="folder-switcher__add-btn"
+    (click)="addFolder.emit()"
+  >
+    <ng-icon name="lucidePlus" />
+    {{ 'ADMIN.RECITATIONS.FOLDERS.ADD' | translate }}
+  </button>
+</ng-template>
