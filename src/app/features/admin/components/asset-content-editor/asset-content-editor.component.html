@@ -5,6 +5,11 @@
     </a>
     <h1 class="content-editor__title">
       {{ 'ADMIN.CONTENT_EDITOR.TITLE' | translate }}
+      @if (grid(); as g) {
+        @if (!g.loading()) {
+          <app-admin-title-count [count]="g.entriesTotal()" />
+        }
+      }
     </h1>
     <p class="content-editor__hint">
       {{ 'ADMIN.CONTENT_EDITOR.HINT' | translate }}

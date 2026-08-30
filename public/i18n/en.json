@@ -1409,6 +1409,7 @@
         "UPLOAD_MIXED_CONFIRM_CONTENT": "{{ignored}} file(s) will be ignored (invalid or skipped). {{valid}} file(s) will be uploaded. Continue?",
         "UPLOAD_MIXED_CONFIRM_OK": "Upload",
         "LIST_TITLE": "Uploaded surah audio files",
+        "UPLOAD_QUEUE_TITLE": "Pending uploads",
         "NO_AUDIO_URL": "No playback URL",
         "DELETE_TRACK": "Delete audio file",
         "EMPTY_TITLE": "No audio files yet",

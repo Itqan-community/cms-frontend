@@ -21,7 +21,8 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { NzPaginationModule } from 'ng-zorro-antd/pagination';
+import { AdminTitleCountComponent } from '../../../components/admin-title-count/admin-title-count.component';
+import { AdminTablePaginationComponent } from '../../../components/admin-table-pagination/admin-table-pagination.component';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzSelectModule } from 'ng-zorro-antd/select';
@@ -81,7 +82,8 @@ const MAX_MP3_FILES = 114;
     NzTagModule,
     TranslateModule,
     NzTableModule,
-    NzPaginationModule,
+    AdminTitleCountComponent,
+    AdminTablePaginationComponent,
     NzProgressModule,
     NzAlertModule,
     NzFormModule,
