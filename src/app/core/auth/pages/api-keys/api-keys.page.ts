@@ -78,47 +78,69 @@ export class ApiKeysPage implements OnInit {
     }
   }
 
-  async onCreate(): Promise<void> {
-    if (this.createForm.invalid) {
-      this.createForm.markAllAsTouched();
+readonly localRawKeys = signal<Record<string, string>>((() => {
+  try {
+    const saved = localStorage.getItem('app_saved_api_keys');
+    return saved ? JSON.parse(saved) : {};
+  } catch {
+    return {};
+  }
+})());
+
+async onCreate(): Promise<void> {
+  if (this.createForm.invalid) {
+    this.createForm.markAllAsTouched();
+    return;
+  }
+  const name = this.createForm.controls.name.value.trim();
+
+  this.pageError.set('');
+  this.successMsg.set('');
+  this.isLoading.set(true);
+  try {
+    const result = await firstValueFrom(this.auth.createApiKey({ name }));
+
+    // 2. حفظ الـ rawKey في الـ Signal وفي الـ localStorage مع بعض
+    if (result.rawKey && result.key?.id) {
+      this.localRawKeys.update(prev => {
+        const updated = { ...prev, [result.key.id]: result.rawKey };
+        try {
+          localStorage.setItem('app_saved_api_keys', JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+    }
+
+    this.successMsg.set(this.translate.instant('AUTH.API_KEYS.CREATE_SUCCESS'));
+    this.createForm.reset({ name: '' });
+    this.showCreateForm.set(false);
+    await this.reloadQuiet();
+
+    if (!result.rawKey.trim()) {
+      this.pageError.set(this.translate.instant('AUTH.API_KEYS.CREATE_MISSING_RAW_HINT'));
+    }
+  } catch (e) {
+    if (e instanceof HttpErrorResponse && tryNavigateForAuth401(this.router, e)) {
       return;
     }
-    const name = this.createForm.controls.name.value.trim();
-
-    this.pageError.set('');
-    this.successMsg.set('');
-    this.isLoading.set(true);
-    try {
-      const result = await firstValueFrom(this.auth.createApiKey({ name }));
-      this.revealedRawKey.set({
-        keyLabel: result.key.name || name,
-        raw: result.rawKey,
-      });
-      this.successMsg.set(this.translate.instant('AUTH.API_KEYS.CREATE_SUCCESS'));
-      this.createForm.reset({ name: '' });
-      this.showCreateForm.set(false);
-      await this.reloadQuiet();
-      if (!result.rawKey.trim()) {
-        this.pageError.set(this.translate.instant('AUTH.API_KEYS.CREATE_MISSING_RAW_HINT'));
-      }
-    } catch (e) {
-      if (e instanceof HttpErrorResponse && tryNavigateForAuth401(this.router, e)) {
-        return;
-      }
-      this.pageError.set(
-        e instanceof HttpErrorResponse
-          ? resolveAuthErrorMessage(
-              e,
-              { fallbackKey: 'AUTH.API_KEYS.ACTION_ERROR', context: 'api_keys' },
-              this.translate
-            )
-          : this.translate.instant('AUTH.API_KEYS.ACTION_ERROR')
-      );
-    } finally {
-      this.isLoading.set(false);
-    }
+    this.pageError.set(
+      e instanceof HttpErrorResponse
+        ? resolveAuthErrorMessage(
+            e,
+            { fallbackKey: 'AUTH.API_KEYS.ACTION_ERROR', context: 'api_keys' },
+            this.translate
+          )
+        : this.translate.instant('AUTH.API_KEYS.ACTION_ERROR')
+    );
+  } finally {
+    this.isLoading.set(false);
   }
+}
 
+// 3. دالة العرض زي ما هي
+getKeyDisplay(k: ManagedApiKey): string {
+  return this.localRawKeys()[k.id] || k.maskedKey;
+}
   /** Reload list without clearing unrelated banners (after create). */
   private async reloadQuiet(): Promise<void> {
     this.isLoading.set(true);

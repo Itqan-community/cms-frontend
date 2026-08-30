@@ -26,7 +26,7 @@
           </p>
           <p class="account-manage__hint">{{ 'AUTH.API_KEYS.REVEAL_HINT' | translate }}</p>
           @if (reveal.raw) {
-            <div class="account-manage__mono">{{ reveal.raw }}</div>
+            <div class="account-manage__mono">{{reveal.raw }}</div>
           } @else {
             <p class="account-manage__hint">{{ 'AUTH.API_KEYS.REVEAL_EMPTY' | translate }}</p>
           }
@@ -39,14 +39,14 @@
             >
               {{ 'AUTH.API_KEYS.COPY' | translate }}
             </button>
-            <button
+            <!-- <button
               type="button"
               class="account-manage__btn account-manage__btn--secondary"
               [disabled]="isLoading()"
               (click)="dismissReveal()"
             >
               {{ 'AUTH.API_KEYS.DONE' | translate }}
-            </button>
+            </button> -->
           </div>
         </div>
       }
@@ -143,7 +143,21 @@
                 } @else {
                   <div style="font-weight: 600; margin-top: 4px">{{ k.name }}</div>
                 }
-                <div class="account-manage__mono">{{ k.maskedKey }}</div>
+                <!-- عرض المفتاح بالكامل + زر النسخ -->
+<div class="account-manage__row" style="margin-bottom: 8px; gap: 8px; align-items: center">
+  <div class="account-manage__mono" style="word-break: break-all; flex: 1">
+    {{ getKeyDisplay(k) }}
+  </div>
+  <button
+    type="button"
+    class="account-manage__btn account-manage__btn--secondary"
+    (click)="copyRawKey(getKeyDisplay(k))"
+  >
+    {{ 'AUTH.API_KEYS.COPY' | translate }}
+  </button>
+</div>
+
+
                 <p class="account-manage__hint">
                   @if (k.createdAt) {
                     {{ 'AUTH.API_KEYS.CREATED' | translate }}: {{ k.createdAt }}
