@@ -141,7 +141,7 @@ describe('FolderSwitcherComponent', () => {
     expect(component.renameFolder.emit).toHaveBeenCalledWith(busyDefault);
   });
 
-  it('locks the variant of a classified non-default folder that already holds audio', () => {
+  it('allows editing a classified non-default folder even when it holds audio', () => {
     const classified = makeFolder({
       id: 3,
       slug: '320kbps',
@@ -151,12 +151,12 @@ describe('FolderSwitcherComponent', () => {
       is_default: false,
       tracks_count: 40,
     });
-    expect(component.canEditVariant(classified)).toBeFalse();
+    expect(component.canEditVariant(classified)).toBeTrue();
     expect(component.variantActionKey(classified)).toContain('CHANGE_VARIANT');
 
     spyOn(component.renameFolder, 'emit');
     component.onRename(classified);
-    expect(component.renameFolder.emit).not.toHaveBeenCalled();
+    expect(component.renameFolder.emit).toHaveBeenCalledWith(classified);
   });
 
   it('hides the visibility action entirely while the backend flag is off', () => {

@@ -529,7 +529,7 @@ export class RecitationDetailComponent implements OnInit {
     this.folderFormModalVisible.set(true);
   }
 
-  /** Assigns a variant to an unclassified folder, or corrects one that holds no audio yet. */
+  /** Assigns or updates a folder's quality/effects variant. */
   openRenameFolderModal(folder: RecitationFolderOut): void {
     if (!canEditFolderVariant(folder)) return;
     const current = parseFolderVariant(folder);

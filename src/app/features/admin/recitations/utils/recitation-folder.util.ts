@@ -129,14 +129,11 @@ export function takenFolderVariantKeys(
 /**
  * Whether this folder's variant may still be chosen or changed.
  *
- * The default folder may always be reclassified: its slug stays `default`, so public
- * links never break. Non-default folders lock once classified and holding audio,
- * because their slug was minted from the name and is the public `?folder=` value.
+ * Always allowed: PATCH only updates display names; folder slugs are set at creation
+ * and stay fixed, so reclassifying does not break existing ?folder= links.
  */
 export function canEditFolderVariant(folder: RecitationFolderOut): boolean {
-  if (folder.is_default) return true;
-  if (parseFolderVariant(folder) === null) return true;
-  return folder.tracks_count === 0;
+  return Boolean(folder.slug);
 }
 
 /** A folder is public unless the API says otherwise; see `is_visible` on the model. */

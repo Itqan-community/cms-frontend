@@ -610,7 +610,7 @@
         <p class="recitation-detail__folder-form-hint">
           {{ 'ADMIN.RECITATIONS.FOLDERS.MODAL.HINT' | translate }}
         </p>
-        @if (folderFormTarget()?.is_default) {
+        @if (folderFormTarget()?.slug === 'default') {
           <p
             class="recitation-detail__folder-form-hint recitation-detail__folder-form-hint--default"
           >
