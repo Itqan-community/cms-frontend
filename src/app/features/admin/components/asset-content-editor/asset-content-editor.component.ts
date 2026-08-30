@@ -21,7 +21,7 @@ import { AssetContentGridComponent } from '../asset-content-grid/asset-content-g
 })
 export class AssetContentEditorComponent implements OnInit, HasUnsavedContent {
   private readonly route = inject(ActivatedRoute);
-  private readonly grid = viewChild(AssetContentGridComponent);
+  readonly grid = viewChild(AssetContentGridComponent);
 
   readonly kind = signal<AssetVersionParentKind>('translation');
   readonly slug = signal<string>('');
