@@ -119,22 +119,22 @@
       </div>
     </div>
 
-    <section class="admin-panel recitation-detail__folders-section">
-      <h2 class="admin-panel__title">
-        <ng-icon name="lucideFolderOpen" />
-        {{ 'ADMIN.RECITATIONS.FOLDERS.TITLE' | translate }}
-      </h2>
+    @if (folders().length) {
       <app-folder-switcher
+        class="recitation-detail__folders"
         [folders]="folders()"
-        [activeFolderId]="activeFolderId()"
-        [canManage]="canUpdateRecitation()"
+        [activeFolderSlug]="selectedFolderSlug()"
+        [canCreate]="canCreateFolder()"
+        [canRename]="canUpdateRecitation()"
+        [canDelete]="canDeleteRecitation()"
+        [canToggleVisibility]="canToggleFolderVisibility()"
         (folderSelect)="onFolderSelect($event)"
-        (setDefault)="onSetDefaultFolder($event)"
-        (createFolder)="onCreateFolder($event)"
-        (renameFolder)="onRenameFolder($event)"
-        (deleteFolder)="onDeleteFolder($event)"
+        (addFolder)="openCreateFolderModal()"
+        (renameFolder)="openRenameFolderModal($event)"
+        (deleteFolder)="confirmDeleteFolder($event)"
+        (toggleVisibility)="onToggleFolderVisibility($event)"
       />
-    </section>
+    }
 
     <section class="admin-panel recitation-detail__timings-section">
       <h2 class="admin-panel__title">
@@ -143,12 +143,12 @@
       </h2>
 
       <div class="recitation-detail__timings-panel">
-        @if (recitation()!.ayah_timings_url) {
+        @if (timingDownloadUrl()) {
           <div class="recitation-detail__timings-row">
             <a
               nz-button
               nzType="default"
-              [href]="recitation()!.ayah_timings_url!"
+              [href]="timingDownloadUrl()!"
               target="_blank"
               rel="noopener noreferrer"
               download
@@ -579,4 +579,103 @@
       <a routerLink="/admin/recitations">{{ 'ADMIN.COMMON.BACK_TO_LIST' | translate }}</a>
     </div>
   }
+
+  <nz-modal
+    [nzVisible]="folderFormModalVisible()"
+    (nzVisibleChange)="onFolderFormVisibleChange($event)"
+    (nzOnCancel)="onFolderFormVisibleChange(false)"
+    [nzTitle]="
+      (folderFormMode() === 'create'
+        ? 'ADMIN.RECITATIONS.FOLDERS.MODAL.TITLE_CREATE'
+        : 'ADMIN.RECITATIONS.FOLDERS.MODAL.TITLE_EDIT'
+      ) | translate
+    "
+    [nzWidth]="'min(520px, 92vw)'"
+    nzCentered
+    [nzOkLoading]="folderFormSubmitting()"
+    [nzOkText]="
+      (folderFormMode() === 'create'
+        ? 'ADMIN.RECITATIONS.FOLDERS.MODAL.SUBMIT_CREATE'
+        : 'ADMIN.RECITATIONS.FOLDERS.MODAL.SUBMIT_EDIT'
+      ) | translate
+    "
+    [nzCancelText]="'ADMIN.COMMON.CANCEL' | translate"
+    [nzOkDisabled]="folderForm.invalid || selectedVariantTaken()"
+    (nzOnOk)="submitFolderForm()"
+  >
+    <ng-container *nzModalContent>
+      <form nz-form [formGroup]="folderForm" nzLayout="vertical">
+        <p class="recitation-detail__folder-form-hint">
+          {{ 'ADMIN.RECITATIONS.FOLDERS.MODAL.HINT' | translate }}
+        </p>
+        @if (folderFormTarget()?.is_default) {
+          <p
+            class="recitation-detail__folder-form-hint recitation-detail__folder-form-hint--default"
+          >
+            {{ 'ADMIN.RECITATIONS.FOLDERS.MODAL.DEFAULT_SLUG_HINT' | translate }}
+          </p>
+        }
+
+        <nz-form-item>
+          <nz-form-label nzRequired>{{
+            'ADMIN.RECITATIONS.FOLDERS.MODAL.QUALITY_LABEL' | translate
+          }}</nz-form-label>
+          <nz-form-control>
+            <nz-select
+              formControlName="quality"
+              [nzPlaceHolder]="'ADMIN.RECITATIONS.FOLDERS.MODAL.QUALITY_PLACEHOLDER' | translate"
+            >
+              @for (option of qualityOptions(); track option.quality) {
+                <nz-option
+                  [nzValue]="option.quality"
+                  [nzLabel]="option.labelKey | translate: option.labelParams"
+                  [nzDisabled]="option.fullyTaken"
+                />
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+
+        <nz-form-item>
+          <nz-form-label nzRequired>{{
+            'ADMIN.RECITATIONS.FOLDERS.MODAL.EFFECTS_LABEL' | translate
+          }}</nz-form-label>
+          <nz-form-control>
+            <nz-radio-group formControlName="hasFx">
+              @for (option of effectsOptions(); track option.hasFx) {
+                <!-- nz-radio renders its own input inside this label, which associates them implicitly. -->
+                <!-- eslint-disable-next-line @angular-eslint/template/label-has-associated-control -->
+                <label nz-radio [nzValue]="option.hasFx" [nzDisabled]="option.taken">
+                  {{ option.label | translate }}
+                  @if (option.taken) {
+                    <span class="recitation-detail__folder-form-taken">{{
+                      'ADMIN.RECITATIONS.FOLDERS.MODAL.ALREADY_ADDED' | translate
+                    }}</span>
+                  }
+                </label>
+              }
+            </nz-radio-group>
+          </nz-form-control>
+        </nz-form-item>
+
+        @if (folderNamePreview(); as preview) {
+          <div class="recitation-detail__folder-preview">
+            <span class="recitation-detail__folder-preview-label">{{
+              'ADMIN.RECITATIONS.FOLDERS.MODAL.PREVIEW_LABEL' | translate
+            }}</span>
+            <span class="recitation-detail__folder-preview-name">{{ preview.name_ar }}</span>
+            <span class="recitation-detail__folder-preview-name" dir="ltr">{{
+              preview.name_en
+            }}</span>
+          </div>
+        }
+
+        @if (selectedVariantTaken()) {
+          <p class="recitation-detail__folder-form-error">
+            {{ 'ADMIN.RECITATIONS.FOLDERS.MODAL.ERR_VARIANT_TAKEN' | translate }}
+          </p>
+        }
+      </form>
+    </ng-container>
+  </nz-modal>
 </div>

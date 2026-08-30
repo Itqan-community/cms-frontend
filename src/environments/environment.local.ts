@@ -13,4 +13,6 @@ export const environment = {
   /** Set `true` only if this API issues WebAuthn with `rp.id` / `rpId` equal to `location.hostname`. */
   webauthnReplaceRpIdWithHostname: false,
   useProgramsMockApi: true,
+  /** Off until the portal API exposes `is_visible` on recitation folders. */
+  recitationFolderVisibility: false,
 };

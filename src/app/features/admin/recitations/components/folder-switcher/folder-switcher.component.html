@@ -1,39 +1,33 @@
-<div class="folder-switcher">
-  <div class="folder-switcher__tab-bar" role="tablist">
-    @for (folder of folders(); track folder.id; let idx = $index) {
-      <div
-        class="folder-switcher__tab"
-        [class.folder-switcher__tab--active]="folder.id === activeFolderId()"
-        [class.folder-switcher__tab--default]="folder.isDefault"
-        role="presentation"
-      >
-        <button
-          #tabButton
-          type="button"
-          class="folder-switcher__tab-main"
-          role="tab"
-          [tabindex]="folder.id === rovingFolderId() ? 0 : -1"
-          [attr.aria-selected]="folder.id === activeFolderId()"
-          (click)="onSelectTab(folder.id)"
-          (focus)="onTabFocus(folder.id)"
-          (keydown)="onTabKeydown($event, idx)"
+<nz-tabset
+  class="folder-switcher__tabs"
+  [nzSelectedIndex]="selectedIndex()"
+  (nzSelectedIndexChange)="onTabIndexChange($event)"
+  [nzTabBarExtraContent]="canCreate() ? addFolderTpl : undefined"
+>
+  @for (folder of folders(); track folder.slug) {
+    <nz-tab [nzTitle]="folderTabTitle">
+      <ng-template #folderTabTitle>
+        <span
+          class="folder-switcher__tab-title-wrap"
+          [class.folder-switcher__tab-title-wrap--hidden]="isHidden(folder)"
         >
-          @if (folder.isDefault) {
-            <span
-              class="folder-switcher__star-wrapper"
-              [nz-tooltip]="'ADMIN.RECITATIONS.FOLDERS.DEFAULT_TAG' | translate"
-            >
-              <ng-icon name="lucideStar" class="folder-switcher__star-icon" />
-            </span>
-          } @else {
-            <ng-icon name="lucideFolder" class="folder-switcher__folder-icon" />
+          <ng-icon name="lucideFolder" class="folder-switcher__tab-icon" />
+          <span class="folder-switcher__tab-name">{{ folderLabel(folder) }}</span>
+          @if (folder.is_default) {
+            <nz-tag nzColor="default" class="folder-switcher__tab-tag">{{
+              'ADMIN.RECITATIONS.FOLDERS.DEFAULT_BADGE' | translate
+            }}</nz-tag>
           }
-          <span class="folder-switcher__tab-title">{{ folder.name }}</span>
-          <span class="folder-switcher__tab-badge">({{ folder.trackCount }})</span>
-        </button>
-
-        @if (canManage()) {
-          <div class="folder-switcher__tab-actions">
+          @if (isHidden(folder)) {
+            <ng-icon
+              name="lucideEyeOff"
+              class="folder-switcher__tab-hidden-icon"
+              [attr.aria-label]="'ADMIN.RECITATIONS.FOLDERS.HIDDEN_BADGE' | translate"
+              [nz-tooltip]="'ADMIN.RECITATIONS.FOLDERS.HIDDEN_HINT' | translate"
+            />
+          }
+          <span class="folder-switcher__tab-count">{{ folder.tracks_count }}</span>
+          @if (hasRowActions(folder)) {
             <button
               nz-dropdown
               [nzDropdownMenu]="folderMenu"
@@ -41,137 +35,83 @@
               nz-button
               nzType="text"
               nzSize="small"
-              class="folder-switcher__more-btn"
+              type="button"
+              class="folder-switcher__tab-menu-btn"
               [attr.aria-label]="'ADMIN.RECITATIONS.FOLDERS.ACTIONS' | translate"
+              [nz-tooltip]="'ADMIN.RECITATIONS.FOLDERS.ACTIONS' | translate"
+              (click)="$event.stopPropagation()"
             >
               <ng-icon name="lucideSettings" />
             </button>
             <nz-dropdown-menu #folderMenu="nzDropdownMenu">
               <ul nz-menu>
-                @if (!folder.isDefault) {
+                @if (canEditVariant(folder)) {
                   <li
                     nz-menu-item
                     tabindex="0"
-                    (click)="onSetDefault(folder.id)"
-                    (keyup.enter)="onSetDefault(folder.id)"
+                    (click)="onRename(folder)"
+                    (keyup.enter)="onRename(folder)"
                   >
-                    <ng-icon name="lucideStar" class="folder-switcher__menu-icon--star" />
-                    <span>{{ 'ADMIN.RECITATIONS.FOLDERS.SET_DEFAULT' | translate }}</span>
+                    <ng-icon name="lucideSquarePen" class="folder-switcher__menu-icon" />
+                    <span>{{ variantActionKey(folder) | translate }}</span>
                   </li>
                 }
-                <li
-                  nz-menu-item
-                  tabindex="0"
-                  (click)="openRenameModal(folder)"
-                  (keyup.enter)="openRenameModal(folder)"
-                >
-                  <ng-icon name="lucideSquarePen" class="folder-switcher__menu-icon" />
-                  <span>{{ 'ADMIN.RECITATIONS.FOLDERS.RENAME_FOLDER' | translate }}</span>
-                </li>
-                <li
-                  nz-menu-item
-                  nzDanger
-                  tabindex="0"
-                  [nzDisabled]="folders().length <= 1"
-                  (click)="confirmDelete(folder)"
-                  (keyup.enter)="confirmDelete(folder)"
-                >
-                  <ng-icon name="lucideTrash2" class="folder-switcher__menu-icon" />
-                  <span>{{ 'ADMIN.RECITATIONS.FOLDERS.DELETE_FOLDER' | translate }}</span>
-                </li>
+                @if (canHideFolder(folder)) {
+                  <li
+                    nz-menu-item
+                    tabindex="0"
+                    (click)="onToggleVisibility(folder)"
+                    (keyup.enter)="onToggleVisibility(folder)"
+                  >
+                    <ng-icon
+                      [name]="isHidden(folder) ? 'lucideEye' : 'lucideEyeOff'"
+                      class="folder-switcher__menu-icon"
+                    />
+                    <span>{{
+                      (isHidden(folder)
+                        ? 'ADMIN.RECITATIONS.FOLDERS.SHOW_PUBLICLY'
+                        : 'ADMIN.RECITATIONS.FOLDERS.HIDE_FROM_PUBLIC'
+                      ) | translate
+                    }}</span>
+                  </li>
+                }
+                @if (canDelete()) {
+                  <li
+                    nz-menu-item
+                    nzDanger
+                    tabindex="0"
+                    [nzDisabled]="folder.is_default"
+                    [nz-tooltip]="
+                      folder.is_default
+                        ? ('ADMIN.RECITATIONS.FOLDERS.MESSAGES.CANNOT_DELETE_DEFAULT' | translate)
+                        : null
+                    "
+                    (click)="onDelete(folder)"
+                    (keyup.enter)="onDelete(folder)"
+                  >
+                    <ng-icon name="lucideTrash2" class="folder-switcher__menu-icon" />
+                    <span>{{ 'ADMIN.RECITATIONS.FOLDERS.DELETE.OK' | translate }}</span>
+                  </li>
+                }
               </ul>
             </nz-dropdown-menu>
-          </div>
-        }
-      </div>
-    }
+          }
+        </span>
+      </ng-template>
+    </nz-tab>
+  }
+</nz-tabset>
 
-    @if (canManage()) {
-      <button
-        type="button"
-        class="folder-switcher__add-tab"
-        [attr.title]="'ADMIN.RECITATIONS.FOLDERS.ADD_FOLDER' | translate"
-        (click)="openCreateModal()"
-      >
-        <ng-icon name="lucidePlus" />
-        <span class="folder-switcher__add-label">{{
-          'ADMIN.RECITATIONS.FOLDERS.ADD_FOLDER' | translate
-        }}</span>
-      </button>
-    }
-  </div>
-
-  <!-- Create Folder Modal -->
-  <nz-modal
-    [nzVisible]="isCreateModalVisible()"
-    [nzTitle]="'ADMIN.RECITATIONS.FOLDERS.CREATE_TITLE' | translate"
-    [nzOkText]="'ADMIN.COMMON.ADD' | translate"
-    [nzCancelText]="'ADMIN.COMMON.CANCEL' | translate"
-    [nzOkDisabled]="!newFolderName().trim()"
-    (nzOnCancel)="closeCreateModal()"
-    (nzOnOk)="submitCreate()"
+<ng-template #addFolderTpl>
+  <button
+    nz-button
+    nzType="dashed"
+    nzSize="small"
+    type="button"
+    class="folder-switcher__add-btn"
+    (click)="addFolder.emit()"
   >
-    <ng-container *nzModalContent>
-      <div class="folder-switcher__modal-form">
-        <label for="createFolderNameInput" class="folder-switcher__field-label">{{
-          'ADMIN.RECITATIONS.FOLDERS.CREATE_LABEL' | translate
-        }}</label>
-        <input
-          id="createFolderNameInput"
-          nz-input
-          [placeholder]="'ADMIN.RECITATIONS.FOLDERS.CREATE_PLACEHOLDER' | translate"
-          [ngModel]="newFolderName()"
-          (ngModelChange)="newFolderName.set($event)"
-          (keydown.enter)="submitCreate()"
-        />
-      </div>
-    </ng-container>
-  </nz-modal>
-
-  <!-- Rename Folder Modal -->
-  <nz-modal
-    [nzVisible]="isRenameModalVisible()"
-    [nzTitle]="'ADMIN.RECITATIONS.FOLDERS.RENAME_TITLE' | translate"
-    [nzOkText]="'ADMIN.COMMON.SAVE' | translate"
-    [nzCancelText]="'ADMIN.COMMON.CANCEL' | translate"
-    [nzOkDisabled]="!renameFolderName().trim()"
-    (nzOnCancel)="closeRenameModal()"
-    (nzOnOk)="submitRename()"
-  >
-    <ng-container *nzModalContent>
-      <div class="folder-switcher__modal-form">
-        <label for="renameFolderNameInput" class="folder-switcher__field-label">{{
-          'ADMIN.RECITATIONS.FOLDERS.RENAME_LABEL' | translate
-        }}</label>
-        <input
-          id="renameFolderNameInput"
-          nz-input
-          [ngModel]="renameFolderName()"
-          (ngModelChange)="renameFolderName.set($event)"
-          (keydown.enter)="submitRename()"
-        />
-      </div>
-    </ng-container>
-  </nz-modal>
-
-  <!-- Delete Folder Confirmation Modal -->
-  <nz-modal
-    [nzVisible]="isDeleteConfirmVisible()"
-    [nzTitle]="'ADMIN.RECITATIONS.FOLDERS.DELETE_CONFIRM_TITLE' | translate"
-    [nzOkText]="'ADMIN.COMMON.DELETE' | translate"
-    nzOkType="primary"
-    [nzOkDanger]="true"
-    [nzCancelText]="'ADMIN.COMMON.CANCEL' | translate"
-    (nzOnCancel)="closeDeleteConfirm()"
-    (nzOnOk)="submitDelete()"
-  >
-    <ng-container *nzModalContent>
-      <p>
-        {{
-          'ADMIN.RECITATIONS.FOLDERS.DELETE_CONFIRM_BODY'
-            | translate: { name: deletingFolder()?.name ?? '' }
-        }}
-      </p>
-    </ng-container>
-  </nz-modal>
-</div>
+    <ng-icon name="lucidePlus" />
+    {{ 'ADMIN.RECITATIONS.FOLDERS.ADD' | translate }}
+  </button>
+</ng-template>

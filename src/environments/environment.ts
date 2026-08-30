@@ -12,4 +12,10 @@ export const environment = {
   webauthnReplaceRpIdWithHostname: false,
   /** In-memory programs CRUD until portal programs API is live. */
   useProgramsMockApi: true,
+  /**
+   * Recitation folder public visibility toggle. Off until the portal API exposes
+   * `is_visible` on folders — a toggle that cannot actually hide a folder would tell
+   * admins something untrue, so the control is not rendered rather than mocked.
+   */
+  recitationFolderVisibility: false,
 };

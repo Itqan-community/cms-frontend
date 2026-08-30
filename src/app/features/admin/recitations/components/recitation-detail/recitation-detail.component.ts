@@ -10,21 +10,33 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
+import { NzRadioModule } from 'ng-zorro-antd/radio';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { environment } from '../../../../../../environments/environment';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
 import { GoogleAnalyticsService } from '../../../../../core/services/google-analytics.service';
+import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
+import {
+  RecitationFolderQuality,
+  type RecitationFolderOut,
+  type RecitationFolderVariant,
+} from '../../models/recitation-folders.models';
 import type {
   RecitationSurahTrackListItem,
   RecitationTrackUploadRowState,
@@ -32,16 +44,21 @@ import type {
   RecitationTrackValidateUploadOut,
 } from '../../models/recitation-tracks.models';
 import type { RecitationTimingUploadOut } from '../../models/recitation-timings.models';
-import {
-  MaddLevel,
-  MeemBehavior,
-  RecitationDetails,
-  RecitationFolder,
-} from '../../models/recitations.models';
+import { MaddLevel, MeemBehavior, RecitationDetails } from '../../models/recitations.models';
 import { RecitationTracksUploadOrchestratorService } from '../../services/recitation-tracks-upload.orchestrator';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import { RecitationsService } from '../../services/recitations.service';
+import {
+  FOLDER_QUALITY_ORDER,
+  canEditFolderVariant,
+  folderDisplayName,
+  folderVariantKey,
+  formatFolderVariantNames,
+  isFolderVisible,
+  parseFolderVariant,
+  takenFolderVariantKeys,
+} from '../../utils/recitation-folder.util';
 import {
   buildTimingUploadExtraMessage,
   buildTimingUploadSuccessDescription,
@@ -67,6 +84,10 @@ const MAX_MP3_FILES = 114;
     NzPaginationModule,
     NzProgressModule,
     NzAlertModule,
+    NzFormModule,
+    NzSelectModule,
+    NzRadioModule,
+    ReactiveFormsModule,
     FolderSwitcherComponent,
   ],
   templateUrl: './recitation-detail.component.html',
@@ -82,6 +103,7 @@ export class RecitationDetailComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly adminAuth = inject(AdminAuthService);
   private readonly ga = inject(GoogleAnalyticsService);
+  private readonly fb = inject(FormBuilder);
 
   readonly canUpdateRecitation = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_RECITATION)
@@ -89,6 +111,14 @@ export class RecitationDetailComponent implements OnInit {
 
   readonly canDeleteRecitation = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_RECITATION)
+  );
+
+  readonly canCreateFolder = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_CREATE_RECITATION)
+  );
+
+  readonly canToggleFolderVisibility = computed(
+    () => environment.recitationFolderVisibility && this.canUpdateRecitation()
   );
 
   readonly canUploadTiming = computed(() =>
@@ -111,17 +141,94 @@ export class RecitationDetailComponent implements OnInit {
   readonly maddLevel = MaddLevel;
   readonly meemBehavior = MeemBehavior;
 
-  readonly folders = signal<RecitationFolder[]>([]);
-  readonly activeFolderId = signal<string | null>(null);
-  readonly foldersLoading = signal(false);
+  readonly folders = signal<RecitationFolderOut[]>([]);
+  readonly selectedFolderSlug = signal<string | null>(null);
+  readonly folderFormModalVisible = signal(false);
+  readonly folderFormMode = signal<'create' | 'rename'>('create');
+  readonly folderFormSubmitting = signal(false);
+  readonly folderFormTarget = signal<RecitationFolderOut | null>(null);
+  readonly sessionTimingDownloadByFolderId = signal<Record<number, string>>({});
+
+  readonly selectedFolder = computed(() => {
+    const slug = this.selectedFolderSlug();
+    return this.folders().find((f) => f.slug === slug) ?? null;
+  });
+
+  readonly timingDownloadUrl = computed(() => {
+    const folder = this.selectedFolder();
+    const rec = this.recitation();
+    if (!folder || !rec) return null;
+    const sessionUrl = this.sessionTimingDownloadByFolderId()[folder.id] ?? null;
+    if (folder.is_default) {
+      return rec.ayah_timings_url || sessionUrl;
+    }
+    return sessionUrl;
+  });
+
+  readonly folderForm = this.fb.group({
+    quality: this.fb.control<RecitationFolderQuality | null>(null, {
+      validators: [Validators.required],
+    }),
+    hasFx: this.fb.nonNullable.control(false),
+  });
+
+  /** Mirrors `folderForm` so the picker's derived state can be computed. */
+  private readonly folderFormValue = signal<Partial<RecitationFolderVariant>>({});
+
+  /** Variants already on this recitation, ignoring the folder currently being edited. */
+  private readonly takenVariantKeys = computed(() =>
+    takenFolderVariantKeys(this.folders(), this.folderFormTarget()?.slug)
+  );
+
+  readonly qualityOptions = computed(() => {
+    const taken = this.takenVariantKeys();
+    return FOLDER_QUALITY_ORDER.map((quality) => ({
+      quality,
+      labelKey:
+        quality === RecitationFolderQuality.ORIGINAL
+          ? 'ADMIN.RECITATIONS.FOLDERS.MODAL.QUALITY_ORIGINAL'
+          : 'ADMIN.RECITATIONS.FOLDERS.MODAL.QUALITY_KBPS',
+      labelParams: { kbps: parseInt(quality, 10) },
+      // Greyed out only when neither the plain nor the effects folder is still available.
+      fullyTaken:
+        taken.has(folderVariantKey({ quality, hasFx: false })) &&
+        taken.has(folderVariantKey({ quality, hasFx: true })),
+    }));
+  });
+
+  readonly effectsOptions = computed(() => {
+    const quality = this.folderFormValue().quality;
+    const taken = this.takenVariantKeys();
+    return [false, true].map((hasFx) => ({
+      hasFx,
+      label: hasFx
+        ? 'ADMIN.RECITATIONS.FOLDERS.MODAL.EFFECTS_ON'
+        : 'ADMIN.RECITATIONS.FOLDERS.MODAL.EFFECTS_OFF',
+      taken: !!quality && taken.has(folderVariantKey({ quality, hasFx })),
+    }));
+  });
+
+  /** The exact bilingual name the chosen variant will be saved under. */
+  readonly folderNamePreview = computed(() => {
+    const variant = this.selectedVariant();
+    return variant ? formatFolderVariantNames(variant) : null;
+  });
+
+  readonly selectedVariantTaken = computed(() => {
+    const variant = this.selectedVariant();
+    return !!variant && this.takenVariantKeys().has(folderVariantKey(variant));
+  });
+
+  private readonly selectedVariant = computed<RecitationFolderVariant | null>(() => {
+    const { quality, hasFx } = this.folderFormValue();
+    return quality ? { quality, hasFx: !!hasFx } : null;
+  });
 
   readonly tracksList = signal<RecitationSurahTrackListItem[]>([]);
   readonly tracksTotal = signal(0);
   readonly tracksLoading = signal(false);
   readonly tracksPage = signal(1);
   readonly tracksPageSize = TRACKS_PAGE_SIZE;
-  /** Sequence for folder-scoped track requests; guards against out-of-order responses. */
-  private tracksRequestId = 0;
 
   readonly uploadRows = signal<RecitationTrackUploadRowState[]>([]);
   readonly validateMessage = signal<string | null>(null);
@@ -177,6 +284,14 @@ export class RecitationDetailComponent implements OnInit {
 
   private slug!: string;
   private readonly pendingUploadTasks = new Set<Promise<void>>();
+  /** Sequence for folder-scoped track requests; guards against out-of-order responses. */
+  private tracksRequestId = 0;
+
+  constructor() {
+    this.folderForm.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
+      this.folderFormValue.set({ quality: value.quality ?? undefined, hasFx: value.hasFx });
+    });
+  }
 
   ngOnInit(): void {
     this.slug = this.route.snapshot.params['slug'];
@@ -192,6 +307,14 @@ export class RecitationDetailComponent implements OnInit {
 
   private hasInFlightUploads(): boolean {
     return this.hasInFlightUploadRows();
+  }
+
+  /**
+   * Work that pins the active folder: queued/uploading rows, or a validation round-trip
+   * whose response would otherwise be applied against the newly selected folder.
+   */
+  private hasBlockingFolderWork(): boolean {
+    return this.hasInFlightUploadRows() || this.validateLoading();
   }
 
   private markInFlightAsCancelled(): void {
@@ -288,7 +411,7 @@ export class RecitationDetailComponent implements OnInit {
       next: (data) => {
         this.recitation.set(data);
         this.loading.set(false);
-        this.loadFolders();
+        this.loadFoldersThenTracks();
       },
       error: () => {
         this.loading.set(false);
@@ -296,137 +419,281 @@ export class RecitationDetailComponent implements OnInit {
     });
   }
 
-  /** Uploads queued/uploading or a validation round-trip in flight: the active folder must stay put. */
-  private hasBlockingFolderWork(): boolean {
-    return this.hasInFlightUploadRows() || this.validateLoading();
+  private recitationSlug(): string {
+    return this.recitation()?.slug ?? this.slug;
   }
 
-  /** Same check as `hasBlockingFolderWork`, plus the warning shown for direct user actions. */
-  private warnIfBlockingFolderWork(): boolean {
-    if (!this.hasBlockingFolderWork()) return false;
-    this.message.warning(this.translate.instant('ADMIN.RECITATIONS.TRACKS.NAV_LEAVE_CONTENT'));
-    return true;
-  }
-
-  /** Switches the active folder and rewinds paging so the new folder opens on its first page. */
-  private setActiveFolder(folderId: string | null): void {
-    this.activeFolderId.set(folderId);
-    this.tracksPage.set(1);
-  }
-
-  loadFolders(): void {
-    this.foldersLoading.set(true);
-    this.recitationsService.getFolders(this.slug).subscribe({
+  private loadFoldersThenTracks(): void {
+    this.recitationsService.recitationFoldersList(this.recitationSlug()).subscribe({
       next: (list) => {
         this.folders.set(list);
-        const currentActive = this.activeFolderId();
-        const activeStillExists = !!currentActive && list.some((f) => f.id === currentActive);
-        // Never swap the folder out from under queued/uploading rows or a pending validation.
-        const canSwitch = !currentActive || !this.hasBlockingFolderWork();
-        if (!activeStillExists && canSwitch) {
-          const def = list.find((f) => f.isDefault) ?? list[0];
-          if (def) {
-            this.setActiveFolder(def.id);
-          }
-        }
-        this.foldersLoading.set(false);
+        this.resolveSelectedFolder(this.route.snapshot.queryParamMap.get('folder'));
         this.loadTracksPage();
       },
-      error: () => {
-        this.foldersLoading.set(false);
-        this.loadTracksPage();
-      },
+      error: () => this.loadTracksPage(),
     });
   }
 
-  onFolderSelect(folderId: string): void {
-    if (this.warnIfBlockingFolderWork()) return;
-    this.setActiveFolder(folderId);
+  private reloadFoldersSilent(): void {
+    this.recitationsService.recitationFoldersList(this.recitationSlug()).subscribe({
+      next: (list) => this.folders.set(list),
+    });
+  }
+
+  private resolveSelectedFolder(querySlug: string | null): void {
+    const list = this.folders();
+    if (!list.length) {
+      this.selectedFolderSlug.set(null);
+      return;
+    }
+    const current = this.selectedFolderSlug();
+    const currentFolder = current ? list.find((f) => f.slug === current) : undefined;
+    if (currentFolder) {
+      this.selectedFolderSlug.set(currentFolder.slug);
+      return;
+    }
+    const fromQuery = querySlug ? list.find((f) => f.slug === querySlug) : undefined;
+    const chosen = fromQuery ?? list.find((f) => f.is_default) ?? list[0];
+    this.selectedFolderSlug.set(chosen.slug);
+    this.writeFolderQueryParam(chosen.slug);
+  }
+
+  private writeFolderQueryParam(folderSlug: string): void {
+    if (this.route.snapshot.queryParamMap.get('folder') === folderSlug) return;
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { folder: folderSlug },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
+  folderLabel(folder: RecitationFolderOut): string {
+    return folderDisplayName(folder, this.translate.currentLang);
+  }
+
+  onFolderSelect(folderSlug: string): void {
+    const folder = this.folders().find((f) => f.slug === folderSlug);
+    if (!folder || folder.slug === this.selectedFolderSlug()) return;
+    if (!this.hasBlockingFolderWork()) {
+      this.applyFolderSelection(folder);
+      return;
+    }
+    this.modal.confirm({
+      nzTitle: this.translate.instant('ADMIN.RECITATIONS.TRACKS.NAV_LEAVE_TITLE'),
+      nzContent: this.translate.instant('ADMIN.RECITATIONS.TRACKS.NAV_LEAVE_CONTENT'),
+      nzOkText: this.translate.instant('ADMIN.RECITATIONS.TRACKS.NAV_LEAVE_OK'),
+      nzOkType: 'primary',
+      nzCancelText: this.translate.instant('ADMIN.RECITATIONS.TRACKS.NAV_LEAVE_CANCEL'),
+      nzDirection: this.translate.currentLang === 'ar' ? 'rtl' : 'ltr',
+      nzOnOk: () =>
+        new Promise<void>((okResolve) => {
+          this.uploadOrchestrator.abortCurrentUploadRun();
+          const pending = [...this.pendingUploadTasks];
+          const finish = (): void => {
+            this.markInFlightAsCancelled();
+            this.applyFolderSelection(folder);
+            okResolve();
+          };
+          if (pending.length === 0) {
+            finish();
+            return;
+          }
+          void Promise.all(pending.map((p) => p.catch(() => undefined))).finally(finish);
+        }),
+    });
+  }
+
+  private applyFolderSelection(folder: RecitationFolderOut): void {
+    this.selectedFolderSlug.set(folder.slug);
+    this.writeFolderQueryParam(folder.slug);
+    this.tracksPage.set(1);
     this.clearUploadSelection();
     this.clearTimingsSelection();
+    this.clearTimingsUploadBanner();
     this.loadTracksPage();
   }
 
-  onSetDefaultFolder(folderId: string): void {
-    this.recitationsService.setDefaultFolder(this.slug, folderId).subscribe({
-      next: () => {
-        this.message.success(
-          this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.SET_DEFAULT_SUCCESS')
-        );
-        this.loadFolders();
-      },
-      error: () => {
-        this.message.error(this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.ERROR'));
-      },
-    });
+  openCreateFolderModal(): void {
+    this.folderFormMode.set('create');
+    this.folderFormTarget.set(null);
+    this.folderForm.reset({ quality: null, hasFx: false });
+    this.folderFormModalVisible.set(true);
   }
 
-  onCreateFolder(name: string): void {
-    if (this.warnIfBlockingFolderWork()) return;
-    this.recitationsService.createFolder(this.slug, name).subscribe({
-      next: (created) => {
-        this.message.success(
-          this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.CREATE_SUCCESS')
-        );
-        this.setActiveFolder(created.id);
-        this.loadFolders();
-      },
-      error: () => {
-        this.message.error(this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.ERROR'));
-      },
+  /** Assigns a variant to an unclassified folder, or corrects one that holds no audio yet. */
+  openRenameFolderModal(folder: RecitationFolderOut): void {
+    if (!canEditFolderVariant(folder)) return;
+    const current = parseFolderVariant(folder);
+    this.folderFormMode.set('rename');
+    this.folderFormTarget.set(folder);
+    this.folderForm.reset({
+      quality: current?.quality ?? null,
+      hasFx: current?.hasFx ?? false,
     });
+    this.folderFormModalVisible.set(true);
   }
 
-  onRenameFolder(payload: { id: string; name: string }): void {
-    this.recitationsService.updateFolder(this.slug, payload.id, { name: payload.name }).subscribe({
-      next: () => {
-        this.message.success(
-          this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.RENAME_SUCCESS')
-        );
-        this.loadFolders();
-      },
-      error: () => {
-        this.message.error(this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.ERROR'));
-      },
-    });
-  }
-
-  onDeleteFolder(folderId: string): void {
-    if (this.folders().length <= 1) {
-      this.message.warning(this.translate.instant('ADMIN.RECITATIONS.FOLDERS.CANNOT_DELETE_LAST'));
-      return;
+  onFolderFormVisibleChange(visible: boolean): void {
+    this.folderFormModalVisible.set(visible);
+    if (!visible) {
+      this.folderFormTarget.set(null);
+      this.folderFormSubmitting.set(false);
     }
-    if (this.warnIfBlockingFolderWork()) return;
-    this.recitationsService.deleteFolder(this.slug, folderId).subscribe({
-      next: () => {
+  }
+
+  submitFolderForm(): boolean | Promise<boolean> {
+    const variant = this.selectedVariant();
+    if (this.folderForm.invalid || !variant || this.selectedVariantTaken()) {
+      this.folderForm.markAllAsTouched();
+      return false;
+    }
+    const recSlug = this.recitationSlug();
+    const body = formatFolderVariantNames(variant);
+    const mode = this.folderFormMode();
+    const target = this.folderFormTarget();
+    if (mode === 'rename' && !target) return false;
+    this.folderFormSubmitting.set(true);
+    const req =
+      mode === 'create'
+        ? this.recitationsService.recitationFolderCreate(recSlug, body)
+        : this.recitationsService.recitationFolderPatch(recSlug, target!.slug, body);
+
+    return firstValueFrom(req)
+      .then((folder) => {
+        this.folderFormModalVisible.set(false);
         this.message.success(
-          this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.DELETE_SUCCESS')
+          this.translate.instant(
+            mode === 'create'
+              ? 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.CREATE_OK'
+              : 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.RENAME_OK'
+          )
         );
-        if (this.activeFolderId() === folderId) {
-          this.setActiveFolder(null);
-        }
-        this.loadFolders();
-      },
-      error: () => {
-        this.message.error(this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.ERROR'));
-      },
+        return firstValueFrom(this.recitationsService.recitationFoldersList(recSlug)).then(
+          (list) => {
+            this.folders.set(list);
+            if (mode === 'create') {
+              const created = list.find((f) => f.slug === folder.slug) ?? folder;
+              this.applyFolderSelection(created);
+            }
+            return true;
+          }
+        );
+      })
+      .catch((err: unknown) => {
+        this.message.error(
+          resolveApiErrorMessage(
+            err,
+            { fallbackKey: 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.SAVE_ERROR' },
+            this.translate
+          )
+        );
+        throw err;
+      })
+      .finally(() => this.folderFormSubmitting.set(false));
+  }
+
+  /**
+   * Flips a folder's public visibility. Reachable only while
+   * `environment.recitationFolderVisibility` is on, i.e. once the API accepts `is_visible`.
+   */
+  onToggleFolderVisibility(folder: RecitationFolderOut): void {
+    if (!this.canToggleFolderVisibility() || folder.is_default) return;
+    const nextVisible = !isFolderVisible(folder);
+    firstValueFrom(
+      this.recitationsService.recitationFolderPatch(this.recitationSlug(), folder.slug, {
+        is_visible: nextVisible,
+      })
+    )
+      .then((updated) => {
+        this.folders.update((list) =>
+          list.map((f) => (f.slug === folder.slug ? { ...f, ...updated } : f))
+        );
+        this.message.success(
+          this.translate.instant(
+            nextVisible
+              ? 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.SHOWN_OK'
+              : 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.HIDDEN_OK'
+          )
+        );
+      })
+      .catch((err: unknown) => {
+        this.message.error(
+          resolveApiErrorMessage(
+            err,
+            { fallbackKey: 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.SAVE_ERROR' },
+            this.translate
+          )
+        );
+      });
+  }
+
+  confirmDeleteFolder(folder: RecitationFolderOut): void {
+    if (folder.is_default) return;
+    this.modal.confirm({
+      nzTitle: this.translate.instant('ADMIN.RECITATIONS.FOLDERS.DELETE.CONFIRM_TITLE'),
+      nzContent: this.translate.instant('ADMIN.RECITATIONS.FOLDERS.DELETE.CONFIRM_BODY', {
+        name: this.folderLabel(folder),
+        count: folder.tracks_count,
+      }),
+      nzOkText: this.translate.instant('ADMIN.RECITATIONS.FOLDERS.DELETE.OK'),
+      nzOkType: 'primary',
+      nzOkDanger: true,
+      nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
+      nzDirection: this.translate.currentLang === 'ar' ? 'rtl' : 'ltr',
+      nzOnOk: () =>
+        firstValueFrom(
+          this.recitationsService.recitationFolderDelete(this.recitationSlug(), folder.slug)
+        )
+          .then(() =>
+            firstValueFrom(this.recitationsService.recitationFoldersList(this.recitationSlug()))
+          )
+          .then((list) => {
+            this.sessionTimingDownloadByFolderId.update((map) => {
+              const next = { ...map };
+              delete next[folder.id];
+              return next;
+            });
+            this.folders.set(list);
+            this.message.success(
+              this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.DELETE_OK')
+            );
+            const fallback = list.find((f) => f.is_default) ?? list[0];
+            if (fallback) {
+              this.applyFolderSelection(fallback);
+            } else {
+              this.selectedFolderSlug.set(null);
+              this.tracksList.set([]);
+              this.tracksTotal.set(0);
+            }
+          })
+          .catch((err: unknown) => {
+            this.message.error(
+              resolveApiErrorMessage(
+                err,
+                { fallbackKey: 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.DELETE_ERROR' },
+                this.translate
+              )
+            );
+            return Promise.reject(err);
+          }),
     });
   }
 
   loadTracksPage(): void {
     const rec = this.recitation();
     if (!rec) return;
-    // Monotonic id: only the newest request may write the list, so responses for a
-    // previously selected folder/page that land late are dropped.
+    // Only the newest request may write the list, so a response for a folder or page
+    // the user has already navigated away from is dropped instead of overwriting it.
     const requestId = ++this.tracksRequestId;
     this.tracksLoading.set(true);
     this.recitationsService
       .recitationTracksList({
         recitation_slug: rec.slug ?? this.slug,
         asset_id: rec.id,
-        folder_id: this.activeFolderId() ?? undefined,
         page: this.tracksPage(),
         page_size: this.tracksPageSize,
+        folder: this.selectedFolderSlug() ?? undefined,
       })
       .subscribe({
         next: (res) => {
@@ -472,30 +739,39 @@ export class RecitationDetailComponent implements OnInit {
 
     this.timingsUploadLoading.set(true);
     this.timingsUploadResult.set(null);
-    this.recitationsService.recitationTimingUpload(rec.id, files, this.activeFolderId()).subscribe({
-      next: (res: RecitationTimingUploadOut) => {
-        this.timingsUploadResult.set(res);
-        this.timingsFiles.set([]);
-        const el = this.timingsFileInput()?.nativeElement;
-        if (el) el.value = '';
-        this.load();
-      },
-      error: (err: unknown) => {
-        // Global `errorInterceptor` already shows `error.error.message` — do not duplicate.
-        // Show only structured `extra` (e.g. ResultDict) when present.
-        if (!(err instanceof HttpErrorResponse)) return;
-        const body = err.error;
-        const extra =
-          body && typeof body === 'object' && 'extra' in body
-            ? (body as { extra?: unknown }).extra
-            : undefined;
-        const detail = buildTimingUploadExtraMessage(extra, this.translate);
-        if (detail) {
-          this.message.error(detail, { nzDuration: 12000 });
-        }
-      },
-      complete: () => this.timingsUploadLoading.set(false),
-    });
+    this.recitationsService
+      .recitationTimingUpload(rec.id, files, this.selectedFolder()?.id)
+      .subscribe({
+        next: (res: RecitationTimingUploadOut) => {
+          this.timingsUploadResult.set(res);
+          this.timingsFiles.set([]);
+          const el = this.timingsFileInput()?.nativeElement;
+          if (el) el.value = '';
+          const folderId = res.folder_id ?? this.selectedFolder()?.id;
+          if (folderId != null && res.synced_file_url) {
+            this.sessionTimingDownloadByFolderId.update((map) => ({
+              ...map,
+              [folderId]: res.synced_file_url as string,
+            }));
+          }
+          this.load();
+        },
+        error: (err: unknown) => {
+          // Global `errorInterceptor` already shows `error.error.message` — do not duplicate.
+          // Show only structured `extra` (e.g. ResultDict) when present.
+          if (!(err instanceof HttpErrorResponse)) return;
+          const body = err.error;
+          const extra =
+            body && typeof body === 'object' && 'extra' in body
+              ? (body as { extra?: unknown }).extra
+              : undefined;
+          const detail = buildTimingUploadExtraMessage(extra, this.translate);
+          if (detail) {
+            this.message.error(detail, { nzDuration: 12000 });
+          }
+        },
+        complete: () => this.timingsUploadLoading.set(false),
+      });
   }
 
   clearTimingsUploadBanner(): void {
@@ -564,8 +840,8 @@ export class RecitationDetailComponent implements OnInit {
     this.recitationsService
       .recitationTracksValidateUpload({
         asset_id: rec.id,
-        folder_id: this.activeFolderId() ?? undefined,
         filenames: rows.map((r) => r.filename),
+        folder_id: this.selectedFolder()?.id,
       })
       .subscribe({
         next: (res) => {
@@ -654,13 +930,15 @@ export class RecitationDetailComponent implements OnInit {
 
     const candidateSet = new Set(candidates.map((r) => r.filename));
 
+    const folderId = this.selectedFolder()?.id;
+
     this.validateLoading.set(true);
     try {
       const res = await firstValueFrom(
         this.recitationsService.recitationTracksValidateUpload({
           asset_id: rec.id,
-          folder_id: this.activeFolderId() ?? undefined,
           filenames: candidates.map((r) => r.filename),
+          folder_id: folderId,
         })
       );
       this.applyValidateResponseForFilenames(res, candidateSet);
@@ -698,7 +976,7 @@ export class RecitationDetailComponent implements OnInit {
           this.patchUploadRow(filename, patch);
         },
       },
-      this.activeFolderId() ?? undefined
+      folderId
     );
     this.trackUploadTask(task);
 
@@ -725,6 +1003,7 @@ export class RecitationDetailComponent implements OnInit {
         );
         this.clearValidateUi();
         this.pruneActionableUploadRows();
+        this.reloadFoldersSilent();
         this.loadTracksPage();
       }
     } finally {
@@ -771,13 +1050,15 @@ export class RecitationDetailComponent implements OnInit {
     const fn = row.filename;
     const one = new Set([fn]);
 
+    const folderId = this.selectedFolder()?.id;
+
     this.validateLoading.set(true);
     try {
       const res = await firstValueFrom(
         this.recitationsService.recitationTracksValidateUpload({
           asset_id: rec.id,
-          folder_id: this.activeFolderId() ?? undefined,
           filenames: [fn],
+          folder_id: folderId,
         })
       );
       this.applyValidateResponseForFilenames(res, one);
@@ -811,7 +1092,7 @@ export class RecitationDetailComponent implements OnInit {
           this.patchUploadRow(filename, patch);
         },
       },
-      this.activeFolderId() ?? undefined
+      folderId
     );
     this.trackUploadTask(task);
     void task.then(() => {
@@ -820,6 +1101,7 @@ export class RecitationDetailComponent implements OnInit {
         this.clearValidateUi();
         this.pruneActionableUploadRows();
       }
+      this.reloadFoldersSilent();
       this.loadTracksPage();
     });
   }
@@ -840,16 +1122,13 @@ export class RecitationDetailComponent implements OnInit {
       nzOnOk: () =>
         new Promise<void>((resolve, reject) => {
           this.recitationsService
-            .recitationTracksDelete({
-              asset_id: rec.id,
-              folder_id: this.activeFolderId() ?? undefined,
-              track_ids: [track.id],
-            })
+            .recitationTracksDelete({ asset_id: rec.id, track_ids: [track.id] })
             .subscribe({
               next: () => {
                 this.message.success(
                   this.translate.instant('ADMIN.RECITATIONS.TRACKS.MESSAGES.DELETE_OK')
                 );
+                this.reloadFoldersSilent();
                 this.loadTracksPage();
                 resolve();
               },

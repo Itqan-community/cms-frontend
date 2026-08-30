@@ -31,4 +31,6 @@ export const environment = {
     'https://dce9e26dda3c82231e15b1c029696db0@o4510669335232512.ingest.de.sentry.io/4511206115508304',
   webauthnReplaceRpIdWithHostname: false,
   useProgramsMockApi: true,
+  /** Off until the portal API exposes `is_visible` on recitation folders. */
+  recitationFolderVisibility: false,
 };

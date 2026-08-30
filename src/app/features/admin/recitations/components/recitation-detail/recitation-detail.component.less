@@ -11,6 +11,51 @@
     min-width: 240px;
   }
 
+  &__folders {
+    margin-block: 8px 16px;
+  }
+
+  &__folder-form-hint {
+    margin: 0 0 16px;
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--admin-text-500);
+  }
+
+  &__folder-form-taken {
+    margin-inline-start: 6px;
+    font-size: 0.75rem;
+    color: var(--admin-text-400);
+  }
+
+  &__folder-preview {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 10px;
+    padding: 10px 12px;
+    background: var(--admin-surface-50);
+    border: 1px solid var(--admin-border-200);
+    border-radius: var(--radius-md);
+  }
+
+  &__folder-preview-label {
+    font-size: 0.75rem;
+    color: var(--admin-text-500);
+  }
+
+  &__folder-preview-name {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--admin-text-900);
+  }
+
+  &__folder-form-error {
+    margin: 8px 0 0;
+    color: var(--admin-danger, #cf1322);
+    font-size: 0.875rem;
+  }
+
   &__timings-section {
     margin-top: 8px;
   }
