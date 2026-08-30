@@ -75,6 +75,17 @@
                     }}</span>
                   </li>
                 }
+                @if (canSetDefaultFolder(folder)) {
+                  <li
+                    nz-menu-item
+                    tabindex="0"
+                    (click)="onSetDefault(folder)"
+                    (keyup.enter)="onSetDefault(folder)"
+                  >
+                    <ng-icon name="lucideStar" class="folder-switcher__menu-icon" />
+                    <span>{{ 'ADMIN.RECITATIONS.FOLDERS.SET_AS_DEFAULT' | translate }}</span>
+                  </li>
+                }
                 @if (canDelete()) {
                   <li
                     nz-menu-item

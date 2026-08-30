@@ -128,11 +128,13 @@
         [canRename]="canUpdateRecitation()"
         [canDelete]="canDeleteRecitation()"
         [canToggleVisibility]="canToggleFolderVisibility()"
+        [canSetDefault]="canSetDefaultFolder()"
         (folderSelect)="onFolderSelect($event)"
         (addFolder)="openCreateFolderModal()"
         (renameFolder)="openRenameFolderModal($event)"
         (deleteFolder)="confirmDeleteFolder($event)"
         (toggleVisibility)="onToggleFolderVisibility($event)"
+        (setDefaultFolder)="confirmSetDefaultFolder($event)"
       />
     }
 
@@ -615,7 +617,7 @@
         <p class="recitation-detail__folder-form-hint">
           {{ 'ADMIN.RECITATIONS.FOLDERS.MODAL.HINT' | translate }}
         </p>
-        @if (folderFormTarget()?.is_default) {
+        @if (folderFormTarget()?.slug === 'default') {
           <p
             class="recitation-detail__folder-form-hint recitation-detail__folder-form-hint--default"
           >

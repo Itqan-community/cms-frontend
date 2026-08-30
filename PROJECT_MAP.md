@@ -320,7 +320,8 @@ reserves its classified variant (or _as-uploaded, no effects_ when unclassified)
 relabelled because its slug stays `default`; non-default classified folders that already hold tracks
 cannot be relabelled, since their slug is the public `?folder=` identifier.
 `FolderSwitcherComponent` uses `nz-tabset` (touch-scrollable nav) and is presentational — the
-container owns the API calls and the single picker modal. Backend spec:
+container owns the API calls and the single picker modal. Folder tab menu supports hide/show
+(`is_visible`) and set-default (`is_default: true`); default folder cannot be hidden. Backend spec:
 `.temp/docs/recitation-folders-backend-spec.md`.
 
 **Shared admin components:**
@@ -557,7 +558,8 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
 | `features/mushaf/` (reader)             | Hidden (dormant)  | Module kept; `/mushaf` route + `NAV.MUSHAF` commented out. Mobile menu now respects `hidden`. Admin small-MQ toggle exclusivity fixed.            |
 | `features/admin/audio/`                 | Partial           | Routes defined but implementation details need verification.                                                                                      |
 | `features/admin/software/`              | Partial           | Routes defined but implementation details need verification.                                                                                      |
-| Recitation folder visibility            | Hidden (dormant)  | UI + service built; gated off by `environment.recitationFolderVisibility` until portal `FolderOut`/`FolderPatchIn` carry `is_visible`.            |
+| Recitation folder visibility            | Implemented       | `is_visible` PATCH + hide/show in folder tab menu; requires backend Phase A on the API environment.                                               |
+| Recitation folder set-default           | Implemented       | `PATCH { is_default: true }` from folder tab menu; slugs stay fixed; hidden folders cannot be promoted.                                           |
 | Recitation folder variant taxonomy      | Frontend-owned    | Quality×effects vocabulary lives in `recitation-folder.util.ts` and is carried in folder names; no server-side uniqueness enforcement.            |
 | Recitation folder variant relabelling   | Constrained       | Non-default classified folders with tracks cannot change variant (slug is public `?folder=`); default folder always editable (`?folder=default`). |
 | Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                                                       |

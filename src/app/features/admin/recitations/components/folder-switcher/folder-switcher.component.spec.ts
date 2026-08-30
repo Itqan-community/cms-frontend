@@ -7,6 +7,7 @@ import {
   lucidePlus,
   lucideSettings,
   lucideSquarePen,
+  lucideStar,
   lucideTrash2,
 } from '@ng-icons/lucide';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
@@ -56,6 +57,7 @@ describe('FolderSwitcherComponent', () => {
           lucidePlus,
           lucideSettings,
           lucideSquarePen,
+          lucideStar,
           lucideTrash2,
         }),
       ],
@@ -139,7 +141,7 @@ describe('FolderSwitcherComponent', () => {
     expect(component.renameFolder.emit).toHaveBeenCalledWith(busyDefault);
   });
 
-  it('locks the variant of a classified non-default folder that already holds audio', () => {
+  it('allows editing a classified non-default folder even when it holds audio', () => {
     const classified = makeFolder({
       id: 3,
       slug: '320kbps',
@@ -149,12 +151,12 @@ describe('FolderSwitcherComponent', () => {
       is_default: false,
       tracks_count: 40,
     });
-    expect(component.canEditVariant(classified)).toBeFalse();
+    expect(component.canEditVariant(classified)).toBeTrue();
     expect(component.variantActionKey(classified)).toContain('CHANGE_VARIANT');
 
     spyOn(component.renameFolder, 'emit');
     component.onRename(classified);
-    expect(component.renameFolder.emit).not.toHaveBeenCalled();
+    expect(component.renameFolder.emit).toHaveBeenCalledWith(classified);
   });
 
   it('hides the visibility action entirely while the backend flag is off', () => {
@@ -200,6 +202,25 @@ describe('FolderSwitcherComponent', () => {
       const wraps = fixture.nativeElement.querySelectorAll('.folder-switcher__tab-title-wrap');
       expect(wraps[0].classList).not.toContain('folder-switcher__tab-title-wrap--hidden');
       expect(wraps[1].classList).toContain('folder-switcher__tab-title-wrap--hidden');
+    });
+  });
+
+  describe('with set-default enabled', () => {
+    beforeEach(() => {
+      fixture.componentRef.setInput('canSetDefault', true);
+      fixture.detectChanges();
+    });
+
+    it('offers set-default for a visible non-default folder only', () => {
+      expect(component.canSetDefaultFolder(echoFolder)).toBeTrue();
+      expect(component.canSetDefaultFolder(defaultFolder)).toBeFalse();
+      expect(component.canSetDefaultFolder({ ...echoFolder, is_visible: false })).toBeFalse();
+
+      spyOn(component.setDefaultFolder, 'emit');
+      component.onSetDefault(echoFolder);
+      expect(component.setDefaultFolder.emit).toHaveBeenCalledWith(echoFolder);
+      component.onSetDefault(defaultFolder);
+      expect(component.setDefaultFolder.emit).toHaveBeenCalledTimes(1);
     });
   });
 });

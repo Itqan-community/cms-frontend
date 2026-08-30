@@ -1336,6 +1336,9 @@
         "HIDDEN_HINT": "Hidden from the public API — not listed and not served.",
         "HIDE_FROM_PUBLIC": "Hide from public",
         "SHOW_PUBLICLY": "Show publicly",
+        "SET_AS_DEFAULT": "Set as default",
+        "SET_DEFAULT_CONFIRM_TITLE": "Set this folder as default?",
+        "SET_DEFAULT_CONFIRM_BODY": "“{{name}}” will become the folder tenant sites and the public API use when no ?folder= is specified. Slugs on existing folders stay unchanged.",
         "ERR_NAME_REQUIRED": "The folder name could not be determined. Choose a quality and try again.",
         "MODAL": {
           "TITLE_CREATE": "Add folder",
@@ -1366,9 +1369,13 @@
           "DELETE_OK": "Folder deleted.",
           "HIDDEN_OK": "Folder hidden from the public API.",
           "SHOWN_OK": "Folder is now public.",
+          "SET_DEFAULT_OK": "Default folder updated.",
           "SAVE_ERROR": "Could not save the folder. Try again.",
           "DELETE_ERROR": "Could not delete the folder. Try again.",
           "CANNOT_DELETE_DEFAULT": "The default folder cannot be deleted.",
+          "CANNOT_HIDE_DEFAULT": "The default folder cannot be hidden.",
+          "CANNOT_SET_HIDDEN_AS_DEFAULT": "Show this folder publicly before setting it as default.",
+          "CANNOT_UNSET_DEFAULT": "Choose another folder as default instead of clearing the default flag.",
           "NOT_FOUND": "Folder not found."
         }
       },
