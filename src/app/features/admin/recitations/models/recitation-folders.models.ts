@@ -31,6 +31,8 @@ export interface RecitationFolderWriteIn {
   name_en?: string;
   /** Only sent once the API accepts it; see `is_visible` on `RecitationFolderOut`. */
   is_visible?: boolean;
+  /** Only true is sent when promoting a folder to the public default. */
+  is_default?: boolean;
 }
 
 /**

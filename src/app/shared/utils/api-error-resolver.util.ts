@@ -23,6 +23,10 @@ const CMS_ERROR_NAME_I18N: Record<string, string> = {
   tenant_required: 'ERRORS.TENANT_REQUIRED',
   folder_name_required: 'ADMIN.RECITATIONS.FOLDERS.ERR_NAME_REQUIRED',
   cannot_delete_default_folder: 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.CANNOT_DELETE_DEFAULT',
+  cannot_hide_default_folder: 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.CANNOT_HIDE_DEFAULT',
+  cannot_set_hidden_folder_as_default:
+    'ADMIN.RECITATIONS.FOLDERS.MESSAGES.CANNOT_SET_HIDDEN_AS_DEFAULT',
+  cannot_unset_default_folder: 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.CANNOT_UNSET_DEFAULT',
   folder_not_found: 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.NOT_FOUND',
 };
 

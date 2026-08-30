@@ -9,6 +9,7 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import type { RecitationFolderOut } from '../../models/recitation-folders.models';
 import {
   canEditFolderVariant,
+  canSetFolderAsDefault,
   canToggleFolderVisibility,
   folderDisplayName,
   isFolderVisible,
@@ -45,12 +46,14 @@ export class FolderSwitcherComponent {
   canDelete = input<boolean>(false);
   /** Off until the portal API exposes `is_visible`; see `environment.recitationFolderVisibility`. */
   canToggleVisibility = input<boolean>(false);
+  canSetDefault = input<boolean>(false);
 
   folderSelect = output<string>();
   addFolder = output<void>();
   renameFolder = output<RecitationFolderOut>();
   deleteFolder = output<RecitationFolderOut>();
   toggleVisibility = output<RecitationFolderOut>();
+  setDefaultFolder = output<RecitationFolderOut>();
 
   readonly selectedIndex = computed(() => {
     const slug = this.activeFolderSlug();
@@ -67,11 +70,20 @@ export class FolderSwitcherComponent {
   }
 
   hasRowActions(folder: RecitationFolderOut): boolean {
-    return this.canEditVariant(folder) || this.canHideFolder(folder) || this.canDelete();
+    return (
+      this.canEditVariant(folder) ||
+      this.canHideFolder(folder) ||
+      this.canSetDefaultFolder(folder) ||
+      this.canDelete()
+    );
   }
 
   canHideFolder(folder: RecitationFolderOut): boolean {
     return this.canToggleVisibility() && canToggleFolderVisibility(folder);
+  }
+
+  canSetDefaultFolder(folder: RecitationFolderOut): boolean {
+    return this.canSetDefault() && canSetFolderAsDefault(folder);
   }
 
   isHidden(folder: RecitationFolderOut): boolean {
@@ -103,5 +115,10 @@ export class FolderSwitcherComponent {
   onToggleVisibility(folder: RecitationFolderOut): void {
     if (!this.canHideFolder(folder)) return;
     this.toggleVisibility.emit(folder);
+  }
+
+  onSetDefault(folder: RecitationFolderOut): void {
+    if (!this.canSetDefaultFolder(folder)) return;
+    this.setDefaultFolder.emit(folder);
   }
 }

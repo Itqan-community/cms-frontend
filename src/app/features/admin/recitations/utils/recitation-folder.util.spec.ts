@@ -5,6 +5,7 @@ import {
 import {
   FOLDER_QUALITY_ORDER,
   canEditFolderVariant,
+  canSetFolderAsDefault,
   canToggleFolderVisibility,
   folderDisplayName,
   folderVariantKey,
@@ -179,22 +180,32 @@ describe('isFolderVisible / canToggleFolderVisibility', () => {
   });
 });
 
-describe('canEditFolderVariant', () => {
-  it('always allows editing the default folder, even with tracks', () => {
-    expect(canEditFolderVariant(makeFolder({ is_default: true, tracks_count: 114 }))).toBeTrue();
+describe('canSetFolderAsDefault', () => {
+  it('allows visible non-default folders only', () => {
+    expect(canSetFolderAsDefault(makeFolder({ is_default: false, is_visible: true }))).toBeTrue();
+    expect(canSetFolderAsDefault(makeFolder({ is_default: true }))).toBeFalse();
+    expect(canSetFolderAsDefault(makeFolder({ is_default: false, is_visible: false }))).toBeFalse();
   });
+});
 
-  it('always allows classifying a free-text folder', () => {
+describe('canEditFolderVariant', () => {
+  it('allows editing any folder regardless of default status or track count', () => {
+    expect(canEditFolderVariant(makeFolder({ is_default: true, tracks_count: 114 }))).toBeTrue();
+    expect(
+      canEditFolderVariant(
+        makeFolder({
+          is_default: false,
+          slug: '320kbps',
+          name_ar: '320 كيلوبت',
+          name_en: '320kbps',
+          tracks_count: 40,
+        })
+      )
+    ).toBeTrue();
     expect(
       canEditFolderVariant(
         makeFolder({ name: 'Hafs 1442', name_ar: 'حفص', name_en: 'Hafs 1442', tracks_count: 80 })
       )
     ).toBeTrue();
-  });
-
-  it('locks a classified folder once it holds audio', () => {
-    const classified = makeFolder({ slug: '320kbps', name_ar: '320 كيلوبت', name_en: '320kbps' });
-    expect(canEditFolderVariant({ ...classified, tracks_count: 0 })).toBeTrue();
-    expect(canEditFolderVariant({ ...classified, tracks_count: 1 })).toBeFalse();
   });
 });
