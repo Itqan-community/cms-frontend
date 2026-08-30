@@ -78,6 +78,7 @@ export class AssetContentGridComponent implements OnInit {
   readonly savingDraft = signal(false);
   readonly dirty = signal(false);
   readonly selectedCount = signal(0);
+  readonly entriesTotal = signal(0);
   readonly canUndo = signal(false);
   readonly canRedo = signal(false);
   /** Distinct surahs present in the data, for the Surah dropdown filter. */
@@ -274,6 +275,7 @@ export class AssetContentGridComponent implements OnInit {
             this.loadAllEntries(page + 1, merged);
           } else {
             this.rows.set(merged);
+            this.entriesTotal.set(response.count);
             this.buildSurahOptions(merged);
             this.loading.set(false);
           }

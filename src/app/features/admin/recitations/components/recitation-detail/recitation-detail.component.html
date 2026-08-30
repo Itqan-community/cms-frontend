@@ -332,6 +332,10 @@
         }
 
         @if (uploadRows().length) {
+          <h4 class="recitation-detail__upload-queue-title">
+            {{ 'ADMIN.RECITATIONS.TRACKS.UPLOAD_QUEUE_TITLE' | translate }}
+            <app-admin-title-count [count]="uploadRows().length" />
+          </h4>
           <div class="admin-table-wrap recitation-detail__upload-table-wrap">
             <nz-table
               [nzData]="uploadRows()"
@@ -478,6 +482,9 @@
       <div class="recitation-detail__tracks-list-head">
         <h3 class="recitation-detail__tracks-list-title">
           {{ 'ADMIN.RECITATIONS.TRACKS.LIST_TITLE' | translate }}
+          @if (!tracksLoading()) {
+            <app-admin-title-count [count]="tracksTotal()" />
+          }
         </h3>
       </div>
 
@@ -553,15 +560,15 @@
         </ng-template>
       </div>
 
-      <div class="admin-pagination">
-        <nz-pagination
-          [nzPageIndex]="tracksPage()"
-          [nzTotal]="tracksTotal()"
-          [nzPageSize]="tracksPageSize"
-          [nzShowSizeChanger]="false"
-          (nzPageIndexChange)="onTracksPageChange($event)"
-        ></nz-pagination>
-      </div>
+      <app-admin-table-pagination
+        [page]="tracksPage()"
+        [pageSize]="tracksPageSize"
+        [total]="tracksTotal()"
+        [loading]="tracksLoading()"
+        [showSizeChanger]="false"
+        [showQuickJumper]="false"
+        (pageChange)="onTracksPageChange($event)"
+      />
     </section>
 
     <div class="admin-back">

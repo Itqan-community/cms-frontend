@@ -3,6 +3,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import type { AssetVersionParentKind } from '../../models/asset-content.models';
 import type { HasUnsavedContent } from '../../guards/unsaved-content.guard';
+import { AdminTitleCountComponent } from '../admin-title-count/admin-title-count.component';
 import { AssetContentGridComponent } from '../asset-content-grid/asset-content-grid.component';
 
 /**
@@ -14,7 +15,7 @@ import { AssetContentGridComponent } from '../asset-content-grid/asset-content-g
 @Component({
   selector: 'app-asset-content-editor',
   standalone: true,
-  imports: [RouterLink, TranslateModule, AssetContentGridComponent],
+  imports: [RouterLink, TranslateModule, AdminTitleCountComponent, AssetContentGridComponent],
   templateUrl: './asset-content-editor.component.html',
   styleUrl: './asset-content-editor.component.less',
 })

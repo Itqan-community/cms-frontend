@@ -1414,6 +1414,7 @@
         "UPLOAD_MIXED_CONFIRM_CONTENT": "سيتم تجاهل {{ignored}} ملف (غير صالح أو تم تخطيه). سيتم رفع {{valid}} ملف. هل تريد المتابعة؟",
         "UPLOAD_MIXED_CONFIRM_OK": "رفع",
         "LIST_TITLE": "الملفات الصوتية المرفوعة",
+        "UPLOAD_QUEUE_TITLE": "الرفعات المعلقة",
         "NO_AUDIO_URL": "لا يوجد رابط تشغيل",
         "DELETE_TRACK": "حذف الملف الصوتي",
         "EMPTY_TITLE": "لا توجد ملفات صوتية بعد",

@@ -10,7 +10,8 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { NzPaginationModule } from 'ng-zorro-antd/pagination';
+import { AdminTitleCountComponent } from '../admin-title-count/admin-title-count.component';
+import { AdminTablePaginationComponent } from '../admin-table-pagination/admin-table-pagination.component';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
@@ -35,7 +36,8 @@ const DEFAULT_PAGE_SIZE = 10;
     NzFormModule,
     NzInputModule,
     NzModalModule,
-    NzPaginationModule,
+    AdminTitleCountComponent,
+    AdminTablePaginationComponent,
     NzSpinModule,
     NzTableModule,
     NzToolTipModule,
