@@ -121,6 +121,8 @@ export class RecitationDetailComponent implements OnInit {
     () => environment.recitationFolderVisibility && this.canUpdateRecitation()
   );
 
+  readonly canSetDefaultFolder = computed(() => this.canUpdateRecitation());
+
   readonly canUploadTiming = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPLOAD_TIMING)
   );
@@ -440,6 +442,12 @@ export class RecitationDetailComponent implements OnInit {
     });
   }
 
+  private refreshRecitationDetailSilent(): void {
+    this.recitationsService.getDetail(this.recitationSlug()).subscribe({
+      next: (data) => this.recitation.set(data),
+    });
+  }
+
   private resolveSelectedFolder(querySlug: string | null): void {
     const list = this.folders();
     if (!list.length) {
@@ -626,6 +634,46 @@ export class RecitationDetailComponent implements OnInit {
           )
         );
       });
+  }
+
+  confirmSetDefaultFolder(folder: RecitationFolderOut): void {
+    if (!this.canSetDefaultFolder() || folder.is_default) return;
+    this.modal.confirm({
+      nzTitle: this.translate.instant('ADMIN.RECITATIONS.FOLDERS.SET_DEFAULT_CONFIRM_TITLE'),
+      nzContent: this.translate.instant('ADMIN.RECITATIONS.FOLDERS.SET_DEFAULT_CONFIRM_BODY', {
+        name: this.folderLabel(folder),
+      }),
+      nzOkText: this.translate.instant('ADMIN.RECITATIONS.FOLDERS.SET_AS_DEFAULT'),
+      nzOkType: 'primary',
+      nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
+      nzDirection: this.translate.currentLang === 'ar' ? 'rtl' : 'ltr',
+      nzOnOk: () =>
+        firstValueFrom(
+          this.recitationsService.recitationFolderPatch(this.recitationSlug(), folder.slug, {
+            is_default: true,
+          })
+        )
+          .then(() =>
+            firstValueFrom(this.recitationsService.recitationFoldersList(this.recitationSlug()))
+          )
+          .then((list) => {
+            this.folders.set(list);
+            this.refreshRecitationDetailSilent();
+            this.message.success(
+              this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.SET_DEFAULT_OK')
+            );
+          })
+          .catch((err: unknown) => {
+            this.message.error(
+              resolveApiErrorMessage(
+                err,
+                { fallbackKey: 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.SAVE_ERROR' },
+                this.translate
+              )
+            );
+            return Promise.reject(err);
+          }),
+    });
   }
 
   confirmDeleteFolder(folder: RecitationFolderOut): void {

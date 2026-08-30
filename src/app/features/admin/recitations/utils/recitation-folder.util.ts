@@ -154,6 +154,13 @@ export function canToggleFolderVisibility(folder: RecitationFolderOut): boolean 
   return !folder.is_default;
 }
 
+/** Whether this visible non-default folder may be promoted to the public default. */
+export function canSetFolderAsDefault(
+  folder: Pick<RecitationFolderOut, 'is_default' | 'is_visible'>
+): boolean {
+  return !folder.is_default && isFolderVisible(folder);
+}
+
 function allFolderVariants(): RecitationFolderVariant[] {
   return FOLDER_QUALITY_ORDER.flatMap((quality) => [
     { quality, hasFx: false },

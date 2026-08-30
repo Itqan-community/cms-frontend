@@ -223,6 +223,60 @@ describe('RecitationsService', () => {
     });
   });
 
+  it('should patch folder visibility', (done) => {
+    service
+      .recitationFolderPatch('my-recitation', 'echo', { is_visible: false })
+      .subscribe((folder) => {
+        expect(folder.is_visible).toBeFalse();
+        done();
+      });
+
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url.includes('/portal/recitations/my-recitation/folders/echo/') && r.method === 'PATCH'
+    );
+    expect(req.request.body).toEqual({ is_visible: false });
+    req.flush({
+      id: 2,
+      name: 'Echo',
+      name_ar: 'صدى',
+      name_en: 'Echo',
+      slug: 'echo',
+      is_default: false,
+      is_visible: false,
+      tracks_count: 0,
+      created_at: '2026-01-01T00:00:00Z',
+      updated_at: '2026-01-01T00:00:00Z',
+    });
+  });
+
+  it('should patch folder as default', (done) => {
+    service
+      .recitationFolderPatch('my-recitation', 'echo', { is_default: true })
+      .subscribe((folder) => {
+        expect(folder.is_default).toBeTrue();
+        done();
+      });
+
+    const req = httpMock.expectOne(
+      (r) =>
+        r.url.includes('/portal/recitations/my-recitation/folders/echo/') && r.method === 'PATCH'
+    );
+    expect(req.request.body).toEqual({ is_default: true });
+    req.flush({
+      id: 2,
+      name: 'Echo',
+      name_ar: 'صدى',
+      name_en: 'Echo',
+      slug: 'echo',
+      is_default: true,
+      is_visible: true,
+      tracks_count: 0,
+      created_at: '2026-01-01T00:00:00Z',
+      updated_at: '2026-01-01T00:00:00Z',
+    });
+  });
+
   it('should delete a recitation folder by slug', (done) => {
     service.recitationFolderDelete('my-recitation', 'echo').subscribe(() => done());
 

@@ -32,5 +32,5 @@ export const environment = {
   webauthnReplaceRpIdWithHostname: false,
   useProgramsMockApi: true,
   /** Off until the portal API exposes `is_visible` on recitation folders. */
-  recitationFolderVisibility: false,
+  recitationFolderVisibility: true,
 };

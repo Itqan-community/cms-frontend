@@ -5,6 +5,7 @@ import {
 import {
   FOLDER_QUALITY_ORDER,
   canEditFolderVariant,
+  canSetFolderAsDefault,
   canToggleFolderVisibility,
   folderDisplayName,
   folderVariantKey,
@@ -176,6 +177,14 @@ describe('isFolderVisible / canToggleFolderVisibility', () => {
   it('never allows hiding the default folder, which public reads fall back to', () => {
     expect(canToggleFolderVisibility(makeFolder({ is_default: true }))).toBeFalse();
     expect(canToggleFolderVisibility(makeFolder({ is_default: false }))).toBeTrue();
+  });
+});
+
+describe('canSetFolderAsDefault', () => {
+  it('allows visible non-default folders only', () => {
+    expect(canSetFolderAsDefault(makeFolder({ is_default: false, is_visible: true }))).toBeTrue();
+    expect(canSetFolderAsDefault(makeFolder({ is_default: true }))).toBeFalse();
+    expect(canSetFolderAsDefault(makeFolder({ is_default: false, is_visible: false }))).toBeFalse();
   });
 });
 

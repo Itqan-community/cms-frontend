@@ -17,5 +17,5 @@ export const environment = {
    * `is_visible` on folders — a toggle that cannot actually hide a folder would tell
    * admins something untrue, so the control is not rendered rather than mocked.
    */
-  recitationFolderVisibility: false,
+  recitationFolderVisibility: true,
 };
