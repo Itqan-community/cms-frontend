@@ -27,6 +27,9 @@
 | Package Mgr  | npm / pnpm                                                 | —        |
 | Deployment   | Cloudflare Pages (+ Pages Functions for staging API proxy) | —        |
 
+**Internal docs:** Backend contracts and handoff notes live under `.temp/docs/` only (gitignored).
+Do not add a tracked root `docs/` folder.
+
 ---
 
 ## [SYSTEM_FLOW]
@@ -570,7 +573,7 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
 | Recitation folder variant relabelling   | Constrained       | Non-default classified folders with tracks cannot change variant (slug is public `?folder=`); default folder always editable (`?folder=default`). |
 | Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                                                       |
 | WebAuthn RP ID                          | Development mode  | `webauthnReplaceRpIdWithHostname` env flag allows RP ID patching in dev.                                                                          |
-| Asset content templates (API)           | Frontend-ready    | `assetTemplates` off until portal accepts `template` / `mushaf_print` on create. See `docs/asset-deep-edit-backend-contract.md`.                  |
+| Asset content templates (API)           | Frontend-ready    | `assetTemplates` off until portal accepts `template` / `mushaf_print` on create. See `.temp/docs/asset-deep-edit-backend-contract.md`.            |
 | Asset language instances (API)          | Mock in FE        | `assetLanguageInstances` off; in-memory store in `asset-language-instances.mock-store.ts`.                                                        |
 | Content review workflow (API)           | Mock in FE        | `contentReviewWorkflow` off; client diff MVP via `contentDiffView`; approve/comment mocked in `content-review.mock-store.ts`.                     |
 | Per-print page maps / word IDs          | Backend-owned     | Empty page CSV uses bundled single-print `quraan_data.json` only.                                                                                 |
