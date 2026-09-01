@@ -1,7 +1,17 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { TranslateService } from '@ngx-translate/core';
-import { BehaviorSubject, Observable, catchError, map, of, shareReplay, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  Observable,
+  catchError,
+  filter,
+  map,
+  of,
+  shareReplay,
+  take,
+  tap,
+} from 'rxjs';
 import { SURAHS_METADATA, JUZ_PAGE_MAPPING, SurahMetadata } from '../models/quran-metadata';
 
 export interface AyahMarker {
@@ -217,6 +227,17 @@ export class QuranDataService {
 
         return words;
       })
+    );
+  }
+
+  /**
+   * Emits once when bundled Quran JSON has loaded. Use instead of `forkJoin` on
+   * `getAyahs()` / `getSurahs()` — those streams never complete.
+   */
+  whenReady(): Observable<QuranDataJson> {
+    return this.dataSubject.pipe(
+      filter((data): data is QuranDataJson => data !== null),
+      take(1)
     );
   }
 }

@@ -1,0 +1,109 @@
+<nz-tabset
+  class="lang-switcher__tabs"
+  [nzSelectedIndex]="selectedIndex()"
+  (nzSelectedIndexChange)="onTabIndexChange($event)"
+  [nzTabBarExtraContent]="canCreate() ? addLangTpl : undefined"
+>
+  @for (instance of instances(); track instance.slug) {
+    <nz-tab [nzTitle]="langTabTitle">
+      <ng-template #langTabTitle>
+        <span
+          class="lang-switcher__tab-title-wrap"
+          [class.lang-switcher__tab-title-wrap--hidden]="isHidden(instance)"
+        >
+          <ng-icon name="lucideLanguages" class="lang-switcher__tab-icon" />
+          <span class="lang-switcher__tab-name">{{ instanceLabel(instance) }}</span>
+          @if (instance.is_default) {
+            <nz-tag nzColor="default" class="lang-switcher__tab-tag">{{
+              'ADMIN.CONTENT_EDITOR.LANGUAGES.DEFAULT_BADGE' | translate
+            }}</nz-tag>
+          }
+          @if (isHidden(instance)) {
+            <ng-icon
+              name="lucideEyeOff"
+              class="lang-switcher__tab-hidden-icon"
+              [attr.aria-label]="'ADMIN.CONTENT_EDITOR.LANGUAGES.HIDDEN_BADGE' | translate"
+            />
+          }
+          <span class="lang-switcher__tab-count">{{ instance.entries_count }}</span>
+          @if (hasRowActions(instance)) {
+            <button
+              nz-dropdown
+              [nzDropdownMenu]="langMenu"
+              nzTrigger="click"
+              nz-button
+              nzType="text"
+              nzSize="small"
+              type="button"
+              class="lang-switcher__tab-menu-btn"
+              (click)="$event.stopPropagation()"
+            >
+              <ng-icon name="lucideSettings" />
+            </button>
+            <nz-dropdown-menu #langMenu="nzDropdownMenu">
+              <ul nz-menu>
+                @if (canRename()) {
+                  <li
+                    nz-menu-item
+                    tabindex="0"
+                    (click)="onRename(instance)"
+                    (keyup.enter)="onRename(instance)"
+                  >
+                    <ng-icon name="lucideSquarePen" />
+                    {{ 'ADMIN.CONTENT_EDITOR.LANGUAGES.RENAME' | translate }}
+                  </li>
+                }
+                @if (canHide(instance)) {
+                  <li
+                    nz-menu-item
+                    tabindex="0"
+                    (click)="onToggleVisibility(instance)"
+                    (keyup.enter)="onToggleVisibility(instance)"
+                  >
+                    <ng-icon [name]="isHidden(instance) ? 'lucideEye' : 'lucideEyeOff'" />
+                    {{
+                      (isHidden(instance)
+                        ? 'ADMIN.CONTENT_EDITOR.LANGUAGES.SHOW'
+                        : 'ADMIN.CONTENT_EDITOR.LANGUAGES.HIDE'
+                      ) | translate
+                    }}
+                  </li>
+                }
+                @if (canSetDefault(instance)) {
+                  <li
+                    nz-menu-item
+                    tabindex="0"
+                    (click)="onSetDefault(instance)"
+                    (keyup.enter)="onSetDefault(instance)"
+                  >
+                    <ng-icon name="lucideStar" />
+                    {{ 'ADMIN.CONTENT_EDITOR.LANGUAGES.SET_DEFAULT' | translate }}
+                  </li>
+                }
+                @if (canRemove(instance)) {
+                  <li
+                    nz-menu-item
+                    nzDanger
+                    tabindex="0"
+                    (click)="onDelete(instance)"
+                    (keyup.enter)="onDelete(instance)"
+                  >
+                    <ng-icon name="lucideTrash2" />
+                    {{ 'ADMIN.CONTENT_EDITOR.LANGUAGES.DELETE' | translate }}
+                  </li>
+                }
+              </ul>
+            </nz-dropdown-menu>
+          }
+        </span>
+      </ng-template>
+    </nz-tab>
+  }
+</nz-tabset>
+
+<ng-template #addLangTpl>
+  <button nz-button nzType="dashed" nzSize="small" type="button" (click)="addLang.emit()">
+    <ng-icon name="lucidePlus" />
+    {{ 'ADMIN.CONTENT_EDITOR.LANGUAGES.ADD' | translate }}
+  </button>
+</ng-template>

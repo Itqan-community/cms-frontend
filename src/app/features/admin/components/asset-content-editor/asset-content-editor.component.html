@@ -4,7 +4,10 @@
       &larr; {{ 'ADMIN.CONTENT_EDITOR.BACK' | translate }}
     </a>
     <h1 class="content-editor__title">
-      {{ 'ADMIN.CONTENT_EDITOR.TITLE' | translate }}
+      {{
+        (reviewMode() ? 'ADMIN.CONTENT_EDITOR.REVIEW.TITLE' : 'ADMIN.CONTENT_EDITOR.TITLE')
+          | translate
+      }}
       @if (grid(); as g) {
         @if (!g.loading()) {
           <app-admin-title-count [count]="g.entriesTotal()" />
@@ -12,9 +15,38 @@
       }
     </h1>
     <p class="content-editor__hint">
-      {{ 'ADMIN.CONTENT_EDITOR.HINT' | translate }}
+      {{
+        (reviewMode() ? 'ADMIN.CONTENT_EDITOR.REVIEW.HINT' : 'ADMIN.CONTENT_EDITOR.HINT')
+          | translate
+      }}
     </p>
   </header>
 
-  <app-asset-content-grid [kind]="kind()" [slug]="slug()" />
+  @if (showLangSwitcher()) {
+    <app-lang-switcher
+      [instances]="visibleLangInstances()"
+      [activeLangSlug]="activeLangSlug()"
+      [canCreate]="!readOnly()"
+      [canRename]="!readOnly()"
+      [canDelete]="!readOnly()"
+      [canToggleVisibility]="!readOnly()"
+      [canSetDefaultLang]="!readOnly()"
+      (langSelect)="onLangSelect($event)"
+      (addLang)="onAddLanguage()"
+      (renameLang)="onRenameLanguage($event)"
+      (deleteLang)="onDeleteLanguage($event)"
+      (toggleVisibility)="onToggleLanguageVisibility($event)"
+      (setDefaultLang)="onSetDefaultLanguage($event)"
+    />
+  }
+
+  <app-asset-content-grid
+    [kind]="kind()"
+    [slug]="slug()"
+    [template]="template()"
+    [mushafPrint]="mushafPrint()"
+    [langSlug]="activeLangSlug()"
+    [readOnly]="readOnly()"
+    [reviewMode]="reviewMode()"
+  />
 </section>

@@ -28,6 +28,17 @@
     }
   }
 
+  &__diff-loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #1677ff;
+
+    ng-icon {
+      animation: content-grid-spin 1s linear infinite;
+    }
+  }
+
   &__unsaved {
     color: #d46b08;
   }
@@ -39,6 +50,59 @@
   &__actions {
     display: flex;
     gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  &__upload-btn {
+    cursor: pointer;
+    margin: 0;
+  }
+
+  &__upload-progress {
+    width: 120px;
+    margin-inline-start: 8px;
+  }
+
+  &__diff-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  &__surah-select,
+  &__ref-lang {
+    min-width: 160px;
+  }
+
+  &__review-panel {
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    padding: 12px;
+    max-height: 240px;
+    overflow: auto;
+  }
+
+  &__review-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+
+    th,
+    td {
+      border-bottom: 1px solid #f0f0f0;
+      padding: 8px;
+      vertical-align: top;
+    }
+  }
+
+  &__review-row--approved {
+    background: #f6ffed;
+  }
+
+  &__review-actions {
+    white-space: nowrap;
   }
 
   &__table {

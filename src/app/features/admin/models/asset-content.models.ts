@@ -1,14 +1,23 @@
 import type { AssetVersionParentKind } from './asset-versions.models';
+import type { ContentTemplate, MushafPrint } from './content-template.models';
+import type { ContentVersionState } from './content-review.models';
 
-/** A per-ayah content draft version (state === 'draft'). */
+/** A per-ayah content draft version. */
 export interface ContentDraftVersion {
   id: number;
   asset_id: number;
   name: string;
   summary: string;
-  state: 'draft' | 'published';
+  state: ContentVersionState;
   entries_count: number;
   created_at: string;
+}
+
+/** Optional content-template fields on tafsir/translation assets (write-once at creation). */
+export interface AssetContentTemplateFields {
+  template?: ContentTemplate | null;
+  mushaf_print?: MushafPrint | null;
+  default_language?: string | null;
 }
 
 /** One editable per-ayah row returned by the entries endpoint. */

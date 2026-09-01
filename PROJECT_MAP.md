@@ -331,8 +331,14 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   (font/mushaf/tafsir/translation)
 - `asset-versions-manager/` — Version CRUD (tafsir/translation/mushaf/font; program when
   re-enabled); CSV `export/` then `file_url` fallback
-- `asset-content-editor/` + `asset-content-grid/` — Per-ayah draft editor; flush before publish;
-  leave blocked if PATCH fails
+- `asset-content-editor/` + `asset-content-grid/` — Template-aware per-row content editor (surah /
+  ayah / page / word column descriptors); autosave draft; CSV empty-template download + upload
+  (batched PATCH); client diff toggle (`contentDiffView`); language switcher (`lang-switcher/`, mock
+  store until `assetLanguageInstances`); review diff panel + submit-for-review
+  (`contentReviewWorkflow`); word template surah scoping via `?sura=`; optional sibling-language
+  reference column
+- `asset-template-fields/` — Write-once template + mushaf print on create (`assetTemplates` flag)
+- `lang-switcher/` — Language instance tabs (recitation-folder pattern)
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`
 - `search-panel/` — Search UI
@@ -564,6 +570,10 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
 | Recitation folder variant relabelling   | Constrained       | Non-default classified folders with tracks cannot change variant (slug is public `?folder=`); default folder always editable (`?folder=default`). |
 | Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                                                       |
 | WebAuthn RP ID                          | Development mode  | `webauthnReplaceRpIdWithHostname` env flag allows RP ID patching in dev.                                                                          |
+| Asset content templates (API)           | Frontend-ready    | `assetTemplates` off until portal accepts `template` / `mushaf_print` on create. See `docs/asset-deep-edit-backend-contract.md`.                  |
+| Asset language instances (API)          | Mock in FE        | `assetLanguageInstances` off; in-memory store in `asset-language-instances.mock-store.ts`.                                                        |
+| Content review workflow (API)           | Mock in FE        | `contentReviewWorkflow` off; client diff MVP via `contentDiffView`; approve/comment mocked in `content-review.mock-store.ts`.                     |
+| Per-print page maps / word IDs          | Backend-owned     | Empty page CSV uses bundled single-print `quraan_data.json` only.                                                                                 |
 
 ---
 

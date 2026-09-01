@@ -788,7 +788,12 @@
         "SURAH": "السورة",
         "UTHMANI": "الآية (عثماني)",
         "TEXT": "النص",
-        "FOOTNOTES": "الحواشي"
+        "FOOTNOTES": "الحواشي",
+        "PAGE": "الصفحة",
+        "JUZ": "الجزء",
+        "SURAHS_ON_PAGE": "سور الصفحة",
+        "WORD_POSITION": "رقم الكلمة",
+        "UTHMANI_WORD": "الكلمة (عثماني)"
       },
       "MESSAGES": {
         "PUBLISHED": "تم نشر نسخة جديدة",
@@ -816,6 +821,73 @@
         "TRANSLATION_NOT_FOUND": "الترجمة غير موجودة.",
         "TAFSIR_NOT_FOUND": "التفسير غير موجود.",
         "CONTENT_FILE_UNPARSEABLE": "تعذّر تحليل الملف المرفوع."
+      },
+      "TEMPLATE": {
+        "SECTION": "قالب المحتوى",
+        "LABEL": "قالب الصفوف",
+        "MUSHAF_PRINT": "طبعة المصحف",
+        "DOWNLOAD": "تحميل قالب CSV فارغ",
+        "DOWNLOADED": "تم تحميل قالب CSV.",
+        "DOWNLOAD_FAILED": "تعذّر تحميل القالب. يرجى المحاولة مرة أخرى.",
+        "DOWNLOAD_EMPTY": "لا توجد صفوف قالب متاحة بعد.",
+        "OPTIONS": {
+          "SURAH": "حسب السورة",
+          "AYAH": "حسب الآية",
+          "PAGE": "حسب الصفحة",
+          "WORD": "حسب الكلمة"
+        },
+        "PRINTS": {
+          "MADINAH_1405": "المدينة 1405",
+          "MADINAH_1422": "المدينة 1422",
+          "MADINAH_1441": "المدينة 1441",
+          "INDOPAK": "هندي باكستاني"
+        }
+      },
+      "CSV_UPLOAD": {
+        "BUTTON": "رفع CSV",
+        "HEADER_MISMATCH": "عناوين CSV لا تطابق القالب النشط.",
+        "ROW_ERRORS": "تعذّر استيراد {{count}} صف.",
+        "INVALID": "لم يُعثر على صفوف صالحة في CSV.",
+        "SUCCESS": "تم استيراد {{count}} صف."
+      },
+      "DIFF": {
+        "SHOW_ONLY": "عرض التغييرات فقط",
+        "LOADING": "جارٍ المقارنة مع النسخة المنشورة…"
+      },
+      "SURAH_SCOPE": {
+        "LABEL": "السورة",
+        "LEAVE_TITLE": "تغييرات غير محفوظة",
+        "LEAVE_BODY": "التبديل بين السور يتطلب حفظ التعديلات أولًا."
+      },
+      "REFERENCE_LANG": "لغة مرجعية",
+      "REFERENCE_COLUMN": "النص المرجعي",
+      "LANGUAGES": {
+        "DEFAULT_BADGE": "افتراضي",
+        "HIDDEN_BADGE": "مخفي",
+        "ADD": "إضافة لغة",
+        "RENAME": "إعادة تسمية",
+        "DELETE": "حذف",
+        "SHOW": "إظهار للعامة",
+        "HIDE": "إخفاء عن العامة",
+        "SET_DEFAULT": "تعيين كافتراضي",
+        "LEAVE_TITLE": "تغييرات غير محفوظة",
+        "LEAVE_BODY": "التبديل بين اللغات يتطلب حفظ التعديلات أولًا.",
+        "ADD_PROMPT": "رمز اللغة (مثل en، fr)",
+        "RENAME_PROMPT": "الاسم المعروض"
+      },
+      "REVIEW": {
+        "TITLE": "مراجعة المحتوى",
+        "HINT": "راجع الصفوف المتغيرة فقط. وافق على كل تغيير أو أضف تعليقًا.",
+        "SUBMIT": "إرسال للمراجعة",
+        "SUBMITTED": "تم الإرسال للمراجعة.",
+        "DIFF_TITLE": "التغييرات في هذه النسخة",
+        "BEFORE": "قبل",
+        "AFTER": "بعد",
+        "APPROVE": "موافقة",
+        "COMMENT": "تعليق",
+        "COMMENT_PROMPT": "أضف تعليقًا على هذا التغيير",
+        "COMMENT_ADDED": "تمت إضافة التعليق.",
+        "APPROVED_ROW": "تمت الموافقة على التغيير."
       }
     },
     "COMMON": {

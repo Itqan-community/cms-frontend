@@ -25,6 +25,7 @@ import {
 import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
 import { isRestrictedForTenantConflictError } from '../../../../../shared/utils/error.utils';
 import { AssetInitialVersionFieldsComponent } from '../../../components/asset-initial-version-fields/asset-initial-version-fields.component';
+import { AssetTemplateFieldsComponent } from '../../../components/asset-template-fields/asset-template-fields.component';
 
 @Component({
   selector: 'app-translation-form',
@@ -44,6 +45,7 @@ import { AssetInitialVersionFieldsComponent } from '../../../components/asset-in
     NzUploadModule,
     TranslateModule,
     AssetInitialVersionFieldsComponent,
+    AssetTemplateFieldsComponent,
   ],
   templateUrl: './translation-form.component.html',
   styleUrl: './translation-form.component.less',

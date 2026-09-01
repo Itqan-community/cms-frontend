@@ -18,4 +18,12 @@ export const environment = {
    * admins something untrue, so the control is not rendered rather than mocked.
    */
   recitationFolderVisibility: true,
+  /** Template + mushaf print pickers on asset create until portal accepts the fields. */
+  assetTemplates: false,
+  /** Language-instance router; off uses in-memory mock for local UI development. */
+  assetLanguageInstances: false,
+  /** Client-side diff MVP; off still allows mock review actions in dev. */
+  contentDiffView: true,
+  /** Full review workflow (submit-review, per-row approve/comment API). */
+  contentReviewWorkflow: false,
 };

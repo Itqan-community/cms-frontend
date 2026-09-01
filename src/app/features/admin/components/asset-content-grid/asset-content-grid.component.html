@@ -1,7 +1,12 @@
 <div class="content-grid" [attr.dir]="rtl() ? 'rtl' : 'ltr'">
   <div class="content-grid__toolbar">
     <div class="content-grid__status">
-      @if (saving()) {
+      @if (diffLoading()) {
+        <span class="content-grid__diff-loading">
+          <ng-icon name="lucideRotateCw" />
+          {{ 'ADMIN.CONTENT_EDITOR.DIFF.LOADING' | translate }}
+        </span>
+      } @else if (saving()) {
         <span class="content-grid__saving">
           <ng-icon name="lucideRotateCw" />
           {{ 'ADMIN.CONTENT_EDITOR.SAVING' | translate }}
@@ -15,29 +20,101 @@
           {{ 'ADMIN.CONTENT_EDITOR.ALL_SAVED' | translate }}
         </span>
       }
+      @if (csvUploadProgress() !== null) {
+        <nz-progress
+          class="content-grid__upload-progress"
+          [nzPercent]="csvUploadProgress()!"
+          nzSize="small"
+        />
+      }
     </div>
 
     <div class="content-grid__actions">
-      <button
-        nz-button
-        nzType="default"
-        nz-tooltip
-        [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.UNDO' | translate"
-        [disabled]="!canUndo()"
-        (click)="undo()"
-      >
-        <ng-icon name="lucideUndo2" />
-      </button>
-      <button
-        nz-button
-        nzType="default"
-        nz-tooltip
-        [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.REDO' | translate"
-        [disabled]="!canRedo()"
-        (click)="redo()"
-      >
-        <ng-icon name="lucideRedo2" />
-      </button>
+      @if (isWordTemplate()) {
+        <nz-select
+          class="content-grid__surah-select"
+          [ngModel]="selectedSurah()"
+          (ngModelChange)="onSurahScopeChange($event)"
+          [nzPlaceHolder]="'ADMIN.CONTENT_EDITOR.SURAH_SCOPE.LABEL' | translate"
+        >
+          @for (s of surahOptions(); track s.label) {
+            <nz-option [nzValue]="+s.label.split('.')[0]" [nzLabel]="s.label"></nz-option>
+          }
+        </nz-select>
+      }
+
+      @if (referenceLangOptions().length > 0) {
+        <nz-select
+          class="content-grid__ref-lang"
+          [ngModel]="referenceLangSlug"
+          (ngModelChange)="onReferenceLangChange($event)"
+          [nzAllowClear]="true"
+          [nzPlaceHolder]="'ADMIN.CONTENT_EDITOR.REFERENCE_LANG' | translate"
+        >
+          @for (opt of referenceLangOptions(); track opt.slug) {
+            <nz-option [nzValue]="opt.slug" [nzLabel]="opt.label"></nz-option>
+          }
+        </nz-select>
+      }
+
+      @if (contentDiffViewEnabled) {
+        <span class="content-grid__diff-toggle">
+          <nz-switch
+            [ngModel]="showDiffOnly()"
+            (ngModelChange)="toggleDiffOnly($event)"
+            [nzDisabled]="diffLoading()"
+          />
+          <span>{{ 'ADMIN.CONTENT_EDITOR.DIFF.SHOW_ONLY' | translate }}</span>
+          @if (diffRows().length > 0) {
+            ({{ diffRows().length }})
+          }
+        </span>
+      }
+
+      @if (!readOnly) {
+        <button
+          nz-button
+          nzType="default"
+          type="button"
+          [nzLoading]="downloadingTemplate()"
+          (click)="downloadEmptyTemplate()"
+        >
+          <ng-icon name="lucideDownload" />
+          {{ 'ADMIN.CONTENT_EDITOR.TEMPLATE.DOWNLOAD' | translate }}
+        </button>
+        <button nz-button nzType="default" type="button" (click)="csvFileInput.click()">
+          <ng-icon name="lucideUpload" />
+          {{ 'ADMIN.CONTENT_EDITOR.CSV_UPLOAD.BUTTON' | translate }}
+        </button>
+        <input
+          #csvFileInput
+          type="file"
+          accept=".csv,text/csv"
+          hidden
+          (change)="onCsvFileSelected($event)"
+        />
+        <button
+          nz-button
+          nzType="default"
+          nz-tooltip
+          [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.UNDO' | translate"
+          [disabled]="!canUndo()"
+          (click)="undo()"
+        >
+          <ng-icon name="lucideUndo2" />
+        </button>
+        <button
+          nz-button
+          nzType="default"
+          nz-tooltip
+          [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.REDO' | translate"
+          [disabled]="!canRedo()"
+          (click)="redo()"
+        >
+          <ng-icon name="lucideRedo2" />
+        </button>
+      }
+
       <button
         nz-button
         nzType="default"
@@ -50,47 +127,108 @@
           ({{ selectedCount() }})
         }
       </button>
-      <button
-        nz-button
-        nzType="default"
-        nzDanger
-        (click)="confirmDiscard()"
-        [disabled]="publishing() || savingDraft()"
-      >
-        {{ 'ADMIN.CONTENT_EDITOR.DISCARD' | translate }}
-      </button>
-      <button
-        nz-button
-        nzType="default"
-        [nzLoading]="savingDraft()"
-        [disabled]="draftId() === null || publishing() || saving()"
-        (click)="saveDraft()"
-      >
-        {{ 'ADMIN.CONTENT_EDITOR.SAVE_DRAFT' | translate }}
-      </button>
-      <button
-        nz-button
-        nzType="primary"
-        [nzLoading]="publishing()"
-        [disabled]="draftId() === null || savingDraft() || saving()"
-        (click)="publish()"
-      >
-        {{ 'ADMIN.CONTENT_EDITOR.SAVE' | translate }}
-      </button>
+
+      @if (!readOnly) {
+        <button
+          nz-button
+          nzType="default"
+          nzDanger
+          (click)="confirmDiscard()"
+          [disabled]="publishing() || savingDraft() || submittingReview()"
+        >
+          {{ 'ADMIN.CONTENT_EDITOR.DISCARD' | translate }}
+        </button>
+        <button
+          nz-button
+          nzType="default"
+          [nzLoading]="savingDraft()"
+          [disabled]="draftId() === null || publishing() || saving() || submittingReview()"
+          (click)="saveDraft()"
+        >
+          {{ 'ADMIN.CONTENT_EDITOR.SAVE_DRAFT' | translate }}
+        </button>
+        <button
+          nz-button
+          nzType="default"
+          [nzLoading]="submittingReview()"
+          [disabled]="draftId() === null || publishing() || saving() || savingDraft()"
+          (click)="submitForReview()"
+        >
+          {{ 'ADMIN.CONTENT_EDITOR.REVIEW.SUBMIT' | translate }}
+        </button>
+        <button
+          nz-button
+          nzType="primary"
+          [nzLoading]="publishing()"
+          [disabled]="draftId() === null || savingDraft() || saving() || submittingReview()"
+          (click)="publish()"
+        >
+          {{ 'ADMIN.CONTENT_EDITOR.SAVE' | translate }}
+        </button>
+      }
     </div>
   </div>
 
-  <nz-spin [nzSpinning]="loading()" (paste)="onPaste($event)">
+  @if (reviewMode && reviewDiffRows().length > 0) {
+    <div class="content-grid__review-panel">
+      <h3>{{ 'ADMIN.CONTENT_EDITOR.REVIEW.DIFF_TITLE' | translate }}</h3>
+      <table class="content-grid__review-table">
+        <thead>
+          <tr>
+            <th>{{ 'ADMIN.CONTENT_EDITOR.COLUMNS.SURA' | translate }}</th>
+            <th>{{ 'ADMIN.CONTENT_EDITOR.COLUMNS.AYA' | translate }}</th>
+            <th>{{ 'ADMIN.CONTENT_EDITOR.REVIEW.BEFORE' | translate }}</th>
+            <th>{{ 'ADMIN.CONTENT_EDITOR.REVIEW.AFTER' | translate }}</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of reviewDiffRows(); track row.row_key) {
+            <tr [class.content-grid__review-row--approved]="row.approved">
+              <td>{{ row.sura }}</td>
+              <td>{{ row.aya }}</td>
+              <td>{{ row.before_text }}</td>
+              <td>{{ row.after_text }}</td>
+              <td class="content-grid__review-actions">
+                <button
+                  nz-button
+                  nzType="text"
+                  nzSize="small"
+                  [disabled]="row.approved"
+                  (click)="approveDiffRow(row.row_key)"
+                >
+                  <ng-icon name="lucideCheck" />
+                </button>
+                <button
+                  nz-button
+                  nzType="text"
+                  nzSize="small"
+                  (click)="openRowComment(row.row_key)"
+                >
+                  <ng-icon name="lucidePlus" />
+                  @if (row.comments_count > 0) {
+                    ({{ row.comments_count }})
+                  }
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <nz-spin [nzSpinning]="loading() || diffLoading()" (paste)="onPaste($event)">
     <ag-grid-angular
       class="content-grid__table"
       [theme]="theme"
-      [rowData]="rows()"
+      [rowData]="displayRows()"
       [columnDefs]="columnDefs"
       [defaultColDef]="defaultColDef"
       [enableRtl]="rtl()"
       [stopEditingWhenCellsLoseFocus]="true"
-      [rowSelection]="rowSelection"
-      [undoRedoCellEditing]="true"
+      [rowSelection]="readOnly ? undefined : rowSelection"
+      [undoRedoCellEditing]="!readOnly"
       [undoRedoCellEditingLimit]="50"
       (gridReady)="onGridReady($event)"
       (cellValueChanged)="onCellValueChanged($event)"

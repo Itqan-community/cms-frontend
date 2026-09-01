@@ -25,6 +25,7 @@ import {
 import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
 import { isRestrictedForTenantConflictError } from '../../../../../shared/utils/error.utils';
 import { AssetInitialVersionFieldsComponent } from '../../../components/asset-initial-version-fields/asset-initial-version-fields.component';
+import { AssetTemplateFieldsComponent } from '../../../components/asset-template-fields/asset-template-fields.component';
 
 @Component({
   selector: 'app-tafsir-form',
@@ -44,6 +45,7 @@ import { AssetInitialVersionFieldsComponent } from '../../../components/asset-in
     NzToolTipModule,
     TranslateModule,
     AssetInitialVersionFieldsComponent,
+    AssetTemplateFieldsComponent,
   ],
   templateUrl: './tafsir-form.component.html',
   styleUrl: './tafsir-form.component.less',

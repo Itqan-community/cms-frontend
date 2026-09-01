@@ -1,0 +1,40 @@
+@if (enabled && parentForm) {
+  <div [formGroup]="parentForm" nz-row [nzGutter]="20">
+    <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+      <nz-form-item>
+        <nz-form-label nzRequired>{{
+          'ADMIN.CONTENT_EDITOR.TEMPLATE.LABEL' | translate
+        }}</nz-form-label>
+        <nz-form-control>
+          <nz-select formControlName="content_template">
+            @for (t of templateOptions; track t) {
+              <nz-option
+                [nzValue]="t"
+                [nzLabel]="'ADMIN.CONTENT_EDITOR.TEMPLATE.OPTIONS.' + t.toUpperCase() | translate"
+              ></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    @if (showMushafPrint()) {
+      <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
+        <nz-form-item>
+          <nz-form-label nzRequired>{{
+            'ADMIN.CONTENT_EDITOR.TEMPLATE.MUSHAF_PRINT' | translate
+          }}</nz-form-label>
+          <nz-form-control>
+            <nz-select formControlName="mushaf_print">
+              @for (p of mushafPrintOptions; track p) {
+                <nz-option
+                  [nzValue]="p"
+                  [nzLabel]="'ADMIN.CONTENT_EDITOR.TEMPLATE.PRINTS.' + p.toUpperCase() | translate"
+                ></nz-option>
+              }
+            </nz-select>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    }
+  </div>
+}

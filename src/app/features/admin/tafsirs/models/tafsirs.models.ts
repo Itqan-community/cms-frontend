@@ -1,4 +1,5 @@
 import { Licenses } from '../../../../core/enums/licenses.enum';
+import type { ContentTemplate, MushafPrint } from '../../models/content-template.models';
 
 export type AssetSortingQuery =
   | 'id'
@@ -64,6 +65,8 @@ export interface TafsirDetails {
   external_url: string | null;
   versions: AssetVersion[];
   created_at: string;
+  template?: ContentTemplate | null;
+  mushaf_print?: MushafPrint | null;
 }
 
 /** Paginated list response */

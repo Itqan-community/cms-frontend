@@ -788,7 +788,12 @@
         "SURAH": "Surah",
         "UTHMANI": "Ayah (Uthmani)",
         "TEXT": "Text",
-        "FOOTNOTES": "Footnotes"
+        "FOOTNOTES": "Footnotes",
+        "PAGE": "Page",
+        "JUZ": "Juz",
+        "SURAHS_ON_PAGE": "Surahs on page",
+        "WORD_POSITION": "Word #",
+        "UTHMANI_WORD": "Word (Uthmani)"
       },
       "MESSAGES": {
         "PUBLISHED": "New version published",
@@ -816,6 +821,73 @@
         "TRANSLATION_NOT_FOUND": "Translation not found.",
         "TAFSIR_NOT_FOUND": "Tafsir not found.",
         "CONTENT_FILE_UNPARSEABLE": "The uploaded file could not be parsed."
+      },
+      "TEMPLATE": {
+        "SECTION": "Content template",
+        "LABEL": "Row template",
+        "MUSHAF_PRINT": "Mushaf print",
+        "DOWNLOAD": "Empty template CSV",
+        "DOWNLOADED": "Template CSV downloaded.",
+        "DOWNLOAD_FAILED": "Could not download the template. Please try again.",
+        "DOWNLOAD_EMPTY": "No template rows are available yet.",
+        "OPTIONS": {
+          "SURAH": "Surah-based",
+          "AYAH": "Ayah-based",
+          "PAGE": "Page-based",
+          "WORD": "Word-based"
+        },
+        "PRINTS": {
+          "MADINAH_1405": "Medina 1405",
+          "MADINAH_1422": "Medina 1422",
+          "MADINAH_1441": "Medina 1441",
+          "INDOPAK": "Indo-Pak"
+        }
+      },
+      "CSV_UPLOAD": {
+        "BUTTON": "Upload CSV",
+        "HEADER_MISMATCH": "CSV headers do not match the active template.",
+        "ROW_ERRORS": "{{count}} row(s) could not be imported.",
+        "INVALID": "No valid rows found in the CSV.",
+        "SUCCESS": "Imported {{count}} row(s)."
+      },
+      "DIFF": {
+        "SHOW_ONLY": "Show changes only",
+        "LOADING": "Comparing with published version…"
+      },
+      "SURAH_SCOPE": {
+        "LABEL": "Surah",
+        "LEAVE_TITLE": "Unsaved changes",
+        "LEAVE_BODY": "Switch surah and save your edits first?"
+      },
+      "REFERENCE_LANG": "Reference language",
+      "REFERENCE_COLUMN": "Reference text",
+      "LANGUAGES": {
+        "DEFAULT_BADGE": "Default",
+        "HIDDEN_BADGE": "Hidden",
+        "ADD": "Add language",
+        "RENAME": "Rename",
+        "DELETE": "Delete",
+        "SHOW": "Show publicly",
+        "HIDE": "Hide from public",
+        "SET_DEFAULT": "Set as default",
+        "LEAVE_TITLE": "Unsaved changes",
+        "LEAVE_BODY": "Switch language and save your edits first?",
+        "ADD_PROMPT": "Language code (e.g. en, fr)",
+        "RENAME_PROMPT": "Display name"
+      },
+      "REVIEW": {
+        "TITLE": "Review content",
+        "HINT": "Review changed rows only. Approve each change or add a comment.",
+        "SUBMIT": "Submit for review",
+        "SUBMITTED": "Submitted for review.",
+        "DIFF_TITLE": "Changes in this version",
+        "BEFORE": "Before",
+        "AFTER": "After",
+        "APPROVE": "Approve",
+        "COMMENT": "Comment",
+        "COMMENT_PROMPT": "Add a comment on this change",
+        "COMMENT_ADDED": "Comment added.",
+        "APPROVED_ROW": "Change approved."
       }
     },
     "COMMON": {

@@ -74,6 +74,12 @@
             <ng-icon name="lucideLayoutGrid" />
             {{ 'ADMIN.CONTENT_EDITOR.OPEN_BUTTON' | translate }}
           </button>
+          @if (canReviewContent()) {
+            <button nz-button nzType="default" (click)="onReviewContent()">
+              <ng-icon name="lucideCheckSquare" />
+              {{ 'ADMIN.CONTENT_EDITOR.REVIEW.TITLE' | translate }}
+            </button>
+          }
         }
         @if (canDeleteTafsir()) {
           <button nz-button nzDanger (click)="onDelete()">

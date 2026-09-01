@@ -15,4 +15,8 @@ export const environment = {
   useProgramsMockApi: true,
   /** Off until the portal API exposes `is_visible` on recitation folders. */
   recitationFolderVisibility: true,
+  assetTemplates: false,
+  assetLanguageInstances: false,
+  contentDiffView: true,
+  contentReviewWorkflow: false,
 };

@@ -280,6 +280,14 @@
         </nz-form-item>
       </div>
 
+      <div class="admin-form-card">
+        <h3 class="admin-form-card__title">
+          <ng-icon name="lucideLayoutGrid" />
+          {{ 'ADMIN.CONTENT_EDITOR.TEMPLATE.SECTION' | translate }}
+        </h3>
+        <app-asset-template-fields [parentForm]="form" [readOnly]="isEditMode()" />
+      </div>
+
       @if (!isEditMode()) {
         <app-asset-initial-version-fields
           [versionFile]="versionFile()"
