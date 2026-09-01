@@ -31,7 +31,7 @@ import { SurahFloatingFilterComponent, type SurahOption } from './surah-floating
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 /** Columns the positional paste is allowed to write into. */
-const EDITABLE_FIELDS = new Set<string>(['text', 'footnotes']);
+const EDITABLE_FIELDS = new Set<string>(['text']);
 
 const ENTRIES_PAGE_SIZE = 500;
 const AUTOSAVE_DEBOUNCE_MS = 800;
@@ -124,7 +124,6 @@ export class AssetContentGridComponent implements OnInit {
     this.pendingRows.set(row.ayah_id, {
       ayah_id: row.ayah_id,
       text: row.text ?? '',
-      footnotes: row.footnotes ?? '',
     });
     this.dirty.set(true);
     this.autosave$.next();
@@ -216,9 +215,9 @@ export class AssetContentGridComponent implements OnInit {
   }
 
   /**
-   * Copy the selected rows to the clipboard as CSV (`sura,aya,text,footnotes`
-   * with a header) — the same shape as the per-version download, so it can be
-   * saved to a .csv file or pasted back in.
+   * Copy the selected rows to the clipboard as CSV (`sura,aya,text` with a
+   * header) — the same shape as the per-version download, so it can be saved
+   * to a .csv file or pasted back in.
    */
   copySelectedToCsv(): void {
     const api = this.gridApi;
@@ -230,8 +229,8 @@ export class AssetContentGridComponent implements OnInit {
     }
     selected.sort((a, b) => a.order - b.order || a.ayah_id - b.ayah_id);
     const table: string[][] = [
-      ['sura', 'aya', 'text', 'footnotes'],
-      ...selected.map((r) => [String(r.sura), String(r.aya), r.text ?? '', r.footnotes ?? '']),
+      ['sura', 'aya', 'text'],
+      ...selected.map((r) => [String(r.sura), String(r.aya), r.text ?? '']),
     ];
     const csv = serializeCsv(table);
     navigator.clipboard.writeText(csv).then(
@@ -480,27 +479,29 @@ export class AssetContentGridComponent implements OnInit {
         wrapText: true,
         autoHeight: true,
       },
-      {
-        field: 'footnotes',
-        headerName: this.colHeader('FOOTNOTES'),
-        flex: 1,
-        editable: true,
-        cellEditor: 'agLargeTextCellEditor',
-        cellEditorPopup: true,
-        cellEditorParams: { maxLength: 100000, rows: 10, cols: 50 },
-        wrapText: true,
-        autoHeight: true,
-      },
     ];
   }
 
   private showError(err: HttpErrorResponse): void {
-    const name = err?.error?.error_name;
+    const name: string | undefined = err?.error?.error_name;
+
+    // "Nothing changed" isn't really a failure — show it as a friendly popup
+    // rather than a red error toast.
+    if (name === 'no_changes_to_publish') {
+      this.modal.info({
+        nzTitle: this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.NO_CHANGES_TO_PUBLISH_TITLE'),
+        nzContent: this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.NO_CHANGES_TO_PUBLISH'),
+        nzOkText: this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.OK'),
+        nzDirection: this.translate.currentLang === 'ar' ? 'rtl' : 'ltr',
+      });
+      return;
+    }
+
+    const key = name ? `ADMIN.CONTENT_EDITOR.ERRORS.${name.toUpperCase()}` : '';
+    const translated = key ? this.translate.instant(key) : '';
     this.message.error(
-      name
-        ? this.translate.instant(`ADMIN.CONTENT_EDITOR.ERRORS.${name.toUpperCase()}`, {
-            default: this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC'),
-          })
+      translated && translated !== key
+        ? translated
         : this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC')
     );
   }

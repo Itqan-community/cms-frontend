@@ -76,6 +76,14 @@ describe('api-error-resolver.util', () => {
       expect(shouldSuppressGlobalErrorToast(err)).toBe(true);
     });
 
+    it('suppresses no_changes_to_publish (handled by the content editor popup)', () => {
+      const err = new HttpErrorResponse({
+        status: 400,
+        error: { error_name: 'no_changes_to_publish', message: 'x' },
+      });
+      expect(shouldSuppressGlobalErrorToast(err)).toBe(true);
+    });
+
     it('does not suppress generic errors', () => {
       const err = new HttpErrorResponse({
         status: 500,
