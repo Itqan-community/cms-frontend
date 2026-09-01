@@ -20,7 +20,6 @@ export interface ContentEntry {
   surah_name: string;
   uthmani: string;
   text: string;
-  footnotes: string;
   order: number;
 }
 
@@ -34,7 +33,6 @@ export interface ContentEntriesResponse {
 export interface ContentEntryPatch {
   ayah_id: number;
   text: string;
-  footnotes: string;
 }
 
 export type { AssetVersionParentKind };

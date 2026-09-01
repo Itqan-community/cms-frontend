@@ -70,9 +70,9 @@ describe('serializeCsv', () => {
 
   it('round-trips with parseClipboardTable', () => {
     const table = [
-      ['sura', 'aya', 'text', 'footnotes'],
-      ['1', '1', 'with, comma', 'multi\nline'],
-      ['1', '2', 'plain', ''],
+      ['sura', 'aya', 'text'],
+      ['1', '1', 'with, comma'],
+      ['1', '2', 'multi\nline'],
     ];
     expect(parseClipboardTable(serializeCsv(table))).toEqual(table);
   });
