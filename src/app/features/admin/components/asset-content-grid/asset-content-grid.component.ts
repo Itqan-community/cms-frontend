@@ -31,7 +31,7 @@ import { SurahFloatingFilterComponent, type SurahOption } from './surah-floating
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 /** Columns the positional paste is allowed to write into. */
-const EDITABLE_FIELDS = new Set<string>(['text', 'footnotes']);
+const EDITABLE_FIELDS = new Set<string>(['text']);
 
 const ENTRIES_PAGE_SIZE = 500;
 const AUTOSAVE_DEBOUNCE_MS = 800;
@@ -123,7 +123,6 @@ export class AssetContentGridComponent implements OnInit {
     this.pendingRows.set(row.ayah_id, {
       ayah_id: row.ayah_id,
       text: row.text ?? '',
-      footnotes: row.footnotes ?? '',
     });
     this.dirty.set(true);
     this.autosave$.next();
@@ -215,9 +214,9 @@ export class AssetContentGridComponent implements OnInit {
   }
 
   /**
-   * Copy the selected rows to the clipboard as CSV (`sura,aya,text,footnotes`
-   * with a header) — the same shape as the per-version download, so it can be
-   * saved to a .csv file or pasted back in.
+   * Copy the selected rows to the clipboard as CSV (`sura,aya,text` with a
+   * header) — the same shape as the per-version download, so it can be saved
+   * to a .csv file or pasted back in.
    */
   copySelectedToCsv(): void {
     const api = this.gridApi;
@@ -229,8 +228,8 @@ export class AssetContentGridComponent implements OnInit {
     }
     selected.sort((a, b) => a.order - b.order || a.ayah_id - b.ayah_id);
     const table: string[][] = [
-      ['sura', 'aya', 'text', 'footnotes'],
-      ...selected.map((r) => [String(r.sura), String(r.aya), r.text ?? '', r.footnotes ?? '']),
+      ['sura', 'aya', 'text'],
+      ...selected.map((r) => [String(r.sura), String(r.aya), r.text ?? '']),
     ];
     const csv = serializeCsv(table);
     navigator.clipboard.writeText(csv).then(
@@ -475,17 +474,6 @@ export class AssetContentGridComponent implements OnInit {
         // agLargeTextCellEditor defaults to maxLength 200; ayah text is far longer,
         // so raise the cap and enlarge the popup textarea.
         cellEditorParams: { maxLength: 100000, rows: 12, cols: 60 },
-        wrapText: true,
-        autoHeight: true,
-      },
-      {
-        field: 'footnotes',
-        headerName: this.colHeader('FOOTNOTES'),
-        flex: 1,
-        editable: true,
-        cellEditor: 'agLargeTextCellEditor',
-        cellEditorPopup: true,
-        cellEditorParams: { maxLength: 100000, rows: 10, cols: 50 },
         wrapText: true,
         autoHeight: true,
       },

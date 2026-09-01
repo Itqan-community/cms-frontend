@@ -770,7 +770,7 @@
     },
     "CONTENT_EDITOR": {
       "TITLE": "Edit content",
-      "HINT": "Edit the text ayah by ayah. Changes autosave to a draft; publish to create a new version. Tip: select a Text or Footnotes cell and paste (Ctrl+V) CSV/spreadsheet rows to fill cells downward.",
+      "HINT": "Edit the text ayah by ayah. Changes autosave to a draft; publish to create a new version. Tip: select a Text cell and paste (Ctrl+V) CSV/spreadsheet rows to fill cells downward.",
       "BACK": "Back to details",
       "SAVE": "Save & publish",
       "SAVE_DRAFT": "Save draft",
@@ -787,15 +787,14 @@
         "AYA": "Aya",
         "SURAH": "Surah",
         "UTHMANI": "Ayah (Uthmani)",
-        "TEXT": "Text",
-        "FOOTNOTES": "Footnotes"
+        "TEXT": "Text"
       },
       "MESSAGES": {
         "PUBLISHED": "New version published",
         "DRAFT_SAVED": "Draft saved"
       },
       "PASTE": {
-        "SELECT_EDITABLE": "Select a Text or Footnotes cell first, then paste.",
+        "SELECT_EDITABLE": "Select a Text cell first, then paste.",
         "APPLIED": "Pasted into {{count}} cell(s)."
       },
       "COPY": {
