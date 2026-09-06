@@ -101,6 +101,19 @@ describe('errorInterceptor', () => {
     );
   });
 
+  it('does not show global toast for jsDelivr CDN errors', (done) => {
+    const url =
+      'https://cdn.jsdelivr.net/gh/quranpedia/quran-svg@5fbcb1d4d92b5a2972ab51472fe991b6066bb6e2/mushafs/hafs/kfqc/svg/001.svg';
+    http.get(url, { responseType: 'text' }).subscribe({
+      error: () => {
+        expect(messageSpy.error).not.toHaveBeenCalled();
+        done();
+      },
+    });
+    const req = httpMock.expectOne(url);
+    req.flush('fail', { status: 404, statusText: 'Not Found' });
+  });
+
   it('shows global toast for other server errors', (done) => {
     if (!api) {
       pending('API_BASE_URL');

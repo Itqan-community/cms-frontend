@@ -10,13 +10,15 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { NzPaginationModule } from 'ng-zorro-antd/pagination';
+import { AdminTitleCountComponent } from '../admin-title-count/admin-title-count.component';
+import { AdminTablePaginationComponent } from '../admin-table-pagination/admin-table-pagination.component';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { Subject, debounceTime, distinctUntilChanged, finalize, takeUntil } from 'rxjs';
 import type { AssetVersion, AssetVersionParentKind } from '../../models/asset-versions.models';
 import { AssetVersionsService } from '../../services/asset-versions.service';
+import { AssetContentService } from '../../services/asset-content.service';
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../services/admin-auth.service';
 
@@ -34,7 +36,8 @@ const DEFAULT_PAGE_SIZE = 10;
     NzFormModule,
     NzInputModule,
     NzModalModule,
-    NzPaginationModule,
+    AdminTitleCountComponent,
+    AdminTablePaginationComponent,
     NzSpinModule,
     NzTableModule,
     NzToolTipModule,
@@ -45,6 +48,7 @@ const DEFAULT_PAGE_SIZE = 10;
 export class AssetVersionsManagerComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly assetVersionsService = inject(AssetVersionsService);
+  private readonly assetContentService = inject(AssetContentService);
   private readonly message = inject(NzMessageService);
   private readonly modal = inject(NzModalService);
   readonly translate = inject(TranslateService);
@@ -71,6 +75,7 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly pageSize = signal(DEFAULT_PAGE_SIZE);
   readonly loading = signal(false);
   readonly saving = signal(false);
+  readonly downloadingId = signal<number | null>(null);
   readonly searchTerm = signal('');
   readonly selectedFileName = signal<string | null>(null);
   private selectedFile: File | null = null;
@@ -331,6 +336,42 @@ export class AssetVersionsManagerComponent implements OnInit {
           });
         }),
     });
+  }
+
+  /** Download a version's content (CSV of its per-ayah entries, or its file). */
+  downloadVersion(row: AssetVersion): void {
+    if (this.downloadingId() !== null) {
+      return;
+    }
+    this.downloadingId.set(row.id);
+    this.assetContentService
+      .exportVersion(this.kind, this.slug, row.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          const url = URL.createObjectURL(blob);
+          this.triggerDownload(url, `${this.slug}-${row.name}.csv`.replace(/\s+/g, '_'));
+          URL.revokeObjectURL(url);
+          this.downloadingId.set(null);
+        },
+        error: () => {
+          if (row.file_url) {
+            this.triggerDownload(row.file_url, `${this.slug}-${row.name}`.replace(/\s+/g, '_'));
+            this.downloadingId.set(null);
+            return;
+          }
+          this.message.error(this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC'));
+          this.downloadingId.set(null);
+        },
+      });
+  }
+
+  private triggerDownload(href: string, filename: string): void {
+    const anchor = document.createElement('a');
+    anchor.href = href;
+    anchor.download = filename;
+    anchor.rel = 'noopener';
+    anchor.click();
   }
 
   formatBytes(n: number | null | undefined): string {

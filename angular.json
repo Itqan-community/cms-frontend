@@ -109,7 +109,7 @@
                 },
                 {
                   "glob": "_redirects",
-                  "input": "deploy/netlify/staging",
+                  "input": "deploy/cloudflare/staging",
                   "output": "."
                 }
               ]

@@ -203,6 +203,7 @@ export class RecitationTracksUploadOrchestratorService {
       const start = await firstValueFrom(
         this.recitationsService.recitationTracksUploadStart({
           asset_id: assetId,
+          folder_id: folderId,
           filename,
           duration_ms: durationMs,
           size_bytes: blob.size,
@@ -306,6 +307,7 @@ export class RecitationTracksUploadOrchestratorService {
         const finish = await firstValueFrom(
           this.recitationsService.recitationTracksUploadFinish({
             asset_id: assetId,
+            folder_id: folderId,
             filename,
             key,
             upload_id,

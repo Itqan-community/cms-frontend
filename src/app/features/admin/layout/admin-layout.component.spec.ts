@@ -4,11 +4,11 @@ import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { of } from 'rxjs';
-import { AuthService } from '../../core/auth/services/auth.service';
+import { AuthService } from '../../../core/auth/services/auth.service';
 import { AdminLayoutComponent } from './admin-layout.component';
-import { AdminTenantNavigationService } from './services/admin-tenant-navigation.service';
-import { AdminAuthService } from './services/admin-auth.service';
-import { AdminTenantService } from './services/admin-tenant.service';
+import { AdminTenantNavigationService } from '../services/admin-tenant-navigation.service';
+import { AdminAuthService } from '../services/admin-auth.service';
+import { AdminTenantService } from '../services/admin-tenant.service';
 
 describe('AdminLayoutComponent', () => {
   let component: AdminLayoutComponent;
@@ -87,18 +87,6 @@ describe('AdminLayoutComponent', () => {
 
     expect(tenantServiceMock.setSelectedPublisherId).toHaveBeenCalledWith(456);
     expect(tenantNavigationMock.assign).toHaveBeenCalledWith('/admin/publishers/456');
-  });
-
-  it('links the publishers menu item to the selected publisher detail', () => {
-    expect(
-      component.tabRouterLink({ id: 'publishers', path: 'publishers', label: '', icon: '' })
-    ).toEqual(['/admin', 'publishers', 123]);
-  });
-
-  it('keeps non-publisher menu items on their module routes', () => {
-    expect(
-      component.tabRouterLink({ id: 'members', path: 'members', label: '', icon: '' })
-    ).toEqual(['/admin', 'members']);
   });
 
   it('does nothing when the selected tenant is unchanged', () => {

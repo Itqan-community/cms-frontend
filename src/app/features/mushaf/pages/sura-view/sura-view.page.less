@@ -1,0 +1,81 @@
+.sura-view {
+  max-width: 900px;
+  margin-inline: auto;
+  padding: 1.5rem 1rem 3rem;
+
+  &__header {
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+
+  &__back {
+    display: inline-block;
+    margin-bottom: 0.75rem;
+    color: var(--color-primary, #008060);
+    text-decoration: none;
+    font-size: 0.9rem;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+
+  &__name {
+    margin: 0 0 0.25rem;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  &__meta {
+    margin: 0;
+    color: var(--color-text-secondary, #6b7280);
+  }
+
+  &__toolbar {
+    display: flex;
+    justify-content: center;
+    margin-top: 1rem;
+  }
+
+  &__text {
+    padding: 1.5rem;
+    border: 1px solid var(--color-border, #e5e7eb);
+    border-radius: var(--radius-lg, 14px);
+    background: var(--color-surface, #fff);
+    font-family: 'Amiri', 'Scheherazade New', 'Traditional Arabic', serif;
+    font-size: 1.9rem;
+    line-height: 2.6;
+    text-align: justify;
+  }
+
+  &__skeleton {
+    border-radius: var(--radius-md, 10px);
+    background: linear-gradient(
+      90deg,
+      var(--color-fill, #f3f4f6) 25%,
+      var(--color-border, #e5e7eb) 37%,
+      var(--color-fill, #f3f4f6) 63%
+    );
+    background-size: 400% 100%;
+    animation: sura-view-shimmer 1.4s ease infinite;
+
+    &--header {
+      height: 3rem;
+      width: 50%;
+      margin: 0 auto 1.5rem;
+    }
+
+    &--body {
+      height: 18rem;
+    }
+  }
+}
+
+@keyframes sura-view-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}

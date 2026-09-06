@@ -72,7 +72,7 @@
           countryLabel(p.country)
         }}</nz-descriptions-item>
         <nz-descriptions-item [nzTitle]="'ADMIN.PUBLISHERS.DETAIL.FOUNDATION_YEAR' | translate">{{
-          p.foundation_year != null ? p.foundation_year : ('ADMIN.COMMON.EM_DASH' | translate)
+          p.foundation_year !== null ? p.foundation_year : ('ADMIN.COMMON.EM_DASH' | translate)
         }}</nz-descriptions-item>
         <nz-descriptions-item
           [nzTitle]="'ADMIN.PUBLISHERS.DETAIL.ADDRESS' | translate"

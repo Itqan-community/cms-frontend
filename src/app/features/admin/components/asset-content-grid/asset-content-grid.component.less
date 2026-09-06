@@ -1,0 +1,59 @@
+.content-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  height: 100%;
+
+  &__toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  &__status {
+    font-size: 13px;
+    min-height: 22px;
+  }
+
+  &__saving {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #1677ff;
+
+    ng-icon {
+      animation: content-grid-spin 1s linear infinite;
+    }
+  }
+
+  &__unsaved {
+    color: #d46b08;
+  }
+
+  &__saved {
+    color: #389e0d;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  &__table {
+    display: block;
+    width: 100%;
+    height: 70vh;
+    min-height: 480px;
+  }
+}
+
+@keyframes content-grid-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}

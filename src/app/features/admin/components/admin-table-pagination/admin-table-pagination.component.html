@@ -1,0 +1,14 @@
+@if (!loading() && (!hideWhenEmpty() || total() > 0)) {
+  <div class="admin-pagination admin-table-pagination">
+    <nz-pagination
+      [nzPageIndex]="page()"
+      [nzTotal]="total()"
+      [nzPageSize]="pageSize()"
+      [nzShowSizeChanger]="showSizeChanger()"
+      [nzPageSizeOptions]="pageSizeOptions()"
+      [nzShowQuickJumper]="showQuickJumper()"
+      (nzPageIndexChange)="pageChange.emit($event)"
+      (nzPageSizeChange)="pageSizeChange.emit($event)"
+    />
+  </div>
+}

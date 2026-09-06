@@ -10,33 +10,34 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
-import {
-  AbstractControl,
-  FormBuilder,
-  ReactiveFormsModule,
-  ValidationErrors,
-} from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
-import { NzGridModule } from 'ng-zorro-antd/grid';
-import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
-import { NzPaginationModule } from 'ng-zorro-antd/pagination';
+import { AdminTitleCountComponent } from '../../../components/admin-title-count/admin-title-count.component';
+import { AdminTablePaginationComponent } from '../../../components/admin-table-pagination/admin-table-pagination.component';
 import { NzProgressModule } from 'ng-zorro-antd/progress';
+import { NzRadioModule } from 'ng-zorro-antd/radio';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzTableModule } from 'ng-zorro-antd/table';
-import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { environment } from '../../../../../../environments/environment';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
 import { GoogleAnalyticsService } from '../../../../../core/services/google-analytics.service';
 import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
-import type { RecitationFolderOut } from '../../models/recitation-folders.models';
+import {
+  RecitationFolderQuality,
+  type RecitationFolderOut,
+  type RecitationFolderVariant,
+} from '../../models/recitation-folders.models';
 import type {
   RecitationSurahTrackListItem,
   RecitationTrackUploadRowState,
@@ -50,18 +51,23 @@ import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constan
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import { RecitationsService } from '../../services/recitations.service';
 import {
+  FOLDER_QUALITY_ORDER,
+  canEditFolderVariant,
+  folderDisplayName,
+  folderVariantKey,
+  formatFolderVariantNames,
+  isFolderVisible,
+  parseFolderVariant,
+  takenFolderVariantKeys,
+} from '../../utils/recitation-folder.util';
+import {
   buildTimingUploadExtraMessage,
   buildTimingUploadSuccessDescription,
 } from '../../utils/timing-upload-result.format';
+import { FolderSwitcherComponent } from '../folder-switcher/folder-switcher.component';
 
 const TRACKS_PAGE_SIZE = 10;
 const MAX_MP3_FILES = 114;
-
-function atLeastOneFolderName(group: AbstractControl): ValidationErrors | null {
-  const ar = String(group.get('name_ar')?.value ?? '').trim();
-  const en = String(group.get('name_en')?.value ?? '').trim();
-  return ar || en ? null : { folderNameRequired: true };
-}
 
 @Component({
   selector: 'app-recitation-detail',
@@ -76,14 +82,15 @@ function atLeastOneFolderName(group: AbstractControl): ValidationErrors | null {
     NzTagModule,
     TranslateModule,
     NzTableModule,
-    NzPaginationModule,
+    AdminTitleCountComponent,
+    AdminTablePaginationComponent,
     NzProgressModule,
     NzAlertModule,
-    NzTabsModule,
     NzFormModule,
-    NzInputModule,
-    NzGridModule,
+    NzSelectModule,
+    NzRadioModule,
     ReactiveFormsModule,
+    FolderSwitcherComponent,
   ],
   templateUrl: './recitation-detail.component.html',
   styleUrl: './recitation-detail.component.less',
@@ -112,6 +119,12 @@ export class RecitationDetailComponent implements OnInit {
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_CREATE_RECITATION)
   );
 
+  readonly canToggleFolderVisibility = computed(
+    () => environment.recitationFolderVisibility && this.canUpdateRecitation()
+  );
+
+  readonly canSetDefaultFolder = computed(() => this.canUpdateRecitation());
+
   readonly canUploadTiming = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPLOAD_TIMING)
   );
@@ -134,8 +147,6 @@ export class RecitationDetailComponent implements OnInit {
 
   readonly folders = signal<RecitationFolderOut[]>([]);
   readonly selectedFolderSlug = signal<string | null>(null);
-  /** Recreate the tabset when a tab click is cancelled (in-flight uploads). */
-  readonly folderTabsEpoch = signal(1);
   readonly folderFormModalVisible = signal(false);
   readonly folderFormMode = signal<'create' | 'rename'>('create');
   readonly folderFormSubmitting = signal(false);
@@ -145,12 +156,6 @@ export class RecitationDetailComponent implements OnInit {
   readonly selectedFolder = computed(() => {
     const slug = this.selectedFolderSlug();
     return this.folders().find((f) => f.slug === slug) ?? null;
-  });
-
-  readonly selectedFolderIndex = computed(() => {
-    const slug = this.selectedFolderSlug();
-    const idx = this.folders().findIndex((f) => f.slug === slug);
-    return idx >= 0 ? idx : 0;
   });
 
   readonly timingDownloadUrl = computed(() => {
@@ -164,13 +169,64 @@ export class RecitationDetailComponent implements OnInit {
     return sessionUrl;
   });
 
-  readonly folderForm = this.fb.nonNullable.group(
-    {
-      name_ar: [''],
-      name_en: [''],
-    },
-    { validators: [atLeastOneFolderName] }
+  readonly folderForm = this.fb.group({
+    quality: this.fb.control<RecitationFolderQuality | null>(null, {
+      validators: [Validators.required],
+    }),
+    hasFx: this.fb.nonNullable.control(false),
+  });
+
+  /** Mirrors `folderForm` so the picker's derived state can be computed. */
+  private readonly folderFormValue = signal<Partial<RecitationFolderVariant>>({});
+
+  /** Variants already on this recitation, ignoring the folder currently being edited. */
+  private readonly takenVariantKeys = computed(() =>
+    takenFolderVariantKeys(this.folders(), this.folderFormTarget()?.slug)
   );
+
+  readonly qualityOptions = computed(() => {
+    const taken = this.takenVariantKeys();
+    return FOLDER_QUALITY_ORDER.map((quality) => ({
+      quality,
+      labelKey:
+        quality === RecitationFolderQuality.ORIGINAL
+          ? 'ADMIN.RECITATIONS.FOLDERS.MODAL.QUALITY_ORIGINAL'
+          : 'ADMIN.RECITATIONS.FOLDERS.MODAL.QUALITY_KBPS',
+      labelParams: { kbps: parseInt(quality, 10) },
+      // Greyed out only when neither the plain nor the effects folder is still available.
+      fullyTaken:
+        taken.has(folderVariantKey({ quality, hasFx: false })) &&
+        taken.has(folderVariantKey({ quality, hasFx: true })),
+    }));
+  });
+
+  readonly effectsOptions = computed(() => {
+    const quality = this.folderFormValue().quality;
+    const taken = this.takenVariantKeys();
+    return [false, true].map((hasFx) => ({
+      hasFx,
+      label: hasFx
+        ? 'ADMIN.RECITATIONS.FOLDERS.MODAL.EFFECTS_ON'
+        : 'ADMIN.RECITATIONS.FOLDERS.MODAL.EFFECTS_OFF',
+      taken: !!quality && taken.has(folderVariantKey({ quality, hasFx })),
+    }));
+  });
+
+  /** The exact bilingual name the chosen variant will be saved under. */
+  readonly folderNamePreview = computed(() => {
+    const variant = this.selectedVariant();
+    return variant ? formatFolderVariantNames(variant) : null;
+  });
+
+  readonly selectedVariantTaken = computed(() => {
+    const variant = this.selectedVariant();
+    return !!variant && this.takenVariantKeys().has(folderVariantKey(variant));
+  });
+
+  private readonly selectedVariant = computed<RecitationFolderVariant | null>(() => {
+    const { quality, hasFx } = this.folderFormValue();
+    return quality ? { quality, hasFx: !!hasFx } : null;
+  });
 
   readonly tracksList = signal<RecitationSurahTrackListItem[]>([]);
   readonly tracksTotal = signal(0);
@@ -232,6 +288,14 @@ export class RecitationDetailComponent implements OnInit {
 
   private slug!: string;
   private readonly pendingUploadTasks = new Set<Promise<void>>();
+  /** Sequence for folder-scoped track requests; guards against out-of-order responses. */
+  private tracksRequestId = 0;
+
+  constructor() {
+    this.folderForm.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
+      this.folderFormValue.set({ quality: value.quality ?? undefined, hasFx: value.hasFx });
+    });
+  }
 
   ngOnInit(): void {
     this.slug = this.route.snapshot.params['slug'];
@@ -247,6 +311,14 @@ export class RecitationDetailComponent implements OnInit {
 
   private hasInFlightUploads(): boolean {
     return this.hasInFlightUploadRows();
+  }
+
+  /**
+   * Work that pins the active folder: queued/uploading rows, or a validation round-trip
+   * whose response would otherwise be applied against the newly selected folder.
+   */
+  private hasBlockingFolderWork(): boolean {
+    return this.hasInFlightUploadRows() || this.validateLoading();
   }
 
   private markInFlightAsCancelled(): void {
@@ -372,6 +444,12 @@ export class RecitationDetailComponent implements OnInit {
     });
   }
 
+  private refreshRecitationDetailSilent(): void {
+    this.recitationsService.getDetail(this.recitationSlug()).subscribe({
+      next: (data) => this.recitation.set(data),
+    });
+  }
+
   private resolveSelectedFolder(querySlug: string | null): void {
     const list = this.folders();
     if (!list.length) {
@@ -401,17 +479,13 @@ export class RecitationDetailComponent implements OnInit {
   }
 
   folderLabel(folder: RecitationFolderOut): string {
-    const lang = this.translate.currentLang || 'ar';
-    if (lang === 'en') {
-      return (folder.name_en || folder.name_ar || folder.name).trim();
-    }
-    return (folder.name_ar || folder.name_en || folder.name).trim();
+    return folderDisplayName(folder, this.translate.currentLang);
   }
 
-  onFolderTabChange(index: number): void {
-    const folder = this.folders()[index];
+  onFolderSelect(folderSlug: string): void {
+    const folder = this.folders().find((f) => f.slug === folderSlug);
     if (!folder || folder.slug === this.selectedFolderSlug()) return;
-    if (!this.hasInFlightUploadRows()) {
+    if (!this.hasBlockingFolderWork()) {
       this.applyFolderSelection(folder);
       return;
     }
@@ -437,9 +511,6 @@ export class RecitationDetailComponent implements OnInit {
           }
           void Promise.all(pending.map((p) => p.catch(() => undefined))).finally(finish);
         }),
-      nzOnCancel: () => {
-        this.folderTabsEpoch.update((n) => n + 1);
-      },
     });
   }
 
@@ -456,18 +527,19 @@ export class RecitationDetailComponent implements OnInit {
   openCreateFolderModal(): void {
     this.folderFormMode.set('create');
     this.folderFormTarget.set(null);
-    this.folderForm.reset({ name_ar: '', name_en: '' });
+    this.folderForm.reset({ quality: null, hasFx: false });
     this.folderFormModalVisible.set(true);
   }
 
-  openRenameFolderModal(folder: RecitationFolderOut, event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
+  /** Assigns or updates a folder's quality/effects variant. */
+  openRenameFolderModal(folder: RecitationFolderOut): void {
+    if (!canEditFolderVariant(folder)) return;
+    const current = parseFolderVariant(folder);
     this.folderFormMode.set('rename');
     this.folderFormTarget.set(folder);
     this.folderForm.reset({
-      name_ar: folder.name_ar ?? '',
-      name_en: folder.name_en ?? '',
+      quality: current?.quality ?? null,
+      hasFx: current?.hasFx ?? false,
     });
     this.folderFormModalVisible.set(true);
   }
@@ -481,16 +553,13 @@ export class RecitationDetailComponent implements OnInit {
   }
 
   submitFolderForm(): boolean | Promise<boolean> {
-    if (this.folderForm.invalid) {
+    const variant = this.selectedVariant();
+    if (this.folderForm.invalid || !variant || this.selectedVariantTaken()) {
       this.folderForm.markAllAsTouched();
       return false;
     }
     const recSlug = this.recitationSlug();
-    const raw = this.folderForm.getRawValue();
-    const body = {
-      name_ar: raw.name_ar.trim(),
-      name_en: raw.name_en.trim(),
-    };
+    const body = formatFolderVariantNames(variant);
     const mode = this.folderFormMode();
     const target = this.folderFormTarget();
     if (mode === 'rename' && !target) return false;
@@ -534,9 +603,82 @@ export class RecitationDetailComponent implements OnInit {
       .finally(() => this.folderFormSubmitting.set(false));
   }
 
-  confirmDeleteFolder(folder: RecitationFolderOut, event: Event): void {
-    event.preventDefault();
-    event.stopPropagation();
+  /**
+   * Flips a folder's public visibility. Reachable only while
+   * `environment.recitationFolderVisibility` is on, i.e. once the API accepts `is_visible`.
+   */
+  onToggleFolderVisibility(folder: RecitationFolderOut): void {
+    if (!this.canToggleFolderVisibility() || folder.is_default) return;
+    const nextVisible = !isFolderVisible(folder);
+    firstValueFrom(
+      this.recitationsService.recitationFolderPatch(this.recitationSlug(), folder.slug, {
+        is_visible: nextVisible,
+      })
+    )
+      .then((updated) => {
+        this.folders.update((list) =>
+          list.map((f) => (f.slug === folder.slug ? { ...f, ...updated } : f))
+        );
+        this.message.success(
+          this.translate.instant(
+            nextVisible
+              ? 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.SHOWN_OK'
+              : 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.HIDDEN_OK'
+          )
+        );
+      })
+      .catch((err: unknown) => {
+        this.message.error(
+          resolveApiErrorMessage(
+            err,
+            { fallbackKey: 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.SAVE_ERROR' },
+            this.translate
+          )
+        );
+      });
+  }
+
+  confirmSetDefaultFolder(folder: RecitationFolderOut): void {
+    if (!this.canSetDefaultFolder() || folder.is_default) return;
+    this.modal.confirm({
+      nzTitle: this.translate.instant('ADMIN.RECITATIONS.FOLDERS.SET_DEFAULT_CONFIRM_TITLE'),
+      nzContent: this.translate.instant('ADMIN.RECITATIONS.FOLDERS.SET_DEFAULT_CONFIRM_BODY', {
+        name: this.folderLabel(folder),
+      }),
+      nzOkText: this.translate.instant('ADMIN.RECITATIONS.FOLDERS.SET_AS_DEFAULT'),
+      nzOkType: 'primary',
+      nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
+      nzDirection: this.translate.currentLang === 'ar' ? 'rtl' : 'ltr',
+      nzOnOk: () =>
+        firstValueFrom(
+          this.recitationsService.recitationFolderPatch(this.recitationSlug(), folder.slug, {
+            is_default: true,
+          })
+        )
+          .then(() =>
+            firstValueFrom(this.recitationsService.recitationFoldersList(this.recitationSlug()))
+          )
+          .then((list) => {
+            this.folders.set(list);
+            this.refreshRecitationDetailSilent();
+            this.message.success(
+              this.translate.instant('ADMIN.RECITATIONS.FOLDERS.MESSAGES.SET_DEFAULT_OK')
+            );
+          })
+          .catch((err: unknown) => {
+            this.message.error(
+              resolveApiErrorMessage(
+                err,
+                { fallbackKey: 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.SAVE_ERROR' },
+                this.translate
+              )
+            );
+            return Promise.reject(err);
+          }),
+    });
+  }
+
+  confirmDeleteFolder(folder: RecitationFolderOut): void {
     if (folder.is_default) return;
     this.modal.confirm({
       nzTitle: this.translate.instant('ADMIN.RECITATIONS.FOLDERS.DELETE.CONFIRM_TITLE'),
@@ -591,6 +733,9 @@ export class RecitationDetailComponent implements OnInit {
   loadTracksPage(): void {
     const rec = this.recitation();
     if (!rec) return;
+    // Only the newest request may write the list, so a response for a folder or page
+    // the user has already navigated away from is dropped instead of overwriting it.
+    const requestId = ++this.tracksRequestId;
     this.tracksLoading.set(true);
     this.recitationsService
       .recitationTracksList({
@@ -602,11 +747,15 @@ export class RecitationDetailComponent implements OnInit {
       })
       .subscribe({
         next: (res) => {
+          if (requestId !== this.tracksRequestId) return;
           this.tracksList.set(res.results);
           this.tracksTotal.set(res.count);
           this.tracksLoading.set(false);
         },
-        error: () => this.tracksLoading.set(false),
+        error: () => {
+          if (requestId !== this.tracksRequestId) return;
+          this.tracksLoading.set(false);
+        },
       });
   }
 

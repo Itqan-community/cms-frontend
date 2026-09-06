@@ -1,0 +1,16 @@
+<a
+  class="sura-card"
+  [routerLink]="['/mushaf', surah().number]"
+  [queryParams]="{ mushaf: mushafSlug() }"
+>
+  <span class="sura-card__number" aria-hidden="true">{{ numberLabel() }}</span>
+  <span class="sura-card__body">
+    <span class="sura-card__name">{{ surah().nameArabic }}</span>
+    <span class="sura-card__meta">
+      <span class="sura-card__count">
+        {{ ayahCountLabel() }} {{ 'MUSHAF.AYAHS' | translate }}
+      </span>
+      <span class="sura-card__name-en">{{ surah().nameEnglish }}</span>
+    </span>
+  </span>
+</a>

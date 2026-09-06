@@ -214,7 +214,7 @@ export class RecitationsService {
   }
 
   /**
-   * GET /portal/recitations/{slug}/recitation-tracks/?page=&page_size=
+   * GET /portal/recitations/{slug}/recitation-tracks/?folder=&page=&page_size=
    * (Previously numeric asset id in path; backend accepts recitation slug in the same segment.)
    */
   recitationTracksList(params: {

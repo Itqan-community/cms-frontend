@@ -7,7 +7,8 @@ const ar = JSON.parse(fs.readFileSync(arPath, 'utf8'));
 const en = JSON.parse(fs.readFileSync(enPath, 'utf8'));
 
 const adminAr = {
-  HOME: 'الرئيسية',
+  ...ar.ADMIN,
+  HOME: ar.ADMIN && ar.ADMIN.HOME ? ar.ADMIN.HOME : 'الرئيسية',
   REFRESH_PROMPT: {
     TITLE: 'هل تريد إعادة تهيئة البيانات؟',
     CONTENT: 'سيتم تحديث جميع المشاريع والبيانات التجريبية.',
@@ -49,7 +50,8 @@ const adminAr = {
 };
 
 const adminEn = {
-  HOME: 'Home',
+  ...en.ADMIN,
+  HOME: en.ADMIN && en.ADMIN.HOME ? en.ADMIN.HOME : 'Home',
   REFRESH_PROMPT: {
     TITLE: 'Do you want to reset data?',
     CONTENT: 'All projects and experimental data will be updated.',

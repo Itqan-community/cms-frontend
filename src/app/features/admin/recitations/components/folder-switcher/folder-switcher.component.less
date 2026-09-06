@@ -1,0 +1,180 @@
+:host {
+  display: block;
+}
+
+.folder-switcher {
+  &__tabs {
+    // ng-zorro tab bodies are unused — folder content lives below the switcher.
+    ::ng-deep .ant-tabs-content-holder {
+      display: none;
+    }
+
+    ::ng-deep .ant-tabs-nav {
+      margin-bottom: 0;
+
+      &::before {
+        border-bottom-color: var(--admin-border-200);
+      }
+    }
+
+    ::ng-deep .ant-tabs-nav-wrap {
+      min-height: var(--admin-input-height);
+      overflow-x: auto;
+      overflow-y: hidden;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x;
+      overscroll-behavior-x: contain;
+      scrollbar-width: thin;
+
+      &::-webkit-scrollbar {
+        height: 4px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background-color: var(--admin-border-300);
+        border-radius: 2px;
+      }
+    }
+
+    ::ng-deep .ant-tabs-nav-list {
+      flex-wrap: nowrap;
+    }
+
+    ::ng-deep .ant-tabs-tab {
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--admin-text-600);
+      background: transparent;
+      transition:
+        background 0.15s,
+        color 0.15s;
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+      flex-shrink: 0;
+      margin: 0;
+
+      &:hover {
+        color: var(--admin-accent-600);
+        background: var(--admin-accent-50);
+      }
+
+      &-active .ant-tabs-tab-btn {
+        color: var(--admin-accent-600);
+        font-weight: 700;
+      }
+    }
+
+    ::ng-deep .ant-tabs-tab-btn {
+      color: inherit;
+    }
+
+    ::ng-deep .ant-tabs-ink-bar {
+      background: var(--admin-accent-600);
+      height: 2px;
+    }
+
+    ::ng-deep .ant-tabs-extra-content {
+      display: flex;
+      align-items: center;
+      margin-inline-start: 8px;
+      flex-shrink: 0;
+    }
+  }
+
+  &__tab-title-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    max-width: 100%;
+
+    &--hidden {
+      background-image: repeating-linear-gradient(
+        135deg,
+        transparent 0 6px,
+        var(--admin-border-100) 6px 7px
+      );
+
+      .folder-switcher__tab-name {
+        color: var(--admin-text-400);
+      }
+    }
+  }
+
+  &__tab-icon {
+    flex-shrink: 0;
+    width: 16px;
+    height: 16px;
+    color: var(--admin-text-400);
+  }
+
+  &__tab-name {
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__tab-tag.ant-tag {
+    margin-inline: 0;
+    font-weight: 400;
+  }
+
+  &__tab-count {
+    font-size: 0.6875rem;
+    line-height: 1;
+    color: var(--admin-text-400);
+  }
+
+  &__tab-hidden-icon {
+    flex-shrink: 0;
+    width: 14px;
+    height: 14px;
+    color: var(--admin-text-400);
+  }
+
+  &__tab-menu-btn.ant-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    min-width: 22px;
+    padding: 0;
+    margin-inline-start: 2px;
+    color: var(--admin-text-400);
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-md);
+    box-shadow: none;
+    line-height: 1;
+
+    ng-icon {
+      width: 14px;
+      height: 14px;
+    }
+
+    &:hover,
+    &:focus {
+      color: var(--color-action-edit);
+      background: var(--color-action-edit-bg);
+      border-color: transparent;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary-400);
+      outline-offset: 1px;
+    }
+  }
+
+  &__add-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__menu-icon {
+    width: 14px;
+    height: 14px;
+    margin-inline-end: 8px;
+  }
+}
