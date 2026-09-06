@@ -33,7 +33,12 @@
   </div>
   <ul nz-menu nzMode="inline" class="admin-sidenav-menu" nzTheme="light">
     @for (tab of tabs(); track tab.id) {
-      <li nz-menu-item [nzDisabled]="!!tab.disabled" [nzMatchRouter]="!tab.disabled">
+      <li
+        nz-menu-item
+        [nzDisabled]="!!tab.disabled"
+        [nzMatchRouter]="!tab.disabled"
+        [nzMatchRouterExact]="shouldMatchRouterExact(tab)"
+      >
         @if (tab.disabled) {
           <span class="admin-sidenav-link" role="presentation" tabindex="-1" aria-disabled="true">
             <ng-icon [name]="tab.icon" class="admin-sidenav-icon" />

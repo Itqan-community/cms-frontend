@@ -204,6 +204,11 @@ export class AdminSidebarComponent {
     return ['/admin', tab.path];
   }
 
+  /** Home links to `/admin`; without exact match it stays active on every `/admin/*` route. */
+  shouldMatchRouterExact(tab: CmsTab): boolean {
+    return tab.id === 'home' || !tab.path;
+  }
+
   private isMobileViewport(): boolean {
     return window.innerWidth < 992;
   }
