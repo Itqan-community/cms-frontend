@@ -26,7 +26,7 @@
         nz-button
         nzType="default"
         (click)="openAddLanguage()"
-        [disabled]="loading() || publishing() || savingDraft()"
+        [disabled]="loading() || saving() || publishing() || savingDraft()"
       >
         <ng-icon name="lucidePlus" />
         {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD' | translate }}

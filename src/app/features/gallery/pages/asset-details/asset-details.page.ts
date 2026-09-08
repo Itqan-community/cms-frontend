@@ -31,6 +31,7 @@ import { LicenseTagComponent } from '../../../../shared/components/license-tag/l
 import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
 import { IssuesService } from '../../../admin/issues/services/issues.service';
 import { resolveApiErrorMessage } from '../../../../shared/utils/api-error-resolver.util';
+import { localizedLanguageName } from '../../../admin/utils/iso-639.util';
 import { AssetDetails } from '../../models/assets.model';
 import { AssetsService } from '../../services/assets.service';
 import { AssetLicenseAcceptanceService } from '../../services/asset-license-acceptance.service';
@@ -184,16 +185,7 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
 
   /** Language name localized to the current UI language (e.g. fr → "الفرنسية"). */
   languageName(code: string): string {
-    if (!code) return code;
-    try {
-      const name = new Intl.DisplayNames([this.translate.currentLang || 'en'], {
-        type: 'language',
-      }).of(code);
-      if (name && name.toLowerCase() !== code.toLowerCase()) return name;
-    } catch {
-      // Intl.DisplayNames unavailable — fall back to the raw code.
-    }
-    return code;
+    return localizedLanguageName(code, this.translate.currentLang || 'en');
   }
 
   downloadResource() {

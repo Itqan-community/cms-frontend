@@ -28,7 +28,11 @@ import type {
   ContentEntryPatch,
 } from '../../models/asset-content.models';
 import { AssetContentService } from '../../services/asset-content.service';
-import { parseClipboardTable, serializeCsv } from '../../utils/clipboard-table.util';
+import {
+  normalizeClipboardForTextPaste,
+  parseClipboardTable,
+  serializeCsv,
+} from '../../utils/clipboard-table.util';
 import { ISO_639_LANGUAGES, localizedLanguageName } from '../../utils/iso-639.util';
 import { SurahFloatingFilterComponent, type SurahOption } from './surah-floating-filter.component';
 
@@ -36,6 +40,9 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 /** Columns the positional paste is allowed to write into. */
 const EDITABLE_FIELDS = new Set<string>(['text']);
+
+/** Language codes that should render with RTL direction in the source column. */
+const RTL_LANGUAGE_CODES = new Set(['ar', 'fa', 'ur', 'ps', 'ku', 'he', 'yi', 'sd', 'ug']);
 
 const ENTRIES_PAGE_SIZE = 500;
 const AUTOSAVE_DEBOUNCE_MS = 800;
@@ -72,6 +79,8 @@ export class AssetContentGridComponent implements OnInit {
 
   private gridApi?: GridApi<ContentEntry>;
   private readonly autosave$ = new Subject<void>();
+  /** Bumped on each language load so stale draft/entry responses are ignored. */
+  private loadGeneration = 0;
 
   /** Ayah ids with unsaved edits pending the next autosave flush. */
   private readonly pendingRows = new Map<number, ContentEntryPatch>();
@@ -211,7 +220,11 @@ export class AssetContentGridComponent implements OnInit {
     }
 
     const text = event.clipboardData?.getData('text/plain') ?? '';
-    const table = parseClipboardTable(text);
+    const parsed = parseClipboardTable(text);
+    if (parsed.length === 0) return;
+    // Exported CSV includes surah/ayah columns; strip those so paste into Text
+    // only writes the text values (avoids autosaving identifiers as ayah text).
+    const table = normalizeClipboardForTextPaste(parsed);
     if (table.length === 0) return;
     event.preventDefault();
 
@@ -244,9 +257,9 @@ export class AssetContentGridComponent implements OnInit {
   }
 
   /**
-   * Copy the selected rows to the clipboard as CSV (`sura,aya,text` with a
-   * header) — the same shape as the per-version download, so it can be saved
-   * to a .csv file or pasted back in.
+   * Copy the selected rows to the clipboard as CSV (`surah,ayah,text` with a
+   * header) — the same shape as the per-version download. Pasting back into a
+   * Text cell is header-aware and writes only the text column.
    */
   copySelectedToCsv(): void {
     const api = this.gridApi;
@@ -300,6 +313,7 @@ export class AssetContentGridComponent implements OnInit {
       this.loading.set(false);
       return;
     }
+    const generation = ++this.loadGeneration;
     this.loading.set(true);
     // Rebuild columns so the source-reference column appears/disappears.
     this.columnDefs.set(this.buildColumnDefs());
@@ -308,10 +322,12 @@ export class AssetContentGridComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (draft) => {
+          if (generation !== this.loadGeneration) return;
           this.draftId.set(draft.id);
-          this.loadAllEntries(1);
+          this.loadAllEntries(1, [], generation);
         },
         error: (err: HttpErrorResponse) => {
+          if (generation !== this.loadGeneration) return;
           this.loading.set(false);
           this.showError(err);
         },
@@ -321,7 +337,8 @@ export class AssetContentGridComponent implements OnInit {
   /** Switch the edited language: flush pending edits, then reload for the new one. */
   onLanguageChange(language: string): void {
     if (language === this.selectedLanguage()) return;
-    void this.flushPending().then(() => {
+    void this.flushPending().then((ok) => {
+      if (!ok) return;
       this.pendingRows.clear();
       this.dirty.set(false);
       this.rows.set([]);
@@ -358,7 +375,11 @@ export class AssetContentGridComponent implements OnInit {
       });
   }
 
-  private loadAllEntries(page: number, acc: ContentEntry[] = []): void {
+  private loadAllEntries(
+    page: number,
+    acc: ContentEntry[] = [],
+    generation = this.loadGeneration
+  ): void {
     const versionId = this.draftId();
     if (versionId === null) return;
     this.contentService
@@ -366,9 +387,10 @@ export class AssetContentGridComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
+          if (generation !== this.loadGeneration) return;
           const merged = acc.concat(response.results);
           if (merged.length < response.count && response.results.length > 0) {
-            this.loadAllEntries(page + 1, merged);
+            this.loadAllEntries(page + 1, merged, generation);
           } else {
             this.rows.set(merged);
             this.entriesTotal.set(response.count);
@@ -377,6 +399,7 @@ export class AssetContentGridComponent implements OnInit {
           }
         },
         error: (err: HttpErrorResponse) => {
+          if (generation !== this.loadGeneration) return;
           this.loading.set(false);
           this.showError(err);
         },
@@ -572,7 +595,7 @@ export class AssetContentGridComponent implements OnInit {
               headerName: this.sourceColHeader(),
               flex: 2,
               editable: false,
-              cellStyle: { direction: 'rtl' },
+              cellStyle: { direction: this.sourceTextDirection() },
               wrapText: true,
               autoHeight: true,
             } as ColDef<ContentEntry>,
@@ -598,6 +621,15 @@ export class AssetContentGridComponent implements OnInit {
     const source = this.languages().find((l) => l.is_source);
     const label = source ? this.langName(source.language) : this.colHeader('SOURCE');
     return `${this.colHeader('SOURCE')} · ${label}`;
+  }
+
+  /** Text direction for the source-reference column based on the source language. */
+  private sourceTextDirection(): 'rtl' | 'ltr' {
+    const code =
+      this.languages()
+        .find((l) => l.is_source)
+        ?.language?.toLowerCase() ?? 'ar';
+    return RTL_LANGUAGE_CODES.has(code) ? 'rtl' : 'ltr';
   }
 
   private showError(err: HttpErrorResponse): void {

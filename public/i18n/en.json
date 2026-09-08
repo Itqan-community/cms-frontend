@@ -580,7 +580,8 @@
       "ERROR": "Could not submit issue report",
       "FORBIDDEN": "You do not have permission to submit this report",
       "LOGIN_REQUIRED": "Please log in to report an issue"
-    }
+    },
+    "DOWNLOAD_LANGUAGE": "Download language"
   },
   "UI": {
     "FILTERS": "Filters",
@@ -792,7 +793,7 @@
       },
       "LANGUAGE": {
         "LABEL": "Editing language",
-        "SOURCE": "source",
+        "SOURCE": "Source",
         "ADD": "Add language",
         "ADD_TITLE": "Add a translation language",
         "ADD_CONFIRM": "Add",

@@ -83,7 +83,11 @@
                 {{ 'GALLERY.REPORT_ISSUE.BUTTON' | translate }}
               </button>
               @if ((asset()!.available_languages?.length ?? 0) > 1) {
+                <label class="download-language-label" for="download-language">
+                  {{ 'GALLERY.DOWNLOAD_LANGUAGE' | translate }}
+                </label>
                 <nz-select
+                  id="download-language"
                   class="download-language-select"
                   nzBlock
                   [ngModel]="selectedLanguage()"
