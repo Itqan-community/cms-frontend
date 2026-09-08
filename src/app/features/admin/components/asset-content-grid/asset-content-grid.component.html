@@ -1,5 +1,38 @@
 <div class="content-grid" [attr.dir]="rtl() ? 'rtl' : 'ltr'">
   <div class="content-grid__toolbar">
+    <div class="content-grid__language">
+      <span class="content-grid__language-label">
+        {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.LABEL' | translate }}
+      </span>
+      <nz-select
+        class="content-grid__language-select"
+        [ngModel]="selectedLanguage()"
+        (ngModelChange)="onLanguageChange($event)"
+        [nzDisabled]="loading() || saving() || publishing() || savingDraft()"
+      >
+        @for (lang of languages(); track lang.language) {
+          <nz-option
+            [nzValue]="lang.language"
+            [nzLabel]="
+              langName(lang.language) +
+              (lang.is_source
+                ? ' (' + ('ADMIN.CONTENT_EDITOR.LANGUAGE.SOURCE' | translate) + ')'
+                : '')
+            "
+          ></nz-option>
+        }
+      </nz-select>
+      <button
+        nz-button
+        nzType="default"
+        (click)="openAddLanguage()"
+        [disabled]="loading() || saving() || publishing() || savingDraft()"
+      >
+        <ng-icon name="lucidePlus" />
+        {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD' | translate }}
+      </button>
+    </div>
+
     <div class="content-grid__status">
       @if (saving()) {
         <span class="content-grid__saving">
@@ -85,7 +118,7 @@
       class="content-grid__table"
       [theme]="theme"
       [rowData]="rows()"
-      [columnDefs]="columnDefs"
+      [columnDefs]="columnDefs()"
       [defaultColDef]="defaultColDef"
       [enableRtl]="rtl()"
       [stopEditingWhenCellsLoseFocus]="true"
@@ -97,4 +130,30 @@
       (selectionChanged)="onSelectionChanged()"
     ></ag-grid-angular>
   </nz-spin>
+
+  <nz-modal
+    [nzVisible]="addLanguageVisible()"
+    [nzTitle]="'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD_TITLE' | translate"
+    [nzOkText]="'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD_CONFIRM' | translate"
+    [nzOkLoading]="addLanguageBusy()"
+    [nzOkDisabled]="!newLanguage()"
+    [nzCancelText]="'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD_CANCEL' | translate"
+    (nzOnOk)="confirmAddLanguage()"
+    (nzOnCancel)="addLanguageVisible.set(false)"
+  >
+    <ng-container *nzModalContent>
+      <p>{{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.PICK' | translate }}</p>
+      <nz-select
+        class="content-grid__add-language-select"
+        nzShowSearch
+        [nzPlaceHolder]="'ADMIN.CONTENT_EDITOR.LANGUAGE.PICK' | translate"
+        [ngModel]="newLanguage()"
+        (ngModelChange)="newLanguage.set($event)"
+      >
+        @for (lang of addableLanguages(); track lang.code) {
+          <nz-option [nzValue]="lang.code" [nzLabel]="lang.name + ' — ' + lang.native"></nz-option>
+        }
+      </nz-select>
+    </ng-container>
+  </nz-modal>
 </div>

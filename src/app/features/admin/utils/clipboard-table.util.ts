@@ -78,3 +78,23 @@ function csvField(value: string): string {
 export function serializeCsv(rows: string[][]): string {
   return rows.map((row) => row.map((cell) => csvField(cell ?? '')).join(',')).join('\n');
 }
+
+const CSV_ID_HEADERS = new Set(['surah', 'sura', 'ayah', 'aya']);
+const CSV_TEXT_HEADERS = new Set(['text']);
+
+/**
+ * When clipboard data is a content CSV export (`surah,ayah,text` or legacy
+ * `sura,aya,text`), return only the text column (no header) so positional paste
+ * into a Text cell cannot overwrite ayah text with identifiers.
+ * Raw single-column / spreadsheet pastes are returned unchanged.
+ */
+export function normalizeClipboardForTextPaste(table: string[][]): string[][] {
+  if (table.length === 0) return table;
+  const header = table[0].map((c) => c.trim().toLowerCase());
+  const textIdx = header.findIndex((h) => CSV_TEXT_HEADERS.has(h));
+  const hasId = header.some((h) => CSV_ID_HEADERS.has(h));
+  if (textIdx < 0 || !hasId) {
+    return table;
+  }
+  return table.slice(1).map((row) => [row[textIdx] ?? '']);
+}

@@ -12,6 +12,17 @@
     flex-wrap: wrap;
   }
 
+  &__language {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  &__language-select {
+    min-width: 240px;
+  }
+
   &__status {
     font-size: 13px;
     min-height: 22px;
@@ -46,6 +57,11 @@
     width: 100%;
     height: 70vh;
     min-height: 480px;
+  }
+
+  // Fill the modal width so long language labels aren't clipped.
+  &__add-language-select {
+    width: 100%;
   }
 }
 

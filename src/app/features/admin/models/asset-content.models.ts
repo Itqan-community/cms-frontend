@@ -1,9 +1,17 @@
 import type { AssetVersionParentKind } from './asset-versions.models';
 
+/** One language an asset provides content in (source + translations). */
+export interface AssetLanguage {
+  language: string;
+  is_source: boolean;
+}
+
 /** A per-ayah content draft version (state === 'draft'). */
 export interface ContentDraftVersion {
   id: number;
   asset_id: number;
+  /** Language code this draft belongs to. */
+  language: string;
   name: string;
   summary: string;
   state: 'draft' | 'published';
@@ -20,7 +28,8 @@ export interface ContentEntry {
   surah_name: string;
   uthmani: string;
   text: string;
-  footnotes: string;
+  /** Source-language text for the same ayah (translations only; read-only reference). */
+  source_text?: string | null;
   order: number;
 }
 
@@ -34,7 +43,6 @@ export interface ContentEntriesResponse {
 export interface ContentEntryPatch {
   ayah_id: number;
   text: string;
-  footnotes: string;
 }
 
 export type { AssetVersionParentKind };

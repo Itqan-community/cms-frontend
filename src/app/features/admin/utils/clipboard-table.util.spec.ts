@@ -1,4 +1,8 @@
-import { parseClipboardTable, serializeCsv } from './clipboard-table.util';
+import {
+  normalizeClipboardForTextPaste,
+  parseClipboardTable,
+  serializeCsv,
+} from './clipboard-table.util';
 
 describe('parseClipboardTable', () => {
   it('parses TSV (spreadsheet) rows and columns', () => {
@@ -70,10 +74,42 @@ describe('serializeCsv', () => {
 
   it('round-trips with parseClipboardTable', () => {
     const table = [
-      ['sura', 'aya', 'text', 'footnotes'],
-      ['1', '1', 'with, comma', 'multi\nline'],
-      ['1', '2', 'plain', ''],
+      ['sura', 'aya', 'text'],
+      ['1', '1', 'with, comma'],
+      ['1', '2', 'multi\nline'],
     ];
     expect(parseClipboardTable(serializeCsv(table))).toEqual(table);
+  });
+});
+
+describe('normalizeClipboardForTextPaste', () => {
+  it('extracts the text column from a surah/ayah CSV export', () => {
+    const table = [
+      ['surah', 'ayah', 'text'],
+      ['1', '1', 'In the name'],
+      ['1', '2', 'Praise be'],
+    ];
+    expect(normalizeClipboardForTextPaste(table)).toEqual([['In the name'], ['Praise be']]);
+  });
+
+  it('accepts legacy sura/aya headers', () => {
+    const table = [
+      ['sura', 'aya', 'text'],
+      ['2', '1', 'Alif Lam'],
+    ];
+    expect(normalizeClipboardForTextPaste(table)).toEqual([['Alif Lam']]);
+  });
+
+  it('leaves raw spreadsheet pastes unchanged', () => {
+    const table = [['line one'], ['line two']];
+    expect(normalizeClipboardForTextPaste(table)).toEqual(table);
+  });
+
+  it('leaves multi-column pastes without id headers unchanged', () => {
+    const table = [
+      ['hello', 'world'],
+      ['foo', 'bar'],
+    ];
+    expect(normalizeClipboardForTextPaste(table)).toEqual(table);
   });
 });

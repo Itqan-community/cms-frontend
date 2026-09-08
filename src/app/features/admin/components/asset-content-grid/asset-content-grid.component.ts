@@ -16,22 +16,33 @@ import { AgGridAngular } from 'ag-grid-angular';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime } from 'rxjs';
 import type {
+  AssetLanguage,
   AssetVersionParentKind,
   ContentEntry,
   ContentEntryPatch,
 } from '../../models/asset-content.models';
 import { AssetContentService } from '../../services/asset-content.service';
-import { parseClipboardTable, serializeCsv } from '../../utils/clipboard-table.util';
+import {
+  normalizeClipboardForTextPaste,
+  parseClipboardTable,
+  serializeCsv,
+} from '../../utils/clipboard-table.util';
+import { ISO_639_LANGUAGES, localizedLanguageName } from '../../utils/iso-639.util';
 import { SurahFloatingFilterComponent, type SurahOption } from './surah-floating-filter.component';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 /** Columns the positional paste is allowed to write into. */
-const EDITABLE_FIELDS = new Set<string>(['text', 'footnotes']);
+const EDITABLE_FIELDS = new Set<string>(['text']);
+
+/** Language codes that should render with RTL direction in the source column. */
+const RTL_LANGUAGE_CODES = new Set(['ar', 'fa', 'ur', 'ps', 'ku', 'he', 'yi', 'sd', 'ug']);
 
 const ENTRIES_PAGE_SIZE = 500;
 const AUTOSAVE_DEBOUNCE_MS = 800;
@@ -43,8 +54,10 @@ const AUTOSAVE_DEBOUNCE_MS = 800;
     AgGridAngular,
     TranslateModule,
     NgIcon,
+    FormsModule,
     NzButtonModule,
     NzModalModule,
+    NzSelectModule,
     NzSpinModule,
     NzToolTipModule,
   ],
@@ -66,6 +79,8 @@ export class AssetContentGridComponent implements OnInit {
 
   private gridApi?: GridApi<ContentEntry>;
   private readonly autosave$ = new Subject<void>();
+  /** Bumped on each language load so stale draft/entry responses are ignored. */
+  private loadGeneration = 0;
 
   /** Ayah ids with unsaved edits pending the next autosave flush. */
   private readonly pendingRows = new Map<number, ContentEntryPatch>();
@@ -73,6 +88,29 @@ export class AssetContentGridComponent implements OnInit {
   readonly draftId = signal<number | null>(null);
   readonly rows = signal<ContentEntry[]>([]);
   readonly loading = signal(true);
+
+  /** Languages the asset provides content in (source first). */
+  readonly languages = signal<AssetLanguage[]>([]);
+  /** The language currently being edited (exactly one at a time). */
+  readonly selectedLanguage = signal<string | null>(null);
+  /** True when editing the source language (no reference column, no seeding). */
+  readonly isEditingSource = computed(() => {
+    const sel = this.selectedLanguage();
+    return this.languages().find((l) => l.language === sel)?.is_source ?? true;
+  });
+  /** Localized language name for the current UI language (e.g. fr → "الفرنسية"). */
+  readonly langName = (code: string): string =>
+    localizedLanguageName(code, this.translate.currentLang || 'en');
+
+  /** "Add language" modal state. */
+  readonly addLanguageVisible = signal(false);
+  readonly addLanguageBusy = signal(false);
+  readonly newLanguage = signal<string | null>(null);
+  /** ISO options not already on the asset. */
+  readonly addableLanguages = computed(() => {
+    const existing = new Set(this.languages().map((l) => l.language));
+    return ISO_639_LANGUAGES.filter((l) => !existing.has(l.code));
+  });
   readonly saving = signal(false);
   readonly publishing = signal(false);
   readonly savingDraft = signal(false);
@@ -101,13 +139,13 @@ export class AssetContentGridComponent implements OnInit {
     filter: false,
   };
 
-  readonly columnDefs: ColDef<ContentEntry>[] = this.buildColumnDefs();
+  readonly columnDefs = signal<ColDef<ContentEntry>[]>(this.buildColumnDefs());
 
   ngOnInit(): void {
     this.autosave$
       .pipe(debounceTime(AUTOSAVE_DEBOUNCE_MS), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => void this.flushPending());
-    this.initDraft();
+    this.loadLanguages();
   }
 
   /** True while there are edits not yet persisted to the draft. */
@@ -124,7 +162,6 @@ export class AssetContentGridComponent implements OnInit {
     this.pendingRows.set(row.ayah_id, {
       ayah_id: row.ayah_id,
       text: row.text ?? '',
-      footnotes: row.footnotes ?? '',
     });
     this.dirty.set(true);
     this.autosave$.next();
@@ -183,7 +220,11 @@ export class AssetContentGridComponent implements OnInit {
     }
 
     const text = event.clipboardData?.getData('text/plain') ?? '';
-    const table = parseClipboardTable(text);
+    const parsed = parseClipboardTable(text);
+    if (parsed.length === 0) return;
+    // Exported CSV includes surah/ayah columns; strip those so paste into Text
+    // only writes the text values (avoids autosaving identifiers as ayah text).
+    const table = normalizeClipboardForTextPaste(parsed);
     if (table.length === 0) return;
     event.preventDefault();
 
@@ -216,9 +257,9 @@ export class AssetContentGridComponent implements OnInit {
   }
 
   /**
-   * Copy the selected rows to the clipboard as CSV (`sura,aya,text,footnotes`
-   * with a header) — the same shape as the per-version download, so it can be
-   * saved to a .csv file or pasted back in.
+   * Copy the selected rows to the clipboard as CSV (`surah,ayah,text` with a
+   * header) — the same shape as the per-version download. Pasting back into a
+   * Text cell is header-aware and writes only the text column.
    */
   copySelectedToCsv(): void {
     const api = this.gridApi;
@@ -230,8 +271,8 @@ export class AssetContentGridComponent implements OnInit {
     }
     selected.sort((a, b) => a.order - b.order || a.ayah_id - b.ayah_id);
     const table: string[][] = [
-      ['sura', 'aya', 'text', 'footnotes'],
-      ...selected.map((r) => [String(r.sura), String(r.aya), r.text ?? '', r.footnotes ?? '']),
+      ['surah', 'ayah', 'text'],
+      ...selected.map((r) => [String(r.sura), String(r.aya), r.text ?? '']),
     ];
     const csv = serializeCsv(table);
     navigator.clipboard.writeText(csv).then(
@@ -245,15 +286,18 @@ export class AssetContentGridComponent implements OnInit {
     );
   }
 
-  private initDraft(): void {
+  /** Load the asset's languages, default to the source, then open its draft. */
+  private loadLanguages(): void {
     this.loading.set(true);
     this.contentService
-      .createDraft(this.kind, this.slug)
+      .listLanguages(this.kind, this.slug)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (draft) => {
-          this.draftId.set(draft.id);
-          this.loadAllEntries(1);
+        next: (langs) => {
+          this.languages.set(langs);
+          const source = langs.find((l) => l.is_source) ?? langs[0];
+          this.selectedLanguage.set(source?.language ?? null);
+          this.loadForLanguage();
         },
         error: (err: HttpErrorResponse) => {
           this.loading.set(false);
@@ -262,7 +306,80 @@ export class AssetContentGridComponent implements OnInit {
       });
   }
 
-  private loadAllEntries(page: number, acc: ContentEntry[] = []): void {
+  /** Open (get-or-create) the draft for the selected language and load its rows. */
+  private loadForLanguage(): void {
+    const language = this.selectedLanguage();
+    if (!language) {
+      this.loading.set(false);
+      return;
+    }
+    const generation = ++this.loadGeneration;
+    this.loading.set(true);
+    // Rebuild columns so the source-reference column appears/disappears.
+    this.columnDefs.set(this.buildColumnDefs());
+    this.contentService
+      .createDraft(this.kind, this.slug, language)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (draft) => {
+          if (generation !== this.loadGeneration) return;
+          this.draftId.set(draft.id);
+          this.loadAllEntries(1, [], generation);
+        },
+        error: (err: HttpErrorResponse) => {
+          if (generation !== this.loadGeneration) return;
+          this.loading.set(false);
+          this.showError(err);
+        },
+      });
+  }
+
+  /** Switch the edited language: flush pending edits, then reload for the new one. */
+  onLanguageChange(language: string): void {
+    if (language === this.selectedLanguage()) return;
+    void this.flushPending().then((ok) => {
+      if (!ok) return;
+      this.pendingRows.clear();
+      this.dirty.set(false);
+      this.rows.set([]);
+      this.selectedLanguage.set(language);
+      this.loadForLanguage();
+    });
+  }
+
+  /** Open the "add language" modal. */
+  openAddLanguage(): void {
+    this.newLanguage.set(null);
+    this.addLanguageVisible.set(true);
+  }
+
+  /** Confirm adding a translation language and switch to editing it. */
+  confirmAddLanguage(): void {
+    const language = this.newLanguage();
+    if (!language) return;
+    this.addLanguageBusy.set(true);
+    this.contentService
+      .addLanguage(this.kind, this.slug, language)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (added) => {
+          this.addLanguageBusy.set(false);
+          this.addLanguageVisible.set(false);
+          this.languages.update((ls) => [...ls, added]);
+          this.onLanguageChange(added.language);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.addLanguageBusy.set(false);
+          this.showError(err);
+        },
+      });
+  }
+
+  private loadAllEntries(
+    page: number,
+    acc: ContentEntry[] = [],
+    generation = this.loadGeneration
+  ): void {
     const versionId = this.draftId();
     if (versionId === null) return;
     this.contentService
@@ -270,9 +387,10 @@ export class AssetContentGridComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
+          if (generation !== this.loadGeneration) return;
           const merged = acc.concat(response.results);
           if (merged.length < response.count && response.results.length > 0) {
-            this.loadAllEntries(page + 1, merged);
+            this.loadAllEntries(page + 1, merged, generation);
           } else {
             this.rows.set(merged);
             this.entriesTotal.set(response.count);
@@ -281,6 +399,7 @@ export class AssetContentGridComponent implements OnInit {
           }
         },
         error: (err: HttpErrorResponse) => {
+          if (generation !== this.loadGeneration) return;
           this.loading.set(false);
           this.showError(err);
         },
@@ -467,6 +586,20 @@ export class AssetContentGridComponent implements OnInit {
         wrapText: true,
         autoHeight: true,
       },
+      // When editing a translation, show the source language read-only alongside.
+      ...(this.isEditingSource()
+        ? []
+        : [
+            {
+              field: 'source_text',
+              headerName: this.sourceColHeader(),
+              flex: 2,
+              editable: false,
+              cellStyle: { direction: this.sourceTextDirection() },
+              wrapText: true,
+              autoHeight: true,
+            } as ColDef<ContentEntry>,
+          ]),
       {
         field: 'text',
         headerName: this.colHeader('TEXT'),
@@ -480,27 +613,45 @@ export class AssetContentGridComponent implements OnInit {
         wrapText: true,
         autoHeight: true,
       },
-      {
-        field: 'footnotes',
-        headerName: this.colHeader('FOOTNOTES'),
-        flex: 1,
-        editable: true,
-        cellEditor: 'agLargeTextCellEditor',
-        cellEditorPopup: true,
-        cellEditorParams: { maxLength: 100000, rows: 10, cols: 50 },
-        wrapText: true,
-        autoHeight: true,
-      },
     ];
   }
 
+  /** Header for the read-only source-reference column (shows the source language). */
+  private sourceColHeader(): string {
+    const source = this.languages().find((l) => l.is_source);
+    const label = source ? this.langName(source.language) : this.colHeader('SOURCE');
+    return `${this.colHeader('SOURCE')} · ${label}`;
+  }
+
+  /** Text direction for the source-reference column based on the source language. */
+  private sourceTextDirection(): 'rtl' | 'ltr' {
+    const code =
+      this.languages()
+        .find((l) => l.is_source)
+        ?.language?.toLowerCase() ?? 'ar';
+    return RTL_LANGUAGE_CODES.has(code) ? 'rtl' : 'ltr';
+  }
+
   private showError(err: HttpErrorResponse): void {
-    const name = err?.error?.error_name;
+    const name: string | undefined = err?.error?.error_name;
+
+    // "Nothing changed" isn't really a failure — show it as a friendly popup
+    // rather than a red error toast.
+    if (name === 'no_changes_to_publish') {
+      this.modal.info({
+        nzTitle: this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.NO_CHANGES_TO_PUBLISH_TITLE'),
+        nzContent: this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.NO_CHANGES_TO_PUBLISH'),
+        nzOkText: this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.OK'),
+        nzDirection: this.translate.currentLang === 'ar' ? 'rtl' : 'ltr',
+      });
+      return;
+    }
+
+    const key = name ? `ADMIN.CONTENT_EDITOR.ERRORS.${name.toUpperCase()}` : '';
+    const translated = key ? this.translate.instant(key) : '';
     this.message.error(
-      name
-        ? this.translate.instant(`ADMIN.CONTENT_EDITOR.ERRORS.${name.toUpperCase()}`, {
-            default: this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC'),
-          })
+      translated && translated !== key
+        ? translated
         : this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC')
     );
   }
