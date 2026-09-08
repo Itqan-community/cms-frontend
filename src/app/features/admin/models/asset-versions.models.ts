@@ -2,6 +2,8 @@
 export interface AssetVersion {
   id: number;
   asset_id: number;
+  /** Language code of this version (e.g. 'ar', 'fr'). */
+  language?: string;
   name: string;
   summary?: string;
   file_url: string;
@@ -18,6 +20,8 @@ export interface AssetVersionsListParams {
   page: number;
   page_size: number;
   search?: string;
+  /** Filter to a single language's versions (translations/tafsirs). */
+  language?: string;
 }
 
 /** Payload for create/update multipart requests. */
@@ -26,6 +30,8 @@ export interface AssetVersionFormPayload {
   name: string;
   summary: string;
   file?: File | null;
+  /** Language this uploaded version belongs to (translations/tafsirs). */
+  language?: string | null;
 }
 
 export type AssetVersionParentKind = 'tafsir' | 'translation' | 'mushaf' | 'font' | 'program';

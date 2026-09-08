@@ -8,6 +8,26 @@
       }
     </h2>
     <div class="asset-versions-manager__header-actions">
+      @if (supportsLanguages() && languages().length > 1) {
+        <nz-select
+          class="asset-versions-manager__language"
+          [ngModel]="selectedLanguage()"
+          (ngModelChange)="onLanguageChange($event)"
+          [nzDisabled]="loading()"
+        >
+          @for (lang of languages(); track lang.language) {
+            <nz-option
+              [nzValue]="lang.language"
+              [nzLabel]="
+                langName(lang.language) +
+                (lang.is_source
+                  ? ' (' + ('ADMIN.CONTENT_EDITOR.LANGUAGE.SOURCE' | translate) + ')'
+                  : '')
+              "
+            ></nz-option>
+          }
+        </nz-select>
+      }
       @if (canMutateVersions()) {
         <button nz-button nzType="primary" type="button" (click)="openCreateModal()">
           <ng-icon name="lucidePlus" />
@@ -47,6 +67,31 @@
         [attr.dir]="modalDirection()"
         (ngSubmit)="$event.preventDefault(); submit()"
       >
+        @if (modalMode() === 'create' && supportsLanguages() && languages().length > 0) {
+          <nz-form-item>
+            <nz-form-label>{{ t('FORM_LANGUAGE') | translate }}</nz-form-label>
+            <nz-form-control>
+              <nz-select
+                class="asset-versions-manager__modal-language"
+                [ngModel]="versionLanguage()"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="versionLanguage.set($event)"
+              >
+                @for (lang of languages(); track lang.language) {
+                  <nz-option
+                    [nzValue]="lang.language"
+                    [nzLabel]="
+                      langName(lang.language) +
+                      (lang.is_source
+                        ? ' (' + ('ADMIN.CONTENT_EDITOR.LANGUAGE.SOURCE' | translate) + ')'
+                        : '')
+                    "
+                  ></nz-option>
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        }
         <nz-form-item>
           <nz-form-label nzRequired>{{ t('FORM_NAME') | translate }}</nz-form-label>
           <nz-form-control [nzErrorTip]="t('ERR_NAME') | translate">
