@@ -258,7 +258,7 @@ export class AssetContentGridComponent implements OnInit {
     }
     selected.sort((a, b) => a.order - b.order || a.ayah_id - b.ayah_id);
     const table: string[][] = [
-      ['sura', 'aya', 'text'],
+      ['surah', 'ayah', 'text'],
       ...selected.map((r) => [String(r.sura), String(r.aya), r.text ?? '']),
     ];
     const csv = serializeCsv(table);
