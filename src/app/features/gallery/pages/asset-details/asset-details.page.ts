@@ -1,7 +1,13 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -47,6 +53,7 @@ import { AssetLicenseAcceptanceService } from '../../services/asset-license-acce
     NzInputModule,
     NzSelectModule,
     ReactiveFormsModule,
+    FormsModule,
   ],
   templateUrl: './asset-details.page.html',
   styleUrl: './asset-details.page.less',
@@ -77,6 +84,8 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
   canConfirmLicense = signal<boolean>(false);
   isSubmittingRequest = signal<boolean>(false);
   isDownloading = signal<boolean>(false);
+  /** Language chosen for download on a multi-language asset (null = source/default). */
+  selectedLanguage = signal<string | null>(null);
   isReportIssueModalVisible = signal<boolean>(false);
   isSubmittingReportIssue = signal<boolean>(false);
 
@@ -110,6 +119,7 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
         next: (asset) => {
           this.asset.set(asset);
           this.images.set(asset.snapshots.map((snapshot) => snapshot.image_url));
+          this.selectedLanguage.set(asset.available_languages?.[0] ?? null);
           this.loading.set(false);
           this.setSeoFromAsset(asset);
           this.maybeOpenReportIssueModal();
@@ -170,6 +180,20 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
       default:
         return 'lucideFile';
     }
+  }
+
+  /** Language name localized to the current UI language (e.g. fr → "الفرنسية"). */
+  languageName(code: string): string {
+    if (!code) return code;
+    try {
+      const name = new Intl.DisplayNames([this.translate.currentLang || 'en'], {
+        type: 'language',
+      }).of(code);
+      if (name && name.toLowerCase() !== code.toLowerCase()) return name;
+    } catch {
+      // Intl.DisplayNames unavailable — fall back to the raw code.
+    }
+    return code;
   }
 
   downloadResource() {
@@ -488,9 +512,13 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
 
   private downloadAsset(assetId: number): void {
     this.isDownloading.set(true);
-    // Step 1: Get the download_url from backend
+    // Step 1: Get the download_url from backend (scoped to the chosen language, if any)
+    const language = this.selectedLanguage();
+    const params = language ? new HttpParams().set('language', language) : undefined;
     this.http
-      .get<{ download_url: string }>(`${environment.API_BASE_URL}/assets/${assetId}/download/`)
+      .get<{ download_url: string }>(`${environment.API_BASE_URL}/assets/${assetId}/download/`, {
+        params,
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {

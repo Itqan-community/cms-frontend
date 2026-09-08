@@ -40,6 +40,8 @@ export interface AssetDetails {
   is_open_access?: boolean;
   access_status?: AssetAccessStatus | null;
   snapshots: AssetSnapshot[];
+  /** Language codes with at least one published version (multi-language assets). */
+  available_languages?: string[];
 }
 
 interface AssetSnapshot {

@@ -787,7 +787,17 @@
         "AYA": "Aya",
         "SURAH": "Surah",
         "UTHMANI": "Ayah (Uthmani)",
-        "TEXT": "Text"
+        "TEXT": "Text",
+        "SOURCE": "Source"
+      },
+      "LANGUAGE": {
+        "LABEL": "Editing language",
+        "SOURCE": "source",
+        "ADD": "Add language",
+        "ADD_TITLE": "Add a translation language",
+        "ADD_CONFIRM": "Add",
+        "ADD_CANCEL": "Cancel",
+        "PICK": "Choose a language"
       },
       "MESSAGES": {
         "PUBLISHED": "New version published",

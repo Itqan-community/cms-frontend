@@ -16,16 +16,20 @@ import { AgGridAngular } from 'ag-grid-angular';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime } from 'rxjs';
 import type {
+  AssetLanguage,
   AssetVersionParentKind,
   ContentEntry,
   ContentEntryPatch,
 } from '../../models/asset-content.models';
 import { AssetContentService } from '../../services/asset-content.service';
 import { parseClipboardTable, serializeCsv } from '../../utils/clipboard-table.util';
+import { ISO_639_LANGUAGES, localizedLanguageName } from '../../utils/iso-639.util';
 import { SurahFloatingFilterComponent, type SurahOption } from './surah-floating-filter.component';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -43,8 +47,10 @@ const AUTOSAVE_DEBOUNCE_MS = 800;
     AgGridAngular,
     TranslateModule,
     NgIcon,
+    FormsModule,
     NzButtonModule,
     NzModalModule,
+    NzSelectModule,
     NzSpinModule,
     NzToolTipModule,
   ],
@@ -73,6 +79,29 @@ export class AssetContentGridComponent implements OnInit {
   readonly draftId = signal<number | null>(null);
   readonly rows = signal<ContentEntry[]>([]);
   readonly loading = signal(true);
+
+  /** Languages the asset provides content in (source first). */
+  readonly languages = signal<AssetLanguage[]>([]);
+  /** The language currently being edited (exactly one at a time). */
+  readonly selectedLanguage = signal<string | null>(null);
+  /** True when editing the source language (no reference column, no seeding). */
+  readonly isEditingSource = computed(() => {
+    const sel = this.selectedLanguage();
+    return this.languages().find((l) => l.language === sel)?.is_source ?? true;
+  });
+  /** Localized language name for the current UI language (e.g. fr → "الفرنسية"). */
+  readonly langName = (code: string): string =>
+    localizedLanguageName(code, this.translate.currentLang || 'en');
+
+  /** "Add language" modal state. */
+  readonly addLanguageVisible = signal(false);
+  readonly addLanguageBusy = signal(false);
+  readonly newLanguage = signal<string | null>(null);
+  /** ISO options not already on the asset. */
+  readonly addableLanguages = computed(() => {
+    const existing = new Set(this.languages().map((l) => l.language));
+    return ISO_639_LANGUAGES.filter((l) => !existing.has(l.code));
+  });
   readonly saving = signal(false);
   readonly publishing = signal(false);
   readonly savingDraft = signal(false);
@@ -101,13 +130,13 @@ export class AssetContentGridComponent implements OnInit {
     filter: false,
   };
 
-  readonly columnDefs: ColDef<ContentEntry>[] = this.buildColumnDefs();
+  readonly columnDefs = signal<ColDef<ContentEntry>[]>(this.buildColumnDefs());
 
   ngOnInit(): void {
     this.autosave$
       .pipe(debounceTime(AUTOSAVE_DEBOUNCE_MS), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => void this.flushPending());
-    this.initDraft();
+    this.loadLanguages();
   }
 
   /** True while there are edits not yet persisted to the draft. */
@@ -244,10 +273,38 @@ export class AssetContentGridComponent implements OnInit {
     );
   }
 
-  private initDraft(): void {
+  /** Load the asset's languages, default to the source, then open its draft. */
+  private loadLanguages(): void {
     this.loading.set(true);
     this.contentService
-      .createDraft(this.kind, this.slug)
+      .listLanguages(this.kind, this.slug)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (langs) => {
+          this.languages.set(langs);
+          const source = langs.find((l) => l.is_source) ?? langs[0];
+          this.selectedLanguage.set(source?.language ?? null);
+          this.loadForLanguage();
+        },
+        error: (err: HttpErrorResponse) => {
+          this.loading.set(false);
+          this.showError(err);
+        },
+      });
+  }
+
+  /** Open (get-or-create) the draft for the selected language and load its rows. */
+  private loadForLanguage(): void {
+    const language = this.selectedLanguage();
+    if (!language) {
+      this.loading.set(false);
+      return;
+    }
+    this.loading.set(true);
+    // Rebuild columns so the source-reference column appears/disappears.
+    this.columnDefs.set(this.buildColumnDefs());
+    this.contentService
+      .createDraft(this.kind, this.slug, language)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (draft) => {
@@ -256,6 +313,46 @@ export class AssetContentGridComponent implements OnInit {
         },
         error: (err: HttpErrorResponse) => {
           this.loading.set(false);
+          this.showError(err);
+        },
+      });
+  }
+
+  /** Switch the edited language: flush pending edits, then reload for the new one. */
+  onLanguageChange(language: string): void {
+    if (language === this.selectedLanguage()) return;
+    void this.flushPending().then(() => {
+      this.pendingRows.clear();
+      this.dirty.set(false);
+      this.rows.set([]);
+      this.selectedLanguage.set(language);
+      this.loadForLanguage();
+    });
+  }
+
+  /** Open the "add language" modal. */
+  openAddLanguage(): void {
+    this.newLanguage.set(null);
+    this.addLanguageVisible.set(true);
+  }
+
+  /** Confirm adding a translation language and switch to editing it. */
+  confirmAddLanguage(): void {
+    const language = this.newLanguage();
+    if (!language) return;
+    this.addLanguageBusy.set(true);
+    this.contentService
+      .addLanguage(this.kind, this.slug, language)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (added) => {
+          this.addLanguageBusy.set(false);
+          this.addLanguageVisible.set(false);
+          this.languages.update((ls) => [...ls, added]);
+          this.onLanguageChange(added.language);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.addLanguageBusy.set(false);
           this.showError(err);
         },
       });
@@ -466,6 +563,20 @@ export class AssetContentGridComponent implements OnInit {
         wrapText: true,
         autoHeight: true,
       },
+      // When editing a translation, show the source language read-only alongside.
+      ...(this.isEditingSource()
+        ? []
+        : [
+            {
+              field: 'source_text',
+              headerName: this.sourceColHeader(),
+              flex: 2,
+              editable: false,
+              cellStyle: { direction: 'rtl' },
+              wrapText: true,
+              autoHeight: true,
+            } as ColDef<ContentEntry>,
+          ]),
       {
         field: 'text',
         headerName: this.colHeader('TEXT'),
@@ -480,6 +591,13 @@ export class AssetContentGridComponent implements OnInit {
         autoHeight: true,
       },
     ];
+  }
+
+  /** Header for the read-only source-reference column (shows the source language). */
+  private sourceColHeader(): string {
+    const source = this.languages().find((l) => l.is_source);
+    const label = source ? this.langName(source.language) : this.colHeader('SOURCE');
+    return `${this.colHeader('SOURCE')} · ${label}`;
   }
 
   private showError(err: HttpErrorResponse): void {

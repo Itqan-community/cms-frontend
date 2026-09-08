@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import type {
+  AssetLanguage,
   AssetVersionParentKind,
   ContentDraftVersion,
   ContentEntriesResponse,
@@ -20,9 +21,27 @@ export class AssetContentService {
   private readonly http = inject(HttpClient);
   private readonly base = environment.ADMIN_API_BASE_URL;
 
-  /** Get-or-create the asset's shared draft version, seeded from latest published. */
-  createDraft(kind: AssetVersionParentKind, slug: string): Observable<ContentDraftVersion> {
-    return this.http.post<ContentDraftVersion>(`${this.draftBase(kind, slug)}draft/`, {});
+  /** List the languages an asset provides content in (source first). */
+  listLanguages(kind: AssetVersionParentKind, slug: string): Observable<AssetLanguage[]> {
+    return this.http.get<AssetLanguage[]>(`${this.draftBase(kind, slug)}languages/`);
+  }
+
+  /** Add a translation language to the asset. */
+  addLanguage(
+    kind: AssetVersionParentKind,
+    slug: string,
+    language: string
+  ): Observable<AssetLanguage> {
+    return this.http.post<AssetLanguage>(`${this.draftBase(kind, slug)}languages/`, { language });
+  }
+
+  /** Get-or-create the shared draft for one language, seeded from its latest published. */
+  createDraft(
+    kind: AssetVersionParentKind,
+    slug: string,
+    language: string
+  ): Observable<ContentDraftVersion> {
+    return this.http.post<ContentDraftVersion>(`${this.draftBase(kind, slug)}draft/`, { language });
   }
 
   /** Load a page of per-ayah entries for a version. */
