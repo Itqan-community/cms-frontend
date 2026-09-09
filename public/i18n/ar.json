@@ -798,7 +798,11 @@
         "ADD_TITLE": "إضافة لغة ترجمة",
         "ADD_CONFIRM": "إضافة",
         "ADD_CANCEL": "إلغاء",
-        "PICK": "اختر لغة"
+        "PICK": "اختر لغة",
+        "FILE_LABEL": "ملف المحتوى (اختياري)",
+        "FILE_CHOOSE": "اختر ملفًا",
+        "FILE_CLEAR": "إزالة",
+        "FILE_HINT": "يمكنك اختياريًا رفع ملف CSV لنشر محتوى هذه اللغة الآن."
       },
       "MESSAGES": {
         "PUBLISHED": "تم نشر نسخة جديدة",
@@ -1081,7 +1085,12 @@
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
           "TOOLTIP_EDIT": "تعديل",
+          "TOOLTIP_RESTORE": "استعادة كإصدار نشط",
           "TOOLTIP_DELETE": "حذف",
+          "ACTIVE_BADGE": "نشط",
+          "RESTORE_CONFIRM_TITLE": "استعادة هذا الإصدار؟",
+          "RESTORE_CONFIRM_BODY": "سيتم استعادة <b>{{name}}</b> كإصدار جديد ونشط.",
+          "RESTORE_OK": "استعادة",
           "EMPTY_TITLE": "لا توجد إصدارات بعد",
           "EMPTY_SUBTITLE": "استخدم «إضافة إصدار جديد» لرفع ملف.",
           "DELETE_CONFIRM_TITLE": "حذف هذا الإصدار؟",
@@ -1094,6 +1103,8 @@
             "UPDATE_SUCCESS": "تم تحديث الإصدار.",
             "DELETE_SUCCESS": "تم حذف الإصدار.",
             "DELETE_ERROR": "تعذّر حذف الإصدار.",
+            "RESTORE_SUCCESS": "تمت استعادة الإصدار كإصدار نشط.",
+            "RESTORE_ERROR": "تعذّر استعادة الإصدار.",
             "FILE_REQUIRED": "اختر ملفًا للرفع."
           }
         }
@@ -1229,7 +1240,12 @@
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
           "TOOLTIP_EDIT": "تعديل",
+          "TOOLTIP_RESTORE": "استعادة كإصدار نشط",
           "TOOLTIP_DELETE": "حذف",
+          "ACTIVE_BADGE": "نشط",
+          "RESTORE_CONFIRM_TITLE": "استعادة هذا الإصدار؟",
+          "RESTORE_CONFIRM_BODY": "سيتم استعادة <b>{{name}}</b> كإصدار جديد ونشط.",
+          "RESTORE_OK": "استعادة",
           "EMPTY_TITLE": "لا توجد إصدارات بعد",
           "EMPTY_SUBTITLE": "استخدم «إضافة إصدار جديد» لرفع ملف.",
           "DELETE_CONFIRM_TITLE": "حذف هذا الإصدار؟",
@@ -1242,6 +1258,8 @@
             "UPDATE_SUCCESS": "تم تحديث الإصدار.",
             "DELETE_SUCCESS": "تم حذف الإصدار.",
             "DELETE_ERROR": "تعذّر حذف الإصدار.",
+            "RESTORE_SUCCESS": "تمت استعادة الإصدار كإصدار نشط.",
+            "RESTORE_ERROR": "تعذّر استعادة الإصدار.",
             "FILE_REQUIRED": "اختر ملفًا للرفع."
           }
         }
@@ -1994,7 +2012,12 @@
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
           "TOOLTIP_EDIT": "تعديل",
+          "TOOLTIP_RESTORE": "استعادة كإصدار نشط",
           "TOOLTIP_DELETE": "حذف",
+          "ACTIVE_BADGE": "نشط",
+          "RESTORE_CONFIRM_TITLE": "استعادة هذا الإصدار؟",
+          "RESTORE_CONFIRM_BODY": "سيتم استعادة <b>{{name}}</b> كإصدار جديد ونشط.",
+          "RESTORE_OK": "استعادة",
           "EMPTY_TITLE": "لا توجد إصدارات بعد",
           "EMPTY_SUBTITLE": "استخدم «إضافة إصدار جديد» لرفع ملف.",
           "DELETE_CONFIRM_TITLE": "حذف هذا الإصدار؟",
@@ -2007,6 +2030,8 @@
             "UPDATE_SUCCESS": "تم تحديث الإصدار.",
             "DELETE_SUCCESS": "تم حذف الإصدار.",
             "DELETE_ERROR": "تعذّر حذف الإصدار.",
+            "RESTORE_SUCCESS": "تمت استعادة الإصدار كإصدار نشط.",
+            "RESTORE_ERROR": "تعذّر استعادة الإصدار.",
             "FILE_REQUIRED": "اختر ملفًا للرفع."
           }
         }
@@ -2158,7 +2183,12 @@
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
           "TOOLTIP_EDIT": "تعديل",
+          "TOOLTIP_RESTORE": "استعادة كإصدار نشط",
           "TOOLTIP_DELETE": "حذف",
+          "ACTIVE_BADGE": "نشط",
+          "RESTORE_CONFIRM_TITLE": "استعادة هذا الإصدار؟",
+          "RESTORE_CONFIRM_BODY": "سيتم استعادة <b>{{name}}</b> كإصدار جديد ونشط.",
+          "RESTORE_OK": "استعادة",
           "EMPTY_TITLE": "لا توجد إصدارات بعد",
           "EMPTY_SUBTITLE": "استخدم «إضافة إصدار جديد» لرفع ملف خط.",
           "DELETE_CONFIRM_TITLE": "حذف هذا الإصدار؟",
@@ -2171,6 +2201,8 @@
             "UPDATE_SUCCESS": "تم تحديث الإصدار.",
             "DELETE_SUCCESS": "تم حذف الإصدار.",
             "DELETE_ERROR": "تعذّر حذف الإصدار.",
+            "RESTORE_SUCCESS": "تمت استعادة الإصدار كإصدار نشط.",
+            "RESTORE_ERROR": "تعذّر استعادة الإصدار.",
             "FILE_REQUIRED": "اختر ملف خط للرفع."
           }
         }
@@ -2306,7 +2338,12 @@
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
           "TOOLTIP_EDIT": "تعديل",
+          "TOOLTIP_RESTORE": "استعادة كإصدار نشط",
           "TOOLTIP_DELETE": "حذف",
+          "ACTIVE_BADGE": "نشط",
+          "RESTORE_CONFIRM_TITLE": "استعادة هذا الإصدار؟",
+          "RESTORE_CONFIRM_BODY": "سيتم استعادة <b>{{name}}</b> كإصدار جديد ونشط.",
+          "RESTORE_OK": "استعادة",
           "EMPTY_TITLE": "لا توجد إصدارات بعد",
           "EMPTY_SUBTITLE": "استخدم «إضافة إصدار جديد» لرفع حزمة إصدار.",
           "DELETE_CONFIRM_TITLE": "حذف هذا الإصدار؟",
@@ -2319,6 +2356,8 @@
             "UPDATE_SUCCESS": "تم تحديث الإصدار.",
             "DELETE_SUCCESS": "تم حذف الإصدار.",
             "DELETE_ERROR": "تعذّر حذف الإصدار.",
+            "RESTORE_SUCCESS": "تمت استعادة الإصدار كإصدار نشط.",
+            "RESTORE_ERROR": "تعذّر استعادة الإصدار.",
             "FILE_REQUIRED": "اختر ملف إصدار للرفع."
           }
         }

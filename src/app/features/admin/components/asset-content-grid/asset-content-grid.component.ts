@@ -106,10 +106,15 @@ export class AssetContentGridComponent implements OnInit {
   readonly addLanguageVisible = signal(false);
   readonly addLanguageBusy = signal(false);
   readonly newLanguage = signal<string | null>(null);
-  /** ISO options not already on the asset. */
+  /** Optional file to seed the new language with (uploaded as its first version). */
+  private newLanguageFile: File | null = null;
+  readonly newLanguageFileName = signal<string | null>(null);
+  /** ISO options not already on the asset, labelled + sorted in the UI language. */
   readonly addableLanguages = computed(() => {
     const existing = new Set(this.languages().map((l) => l.language));
-    return ISO_639_LANGUAGES.filter((l) => !existing.has(l.code));
+    return ISO_639_LANGUAGES.filter((l) => !existing.has(l.code))
+      .map((l) => ({ code: l.code, label: this.langName(l.code) }))
+      .sort((a, b) => a.label.localeCompare(b.label));
   });
   readonly saving = signal(false);
   readonly publishing = signal(false);
@@ -350,21 +355,37 @@ export class AssetContentGridComponent implements OnInit {
   /** Open the "add language" modal. */
   openAddLanguage(): void {
     this.newLanguage.set(null);
+    this.clearNewLanguageFile();
     this.addLanguageVisible.set(true);
   }
 
-  /** Confirm adding a translation language and switch to editing it. */
+  /** Pick the optional seed file for the new language. */
+  onPickNewLanguageFile(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    input.value = '';
+    this.newLanguageFile = file;
+    this.newLanguageFileName.set(file?.name ?? null);
+  }
+
+  clearNewLanguageFile(): void {
+    this.newLanguageFile = null;
+    this.newLanguageFileName.set(null);
+  }
+
+  /** Confirm adding a translation language (optionally seeded from a file) and edit it. */
   confirmAddLanguage(): void {
     const language = this.newLanguage();
     if (!language) return;
     this.addLanguageBusy.set(true);
     this.contentService
-      .addLanguage(this.kind, this.slug, language)
+      .addLanguage(this.kind, this.slug, language, this.newLanguageFile)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (added) => {
           this.addLanguageBusy.set(false);
           this.addLanguageVisible.set(false);
+          this.clearNewLanguageFile();
           this.languages.update((ls) => [...ls, added]);
           this.onLanguageChange(added.language);
         },

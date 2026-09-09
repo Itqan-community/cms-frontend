@@ -26,13 +26,19 @@ export class AssetContentService {
     return this.http.get<AssetLanguage[]>(`${this.draftBase(kind, slug)}languages/`);
   }
 
-  /** Add a translation language to the asset. */
+  /** Add a translation language, optionally seeding it from an uploaded file. */
   addLanguage(
     kind: AssetVersionParentKind,
     slug: string,
-    language: string
+    language: string,
+    file?: File | null
   ): Observable<AssetLanguage> {
-    return this.http.post<AssetLanguage>(`${this.draftBase(kind, slug)}languages/`, { language });
+    const data = new FormData();
+    data.append('language', language);
+    if (file) {
+      data.append('file', file);
+    }
+    return this.http.post<AssetLanguage>(`${this.draftBase(kind, slug)}languages/`, data);
   }
 
   /** Get-or-create the shared draft for one language, seeded from its latest published. */
@@ -89,6 +95,18 @@ export class AssetContentService {
   /** Discard the draft and all its unsaved entries. */
   discardDraft(kind: AssetVersionParentKind, slug: string, versionId: number): Observable<void> {
     return this.http.delete<void>(this.versionBase(kind, slug, versionId));
+  }
+
+  /** Restore a version's content as a new published version (becomes the active one). */
+  restoreVersion(
+    kind: AssetVersionParentKind,
+    slug: string,
+    versionId: number
+  ): Observable<ContentDraftVersion> {
+    return this.http.post<ContentDraftVersion>(
+      `${this.versionBase(kind, slug, versionId)}restore/`,
+      {}
+    );
   }
 
   /** Download a version's content as a CSV blob (auth token added by interceptor). */

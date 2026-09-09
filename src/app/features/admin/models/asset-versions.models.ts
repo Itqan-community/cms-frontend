@@ -4,6 +4,8 @@ export interface AssetVersion {
   asset_id: number;
   /** Language code of this version (e.g. 'ar', 'fr'). */
   language?: string;
+  /** True when this is the latest published (active) version for its language. */
+  is_active?: boolean;
   name: string;
   summary?: string;
   file_url: string;

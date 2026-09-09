@@ -90,6 +90,7 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly downloadingId = signal<number | null>(null);
+  readonly restoringId = signal<number | null>(null);
   readonly searchTerm = signal('');
   readonly selectedFileName = signal<string | null>(null);
   private selectedFile: File | null = null;
@@ -389,6 +390,41 @@ export class AssetVersionsManagerComponent implements OnInit {
               reject();
             },
           });
+        }),
+    });
+  }
+
+  /** Restore a version as a new published version, making it the active one. */
+  restoreVersion(row: AssetVersion): void {
+    if (!this.canMutateVersions() || this.restoringId() !== null) {
+      return;
+    }
+    this.modal.confirm({
+      nzTitle: this.translate.instant(this.t('RESTORE_CONFIRM_TITLE')),
+      nzContent: this.translate.instant(this.t('RESTORE_CONFIRM_BODY'), { name: row.name }),
+      nzOkText: this.translate.instant(this.t('RESTORE_OK')),
+      nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
+      nzDirection: this.modalDirection(),
+      nzOnOk: () =>
+        new Promise<void>((resolve, reject) => {
+          this.restoringId.set(row.id);
+          this.assetContentService
+            .restoreVersion(this.kind, this.slug, row.id)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: () => {
+                this.restoringId.set(null);
+                this.message.success(this.translate.instant(this.t('MESSAGES.RESTORE_SUCCESS')));
+                this.page.set(1);
+                this.loadList();
+                resolve();
+              },
+              error: () => {
+                this.restoringId.set(null);
+                this.message.error(this.translate.instant(this.t('MESSAGES.RESTORE_ERROR')));
+                reject();
+              },
+            });
         }),
     });
   }
