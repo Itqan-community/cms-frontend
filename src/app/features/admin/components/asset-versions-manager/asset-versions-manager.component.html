@@ -8,6 +8,26 @@
       }
     </h2>
     <div class="asset-versions-manager__header-actions">
+      @if (supportsLanguages() && languages().length > 1) {
+        <nz-select
+          class="asset-versions-manager__language"
+          [ngModel]="selectedLanguage()"
+          (ngModelChange)="onLanguageChange($event)"
+          [nzDisabled]="loading()"
+        >
+          @for (lang of languages(); track lang.language) {
+            <nz-option
+              [nzValue]="lang.language"
+              [nzLabel]="
+                langName(lang.language) +
+                (lang.is_source
+                  ? ' (' + ('ADMIN.CONTENT_EDITOR.LANGUAGE.SOURCE' | translate) + ')'
+                  : '')
+              "
+            ></nz-option>
+          }
+        </nz-select>
+      }
       @if (canMutateVersions()) {
         <button nz-button nzType="primary" type="button" (click)="openCreateModal()">
           <ng-icon name="lucidePlus" />
@@ -47,6 +67,31 @@
         [attr.dir]="modalDirection()"
         (ngSubmit)="$event.preventDefault(); submit()"
       >
+        @if (modalMode() === 'create' && supportsLanguages() && languages().length > 0) {
+          <nz-form-item>
+            <nz-form-label>{{ t('FORM_LANGUAGE') | translate }}</nz-form-label>
+            <nz-form-control>
+              <nz-select
+                class="asset-versions-manager__modal-language"
+                [ngModel]="versionLanguage()"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="versionLanguage.set($event)"
+              >
+                @for (lang of languages(); track lang.language) {
+                  <nz-option
+                    [nzValue]="lang.language"
+                    [nzLabel]="
+                      langName(lang.language) +
+                      (lang.is_source
+                        ? ' (' + ('ADMIN.CONTENT_EDITOR.LANGUAGE.SOURCE' | translate) + ')'
+                        : '')
+                    "
+                  ></nz-option>
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        }
         <nz-form-item>
           <nz-form-label nzRequired>{{ t('FORM_NAME') | translate }}</nz-form-label>
           <nz-form-control [nzErrorTip]="t('ERR_NAME') | translate">
@@ -138,26 +183,23 @@
             <th>{{ t('COL_SUMMARY') | translate }}</th>
             <th nzWidth="100px">{{ t('COL_SIZE') | translate }}</th>
             <th nzWidth="120px">{{ t('COL_DATE') | translate }}</th>
-            <th>{{ t('COL_FILE') | translate }}</th>
-            <th nzWidth="120px">{{ t('COL_ACTIONS') | translate }}</th>
+            <th nzWidth="150px">{{ t('COL_ACTIONS') | translate }}</th>
           </tr>
         </thead>
         <tbody>
           @for (ver of versionsTable.data; track ver.id) {
             <tr>
-              <td>{{ ver.name }}</td>
+              <td>
+                {{ ver.name }}
+                @if (supportsLanguages() && ver.is_active) {
+                  <span class="asset-versions-manager__active-badge">
+                    {{ t('ACTIVE_BADGE') | translate }}
+                  </span>
+                }
+              </td>
               <td class="asset-versions-manager__summary-cell">{{ truncate(ver.summary) }}</td>
               <td>{{ formatBytes(ver.size_bytes) }}</td>
               <td>{{ ver.created_at | date: 'dd/MM/yyyy' }}</td>
-              <td>
-                @if (ver.file_url) {
-                  <a [href]="ver.file_url" target="_blank" rel="noopener">
-                    <ng-icon name="lucideDownload" /> {{ 'ADMIN.COMMON.DOWNLOAD' | translate }}
-                  </a>
-                } @else {
-                  <span class="admin-list-desc">—</span>
-                }
-              </td>
               <td>
                 <div class="admin-list-actions">
                   <button
@@ -173,6 +215,21 @@
                   >
                     <ng-icon name="lucideDownload" aria-hidden="true" />
                   </button>
+                  @if (supportsLanguages() && canMutateVersions() && !ver.is_active) {
+                    <button
+                      type="button"
+                      nz-button
+                      nzType="text"
+                      class="action-icon"
+                      nz-tooltip
+                      [nzTooltipTitle]="t('TOOLTIP_RESTORE') | translate"
+                      [nzLoading]="restoringId() === ver.id"
+                      [disabled]="restoringId() !== null"
+                      (click)="restoreVersion(ver)"
+                    >
+                      <ng-icon name="lucideHistory" aria-hidden="true" />
+                    </button>
+                  }
                   @if (canMutateVersions()) {
                     <button
                       type="button"

@@ -151,9 +151,46 @@
         (ngModelChange)="newLanguage.set($event)"
       >
         @for (lang of addableLanguages(); track lang.code) {
-          <nz-option [nzValue]="lang.code" [nzLabel]="lang.name + ' — ' + lang.native"></nz-option>
+          <nz-option [nzValue]="lang.code" [nzLabel]="lang.label"></nz-option>
         }
       </nz-select>
+
+      <div class="content-grid__add-language-file">
+        <p class="content-grid__add-language-file-label">
+          {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.FILE_LABEL' | translate }}
+        </p>
+        <input
+          #addLanguageFileInput
+          type="file"
+          class="content-grid__file-input"
+          (change)="onPickNewLanguageFile($event)"
+        />
+        <div class="content-grid__add-language-file-actions">
+          <button nz-button nzType="default" type="button" (click)="addLanguageFileInput.click()">
+            <ng-icon name="lucideFolderOpen" />
+            {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.FILE_CHOOSE' | translate }}
+          </button>
+          @if (newLanguageFileName()) {
+            <button
+              nz-button
+              nzType="default"
+              nzDanger
+              type="button"
+              (click)="clearNewLanguageFile()"
+            >
+              <ng-icon name="lucideX" />
+              {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.FILE_CLEAR' | translate }}
+            </button>
+          }
+        </div>
+        @if (newLanguageFileName()) {
+          <p class="content-grid__add-language-file-name admin-mono">{{ newLanguageFileName() }}</p>
+        } @else {
+          <p class="content-grid__add-language-file-hint">
+            {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.FILE_HINT' | translate }}
+          </p>
+        }
+      </div>
     </ng-container>
   </nz-modal>
 </div>

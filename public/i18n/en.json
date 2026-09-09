@@ -798,7 +798,11 @@
         "ADD_TITLE": "Add a translation language",
         "ADD_CONFIRM": "Add",
         "ADD_CANCEL": "Cancel",
-        "PICK": "Choose a language"
+        "PICK": "Choose a language",
+        "FILE_LABEL": "Content file (optional)",
+        "FILE_CHOOSE": "Choose file",
+        "FILE_CLEAR": "Remove",
+        "FILE_HINT": "Optionally upload a CSV to publish this language's content now."
       },
       "MESSAGES": {
         "PUBLISHED": "New version published",
@@ -874,6 +878,7 @@
         "SECTION_TITLE": "Initial version",
         "SECTION_HINT": "Optionally attach the first file version now. You can add versions later from the asset detail page.",
         "FORM_NAME": "Version name",
+        "FORM_LANGUAGE": "Version language",
         "FORM_SUMMARY": "Summary",
         "FORM_FILE": "File",
         "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
@@ -1058,6 +1063,7 @@
           "MODAL_TITLE_CREATE": "Add new version",
           "MODAL_TITLE_EDIT": "Edit version",
           "FORM_NAME": "Version name",
+          "FORM_LANGUAGE": "Version language",
           "FORM_SUMMARY": "Summary",
           "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
           "PLACEHOLDER_SUMMARY": "Short notes about this file…",
@@ -1079,7 +1085,12 @@
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
           "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_RESTORE": "Restore as active version",
           "TOOLTIP_DELETE": "Delete",
+          "ACTIVE_BADGE": "Active",
+          "RESTORE_CONFIRM_TITLE": "Restore this version?",
+          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
+          "RESTORE_OK": "Restore",
           "EMPTY_TITLE": "No versions yet",
           "EMPTY_SUBTITLE": "Use “Add new version” to upload a file.",
           "DELETE_CONFIRM_TITLE": "Delete this version?",
@@ -1092,6 +1103,8 @@
             "UPDATE_SUCCESS": "Version updated.",
             "DELETE_SUCCESS": "Version deleted.",
             "DELETE_ERROR": "Could not delete version.",
+            "RESTORE_SUCCESS": "Version restored as the active version.",
+            "RESTORE_ERROR": "Could not restore version.",
             "FILE_REQUIRED": "Choose a file to upload."
           }
         }
@@ -1205,6 +1218,7 @@
           "MODAL_TITLE_CREATE": "Add new version",
           "MODAL_TITLE_EDIT": "Edit version",
           "FORM_NAME": "Version name",
+          "FORM_LANGUAGE": "Version language",
           "FORM_SUMMARY": "Summary",
           "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
           "PLACEHOLDER_SUMMARY": "Short notes about this file…",
@@ -1226,7 +1240,12 @@
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
           "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_RESTORE": "Restore as active version",
           "TOOLTIP_DELETE": "Delete",
+          "ACTIVE_BADGE": "Active",
+          "RESTORE_CONFIRM_TITLE": "Restore this version?",
+          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
+          "RESTORE_OK": "Restore",
           "EMPTY_TITLE": "No versions yet",
           "EMPTY_SUBTITLE": "Use “Add new version” to upload a file.",
           "DELETE_CONFIRM_TITLE": "Delete this version?",
@@ -1239,6 +1258,8 @@
             "UPDATE_SUCCESS": "Version updated.",
             "DELETE_SUCCESS": "Version deleted.",
             "DELETE_ERROR": "Could not delete version.",
+            "RESTORE_SUCCESS": "Version restored as the active version.",
+            "RESTORE_ERROR": "Could not restore version.",
             "FILE_REQUIRED": "Choose a file to upload."
           }
         }
@@ -1969,6 +1990,7 @@
           "MODAL_TITLE_CREATE": "Add new version",
           "MODAL_TITLE_EDIT": "Edit version",
           "FORM_NAME": "Version name",
+          "FORM_LANGUAGE": "Version language",
           "FORM_SUMMARY": "Summary",
           "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
           "PLACEHOLDER_SUMMARY": "Short notes about this file…",
@@ -1990,7 +2012,12 @@
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
           "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_RESTORE": "Restore as active version",
           "TOOLTIP_DELETE": "Delete",
+          "ACTIVE_BADGE": "Active",
+          "RESTORE_CONFIRM_TITLE": "Restore this version?",
+          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
+          "RESTORE_OK": "Restore",
           "EMPTY_TITLE": "No versions yet",
           "EMPTY_SUBTITLE": "Use “Add new version” to upload a file.",
           "DELETE_CONFIRM_TITLE": "Delete this version?",
@@ -2003,6 +2030,8 @@
             "UPDATE_SUCCESS": "Version updated.",
             "DELETE_SUCCESS": "Version deleted.",
             "DELETE_ERROR": "Could not delete version.",
+            "RESTORE_SUCCESS": "Version restored as the active version.",
+            "RESTORE_ERROR": "Could not restore version.",
             "FILE_REQUIRED": "Choose a file to upload."
           }
         }
@@ -2132,6 +2161,7 @@
           "MODAL_TITLE_CREATE": "Add new version",
           "MODAL_TITLE_EDIT": "Edit version",
           "FORM_NAME": "Version name",
+          "FORM_LANGUAGE": "Version language",
           "FORM_SUMMARY": "Summary",
           "PLACEHOLDER_NAME": "e.g. v1.0 — Regular WOFF2",
           "PLACEHOLDER_SUMMARY": "Short notes about this font file…",
@@ -2153,7 +2183,12 @@
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
           "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_RESTORE": "Restore as active version",
           "TOOLTIP_DELETE": "Delete",
+          "ACTIVE_BADGE": "Active",
+          "RESTORE_CONFIRM_TITLE": "Restore this version?",
+          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
+          "RESTORE_OK": "Restore",
           "EMPTY_TITLE": "No versions yet",
           "EMPTY_SUBTITLE": "Use “Add new version” to upload a font file.",
           "DELETE_CONFIRM_TITLE": "Delete this version?",
@@ -2166,6 +2201,8 @@
             "UPDATE_SUCCESS": "Version updated.",
             "DELETE_SUCCESS": "Version deleted.",
             "DELETE_ERROR": "Could not delete version.",
+            "RESTORE_SUCCESS": "Version restored as the active version.",
+            "RESTORE_ERROR": "Could not restore version.",
             "FILE_REQUIRED": "Choose a font file to upload."
           }
         }
@@ -2279,6 +2316,7 @@
           "MODAL_TITLE_CREATE": "Add new version",
           "MODAL_TITLE_EDIT": "Edit version",
           "FORM_NAME": "Version name",
+          "FORM_LANGUAGE": "Version language",
           "FORM_SUMMARY": "Summary",
           "PLACEHOLDER_NAME": "e.g. v3.2 — Android release",
           "PLACEHOLDER_SUMMARY": "Short release notes for this build…",
@@ -2300,7 +2338,12 @@
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
           "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_RESTORE": "Restore as active version",
           "TOOLTIP_DELETE": "Delete",
+          "ACTIVE_BADGE": "Active",
+          "RESTORE_CONFIRM_TITLE": "Restore this version?",
+          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
+          "RESTORE_OK": "Restore",
           "EMPTY_TITLE": "No versions yet",
           "EMPTY_SUBTITLE": "Use “Add new version” to upload a release package.",
           "DELETE_CONFIRM_TITLE": "Delete this version?",
@@ -2313,6 +2356,8 @@
             "UPDATE_SUCCESS": "Version updated.",
             "DELETE_SUCCESS": "Version deleted.",
             "DELETE_ERROR": "Could not delete version.",
+            "RESTORE_SUCCESS": "Version restored as the active version.",
+            "RESTORE_ERROR": "Could not restore version.",
             "FILE_REQUIRED": "Choose a release file to upload."
           }
         }

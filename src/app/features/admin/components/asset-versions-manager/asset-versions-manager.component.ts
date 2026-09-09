@@ -2,7 +2,7 @@ import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, Input, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -10,6 +10,7 @@ import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 import { AdminTitleCountComponent } from '../admin-title-count/admin-title-count.component';
 import { AdminTablePaginationComponent } from '../admin-table-pagination/admin-table-pagination.component';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
@@ -17,8 +18,10 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { Subject, debounceTime, distinctUntilChanged, finalize, takeUntil } from 'rxjs';
 import type { AssetVersion, AssetVersionParentKind } from '../../models/asset-versions.models';
+import type { AssetLanguage } from '../../models/asset-content.models';
 import { AssetVersionsService } from '../../services/asset-versions.service';
 import { AssetContentService } from '../../services/asset-content.service';
+import { localizedLanguageName } from '../../utils/iso-639.util';
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../services/admin-auth.service';
 
@@ -32,10 +35,12 @@ const DEFAULT_PAGE_SIZE = 10;
     ReactiveFormsModule,
     TranslateModule,
     NgIcon,
+    FormsModule,
     NzButtonModule,
     NzFormModule,
     NzInputModule,
     NzModalModule,
+    NzSelectModule,
     AdminTitleCountComponent,
     AdminTablePaginationComponent,
     NzSpinModule,
@@ -68,14 +73,24 @@ export class AssetVersionsManagerComponent implements OnInit {
   @Input({ required: true }) sectionTitleKey!: string;
   /** Parent asset id (required by portal multipart body). */
   @Input({ required: true }) assetId!: number;
+  /** Asset English name — used to name exported files (falls back to the slug). */
+  @Input() assetNameEn?: string;
 
   readonly list = signal<AssetVersion[]>([]);
   readonly total = signal(0);
   readonly page = signal(1);
+
+  /** Multi-language assets (translations/tafsirs) let the versions be filtered by language. */
+  readonly languages = signal<AssetLanguage[]>([]);
+  readonly selectedLanguage = signal<string | null>(null);
+  /** Localized language name for the current UI language (e.g. fr → "الفرنسية"). */
+  readonly langName = (code: string): string =>
+    localizedLanguageName(code, this.translate.currentLang || 'en');
   readonly pageSize = signal(DEFAULT_PAGE_SIZE);
   readonly loading = signal(false);
   readonly saving = signal(false);
   readonly downloadingId = signal<number | null>(null);
+  readonly restoringId = signal<number | null>(null);
   readonly searchTerm = signal('');
   readonly selectedFileName = signal<string | null>(null);
   private selectedFile: File | null = null;
@@ -86,11 +101,18 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly versionModalTitleKey = signal('');
   readonly modalMode = signal<'create' | 'edit'>('create');
   readonly editingId = signal<number | null>(null);
+  /** Language chosen for a newly uploaded version (translations/tafsirs). */
+  readonly versionLanguage = signal<string | null>(null);
 
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required]],
     summary: ['', [Validators.required]],
   });
+
+  /** Only translations and tafsirs carry per-language content/versions. */
+  supportsLanguages(): boolean {
+    return this.kind === 'translation' || this.kind === 'tafsir';
+  }
 
   ngOnInit(): void {
     this.search$
@@ -100,6 +122,33 @@ export class AssetVersionsManagerComponent implements OnInit {
         this.page.set(1);
         this.loadList();
       });
+    if (this.supportsLanguages()) {
+      this.loadLanguages();
+    } else {
+      this.loadList();
+    }
+  }
+
+  /** Load the asset's languages, default to the source, then load its versions. */
+  private loadLanguages(): void {
+    this.assetContentService
+      .listLanguages(this.kind, this.slug)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (langs) => {
+          this.languages.set(langs);
+          const source = langs.find((l) => l.is_source) ?? langs[0];
+          this.selectedLanguage.set(source?.language ?? null);
+          this.loadList();
+        },
+        // If languages can't be loaded, still show the (unfiltered) versions.
+        error: () => this.loadList(),
+      });
+  }
+
+  onLanguageChange(language: string): void {
+    this.selectedLanguage.set(language);
+    this.page.set(1);
     this.loadList();
   }
 
@@ -115,6 +164,7 @@ export class AssetVersionsManagerComponent implements OnInit {
         page: this.page(),
         page_size: this.pageSize(),
         search: this.searchTerm() || undefined,
+        language: this.supportsLanguages() ? this.selectedLanguage() || undefined : undefined,
       })
       .subscribe({
         next: (res) => {
@@ -180,6 +230,9 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.editingId.set(null);
     this.form.reset({ name: '', summary: '' });
     this.clearFile();
+    // Default the upload to the language currently being viewed, else the source.
+    const source = this.languages().find((l) => l.is_source) ?? this.languages()[0];
+    this.versionLanguage.set(this.selectedLanguage() ?? source?.language ?? null);
     this.versionModalTitleKey.set(`${this.i18nPrefix}.MODAL_TITLE_CREATE`);
     this.versionModalOpen.set(true);
   }
@@ -260,6 +313,9 @@ export class AssetVersionsManagerComponent implements OnInit {
       name: this.form.getRawValue().name,
       summary: this.form.getRawValue().summary,
       file: this.selectedFile ?? undefined,
+      // Language only applies when creating a new (uploaded) version.
+      language:
+        id == null && this.supportsLanguages() ? (this.versionLanguage() ?? undefined) : undefined,
     };
 
     // Abort any previous in-flight save (e.g. double submit).
@@ -338,6 +394,41 @@ export class AssetVersionsManagerComponent implements OnInit {
     });
   }
 
+  /** Restore a version as a new published version, making it the active one. */
+  restoreVersion(row: AssetVersion): void {
+    if (!this.canMutateVersions() || this.restoringId() !== null) {
+      return;
+    }
+    this.modal.confirm({
+      nzTitle: this.translate.instant(this.t('RESTORE_CONFIRM_TITLE')),
+      nzContent: this.translate.instant(this.t('RESTORE_CONFIRM_BODY'), { name: row.name }),
+      nzOkText: this.translate.instant(this.t('RESTORE_OK')),
+      nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
+      nzDirection: this.modalDirection(),
+      nzOnOk: () =>
+        new Promise<void>((resolve, reject) => {
+          this.restoringId.set(row.id);
+          this.assetContentService
+            .restoreVersion(this.kind, this.slug, row.id)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: () => {
+                this.restoringId.set(null);
+                this.message.success(this.translate.instant(this.t('MESSAGES.RESTORE_SUCCESS')));
+                this.page.set(1);
+                this.loadList();
+                resolve();
+              },
+              error: () => {
+                this.restoringId.set(null);
+                this.message.error(this.translate.instant(this.t('MESSAGES.RESTORE_ERROR')));
+                reject();
+              },
+            });
+        }),
+    });
+  }
+
   /** Download a version's content (CSV of its per-ayah entries, or its file). */
   downloadVersion(row: AssetVersion): void {
     if (this.downloadingId() !== null) {
@@ -350,13 +441,13 @@ export class AssetVersionsManagerComponent implements OnInit {
       .subscribe({
         next: (blob) => {
           const url = URL.createObjectURL(blob);
-          this.triggerDownload(url, `${this.slug}-${row.name}.csv`.replace(/\s+/g, '_'));
+          this.triggerDownload(url, `${this.exportBaseName(row)}.csv`);
           URL.revokeObjectURL(url);
           this.downloadingId.set(null);
         },
         error: () => {
           if (row.file_url) {
-            this.triggerDownload(row.file_url, `${this.slug}-${row.name}`.replace(/\s+/g, '_'));
+            this.triggerDownload(row.file_url, this.exportBaseName(row));
             this.downloadingId.set(null);
             return;
           }
@@ -364,6 +455,12 @@ export class AssetVersionsManagerComponent implements OnInit {
           this.downloadingId.set(null);
         },
       });
+  }
+
+  /** Exported file base name: {english name}-{language}-{version}, sanitized. */
+  private exportBaseName(row: AssetVersion): string {
+    const parts = [this.assetNameEn?.trim() || this.slug, row.language, row.name].filter(Boolean);
+    return parts.join('-').replace(/\s+/g, '_');
   }
 
   private triggerDownload(href: string, filename: string): void {
