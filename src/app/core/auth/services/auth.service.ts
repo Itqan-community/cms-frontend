@@ -845,8 +845,10 @@ export class AuthService {
 
   private readNextQueryParam(): string {
     const tree = this.router.parseUrl(this.router.url);
-    const next = tree.queryParams['next'];
-    return typeof next === 'string' && next.startsWith('/') ? next : ALLAUTH_LOGIN_REDIRECT_URL;
+    const params = tree.queryParams;
+    // Support both the canonical `next` param and the legacy `returnUrl` alias.
+    const raw = params['next'] || params['returnUrl'];
+    return typeof raw === 'string' && raw.startsWith('/') ? raw : ALLAUTH_LOGIN_REDIRECT_URL;
   }
 
   /**
