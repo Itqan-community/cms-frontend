@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { permissionGuard } from '../guards/permission.guard';
+import { unsavedContentGuard } from '../guards/unsaved-content.guard';
 import { PORTAL_PERMISSIONS } from '../constants/portal-permission.constants';
 import { TafsirsLayoutComponent } from './tafsirs-layout.component';
 
@@ -30,6 +31,16 @@ export const tafsirRoutes: Routes = [
         loadComponent: () =>
           import('./components/tafsir-form/tafsir-form.component').then(
             (m) => m.TafsirFormComponent
+          ),
+      },
+      {
+        path: ':slug/edit-content',
+        canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR] })],
+        canDeactivate: [unsavedContentGuard],
+        data: { kind: 'tafsir' },
+        loadComponent: () =>
+          import('../components/asset-content-editor/asset-content-editor.component').then(
+            (m) => m.AssetContentEditorComponent
           ),
       },
       {

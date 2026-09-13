@@ -1,7 +1,12 @@
 <div class="publishers-list admin-list-page">
   <div class="admin-list-header">
     <div class="admin-list-header__text">
-      <h2 class="admin-list-header__title">{{ 'ADMIN.PUBLISHERS.TITLE' | translate }}</h2>
+      <h2 class="admin-list-header__title">
+        {{ 'ADMIN.PUBLISHERS.TITLE' | translate }}
+        @if (!loading()) {
+          <app-admin-title-count [count]="total()" />
+        }
+      </h2>
       <p class="admin-list-header__subtitle">{{ 'ADMIN.PUBLISHERS.SUBTITLE' | translate }}</p>
     </div>
     @if (canCreatePublishers()) {
@@ -141,17 +146,13 @@
   </ng-template>
 
   @if (!loading() && total() > 0) {
-    <div class="admin-pagination">
-      <nz-pagination
-        [nzPageIndex]="page()"
-        [nzTotal]="total()"
-        [nzPageSize]="pageSize()"
-        [nzShowSizeChanger]="true"
-        [nzPageSizeOptions]="[10, 25, 50]"
-        nzShowQuickJumper
-        (nzPageIndexChange)="onPageChange($event)"
-        (nzPageSizeChange)="onPageSizeChange($event)"
-      ></nz-pagination>
-    </div>
+    <app-admin-table-pagination
+      [page]="page()"
+      [pageSize]="pageSize()"
+      [total]="total()"
+      [loading]="loading()"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+    />
   }
 </div>

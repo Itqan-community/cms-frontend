@@ -100,7 +100,7 @@ export class RecitationTracksUploadOrchestratorService {
     assetId: number,
     files: { filename: string; blob: File }[],
     cbs: UploadOrchestratorCallbacks,
-    folderId?: string | number
+    folderId?: number | null
   ): Promise<void> {
     const ac = new AbortController();
     this.activeRunControllers.add(ac);
@@ -122,7 +122,7 @@ export class RecitationTracksUploadOrchestratorService {
     queue: { filename: string; blob: File }[],
     cbs: UploadOrchestratorCallbacks,
     signal: AbortSignal,
-    folderId?: string | number
+    folderId?: number | null
   ): Promise<void> {
     while (queue.length > 0) {
       if (signal.aborted) return;
@@ -148,7 +148,7 @@ export class RecitationTracksUploadOrchestratorService {
     file: { filename: string; blob: File },
     cbs: UploadOrchestratorCallbacks,
     globalSignal: AbortSignal,
-    folderId?: string | number
+    folderId?: number | null
   ): Promise<void> {
     const { filename } = file;
     const previous = this.perFileUploadChain.get(filename);
@@ -171,7 +171,7 @@ export class RecitationTracksUploadOrchestratorService {
     file: { filename: string; blob: File },
     cbs: UploadOrchestratorCallbacks,
     globalSignal: AbortSignal,
-    folderId?: string | number
+    folderId?: number | null
   ): Promise<void> {
     const { filename, blob } = file;
 
@@ -207,6 +207,7 @@ export class RecitationTracksUploadOrchestratorService {
           filename,
           duration_ms: durationMs,
           size_bytes: blob.size,
+          ...(folderId != null ? { folder_id: folderId } : {}),
         })
       );
 
@@ -313,6 +314,7 @@ export class RecitationTracksUploadOrchestratorService {
             parts,
             duration_ms: durationMs,
             size_bytes: blob.size,
+            ...(folderId != null ? { folder_id: folderId } : {}),
           })
         );
 

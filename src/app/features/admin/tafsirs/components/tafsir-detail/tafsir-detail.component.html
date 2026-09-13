@@ -70,6 +70,10 @@
             <ng-icon name="lucideSquarePen" />
             {{ 'ADMIN.COMMON.EDIT' | translate }}
           </button>
+          <button nz-button nzType="default" (click)="onEditContent()">
+            <ng-icon name="lucideLayoutGrid" />
+            {{ 'ADMIN.CONTENT_EDITOR.OPEN_BUTTON' | translate }}
+          </button>
         }
         @if (canDeleteTafsir()) {
           <button nz-button nzDanger (click)="onDelete()">

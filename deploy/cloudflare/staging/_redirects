@@ -1,0 +1,4 @@
+# SPA fallback for Cloudflare Pages staging. API paths are proxied via repo-root `functions/`.
+/portal/invitations/accept   /index.html  200
+/portal/invitations/accept/  /index.html  200
+/*                           /index.html  200

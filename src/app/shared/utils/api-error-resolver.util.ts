@@ -21,6 +21,13 @@ const CMS_ERROR_NAME_I18N: Record<string, string> = {
   invalid_status: 'ADMIN.ACCESS_REQUESTS.MESSAGES.ALREADY_DECIDED',
   restricted_for_tenant_conflict: 'ERRORS.RESTRICTED_FOR_TENANT_CONFLICT',
   tenant_required: 'ERRORS.TENANT_REQUIRED',
+  folder_name_required: 'ADMIN.RECITATIONS.FOLDERS.ERR_NAME_REQUIRED',
+  cannot_delete_default_folder: 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.CANNOT_DELETE_DEFAULT',
+  cannot_hide_default_folder: 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.CANNOT_HIDE_DEFAULT',
+  cannot_set_hidden_folder_as_default:
+    'ADMIN.RECITATIONS.FOLDERS.MESSAGES.CANNOT_SET_HIDDEN_AS_DEFAULT',
+  cannot_unset_default_folder: 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.CANNOT_UNSET_DEFAULT',
+  folder_not_found: 'ADMIN.RECITATIONS.FOLDERS.MESSAGES.NOT_FOUND',
 };
 
 /** django-allauth `errors[].code` values reused on CMS endpoints. */
@@ -117,7 +124,12 @@ export function shouldSuppressGlobalErrorToast(error: unknown): boolean {
   }
 
   const errorName = extractErrorName(error);
-  if (errorName === 'invalid_status' || errorName === 'tenant_required') {
+  if (
+    errorName === 'invalid_status' ||
+    errorName === 'tenant_required' ||
+    // Handled locally by the content editor grid with a friendly popup.
+    errorName === 'no_changes_to_publish'
+  ) {
     return true;
   }
 

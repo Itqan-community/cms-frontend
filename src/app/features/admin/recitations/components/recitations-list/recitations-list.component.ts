@@ -4,7 +4,8 @@ import { RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
-import { NzPaginationModule } from 'ng-zorro-antd/pagination';
+import { AdminTitleCountComponent } from '../../../components/admin-title-count/admin-title-count.component';
+import { AdminTablePaginationComponent } from '../../../components/admin-table-pagination/admin-table-pagination.component';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
@@ -33,7 +34,8 @@ import { AdminHijriYearPipe } from '../../../pipes/admin-hijri-year.pipe';
     DatePipe,
     RouterLink,
     NzButtonModule,
-    NzPaginationModule,
+    AdminTitleCountComponent,
+    AdminTablePaginationComponent,
     NzSpinModule,
     NzTableModule,
     NzTagModule,

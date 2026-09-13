@@ -82,6 +82,23 @@
                 <ng-icon name="lucideAlertTriangle" />
                 {{ 'GALLERY.REPORT_ISSUE.BUTTON' | translate }}
               </button>
+              @if ((asset()!.available_languages?.length ?? 0) > 1) {
+                <label class="download-language-label" for="download-language">
+                  {{ 'GALLERY.DOWNLOAD_LANGUAGE' | translate }}
+                </label>
+                <nz-select
+                  id="download-language"
+                  class="download-language-select"
+                  nzBlock
+                  [ngModel]="selectedLanguage()"
+                  (ngModelChange)="selectedLanguage.set($event)"
+                  [nzDisabled]="isDownloading()"
+                >
+                  @for (lang of asset()!.available_languages; track lang) {
+                    <nz-option [nzValue]="lang" [nzLabel]="languageName(lang)"></nz-option>
+                  }
+                </nz-select>
+              }
               <button
                 nz-button
                 nzType="primary"

@@ -29,4 +29,5 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
-# SPA fallback + staging API proxies live in `dist/browser/_redirects` (see `deploy/netlify/*`).
+# SPA fallback in `dist/browser/_redirects` (see `deploy/netlify/production`).
+# Staging on Cloudflare Pages proxies `/cms-api`, `/accounts`, `/portal` via repo-root `functions/`.

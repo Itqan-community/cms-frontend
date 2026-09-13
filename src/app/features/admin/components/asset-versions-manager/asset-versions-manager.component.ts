@@ -1,7 +1,4 @@
-import {
-  DatePipe,
-} from '@angular/common';
-
+import { DatePipe } from '@angular/common';
 import {
   HttpClient,
   HttpErrorResponse,
@@ -16,9 +13,7 @@ import {
   signal,
 } from '@angular/core';
 
-import {
-  takeUntilDestroyed,
-} from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import {
   FormBuilder,
@@ -26,51 +21,28 @@ import {
   Validators,
 } from '@angular/forms';
 
-import {
-  NgIcon,
-} from '@ng-icons/core';
+import { NgIcon } from '@ng-icons/core';
 
 import {
   TranslateModule,
   TranslateService,
 } from '@ngx-translate/core';
 
-import {
-  NzButtonModule,
-} from 'ng-zorro-antd/button';
-
-import {
-  NzFormModule,
-} from 'ng-zorro-antd/form';
-
-import {
-  NzInputModule,
-} from 'ng-zorro-antd/input';
-
-import {
-  NzMessageService,
-} from 'ng-zorro-antd/message';
+import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzInputModule } from 'ng-zorro-antd/input';
+import { NzMessageService } from 'ng-zorro-antd/message';
 
 import {
   NzModalModule,
   NzModalService,
 } from 'ng-zorro-antd/modal';
 
-import {
-  NzPaginationModule,
-} from 'ng-zorro-antd/pagination';
+import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 
-import {
-  NzSpinModule,
-} from 'ng-zorro-antd/spin';
-
-import {
-  NzTableModule,
-} from 'ng-zorro-antd/table';
-
-import {
-  NzToolTipModule,
-} from 'ng-zorro-antd/tooltip';
+import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzTableModule } from 'ng-zorro-antd/table';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 
 import {
   Subject,
@@ -81,32 +53,23 @@ import {
   takeUntil,
 } from 'rxjs';
 
-import {
-  PORTAL_PERMISSIONS,
-} from '../../constants/portal-permission.constants';
+import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
 
 import type {
   AssetVersion,
   AssetVersionParentKind,
 } from '../../models/asset-versions.models';
 
-import {
-  AdminAuthService,
-} from '../../services/admin-auth.service';
+import { AdminAuthService } from '../../services/admin-auth.service';
+import { AssetContentService } from '../../services/asset-content.service';
+import { AssetVersionsService } from '../../services/asset-versions.service';
 
-import {
-  AssetVersionsService,
-} from '../../services/asset-versions.service';
-
-import {
-  UniversalAssetPreviewerComponent,
-} from '../universal-asset-previewer/universal-asset-previewer.component';
+import { UniversalAssetPreviewerComponent } from '../universal-asset-previewer/universal-asset-previewer.component';
 
 const DEFAULT_PAGE_SIZE = 10;
 
 @Component({
-  selector:
-    'app-asset-versions-manager',
+  selector: 'app-asset-versions-manager',
 
   standalone: true,
 
@@ -126,20 +89,20 @@ const DEFAULT_PAGE_SIZE = 10;
     UniversalAssetPreviewerComponent,
   ],
 
-  templateUrl:
-    './asset-versions-manager.component.html',
+  templateUrl: './asset-versions-manager.component.html',
 
-  styleUrl:
-    './asset-versions-manager.component.less',
+  styleUrl: './asset-versions-manager.component.less',
 })
 export class AssetVersionsManagerComponent
   implements OnInit
 {
-  private readonly fb =
-    inject(FormBuilder);
+  private readonly fb = inject(FormBuilder);
 
   private readonly assetVersionsService =
     inject(AssetVersionsService);
+
+  private readonly assetContentService =
+    inject(AssetContentService);
 
   private readonly message =
     inject(NzMessageService);
@@ -197,6 +160,9 @@ export class AssetVersionsManagerComponent
 
   readonly saving =
     signal(false);
+
+  readonly downloadingId =
+    signal<number | null>(null);
 
   readonly searchTerm =
     signal('');
@@ -1006,6 +972,92 @@ export class AssetVersionsManagerComponent
     });
   }
 
+  /** Download a version's content (CSV of its per-ayah entries, or its file). */
+  downloadVersion(
+    row: AssetVersion,
+  ): void {
+    if (this.downloadingId() !== null) {
+      return;
+    }
+
+    this.downloadingId.set(
+      row.id,
+    );
+
+    this.assetContentService
+      .exportVersion(
+        this.kind,
+        this.slug,
+        row.id,
+      )
+      .pipe(
+        takeUntilDestroyed(
+          this.destroyRef,
+        ),
+      )
+      .subscribe({
+        next: (blob) => {
+          const url =
+            URL.createObjectURL(blob);
+
+          this.triggerDownload(
+            url,
+            `${this.slug}-${row.name}.csv`.replace(
+              /\s+/g,
+              '_',
+            ),
+          );
+
+          URL.revokeObjectURL(url);
+
+          this.downloadingId.set(
+            null,
+          );
+        },
+
+        error: () => {
+          if (row.file_url) {
+            this.triggerDownload(
+              row.file_url,
+              `${this.slug}-${row.name}`.replace(
+                /\s+/g,
+                '_',
+              ),
+            );
+
+            this.downloadingId.set(
+              null,
+            );
+
+            return;
+          }
+
+          this.message.error(
+            this.translate.instant(
+              'ADMIN.CONTENT_EDITOR.ERRORS.GENERIC',
+            ),
+          );
+
+          this.downloadingId.set(
+            null,
+          );
+        },
+      });
+  }
+
+  private triggerDownload(
+    href: string,
+    filename: string,
+  ): void {
+    const anchor =
+      document.createElement('a');
+
+    anchor.href = href;
+    anchor.download = filename;
+    anchor.rel = 'noopener';
+    anchor.click();
+  }
+
   formatBytes(
     n:
       | number
@@ -1036,8 +1088,7 @@ export class AssetVersionsManagerComponent
 
     return `${(
       n /
-      (1024 *
-        1024)
+      (1024 * 1024)
     ).toFixed(2)} MB`;
   }
 

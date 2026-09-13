@@ -2,7 +2,7 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
-import { AdminSidebarComponent } from './admin-sidebar.component';
+import { AdminSidebarComponent, TAB_HOME } from './admin-sidebar.component';
 import { AdminAuthService } from '../services/admin-auth.service';
 import { AdminTenantService } from '../services/admin-tenant.service';
 
@@ -97,5 +97,18 @@ describe('AdminSidebarComponent', () => {
         description: '',
       })
     ).toEqual(['/admin']);
+  });
+
+  it('uses exact router matching only for the home tab', () => {
+    expect(component.shouldMatchRouterExact(TAB_HOME)).toBeTrue();
+    expect(
+      component.shouldMatchRouterExact({
+        id: 'recitations',
+        path: 'recitations',
+        label: '',
+        icon: '',
+        description: '',
+      })
+    ).toBeFalse();
   });
 });

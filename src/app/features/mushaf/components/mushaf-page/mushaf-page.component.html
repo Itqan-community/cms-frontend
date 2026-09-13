@@ -1,0 +1,29 @@
+@if (loading()) {
+  <div class="mushaf-page__skeleton"></div>
+} @else if (errorState()) {
+  <app-state-message
+    icon="lucideAlertCircle"
+    iconVariant="error"
+    [title]="'UI.SOMETHING_WENT_WRONG' | translate"
+    [message]="'ERRORS.SERVER_ERROR' | translate"
+    [actionLabel]="'UI.TRY_AGAIN' | translate"
+    actionIcon="lucideRotateCw"
+    (actionClick)="retry()"
+  />
+}
+
+<!-- Kept in the DOM (hidden while loading) so the SVG host ref is always available. -->
+<div
+  #svgHost
+  class="mushaf-page__svg"
+  [class.mushaf-page__svg--hidden]="loading() || errorState()"
+  [innerHTML]="safeSvg()"
+></div>
+
+@if (!loading() && !errorState()) {
+  <p class="mushaf-page__attribution">
+    <a href="https://github.com/quranpedia/quran-svg" target="_blank" rel="noopener noreferrer">
+      {{ 'MUSHAF.ATTRIBUTION' | translate }}
+    </a>
+  </p>
+}

@@ -11,35 +11,37 @@
       <div class="mobile-menu__nav">
         <ul class="mobile-menu__links">
           @for (link of links(); track link.link) {
-            <li class="mobile-menu__link-item">
-              @if (!link.isExternal) {
-                <a
-                  [routerLink]="link.link"
-                  routerLinkActive="mobile-menu__link--active"
-                  class="mobile-menu__link"
-                  [ngClass]="{ 'mobile-menu__link--disabled': link.disabled }"
-                  (click)="close()"
-                >
-                  {{ link.label | translate }}
-                  @if (link.icon) {
-                    <ng-icon [name]="link.icon" class="mobile-menu__link-icon" />
-                  }
-                </a>
-              } @else {
-                <a
-                  [href]="link.link"
-                  target="_blank"
-                  class="mobile-menu__link"
-                  [ngClass]="{ 'mobile-menu__link--disabled': link.disabled }"
-                  (click)="close()"
-                >
-                  {{ link.label | translate }}
-                  @if (link.icon) {
-                    <ng-icon [name]="link.icon" class="mobile-menu__link-icon" />
-                  }
-                </a>
-              }
-            </li>
+            @if (!link.hidden) {
+              <li class="mobile-menu__link-item">
+                @if (!link.isExternal) {
+                  <a
+                    [routerLink]="link.link"
+                    routerLinkActive="mobile-menu__link--active"
+                    class="mobile-menu__link"
+                    [ngClass]="{ 'mobile-menu__link--disabled': link.disabled }"
+                    (click)="close()"
+                  >
+                    {{ link.label | translate }}
+                    @if (link.icon) {
+                      <ng-icon [name]="link.icon" class="mobile-menu__link-icon" />
+                    }
+                  </a>
+                } @else {
+                  <a
+                    [href]="link.link"
+                    target="_blank"
+                    class="mobile-menu__link"
+                    [ngClass]="{ 'mobile-menu__link--disabled': link.disabled }"
+                    (click)="close()"
+                  >
+                    {{ link.label | translate }}
+                    @if (link.icon) {
+                      <ng-icon [name]="link.icon" class="mobile-menu__link-icon" />
+                    }
+                  </a>
+                }
+              </li>
+            }
           }
         </ul>
       </div>

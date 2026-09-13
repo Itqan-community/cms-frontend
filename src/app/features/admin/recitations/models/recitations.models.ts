@@ -1,4 +1,5 @@
 import { PublisherRef } from '../../tafsirs/models/tafsirs.models';
+import type { RecitationDetailFolderRef } from './recitation-folders.models';
 
 export enum MaddLevel {
   TWASSUT = 'twassut',
@@ -8,26 +9,6 @@ export enum MaddLevel {
 export enum MeemBehavior {
   SILAH = 'silah',
   SKOUN = 'skoun',
-}
-
-export interface RecitationFolder {
-  id: string;
-  name: string;
-  isDefault: boolean;
-  trackCount: number;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface RecitationFolderApiRow {
-  id: string | number;
-  name: string;
-  is_default?: boolean;
-  isDefault?: boolean;
-  track_count?: number;
-  trackCount?: number;
-  created_at?: string;
-  updated_at?: string;
 }
 
 export interface MinimalReciter {
@@ -84,6 +65,8 @@ export interface RecitationDetails {
   year: number | null;
   license: string;
   ayah_timings_url?: string | null;
+  /** Default-folder export only; per-folder URLs are not on this field. */
+  folders?: RecitationDetailFolderRef[];
   is_open_access: boolean;
   restricted_for_tenant: boolean;
   created_at: string;

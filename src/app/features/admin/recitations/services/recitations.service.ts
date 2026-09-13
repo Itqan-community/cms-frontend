@@ -1,7 +1,11 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, catchError, map, of } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import type {
+  RecitationFolderOut,
+  RecitationFolderWriteIn,
+} from '../models/recitation-folders.models';
 import type { RecitationTimingUploadOut } from '../models/recitation-timings.models';
 import type {
   RecitationSurahTrackListItem,
@@ -21,8 +25,6 @@ import type {
 import {
   NamedId,
   RecitationDetails,
-  RecitationFolder,
-  RecitationFolderApiRow,
   RecitationFormValue,
   RecitationListFilters,
   RecitationsListResponse,
@@ -112,75 +114,11 @@ export class RecitationsService {
     return this.http.delete<void>(`${this.apiUrl}${slug}/`);
   }
 
-  // --- Recitation Folders ---
-
-  getFolders(recitationSlug: string): Observable<RecitationFolder[]> {
-    const url = `${this.portalBaseUrl}/recitations/${encodeURIComponent(recitationSlug)}/folders/`;
-    return this.http
-      .get<{ results?: RecitationFolderApiRow[] } | RecitationFolderApiRow[]>(url)
-      .pipe(
-        map((res) => {
-          const rows = Array.isArray(res) ? res : (res?.results ?? []);
-          if (!rows.length) {
-            return [{ id: 'default', name: 'Main', isDefault: true, trackCount: 0 }];
-          }
-          return rows.map((row) => this.mapFolderRow(row));
-        }),
-        catchError(() => of([{ id: 'default', name: 'Main', isDefault: true, trackCount: 0 }]))
-      );
-  }
-
-  createFolder(
-    recitationSlug: string,
-    name: string,
-    isDefault = false
-  ): Observable<RecitationFolder> {
-    const url = `${this.portalBaseUrl}/recitations/${encodeURIComponent(recitationSlug)}/folders/`;
-    return this.http
-      .post<RecitationFolderApiRow>(url, { name, is_default: isDefault })
-      .pipe(map((row) => this.mapFolderRow(row)));
-  }
-
-  updateFolder(
-    recitationSlug: string,
-    folderId: string,
-    data: { name?: string; is_default?: boolean }
-  ): Observable<RecitationFolder> {
-    const url = `${this.portalBaseUrl}/recitations/${encodeURIComponent(recitationSlug)}/folders/${encodeURIComponent(folderId)}/`;
-    return this.http
-      .patch<RecitationFolderApiRow>(url, data)
-      .pipe(map((row) => this.mapFolderRow(row)));
-  }
-
-  setDefaultFolder(recitationSlug: string, folderId: string): Observable<RecitationFolder> {
-    const url = `${this.portalBaseUrl}/recitations/${encodeURIComponent(recitationSlug)}/folders/${encodeURIComponent(folderId)}/set-default/`;
-    return this.http.post<RecitationFolderApiRow>(url, {}).pipe(
-      map((row) => this.mapFolderRow(row)),
-      catchError(() => this.updateFolder(recitationSlug, folderId, { is_default: true }))
-    );
-  }
-
-  deleteFolder(recitationSlug: string, folderId: string): Observable<void> {
-    const url = `${this.portalBaseUrl}/recitations/${encodeURIComponent(recitationSlug)}/folders/${encodeURIComponent(folderId)}/`;
-    return this.http.delete<void>(url);
-  }
-
-  private mapFolderRow(row: RecitationFolderApiRow): RecitationFolder {
-    return {
-      id: String(row.id),
-      name: row.name,
-      isDefault: Boolean(row.is_default ?? row.isDefault),
-      trackCount: row.track_count ?? row.trackCount ?? 0,
-      created_at: row.created_at,
-      updated_at: row.updated_at,
-    };
-  }
-
-  /** POST /portal/timing/upload/ — multipart: asset_id, folder_id, files[] */
+  /** POST /portal/timing/upload/ — multipart: asset_id, files[], optional folder_id */
   recitationTimingUpload(
     assetId: number,
     files: File[],
-    folderId?: string | number | null
+    folderId?: number | null
   ): Observable<RecitationTimingUploadOut> {
     const formData = new FormData();
     formData.append('asset_id', String(assetId));
@@ -194,6 +132,34 @@ export class RecitationsService {
       `${this.portalBaseUrl}/timing/upload/`,
       formData
     );
+  }
+
+  // --- Recitation folders (portal) ---
+
+  recitationFoldersList(recitationSlug: string): Observable<RecitationFolderOut[]> {
+    return this.http.get<RecitationFolderOut[]>(this.recitationFoldersUrl(recitationSlug));
+  }
+
+  recitationFolderCreate(
+    recitationSlug: string,
+    body: RecitationFolderWriteIn
+  ): Observable<RecitationFolderOut> {
+    return this.http.post<RecitationFolderOut>(this.recitationFoldersUrl(recitationSlug), body);
+  }
+
+  recitationFolderPatch(
+    recitationSlug: string,
+    folderSlug: string,
+    body: RecitationFolderWriteIn
+  ): Observable<RecitationFolderOut> {
+    return this.http.patch<RecitationFolderOut>(
+      this.recitationFolderItemUrl(recitationSlug, folderSlug),
+      body
+    );
+  }
+
+  recitationFolderDelete(recitationSlug: string, folderSlug: string): Observable<void> {
+    return this.http.delete<void>(this.recitationFolderItemUrl(recitationSlug, folderSlug));
   }
 
   // --- Recitation surah tracks (portal) ---
@@ -248,23 +214,23 @@ export class RecitationsService {
   }
 
   /**
-   * GET /portal/recitations/{slug}/recitation-tracks/?folder_id=&page=&page_size=
+   * GET /portal/recitations/{slug}/recitation-tracks/?folder=&page=&page_size=
    * (Previously numeric asset id in path; backend accepts recitation slug in the same segment.)
    */
   recitationTracksList(params: {
     recitation_slug: string;
     /** Recitation id — upload/delete APIs still use this as `asset_id`; list rows keep it for UI. */
     asset_id: number;
-    folder_id?: string | number | null;
     page?: number;
     page_size?: number;
+    /** Folder slug or localized name. Omit to list the default folder. */
+    folder?: string;
   }): Observable<{ results: RecitationSurahTrackListItem[]; count: number }> {
     let httpParams = new HttpParams()
       .set('page', (params.page ?? 1).toString())
       .set('page_size', (params.page_size ?? 10).toString());
-
-    if (params.folder_id != null) {
-      httpParams = httpParams.set('folder_id', params.folder_id.toString());
+    if (params.folder) {
+      httpParams = httpParams.set('folder', params.folder);
     }
 
     const url = `${this.portalBaseUrl}/recitations/${encodeURIComponent(params.recitation_slug)}/recitation-tracks/`;
@@ -277,6 +243,14 @@ export class RecitationsService {
           count: res.count,
         }))
       );
+  }
+
+  private recitationFoldersUrl(recitationSlug: string): string {
+    return `${this.portalBaseUrl}/recitations/${encodeURIComponent(recitationSlug)}/folders/`;
+  }
+
+  private recitationFolderItemUrl(recitationSlug: string, folderSlug: string): string {
+    return `${this.recitationFoldersUrl(recitationSlug)}${encodeURIComponent(folderSlug)}/`;
   }
 
   private mapAssetTrackRow(row: RecitationTrackOut, assetId: number): RecitationSurahTrackListItem {

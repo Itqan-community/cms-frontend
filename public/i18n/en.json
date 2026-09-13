@@ -510,6 +510,7 @@
     "PUBLISHER_DASHBOARD": "Publisher Dashboard",
     "ASSET_REQUEST_FORM": "Add Quranic Content to ITQAN",
     "ADMIN_PORTAL": "Admin Portal",
+    "MUSHAF": "Quran",
     "RECITERS": "Reciters"
   },
   "HOME": {
@@ -579,7 +580,8 @@
       "ERROR": "Could not submit issue report",
       "FORBIDDEN": "You do not have permission to submit this report",
       "LOGIN_REQUIRED": "Please log in to report an issue"
-    }
+    },
+    "DOWNLOAD_LANGUAGE": "Download language"
   },
   "UI": {
     "FILTERS": "Filters",
@@ -786,6 +788,68 @@
       "LABEL": "Home",
       "TITLE": "Overview",
       "SUBTITLE": "Manage platform content and settings"
+    },
+    "CONTENT_EDITOR": {
+      "TITLE": "Edit content",
+      "HINT": "Edit the text ayah by ayah. Changes autosave to a draft; publish to create a new version. Tip: select a Text cell and paste (Ctrl+V) CSV/spreadsheet rows to fill cells downward.",
+      "BACK": "Back to details",
+      "SAVE": "Save & publish",
+      "SAVE_DRAFT": "Save draft",
+      "DISCARD": "Discard",
+      "UNDO": "Undo",
+      "REDO": "Redo",
+      "FILTER_ALL": "All surahs",
+      "SAVING": "Saving…",
+      "UNSAVED": "Unsaved changes",
+      "ALL_SAVED": "All changes saved to draft",
+      "OPEN_BUTTON": "Edit content",
+      "COLUMNS": {
+        "SURA": "Sura",
+        "AYA": "Aya",
+        "SURAH": "Surah",
+        "UTHMANI": "Ayah (Uthmani)",
+        "TEXT": "Text",
+        "SOURCE": "Source"
+      },
+      "LANGUAGE": {
+        "LABEL": "Editing language",
+        "SOURCE": "Source",
+        "ADD": "Add language",
+        "ADD_TITLE": "Add a translation language",
+        "ADD_CONFIRM": "Add",
+        "ADD_CANCEL": "Cancel",
+        "PICK": "Choose a language"
+      },
+      "MESSAGES": {
+        "PUBLISHED": "New version published",
+        "DRAFT_SAVED": "Draft saved"
+      },
+      "PASTE": {
+        "SELECT_EDITABLE": "Select a Text cell first, then paste.",
+        "APPLIED": "Pasted into {{count}} cell(s)."
+      },
+      "COPY": {
+        "BUTTON": "Copy to CSV",
+        "COPIED": "Copied {{count}} row(s) to the clipboard as CSV.",
+        "NONE_SELECTED": "Select one or more rows first.",
+        "FAILED": "Could not copy to the clipboard."
+      },
+      "LEAVE": {
+        "CONFIRM_TITLE": "Discard unsaved changes?",
+        "CONFIRM_BODY": "Your draft edits will be discarded and no new version will be created.",
+        "OK": "Discard changes",
+        "CANCEL": "Keep editing"
+      },
+      "ERRORS": {
+        "GENERIC": "Something went wrong. Please try again.",
+        "OK": "Got it",
+        "NO_CHANGES_TO_PUBLISH_TITLE": "No changes to publish",
+        "NO_CHANGES_TO_PUBLISH": "You haven't edited anything in this draft yet. Make a change first, then save and publish a new version.",
+        "VERSION_NOT_EDITABLE": "This version can no longer be edited.",
+        "TRANSLATION_NOT_FOUND": "Translation not found.",
+        "TAFSIR_NOT_FOUND": "Tafsir not found.",
+        "CONTENT_FILE_UNPARSEABLE": "The uploaded file could not be parsed."
+      }
     },
     "COMMON": {
       "ADD": "Add",
@@ -1295,6 +1359,59 @@
         "DESC_AR": "Description (Arabic)",
         "DESC_EN": "Description (EN)"
       },
+      "FOLDERS": {
+        "ADD": "Add folder",
+        "SET_VARIANT": "Set quality and effects",
+        "CHANGE_VARIANT": "Change quality and effects",
+        "ACTIONS": "Folder actions",
+        "DEFAULT_BADGE": "Default",
+        "HIDDEN_BADGE": "Hidden",
+        "HIDDEN_HINT": "Hidden from the public API — not listed and not served.",
+        "HIDE_FROM_PUBLIC": "Hide from public",
+        "SHOW_PUBLICLY": "Show publicly",
+        "SET_AS_DEFAULT": "Set as default",
+        "SET_DEFAULT_CONFIRM_TITLE": "Set this folder as default?",
+        "SET_DEFAULT_CONFIRM_BODY": "“{{name}}” will become the folder tenant sites and the public API use when no ?folder= is specified. Slugs on existing folders stay unchanged.",
+        "ERR_NAME_REQUIRED": "The folder name could not be determined. Choose a quality and try again.",
+        "MODAL": {
+          "TITLE_CREATE": "Add folder",
+          "TITLE_EDIT": "Quality and effects",
+          "SUBMIT_CREATE": "Add",
+          "SUBMIT_EDIT": "Save",
+          "HINT": "A folder holds the same recitation re-rendered at one quality. Its name is set from your choices below.",
+          "DEFAULT_SLUG_HINT": "This folder's public link always uses ?folder=default; only the display name will change.",
+          "QUALITY_LABEL": "Audio quality",
+          "QUALITY_PLACEHOLDER": "Choose a quality",
+          "QUALITY_ORIGINAL": "As uploaded",
+          "QUALITY_KBPS": "{{kbps}} kbps MP3",
+          "EFFECTS_LABEL": "Sound",
+          "EFFECTS_OFF": "Plain",
+          "EFFECTS_ON": "With effects",
+          "ALREADY_ADDED": "already added",
+          "PREVIEW_LABEL": "Folder name",
+          "ERR_VARIANT_TAKEN": "This recitation already has a folder for that quality and sound. Pick a different combination."
+        },
+        "DELETE": {
+          "CONFIRM_TITLE": "Delete this folder?",
+          "CONFIRM_BODY": "This deletes “{{name}}” and all of its audio tracks and ayah timings ({{count}} track(s)). This cannot be undone.",
+          "OK": "Delete folder"
+        },
+        "MESSAGES": {
+          "CREATE_OK": "Folder created.",
+          "RENAME_OK": "Folder updated.",
+          "DELETE_OK": "Folder deleted.",
+          "HIDDEN_OK": "Folder hidden from the public API.",
+          "SHOWN_OK": "Folder is now public.",
+          "SET_DEFAULT_OK": "Default folder updated.",
+          "SAVE_ERROR": "Could not save the folder. Try again.",
+          "DELETE_ERROR": "Could not delete the folder. Try again.",
+          "CANNOT_DELETE_DEFAULT": "The default folder cannot be deleted.",
+          "CANNOT_HIDE_DEFAULT": "The default folder cannot be hidden.",
+          "CANNOT_SET_HIDDEN_AS_DEFAULT": "Show this folder publicly before setting it as default.",
+          "CANNOT_UNSET_DEFAULT": "Choose another folder as default instead of clearing the default flag.",
+          "NOT_FOUND": "Folder not found."
+        }
+      },
       "TRACKS": {
         "SECTION_TITLE": "Surah audio tracks",
         "CHOOSE_FILES": "Choose MP3 files",
@@ -1325,6 +1442,7 @@
         "UPLOAD_MIXED_CONFIRM_CONTENT": "{{ignored}} file(s) will be ignored (invalid or skipped). {{valid}} file(s) will be uploaded. Continue?",
         "UPLOAD_MIXED_CONFIRM_OK": "Upload",
         "LIST_TITLE": "Uploaded surah audio files",
+        "UPLOAD_QUEUE_TITLE": "Pending uploads",
         "NO_AUDIO_URL": "No playback URL",
         "DELETE_TRACK": "Delete audio file",
         "EMPTY_TITLE": "No audio files yet",
@@ -1398,30 +1516,6 @@
         "CREATE_SUCCESS": "Recitation added successfully",
         "UPDATE_SUCCESS": "Recitation updated successfully",
         "DELETE_SUCCESS": "Recitation deleted successfully"
-      },
-      "FOLDERS": {
-        "TITLE": "Folders",
-        "ADD_FOLDER": "Add New Folder",
-        "RENAME_FOLDER": "Rename Folder",
-        "DELETE_FOLDER": "Delete Folder",
-        "SET_DEFAULT": "Set as Default",
-        "DEFAULT_TAG": "Default Folder",
-        "ACTIONS": "Folder Actions",
-        "CREATE_TITLE": "Add New Folder",
-        "CREATE_LABEL": "Folder Name",
-        "CREATE_PLACEHOLDER": "Enter folder name (e.g. Hafs 1442)",
-        "RENAME_TITLE": "Rename Folder",
-        "RENAME_LABEL": "New Folder Name",
-        "DELETE_CONFIRM_TITLE": "Delete Folder",
-        "DELETE_CONFIRM_BODY": "Are you sure you want to delete folder \"{{name}}\"? All tracks and timings in this folder will be deleted.",
-        "CANNOT_DELETE_LAST": "Cannot delete the last remaining folder.",
-        "MESSAGES": {
-          "CREATE_SUCCESS": "Folder added successfully",
-          "RENAME_SUCCESS": "Folder renamed successfully",
-          "DELETE_SUCCESS": "Folder deleted successfully",
-          "SET_DEFAULT_SUCCESS": "Folder set as default successfully",
-          "ERROR": "An error occurred while performing the operation"
-        }
       }
     },
     "RECITERS": {
@@ -2260,6 +2354,19 @@
     "TOP_ENTITIES": "Top entities",
     "NO_DATA": "No data for the selected period",
     "ERROR_UNAVAILABLE": "Usage stats are temporarily unavailable. Please try again later."
+  },
+  "MUSHAF": {
+    "TITLE": "The Noble Quran",
+    "INDEX_SUBTITLE": "Browse the suras and read the mushaf page by page",
+    "AYAHS": "ayahs",
+    "AYAH": "Ayah",
+    "MECCAN": "Meccan",
+    "MEDINAN": "Medinan",
+    "BACK_TO_INDEX": "Back to suras",
+    "SURA_NOT_FOUND": "Sura not found",
+    "AYAH_NOT_FOUND": "Ayah not found",
+    "EDITION": "Edition",
+    "ATTRIBUTION": "Mushaf rendering by Quranpedia (quran-svg)"
   },
   "RECITERS": {
     "PAGE_TITLE": "Quran Reciters",

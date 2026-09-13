@@ -1,7 +1,12 @@
 <div class="members-list admin-list-page">
   <div class="admin-list-header">
     <div class="admin-list-header__text">
-      <h2 class="admin-list-header__title">{{ 'ADMIN.MEMBERS.TITLE' | translate }}</h2>
+      <h2 class="admin-list-header__title">
+        {{ 'ADMIN.MEMBERS.TITLE' | translate }}
+        @if (!loading()) {
+          <app-admin-title-count [count]="total()" />
+        }
+      </h2>
       <p class="admin-list-header__subtitle">{{ 'ADMIN.MEMBERS.SUBTITLE' | translate }}</p>
     </div>
     @if (canInvite()) {
@@ -143,18 +148,14 @@
   </ng-template>
 
   @if (!loading() && total() > 0) {
-    <div class="admin-pagination">
-      <nz-pagination
-        [nzPageIndex]="page()"
-        [nzTotal]="total()"
-        [nzPageSize]="pageSize()"
-        [nzShowSizeChanger]="true"
-        [nzPageSizeOptions]="[10, 25, 50]"
-        nzShowQuickJumper
-        (nzPageIndexChange)="onPageChange($event)"
-        (nzPageSizeChange)="onPageSizeChange($event)"
-      ></nz-pagination>
-    </div>
+    <app-admin-table-pagination
+      [page]="page()"
+      [pageSize]="pageSize()"
+      [total]="total()"
+      [loading]="loading()"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+    />
   }
 
   <nz-modal

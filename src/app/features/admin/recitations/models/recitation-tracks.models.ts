@@ -10,8 +10,8 @@ export type RecitationTrackValidateUploadStatus = 'valid' | 'invalid';
 /** POST /portal/recitation-tracks/validate-upload/ */
 export interface RecitationTrackValidateUploadIn {
   asset_id: number;
-  folder_id?: string | number;
   filenames: string[];
+  folder_id?: number | null;
 }
 
 export interface RecitationTrackValidateFileOut {
@@ -21,6 +21,7 @@ export interface RecitationTrackValidateFileOut {
 
 export interface RecitationTrackValidateUploadOut {
   asset_id: number;
+  folder_id?: number;
   status: RecitationTrackValidateUploadStatus;
   message: string;
   files: RecitationTrackValidateFileOut[];
@@ -29,17 +30,16 @@ export interface RecitationTrackValidateUploadOut {
 /** DELETE /portal/recitation-tracks/ */
 export interface RecitationTrackDeleteTracksIn {
   asset_id: number;
-  folder_id?: string | number;
   track_ids: number[];
 }
 
 /** POST /portal/recitation-tracks/uploads/start/ */
 export interface RecitationTrackUploadStartIn {
   asset_id: number;
-  folder_id?: string | number;
   filename: string;
   duration_ms?: number | null;
   size_bytes?: number | null;
+  folder_id?: number | null;
 }
 
 export interface RecitationTrackUploadStartOut {
@@ -47,6 +47,7 @@ export interface RecitationTrackUploadStartOut {
   upload_id: string;
   content_type: string;
   surah_number: number;
+  folder_id?: number;
 }
 
 /** POST /portal/recitation-tracks/uploads/sign-part/ */
@@ -69,18 +70,19 @@ export interface RecitationTrackUploadFinishPart {
 /** POST /portal/recitation-tracks/uploads/finish/ */
 export interface RecitationTrackUploadFinishIn {
   asset_id: number;
-  folder_id?: string | number;
   filename: string;
   key: string;
   upload_id: string;
   parts: RecitationTrackUploadFinishPart[];
   duration_ms?: number | null;
   size_bytes?: number | null;
+  folder_id?: number | null;
 }
 
 export interface RecitationTrackUploadFinishOut {
   track_id: number;
   asset_id: number;
+  folder_id?: number;
   surah_number: number;
   size_bytes: number;
   finished_at: string;
