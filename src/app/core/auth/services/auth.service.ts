@@ -848,7 +848,12 @@ export class AuthService {
     const params = tree.queryParams;
     // Support both the canonical `next` param and the legacy `returnUrl` alias.
     const raw = params['next'] || params['returnUrl'];
-    return typeof raw === 'string' && raw.startsWith('/') ? raw : ALLAUTH_LOGIN_REDIRECT_URL;
+    return typeof raw === 'string' &&
+      raw.startsWith('/') &&
+      !raw.startsWith('//') &&
+      !raw.startsWith('/\\')
+      ? raw
+      : ALLAUTH_LOGIN_REDIRECT_URL;
   }
 
   /**
