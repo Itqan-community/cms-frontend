@@ -762,6 +762,26 @@
     }
   },
   "ADMIN": {
+    "PREVIEW": {
+  "LOADING": "Loading preview…",
+  "AUDIO_ERROR": "Unable to load this audio file.",
+  "OPEN_AUDIO": "Open audio",
+  "IMAGE_ERROR": "Unable to display this image.",
+  "OPEN_IMAGE": "Open image",
+  "IMAGE_ZOOM_CONTROLS": "Image zoom controls",
+  "ZOOM_OUT": "Zoom out",
+  "RESET_ZOOM": "Reset zoom",
+  "ZOOM_IN": "Zoom in",
+  "PDF_ERROR": "Unable to display this PDF.",
+  "OPEN_PDF": "Open PDF in a new tab",
+  "FILE_ERROR": "Unable to load this file for preview.",
+  "OPEN_FILE": "Open file",
+  "NO_CSV_DATA": "No CSV data available.",
+  "TEXT_DIFF": "Text diff",
+  "UNSUPPORTED": "This file type is not supported for preview.",
+  "OPEN_DOWNLOAD": "Open / Download file",
+  "AUDIO_ARIA": "Audio preview"
+},
     "HOME": {
       "LABEL": "Home",
       "TITLE": "Overview",

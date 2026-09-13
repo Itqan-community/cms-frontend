@@ -1,0 +1,481 @@
+<div class="asset-previewer">
+
+  <div class="preview-header">
+    <h3>{{ fileName() }}</h3>
+  </div>
+
+  @if (previewType() === 'audio') {
+
+    <div class="preview-content audio-preview">
+
+      @if (binaryLoading()) {
+
+        <div
+          class="preview-message"
+          aria-live="polite"
+        >
+          <span>
+            Loading preview...
+          </span>
+        </div>
+
+      } @else if (binaryError()) {
+
+        <div
+          class="preview-message preview-message--error"
+        >
+          <p>
+            Unable to load this audio file.
+          </p>
+
+          <a
+            [href]="fileUrl()"
+            target="_blank"
+            rel="noopener"
+          >
+            Open audio
+          </a>
+        </div>
+
+      } @else {
+
+        <audio
+          controls
+          preload="metadata"
+          [src]="previewUrl()"
+          aria-label="Audio preview"
+        ></audio>
+
+      }
+
+    </div>
+
+  } @else if (previewType() === 'image') {
+
+    <div class="preview-content image-preview">
+
+      @if (binaryLoading()) {
+
+        <div
+          class="preview-message"
+          aria-live="polite"
+        >
+          <span>
+            Loading preview...
+          </span>
+        </div>
+
+      } @else if (imageError() || binaryError()) {
+
+        <div
+          class="preview-message preview-message--error"
+        >
+
+          <p>
+            Unable to display this image.
+          </p>
+
+          <a
+            [href]="fileUrl()"
+            target="_blank"
+            rel="noopener"
+          >
+            Open image
+          </a>
+
+        </div>
+
+      } @else {
+
+        <div
+          class="image-controls"
+          aria-label="Image zoom controls"
+        >
+
+          <button
+            type="button"
+            nz-button
+            nzType="default"
+            (click)="zoomOut()"
+            [disabled]="imageZoom() <= 0.5"
+            aria-label="Zoom out"
+            title="Zoom out"
+          >
+            −
+          </button>
+
+          <button
+            type="button"
+            nz-button
+            nzType="default"
+            (click)="resetZoom()"
+            aria-label="Reset image zoom"
+            title="Reset zoom"
+          >
+            {{ imageZoom() * 100 }}%
+          </button>
+
+          <button
+            type="button"
+            nz-button
+            nzType="default"
+            (click)="zoomIn()"
+            [disabled]="imageZoom() >= 3"
+            aria-label="Zoom in"
+            title="Zoom in"
+          >
+            +
+          </button>
+
+        </div>
+
+        <div class="image-container">
+
+          <img
+            [src]="previewUrl()"
+            [alt]="fileName()"
+            [style.transform]="
+              'scale(' + imageZoom() + ')'
+            "
+            (load)="onImageLoad()"
+            (error)="onImageError()"
+          />
+
+        </div>
+
+      }
+
+    </div>
+
+  } @else if (previewType() === 'pdf') {
+
+    <div class="preview-content pdf-preview">
+
+      @if (binaryLoading()) {
+
+        <div
+          class="preview-message"
+          aria-live="polite"
+        >
+          <span>
+            Loading preview...
+          </span>
+        </div>
+
+      } @else if (binaryError()) {
+
+        <div
+          class="preview-message preview-message--error"
+        >
+
+          <p>
+            Unable to display this PDF.
+          </p>
+
+          <a
+            [href]="fileUrl()"
+            target="_blank"
+            rel="noopener"
+          >
+            Open PDF in a new tab
+          </a>
+
+        </div>
+
+      } @else {
+
+        <iframe
+          [src]="safeFileUrl()"
+          [title]="fileName()"
+          (error)="onPdfError()"
+        ></iframe>
+
+        <a
+          class="pdf-fallback-link"
+          [href]="fileUrl()"
+          target="_blank"
+          rel="noopener"
+        >
+          Open PDF in a new tab
+        </a>
+
+      }
+
+    </div>
+
+  } @else if (previewType() === 'csv') {
+
+    <div class="preview-content csv-preview">
+
+      @if (loading()) {
+
+        <div
+          class="preview-message"
+          aria-live="polite"
+        >
+          <span>
+            Loading preview...
+          </span>
+        </div>
+
+      } @else if (error()) {
+
+        <div
+          class="preview-message preview-message--error"
+        >
+
+          <p>
+            Unable to load this file for preview.
+          </p>
+
+          <a
+            [href]="fileUrl()"
+            target="_blank"
+            rel="noopener"
+          >
+            Open file
+          </a>
+
+        </div>
+
+      } @else if (csvHeaders().length > 0) {
+
+        <div class="csv-table-wrapper">
+
+          <nz-table
+            [nzData]="csvPageRows()"
+            [nzFrontPagination]="false"
+            nzSize="middle"
+          >
+
+            <thead>
+
+              <tr>
+
+                @for (
+                  header of csvHeaders();
+                  track $index
+                ) {
+
+                  <th>
+                    {{ header }}
+                  </th>
+
+                }
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              @for (
+                row of csvPageRows();
+                track $index
+              ) {
+
+                <tr>
+
+                  @for (
+                    cell of row;
+                    track $index
+                  ) {
+
+                    <td>
+                      {{ cell }}
+                    </td>
+
+                  }
+
+                </tr>
+
+              }
+
+            </tbody>
+
+          </nz-table>
+
+        </div>
+
+        <div class="csv-pagination">
+
+          <nz-pagination
+            [nzPageIndex]="csvPage()"
+            [nzTotal]="csvDataRows().length"
+            [nzPageSize]="csvPageSize()"
+            [nzShowSizeChanger]="true"
+            [nzPageSizeOptions]="[
+              10,
+              25,
+              50,
+              100
+            ]"
+            nzShowQuickJumper
+            (nzPageIndexChange)="
+              onCsvPageChange($event)
+            "
+            (nzPageSizeChange)="
+              onCsvPageSizeChange($event)
+            "
+          />
+
+        </div>
+
+      } @else {
+
+        <div class="preview-message">
+
+          <p>
+            No CSV data available.
+          </p>
+
+        </div>
+
+      }
+
+    </div>
+
+  } @else if (previewType() === 'code') {
+
+    <div class="preview-content file-preview">
+
+      @if (diffMode()) {
+
+        <div class="diff-content">
+
+          <div class="diff-header">
+            <span>
+              Text diff
+            </span>
+          </div>
+
+          <pre
+            class="file-content diff-content__body"
+          ><code>{{ diffLines().join('\n') }}</code></pre>
+
+        </div>
+
+      } @else if (loading()) {
+
+        <div
+          class="preview-message"
+          aria-live="polite"
+        >
+          <span>
+            Loading preview...
+          </span>
+        </div>
+
+      } @else if (error()) {
+
+        <div
+          class="preview-message preview-message--error"
+        >
+
+          <p>
+            Unable to load this file for preview.
+          </p>
+
+          <a
+            [href]="fileUrl()"
+            target="_blank"
+            rel="noopener"
+          >
+            Open file
+          </a>
+
+        </div>
+
+      } @else {
+
+        <pre
+          class="file-content code-highlight"
+        ><code
+          class="hljs"
+          [innerHTML]="highlightedCode()"
+        ></code></pre>
+
+      }
+
+    </div>
+
+  } @else if (previewType() === 'text') {
+
+    <div class="preview-content file-preview">
+
+      @if (diffMode()) {
+
+        <div class="diff-content">
+
+          <div class="diff-header">
+            <span>
+              Text diff
+            </span>
+          </div>
+
+          <pre
+            class="file-content diff-content__body"
+          ><code>{{ diffLines().join('\n') }}</code></pre>
+
+        </div>
+
+      } @else if (loading()) {
+
+        <div
+          class="preview-message"
+          aria-live="polite"
+        >
+          <span>
+            Loading preview...
+          </span>
+        </div>
+
+      } @else if (error()) {
+
+        <div
+          class="preview-message preview-message--error"
+        >
+
+          <p>
+            Unable to load this file for preview.
+          </p>
+
+          <a
+            [href]="fileUrl()"
+            target="_blank"
+            rel="noopener"
+          >
+            Open file
+          </a>
+
+        </div>
+
+      } @else {
+
+        <pre class="file-content"><code>{{ textContent() }}</code></pre>
+
+      }
+
+    </div>
+
+  } @else {
+
+    <div class="preview-content unsupported-preview">
+
+      <p>
+        ⚠️ This file type is not supported for preview.
+      </p>
+
+      <a
+        [href]="fileUrl()"
+        target="_blank"
+        rel="noopener"
+      >
+        Open / Download file
+      </a>
+
+    </div>
+
+  }
+
+</div>
