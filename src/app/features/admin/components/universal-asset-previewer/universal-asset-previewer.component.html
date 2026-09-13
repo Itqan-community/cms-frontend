@@ -15,7 +15,7 @@
           aria-live="polite"
         >
           <span>
-            Loading preview...
+            {{ 'ADMIN.PREVIEW.LOADING' | translate }}
           </span>
         </div>
 
@@ -25,7 +25,7 @@
           class="preview-message preview-message--error"
         >
           <p>
-            Unable to load this audio file.
+            {{ 'ADMIN.PREVIEW.AUDIO_ERROR' | translate }}
           </p>
 
           <a
@@ -33,7 +33,7 @@
             target="_blank"
             rel="noopener"
           >
-            Open audio
+            {{ 'ADMIN.PREVIEW.OPEN_AUDIO' | translate }}
           </a>
         </div>
 
@@ -43,7 +43,10 @@
           controls
           preload="metadata"
           [src]="previewUrl()"
-          aria-label="Audio preview"
+          [attr.aria-label]="
+            'ADMIN.PREVIEW.AUDIO_ARIA' | translate
+          "
+          (error)="onAudioError()"
         ></audio>
 
       }
@@ -61,7 +64,7 @@
           aria-live="polite"
         >
           <span>
-            Loading preview...
+            {{ 'ADMIN.PREVIEW.LOADING' | translate }}
           </span>
         </div>
 
@@ -72,7 +75,7 @@
         >
 
           <p>
-            Unable to display this image.
+            {{ 'ADMIN.PREVIEW.IMAGE_ERROR' | translate }}
           </p>
 
           <a
@@ -80,7 +83,7 @@
             target="_blank"
             rel="noopener"
           >
-            Open image
+            {{ 'ADMIN.PREVIEW.OPEN_IMAGE' | translate }}
           </a>
 
         </div>
@@ -89,7 +92,9 @@
 
         <div
           class="image-controls"
-          aria-label="Image zoom controls"
+          [attr.aria-label]="
+            'ADMIN.PREVIEW.IMAGE_ZOOM_CONTROLS' | translate
+          "
         >
 
           <button
@@ -98,8 +103,12 @@
             nzType="default"
             (click)="zoomOut()"
             [disabled]="imageZoom() <= 0.5"
-            aria-label="Zoom out"
-            title="Zoom out"
+            [attr.aria-label]="
+              'ADMIN.PREVIEW.ZOOM_OUT' | translate
+            "
+            [attr.title]="
+              'ADMIN.PREVIEW.ZOOM_OUT' | translate
+            "
           >
             −
           </button>
@@ -109,8 +118,12 @@
             nz-button
             nzType="default"
             (click)="resetZoom()"
-            aria-label="Reset image zoom"
-            title="Reset zoom"
+            [attr.aria-label]="
+              'ADMIN.PREVIEW.RESET_ZOOM' | translate
+            "
+            [attr.title]="
+              'ADMIN.PREVIEW.RESET_ZOOM' | translate
+            "
           >
             {{ imageZoom() * 100 }}%
           </button>
@@ -121,8 +134,12 @@
             nzType="default"
             (click)="zoomIn()"
             [disabled]="imageZoom() >= 3"
-            aria-label="Zoom in"
-            title="Zoom in"
+            [attr.aria-label]="
+              'ADMIN.PREVIEW.ZOOM_IN' | translate
+            "
+            [attr.title]="
+              'ADMIN.PREVIEW.ZOOM_IN' | translate
+            "
           >
             +
           </button>
@@ -158,7 +175,7 @@
           aria-live="polite"
         >
           <span>
-            Loading preview...
+            {{ 'ADMIN.PREVIEW.LOADING' | translate }}
           </span>
         </div>
 
@@ -169,7 +186,7 @@
         >
 
           <p>
-            Unable to display this PDF.
+            {{ 'ADMIN.PREVIEW.PDF_ERROR' | translate }}
           </p>
 
           <a
@@ -177,7 +194,7 @@
             target="_blank"
             rel="noopener"
           >
-            Open PDF in a new tab
+            {{ 'ADMIN.PREVIEW.OPEN_PDF' | translate }}
           </a>
 
         </div>
@@ -196,7 +213,7 @@
           target="_blank"
           rel="noopener"
         >
-          Open PDF in a new tab
+          {{ 'ADMIN.PREVIEW.OPEN_PDF' | translate }}
         </a>
 
       }
@@ -214,7 +231,7 @@
           aria-live="polite"
         >
           <span>
-            Loading preview...
+            {{ 'ADMIN.PREVIEW.LOADING' | translate }}
           </span>
         </div>
 
@@ -225,7 +242,7 @@
         >
 
           <p>
-            Unable to load this file for preview.
+            {{ 'ADMIN.PREVIEW.FILE_ERROR' | translate }}
           </p>
 
           <a
@@ -233,7 +250,7 @@
             target="_blank"
             rel="noopener"
           >
-            Open file
+            {{ 'ADMIN.PREVIEW.OPEN_FILE' | translate }}
           </a>
 
         </div>
@@ -326,7 +343,7 @@
         <div class="preview-message">
 
           <p>
-            No CSV data available.
+            {{ 'ADMIN.PREVIEW.NO_CSV_DATA' | translate }}
           </p>
 
         </div>
@@ -345,7 +362,7 @@
 
           <div class="diff-header">
             <span>
-              Text diff
+              {{ 'ADMIN.PREVIEW.TEXT_DIFF' | translate }}
             </span>
           </div>
 
@@ -362,7 +379,7 @@
           aria-live="polite"
         >
           <span>
-            Loading preview...
+            {{ 'ADMIN.PREVIEW.LOADING' | translate }}
           </span>
         </div>
 
@@ -373,7 +390,7 @@
         >
 
           <p>
-            Unable to load this file for preview.
+            {{ 'ADMIN.PREVIEW.FILE_ERROR' | translate }}
           </p>
 
           <a
@@ -381,7 +398,7 @@
             target="_blank"
             rel="noopener"
           >
-            Open file
+            {{ 'ADMIN.PREVIEW.OPEN_FILE' | translate }}
           </a>
 
         </div>
@@ -409,7 +426,7 @@
 
           <div class="diff-header">
             <span>
-              Text diff
+              {{ 'ADMIN.PREVIEW.TEXT_DIFF' | translate }}
             </span>
           </div>
 
@@ -426,7 +443,7 @@
           aria-live="polite"
         >
           <span>
-            Loading preview...
+            {{ 'ADMIN.PREVIEW.LOADING' | translate }}
           </span>
         </div>
 
@@ -437,7 +454,7 @@
         >
 
           <p>
-            Unable to load this file for preview.
+            {{ 'ADMIN.PREVIEW.FILE_ERROR' | translate }}
           </p>
 
           <a
@@ -445,7 +462,7 @@
             target="_blank"
             rel="noopener"
           >
-            Open file
+            {{ 'ADMIN.PREVIEW.OPEN_FILE' | translate }}
           </a>
 
         </div>
@@ -463,7 +480,7 @@
     <div class="preview-content unsupported-preview">
 
       <p>
-        ⚠️ This file type is not supported for preview.
+        ⚠️ {{ 'ADMIN.PREVIEW.UNSUPPORTED' | translate }}
       </p>
 
       <a
@@ -471,7 +488,7 @@
         target="_blank"
         rel="noopener"
       >
-        Open / Download file
+        {{ 'ADMIN.PREVIEW.OPEN_DOWNLOAD' | translate }}
       </a>
 
     </div>

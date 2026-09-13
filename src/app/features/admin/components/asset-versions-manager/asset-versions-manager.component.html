@@ -302,7 +302,12 @@
                       nzType="text"
                       class="action-icon"
                       nz-tooltip
-                      [nzTooltipTitle]="'Preview'"
+                      [attr.aria-label]="
+                        'ADMIN.PREVIEW.OPEN_FILE' | translate
+                      "
+                      [nzTooltipTitle]="
+                        'ADMIN.PREVIEW.OPEN_FILE' | translate
+                      "
                       (click)="openPreview(ver)"
                     >
                       <ng-icon
@@ -413,7 +418,7 @@
             class="preview-loading"
             aria-live="polite"
           >
-            Loading preview...
+            {{ 'ADMIN.PREVIEW.LOADING' | translate }}
           </div>
         }
 

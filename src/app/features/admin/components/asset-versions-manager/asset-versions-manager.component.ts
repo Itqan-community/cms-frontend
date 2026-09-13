@@ -128,6 +128,9 @@ export class AssetVersionsManagerComponent
   private readonly cancelInFlightSubmit$ =
     new Subject<void>();
 
+  private readonly cancelPreview$ =
+    new Subject<void>();
+
   @Input({ required: true })
   kind!: AssetVersionParentKind;
 
@@ -358,6 +361,8 @@ export class AssetVersionsManagerComponent
   openPreview(
     row: AssetVersion,
   ): void {
+    this.cancelPreview$.next();
+
     this.previewingVersion.set(
       row,
     );
@@ -390,9 +395,11 @@ export class AssetVersionsManagerComponent
       .listAll(
         this.kind,
         this.slug,
-        this.total(),
       )
       .pipe(
+        takeUntil(
+          this.cancelPreview$,
+        ),
         takeUntilDestroyed(
           this.destroyRef,
         ),
@@ -515,6 +522,9 @@ export class AssetVersionsManagerComponent
         ),
     })
       .pipe(
+        takeUntil(
+          this.cancelPreview$,
+        ),
         takeUntilDestroyed(
           this.destroyRef,
         ),
@@ -598,6 +608,8 @@ export class AssetVersionsManagerComponent
   }
 
   closePreview(): void {
+    this.cancelPreview$.next();
+
     this.previewingVersion.set(
       null,
     );

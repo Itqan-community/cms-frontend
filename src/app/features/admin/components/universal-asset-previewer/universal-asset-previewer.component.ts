@@ -1,5 +1,6 @@
 import {
   Component,
+  DestroyRef,
   OnDestroy,
   OnInit,
   computed,
@@ -7,6 +8,10 @@ import {
   input,
   signal,
 } from '@angular/core';
+
+import {
+  takeUntilDestroyed,
+} from '@angular/core/rxjs-interop';
 
 import {
   HttpClient,
@@ -21,6 +26,18 @@ import {
   TranslateModule,
 } from '@ngx-translate/core';
 
+import {
+  NzButtonModule,
+} from 'ng-zorro-antd/button';
+
+import {
+  NzPaginationModule,
+} from 'ng-zorro-antd/pagination';
+
+import {
+  NzTableModule,
+} from 'ng-zorro-antd/table';
+
 import hljs from 'highlight.js/lib/core';
 
 import bash from 'highlight.js/lib/languages/bash';
@@ -33,18 +50,6 @@ import sql from 'highlight.js/lib/languages/sql';
 import typescript from 'highlight.js/lib/languages/typescript';
 import xml from 'highlight.js/lib/languages/xml';
 import yaml from 'highlight.js/lib/languages/yaml';
-
-import {
-  NzButtonModule,
-} from 'ng-zorro-antd/button';
-
-import {
-  NzPaginationModule,
-} from 'ng-zorro-antd/pagination';
-
-import {
-  NzTableModule,
-} from 'ng-zorro-antd/table';
 
 hljs.registerLanguage(
   'bash',
@@ -141,6 +146,9 @@ export class UniversalAssetPreviewerComponent
 
   private readonly sanitizer =
     inject(DomSanitizer);
+
+  private readonly destroyRef =
+    inject(DestroyRef);
 
   private previewObjectUrl:
     string | null = null;
@@ -499,6 +507,11 @@ export class UniversalAssetPreviewerComponent
           responseType: 'blob',
         },
       )
+      .pipe(
+        takeUntilDestroyed(
+          this.destroyRef,
+        ),
+      )
       .subscribe({
         next: (blob) => {
           this.previewObjectUrl =
@@ -582,6 +595,10 @@ export class UniversalAssetPreviewerComponent
   }
 
   onPdfError(): void {
+    this.binaryError.set(true);
+  }
+
+  onAudioError(): void {
     this.binaryError.set(true);
   }
 
@@ -728,53 +745,113 @@ export class UniversalAssetPreviewerComponent
 
     const result: DiffLine[] = [];
 
-    const maxLength =
-      Math.max(
-        originalLines.length,
-        modifiedLines.length,
+    const rows =
+      originalLines.length + 1;
+
+    const columns =
+      modifiedLines.length + 1;
+
+    const lcs: number[][] =
+      Array.from(
+        { length: rows },
+        () =>
+          Array<number>(
+            columns,
+          ).fill(0),
       );
 
     for (
-      let i = 0;
-      i < maxLength;
-      i++
+      let i =
+        originalLines.length - 1;
+      i >= 0;
+      i--
     ) {
-      const oldLine =
-        originalLines[i];
+      for (
+        let j =
+          modifiedLines.length - 1;
+        j >= 0;
+        j--
+      ) {
+        if (
+          originalLines[i] ===
+          modifiedLines[j]
+        ) {
+          lcs[i][j] =
+            lcs[i + 1][j + 1] + 1;
+        } else {
+          lcs[i][j] =
+            Math.max(
+              lcs[i + 1][j],
+              lcs[i][j + 1],
+            );
+        }
+      }
+    }
 
-      const newLine =
-        modifiedLines[i];
+    let i = 0;
+    let j = 0;
 
+    while (
+      i < originalLines.length &&
+      j < modifiedLines.length
+    ) {
       if (
-        oldLine !== undefined &&
-        newLine !== undefined &&
-        oldLine === newLine
+        originalLines[i] ===
+        modifiedLines[j]
       ) {
         result.push({
           type: 'same',
-          text: `  ${oldLine}`,
+          text: `  ${originalLines[i]}`,
         });
+
+        i++;
+        j++;
 
         continue;
       }
 
       if (
-        oldLine !== undefined
+        lcs[i + 1][j] >=
+        lcs[i][j + 1]
       ) {
         result.push({
           type: 'removed',
-          text: `- ${oldLine}`,
+          text: `- ${originalLines[i]}`,
         });
+
+        i++;
+
+        continue;
       }
 
-      if (
-        newLine !== undefined
-      ) {
-        result.push({
-          type: 'added',
-          text: `+ ${newLine}`,
-        });
-      }
+      result.push({
+        type: 'added',
+        text: `+ ${modifiedLines[j]}`,
+      });
+
+      j++;
+    }
+
+    while (
+      i < originalLines.length
+    ) {
+      result.push({
+        type: 'removed',
+        text: `- ${originalLines[i]}`,
+      });
+
+      i++;
+    }
+
+    while (
+      j < modifiedLines.length
+    ) {
+      result.push({
+        type: 'added',
+        text: `+ ${modifiedLines[j]}`,
+      });
+
+      j++;
     }
 
     return result;
