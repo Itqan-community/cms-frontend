@@ -8,6 +8,10 @@ export interface AssetVersion {
   is_active?: boolean;
   name: string;
   summary?: string;
+  /** Commit author (version creator) display name. */
+  created_by?: string | null;
+  /** Per-type change tallies for this commit (null for legacy/pre-feature versions). */
+  change_counts?: { added: number; modified: number; removed: number } | null;
   file_url: string;
   size_bytes: number;
   created_at: string;

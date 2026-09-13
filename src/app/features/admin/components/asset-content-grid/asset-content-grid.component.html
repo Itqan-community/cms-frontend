@@ -106,9 +106,9 @@
         nzType="primary"
         [nzLoading]="publishing()"
         [disabled]="draftId() === null || savingDraft() || saving()"
-        (click)="publish()"
+        (click)="openCommit()"
       >
-        {{ 'ADMIN.CONTENT_EDITOR.SAVE' | translate }}
+        {{ 'ADMIN.CONTENT_EDITOR.COMMIT.BUTTON' | translate }}
       </button>
     </div>
   </div>
@@ -189,6 +189,63 @@
           <p class="content-grid__add-language-file-hint">
             {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.FILE_HINT' | translate }}
           </p>
+        }
+      </div>
+    </ng-container>
+  </nz-modal>
+
+  <nz-modal
+    [nzVisible]="commitDialogVisible()"
+    [nzTitle]="'ADMIN.CONTENT_EDITOR.COMMIT.TITLE' | translate"
+    [nzOkText]="'ADMIN.CONTENT_EDITOR.COMMIT.CONFIRM' | translate"
+    [nzOkLoading]="committing()"
+    [nzOkDisabled]="!commitMessage().trim()"
+    [nzCancelText]="'ADMIN.CONTENT_EDITOR.COMMIT.CANCEL' | translate"
+    (nzOnOk)="confirmCommit()"
+    (nzOnCancel)="commitDialogVisible.set(false)"
+  >
+    <ng-container *nzModalContent>
+      <label class="content-grid__commit-label">
+        {{ 'ADMIN.CONTENT_EDITOR.COMMIT.MESSAGE_LABEL' | translate }}
+      </label>
+      <textarea
+        nz-input
+        [ngModel]="commitMessage()"
+        (ngModelChange)="commitMessage.set($event)"
+        [nzAutosize]="{ minRows: 2, maxRows: 5 }"
+        [placeholder]="'ADMIN.CONTENT_EDITOR.COMMIT.MESSAGE_PLACEHOLDER' | translate"
+      ></textarea>
+
+      <div class="content-grid__commit-review">
+        @if (pendingLoading()) {
+          <span>{{ 'ADMIN.CONTENT_EDITOR.COMMIT.REVIEW_LOADING' | translate }}</span>
+        } @else {
+          <p class="content-grid__commit-summary">
+            <span class="content-grid__diff-added">+{{ pendingCounts().added }}</span>
+            <span class="content-grid__diff-modified">~{{ pendingCounts().modified }}</span>
+            <span class="content-grid__diff-removed">−{{ pendingCounts().removed }}</span>
+            {{ 'ADMIN.CONTENT_EDITOR.COMMIT.REVIEW' | translate }}
+          </p>
+          <ul class="content-grid__commit-changes">
+            @for (change of pendingChanges(); track change.ayah_id) {
+              <li>
+                <span
+                  [class.content-grid__diff-added]="change.change_type === 'added'"
+                  [class.content-grid__diff-modified]="change.change_type === 'modified'"
+                  [class.content-grid__diff-removed]="change.change_type === 'removed'"
+                >
+                  {{
+                    change.change_type === 'added'
+                      ? '+'
+                      : change.change_type === 'removed'
+                        ? '−'
+                        : '~'
+                  }}
+                  {{ change.sura }}:{{ change.aya }}
+                </span>
+              </li>
+            }
+          </ul>
         }
       </div>
     </ng-container>

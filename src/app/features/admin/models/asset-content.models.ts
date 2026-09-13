@@ -4,6 +4,9 @@ import type { AssetVersionParentKind } from './asset-versions.models';
 export interface AssetLanguage {
   language: string;
   is_source: boolean;
+  /** Whether this language is available to consumers (READY). Translations start
+   *  pending (false) until explicitly marked available. */
+  is_available: boolean;
 }
 
 /** A per-ayah content draft version (state === 'draft'). */
@@ -37,6 +40,17 @@ export interface ContentEntry {
 export interface ContentEntriesResponse {
   results: ContentEntry[];
   count: number;
+}
+
+/** One changed ayah in a commit diff (or a pending/uncommitted diff). */
+export interface ContentChange {
+  ayah_id: number;
+  sura: number;
+  aya: number;
+  surah_name: string;
+  change_type: 'added' | 'modified' | 'removed';
+  old_text: string;
+  new_text: string;
 }
 
 /** A single dirty row sent to the PATCH entries endpoint. */

@@ -14,6 +14,7 @@ import type {
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from 'ag-grid-community';
 import { AgGridAngular } from 'ag-grid-angular';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
@@ -24,10 +25,12 @@ import { Subject, debounceTime } from 'rxjs';
 import type {
   AssetLanguage,
   AssetVersionParentKind,
+  ContentChange,
   ContentEntry,
   ContentEntryPatch,
 } from '../../models/asset-content.models';
 import { AssetContentService } from '../../services/asset-content.service';
+import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import {
   normalizeClipboardForTextPaste,
   parseClipboardTable,
@@ -56,6 +59,7 @@ const AUTOSAVE_DEBOUNCE_MS = 800;
     NgIcon,
     FormsModule,
     NzButtonModule,
+    NzInputModule,
     NzModalModule,
     NzSelectModule,
     NzSpinModule,
@@ -71,6 +75,7 @@ export class AssetContentGridComponent implements OnInit {
   @Input({ required: true }) slug!: string;
 
   private readonly contentService = inject(AssetContentService);
+  private readonly lastLanguage = inject(LastActiveLanguageService);
   private readonly message = inject(NzMessageService);
   private readonly modal = inject(NzModalService);
   private readonly translate = inject(TranslateService);
@@ -120,6 +125,18 @@ export class AssetContentGridComponent implements OnInit {
   readonly publishing = signal(false);
   readonly savingDraft = signal(false);
   readonly dirty = signal(false);
+
+  /** Commit dialog state (required message + change review). */
+  readonly commitDialogVisible = signal(false);
+  readonly commitMessage = signal('');
+  readonly committing = signal(false);
+  readonly pendingLoading = signal(false);
+  readonly pendingChanges = signal<ContentChange[]>([]);
+  readonly pendingCounts = computed(() => {
+    const counts = { added: 0, modified: 0, removed: 0 };
+    for (const change of this.pendingChanges()) counts[change.change_type]++;
+    return counts;
+  });
   readonly selectedCount = signal(0);
   readonly entriesTotal = signal(0);
   readonly canUndo = signal(false);
@@ -291,7 +308,8 @@ export class AssetContentGridComponent implements OnInit {
     );
   }
 
-  /** Load the asset's languages, default to the source, then open its draft. */
+  /** Load the asset's languages, restoring the last-active one (else the source),
+   *  then open its draft. */
   private loadLanguages(): void {
     this.loading.set(true);
     this.contentService
@@ -301,7 +319,9 @@ export class AssetContentGridComponent implements OnInit {
         next: (langs) => {
           this.languages.set(langs);
           const source = langs.find((l) => l.is_source) ?? langs[0];
-          this.selectedLanguage.set(source?.language ?? null);
+          const remembered = this.lastLanguage.get(this.kind, this.slug);
+          const initial = langs.find((l) => l.language === remembered) ?? source;
+          this.selectedLanguage.set(initial?.language ?? null);
           this.loadForLanguage();
         },
         error: (err: HttpErrorResponse) => {
@@ -348,6 +368,7 @@ export class AssetContentGridComponent implements OnInit {
       this.dirty.set(false);
       this.rows.set([]);
       this.selectedLanguage.set(language);
+      this.lastLanguage.set(this.kind, this.slug, language);
       this.loadForLanguage();
     });
   }
@@ -481,34 +502,54 @@ export class AssetContentGridComponent implements OnInit {
     return this.flushPending();
   }
 
-  /** Save = publish the draft as a new version. Flushes pending edits first. */
-  publish(): void {
+  /** Open the commit dialog: flush pending edits, then load the change review. */
+  openCommit(): void {
     const versionId = this.draftId();
     if (versionId === null) return;
     this.publishing.set(true);
     void this.flushPending().then((ok) => {
-      if (!ok) {
-        this.publishing.set(false);
-        return;
-      }
+      this.publishing.set(false);
+      if (!ok) return;
+      this.commitMessage.set('');
+      this.pendingChanges.set([]);
+      this.commitDialogVisible.set(true);
+      this.pendingLoading.set(true);
       this.contentService
-        .publish(this.kind, this.slug, versionId)
+        .pendingChanges(this.kind, this.slug, versionId)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
-          next: () => {
-            this.publishing.set(false);
-            this.dirty.set(false);
-            this.pendingRows.clear();
-            this.draftId.set(null);
-            this.message.success(this.translate.instant('ADMIN.CONTENT_EDITOR.MESSAGES.PUBLISHED'));
-            void this.router.navigate(['/admin', this.listSegment(), this.slug]);
+          next: (res) => {
+            this.pendingChanges.set(res.results);
+            this.pendingLoading.set(false);
           },
-          error: (err: HttpErrorResponse) => {
-            this.publishing.set(false);
-            this.showError(err);
-          },
+          error: () => this.pendingLoading.set(false),
         });
     });
+  }
+
+  /** Confirm the commit: publish the draft with the (required) message. */
+  confirmCommit(): void {
+    const versionId = this.draftId();
+    if (versionId === null || !this.commitMessage().trim()) return;
+    this.committing.set(true);
+    this.contentService
+      .commit(this.kind, this.slug, versionId, this.commitMessage().trim())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.committing.set(false);
+          this.commitDialogVisible.set(false);
+          this.dirty.set(false);
+          this.pendingRows.clear();
+          this.draftId.set(null);
+          this.message.success(this.translate.instant('ADMIN.CONTENT_EDITOR.MESSAGES.PUBLISHED'));
+          void this.router.navigate(['/admin', this.listSegment(), this.slug]);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.committing.set(false);
+          this.showError(err);
+        },
+      });
   }
 
   /** Confirm, then discard the draft and leave. */

@@ -1,6 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, Input, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, Input, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgIcon } from '@ng-icons/core';
@@ -18,9 +18,10 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { Subject, debounceTime, distinctUntilChanged, finalize, takeUntil } from 'rxjs';
 import type { AssetVersion, AssetVersionParentKind } from '../../models/asset-versions.models';
-import type { AssetLanguage } from '../../models/asset-content.models';
+import type { AssetLanguage, ContentChange } from '../../models/asset-content.models';
 import { AssetVersionsService } from '../../services/asset-versions.service';
 import { AssetContentService } from '../../services/asset-content.service';
+import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { localizedLanguageName } from '../../utils/iso-639.util';
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../services/admin-auth.service';
@@ -59,6 +60,7 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly adminAuth = inject(AdminAuthService);
+  private readonly lastLanguage = inject(LastActiveLanguageService);
   private readonly search$ = new Subject<string>();
   /** Emits to abort the in-flight create/update HTTP request (unsubscribe → browser abort). */
   private readonly cancelInFlightSubmit$ = new Subject<void>();
@@ -80,12 +82,31 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly total = signal(0);
   readonly page = signal(1);
 
+  /** Expanded commit's diff panel state. */
+  readonly expandedId = signal<number | null>(null);
+  readonly diffLoading = signal(false);
+  readonly diff = signal<ContentChange[]>([]);
+
   /** Multi-language assets (translations/tafsirs) let the versions be filtered by language. */
   readonly languages = signal<AssetLanguage[]>([]);
   readonly selectedLanguage = signal<string | null>(null);
   /** Localized language name for the current UI language (e.g. fr → "الفرنسية"). */
   readonly langName = (code: string): string =>
     localizedLanguageName(code, this.translate.currentLang || 'en');
+
+  /** The currently selected language rendition (source or translation). */
+  readonly selectedLanguageObj = computed(() =>
+    this.languages().find((l) => l.language === this.selectedLanguage())
+  );
+  /** The source language's availability follows the asset's own status, so only
+   *  translations expose a manual availability toggle here. */
+  readonly canToggleAvailability = computed(
+    () => this.canMutateVersions() && this.selectedLanguageObj()?.is_source === false
+  );
+  readonly selectedLangAvailable = computed(
+    () => this.selectedLanguageObj()?.is_available ?? false
+  );
+  readonly togglingAvailability = signal(false);
   readonly pageSize = signal(DEFAULT_PAGE_SIZE);
   readonly loading = signal(false);
   readonly saving = signal(false);
@@ -129,7 +150,8 @@ export class AssetVersionsManagerComponent implements OnInit {
     }
   }
 
-  /** Load the asset's languages, default to the source, then load its versions. */
+  /** Load the asset's languages, restoring the last-active one (else the source),
+   *  then load its versions. */
   private loadLanguages(): void {
     this.assetContentService
       .listLanguages(this.kind, this.slug)
@@ -138,7 +160,9 @@ export class AssetVersionsManagerComponent implements OnInit {
         next: (langs) => {
           this.languages.set(langs);
           const source = langs.find((l) => l.is_source) ?? langs[0];
-          this.selectedLanguage.set(source?.language ?? null);
+          const remembered = this.lastLanguage.get(this.kind, this.slug);
+          const initial = langs.find((l) => l.language === remembered) ?? source;
+          this.selectedLanguage.set(initial?.language ?? null);
           this.loadList();
         },
         // If languages can't be loaded, still show the (unfiltered) versions.
@@ -148,6 +172,7 @@ export class AssetVersionsManagerComponent implements OnInit {
 
   onLanguageChange(language: string): void {
     this.selectedLanguage.set(language);
+    this.lastLanguage.set(this.kind, this.slug, language);
     this.page.set(1);
     this.loadList();
   }
@@ -392,6 +417,66 @@ export class AssetVersionsManagerComponent implements OnInit {
           });
         }),
     });
+  }
+
+  /** Toggle a commit's diff panel, lazy-loading the diff on first expand. */
+  toggleDiff(row: AssetVersion): void {
+    if (this.expandedId() === row.id) {
+      this.expandedId.set(null);
+      return;
+    }
+    this.expandedId.set(row.id);
+    this.diff.set([]);
+    this.diffLoading.set(true);
+    this.assetContentService
+      .versionDiff(this.kind, this.slug, row.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.diff.set(res.results);
+          this.diffLoading.set(false);
+        },
+        error: () => this.diffLoading.set(false),
+      });
+  }
+
+  /** Mark the selected translation available (READY) or pending (DRAFT) to consumers. */
+  toggleSelectedLanguageAvailability(): void {
+    const lang = this.selectedLanguageObj();
+    if (!lang || !this.canToggleAvailability() || this.togglingAvailability()) {
+      return;
+    }
+    const next = !lang.is_available;
+    this.togglingAvailability.set(true);
+    this.assetContentService
+      .setLanguageAvailability(this.kind, this.slug, lang.language, next)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (updated) => {
+          this.togglingAvailability.set(false);
+          this.languages.update((langs) =>
+            langs.map((l) => (l.language === updated.language ? updated : l))
+          );
+          this.message.success(
+            this.translate.instant(
+              next
+                ? 'ADMIN.CONTENT_EDITOR.AVAILABILITY.MARKED_AVAILABLE'
+                : 'ADMIN.CONTENT_EDITOR.AVAILABILITY.MARKED_PENDING'
+            )
+          );
+        },
+        error: (err: HttpErrorResponse) => {
+          this.togglingAvailability.set(false);
+          const name: string | undefined = err?.error?.error_name;
+          const key = name ? `ADMIN.CONTENT_EDITOR.ERRORS.${name.toUpperCase()}` : '';
+          const translated = key ? this.translate.instant(key) : '';
+          this.message.error(
+            translated && translated !== key
+              ? translated
+              : this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC')
+          );
+        },
+      });
   }
 
   /** Restore a version as a new published version, making it the active one. */

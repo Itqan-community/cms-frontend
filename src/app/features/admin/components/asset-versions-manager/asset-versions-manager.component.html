@@ -28,6 +28,37 @@
           }
         </nz-select>
       }
+      @if (supportsLanguages() && selectedLanguageObj() && !selectedLanguageObj()!.is_source) {
+        <span
+          class="asset-versions-manager__availability"
+          [class.asset-versions-manager__availability--available]="selectedLangAvailable()"
+          nz-tooltip
+          [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.AVAILABILITY.HINT' | translate"
+        >
+          {{
+            (selectedLangAvailable()
+              ? 'ADMIN.CONTENT_EDITOR.AVAILABILITY.AVAILABLE'
+              : 'ADMIN.CONTENT_EDITOR.AVAILABILITY.PENDING'
+            ) | translate
+          }}
+        </span>
+        @if (canToggleAvailability()) {
+          <button
+            nz-button
+            nzType="default"
+            [nzLoading]="togglingAvailability()"
+            [disabled]="loading()"
+            (click)="toggleSelectedLanguageAvailability()"
+          >
+            {{
+              (selectedLangAvailable()
+                ? 'ADMIN.CONTENT_EDITOR.AVAILABILITY.MARK_PENDING'
+                : 'ADMIN.CONTENT_EDITOR.AVAILABILITY.MARK_AVAILABLE'
+              ) | translate
+            }}
+          </button>
+        }
+      }
       @if (canMutateVersions()) {
         <button nz-button nzType="primary" type="button" (click)="openCreateModal()">
           <ng-icon name="lucidePlus" />
@@ -196,12 +227,44 @@
                     {{ t('ACTIVE_BADGE') | translate }}
                   </span>
                 }
+                @if (ver.created_by) {
+                  <span class="asset-versions-manager__author">{{ ver.created_by }}</span>
+                }
               </td>
-              <td class="asset-versions-manager__summary-cell">{{ truncate(ver.summary) }}</td>
+              <td class="asset-versions-manager__summary-cell">
+                {{ truncate(ver.summary) }}
+                @if (ver.change_counts; as counts) {
+                  <span class="asset-versions-manager__counts">
+                    <span class="asset-versions-manager__diff-added">+{{ counts.added }}</span>
+                    <span class="asset-versions-manager__diff-modified"
+                      >~{{ counts.modified }}</span
+                    >
+                    <span class="asset-versions-manager__diff-removed">−{{ counts.removed }}</span>
+                  </span>
+                }
+              </td>
               <td>{{ formatBytes(ver.size_bytes) }}</td>
               <td>{{ ver.created_at | date: 'dd/MM/yyyy' }}</td>
               <td>
                 <div class="admin-list-actions">
+                  @if (supportsLanguages()) {
+                    <button
+                      type="button"
+                      nz-button
+                      nzType="text"
+                      class="action-icon"
+                      nz-tooltip
+                      [nzTooltipTitle]="t('TOOLTIP_DIFF') | translate"
+                      (click)="toggleDiff(ver)"
+                    >
+                      <ng-icon
+                        [name]="
+                          expandedId() === ver.id ? 'lucideChevronDown' : 'lucideChevronRight'
+                        "
+                        aria-hidden="true"
+                      />
+                    </button>
+                  }
                   <button
                     type="button"
                     nz-button
@@ -259,6 +322,59 @@
                 </div>
               </td>
             </tr>
+            @if (expandedId() === ver.id) {
+              <tr class="asset-versions-manager__diff-row">
+                <td colspan="5">
+                  @if (diffLoading()) {
+                    <span class="asset-versions-manager__diff-loading">
+                      {{ t('DIFF_LOADING') | translate }}
+                    </span>
+                  } @else if (diff().length === 0) {
+                    <span class="asset-versions-manager__diff-empty">
+                      {{ t('DIFF_EMPTY') | translate }}
+                    </span>
+                  } @else {
+                    <ul class="asset-versions-manager__diff-list">
+                      @for (change of diff(); track change.ayah_id) {
+                        <li class="asset-versions-manager__diff-item">
+                          <span
+                            class="asset-versions-manager__diff-ref"
+                            [class.asset-versions-manager__diff-added]="
+                              change.change_type === 'added'
+                            "
+                            [class.asset-versions-manager__diff-modified]="
+                              change.change_type === 'modified'
+                            "
+                            [class.asset-versions-manager__diff-removed]="
+                              change.change_type === 'removed'
+                            "
+                          >
+                            {{
+                              change.change_type === 'added'
+                                ? '+'
+                                : change.change_type === 'removed'
+                                  ? '−'
+                                  : '~'
+                            }}
+                            {{ change.sura }}:{{ change.aya }}
+                          </span>
+                          @if (change.change_type !== 'added' && change.old_text) {
+                            <span class="asset-versions-manager__diff-old">{{
+                              change.old_text
+                            }}</span>
+                          }
+                          @if (change.change_type !== 'removed' && change.new_text) {
+                            <span class="asset-versions-manager__diff-new">{{
+                              change.new_text
+                            }}</span>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  }
+                </td>
+              </tr>
+            }
           }
         </tbody>
       </nz-table>
