@@ -1,16 +1,16 @@
-import { TestBed } from '@angular/core/testing';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { firstValueFrom, of, throwError } from 'rxjs';
-import { AuthService } from './auth.service';
-import { HeadlessAuthApiService } from '../headless/headless-auth-api.service';
+import type { AuthenticatedResponse, ConfigurationResponse } from '../headless/headless-api.types';
 import {
   ALLAUTH_SESSION_TOKEN_STORAGE_KEY,
   HeadlessAppTokenService,
 } from '../headless/headless-app-token.service';
-import type { AuthenticatedResponse, ConfigurationResponse } from '../headless/headless-api.types';
+import { HeadlessAuthApiService } from '../headless/headless-auth-api.service';
+import { AuthService } from './auth.service';
 
 const mockUser = {
   id: 1,
@@ -559,5 +559,47 @@ describe('AuthService (app / headless)', () => {
     await firstValueFrom(service.deleteApiKey('abc/def'));
     const delUrl = httpClientMock.delete.calls.mostRecent().args[0] as string;
     expect(delUrl).toContain('abc%2Fdef');
+  });
+
+  describe('readNextQueryParam()', () => {
+    const readNext = (svc: AuthService) =>
+      (svc as unknown as { readNextQueryParam(): string }).readNextQueryParam();
+
+    it('returns the `next` param when it is a valid internal path', () => {
+      routerMock.parseUrl.and.returnValue({ queryParams: { next: '/dashboard' } });
+      expect(readNext(service)).toBe('/dashboard');
+    });
+
+    it('falls back to `returnUrl` when `next` is absent', () => {
+      routerMock.parseUrl.and.returnValue({ queryParams: { returnUrl: '/recitations' } });
+      expect(readNext(service)).toBe('/recitations');
+    });
+
+    it('falls back to default when both params are absent', () => {
+      routerMock.parseUrl.and.returnValue({ queryParams: {} });
+      expect(readNext(service)).toBe('/gallery');
+    });
+
+    it('rejects an absolute URL (http://…) and falls back to default', () => {
+      routerMock.parseUrl.and.returnValue({
+        queryParams: { next: 'http://evil.com/steal' },
+      });
+      expect(readNext(service)).toBe('/gallery');
+    });
+
+    it('rejects a protocol-relative URL starting with //', () => {
+      routerMock.parseUrl.and.returnValue({ queryParams: { next: '//evil.com/steal' } });
+      expect(readNext(service)).toBe('/gallery');
+    });
+
+    it('rejects a protocol-relative URL starting with /\\', () => {
+      routerMock.parseUrl.and.returnValue({ queryParams: { next: '/\\evil.com' } });
+      expect(readNext(service)).toBe('/gallery');
+    });
+
+    it('falls back to default when `next` is an empty string', () => {
+      routerMock.parseUrl.and.returnValue({ queryParams: { next: '' } });
+      expect(readNext(service)).toBe('/gallery');
+    });
   });
 });
