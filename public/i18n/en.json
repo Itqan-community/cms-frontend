@@ -856,6 +856,56 @@
         "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "Publish a version for this language before making it available."
       }
     },
+    "REVIEW": {
+      "TITLE": "Review changes",
+      "NO_ASSIGNED_LANGUAGES": "You have no languages assigned to review for this asset.",
+      "NO_CHANGES": "No changes to show.",
+      "FILTER": {
+        "ALL": "All",
+        "UNREVIEWED": "Unreviewed",
+        "APPROVED": "Approved",
+        "COMMENTED": "Needs changes"
+      },
+      "STATE": {
+        "UNREVIEWED": "Unreviewed",
+        "APPROVED": "Approved",
+        "COMMENTED": "Needs changes"
+      },
+      "TYPE": {
+        "ADDED": "Added",
+        "MODIFIED": "Modified",
+        "REMOVED": "Removed"
+      },
+      "ACTION": {
+        "APPROVE": "Approve",
+        "COMMENT": "Comment",
+        "UNREVIEW": "Unreview"
+      },
+      "COLUMN": {
+        "AYAH": "Ayah",
+        "TYPE": "Type",
+        "CHANGE": "Change",
+        "COMMIT": "Commit",
+        "STATE": "Review",
+        "ACTIONS": "Actions"
+      },
+      "COMMENT_DIALOG": {
+        "TITLE": "Request changes",
+        "PLACEHOLDER": "Describe what needs to change…",
+        "CONFIRM": "Save comment",
+        "CANCEL": "Cancel"
+      },
+      "MESSAGES": {
+        "APPROVED": "Change approved.",
+        "COMMENTED": "Comment saved.",
+        "UNREVIEWED": "Marked as unreviewed."
+      },
+      "ERRORS": {
+        "REVIEW_COMMENT_REQUIRED": "A comment is required when requesting changes.",
+        "LANGUAGE_NOT_ASSIGNED": "You are not assigned to review this language.",
+        "GENERIC": "Something went wrong. Please try again."
+      }
+    },
     "COMMON": {
       "ADD": "Add",
       "TOOLTIP_VIEW": "View",

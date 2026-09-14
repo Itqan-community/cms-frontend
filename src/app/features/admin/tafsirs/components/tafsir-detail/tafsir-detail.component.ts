@@ -17,6 +17,7 @@ import {
   localizeLanguageCode,
 } from '../../../utils/display-localization.util';
 import { AssetVersionsManagerComponent } from '../../../components/asset-versions-manager/asset-versions-manager.component';
+import { AssetReviewGridComponent } from '../../../components/asset-review-grid/asset-review-grid.component';
 import { TafsirDetails } from '../../models/tafsirs.models';
 import { TafsirsService } from '../../services/tafsirs.service';
 
@@ -34,6 +35,7 @@ import { TafsirsService } from '../../services/tafsirs.service';
     NzToolTipModule,
     TranslateModule,
     AssetVersionsManagerComponent,
+    AssetReviewGridComponent,
   ],
   templateUrl: './tafsir-detail.component.html',
   styleUrl: './tafsir-detail.component.less',

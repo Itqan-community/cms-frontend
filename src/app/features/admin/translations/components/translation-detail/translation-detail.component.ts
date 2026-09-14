@@ -11,6 +11,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
 import { AssetVersionsManagerComponent } from '../../../components/asset-versions-manager/asset-versions-manager.component';
+import { AssetReviewGridComponent } from '../../../components/asset-review-grid/asset-review-grid.component';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import {
@@ -34,6 +35,7 @@ import { TranslationsService } from '../../services/translations.service';
     NzToolTipModule,
     TranslateModule,
     AssetVersionsManagerComponent,
+    AssetReviewGridComponent,
   ],
   templateUrl: './translation-detail.component.html',
   styleUrl: './translation-detail.component.less',

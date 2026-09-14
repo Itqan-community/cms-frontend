@@ -116,6 +116,8 @@
       sectionTitleKey="ADMIN.TAFSIRS.DETAIL.VERSIONS_TITLE"
     />
 
+    <app-asset-review-grid kind="tafsir" [slug]="tafsir()!.slug" />
+
     <div class="admin-back">
       <a routerLink="/admin/tafsirs">
         <button nz-button nzType="default">

@@ -126,6 +126,8 @@
       sectionTitleKey="ADMIN.TRANSLATIONS.DETAIL.VERSIONS_TITLE"
     />
 
+    <app-asset-review-grid kind="translation" [slug]="translation()!.slug ?? routeSlug" />
+
     <div class="admin-back">
       <a routerLink="/admin/translations">
         <button nz-button nzType="default">
