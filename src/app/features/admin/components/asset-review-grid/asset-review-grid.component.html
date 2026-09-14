@@ -66,8 +66,8 @@
                 <td>{{ typeKey(row.change_type) | translate }}</td>
                 <td>
                   <div class="asset-review-grid__change">
-                    @if (row.old_text) {
-                      <span class="asset-review-grid__old">{{ row.old_text }}</span>
+                    @if (row.baseline_text) {
+                      <span class="asset-review-grid__old">{{ row.baseline_text }}</span>
                     }
                     @if (row.new_text) {
                       <span class="asset-review-grid__new">{{ row.new_text }}</span>

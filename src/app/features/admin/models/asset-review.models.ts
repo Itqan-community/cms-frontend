@@ -9,6 +9,8 @@ export interface ReviewChange {
   change_type: 'added' | 'modified' | 'removed';
   old_text: string;
   new_text: string;
+  /** The last-approved text for this ayah (the review baseline); empty if never approved. */
+  baseline_text: string;
   commit_ref: string;
   commit_id: number;
   review_state: ReviewState;
