@@ -428,15 +428,29 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.expandedId.set(row.id);
     this.diff.set([]);
     this.diffLoading.set(true);
+    this.loadAllVersionDiffs(row.id, 1, []);
+  }
+
+  private loadAllVersionDiffs(versionId: number, page: number, acc: ContentChange[]): void {
     this.assetContentService
-      .versionDiff(this.kind, this.slug, row.id)
+      .versionDiff(this.kind, this.slug, versionId, page, 100)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          this.diff.set(res.results);
-          this.diffLoading.set(false);
+          if (this.expandedId() !== versionId) return;
+          const merged = acc.concat(res.results);
+          if (merged.length < res.count && res.results.length > 0) {
+            this.loadAllVersionDiffs(versionId, page + 1, merged);
+          } else {
+            this.diff.set(merged);
+            this.diffLoading.set(false);
+          }
         },
-        error: () => this.diffLoading.set(false),
+        error: () => {
+          if (this.expandedId() === versionId) {
+            this.diffLoading.set(false);
+          }
+        },
       });
   }
 

@@ -255,6 +255,7 @@
                       class="action-icon"
                       nz-tooltip
                       [nzTooltipTitle]="t('TOOLTIP_DIFF') | translate"
+                      [attr.aria-label]="t('TOOLTIP_DIFF') | translate"
                       (click)="toggleDiff(ver)"
                     >
                       <ng-icon
@@ -272,6 +273,7 @@
                     class="action-icon"
                     nz-tooltip
                     [nzTooltipTitle]="'ADMIN.COMMON.DOWNLOAD' | translate"
+                    [attr.aria-label]="'ADMIN.COMMON.DOWNLOAD' | translate"
                     [nzLoading]="downloadingId() === ver.id"
                     [disabled]="downloadingId() !== null"
                     (click)="downloadVersion(ver)"
@@ -286,6 +288,7 @@
                       class="action-icon"
                       nz-tooltip
                       [nzTooltipTitle]="t('TOOLTIP_RESTORE') | translate"
+                      [attr.aria-label]="t('TOOLTIP_RESTORE') | translate"
                       [nzLoading]="restoringId() === ver.id"
                       [disabled]="restoringId() !== null"
                       (click)="restoreVersion(ver)"
@@ -301,6 +304,7 @@
                       class="action-icon action-icon--edit"
                       nz-tooltip
                       [nzTooltipTitle]="t('TOOLTIP_EDIT') | translate"
+                      [attr.aria-label]="t('TOOLTIP_EDIT') | translate"
                       (click)="openEditModal(ver)"
                     >
                       <ng-icon name="lucideSquarePen" aria-hidden="true" />
@@ -314,6 +318,7 @@
                       class="action-icon action-icon--delete"
                       nz-tooltip
                       [nzTooltipTitle]="t('TOOLTIP_DELETE') | translate"
+                      [attr.aria-label]="t('TOOLTIP_DELETE') | translate"
                       (click)="deleteRow(ver)"
                     >
                       <ng-icon name="lucideTrash2" aria-hidden="true" />
@@ -358,12 +363,20 @@
                             }}
                             {{ change.sura }}:{{ change.aya }}
                           </span>
-                          @if (change.change_type !== 'added' && change.old_text) {
+                          @if (
+                            change.change_type !== 'added' &&
+                            change.old_text !== null &&
+                            change.old_text !== undefined
+                          ) {
                             <span class="asset-versions-manager__diff-old">{{
                               change.old_text
                             }}</span>
                           }
-                          @if (change.change_type !== 'removed' && change.new_text) {
+                          @if (
+                            change.change_type !== 'removed' &&
+                            change.new_text !== null &&
+                            change.new_text !== undefined
+                          ) {
                             <span class="asset-versions-manager__diff-new">{{
                               change.new_text
                             }}</span>
