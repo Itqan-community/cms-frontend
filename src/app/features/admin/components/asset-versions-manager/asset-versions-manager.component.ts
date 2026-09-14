@@ -421,6 +421,7 @@ export class AssetVersionsManagerComponent
             !this.isTextPreviewable(
               row.file_url,
             ) ||
+            !previousVersion.file_url ||
             !this.isTextPreviewable(
               previousVersion.file_url,
             )

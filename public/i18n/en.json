@@ -780,6 +780,10 @@
   "OPEN_FILE": "Open file",
   "NO_CSV_DATA": "No CSV data available.",
   "TEXT_DIFF": "Text diff",
+  "VIEW_MODE": "View mode",
+  "FILE_PREVIEW": "File preview",
+  "DIFF_VIEW": "Diff",
+  "DIFF_TOO_LARGE": "The comparison cannot be displayed because this file is too large.",
   "UNSUPPORTED": "This file type is not supported for preview.",
   "OPEN_DOWNLOAD": "Open / Download file",
   "AUDIO_ARIA": "Audio preview"

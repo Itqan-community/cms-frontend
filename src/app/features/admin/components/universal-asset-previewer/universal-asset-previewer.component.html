@@ -5,110 +5,52 @@
   </div>
 
   @if (previewType() === 'audio') {
-
     <div class="preview-content audio-preview">
-
-      @if (binaryLoading()) {
-
-        <div
-          class="preview-message"
-          aria-live="polite"
-        >
-          <span>
-            {{ 'ADMIN.PREVIEW.LOADING' | translate }}
-          </span>
-        </div>
-
-      } @else if (binaryError()) {
-
-        <div
-          class="preview-message preview-message--error"
-        >
+      @if (binaryError()) {
+        <div class="preview-message preview-message--error">
           <p>
             {{ 'ADMIN.PREVIEW.AUDIO_ERROR' | translate }}
           </p>
 
-          <a
-            [href]="fileUrl()"
-            target="_blank"
-            rel="noopener"
-          >
+          <a [href]="fileUrl()" target="_blank" rel="noopener">
             {{ 'ADMIN.PREVIEW.OPEN_AUDIO' | translate }}
           </a>
         </div>
-
       } @else {
-
         <audio
           controls
           preload="metadata"
-          [src]="previewUrl()"
-          [attr.aria-label]="
-            'ADMIN.PREVIEW.AUDIO_ARIA' | translate
-          "
+          [src]="fileUrl()"
+          [attr.aria-label]="'ADMIN.PREVIEW.AUDIO_ARIA' | translate"
           (error)="onAudioError()"
         ></audio>
-
       }
-
     </div>
-
   } @else if (previewType() === 'image') {
-
     <div class="preview-content image-preview">
-
-      @if (binaryLoading()) {
-
-        <div
-          class="preview-message"
-          aria-live="polite"
-        >
-          <span>
-            {{ 'ADMIN.PREVIEW.LOADING' | translate }}
-          </span>
-        </div>
-
-      } @else if (imageError() || binaryError()) {
-
-        <div
-          class="preview-message preview-message--error"
-        >
-
+      @if (imageError() || binaryError()) {
+        <div class="preview-message preview-message--error">
           <p>
             {{ 'ADMIN.PREVIEW.IMAGE_ERROR' | translate }}
           </p>
 
-          <a
-            [href]="fileUrl()"
-            target="_blank"
-            rel="noopener"
-          >
+          <a [href]="fileUrl()" target="_blank" rel="noopener">
             {{ 'ADMIN.PREVIEW.OPEN_IMAGE' | translate }}
           </a>
-
         </div>
-
       } @else {
-
         <div
           class="image-controls"
-          [attr.aria-label]="
-            'ADMIN.PREVIEW.IMAGE_ZOOM_CONTROLS' | translate
-          "
+          [attr.aria-label]="'ADMIN.PREVIEW.IMAGE_ZOOM_CONTROLS' | translate"
         >
-
           <button
             type="button"
             nz-button
             nzType="default"
             (click)="zoomOut()"
             [disabled]="imageZoom() <= 0.5"
-            [attr.aria-label]="
-              'ADMIN.PREVIEW.ZOOM_OUT' | translate
-            "
-            [attr.title]="
-              'ADMIN.PREVIEW.ZOOM_OUT' | translate
-            "
+            [attr.aria-label]="'ADMIN.PREVIEW.ZOOM_OUT' | translate"
+            [attr.title]="'ADMIN.PREVIEW.ZOOM_OUT' | translate"
           >
             −
           </button>
@@ -118,12 +60,8 @@
             nz-button
             nzType="default"
             (click)="resetZoom()"
-            [attr.aria-label]="
-              'ADMIN.PREVIEW.RESET_ZOOM' | translate
-            "
-            [attr.title]="
-              'ADMIN.PREVIEW.RESET_ZOOM' | translate
-            "
+            [attr.aria-label]="'ADMIN.PREVIEW.RESET_ZOOM' | translate"
+            [attr.title]="'ADMIN.PREVIEW.RESET_ZOOM' | translate"
           >
             {{ imageZoom() * 100 }}%
           </button>
@@ -134,36 +72,24 @@
             nzType="default"
             (click)="zoomIn()"
             [disabled]="imageZoom() >= 3"
-            [attr.aria-label]="
-              'ADMIN.PREVIEW.ZOOM_IN' | translate
-            "
-            [attr.title]="
-              'ADMIN.PREVIEW.ZOOM_IN' | translate
-            "
+            [attr.aria-label]="'ADMIN.PREVIEW.ZOOM_IN' | translate"
+            [attr.title]="'ADMIN.PREVIEW.ZOOM_IN' | translate"
           >
             +
           </button>
-
         </div>
 
         <div class="image-container">
-
           <img
-            [src]="previewUrl()"
+            [src]="fileUrl()"
             [alt]="fileName()"
-            [style.transform]="
-              'scale(' + imageZoom() + ')'
-            "
+            [style.transform]="'scale(' + imageZoom() + ')'"
             (load)="onImageLoad()"
             (error)="onImageError()"
           />
-
         </div>
-
       }
-
     </div>
-
   } @else if (previewType() === 'pdf') {
 
     <div class="preview-content pdf-preview">
@@ -353,128 +279,162 @@
     </div>
 
   } @else if (previewType() === 'code') {
-
     <div class="preview-content file-preview">
-
       @if (diffMode()) {
+        <div
+          class="preview-tabs"
+          role="tablist"
+          [attr.aria-label]="'ADMIN.PREVIEW.VIEW_MODE' | translate"
+        >
+          <button
+            type="button"
+            class="preview-tab"
+            [class.preview-tab--active]="previewMode() === 'preview'"
+            role="tab"
+            [attr.aria-selected]="previewMode() === 'preview'"
+            aria-controls="preview-panel"
+            (click)="setPreviewMode('preview')"
+          >
+            {{ 'ADMIN.PREVIEW.FILE_PREVIEW' | translate }}
+          </button>
 
-        <div class="diff-content">
+          <button
+            type="button"
+            class="preview-tab"
+            [class.preview-tab--active]="previewMode() === 'diff'"
+            role="tab"
+            [attr.aria-selected]="previewMode() === 'diff'"
+            aria-controls="diff-panel"
+            (click)="setPreviewMode('diff')"
+          >
+            {{ 'ADMIN.PREVIEW.DIFF_VIEW' | translate }}
+          </button>
+        </div>
+      }
 
+      @if (diffMode() && previewMode() === 'diff') {
+        <div id="diff-panel" class="diff-content" role="tabpanel">
           <div class="diff-header">
             <span>
               {{ 'ADMIN.PREVIEW.TEXT_DIFF' | translate }}
             </span>
           </div>
 
-          <pre
-            class="file-content diff-content__body"
-          ><code>{{ diffLines().join('\n') }}</code></pre>
-
+          @if (diffTooLarge()) {
+            <div class="preview-message" aria-live="polite">
+              <p>
+                {{ 'ADMIN.PREVIEW.DIFF_TOO_LARGE' | translate }}
+              </p>
+            </div>
+          } @else {
+            <pre
+              class="file-content diff-content__body"
+            ><code>{{ diffLines().join('\n') }}</code></pre>
+          }
         </div>
-
       } @else if (loading()) {
-
-        <div
-          class="preview-message"
-          aria-live="polite"
-        >
+        <div class="preview-message" aria-live="polite">
           <span>
             {{ 'ADMIN.PREVIEW.LOADING' | translate }}
           </span>
         </div>
-
       } @else if (error()) {
-
-        <div
-          class="preview-message preview-message--error"
-        >
-
+        <div class="preview-message preview-message--error">
           <p>
             {{ 'ADMIN.PREVIEW.FILE_ERROR' | translate }}
           </p>
 
-          <a
-            [href]="fileUrl()"
-            target="_blank"
-            rel="noopener"
-          >
+          <a [href]="fileUrl()" target="_blank" rel="noopener">
             {{ 'ADMIN.PREVIEW.OPEN_FILE' | translate }}
           </a>
-
         </div>
-
       } @else {
-
-        <pre
-          class="file-content code-highlight"
-        ><code
-          class="hljs"
-          [innerHTML]="highlightedCode()"
-        ></code></pre>
-
+        <div id="preview-panel" role="tabpanel">
+          <pre class="file-content code-highlight"><code
+            class="hljs"
+            [innerHTML]="highlightedCode()"
+          ></code></pre>
+        </div>
       }
-
     </div>
-
   } @else if (previewType() === 'text') {
-
     <div class="preview-content file-preview">
-
       @if (diffMode()) {
+        <div
+          class="preview-tabs"
+          role="tablist"
+          [attr.aria-label]="'ADMIN.PREVIEW.VIEW_MODE' | translate"
+        >
+          <button
+            type="button"
+            class="preview-tab"
+            [class.preview-tab--active]="previewMode() === 'preview'"
+            role="tab"
+            [attr.aria-selected]="previewMode() === 'preview'"
+            aria-controls="preview-panel"
+            (click)="setPreviewMode('preview')"
+          >
+            {{ 'ADMIN.PREVIEW.FILE_PREVIEW' | translate }}
+          </button>
 
-        <div class="diff-content">
+          <button
+            type="button"
+            class="preview-tab"
+            [class.preview-tab--active]="previewMode() === 'diff'"
+            role="tab"
+            [attr.aria-selected]="previewMode() === 'diff'"
+            aria-controls="diff-panel"
+            (click)="setPreviewMode('diff')"
+          >
+            {{ 'ADMIN.PREVIEW.DIFF_VIEW' | translate }}
+          </button>
+        </div>
+      }
 
+      @if (diffMode() && previewMode() === 'diff') {
+        <div id="diff-panel" class="diff-content" role="tabpanel">
           <div class="diff-header">
             <span>
               {{ 'ADMIN.PREVIEW.TEXT_DIFF' | translate }}
             </span>
           </div>
 
-          <pre
-            class="file-content diff-content__body"
-          ><code>{{ diffLines().join('\n') }}</code></pre>
-
+          @if (diffTooLarge()) {
+            <div class="preview-message" aria-live="polite">
+              <p>
+                {{ 'ADMIN.PREVIEW.DIFF_TOO_LARGE' | translate }}
+              </p>
+            </div>
+          } @else {
+            <pre
+              class="file-content diff-content__body"
+            ><code>{{ diffLines().join('\n') }}</code></pre>
+          }
         </div>
-
       } @else if (loading()) {
-
-        <div
-          class="preview-message"
-          aria-live="polite"
-        >
+        <div class="preview-message" aria-live="polite">
           <span>
             {{ 'ADMIN.PREVIEW.LOADING' | translate }}
           </span>
         </div>
-
       } @else if (error()) {
-
-        <div
-          class="preview-message preview-message--error"
-        >
-
+        <div class="preview-message preview-message--error">
           <p>
             {{ 'ADMIN.PREVIEW.FILE_ERROR' | translate }}
           </p>
 
-          <a
-            [href]="fileUrl()"
-            target="_blank"
-            rel="noopener"
-          >
+          <a [href]="fileUrl()" target="_blank" rel="noopener">
             {{ 'ADMIN.PREVIEW.OPEN_FILE' | translate }}
           </a>
-
         </div>
-
       } @else {
-
-        <pre class="file-content"><code>{{ textContent() }}</code></pre>
-
+        <div id="preview-panel" role="tabpanel">
+          <pre class="file-content">
+            <code>{{ textContent() }}</code>
+          </pre>
+        </div>
       }
-
     </div>
-
   } @else {
 
     <div class="preview-content unsupported-preview">
