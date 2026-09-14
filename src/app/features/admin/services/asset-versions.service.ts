@@ -88,6 +88,12 @@ export class AssetVersionsService {
     slug: string,
     pageSize = 100,
   ): Observable<AssetVersionsListResponse> {
+    const effectivePageSize =
+      Math.min(
+        pageSize,
+        1000,
+      );
+
     const firstPageParams =
       new HttpParams()
         .set(
@@ -96,7 +102,7 @@ export class AssetVersionsService {
         )
         .set(
           'page_size',
-          pageSize.toString(),
+          effectivePageSize.toString(),
         );
 
     return this.http
@@ -114,7 +120,7 @@ export class AssetVersionsService {
           const totalPages =
             Math.ceil(
               firstPage.count /
-                pageSize,
+                effectivePageSize,
             );
 
           if (
@@ -141,7 +147,7 @@ export class AssetVersionsService {
                     )
                     .set(
                       'page_size',
-                      pageSize.toString(),
+                      effectivePageSize.toString(),
                     );
 
                 return this.http.get<AssetVersionsListResponse>(
