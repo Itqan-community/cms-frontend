@@ -29,12 +29,12 @@ import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/br
 import { ImageCarouselComponent } from '../../../../shared/components/image-carousel/image-carousel.component';
 import { LicenseTagComponent } from '../../../../shared/components/license-tag/license-tag.component';
 import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
-import { IssuesService } from '../../../admin/issues/services/issues.service';
 import { resolveApiErrorMessage } from '../../../../shared/utils/api-error-resolver.util';
+import { IssuesService } from '../../../admin/issues/services/issues.service';
 import { localizedLanguageName } from '../../../admin/utils/iso-639.util';
 import { AssetDetails } from '../../models/assets.model';
-import { AssetsService } from '../../services/assets.service';
 import { AssetLicenseAcceptanceService } from '../../services/asset-license-acceptance.service';
+import { AssetsService } from '../../services/assets.service';
 
 @Component({
   selector: 'app-asset-details-page',
@@ -190,7 +190,9 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
 
   downloadResource() {
     if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/account/login']);
+      void this.router.navigate(['/account/login'], {
+        queryParams: { next: this.router.url },
+      });
       return;
     }
 
@@ -490,7 +492,9 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
 
   downloadOriginalResource() {
     if (!this.authService.isLoggedIn()) {
-      this.router.navigate(['/account/login']);
+      void this.router.navigate(['/account/login'], {
+        queryParams: { next: this.router.url },
+      });
       return;
     }
 
