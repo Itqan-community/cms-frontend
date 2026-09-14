@@ -872,8 +872,6 @@ export class AssetVersionsManagerComponent
             return;
           }
 
-          this.loadList();
-
           this.message.error(
             this.translate.instant(
               `${this.i18nPrefix}.MESSAGES.SAVE_ERROR`,
