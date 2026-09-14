@@ -52,7 +52,9 @@
       "prettier --write",
       "node scripts/check-arabic-translations.js"
     ],
-    "*.{json,html,css,less,md}": ["prettier --write"]
+    "*.{json,html,css,less,md}": [
+      "prettier --write"
+    ]
   },
   "private": true,
   "dependencies": {
@@ -69,6 +71,7 @@
     "@ngx-translate/core": "^17.0.0",
     "@ngx-translate/http-loader": "^17.0.0",
     "@sentry/angular": "^10.47.0",
+    "highlight.js": "^11.12.0",
     "ag-grid-angular": "^36.0.0",
     "ag-grid-community": "^36.0.0",
     "ng-zorro-antd": "^20.3.1",
