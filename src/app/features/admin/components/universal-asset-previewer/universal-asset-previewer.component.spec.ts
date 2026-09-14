@@ -1,15 +1,23 @@
 import { provideHttpClient } from '@angular/common/http';
+import {
+  HttpTestingController,
+  provideHttpClientTesting,
+} from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { UniversalAssetPreviewerComponent } from './universal-asset-previewer.component';
 
 describe('UniversalAssetPreviewerComponent', () => {
   let component: UniversalAssetPreviewerComponent;
   let fixture: ComponentFixture<UniversalAssetPreviewerComponent>;
+  let httpTestingController: HttpTestingController;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [UniversalAssetPreviewerComponent],
-      providers: [provideHttpClient()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
     });
 
     TestBed.overrideComponent(UniversalAssetPreviewerComponent, {
@@ -24,6 +32,9 @@ describe('UniversalAssetPreviewerComponent', () => {
 
     component = fixture.componentInstance;
 
+    httpTestingController =
+      TestBed.inject(HttpTestingController);
+
     fixture.componentRef.setInput(
       'fileUrl',
       'https://example.com/file.txt',
@@ -35,6 +46,17 @@ describe('UniversalAssetPreviewerComponent', () => {
     );
 
     fixture.detectChanges();
+
+    const request =
+      httpTestingController.expectOne(
+        'https://example.com/file.txt',
+      );
+
+    request.flush('test file content');
+  });
+
+  afterEach(() => {
+    httpTestingController.verify();
   });
 
   it('starts in file preview mode', () => {

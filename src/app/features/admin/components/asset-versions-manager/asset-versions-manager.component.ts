@@ -383,10 +383,6 @@ export class AssetVersionsManagerComponent
       false,
     );
 
-    if (this.total() <= 1) {
-      return;
-    }
-
     this.previewDiffLoading.set(
       true,
     );

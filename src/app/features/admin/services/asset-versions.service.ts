@@ -10,6 +10,10 @@ import {
 
 import {
   Observable,
+  forkJoin,
+  map,
+  of,
+  switchMap,
 } from 'rxjs';
 
 import {
@@ -84,7 +88,7 @@ export class AssetVersionsService {
     slug: string,
     pageSize = 100,
   ): Observable<AssetVersionsListResponse> {
-    const httpParams =
+    const firstPageParams =
       new HttpParams()
         .set(
           'page',
@@ -95,15 +99,80 @@ export class AssetVersionsService {
           pageSize.toString(),
         );
 
-    return this.http.get<AssetVersionsListResponse>(
-      this.listUrl(
-        kind,
-        slug,
-      ),
-      {
-        params: httpParams,
-      },
-    );
+    return this.http
+      .get<AssetVersionsListResponse>(
+        this.listUrl(
+          kind,
+          slug,
+        ),
+        {
+          params: firstPageParams,
+        },
+      )
+      .pipe(
+        switchMap((firstPage) => {
+          const totalPages =
+            Math.ceil(
+              firstPage.count /
+                pageSize,
+            );
+
+          if (
+            totalPages <= 1
+          ) {
+            return of(firstPage);
+          }
+
+          const remainingRequests =
+            Array.from(
+              {
+                length:
+                  totalPages - 1,
+              },
+              (_, index) => {
+                const page =
+                  index + 2;
+
+                const params =
+                  new HttpParams()
+                    .set(
+                      'page',
+                      page.toString(),
+                    )
+                    .set(
+                      'page_size',
+                      pageSize.toString(),
+                    );
+
+                return this.http.get<AssetVersionsListResponse>(
+                  this.listUrl(
+                    kind,
+                    slug,
+                  ),
+                  {
+                    params,
+                  },
+                );
+              },
+            );
+
+          return forkJoin(
+            remainingRequests,
+          ).pipe(
+            map((responses) => ({
+              results: [
+                ...firstPage.results,
+                ...responses.flatMap(
+                  (response) =>
+                    response.results,
+                ),
+              ],
+              count:
+                firstPage.count,
+            })),
+          );
+        }),
+      );
   }
 
   create(
