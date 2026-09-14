@@ -1,0 +1,11 @@
+<section class="review-page">
+  <header class="review-page__header">
+    <a class="review-page__back" [routerLink]="['/admin', listSegment, slug()]">
+      &larr; {{ 'ADMIN.REVIEW.BACK' | translate }}
+    </a>
+    <h1 class="review-page__title">{{ 'ADMIN.REVIEW.PAGE_TITLE' | translate }}</h1>
+    <p class="review-page__hint">{{ 'ADMIN.REVIEW.HINT' | translate }}</p>
+  </header>
+
+  <app-asset-review-grid [kind]="kind()" [slug]="slug()" />
+</section>

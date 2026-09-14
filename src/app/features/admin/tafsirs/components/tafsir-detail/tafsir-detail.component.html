@@ -75,6 +75,12 @@
             {{ 'ADMIN.CONTENT_EDITOR.OPEN_BUTTON' | translate }}
           </button>
         }
+        @if (canReview()) {
+          <button nz-button nzType="default" (click)="onReview()">
+            <ng-icon name="lucideCheck" />
+            {{ 'ADMIN.REVIEW.OPEN_BUTTON' | translate }}
+          </button>
+        }
         @if (canDeleteTafsir()) {
           <button nz-button nzDanger (click)="onDelete()">
             <ng-icon name="lucideTrash2" />
@@ -115,8 +121,6 @@
       i18nPrefix="ADMIN.TAFSIRS.DETAIL.VERSIONS"
       sectionTitleKey="ADMIN.TAFSIRS.DETAIL.VERSIONS_TITLE"
     />
-
-    <app-asset-review-grid kind="tafsir" [slug]="tafsir()!.slug" />
 
     <div class="admin-back">
       <a routerLink="/admin/tafsirs">

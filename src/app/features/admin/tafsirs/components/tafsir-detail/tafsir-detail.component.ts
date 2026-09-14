@@ -17,7 +17,6 @@ import {
   localizeLanguageCode,
 } from '../../../utils/display-localization.util';
 import { AssetVersionsManagerComponent } from '../../../components/asset-versions-manager/asset-versions-manager.component';
-import { AssetReviewGridComponent } from '../../../components/asset-review-grid/asset-review-grid.component';
 import { TafsirDetails } from '../../models/tafsirs.models';
 import { TafsirsService } from '../../services/tafsirs.service';
 
@@ -35,7 +34,6 @@ import { TafsirsService } from '../../services/tafsirs.service';
     NzToolTipModule,
     TranslateModule,
     AssetVersionsManagerComponent,
-    AssetReviewGridComponent,
   ],
   templateUrl: './tafsir-detail.component.html',
   styleUrl: './tafsir-detail.component.less',
@@ -55,6 +53,10 @@ export class TafsirDetailComponent implements OnInit {
 
   readonly canDeleteTafsir = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TAFSIR)
+  );
+
+  readonly canReview = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_REVIEW_CONTENT)
   );
 
   readonly tafsir = signal<TafsirDetails | null>(null);
@@ -87,6 +89,10 @@ export class TafsirDetailComponent implements OnInit {
 
   onEditContent(): void {
     void this.router.navigate(['/admin/tafsirs', this.slug, 'edit-content']);
+  }
+
+  onReview(): void {
+    void this.router.navigate(['/admin/tafsirs', this.slug, 'review']);
   }
 
   onDelete(): void {

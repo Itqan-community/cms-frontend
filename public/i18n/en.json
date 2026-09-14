@@ -858,6 +858,10 @@
     },
     "REVIEW": {
       "TITLE": "Review changes",
+      "PAGE_TITLE": "Review changes",
+      "OPEN_BUTTON": "Review",
+      "BACK": "Back to asset",
+      "HINT": "Approve each change or leave a comment. You can only review languages assigned to you, and you cannot edit the content here.",
       "NO_ASSIGNED_LANGUAGES": "You have no languages assigned to review for this asset.",
       "NO_CHANGES": "No changes to show.",
       "FILTER": {
