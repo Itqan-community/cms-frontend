@@ -22,15 +22,17 @@
           ></nz-option>
         }
       </nz-select>
-      <button
-        nz-button
-        nzType="default"
-        (click)="openAddLanguage()"
-        [disabled]="loading() || saving() || publishing() || savingDraft()"
-      >
-        <ng-icon name="lucidePlus" />
-        {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD' | translate }}
-      </button>
+      @if (canAddLanguage()) {
+        <button
+          nz-button
+          nzType="default"
+          (click)="openAddLanguage()"
+          [disabled]="loading() || saving() || publishing() || savingDraft()"
+        >
+          <ng-icon name="lucidePlus" />
+          {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD' | translate }}
+        </button>
+      }
     </div>
 
     <div class="content-grid__status">

@@ -54,6 +54,9 @@
             <th nzWidth="220px">{{ 'ADMIN.MEMBERS.COLUMNS.EMAIL' | translate }}</th>
             <th nzWidth="120px">{{ 'ADMIN.MEMBERS.COLUMNS.GROUP' | translate }}</th>
             <th nzWidth="180px">{{ 'ADMIN.MEMBERS.COLUMNS.STATUS' | translate }}</th>
+            <th nzWidth="180px">
+              {{ 'ADMIN.MEMBERS.COLUMNS.ASSIGNED_LANGUAGES' | translate }}
+            </th>
             <th
               nzWidth="130px"
               [nzSortFn]="true"
@@ -83,6 +86,17 @@
                   }
                 </div>
               </td>
+              <td>
+                @if (row.languages.length) {
+                  <div class="members-list__lang-cell">
+                    @for (code of row.languages; track code) {
+                      <nz-tag nzColor="blue">{{ langName(code) }}</nz-tag>
+                    }
+                  </div>
+                } @else {
+                  <span class="members-list__lang-empty">—</span>
+                }
+              </td>
               <td>{{ row.created_at | date: 'dd/MM/yyyy' }}</td>
               <td (click)="$event.stopPropagation()">
                 <div class="admin-list-actions">
@@ -97,6 +111,19 @@
                       (click)="openEditModal(row)"
                     >
                       <ng-icon name="lucideSquarePen" aria-hidden="true" />
+                    </button>
+                  }
+                  @if (canUpdate() && canManageRow(row) && row.status === 'active') {
+                    <button
+                      nz-button
+                      nzType="text"
+                      type="button"
+                      class="action-icon action-icon--languages"
+                      nz-tooltip
+                      [nzTooltipTitle]="'ADMIN.MEMBERS.TOOLTIP_ASSIGNED_LANGUAGES' | translate"
+                      (click)="openLanguagesModal(row)"
+                    >
+                      <ng-icon name="lucideLanguages" aria-hidden="true" />
                     </button>
                   }
                   @if (canInvite() && row.status === 'pending') {
@@ -230,6 +257,40 @@
           </p>
         }
       </form>
+    </ng-container>
+  </nz-modal>
+
+  <nz-modal
+    [nzVisible]="langModalVisible()"
+    (nzVisibleChange)="onLangModalVisibleChange($event)"
+    (nzOnCancel)="closeLangModal()"
+    [nzTitle]="
+      ('ADMIN.MEMBERS.ASSIGNED_LANGUAGES.TITLE' | translate: { name: langMember()?.name ?? '' })
+    "
+    [nzWidth]="'min(520px, 92vw)'"
+    nzCentered
+    [nzOkLoading]="langSubmitting()"
+    [nzOkText]="'ADMIN.MEMBERS.ASSIGNED_LANGUAGES.SUBMIT' | translate"
+    [nzCancelText]="'ADMIN.MEMBERS.FORM.CANCEL' | translate"
+    (nzOnOk)="submitLanguages()"
+  >
+    <ng-container *nzModalContent>
+      <p class="members-list__lang-hint">
+        {{ 'ADMIN.MEMBERS.ASSIGNED_LANGUAGES.HINT' | translate }}
+      </p>
+      <nz-select
+        class="members-list__lang-select"
+        nzMode="multiple"
+        [ngModel]="selectedLanguages()"
+        (ngModelChange)="selectedLanguages.set($event)"
+        [nzPlaceHolder]="'ADMIN.MEMBERS.ASSIGNED_LANGUAGES.PLACEHOLDER' | translate"
+        nzAllowClear
+        [nzDisabled]="langSubmitting()"
+      >
+        @for (lang of languageOptions; track lang.code) {
+          <nz-option [nzValue]="lang.code" [nzLabel]="langName(lang.code)"></nz-option>
+        }
+      </nz-select>
     </ng-container>
   </nz-modal>
 </div>

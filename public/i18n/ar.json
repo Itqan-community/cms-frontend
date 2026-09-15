@@ -1756,11 +1756,13 @@
       "TOOLTIP_RESEND": "إعادة إرسال الدعوة",
       "TOOLTIP_CANCEL": "إلغاء الدعوة",
       "TOOLTIP_REMOVE": "إزالة العضو",
+      "TOOLTIP_ASSIGNED_LANGUAGES": "تعيين اللغات",
       "COLUMNS": {
         "NAME": "الاسم",
         "EMAIL": "البريد الإلكتروني",
         "GROUP": "المجموعة",
         "STATUS": "الحالة",
+        "ASSIGNED_LANGUAGES": "اللغات",
         "CREATED_AT": "تاريخ الإضافة",
         "ACTIONS": "الإجراءات"
       },
@@ -1808,6 +1810,14 @@
         "CONFIRM_TITLE": "إعادة إرسال الدعوة؟",
         "CONFIRM_BODY": "{{name}} — سيتوقف الرابط السابق عن العمل فوراً.",
         "CONFIRM_OK": "إعادة الإرسال"
+      },
+      "ASSIGNED_LANGUAGES": {
+        "TITLE": "اللغات المعيّنة — {{name}}",
+        "HINT": "اختر اللغات التي يعمل بها هذا العضو. لن يتمكن من تحرير أو مراجعة المحتوى إلا في اللغات المعيّنة هنا.",
+        "PLACEHOLDER": "اختر اللغات",
+        "SUBMIT": "حفظ",
+        "SAVED": "تم تحديث اللغات المعيّنة",
+        "SAVE_ERROR": "تعذر تحديث اللغات المعيّنة"
       },
       "MESSAGES": {
         "INVITE_SUCCESS": "تم إرسال الدعوة",

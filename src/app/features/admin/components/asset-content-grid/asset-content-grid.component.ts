@@ -29,6 +29,8 @@ import type {
   ContentEntry,
   ContentEntryPatch,
 } from '../../models/asset-content.models';
+import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
+import { AdminAuthService } from '../../services/admin-auth.service';
 import { AssetContentService } from '../../services/asset-content.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import {
@@ -81,6 +83,12 @@ export class AssetContentGridComponent implements OnInit {
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly adminAuth = inject(AdminAuthService);
+
+  /** Starting a new language is controlled separately from editing one. */
+  readonly canAddLanguage = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ADD_ASSET_LANGUAGE)
+  );
 
   private gridApi?: GridApi<ContentEntry>;
   private readonly autosave$ = new Subject<void>();

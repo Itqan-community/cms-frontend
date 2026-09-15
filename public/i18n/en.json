@@ -1756,11 +1756,13 @@
       "TOOLTIP_RESEND": "Resend invitation",
       "TOOLTIP_CANCEL": "Cancel invitation",
       "TOOLTIP_REMOVE": "Remove member",
+      "TOOLTIP_ASSIGNED_LANGUAGES": "Assign languages",
       "COLUMNS": {
         "NAME": "Name",
         "EMAIL": "Email",
         "GROUP": "Group",
         "STATUS": "Status",
+        "ASSIGNED_LANGUAGES": "Languages",
         "CREATED_AT": "Added",
         "ACTIONS": "Actions"
       },
@@ -1808,6 +1810,14 @@
         "CONFIRM_TITLE": "Resend invitation?",
         "CONFIRM_BODY": "{{name}} — the previous link will stop working immediately.",
         "CONFIRM_OK": "Resend"
+      },
+      "ASSIGNED_LANGUAGES": {
+        "TITLE": "Assigned languages — {{name}}",
+        "HINT": "Select the languages this member works in. They can only edit and review content in the languages assigned here.",
+        "PLACEHOLDER": "Select languages",
+        "SUBMIT": "Save",
+        "SAVED": "Assigned languages updated",
+        "SAVE_ERROR": "Could not update assigned languages"
       },
       "MESSAGES": {
         "INVITE_SUCCESS": "Invitation sent",

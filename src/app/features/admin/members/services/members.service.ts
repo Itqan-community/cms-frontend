@@ -50,6 +50,11 @@ export class MembersService {
     return this.http.patch<MemberOut>(`${this.baseUrl}/${id}/`, body);
   }
 
+  /** Replace the languages this member works in (editing and reviewing alike). */
+  setMemberLanguages(id: number, languages: string[]): Observable<MemberOut> {
+    return this.http.put<MemberOut>(`${this.baseUrl}/${id}/languages/`, { languages });
+  }
+
   remove(id: number): Observable<void> {
     return this.http.delete<void>(`${this.baseUrl}/${id}/`);
   }
