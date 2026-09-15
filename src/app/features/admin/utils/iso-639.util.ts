@@ -220,6 +220,13 @@ function displayNames(
   }
 }
 
+/** Codes outside ISO 639-1 that the picker offered before the list was derived
+ *  from `Intl.DisplayNames`. Kept so existing options never disappear; the
+ *  curated names are the fallback when the platform has no name for the code. */
+const SUPPLEMENTAL_LANGUAGES: readonly IsoLanguage[] = [
+  { code: 'fil', name: 'Filipino', native: 'Filipino' },
+];
+
 function buildLanguages(): IsoLanguage[] {
   // `fallback: 'none'` returns undefined when the platform has no name for a
   // code, so we can drop codes that would otherwise show as bare codes.
@@ -230,6 +237,12 @@ function buildLanguages(): IsoLanguage[] {
     if (!name) continue; // no real name → skip
     const native = displayNames(code)?.of(code) ?? name;
     languages.push({ code, name, native: native || name });
+  }
+  for (const fallback of SUPPLEMENTAL_LANGUAGES) {
+    if (languages.some((l) => l.code === fallback.code)) continue;
+    const name = (en ? en.of(fallback.code) : null) || fallback.name;
+    const native = displayNames(fallback.code)?.of(fallback.code) || fallback.native;
+    languages.push({ code: fallback.code, name, native });
   }
   return languages.sort((a, b) => a.name.localeCompare(b.name));
 }

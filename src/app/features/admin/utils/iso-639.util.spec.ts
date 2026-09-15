@@ -8,6 +8,13 @@ describe('iso-639.util', () => {
       expect(ar).toBeDefined();
       expect(ar?.code).toBe('ar');
     });
+
+    it('should keep supplemental non-ISO-639-1 options such as Filipino', () => {
+      const fil = ISO_639_LANGUAGES.find((l) => l.code === 'fil');
+      expect(fil).toBeDefined();
+      expect(fil?.name).toBeTruthy();
+      expect(fil?.native).toBeTruthy();
+    });
   });
 
   describe('languageLabel', () => {

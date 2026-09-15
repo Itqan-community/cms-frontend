@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { Subject, of } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import type { AssetLanguage } from '../../models/asset-content.models';
 import type { AssetVersionsListResponse } from '../../models/asset-versions.models';
 import { AdminAuthService } from '../../services/admin-auth.service';
@@ -112,6 +112,32 @@ describe('AssetVersionsManagerComponent', () => {
 
       expect(component.missingVersionLanguage()).toBeFalse();
       expect(versionsService.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('version diff', () => {
+    it('flags an error instead of reporting a failed diff as "no changes"', () => {
+      contentService.versionDiff.and.returnValue(throwError(() => new Error('boom')));
+      fixture.detectChanges();
+
+      component.toggleDiff(page('ar').results[0]);
+
+      expect(component.diffError()).toBeTrue();
+      expect(component.diffLoading()).toBeFalse();
+      expect(component.diff()).toEqual([]);
+    });
+
+    it('clears the error when a later diff loads', () => {
+      contentService.versionDiff.and.returnValue(throwError(() => new Error('boom')));
+      fixture.detectChanges();
+      const row = page('ar').results[0];
+      component.toggleDiff(row);
+      component.toggleDiff(row); // collapse
+
+      contentService.versionDiff.and.returnValue(of({ results: [], count: 0 }));
+      component.toggleDiff(row);
+
+      expect(component.diffError()).toBeFalse();
     });
   });
 

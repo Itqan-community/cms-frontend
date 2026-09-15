@@ -222,6 +222,10 @@
       <div class="content-grid__commit-review">
         @if (pendingLoading()) {
           <span>{{ 'ADMIN.CONTENT_EDITOR.COMMIT.REVIEW_LOADING' | translate }}</span>
+        } @else if (pendingError()) {
+          <span class="content-grid__commit-error">
+            {{ 'ADMIN.CONTENT_EDITOR.COMMIT.REVIEW_ERROR' | translate }}
+          </span>
         } @else {
           <p class="content-grid__commit-summary">
             <span class="content-grid__diff-added">+{{ pendingCounts().added }}</span>

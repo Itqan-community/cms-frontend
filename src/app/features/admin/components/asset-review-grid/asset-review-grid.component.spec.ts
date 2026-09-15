@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
 import type { ReviewChange, ReviewChangesResponse } from '../../models/asset-review.models';
 import { AdminAuthService } from '../../services/admin-auth.service';
@@ -234,5 +234,20 @@ describe('AssetReviewGridComponent', () => {
     component.confirmComment();
 
     expect(reviewServiceSpy.setState).not.toHaveBeenCalled();
+  });
+
+  it('should ignore a changes response that a newer reload has superseded', () => {
+    const stale$ = new Subject<ReviewChangesResponse>();
+    const fresh$ = new Subject<ReviewChangesResponse>();
+    reviewServiceSpy.listChanges.and.returnValues(stale$, fresh$);
+    fixture.detectChanges(); // ngOnInit → loadLanguages → loadChanges (stale$)
+
+    component.onFilterChange('approved'); // loadChanges (fresh$)
+    const approved: ReviewChange = { ...mockChange, id: 2, review_state: 'approved' };
+    fresh$.next({ count: 1, results: [approved] });
+    stale$.next(mockResponse); // slow earlier request answering late
+
+    expect(component.changes().map((c) => c.id)).toEqual([2]);
+    expect(component.loading()).toBeFalse();
   });
 });

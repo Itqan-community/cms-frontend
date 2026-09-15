@@ -88,6 +88,9 @@ export class AssetVersionsManagerComponent implements OnInit {
   /** Expanded commit's diff panel state. */
   readonly expandedId = signal<number | null>(null);
   readonly diffLoading = signal(false);
+  /** Set when the diff request failed, so the panel says so instead of
+   *  reporting the empty diff as "no changes". */
+  readonly diffError = signal(false);
   readonly diff = signal<ContentChange[]>([]);
 
   /** Multi-language assets (translations/tafsirs) let the versions be filtered by language. */
@@ -448,6 +451,7 @@ export class AssetVersionsManagerComponent implements OnInit {
     }
     this.expandedId.set(row.id);
     this.diff.set([]);
+    this.diffError.set(false);
     this.diffLoading.set(true);
     this.loadAllVersionDiffs(row.id, 1, []);
   }
@@ -470,6 +474,7 @@ export class AssetVersionsManagerComponent implements OnInit {
         error: () => {
           if (this.expandedId() === versionId) {
             this.diffLoading.set(false);
+            this.diffError.set(true);
           }
         },
       });

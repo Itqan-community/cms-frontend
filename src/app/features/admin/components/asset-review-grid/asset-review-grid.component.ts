@@ -4,6 +4,7 @@ import { Component, DestroyRef, Input, OnInit, computed, inject, signal } from '
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { Subject, takeUntil } from 'rxjs';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -52,6 +53,10 @@ export class AssetReviewGridComponent implements OnInit {
   private readonly message = inject(NzMessageService);
   readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  /** Emits to abort the in-flight changes request. Row actions stay available
+   *  while another row is saving, so two reloads can otherwise race and an older
+   *  response can restore a row the current filter no longer includes. */
+  private readonly cancelInFlightChanges$ = new Subject<void>();
 
   /** Parent asset kind — drives API paths. */
   @Input({ required: true }) kind!: AssetVersionParentKind;
@@ -131,6 +136,7 @@ export class AssetReviewGridComponent implements OnInit {
     if (!language) {
       return;
     }
+    this.cancelInFlightChanges$.next();
     this.loading.set(true);
     const filter = this.stateFilter();
     this.reviewService
@@ -142,7 +148,7 @@ export class AssetReviewGridComponent implements OnInit {
         this.pageSize(),
         filter === 'all' ? null : filter
       )
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntil(this.cancelInFlightChanges$), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           this.changes.set(res.results);
