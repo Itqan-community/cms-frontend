@@ -200,13 +200,22 @@ const ISO_639_1_CODES: readonly string[] = [
   'zu',
 ];
 
+const displayNamesCache = new Map<string, Intl.DisplayNames | null>();
+
 function displayNames(
   locale: string,
   fallback: 'code' | 'none' = 'code'
 ): Intl.DisplayNames | null {
+  const cacheKey = `${locale}:${fallback}`;
+  if (displayNamesCache.has(cacheKey)) {
+    return displayNamesCache.get(cacheKey) ?? null;
+  }
   try {
-    return new Intl.DisplayNames([locale], { type: 'language', fallback });
+    const instance = new Intl.DisplayNames([locale], { type: 'language', fallback });
+    displayNamesCache.set(cacheKey, instance);
+    return instance;
   } catch {
+    displayNamesCache.set(cacheKey, null);
     return null;
   }
 }
@@ -241,11 +250,14 @@ export function languageLabel(code: string): string {
  */
 export function localizedLanguageName(code: string, uiLang: string): string {
   if (!code) return code;
-  try {
-    const name = new Intl.DisplayNames([uiLang], { type: 'language' }).of(code);
-    if (name && name.toLowerCase() !== code.toLowerCase()) return name;
-  } catch {
-    // Intl.DisplayNames unavailable or bad code — fall through to the curated list.
+  const dn = displayNames(uiLang, 'code');
+  if (dn) {
+    try {
+      const name = dn.of(code);
+      if (name && name.toLowerCase() !== code.toLowerCase()) return name;
+    } catch {
+      // Intl.DisplayNames unhandled or bad code — fall through to the curated list.
+    }
   }
   const found = ISO_639_LANGUAGES.find((l) => l.code === code);
   return found ? found.native : code;

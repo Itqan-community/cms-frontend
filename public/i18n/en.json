@@ -864,6 +864,7 @@
       "HINT": "Approve each change or leave a comment. You can only review languages assigned to you, and you cannot edit the content here.",
       "NO_ASSIGNED_LANGUAGES": "You have no languages assigned to review for this asset.",
       "NO_CHANGES": "No changes to show.",
+      "RETRY": "Retry",
       "FILTER": {
         "ALL": "All",
         "UNREVIEWED": "Unreviewed",

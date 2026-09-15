@@ -365,6 +365,14 @@ export class AssetVersionsManagerComponent implements OnInit {
               : `${this.i18nPrefix}.MESSAGES.UPDATE_SUCCESS`;
           this.message.success(this.translate.instant(msgKey));
           this.closeVersionModalWithoutCancelEmit();
+          if (id == null && this.supportsLanguages() && this.versionLanguage()) {
+            const targetLang = this.versionLanguage()!;
+            if (targetLang !== this.selectedLanguage()) {
+              this.selectedLanguage.set(targetLang);
+              this.lastLanguage.set(this.kind, this.slug, targetLang);
+              this.page.set(1);
+            }
+          }
           this.loadList();
         },
         error: (err: unknown) => {
@@ -519,6 +527,17 @@ export class AssetVersionsManagerComponent implements OnInit {
     if (this.downloadingId() !== null) {
       return;
     }
+    // For assets that don't support per-ayah content (mushafs, fonts, programs),
+    // download directly from file_url without attempting translation export.
+    if (!this.supportsLanguages()) {
+      if (row.file_url) {
+        this.triggerDownload(row.file_url, this.exportBaseName(row));
+      } else {
+        this.message.error(this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC'));
+      }
+      return;
+    }
+
     this.downloadingId.set(row.id);
     this.assetContentService
       .exportVersion(this.kind, this.slug, row.id)

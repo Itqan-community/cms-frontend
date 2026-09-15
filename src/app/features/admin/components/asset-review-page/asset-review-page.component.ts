@@ -1,5 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { NgIcon } from '@ng-icons/core';
 import { TranslateModule } from '@ngx-translate/core';
 
 import type { AssetVersionParentKind } from '../../models/asset-versions.models';
@@ -12,7 +13,7 @@ import { AssetReviewGridComponent } from '../asset-review-grid/asset-review-grid
 @Component({
   selector: 'app-asset-review-page',
   standalone: true,
-  imports: [RouterLink, TranslateModule, AssetReviewGridComponent],
+  imports: [RouterLink, TranslateModule, NgIcon, AssetReviewGridComponent],
   templateUrl: './asset-review-page.component.html',
   styleUrl: './asset-review-page.component.less',
 })

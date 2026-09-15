@@ -205,10 +205,11 @@
     (nzOnCancel)="commitDialogVisible.set(false)"
   >
     <ng-container *nzModalContent>
-      <label class="content-grid__commit-label">
+      <label class="content-grid__commit-label" for="commit-message-input">
         {{ 'ADMIN.CONTENT_EDITOR.COMMIT.MESSAGE_LABEL' | translate }}
       </label>
       <textarea
+        id="commit-message-input"
         nz-input
         [ngModel]="commitMessage()"
         (ngModelChange)="commitMessage.set($event)"

@@ -18,7 +18,10 @@ import type { ReviewChange, ReviewState } from '../../models/asset-review.models
 import type { AssetVersionParentKind } from '../../models/asset-versions.models';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { AssetReviewService } from '../../services/asset-review.service';
+import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { localizedLanguageName } from '../../utils/iso-639.util';
+
+export type ReviewActionType = 'approve' | 'comment' | 'unreview';
 
 type StateFilter = 'all' | ReviewState;
 
@@ -45,6 +48,7 @@ const DEFAULT_PAGE_SIZE = 25;
 export class AssetReviewGridComponent implements OnInit {
   private readonly reviewService = inject(AssetReviewService);
   private readonly adminAuth = inject(AdminAuthService);
+  private readonly lastLanguage = inject(LastActiveLanguageService);
   private readonly message = inject(NzMessageService);
   readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -54,7 +58,9 @@ export class AssetReviewGridComponent implements OnInit {
   /** Slug from route (tafsir or translation). */
   @Input({ required: true }) slug!: string;
 
-  readonly canReview = this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_REVIEW_CONTENT);
+  readonly canReview = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_REVIEW_CONTENT)
+  );
 
   readonly languages = signal<string[]>([]);
   readonly selectedLanguage = signal<string | null>(null);
@@ -63,13 +69,14 @@ export class AssetReviewGridComponent implements OnInit {
   readonly page = signal(1);
   readonly pageSize = signal(DEFAULT_PAGE_SIZE);
   readonly loading = signal(false);
+  readonly languagesError = signal(false);
   readonly stateFilter = signal<StateFilter>('unreviewed');
-  readonly savingId = signal<number | null>(null);
+  readonly savingAction = signal<{ id: number; action: ReviewActionType } | null>(null);
 
   /** Comment dialog state. */
   readonly commentOpen = signal(false);
   readonly commentText = signal('');
-  private commentChangeId: number | null = null;
+  commentChangeId: number | null = null;
 
   readonly hasLanguages = computed(() => this.languages().length > 0);
 
@@ -87,13 +94,14 @@ export class AssetReviewGridComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    if (!this.canReview) {
+    if (!this.canReview()) {
       return;
     }
     this.loadLanguages();
   }
 
-  private loadLanguages(): void {
+  loadLanguages(): void {
+    this.languagesError.set(false);
     this.loading.set(true);
     this.reviewService
       .listLanguages(this.kind, this.slug)
@@ -101,14 +109,20 @@ export class AssetReviewGridComponent implements OnInit {
       .subscribe({
         next: (langs) => {
           this.languages.set(langs);
-          this.selectedLanguage.set(langs[0] ?? null);
+          const remembered = this.lastLanguage.get(this.kind, this.slug);
+          const initial = langs.find((l) => l === remembered) ?? langs[0] ?? null;
+          this.selectedLanguage.set(initial);
           if (this.selectedLanguage()) {
             this.loadChanges();
           } else {
             this.loading.set(false);
           }
         },
-        error: () => this.loading.set(false),
+        error: (err: HttpErrorResponse) => {
+          this.loading.set(false);
+          this.languagesError.set(true);
+          this.showError(err);
+        },
       });
   }
 
@@ -144,6 +158,7 @@ export class AssetReviewGridComponent implements OnInit {
 
   onLanguageChange(language: string): void {
     this.selectedLanguage.set(language);
+    this.lastLanguage.set(this.kind, this.slug, language);
     this.page.set(1);
     this.loadChanges();
   }
@@ -166,11 +181,11 @@ export class AssetReviewGridComponent implements OnInit {
   }
 
   approve(row: ReviewChange): void {
-    this.applyState(row.id, 'approved');
+    this.applyState(row.id, 'approved', undefined, undefined, 'approve');
   }
 
   unreview(row: ReviewChange): void {
-    this.applyState(row.id, 'unreviewed');
+    this.applyState(row.id, 'unreviewed', undefined, undefined, 'unreview');
   }
 
   openComment(row: ReviewChange): void {
@@ -181,28 +196,39 @@ export class AssetReviewGridComponent implements OnInit {
 
   confirmComment(): void {
     const id = this.commentChangeId;
-    if (id === null || !this.commentText().trim()) {
+    if (id === null || !this.commentText().trim() || this.savingAction() !== null) {
       return;
     }
-    this.applyState(id, 'commented', this.commentText().trim(), () => {
-      this.commentOpen.set(false);
-      this.commentChangeId = null;
-    });
+    this.applyState(
+      id,
+      'commented',
+      this.commentText().trim(),
+      () => {
+        this.closeComment();
+      },
+      'comment'
+    );
+  }
+
+  closeComment(): void {
+    this.commentOpen.set(false);
+    this.commentChangeId = null;
   }
 
   private applyState(
     changeId: number,
     state: ReviewState,
     comment?: string,
-    onSuccess?: () => void
+    onSuccess?: () => void,
+    action: ReviewActionType = 'approve'
   ): void {
-    this.savingId.set(changeId);
+    this.savingAction.set({ id: changeId, action });
     this.reviewService
       .setState(this.kind, this.slug, changeId, state, comment)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (updated) => {
-          this.savingId.set(null);
+          this.savingAction.set(null);
           onSuccess?.();
           this.message.success(
             this.translate.instant(`ADMIN.REVIEW.MESSAGES.${state.toUpperCase()}`)
@@ -215,7 +241,7 @@ export class AssetReviewGridComponent implements OnInit {
           }
         },
         error: (err: HttpErrorResponse) => {
-          this.savingId.set(null);
+          this.savingAction.set(null);
           this.showError(err);
         },
       });

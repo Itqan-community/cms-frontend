@@ -1,4 +1,4 @@
-@if (canReview) {
+@if (canReview()) {
   <section class="admin-panel asset-review-grid">
     <div class="asset-review-grid__header">
       <div class="asset-review-grid__toolbar">
@@ -37,7 +37,14 @@
       </div>
     </div>
 
-    @if (!hasLanguages()) {
+    @if (languagesError()) {
+      <div class="asset-review-grid__error">
+        <p>{{ 'ADMIN.REVIEW.ERRORS.GENERIC' | translate }}</p>
+        <button nz-button nzType="default" nzSize="small" (click)="loadLanguages()">
+          {{ 'ADMIN.REVIEW.RETRY' | translate }}
+        </button>
+      </div>
+    } @else if (!hasLanguages()) {
       <p class="asset-review-grid__empty">{{ 'ADMIN.REVIEW.NO_ASSIGNED_LANGUAGES' | translate }}</p>
     } @else {
       <nz-spin [nzSpinning]="loading()">
@@ -65,7 +72,7 @@
                 <td>{{ row.surah_name }} {{ row.sura }}:{{ row.aya }}</td>
                 <td>{{ typeKey(row.change_type) | translate }}</td>
                 <td>
-                  <div class="asset-review-grid__change">
+                  <div class="asset-review-grid__change" dir="auto">
                     @if (row.baseline_text) {
                       <span class="asset-review-grid__old">{{ row.baseline_text }}</span>
                     }
@@ -74,7 +81,7 @@
                     }
                   </div>
                   @if (row.comment) {
-                    <p class="asset-review-grid__comment">{{ row.comment }}</p>
+                    <p class="asset-review-grid__comment" dir="auto">{{ row.comment }}</p>
                   }
                 </td>
                 <td class="admin-mono">{{ row.commit_ref }}</td>
@@ -101,7 +108,10 @@
                       nz-button
                       nzSize="small"
                       [nzType]="row.review_state === 'approved' ? 'primary' : 'default'"
-                      [nzLoading]="savingId() === row.id"
+                      [nzLoading]="
+                        savingAction()?.id === row.id && savingAction()?.action === 'approve'
+                      "
+                      [disabled]="savingAction()?.id === row.id"
                       (click)="approve(row)"
                     >
                       {{ 'ADMIN.REVIEW.ACTION.APPROVE' | translate }}
@@ -110,7 +120,7 @@
                       nz-button
                       nzSize="small"
                       [nzType]="row.review_state === 'commented' ? 'primary' : 'default'"
-                      [disabled]="savingId() === row.id"
+                      [disabled]="savingAction()?.id === row.id"
                       (click)="openComment(row)"
                     >
                       {{ 'ADMIN.REVIEW.ACTION.COMMENT' | translate }}
@@ -120,7 +130,10 @@
                         nz-button
                         nzSize="small"
                         nzType="link"
-                        [disabled]="savingId() === row.id"
+                        [nzLoading]="
+                          savingAction()?.id === row.id && savingAction()?.action === 'unreview'
+                        "
+                        [disabled]="savingAction()?.id === row.id"
                         (click)="unreview(row)"
                       >
                         {{ 'ADMIN.REVIEW.ACTION.UNREVIEW' | translate }}
@@ -152,10 +165,14 @@
       [nzVisible]="commentOpen()"
       [nzTitle]="'ADMIN.REVIEW.COMMENT_DIALOG.TITLE' | translate"
       [nzOkText]="'ADMIN.REVIEW.COMMENT_DIALOG.CONFIRM' | translate"
-      [nzOkDisabled]="!commentText().trim()"
+      [nzOkLoading]="savingAction()?.id === commentChangeId && savingAction()?.action === 'comment'"
+      [nzOkDisabled]="
+        !commentText().trim() ||
+        (savingAction()?.id === commentChangeId && savingAction()?.action === 'comment')
+      "
       [nzCancelText]="'ADMIN.REVIEW.COMMENT_DIALOG.CANCEL' | translate"
       (nzOnOk)="confirmComment()"
-      (nzOnCancel)="commentOpen.set(false)"
+      (nzOnCancel)="closeComment()"
     >
       <ng-container *nzModalContent>
         <textarea
@@ -164,6 +181,7 @@
           (ngModelChange)="commentText.set($event)"
           [nzAutosize]="{ minRows: 3, maxRows: 6 }"
           [placeholder]="'ADMIN.REVIEW.COMMENT_DIALOG.PLACEHOLDER' | translate"
+          dir="auto"
         ></textarea>
       </ng-container>
     </nz-modal>
