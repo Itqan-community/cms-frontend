@@ -779,6 +779,16 @@
       "UNDO": "Undo",
       "REDO": "Redo",
       "FILTER_ALL": "All surahs",
+      "COMMIT": {
+        "BUTTON": "Commit",
+        "TITLE": "Commit changes",
+        "MESSAGE_LABEL": "Commit message",
+        "MESSAGE_PLACEHOLDER": "Describe what you changed…",
+        "REVIEW": "to be committed",
+        "REVIEW_LOADING": "Reviewing changes…",
+        "CONFIRM": "Commit",
+        "CANCEL": "Cancel"
+      },
       "SAVING": "Saving…",
       "UNSAVED": "Unsaved changes",
       "ALL_SAVED": "All changes saved to draft",
@@ -798,7 +808,20 @@
         "ADD_TITLE": "Add a translation language",
         "ADD_CONFIRM": "Add",
         "ADD_CANCEL": "Cancel",
-        "PICK": "Choose a language"
+        "PICK": "Choose a language",
+        "FILE_LABEL": "Content file (optional)",
+        "FILE_CHOOSE": "Choose file",
+        "FILE_CLEAR": "Remove",
+        "FILE_HINT": "Optionally upload a CSV to publish this language's content now."
+      },
+      "AVAILABILITY": {
+        "AVAILABLE": "Available",
+        "PENDING": "Pending",
+        "MARK_AVAILABLE": "Mark available",
+        "MARK_PENDING": "Mark pending",
+        "HINT": "Available languages can be downloaded by consumers. Pending languages stay hidden until you make them available.",
+        "MARKED_AVAILABLE": "Language is now available to consumers.",
+        "MARKED_PENDING": "Language is now hidden from consumers."
       },
       "MESSAGES": {
         "PUBLISHED": "New version published",
@@ -826,9 +849,11 @@
         "NO_CHANGES_TO_PUBLISH_TITLE": "No changes to publish",
         "NO_CHANGES_TO_PUBLISH": "You haven't edited anything in this draft yet. Make a change first, then save and publish a new version.",
         "VERSION_NOT_EDITABLE": "This version can no longer be edited.",
+        "COMMIT_MESSAGE_REQUIRED": "A commit message is required.",
         "TRANSLATION_NOT_FOUND": "Translation not found.",
         "TAFSIR_NOT_FOUND": "Tafsir not found.",
-        "CONTENT_FILE_UNPARSEABLE": "The uploaded file could not be parsed."
+        "CONTENT_FILE_UNPARSEABLE": "The uploaded file could not be parsed.",
+        "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "Publish a version for this language before making it available."
       }
     },
     "COMMON": {
@@ -874,6 +899,7 @@
         "SECTION_TITLE": "Initial version",
         "SECTION_HINT": "Optionally attach the first file version now. You can add versions later from the asset detail page.",
         "FORM_NAME": "Version name",
+        "FORM_LANGUAGE": "Version language",
         "FORM_SUMMARY": "Summary",
         "FORM_FILE": "File",
         "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
@@ -1058,6 +1084,7 @@
           "MODAL_TITLE_CREATE": "Add new version",
           "MODAL_TITLE_EDIT": "Edit version",
           "FORM_NAME": "Version name",
+          "FORM_LANGUAGE": "Version language",
           "FORM_SUMMARY": "Summary",
           "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
           "PLACEHOLDER_SUMMARY": "Short notes about this file…",
@@ -1070,6 +1097,7 @@
           "CLEAR_FILE": "Remove file",
           "EDIT_FILE_HINT": "Optional: choose a new file to replace the current one.",
           "FILE_REQUIRED_HINT": "Select a file to upload.",
+          "LANGUAGES_UNAVAILABLE_HINT": "Languages could not be loaded. Reload the page before uploading a new version.",
           "LIST_TITLE": "Published versions",
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
@@ -1079,7 +1107,15 @@
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
           "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_RESTORE": "Restore as active version",
           "TOOLTIP_DELETE": "Delete",
+          "ACTIVE_BADGE": "Active",
+          "TOOLTIP_DIFF": "Show changes",
+          "DIFF_LOADING": "Loading changes…",
+          "DIFF_EMPTY": "No per-ayah changes recorded for this version.",
+          "RESTORE_CONFIRM_TITLE": "Restore this version?",
+          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
+          "RESTORE_OK": "Restore",
           "EMPTY_TITLE": "No versions yet",
           "EMPTY_SUBTITLE": "Use “Add new version” to upload a file.",
           "DELETE_CONFIRM_TITLE": "Delete this version?",
@@ -1092,7 +1128,10 @@
             "UPDATE_SUCCESS": "Version updated.",
             "DELETE_SUCCESS": "Version deleted.",
             "DELETE_ERROR": "Could not delete version.",
-            "FILE_REQUIRED": "Choose a file to upload."
+            "RESTORE_SUCCESS": "Version restored as the active version.",
+            "RESTORE_ERROR": "Could not restore version.",
+            "FILE_REQUIRED": "Choose a file to upload.",
+            "LANGUAGE_REQUIRED": "Choose the version language."
           }
         }
       },
@@ -1205,6 +1244,7 @@
           "MODAL_TITLE_CREATE": "Add new version",
           "MODAL_TITLE_EDIT": "Edit version",
           "FORM_NAME": "Version name",
+          "FORM_LANGUAGE": "Version language",
           "FORM_SUMMARY": "Summary",
           "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
           "PLACEHOLDER_SUMMARY": "Short notes about this file…",
@@ -1217,6 +1257,7 @@
           "CLEAR_FILE": "Remove file",
           "EDIT_FILE_HINT": "Optional: choose a new file to replace the current one.",
           "FILE_REQUIRED_HINT": "Select a file to upload.",
+          "LANGUAGES_UNAVAILABLE_HINT": "Languages could not be loaded. Reload the page before uploading a new version.",
           "LIST_TITLE": "Published versions",
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
@@ -1226,7 +1267,15 @@
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
           "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_RESTORE": "Restore as active version",
           "TOOLTIP_DELETE": "Delete",
+          "ACTIVE_BADGE": "Active",
+          "TOOLTIP_DIFF": "Show changes",
+          "DIFF_LOADING": "Loading changes…",
+          "DIFF_EMPTY": "No per-ayah changes recorded for this version.",
+          "RESTORE_CONFIRM_TITLE": "Restore this version?",
+          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
+          "RESTORE_OK": "Restore",
           "EMPTY_TITLE": "No versions yet",
           "EMPTY_SUBTITLE": "Use “Add new version” to upload a file.",
           "DELETE_CONFIRM_TITLE": "Delete this version?",
@@ -1239,7 +1288,10 @@
             "UPDATE_SUCCESS": "Version updated.",
             "DELETE_SUCCESS": "Version deleted.",
             "DELETE_ERROR": "Could not delete version.",
-            "FILE_REQUIRED": "Choose a file to upload."
+            "RESTORE_SUCCESS": "Version restored as the active version.",
+            "RESTORE_ERROR": "Could not restore version.",
+            "FILE_REQUIRED": "Choose a file to upload.",
+            "LANGUAGE_REQUIRED": "Choose the version language."
           }
         }
       },
@@ -1969,6 +2021,7 @@
           "MODAL_TITLE_CREATE": "Add new version",
           "MODAL_TITLE_EDIT": "Edit version",
           "FORM_NAME": "Version name",
+          "FORM_LANGUAGE": "Version language",
           "FORM_SUMMARY": "Summary",
           "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
           "PLACEHOLDER_SUMMARY": "Short notes about this file…",
@@ -1990,7 +2043,15 @@
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
           "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_RESTORE": "Restore as active version",
           "TOOLTIP_DELETE": "Delete",
+          "ACTIVE_BADGE": "Active",
+          "TOOLTIP_DIFF": "Show changes",
+          "DIFF_LOADING": "Loading changes…",
+          "DIFF_EMPTY": "No per-ayah changes recorded for this version.",
+          "RESTORE_CONFIRM_TITLE": "Restore this version?",
+          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
+          "RESTORE_OK": "Restore",
           "EMPTY_TITLE": "No versions yet",
           "EMPTY_SUBTITLE": "Use “Add new version” to upload a file.",
           "DELETE_CONFIRM_TITLE": "Delete this version?",
@@ -2003,6 +2064,8 @@
             "UPDATE_SUCCESS": "Version updated.",
             "DELETE_SUCCESS": "Version deleted.",
             "DELETE_ERROR": "Could not delete version.",
+            "RESTORE_SUCCESS": "Version restored as the active version.",
+            "RESTORE_ERROR": "Could not restore version.",
             "FILE_REQUIRED": "Choose a file to upload."
           }
         }
@@ -2132,6 +2195,7 @@
           "MODAL_TITLE_CREATE": "Add new version",
           "MODAL_TITLE_EDIT": "Edit version",
           "FORM_NAME": "Version name",
+          "FORM_LANGUAGE": "Version language",
           "FORM_SUMMARY": "Summary",
           "PLACEHOLDER_NAME": "e.g. v1.0 — Regular WOFF2",
           "PLACEHOLDER_SUMMARY": "Short notes about this font file…",
@@ -2153,7 +2217,15 @@
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
           "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_RESTORE": "Restore as active version",
           "TOOLTIP_DELETE": "Delete",
+          "ACTIVE_BADGE": "Active",
+          "TOOLTIP_DIFF": "Show changes",
+          "DIFF_LOADING": "Loading changes…",
+          "DIFF_EMPTY": "No per-ayah changes recorded for this version.",
+          "RESTORE_CONFIRM_TITLE": "Restore this version?",
+          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
+          "RESTORE_OK": "Restore",
           "EMPTY_TITLE": "No versions yet",
           "EMPTY_SUBTITLE": "Use “Add new version” to upload a font file.",
           "DELETE_CONFIRM_TITLE": "Delete this version?",
@@ -2166,6 +2238,8 @@
             "UPDATE_SUCCESS": "Version updated.",
             "DELETE_SUCCESS": "Version deleted.",
             "DELETE_ERROR": "Could not delete version.",
+            "RESTORE_SUCCESS": "Version restored as the active version.",
+            "RESTORE_ERROR": "Could not restore version.",
             "FILE_REQUIRED": "Choose a font file to upload."
           }
         }
@@ -2279,6 +2353,7 @@
           "MODAL_TITLE_CREATE": "Add new version",
           "MODAL_TITLE_EDIT": "Edit version",
           "FORM_NAME": "Version name",
+          "FORM_LANGUAGE": "Version language",
           "FORM_SUMMARY": "Summary",
           "PLACEHOLDER_NAME": "e.g. v3.2 — Android release",
           "PLACEHOLDER_SUMMARY": "Short release notes for this build…",
@@ -2300,7 +2375,15 @@
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
           "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_RESTORE": "Restore as active version",
           "TOOLTIP_DELETE": "Delete",
+          "ACTIVE_BADGE": "Active",
+          "TOOLTIP_DIFF": "Show changes",
+          "DIFF_LOADING": "Loading changes…",
+          "DIFF_EMPTY": "No per-ayah changes recorded for this version.",
+          "RESTORE_CONFIRM_TITLE": "Restore this version?",
+          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
+          "RESTORE_OK": "Restore",
           "EMPTY_TITLE": "No versions yet",
           "EMPTY_SUBTITLE": "Use “Add new version” to upload a release package.",
           "DELETE_CONFIRM_TITLE": "Delete this version?",
@@ -2313,6 +2396,8 @@
             "UPDATE_SUCCESS": "Version updated.",
             "DELETE_SUCCESS": "Version deleted.",
             "DELETE_ERROR": "Could not delete version.",
+            "RESTORE_SUCCESS": "Version restored as the active version.",
+            "RESTORE_ERROR": "Could not restore version.",
             "FILE_REQUIRED": "Choose a release file to upload."
           }
         }

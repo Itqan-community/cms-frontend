@@ -5,6 +5,7 @@ import { environment } from '../../../../environments/environment';
 import type {
   AssetLanguage,
   AssetVersionParentKind,
+  ContentChange,
   ContentDraftVersion,
   ContentEntriesResponse,
   ContentEntry,
@@ -26,13 +27,32 @@ export class AssetContentService {
     return this.http.get<AssetLanguage[]>(`${this.draftBase(kind, slug)}languages/`);
   }
 
-  /** Add a translation language to the asset. */
+  /** Add a translation language, optionally seeding it from an uploaded file. */
   addLanguage(
     kind: AssetVersionParentKind,
     slug: string,
-    language: string
+    language: string,
+    file?: File | null
   ): Observable<AssetLanguage> {
-    return this.http.post<AssetLanguage>(`${this.draftBase(kind, slug)}languages/`, { language });
+    const data = new FormData();
+    data.append('language', language);
+    if (file) {
+      data.append('file', file);
+    }
+    return this.http.post<AssetLanguage>(`${this.draftBase(kind, slug)}languages/`, data);
+  }
+
+  /** Mark a language available (READY) or pending (DRAFT) to consumers. */
+  setLanguageAvailability(
+    kind: AssetVersionParentKind,
+    slug: string,
+    language: string,
+    available: boolean
+  ): Observable<AssetLanguage> {
+    return this.http.patch<AssetLanguage>(
+      `${this.draftBase(kind, slug)}languages/${encodeURIComponent(language)}/availability/`,
+      { available }
+    );
   }
 
   /** Get-or-create the shared draft for one language, seeded from its latest published. */
@@ -73,22 +93,62 @@ export class AssetContentService {
     });
   }
 
-  /** Publish the draft: it becomes the latest published version. */
-  publish(
+  /** Commit the draft: publish it as a new version with a required message. */
+  commit(
     kind: AssetVersionParentKind,
     slug: string,
     versionId: number,
-    body: { name?: string; summary?: string } = {}
+    message: string
   ): Observable<ContentDraftVersion> {
     return this.http.post<ContentDraftVersion>(
       `${this.versionBase(kind, slug, versionId)}publish/`,
-      body
+      { message }
+    );
+  }
+
+  /** The uncommitted diff of a draft vs the current head (change review). */
+  pendingChanges(
+    kind: AssetVersionParentKind,
+    slug: string,
+    versionId: number
+  ): Observable<{ results: ContentChange[]; count: number }> {
+    return this.http.get<{ results: ContentChange[]; count: number }>(
+      `${this.versionBase(kind, slug, versionId)}pending-diff/`
+    );
+  }
+
+  /** A commit's stored diff, paginated (history view). */
+  versionDiff(
+    kind: AssetVersionParentKind,
+    slug: string,
+    versionId: number,
+    page = 1,
+    pageSize = 100
+  ): Observable<{ results: ContentChange[]; count: number }> {
+    const params = new HttpParams()
+      .set('page', page.toString())
+      .set('page_size', pageSize.toString());
+    return this.http.get<{ results: ContentChange[]; count: number }>(
+      `${this.versionBase(kind, slug, versionId)}diff/`,
+      { params }
     );
   }
 
   /** Discard the draft and all its unsaved entries. */
   discardDraft(kind: AssetVersionParentKind, slug: string, versionId: number): Observable<void> {
     return this.http.delete<void>(this.versionBase(kind, slug, versionId));
+  }
+
+  /** Restore a version's content as a new published version (becomes the active one). */
+  restoreVersion(
+    kind: AssetVersionParentKind,
+    slug: string,
+    versionId: number
+  ): Observable<ContentDraftVersion> {
+    return this.http.post<ContentDraftVersion>(
+      `${this.versionBase(kind, slug, versionId)}restore/`,
+      {}
+    );
   }
 
   /** Download a version's content as a CSV blob (auth token added by interceptor). */

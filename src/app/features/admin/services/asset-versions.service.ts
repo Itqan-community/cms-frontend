@@ -26,6 +26,9 @@ export class AssetVersionsService {
     if (params.search?.trim()) {
       httpParams = httpParams.set('search', params.search.trim());
     }
+    if (params.language) {
+      httpParams = httpParams.set('language', params.language);
+    }
     return this.http.get<AssetVersionsListResponse>(this.listUrl(kind, slug), {
       params: httpParams,
     });
@@ -91,6 +94,9 @@ export class AssetVersionsService {
     data.append('summary', payload.summary);
     if (payload.file) {
       data.append('file', payload.file);
+    }
+    if (payload.language) {
+      data.append('language', payload.language);
     }
     return data;
   }
