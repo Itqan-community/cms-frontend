@@ -1152,6 +1152,7 @@
           "CLEAR_FILE": "إزالة الملف",
           "EDIT_FILE_HINT": "اختياري: اختر ملفًا جديدًا لاستبدال الحالي.",
           "FILE_REQUIRED_HINT": "اختر ملفًا للرفع.",
+          "LANGUAGES_UNAVAILABLE_HINT": "تعذّر تحميل اللغات. أعد تحميل الصفحة قبل رفع إصدار جديد.",
           "LIST_TITLE": "الإصدارات المنشورة",
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
@@ -1184,7 +1185,8 @@
             "DELETE_ERROR": "تعذّر حذف الإصدار.",
             "RESTORE_SUCCESS": "تمت استعادة الإصدار كإصدار نشط.",
             "RESTORE_ERROR": "تعذّر استعادة الإصدار.",
-            "FILE_REQUIRED": "اختر ملفًا للرفع."
+            "FILE_REQUIRED": "اختر ملفًا للرفع.",
+            "LANGUAGE_REQUIRED": "اختر لغة الإصدار."
           }
         }
       },
@@ -1310,6 +1312,7 @@
           "CLEAR_FILE": "إزالة الملف",
           "EDIT_FILE_HINT": "اختياري: اختر ملفًا جديدًا لاستبدال الحالي.",
           "FILE_REQUIRED_HINT": "اختر ملفًا للرفع.",
+          "LANGUAGES_UNAVAILABLE_HINT": "تعذّر تحميل اللغات. أعد تحميل الصفحة قبل رفع إصدار جديد.",
           "LIST_TITLE": "الإصدارات المنشورة",
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
@@ -1342,7 +1345,8 @@
             "DELETE_ERROR": "تعذّر حذف الإصدار.",
             "RESTORE_SUCCESS": "تمت استعادة الإصدار كإصدار نشط.",
             "RESTORE_ERROR": "تعذّر استعادة الإصدار.",
-            "FILE_REQUIRED": "اختر ملفًا للرفع."
+            "FILE_REQUIRED": "اختر ملفًا للرفع.",
+            "LANGUAGE_REQUIRED": "اختر لغة الإصدار."
           }
         }
       },

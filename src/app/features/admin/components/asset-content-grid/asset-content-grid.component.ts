@@ -139,7 +139,10 @@ export class AssetContentGridComponent implements OnInit {
   readonly commitMessage = signal('');
   readonly committing = signal(false);
   readonly pendingLoading = signal(false);
+  readonly pendingError = signal(false);
   readonly pendingChanges = signal<ContentChange[]>([]);
+  private activePatchesCount = 0;
+  private activePatchError = false;
   readonly pendingCounts = computed(() => {
     const counts = { added: 0, modified: 0, removed: 0 };
     for (const change of this.pendingChanges()) counts[change.change_type]++;
@@ -457,39 +460,55 @@ export class AssetContentGridComponent implements OnInit {
   }
 
   /** Persist any pending edits to the draft. `true` on success/nothing to save. */
-  private flushPending(): Promise<boolean> {
+  private async flushPending(): Promise<boolean> {
     const versionId = this.draftId();
-    if (versionId === null || this.pendingRows.size === 0) {
-      return Promise.resolve(true);
+    if (versionId === null) {
+      return true;
     }
-    const batch = Array.from(this.pendingRows.values());
-    this.pendingRows.clear();
-    this.saving.set(true);
-    return new Promise<boolean>((resolve) => {
-      this.contentService
-        .patchEntries(this.kind, this.slug, versionId, batch)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: () => {
-            this.saving.set(false);
-            if (this.pendingRows.size === 0) {
-              this.dirty.set(false);
-            }
-            resolve(true);
-          },
-          error: (err: HttpErrorResponse) => {
-            // Re-queue the failed batch so nothing is silently lost.
-            for (const patch of batch) {
-              if (!this.pendingRows.has(patch.ayah_id)) {
-                this.pendingRows.set(patch.ayah_id, patch);
+    if (this.pendingRows.size > 0) {
+      const batch = Array.from(this.pendingRows.values());
+      this.pendingRows.clear();
+      this.saving.set(true);
+      this.activePatchesCount++;
+      await new Promise<void>((resolve) => {
+        this.contentService
+          .patchEntries(this.kind, this.slug, versionId, batch)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              this.activePatchesCount--;
+              if (this.pendingRows.size === 0) {
+                this.dirty.set(false);
               }
-            }
-            this.saving.set(false);
-            this.showError(err);
-            resolve(false);
-          },
-        });
-    });
+              resolve();
+            },
+            error: (err: HttpErrorResponse) => {
+              this.activePatchesCount--;
+              this.activePatchError = true;
+              // Re-queue the failed batch so nothing is silently lost.
+              for (const patch of batch) {
+                if (!this.pendingRows.has(patch.ayah_id)) {
+                  this.pendingRows.set(patch.ayah_id, patch);
+                }
+              }
+              this.showError(err);
+              resolve();
+            },
+          });
+      });
+    }
+
+    // Wait if there are still active in-flight patch requests.
+    while (this.activePatchesCount > 0) {
+      await new Promise((r) => setTimeout(r, 50));
+    }
+    this.saving.set(false);
+
+    if (this.activePatchError || this.pendingRows.size > 0) {
+      this.activePatchError = false;
+      return false;
+    }
+    return true;
   }
 
   /** Save the current edits to the draft and return to the detail page, keeping
@@ -520,6 +539,7 @@ export class AssetContentGridComponent implements OnInit {
       if (!ok) return;
       this.commitMessage.set('');
       this.pendingChanges.set([]);
+      this.pendingError.set(false);
       this.commitDialogVisible.set(true);
       this.pendingLoading.set(true);
       this.contentService
@@ -530,7 +550,11 @@ export class AssetContentGridComponent implements OnInit {
             this.pendingChanges.set(res.results);
             this.pendingLoading.set(false);
           },
-          error: () => this.pendingLoading.set(false),
+          error: (err: HttpErrorResponse) => {
+            this.pendingLoading.set(false);
+            this.pendingError.set(true);
+            this.showError(err);
+          },
         });
     });
   }
@@ -538,7 +562,14 @@ export class AssetContentGridComponent implements OnInit {
   /** Confirm the commit: publish the draft with the (required) message. */
   confirmCommit(): void {
     const versionId = this.draftId();
-    if (versionId === null || !this.commitMessage().trim()) return;
+    if (
+      versionId === null ||
+      !this.commitMessage().trim() ||
+      this.pendingLoading() ||
+      this.pendingError()
+    ) {
+      return;
+    }
     this.committing.set(true);
     this.contentService
       .commit(this.kind, this.slug, versionId, this.commitMessage().trim())

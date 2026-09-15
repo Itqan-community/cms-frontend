@@ -201,17 +201,17 @@
     [nzTitle]="'ADMIN.CONTENT_EDITOR.COMMIT.TITLE' | translate"
     [nzOkText]="'ADMIN.CONTENT_EDITOR.COMMIT.CONFIRM' | translate"
     [nzOkLoading]="committing()"
-    [nzOkDisabled]="!commitMessage().trim()"
+    [nzOkDisabled]="!commitMessage().trim() || pendingLoading() || pendingError()"
     [nzCancelText]="'ADMIN.CONTENT_EDITOR.COMMIT.CANCEL' | translate"
     (nzOnOk)="confirmCommit()"
     (nzOnCancel)="commitDialogVisible.set(false)"
   >
     <ng-container *nzModalContent>
-      <label class="content-grid__commit-label" for="commit-message-input">
+      <label class="content-grid__commit-label" for="content-grid-commit-message">
         {{ 'ADMIN.CONTENT_EDITOR.COMMIT.MESSAGE_LABEL' | translate }}
       </label>
       <textarea
-        id="commit-message-input"
+        id="content-grid-commit-message"
         nz-input
         [ngModel]="commitMessage()"
         (ngModelChange)="commitMessage.set($event)"
