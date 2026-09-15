@@ -59,6 +59,11 @@ export const PORTAL_PERMISSIONS = {
   PORTAL_VIEW_ACCESS_REQUESTS: 'portal_view_access_requests',
   PORTAL_ACCEPT_OR_REJECT_ACCESS_REQUESTS: 'portal_accept_or_reject_access_requests',
   PORTAL_MANAGE_ACCESS_REQUESTS_SETTINGS: 'portal_manage_access_requests_settings',
+
+  PORTAL_REVIEW_CONTENT: 'portal_review_content',
+
+  PORTAL_ACCESS_ALL_LANGUAGES: 'portal_access_all_languages',
+  PORTAL_ADD_ASSET_LANGUAGE: 'portal_add_asset_language',
 } as const;
 
 export type PortalPermissionCode = (typeof PORTAL_PERMISSIONS)[keyof typeof PORTAL_PERMISSIONS];

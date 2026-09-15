@@ -8,12 +8,12 @@
       }
     </h2>
     <div class="asset-versions-manager__header-actions">
-      @if (supportsLanguages() && languages().length > 1) {
+      @if (supportsLanguages() && languages().length > 0) {
         <nz-select
           class="asset-versions-manager__language"
           [ngModel]="selectedLanguage()"
           (ngModelChange)="onLanguageChange($event)"
-          [nzDisabled]="loading()"
+          [nzDisabled]="loading() || languages().length === 1"
         >
           @for (lang of languages(); track lang.language) {
             <nz-option
@@ -338,6 +338,10 @@
                   @if (diffLoading()) {
                     <span class="asset-versions-manager__diff-loading">
                       {{ t('DIFF_LOADING') | translate }}
+                    </span>
+                  } @else if (diffError()) {
+                    <span class="asset-versions-manager__diff-error">
+                      {{ t('DIFF_ERROR') | translate }}
                     </span>
                   } @else if (diff().length === 0) {
                     <span class="asset-versions-manager__diff-empty">

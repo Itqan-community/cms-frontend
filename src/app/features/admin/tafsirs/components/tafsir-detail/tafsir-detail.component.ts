@@ -55,6 +55,10 @@ export class TafsirDetailComponent implements OnInit {
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TAFSIR)
   );
 
+  readonly canReview = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_REVIEW_CONTENT)
+  );
+
   readonly tafsir = signal<TafsirDetails | null>(null);
   readonly loading = signal(true);
   readonly licensesColors = LicensesColors;
@@ -85,6 +89,10 @@ export class TafsirDetailComponent implements OnInit {
 
   onEditContent(): void {
     void this.router.navigate(['/admin/tafsirs', this.slug, 'edit-content']);
+  }
+
+  onReview(): void {
+    void this.router.navigate(['/admin/tafsirs', this.slug, 'review']);
   }
 
   onDelete(): void {

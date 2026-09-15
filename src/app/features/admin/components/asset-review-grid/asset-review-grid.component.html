@@ -1,0 +1,189 @@
+@if (canReview()) {
+  <section class="admin-panel asset-review-grid">
+    <div class="asset-review-grid__header">
+      <div class="asset-review-grid__toolbar">
+        @if (hasLanguages()) {
+          <nz-select
+            class="asset-review-grid__language"
+            [ngModel]="selectedLanguage()"
+            (ngModelChange)="onLanguageChange($event)"
+            [nzDisabled]="loading()"
+          >
+            @for (lang of languages(); track lang) {
+              <nz-option [nzValue]="lang" [nzLabel]="langName(lang)"></nz-option>
+            }
+          </nz-select>
+          <nz-select
+            class="asset-review-grid__filter"
+            [ngModel]="stateFilter()"
+            (ngModelChange)="onFilterChange($event)"
+            [nzDisabled]="loading()"
+          >
+            <nz-option nzValue="all" [nzLabel]="'ADMIN.REVIEW.FILTER.ALL' | translate"></nz-option>
+            <nz-option
+              nzValue="unreviewed"
+              [nzLabel]="'ADMIN.REVIEW.FILTER.UNREVIEWED' | translate"
+            ></nz-option>
+            <nz-option
+              nzValue="approved"
+              [nzLabel]="'ADMIN.REVIEW.FILTER.APPROVED' | translate"
+            ></nz-option>
+            <nz-option
+              nzValue="commented"
+              [nzLabel]="'ADMIN.REVIEW.FILTER.COMMENTED' | translate"
+            ></nz-option>
+          </nz-select>
+        }
+      </div>
+    </div>
+
+    @if (languagesError()) {
+      <div class="asset-review-grid__error">
+        <p>{{ 'ADMIN.REVIEW.ERRORS.GENERIC' | translate }}</p>
+        <button nz-button nzType="default" nzSize="small" (click)="loadLanguages()">
+          {{ 'ADMIN.REVIEW.RETRY' | translate }}
+        </button>
+      </div>
+    } @else if (!hasLanguages()) {
+      <p class="asset-review-grid__empty">{{ 'ADMIN.REVIEW.NO_ASSIGNED_LANGUAGES' | translate }}</p>
+    } @else {
+      <nz-spin [nzSpinning]="loading()">
+        <nz-table
+          #reviewTable
+          [nzData]="changes()"
+          [nzFrontPagination]="false"
+          [nzShowPagination]="false"
+          nzSize="middle"
+          [nzNoResult]="emptyTpl"
+        >
+          <thead>
+            <tr>
+              <th nzWidth="120px">{{ 'ADMIN.REVIEW.COLUMN.AYAH' | translate }}</th>
+              <th nzWidth="90px">{{ 'ADMIN.REVIEW.COLUMN.TYPE' | translate }}</th>
+              <th>{{ 'ADMIN.REVIEW.COLUMN.CHANGE' | translate }}</th>
+              <th nzWidth="90px">{{ 'ADMIN.REVIEW.COLUMN.COMMIT' | translate }}</th>
+              <th nzWidth="150px">{{ 'ADMIN.REVIEW.COLUMN.STATE' | translate }}</th>
+              <th nzWidth="240px">{{ 'ADMIN.REVIEW.COLUMN.ACTIONS' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of reviewTable.data; track row.id) {
+              <tr>
+                <td>{{ row.surah_name }} {{ row.sura }}:{{ row.aya }}</td>
+                <td>{{ typeKey(row.change_type) | translate }}</td>
+                <td>
+                  <div class="asset-review-grid__change" dir="auto">
+                    @if (row.baseline_text) {
+                      <span class="asset-review-grid__old">{{ row.baseline_text }}</span>
+                    }
+                    @if (row.new_text) {
+                      <span class="asset-review-grid__new">{{ row.new_text }}</span>
+                    }
+                  </div>
+                  @if (row.comment) {
+                    <p class="asset-review-grid__comment" dir="auto">{{ row.comment }}</p>
+                  }
+                </td>
+                <td class="admin-mono">{{ row.commit_ref }}</td>
+                <td>
+                  <span
+                    class="asset-review-grid__state"
+                    [class.asset-review-grid__state--approved]="row.review_state === 'approved'"
+                    [class.asset-review-grid__state--commented]="row.review_state === 'commented'"
+                  >
+                    {{ stateKey(row.review_state) | translate }}
+                  </span>
+                  @if (row.reviewed_by) {
+                    <span class="asset-review-grid__reviewer">
+                      {{ row.reviewed_by }}
+                      @if (row.reviewed_at) {
+                        · {{ row.reviewed_at | date: 'short' }}
+                      }
+                    </span>
+                  }
+                </td>
+                <td>
+                  <div class="asset-review-grid__actions">
+                    <button
+                      nz-button
+                      nzSize="small"
+                      [nzType]="row.review_state === 'approved' ? 'primary' : 'default'"
+                      [nzLoading]="
+                        savingAction()?.id === row.id && savingAction()?.action === 'approve'
+                      "
+                      [disabled]="savingAction()?.id === row.id"
+                      (click)="approve(row)"
+                    >
+                      {{ 'ADMIN.REVIEW.ACTION.APPROVE' | translate }}
+                    </button>
+                    <button
+                      nz-button
+                      nzSize="small"
+                      [nzType]="row.review_state === 'commented' ? 'primary' : 'default'"
+                      [disabled]="savingAction()?.id === row.id"
+                      (click)="openComment(row)"
+                    >
+                      {{ 'ADMIN.REVIEW.ACTION.COMMENT' | translate }}
+                    </button>
+                    @if (row.review_state !== 'unreviewed') {
+                      <button
+                        nz-button
+                        nzSize="small"
+                        nzType="link"
+                        [nzLoading]="
+                          savingAction()?.id === row.id && savingAction()?.action === 'unreview'
+                        "
+                        [disabled]="savingAction()?.id === row.id"
+                        (click)="unreview(row)"
+                      >
+                        {{ 'ADMIN.REVIEW.ACTION.UNREVIEW' | translate }}
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </nz-table>
+
+        <app-admin-table-pagination
+          [page]="page()"
+          [pageSize]="pageSize()"
+          [total]="total()"
+          [loading]="loading()"
+          (pageChange)="onPageChange($event)"
+          (pageSizeChange)="onPageSizeChange($event)"
+        />
+      </nz-spin>
+
+      <ng-template #emptyTpl>
+        <p class="asset-review-grid__empty">{{ 'ADMIN.REVIEW.NO_CHANGES' | translate }}</p>
+      </ng-template>
+    }
+
+    <nz-modal
+      [nzVisible]="commentOpen()"
+      [nzTitle]="'ADMIN.REVIEW.COMMENT_DIALOG.TITLE' | translate"
+      [nzOkText]="'ADMIN.REVIEW.COMMENT_DIALOG.CONFIRM' | translate"
+      [nzOkLoading]="savingAction()?.id === commentChangeId && savingAction()?.action === 'comment'"
+      [nzOkDisabled]="
+        !commentText().trim() ||
+        (savingAction()?.id === commentChangeId && savingAction()?.action === 'comment')
+      "
+      [nzCancelText]="'ADMIN.REVIEW.COMMENT_DIALOG.CANCEL' | translate"
+      (nzOnOk)="confirmComment()"
+      (nzOnCancel)="closeComment()"
+    >
+      <ng-container *nzModalContent>
+        <textarea
+          nz-input
+          [ngModel]="commentText()"
+          (ngModelChange)="commentText.set($event)"
+          [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+          [placeholder]="'ADMIN.REVIEW.COMMENT_DIALOG.PLACEHOLDER' | translate"
+          dir="auto"
+        ></textarea>
+      </ng-container>
+    </nz-modal>
+  </section>
+}

@@ -88,6 +88,9 @@ export class AssetVersionsManagerComponent implements OnInit {
   /** Expanded commit's diff panel state. */
   readonly expandedId = signal<number | null>(null);
   readonly diffLoading = signal(false);
+  /** Set when the diff request failed, so the panel says so instead of
+   *  reporting the empty diff as "no changes". */
+  readonly diffError = signal(false);
   readonly diff = signal<ContentChange[]>([]);
 
   /** Multi-language assets (translations/tafsirs) let the versions be filtered by language. */
@@ -378,6 +381,14 @@ export class AssetVersionsManagerComponent implements OnInit {
               : `${this.i18nPrefix}.MESSAGES.UPDATE_SUCCESS`;
           this.message.success(this.translate.instant(msgKey));
           this.closeVersionModalWithoutCancelEmit();
+          if (id == null && this.supportsLanguages() && this.versionLanguage()) {
+            const targetLang = this.versionLanguage()!;
+            if (targetLang !== this.selectedLanguage()) {
+              this.selectedLanguage.set(targetLang);
+              this.lastLanguage.set(this.kind, this.slug, targetLang);
+              this.page.set(1);
+            }
+          }
           this.loadList();
         },
         error: (err: unknown) => {
@@ -440,6 +451,7 @@ export class AssetVersionsManagerComponent implements OnInit {
     }
     this.expandedId.set(row.id);
     this.diff.set([]);
+    this.diffError.set(false);
     this.diffLoading.set(true);
     this.loadAllVersionDiffs(row.id, 1, []);
   }
@@ -462,6 +474,7 @@ export class AssetVersionsManagerComponent implements OnInit {
         error: () => {
           if (this.expandedId() === versionId) {
             this.diffLoading.set(false);
+            this.diffError.set(true);
           }
         },
       });
@@ -546,6 +559,17 @@ export class AssetVersionsManagerComponent implements OnInit {
     if (this.downloadingId() !== null) {
       return;
     }
+    // For assets that don't support per-ayah content (mushafs, fonts, programs),
+    // download directly from file_url without attempting translation export.
+    if (!this.supportsLanguages()) {
+      if (row.file_url) {
+        this.triggerDownload(row.file_url, this.exportBaseName(row));
+      } else {
+        this.message.error(this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC'));
+      }
+      return;
+    }
+
     this.downloadingId.set(row.id);
     this.assetContentService
       .exportVersion(this.kind, this.slug, row.id)
