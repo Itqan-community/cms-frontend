@@ -249,7 +249,9 @@ export class MembersListComponent extends AdminListBase<MemberOut, MemberUiFilte
       },
       error: (err) => {
         this.langSubmitting.set(false);
-        this.message.error(this.apiErrorMessage(err, 'ADMIN.MEMBERS.ASSIGNED_LANGUAGES.SAVE_ERROR'));
+        this.message.error(
+          this.apiErrorMessage(err, 'ADMIN.MEMBERS.ASSIGNED_LANGUAGES.SAVE_ERROR')
+        );
       },
     });
   }

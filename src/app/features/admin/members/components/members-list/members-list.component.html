@@ -265,7 +265,7 @@
     (nzVisibleChange)="onLangModalVisibleChange($event)"
     (nzOnCancel)="closeLangModal()"
     [nzTitle]="
-      ('ADMIN.MEMBERS.ASSIGNED_LANGUAGES.TITLE' | translate: { name: langMember()?.name ?? '' })
+      'ADMIN.MEMBERS.ASSIGNED_LANGUAGES.TITLE' | translate: { name: langMember()?.name ?? '' }
     "
     [nzWidth]="'min(520px, 92vw)'"
     nzCentered
