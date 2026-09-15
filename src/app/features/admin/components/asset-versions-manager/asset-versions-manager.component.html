@@ -98,6 +98,11 @@
         [attr.dir]="modalDirection()"
         (ngSubmit)="$event.preventDefault(); submit()"
       >
+        @if (modalMode() === 'create' && supportsLanguages() && languages().length === 0) {
+          <p class="asset-versions-manager__hint">
+            {{ t('LANGUAGES_UNAVAILABLE_HINT') | translate }}
+          </p>
+        }
         @if (modalMode() === 'create' && supportsLanguages() && languages().length > 0) {
           <nz-form-item>
             <nz-form-label>{{ t('FORM_LANGUAGE') | translate }}</nz-form-label>
@@ -185,7 +190,7 @@
           nzType="primary"
           type="button"
           [nzLoading]="saving()"
-          [disabled]="form.invalid"
+          [disabled]="form.invalid || missingVersionLanguage()"
           (click)="submit()"
         >
           @if (modalMode() === 'create') {

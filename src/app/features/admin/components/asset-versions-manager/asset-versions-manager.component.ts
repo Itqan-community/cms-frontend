@@ -64,6 +64,9 @@ export class AssetVersionsManagerComponent implements OnInit {
   private readonly search$ = new Subject<string>();
   /** Emits to abort the in-flight create/update HTTP request (unsubscribe → browser abort). */
   private readonly cancelInFlightSubmit$ = new Subject<void>();
+  /** Emits to abort the in-flight versions request, so a slower earlier response
+   *  can never overwrite the list of the language/page now selected. */
+  private readonly cancelInFlightList$ = new Subject<void>();
 
   /** Parent asset kind — drives API paths. */
   @Input({ required: true }) kind!: AssetVersionParentKind;
@@ -124,6 +127,10 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly editingId = signal<number | null>(null);
   /** Language chosen for a newly uploaded version (translations/tafsirs). */
   readonly versionLanguage = signal<string | null>(null);
+  /** A language-aware upload needs a language; the list may still be loading or have failed. */
+  readonly missingVersionLanguage = computed(
+    () => this.modalMode() === 'create' && this.supportsLanguages() && !this.versionLanguage()
+  );
 
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required]],
@@ -183,6 +190,7 @@ export class AssetVersionsManagerComponent implements OnInit {
 
   loadList(): void {
     if (!this.slug) return;
+    this.cancelInFlightList$.next();
     this.loading.set(true);
     this.assetVersionsService
       .list(this.kind, this.slug, {
@@ -191,6 +199,7 @@ export class AssetVersionsManagerComponent implements OnInit {
         search: this.searchTerm() || undefined,
         language: this.supportsLanguages() ? this.selectedLanguage() || undefined : undefined,
       })
+      .pipe(takeUntil(this.cancelInFlightList$), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           this.list.set(res.results);
@@ -330,6 +339,10 @@ export class AssetVersionsManagerComponent implements OnInit {
     const id = this.editingId();
     if (id == null && !this.selectedFile) {
       this.message.warning(this.translate.instant(`${this.i18nPrefix}.MESSAGES.FILE_REQUIRED`));
+      return;
+    }
+    if (id == null && this.supportsLanguages() && !this.versionLanguage()) {
+      this.message.warning(this.translate.instant(`${this.i18nPrefix}.MESSAGES.LANGUAGE_REQUIRED`));
       return;
     }
 

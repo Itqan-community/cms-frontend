@@ -1097,6 +1097,7 @@
           "CLEAR_FILE": "Remove file",
           "EDIT_FILE_HINT": "Optional: choose a new file to replace the current one.",
           "FILE_REQUIRED_HINT": "Select a file to upload.",
+          "LANGUAGES_UNAVAILABLE_HINT": "Languages could not be loaded. Reload the page before uploading a new version.",
           "LIST_TITLE": "Published versions",
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
@@ -1129,7 +1130,8 @@
             "DELETE_ERROR": "Could not delete version.",
             "RESTORE_SUCCESS": "Version restored as the active version.",
             "RESTORE_ERROR": "Could not restore version.",
-            "FILE_REQUIRED": "Choose a file to upload."
+            "FILE_REQUIRED": "Choose a file to upload.",
+            "LANGUAGE_REQUIRED": "Choose the version language."
           }
         }
       },
@@ -1255,6 +1257,7 @@
           "CLEAR_FILE": "Remove file",
           "EDIT_FILE_HINT": "Optional: choose a new file to replace the current one.",
           "FILE_REQUIRED_HINT": "Select a file to upload.",
+          "LANGUAGES_UNAVAILABLE_HINT": "Languages could not be loaded. Reload the page before uploading a new version.",
           "LIST_TITLE": "Published versions",
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
@@ -1287,7 +1290,8 @@
             "DELETE_ERROR": "Could not delete version.",
             "RESTORE_SUCCESS": "Version restored as the active version.",
             "RESTORE_ERROR": "Could not restore version.",
-            "FILE_REQUIRED": "Choose a file to upload."
+            "FILE_REQUIRED": "Choose a file to upload.",
+            "LANGUAGE_REQUIRED": "Choose the version language."
           }
         }
       },
