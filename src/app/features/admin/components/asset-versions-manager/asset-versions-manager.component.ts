@@ -414,25 +414,16 @@ export class AssetVersionsManagerComponent
 
           if (
             !previousVersion ||
-            !this.isTextPreviewable(
-              row.file_url,
-            ) ||
+            !row.file_url ||
+            !this.isTextPreviewable(row.file_url) ||
             !previousVersion.file_url ||
-            !this.isTextPreviewable(
-              previousVersion.file_url,
-            )
+            !this.isTextPreviewable(previousVersion.file_url)
           ) {
-            this.previewDiffLoading.set(
-              false,
-            );
-
+            this.previewDiffLoading.set(false);
             return;
           }
 
-          this.loadTextDiff(
-            row,
-            previousVersion,
-          );
+          this.loadTextDiff(row, previousVersion);
         },
 
         error: () => {
@@ -459,110 +450,66 @@ export class AssetVersionsManagerComponent
     current: AssetVersion,
     versions: AssetVersion[],
   ): AssetVersion | null {
-    const orderedVersions =
-      [...versions].sort(
-        (a, b) =>
-          new Date(
-            b.created_at,
-          ).getTime() -
-          new Date(
-            a.created_at,
-          ).getTime(),
-      );
+    const orderedVersions = [...versions].sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() -
+        new Date(a.created_at).getTime(),
+    );
 
-    const currentIndex =
-      orderedVersions.findIndex(
-        (version) =>
-          version.id === current.id,
-      );
+    const currentIndex = orderedVersions.findIndex(
+      (version) => version.id === current.id,
+    );
 
     if (
       currentIndex === -1 ||
-      currentIndex >=
-        orderedVersions.length - 1
+      currentIndex >= orderedVersions.length - 1
     ) {
       return null;
     }
 
-    return (
-      orderedVersions[
-        currentIndex + 1
-      ] ?? null
-    );
+    return orderedVersions[currentIndex + 1] ?? null;
   }
 
   private loadTextDiff(
     current: AssetVersion,
     previous: AssetVersion,
   ): void {
-    this.previewDiffLoading.set(
-      true,
-    );
+    this.previewDiffLoading.set(true);
 
     forkJoin({
-      original:
-        this.http.get(
-          previous.file_url,
-          {
-            responseType:
-              'text',
-          },
-        ),
-
-      modified:
-        this.http.get(
-          current.file_url,
-          {
-            responseType:
-              'text',
-          },
-        ),
+      original: this.http.get(previous.file_url, {
+        responseType: 'text',
+      }),
+      modified: this.http.get(current.file_url, {
+        responseType: 'text',
+      }),
     })
       .pipe(
-        takeUntil(
-          this.cancelPreview$,
-        ),
-        takeUntilDestroyed(
-          this.destroyRef,
-        ),
+        takeUntil(this.cancelPreview$),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: ({
-          original,
-          modified,
-        }) => {
-          this.previewOriginalText.set(
-            original,
-          );
-
-          this.previewModifiedText.set(
-            modified,
-          );
-
-          this.previewDiffLoading.set(
-            false,
-          );
+        next: ({ original, modified }) => {
+          this.previewOriginalText.set(original);
+          this.previewModifiedText.set(modified);
+          this.previewDiffLoading.set(false);
         },
 
         error: () => {
-          this.previewOriginalText.set(
-            null,
-          );
-
-          this.previewModifiedText.set(
-            null,
-          );
-
-          this.previewDiffLoading.set(
-            false,
-          );
+          this.previewOriginalText.set(null);
+          this.previewModifiedText.set(null);
+          this.previewDiffLoading.set(false);
         },
       });
   }
 
   private isTextPreviewable(
-    fileUrl: string,
+    fileUrl: string | null | undefined,
   ): boolean {
+    if (!fileUrl) {
+      return false;
+    }
+
     const cleanUrl =
       fileUrl
         .split('?')[0]
