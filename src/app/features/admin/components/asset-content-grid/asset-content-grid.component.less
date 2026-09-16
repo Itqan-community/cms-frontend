@@ -63,6 +63,74 @@
   &__add-language-select {
     width: 100%;
   }
+
+  &__add-language-file {
+    margin-top: 16px;
+  }
+
+  &__add-language-file-label {
+    margin: 0 0 6px;
+    font-weight: 500;
+  }
+
+  &__add-language-file-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  &__add-language-file-name {
+    margin: 8px 0 0;
+  }
+
+  &__add-language-file-hint {
+    margin: 8px 0 0;
+    color: rgba(0, 0, 0, 0.45);
+    font-size: 12px;
+  }
+
+  &__file-input {
+    display: none;
+  }
+
+  &__commit-label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  &__commit-review {
+    margin-top: 16px;
+  }
+
+  &__commit-summary {
+    margin: 0 0 8px;
+    font-weight: 500;
+  }
+
+  &__commit-changes {
+    max-height: 220px;
+    overflow-y: auto;
+    margin: 0;
+    padding-inline-start: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
+    font-family: monospace;
+    font-size: 12px;
+  }
+
+  &__diff-added {
+    color: #389e0d;
+  }
+
+  &__diff-modified {
+    color: #d46b08;
+  }
+
+  &__diff-removed {
+    color: #cf1322;
+  }
 }
 
 @keyframes content-grid-spin {

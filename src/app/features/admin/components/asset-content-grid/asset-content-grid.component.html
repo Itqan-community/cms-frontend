@@ -106,9 +106,9 @@
         nzType="primary"
         [nzLoading]="publishing()"
         [disabled]="draftId() === null || savingDraft() || saving()"
-        (click)="publish()"
+        (click)="openCommit()"
       >
-        {{ 'ADMIN.CONTENT_EDITOR.SAVE' | translate }}
+        {{ 'ADMIN.CONTENT_EDITOR.COMMIT.BUTTON' | translate }}
       </button>
     </div>
   </div>
@@ -151,9 +151,104 @@
         (ngModelChange)="newLanguage.set($event)"
       >
         @for (lang of addableLanguages(); track lang.code) {
-          <nz-option [nzValue]="lang.code" [nzLabel]="lang.name + ' — ' + lang.native"></nz-option>
+          <nz-option [nzValue]="lang.code" [nzLabel]="lang.label"></nz-option>
         }
       </nz-select>
+
+      <div class="content-grid__add-language-file">
+        <p class="content-grid__add-language-file-label">
+          {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.FILE_LABEL' | translate }}
+        </p>
+        <input
+          #addLanguageFileInput
+          type="file"
+          class="content-grid__file-input"
+          (change)="onPickNewLanguageFile($event)"
+        />
+        <div class="content-grid__add-language-file-actions">
+          <button nz-button nzType="default" type="button" (click)="addLanguageFileInput.click()">
+            <ng-icon name="lucideFolderOpen" />
+            {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.FILE_CHOOSE' | translate }}
+          </button>
+          @if (newLanguageFileName()) {
+            <button
+              nz-button
+              nzType="default"
+              nzDanger
+              type="button"
+              (click)="clearNewLanguageFile()"
+            >
+              <ng-icon name="lucideX" />
+              {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.FILE_CLEAR' | translate }}
+            </button>
+          }
+        </div>
+        @if (newLanguageFileName()) {
+          <p class="content-grid__add-language-file-name admin-mono">{{ newLanguageFileName() }}</p>
+        } @else {
+          <p class="content-grid__add-language-file-hint">
+            {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.FILE_HINT' | translate }}
+          </p>
+        }
+      </div>
+    </ng-container>
+  </nz-modal>
+
+  <nz-modal
+    [nzVisible]="commitDialogVisible()"
+    [nzTitle]="'ADMIN.CONTENT_EDITOR.COMMIT.TITLE' | translate"
+    [nzOkText]="'ADMIN.CONTENT_EDITOR.COMMIT.CONFIRM' | translate"
+    [nzOkLoading]="committing()"
+    [nzOkDisabled]="!commitMessage().trim() || pendingLoading() || pendingError()"
+    [nzCancelText]="'ADMIN.CONTENT_EDITOR.COMMIT.CANCEL' | translate"
+    (nzOnOk)="confirmCommit()"
+    (nzOnCancel)="commitDialogVisible.set(false)"
+  >
+    <ng-container *nzModalContent>
+      <label class="content-grid__commit-label" for="content-grid-commit-message">
+        {{ 'ADMIN.CONTENT_EDITOR.COMMIT.MESSAGE_LABEL' | translate }}
+      </label>
+      <textarea
+        id="content-grid-commit-message"
+        nz-input
+        [ngModel]="commitMessage()"
+        (ngModelChange)="commitMessage.set($event)"
+        [nzAutosize]="{ minRows: 2, maxRows: 5 }"
+        [placeholder]="'ADMIN.CONTENT_EDITOR.COMMIT.MESSAGE_PLACEHOLDER' | translate"
+      ></textarea>
+
+      <div class="content-grid__commit-review">
+        @if (pendingLoading()) {
+          <span>{{ 'ADMIN.CONTENT_EDITOR.COMMIT.REVIEW_LOADING' | translate }}</span>
+        } @else {
+          <p class="content-grid__commit-summary">
+            <span class="content-grid__diff-added">+{{ pendingCounts().added }}</span>
+            <span class="content-grid__diff-modified">~{{ pendingCounts().modified }}</span>
+            <span class="content-grid__diff-removed">−{{ pendingCounts().removed }}</span>
+            {{ 'ADMIN.CONTENT_EDITOR.COMMIT.REVIEW' | translate }}
+          </p>
+          <ul class="content-grid__commit-changes">
+            @for (change of pendingChanges(); track change.ayah_id) {
+              <li>
+                <span
+                  [class.content-grid__diff-added]="change.change_type === 'added'"
+                  [class.content-grid__diff-modified]="change.change_type === 'modified'"
+                  [class.content-grid__diff-removed]="change.change_type === 'removed'"
+                >
+                  {{
+                    change.change_type === 'added'
+                      ? '+'
+                      : change.change_type === 'removed'
+                        ? '−'
+                        : '~'
+                  }}
+                  {{ change.sura }}:{{ change.aya }}
+                </span>
+              </li>
+            }
+          </ul>
+        }
+      </div>
     </ng-container>
   </nz-modal>
 </div>

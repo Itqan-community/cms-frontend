@@ -1,45 +1,78 @@
 <section class="admin-panel asset-versions-manager">
   <div class="asset-versions-manager__header">
-    <h2
-      class="admin-panel__title asset-versions-manager__title"
-    >
+    <h2 class="admin-panel__title asset-versions-manager__title">
       <ng-icon name="lucideRotateCw" />
       {{ sectionTitleKey | translate }}
+      @if (!loading()) {
+        <app-admin-title-count [count]="total()" />
+      }
     </h2>
-
-    <div
-      class="asset-versions-manager__header-actions"
-    >
-      @if (canMutateVersions()) {
-        <button
-          nz-button
-          nzType="primary"
-          type="button"
-          (click)="openCreateModal()"
+    <div class="asset-versions-manager__header-actions">
+      @if (supportsLanguages() && languages().length > 1) {
+        <nz-select
+          class="asset-versions-manager__language"
+          [ngModel]="selectedLanguage()"
+          (ngModelChange)="onLanguageChange($event)"
+          [nzDisabled]="loading()"
         >
+          @for (lang of languages(); track lang.language) {
+            <nz-option
+              [nzValue]="lang.language"
+              [nzLabel]="
+                langName(lang.language) +
+                (lang.is_source
+                  ? ' (' + ('ADMIN.CONTENT_EDITOR.LANGUAGE.SOURCE' | translate) + ')'
+                  : '')
+              "
+            ></nz-option>
+          }
+        </nz-select>
+      }
+      @if (supportsLanguages() && selectedLanguageObj() && !selectedLanguageObj()!.is_source) {
+        <span
+          class="asset-versions-manager__availability"
+          [class.asset-versions-manager__availability--available]="selectedLangAvailable()"
+          nz-tooltip
+          [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.AVAILABILITY.HINT' | translate"
+        >
+          {{
+            (selectedLangAvailable()
+              ? 'ADMIN.CONTENT_EDITOR.AVAILABILITY.AVAILABLE'
+              : 'ADMIN.CONTENT_EDITOR.AVAILABILITY.PENDING'
+            ) | translate
+          }}
+        </span>
+        @if (canToggleAvailability()) {
+          <button
+            nz-button
+            nzType="default"
+            [nzLoading]="togglingAvailability()"
+            [disabled]="loading()"
+            (click)="toggleSelectedLanguageAvailability()"
+          >
+            {{
+              (selectedLangAvailable()
+                ? 'ADMIN.CONTENT_EDITOR.AVAILABILITY.MARK_PENDING'
+                : 'ADMIN.CONTENT_EDITOR.AVAILABILITY.MARK_AVAILABLE'
+              ) | translate
+            }}
+          </button>
+        }
+      }
+      @if (canMutateVersions()) {
+        <button nz-button nzType="primary" type="button" (click)="openCreateModal()">
           <ng-icon name="lucidePlus" />
           {{ t('ADD_BUTTON') | translate }}
         </button>
       }
-
-      <nz-input-group
-        [nzPrefix]="searchIconTpl"
-        class="asset-versions-manager__search"
-      >
+      <nz-input-group [nzPrefix]="searchIconTpl" class="asset-versions-manager__search">
         <input
           nz-input
           type="text"
-          [placeholder]="
-            t('SEARCH_PLACEHOLDER') | translate
-          "
-          (input)="
-            onSearchInput(
-              $any($event.target).value
-            )
-          "
+          [placeholder]="t('SEARCH_PLACEHOLDER') | translate"
+          (input)="onSearchInput($any($event.target).value)"
         />
       </nz-input-group>
-
       <ng-template #searchIconTpl>
         <ng-icon name="lucideSearch" />
       </ng-template>
@@ -48,13 +81,9 @@
 
   <nz-modal
     [nzVisible]="versionModalOpen()"
-    (nzVisibleChange)="
-      onVersionModalVisibleChange($event)
-    "
+    (nzVisibleChange)="onVersionModalVisibleChange($event)"
     (nzOnCancel)="closeVersionModal()"
-    [nzTitle]="
-      versionModalTitleKey() | translate
-    "
+    [nzTitle]="versionModalTitleKey() | translate"
     [nzWidth]="'min(560px, 92vw)'"
     nzCentered
     [nzMaskClosable]="true"
@@ -67,232 +96,157 @@
         nzLayout="vertical"
         class="asset-versions-manager__modal-form"
         [attr.dir]="modalDirection()"
-        (ngSubmit)="
-          $event.preventDefault();
-          submit()
-        "
+        (ngSubmit)="$event.preventDefault(); submit()"
       >
+        @if (modalMode() === 'create' && supportsLanguages() && languages().length === 0) {
+          <p class="asset-versions-manager__hint">
+            {{ t('LANGUAGES_UNAVAILABLE_HINT') | translate }}
+          </p>
+        }
+        @if (modalMode() === 'create' && supportsLanguages() && languages().length > 0) {
+          <nz-form-item>
+            <nz-form-label>{{ t('FORM_LANGUAGE') | translate }}</nz-form-label>
+            <nz-form-control>
+              <nz-select
+                class="asset-versions-manager__modal-language"
+                [ngModel]="versionLanguage()"
+                (ngModelChange)="versionLanguage.set($event)"
+                [ngModelOptions]="{ standalone: true }"
+              >
+                @for (lang of languages(); track lang.language) {
+                  <nz-option
+                    [nzValue]="lang.language"
+                    [nzLabel]="langName(lang.language)"
+                  ></nz-option>
+                }
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        }
         <nz-form-item>
-          <nz-form-label nzRequired>
-            {{ t('FORM_NAME') | translate }}
-          </nz-form-label>
-
-          <nz-form-control
-            [nzErrorTip]="
-              t('ERR_NAME') | translate
-            "
-          >
-            <input
-              nz-input
-              formControlName="name"
-              [placeholder]="
-                t('PLACEHOLDER_NAME') | translate
-              "
-            />
+          <nz-form-label nzRequired>{{ t('FORM_NAME') | translate }}</nz-form-label>
+          <nz-form-control [nzErrorTip]="nameErrorTpl">
+            <input nz-input formControlName="name" [placeholder]="t('NAME_PH') | translate" />
+            <ng-template #nameErrorTpl>
+              @if (form.controls.name.errors?.['required']) {
+                {{ t('NAME_ERR_REQ') | translate }}
+              }
+            </ng-template>
           </nz-form-control>
         </nz-form-item>
 
         <nz-form-item>
-          <nz-form-label nzRequired>
-            {{ t('FORM_SUMMARY') | translate }}
-          </nz-form-label>
-
-          <nz-form-control
-            [nzErrorTip]="
-              t('ERR_SUMMARY') | translate
-            "
-          >
+          <nz-form-label nzRequired>{{ t('FORM_SUMMARY') | translate }}</nz-form-label>
+          <nz-form-control [nzErrorTip]="summaryErrorTpl">
             <textarea
               nz-input
               formControlName="summary"
-              [placeholder]="
-                t('PLACEHOLDER_SUMMARY') | translate
-              "
-              [nzAutosize]="{
-                minRows: 3,
-                maxRows: 6
-              }"
+              rows="3"
+              [placeholder]="t('SUMMARY_PH') | translate"
             ></textarea>
+            <ng-template #summaryErrorTpl>
+              @if (form.controls.summary.errors?.['required']) {
+                {{ t('SUMMARY_ERR_REQ') | translate }}
+              }
+            </ng-template>
           </nz-form-control>
         </nz-form-item>
 
-        <div
-          class="asset-versions-manager__upload"
-        >
-          <input
-            #modalFileInput
-            type="file"
-            class="asset-versions-manager__file-input"
-            (change)="onPickFile($event)"
-          />
-
-          <div
-            class="asset-versions-manager__upload-actions"
-          >
-            <button
-              nz-button
-              nzType="default"
-              type="button"
-              (click)="modalFileInput.click()"
-            >
-              <ng-icon
-                name="lucideFolderOpen"
-              />
-              {{ t('CHOOSE_FILE') | translate }}
-            </button>
-
-            @if (selectedFileName()) {
-              <button
-                nz-button
-                nzType="default"
-                nzDanger
-                type="button"
-                (click)="clearFile()"
-              >
-                <ng-icon name="lucideX" />
-                {{ t('CLEAR_FILE') | translate }}
-              </button>
+        <nz-form-item>
+          <nz-form-label [nzRequired]="modalMode() === 'create'">
+            {{ t('FORM_FILE') | translate }}
+          </nz-form-label>
+          <nz-form-control>
+            <div class="asset-versions-manager__file-row">
+              <label class="ant-btn ant-btn-default asset-versions-manager__file-btn">
+                <ng-icon name="lucideUpload" />
+                {{ t('CHOOSE_FILE') | translate }}
+                <input
+                  type="file"
+                  class="asset-versions-manager__file-input"
+                  (change)="onFileSelected($event)"
+                />
+              </label>
+              @if (selectedFileName()) {
+                <span class="asset-versions-manager__file-name">{{ selectedFileName() }}</span>
+              }
+            </div>
+            @if (modalMode() === 'edit') {
+              <p class="asset-versions-manager__file-hint">
+                {{ t('EDIT_FILE_HINT') | translate }}
+              </p>
             }
-          </div>
+          </nz-form-control>
+        </nz-form-item>
 
-          @if (selectedFileName()) {
-            <p
-              class="asset-versions-manager__file-preview"
-            >
-              <span class="admin-mono">
-                {{ selectedFileName() }}
-              </span>
-            </p>
-          } @else if (modalMode() === 'edit') {
-            <p
-              class="asset-versions-manager__hint"
-            >
-              {{ t('EDIT_FILE_HINT') | translate }}
-            </p>
-          } @else {
-            <p
-              class="asset-versions-manager__hint"
-            >
-              {{ t('FILE_REQUIRED_HINT') | translate }}
-            </p>
-          }
+        <div class="asset-versions-manager__modal-actions">
+          <button nz-button type="button" (click)="closeVersionModal()" [disabled]="saving()">
+            {{ 'ADMIN.COMMON.CANCEL' | translate }}
+          </button>
+          <button
+            nz-button
+            nzType="primary"
+            type="submit"
+            [nzLoading]="saving()"
+            [disabled]="missingVersionLanguage()"
+          >
+            {{
+              (modalMode() === 'create' ? 'ADMIN.COMMON.CREATE' : 'ADMIN.COMMON.SAVE') | translate
+            }}
+          </button>
         </div>
       </form>
     </ng-container>
-
-    <ng-container *nzModalFooter>
-      <div
-        class="asset-versions-manager__modal-footer"
-        [attr.dir]="modalDirection()"
-      >
-        <button
-          nz-button
-          nzType="default"
-          type="button"
-          (click)="closeVersionModal()"
-        >
-          {{ 'ADMIN.COMMON.CANCEL' | translate }}
-        </button>
-
-        <button
-          nz-button
-          nzType="primary"
-          type="button"
-          [nzLoading]="saving()"
-          [disabled]="form.invalid"
-          (click)="submit()"
-        >
-          @if (modalMode() === 'create') {
-            {{ t('SUBMIT_CREATE') | translate }}
-          } @else {
-            {{ t('SUBMIT_UPDATE') | translate }}
-          }
-        </button>
-      </div>
-    </ng-container>
   </nz-modal>
 
-  <div class="admin-table-wrap">
+  <div class="admin-table-container">
     <nz-spin [nzSpinning]="loading()">
       <nz-table
         #versionsTable
         [nzData]="list()"
         [nzFrontPagination]="false"
         [nzShowPagination]="false"
-        nzSize="middle"
         [nzNoResult]="emptyTpl"
+        nzSize="middle"
+        class="admin-table"
       >
         <thead>
           <tr>
-            <th>
-              {{ t('COL_NAME') | translate }}
-            </th>
-
-            <th>
-              {{ t('COL_SUMMARY') | translate }}
-            </th>
-
-            <th nzWidth="100px">
-              {{ t('COL_SIZE') | translate }}
-            </th>
-
-            <th nzWidth="120px">
-              {{ t('COL_DATE') | translate }}
-            </th>
-
-            <th>
-              {{ t('COL_FILE') | translate }}
-            </th>
-
-            <th nzWidth="160px">
-              {{ t('COL_ACTIONS') | translate }}
-            </th>
+            <th>{{ t('COL_NAME') | translate }}</th>
+            <th>{{ t('COL_SUMMARY') | translate }}</th>
+            <th nzWidth="100px">{{ t('COL_SIZE') | translate }}</th>
+            <th nzWidth="120px">{{ t('COL_DATE') | translate }}</th>
+            <th nzWidth="180px">{{ t('COL_ACTIONS') | translate }}</th>
           </tr>
         </thead>
-
         <tbody>
-          @for (
-            ver of versionsTable.data;
-            track ver.id
-          ) {
+          @for (ver of versionsTable.data; track ver.id) {
             <tr>
               <td>
                 {{ ver.name }}
+                @if (supportsLanguages() && ver.is_active) {
+                  <span class="asset-versions-manager__active-badge">
+                    {{ t('ACTIVE_BADGE') | translate }}
+                  </span>
+                }
+                @if (ver.created_by) {
+                  <span class="asset-versions-manager__author">{{ ver.created_by }}</span>
+                }
               </td>
-
-              <td
-                class="asset-versions-manager__summary-cell"
-              >
+              <td class="asset-versions-manager__summary-cell">
                 {{ truncate(ver.summary) }}
-              </td>
-
-              <td>
-                {{ formatBytes(ver.size_bytes) }}
-              </td>
-
-              <td>
-                {{ ver.created_at | date: 'dd/MM/yyyy' }}
-              </td>
-
-              <td>
-                @if (ver.file_url) {
-                  <a
-                    [href]="ver.file_url"
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <ng-icon
-                      name="lucideDownload"
-                    />
-                    {{ 'ADMIN.COMMON.DOWNLOAD' | translate }}
-                  </a>
-                } @else {
-                  <span class="admin-list-desc">
-                    —
+                @if (ver.change_counts; as counts) {
+                  <span class="asset-versions-manager__counts">
+                    <span class="asset-versions-manager__diff-added">+{{ counts.added }}</span>
+                    <span class="asset-versions-manager__diff-modified"
+                      >~{{ counts.modified }}</span
+                    >
+                    <span class="asset-versions-manager__diff-removed">−{{ counts.removed }}</span>
                   </span>
                 }
               </td>
-
+              <td>{{ formatBytes(ver.size_bytes) }}</td>
+              <td>{{ ver.created_at | date: 'dd/MM/yyyy' }}</td>
               <td>
                 <div class="admin-list-actions">
                   @if (ver.file_url) {
@@ -302,21 +256,62 @@
                       nzType="text"
                       class="action-icon"
                       nz-tooltip
-                      [attr.aria-label]="
-                        'ADMIN.PREVIEW.OPEN_FILE' | translate
-                      "
-                      [nzTooltipTitle]="
-                        'ADMIN.PREVIEW.OPEN_FILE' | translate
-                      "
+                      [nzTooltipTitle]="'ADMIN.PREVIEW.OPEN_FILE' | translate"
+                      [attr.aria-label]="'ADMIN.PREVIEW.OPEN_FILE' | translate"
                       (click)="openPreview(ver)"
                     >
+                      <ng-icon name="lucideEye" aria-hidden="true" />
+                    </button>
+                  }
+                  @if (supportsLanguages()) {
+                    <button
+                      type="button"
+                      nz-button
+                      nzType="text"
+                      class="action-icon"
+                      nz-tooltip
+                      [nzTooltipTitle]="t('TOOLTIP_DIFF') | translate"
+                      [attr.aria-label]="t('TOOLTIP_DIFF') | translate"
+                      (click)="toggleDiff(ver)"
+                    >
                       <ng-icon
-                        name="lucideEye"
+                        [name]="
+                          expandedId() === ver.id ? 'lucideChevronDown' : 'lucideChevronRight'
+                        "
                         aria-hidden="true"
                       />
                     </button>
                   }
-
+                  <button
+                    type="button"
+                    nz-button
+                    nzType="text"
+                    class="action-icon"
+                    nz-tooltip
+                    [nzTooltipTitle]="'ADMIN.COMMON.DOWNLOAD' | translate"
+                    [attr.aria-label]="'ADMIN.COMMON.DOWNLOAD' | translate"
+                    [nzLoading]="downloadingId() === ver.id"
+                    [disabled]="downloadingId() !== null"
+                    (click)="downloadVersion(ver)"
+                  >
+                    <ng-icon name="lucideDownload" aria-hidden="true" />
+                  </button>
+                  @if (supportsLanguages() && canMutateVersions() && !ver.is_active) {
+                    <button
+                      type="button"
+                      nz-button
+                      nzType="text"
+                      class="action-icon"
+                      nz-tooltip
+                      [nzTooltipTitle]="t('TOOLTIP_RESTORE') | translate"
+                      [attr.aria-label]="t('TOOLTIP_RESTORE') | translate"
+                      [nzLoading]="restoringId() === ver.id"
+                      [disabled]="restoringId() !== null"
+                      (click)="restoreVersion(ver)"
+                    >
+                      <ng-icon name="lucideHistory" aria-hidden="true" />
+                    </button>
+                  }
                   @if (canMutateVersions()) {
                     <button
                       type="button"
@@ -324,18 +319,13 @@
                       nzType="text"
                       class="action-icon action-icon--edit"
                       nz-tooltip
-                      [nzTooltipTitle]="
-                        t('TOOLTIP_EDIT') | translate
-                      "
+                      [nzTooltipTitle]="t('TOOLTIP_EDIT') | translate"
+                      [attr.aria-label]="t('TOOLTIP_EDIT') | translate"
                       (click)="openEditModal(ver)"
                     >
-                      <ng-icon
-                        name="lucideSquarePen"
-                        aria-hidden="true"
-                      />
+                      <ng-icon name="lucideSquarePen" aria-hidden="true" />
                     </button>
                   }
-
                   @if (canDeleteVersions()) {
                     <button
                       type="button"
@@ -343,70 +333,107 @@
                       nzType="text"
                       class="action-icon action-icon--delete"
                       nz-tooltip
-                      [nzTooltipTitle]="
-                        t('TOOLTIP_DELETE') | translate
-                      "
+                      [nzTooltipTitle]="t('TOOLTIP_DELETE') | translate"
+                      [attr.aria-label]="t('TOOLTIP_DELETE') | translate"
                       (click)="deleteRow(ver)"
                     >
-                      <ng-icon
-                        name="lucideTrash2"
-                        aria-hidden="true"
-                      />
+                      <ng-icon name="lucideTrash2" aria-hidden="true" />
                     </button>
                   }
                 </div>
               </td>
             </tr>
+            @if (expandedId() === ver.id) {
+              <tr class="asset-versions-manager__diff-row">
+                <td colspan="5">
+                  @if (diffLoading()) {
+                    <span class="asset-versions-manager__diff-loading">
+                      {{ t('DIFF_LOADING') | translate }}
+                    </span>
+                  } @else if (diff().length === 0) {
+                    <span class="asset-versions-manager__diff-empty">
+                      {{ t('DIFF_EMPTY') | translate }}
+                    </span>
+                  } @else {
+                    <ul class="asset-versions-manager__diff-list">
+                      @for (change of diff(); track change.ayah_id) {
+                        <li class="asset-versions-manager__diff-item">
+                          <span
+                            class="asset-versions-manager__diff-ref"
+                            [class.asset-versions-manager__diff-added]="
+                              change.change_type === 'added'
+                            "
+                            [class.asset-versions-manager__diff-modified]="
+                              change.change_type === 'modified'
+                            "
+                            [class.asset-versions-manager__diff-removed]="
+                              change.change_type === 'removed'
+                            "
+                          >
+                            {{
+                              change.change_type === 'added'
+                                ? '+'
+                                : change.change_type === 'removed'
+                                  ? '−'
+                                  : '~'
+                            }}
+                            {{ change.sura }}:{{ change.aya }}
+                          </span>
+                          @if (
+                            change.change_type !== 'added' &&
+                            change.old_text !== null &&
+                            change.old_text !== undefined
+                          ) {
+                            <span class="asset-versions-manager__diff-old">{{
+                              change.old_text
+                            }}</span>
+                          }
+                          @if (
+                            change.change_type !== 'removed' &&
+                            change.new_text !== null &&
+                            change.new_text !== undefined
+                          ) {
+                            <span class="asset-versions-manager__diff-new">{{
+                              change.new_text
+                            }}</span>
+                          }
+                        </li>
+                      }
+                    </ul>
+                  }
+                </td>
+              </tr>
+            }
           }
         </tbody>
       </nz-table>
     </nz-spin>
-
     <ng-template #emptyTpl>
-      <div
-        class="admin-empty-state admin-empty-state--compact"
-      >
-        <ng-icon
-          name="lucideFile"
-          class="admin-empty-state__icon"
-        />
-
-        <p
-          class="admin-empty-state__title"
-        >
-          {{ t('EMPTY_TITLE') | translate }}
-        </p>
-
-        <p
-          class="admin-empty-state__subtitle"
-        >
-          {{ t('EMPTY_SUBTITLE') | translate }}
-        </p>
+      <div class="admin-empty-state admin-empty-state--compact">
+        <ng-icon name="lucideFile" class="admin-empty-state__icon" />
+        <p class="admin-empty-state__title">{{ t('EMPTY_TITLE') | translate }}</p>
+        <p class="admin-empty-state__subtitle">{{ t('EMPTY_SUBTITLE') | translate }}</p>
       </div>
     </ng-template>
   </div>
 
   @if (!loading() && total() > 0) {
-    <div class="admin-pagination">
-      <nz-pagination
-        [nzPageIndex]="page()"
-        [nzTotal]="total()"
-        [nzPageSize]="pageSize()"
-        [nzShowSizeChanger]="true"
-        [nzPageSizeOptions]="[10, 25, 50]"
-        nzShowQuickJumper
-        (nzPageIndexChange)="onPageChange($event)"
-        (nzPageSizeChange)="onPageSizeChange($event)"
-      ></nz-pagination>
-    </div>
+    <app-admin-table-pagination
+      [page]="page()"
+      [pageSize]="pageSize()"
+      [total]="total()"
+      [loading]="loading()"
+      (pageChange)="onPageChange($event)"
+      (pageSizeChange)="onPageSizeChange($event)"
+    />
   }
 
-  @if (previewingVersion(); as version) {
+  @if (previewVersion(); as version) {
     <nz-modal
-      [nzVisible]="true"
-      (nzOnCancel)="closePreview()"
+      [(nzVisible)]="previewModalVisible"
       [nzTitle]="version.name"
-      [nzWidth]="'min(1000px, 95vw)'"
+      (nzOnCancel)="closePreview()"
+      nzWidth="900px"
       nzCentered
       [nzMaskClosable]="true"
       [nzClosable]="true"
@@ -414,10 +441,7 @@
     >
       <ng-container *nzModalContent>
         @if (previewDiffLoading()) {
-          <div
-            class="preview-loading"
-            aria-live="polite"
-          >
+          <div class="preview-loading" aria-live="polite">
             {{ 'ADMIN.PREVIEW.LOADING' | translate }}
           </div>
         }
