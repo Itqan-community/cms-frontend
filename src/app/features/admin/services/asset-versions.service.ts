@@ -89,10 +89,9 @@ export class AssetVersionsService {
     pageSize = 100,
   ): Observable<AssetVersionsListResponse> {
     const effectivePageSize =
-      Math.min(
-        pageSize,
-        1000,
-      );
+      Number.isFinite(pageSize) && pageSize > 0
+        ? Math.min(pageSize, 1000)
+        : 100;
 
     const firstPageParams =
       new HttpParams()
