@@ -531,6 +531,19 @@
                   }
                 </td>
                 <td>
+                  @if (canUploadTiming()) {
+                    <button
+                      nz-button
+                      nzType="text"
+                      type="button"
+                      class="action-icon"
+                      [attr.title]="'ADMIN.AUDIO.TIMESTAMPS.TITLE' | translate"
+                      [attr.aria-label]="'ADMIN.AUDIO.TIMESTAMPS.TITLE' | translate"
+                      (click)="openTimestampEditor(track)"
+                    >
+                      <ng-icon name="lucideClock" />
+                    </button>
+                  }
                   @if (canDeleteRecitation()) {
                     <button
                       nz-button

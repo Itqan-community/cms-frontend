@@ -1,0 +1,277 @@
+<section class="timestamp-editor">
+  @if (loadError()) {
+    <nz-alert nzType="error" [nzMessage]="loadError()" nzShowIcon />
+    <a nz-button [routerLink]="backLink()" class="timestamp-editor__back-cta">
+      {{ 'ADMIN.AUDIO.TIMESTAMPS.BACK_TO_RECITATION' | translate }}
+    </a>
+  } @else if (loading()) {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 6 }" />
+  } @else {
+    <header class="timestamp-editor__head">
+      <div class="timestamp-editor__title-block">
+        <a [routerLink]="backLink()" class="timestamp-editor__breadcrumb hoverable-link">
+          <ng-icon name="lucideArrowRight" />
+          {{ 'ADMIN.AUDIO.TIMESTAMPS.BACK_TO_RECITATION' | translate }}
+        </a>
+        <h1 class="timestamp-editor__title">
+          {{ 'ADMIN.AUDIO.TIMESTAMPS.TITLE' | translate }}
+        </h1>
+        <p class="timestamp-editor__subtitle">
+          {{
+            'ADMIN.AUDIO.TIMESTAMPS.SUBTITLE'
+              | translate: { surah: track()?.surah_number, filename: track()?.filename }
+          }}
+        </p>
+      </div>
+
+      <div class="timestamp-editor__head-actions">
+        @if (dirty()) {
+          <button nz-button type="button" (click)="discardChanges()" [disabled]="saving()">
+            {{ 'ADMIN.AUDIO.TIMESTAMPS.DISCARD' | translate }}
+          </button>
+        }
+        <button
+          nz-button
+          nzType="primary"
+          type="button"
+          [disabled]="!canEdit() || !dirty() || saving()"
+          [nzLoading]="saving()"
+          (click)="save()"
+        >
+          <ng-icon name="lucideSave" />
+          {{ 'ADMIN.AUDIO.TIMESTAMPS.SAVE' | translate }}
+        </button>
+      </div>
+    </header>
+
+    @if (!canEdit()) {
+      <nz-alert
+        nzType="info"
+        [nzMessage]="'ADMIN.AUDIO.TIMESTAMPS.READ_ONLY' | translate"
+        nzShowIcon
+      />
+    }
+
+    @if (timestampsError()) {
+      <nz-alert nzType="warning" [nzMessage]="timestampsError()" nzShowIcon />
+    }
+
+    @if (issues().length > 0) {
+      <nz-alert
+        nzType="warning"
+        [nzMessage]="'ADMIN.AUDIO.TIMESTAMPS.ISSUES' | translate: { count: issues().length }"
+        nzShowIcon
+      />
+    }
+
+    <!-- Hidden: the page renders its own transport so millisecond values stay visible. -->
+    <audio
+      #audio
+      class="timestamp-editor__audio"
+      preload="metadata"
+      [src]="track()?.audio_url"
+      (play)="onPlay()"
+      (pause)="onPause()"
+      (timeupdate)="onTimeUpdate()"
+    ></audio>
+
+    @if (peaksError()) {
+      <nz-alert nzType="info" [nzMessage]="peaksError()" nzShowIcon />
+    }
+
+    <div class="admin-panel timestamp-editor__waveform-panel">
+      <div class="timestamp-editor__waveform-head">
+        <span class="timestamp-editor__waveform-label">
+          {{ 'ADMIN.AUDIO.TIMESTAMPS.WAVEFORM' | translate }}
+          @if (peaksLoading()) {
+            <span class="timestamp-editor__hint">
+              {{ 'ADMIN.AUDIO.TIMESTAMPS.WAVEFORM_LOADING' | translate }}
+            </span>
+          }
+        </span>
+
+        <div class="timestamp-editor__zoom">
+          <button
+            nz-button
+            type="button"
+            class="btn__icon"
+            [attr.aria-label]="'ADMIN.AUDIO.TIMESTAMPS.ZOOM_OUT' | translate"
+            (click)="zoomBy(1.6)"
+          >
+            <ng-icon name="lucideZoomOut" />
+          </button>
+          <button
+            nz-button
+            type="button"
+            class="btn__icon"
+            [attr.aria-label]="'ADMIN.AUDIO.TIMESTAMPS.ZOOM_IN' | translate"
+            (click)="zoomBy(0.625)"
+          >
+            <ng-icon name="lucideZoomIn" />
+          </button>
+          <button nz-button type="button" (click)="resetZoom()">
+            {{ 'ADMIN.AUDIO.TIMESTAMPS.ZOOM_RESET' | translate }}
+          </button>
+        </div>
+      </div>
+
+      <app-waveform-canvas
+        [peaks]="peaks()"
+        [markers]="markers()"
+        [selectedId]="selectedId()"
+        [playheadMs]="playheadMs()"
+        [durationMs]="durationMs()"
+        [view]="view()"
+        [editable]="canEdit()"
+        [ariaLabel]="'ADMIN.AUDIO.TIMESTAMPS.WAVEFORM' | translate"
+        (seek)="seekTo($event)"
+        (markerGrabbed)="selectMarker($event)"
+        (markerDragged)="onMarkerDragged($event)"
+        (viewChanged)="onViewChanged($event)"
+      />
+
+      <p class="timestamp-editor__waveform-hint">
+        {{ 'ADMIN.AUDIO.TIMESTAMPS.WAVEFORM_HINT' | translate }}
+      </p>
+    </div>
+
+    <div class="admin-panel timestamp-editor__transport">
+      <div class="timestamp-editor__transport-controls">
+        <button
+          nz-button
+          type="button"
+          class="btn__icon"
+          [attr.aria-label]="
+            (isPlaying() ? 'ADMIN.AUDIO.TIMESTAMPS.PAUSE' : 'ADMIN.AUDIO.TIMESTAMPS.PLAY')
+              | translate
+          "
+          (click)="togglePlay()"
+        >
+          <ng-icon [name]="isPlaying() ? 'lucidePause' : 'lucidePlay'" />
+        </button>
+
+        <button
+          nz-button
+          type="button"
+          class="btn__icon"
+          nz-tooltip
+          [nzTooltipTitle]="'ADMIN.AUDIO.TIMESTAMPS.PREVIOUS_MARKER' | translate"
+          [attr.aria-label]="'ADMIN.AUDIO.TIMESTAMPS.PREVIOUS_MARKER' | translate"
+          (click)="goToPreviousMarker()"
+        >
+          <ng-icon name="lucideSkipBack" />
+        </button>
+        <button
+          nz-button
+          type="button"
+          class="btn__icon"
+          nz-tooltip
+          [nzTooltipTitle]="'ADMIN.AUDIO.TIMESTAMPS.NEXT_MARKER' | translate"
+          [attr.aria-label]="'ADMIN.AUDIO.TIMESTAMPS.NEXT_MARKER' | translate"
+          (click)="goToNextMarker()"
+        >
+          <ng-icon name="lucideSkipForward" />
+        </button>
+
+        <span class="timestamp-editor__clock admin-mono">
+          {{ formatMs(playheadMs()) }} / {{ formatMs(durationMs()) }}
+        </span>
+      </div>
+
+      <div class="timestamp-editor__nudges">
+        <span class="timestamp-editor__nudges-label">
+          {{ 'ADMIN.AUDIO.TIMESTAMPS.NUDGE_LABEL' | translate }}
+        </span>
+        @for (step of nudgeSteps; track step) {
+          <button
+            nz-button
+            type="button"
+            class="timestamp-editor__nudge"
+            [disabled]="!canEdit() || !selectedMarker()"
+            (click)="nudge(step)"
+          >
+            {{ formatNudge(step) }}
+          </button>
+        }
+        <button
+          nz-button
+          type="button"
+          [disabled]="!canEdit() || !selectedMarker()"
+          (click)="snapToPlayhead()"
+        >
+          {{ 'ADMIN.AUDIO.TIMESTAMPS.SNAP' | translate }}
+        </button>
+      </div>
+
+      <div class="timestamp-editor__readout admin-mono">
+        @if (selectedMarker(); as marker) {
+          <span>
+            {{ 'ADMIN.AUDIO.TIMESTAMPS.SELECTED' | translate }}
+            <b>{{ marker.id }}</b>
+          </span>
+          <span>{{ formatMs(marker.ms) }}</span>
+          <span
+            class="timestamp-editor__drift"
+            [class.timestamp-editor__drift--moved]="selectedDriftMs() !== 0"
+          >
+            {{ formatDrift(selectedDriftMs()) }}
+          </span>
+        } @else {
+          <span class="timestamp-editor__hint">
+            {{ 'ADMIN.AUDIO.TIMESTAMPS.SELECT_HINT' | translate }}
+          </span>
+        }
+      </div>
+    </div>
+
+    <div class="admin-panel timestamp-editor__markers">
+      <h2 class="timestamp-editor__markers-title">
+        {{ 'ADMIN.AUDIO.TIMESTAMPS.AYAH_LIST' | translate }}
+      </h2>
+
+      @if (ayahRows().length === 0) {
+        <div class="admin-empty-state admin-empty-state--compact">
+          <ng-icon name="lucideClock" class="admin-empty-state__icon" />
+          <p class="admin-empty-state__title">
+            {{ 'ADMIN.AUDIO.TIMESTAMPS.EMPTY_TITLE' | translate }}
+          </p>
+          <p class="admin-empty-state__subtitle">
+            {{ 'ADMIN.AUDIO.TIMESTAMPS.EMPTY_SUBTITLE' | translate }}
+          </p>
+        </div>
+      } @else {
+        <ul class="timestamp-editor__rows">
+          @for (row of ayahRows(); track row.ayah) {
+            <li class="timestamp-editor__row">
+              <span class="timestamp-editor__ayah">
+                {{ 'ADMIN.AUDIO.TIMESTAMPS.AYAH' | translate: { number: row.ayah } }}
+              </span>
+
+              @if (row.start; as start) {
+                <button
+                  type="button"
+                  class="timestamp-editor__bound admin-mono"
+                  [class.timestamp-editor__bound--selected]="selectedId() === start.id"
+                  (click)="playFromMarker(start)"
+                >
+                  {{ formatMs(start.ms) }}
+                </button>
+              }
+
+              @if (row.end; as end) {
+                <button
+                  type="button"
+                  class="timestamp-editor__bound admin-mono"
+                  [class.timestamp-editor__bound--selected]="selectedId() === end.id"
+                  (click)="playFromMarker(end)"
+                >
+                  {{ formatMs(end.ms) }}
+                </button>
+              }
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  }
+</section>

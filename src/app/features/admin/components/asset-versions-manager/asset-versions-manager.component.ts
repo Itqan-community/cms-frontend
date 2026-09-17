@@ -24,10 +24,43 @@ import { AssetVersionsService } from '../../services/asset-versions.service';
 import { AssetContentService } from '../../services/asset-content.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { localizedLanguageName } from '../../utils/iso-639.util';
-import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
+import {
+  PORTAL_PERMISSIONS,
+  type PortalPermissionCode,
+} from '../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../services/admin-auth.service';
 
 const DEFAULT_PAGE_SIZE = 10;
+
+/**
+ * Version management is gated per asset type: the backend `PermissionChoice` set has no
+ * catalogue-wide code, so each kind maps to its own update/delete permission.
+ */
+const VERSION_PERMISSIONS: Record<
+  AssetVersionParentKind,
+  { mutate: PortalPermissionCode; delete: PortalPermissionCode }
+> = {
+  tafsir: {
+    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR,
+    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_TAFSIR,
+  },
+  translation: {
+    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION,
+    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_TRANSLATION,
+  },
+  mushaf: {
+    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_MUSHAF,
+    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_MUSHAF,
+  },
+  font: {
+    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_FONT,
+    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_FONT,
+  },
+  program: {
+    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_PROGRAM,
+    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_PROGRAM,
+  },
+};
 
 @Component({
   selector: 'app-asset-versions-manager',
@@ -166,7 +199,7 @@ export class AssetVersionsManagerComponent implements OnInit {
 
   private loadLanguages(): void {
     this.assetContentService
-      .getLanguages(this.kind, this.slug)
+      .listLanguages(this.kind, this.slug)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (langs) => {
@@ -177,7 +210,7 @@ export class AssetVersionsManagerComponent implements OnInit {
             this.loadList();
             return;
           }
-          const stored = this.lastLanguage.getLanguage(this.kind, this.slug);
+          const stored = this.lastLanguage.get(this.kind, this.slug);
           const remembered = stored && langs.some((l) => l.language === stored) ? stored : null;
           const defaultLang = remembered ?? langs[0].language;
           this.selectedLanguage.set(defaultLang);
@@ -197,7 +230,7 @@ export class AssetVersionsManagerComponent implements OnInit {
     if (this.selectedLanguage() === lang) return;
     this.selectedLanguage.set(lang);
     this.versionLanguage.set(lang);
-    this.lastLanguage.setLanguage(this.kind, this.slug, lang);
+    this.lastLanguage.set(this.kind, this.slug, lang);
     this.page.set(1);
     this.loadList();
   }
@@ -642,7 +675,7 @@ export class AssetVersionsManagerComponent implements OnInit {
     anchor.click();
   }
 
-  truncate(summary: string): string {
+  truncate(summary: string | undefined): string {
     if (!summary) return '—';
     return summary.length > 90 ? `${summary.slice(0, 90)}...` : summary;
   }
@@ -664,10 +697,10 @@ export class AssetVersionsManagerComponent implements OnInit {
   }
 
   canMutateVersions(): boolean {
-    return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.CATALOG_MUTATE);
+    return this.adminAuth.hasPermission(VERSION_PERMISSIONS[this.kind].mutate);
   }
 
   canDeleteVersions(): boolean {
-    return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.CATALOG_DELETE);
+    return this.adminAuth.hasPermission(VERSION_PERMISSIONS[this.kind].delete);
   }
 }
