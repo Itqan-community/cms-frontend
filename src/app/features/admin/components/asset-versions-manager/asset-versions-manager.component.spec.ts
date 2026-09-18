@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -62,6 +64,9 @@ describe('AssetVersionsManagerComponent', () => {
     await TestBed.configureTestingModule({
       imports: [AssetVersionsManagerComponent, TranslateModule.forRoot()],
       providers: [
+        // The component injects HttpClient directly for its own file requests.
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: AssetVersionsService, useValue: versionsService },
         { provide: AssetContentService, useValue: contentService },
         { provide: NzMessageService, useValue: message },
@@ -89,7 +94,7 @@ describe('AssetVersionsManagerComponent', () => {
 
       component.openCreateModal();
       component.form.setValue({ name: 'v1', summary: 'first upload' });
-      component.onPickFile({
+      component.onFileSelected({
         target: { files: [new File(['x'], 'v1.csv')], value: '' },
       } as unknown as Event);
       component.submit();
@@ -105,7 +110,7 @@ describe('AssetVersionsManagerComponent', () => {
 
       component.openCreateModal();
       component.form.setValue({ name: 'v1', summary: 'first upload' });
-      component.onPickFile({
+      component.onFileSelected({
         target: { files: [new File(['x'], 'v1.csv')], value: '' },
       } as unknown as Event);
       component.submit();
