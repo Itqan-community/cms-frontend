@@ -138,7 +138,7 @@
       [rowModelType]="rowModelType()"
       [rowData]="rowModelType() === 'clientSide' ? rows() : undefined"
       [datasource]="rowModelType() === 'infinite' ? wordDatasource() : undefined"
-      [cacheBlockSize]="wordCacheBlockSize"
+      [cacheBlockSize]="rowModelType() === 'infinite' ? wordCacheBlockSize : undefined"
       [columnDefs]="columnDefs()"
       [defaultColDef]="defaultColDef"
       [enableRtl]="rtl()"

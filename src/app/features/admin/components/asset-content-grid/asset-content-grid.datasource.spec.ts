@@ -13,11 +13,13 @@ import type { ContentDraftVersion } from '../../models/asset-content.models';
  * version is created internally by `loadForLanguage()` and exposed via the
  * `draftId` signal, not bound from outside. So every scenario here flushes
  * the `languages/` and `draft/` requests the same way the running app would,
- * then drives the datasource from the resulting `draftId`.
+ * then drives the datasource from the resulting `draftId`. Matched by slug
+ * (not just `draft/`) so two fixtures' requests pending at once don't collide
+ * on `expectOne`.
  */
-function flushDraft(httpMock: HttpTestingController, id: number): void {
+function flushDraft(httpMock: HttpTestingController, slug: string, id: number): void {
   httpMock
-    .expectOne((r) => r.url.includes('languages/'))
+    .expectOne((r) => r.url.includes(slug) && r.url.includes('languages/'))
     .flush([{ language: 'ar', is_source: true, is_available: true }]);
   const draft: ContentDraftVersion = {
     id,
@@ -29,7 +31,9 @@ function flushDraft(httpMock: HttpTestingController, id: number): void {
     entries_count: 0,
     created_at: '2026-01-01T00:00:00Z',
   };
-  httpMock.expectOne((r) => r.url.includes('draft/')).flush(draft);
+  httpMock
+    .expectOne((r) => r.url.includes('draft/') && r.url.includes(slug))
+    .flush(draft);
 }
 
 describe('AssetContentGridComponent word datasource', () => {
@@ -46,26 +50,38 @@ describe('AssetContentGridComponent word datasource', () => {
   afterEach(() => httpMock.verify());
 
   it('uses the infinite row model only for the word template', () => {
-    // Arrange
-    const fixture = TestBed.createComponent(AssetContentGridComponent);
-    fixture.componentRef.setInput('kind', 'translation');
-    fixture.componentRef.setInput('slug', 'a-translation');
+    // Arrange — a template never actually flips on one live asset instance
+    // (it's immutable per asset, per Task 13); two fixtures model that
+    // instead of toggling the input on a single already-rendered grid, which
+    // would force AG Grid through a rowModelType transition it doesn't
+    // support post-init.
+    const wordFixture = TestBed.createComponent(AssetContentGridComponent);
+    wordFixture.componentRef.setInput('kind', 'translation');
+    wordFixture.componentRef.setInput('slug', 'a-word-translation');
+    wordFixture.componentRef.setInput('template', 'word');
+
+    const ayahFixture = TestBed.createComponent(AssetContentGridComponent);
+    ayahFixture.componentRef.setInput('kind', 'translation');
+    ayahFixture.componentRef.setInput('slug', 'an-ayah-translation');
+    ayahFixture.componentRef.setInput('template', 'ayah');
 
     // Act
-    fixture.componentRef.setInput('template', 'word');
-    fixture.detectChanges();
-    const wordModel = fixture.componentInstance.rowModelType();
-    fixture.componentRef.setInput('template', 'ayah');
-    fixture.detectChanges();
-    const ayahModel = fixture.componentInstance.rowModelType();
+    wordFixture.detectChanges();
+    const wordModel = wordFixture.componentInstance.rowModelType();
+    ayahFixture.detectChanges();
+    const ayahModel = ayahFixture.componentInstance.rowModelType();
 
     // Assert
     expect(wordModel).toBe('infinite');
     expect(ayahModel).toBe('clientSide');
 
-    // Drain the draft + first-page requests that ngOnInit kicked off.
-    flushDraft(httpMock, 1);
-    httpMock.expectOne((r) => r.url.includes('entries/')).flush({ results: [], count: 0 });
+    // Drain the draft + first-page requests that ngOnInit kicked off on
+    // each fixture.
+    flushDraft(httpMock, 'a-word-translation', 1);
+    flushDraft(httpMock, 'an-ayah-translation', 2);
+    httpMock
+      .match((r) => r.url.includes('entries/'))
+      .forEach((req) => req.flush({ results: [], count: 0 }));
   });
 
   it('translates a block request into a page request and reports the total', () => {
@@ -79,7 +95,7 @@ describe('AssetContentGridComponent word datasource', () => {
     // ngOnInit's initDraft() -> loadAllEntries(1) fires first; give it a
     // draft id and a word-shaped first page so it derives the template and
     // stops (word never finishes the client-side pagination loop).
-    flushDraft(httpMock, 7);
+    flushDraft(httpMock, 'a-translation', 7);
     httpMock.expectOne((r) => r.url.includes('entries/')).flush({
       results: [
         {
