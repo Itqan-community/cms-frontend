@@ -1,5 +1,14 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, Input, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  Input,
+  OnInit,
+  computed,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
@@ -10,6 +19,7 @@ import type {
   GridReadyEvent,
   GridApi,
   RowSelectionOptions,
+  ValueGetterParams,
 } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from 'ag-grid-community';
 import { AgGridAngular } from 'ag-grid-angular';
@@ -24,6 +34,7 @@ import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime } from 'rxjs';
 import type {
   AssetLanguage,
+  AssetTemplate,
   AssetVersionParentKind,
   ContentChange,
   ContentEntry,
@@ -31,6 +42,7 @@ import type {
 } from '../../models/asset-content.models';
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../services/admin-auth.service';
+import { SURAHS_METADATA } from '../../models/quran-metadata';
 import { AssetContentService } from '../../services/asset-content.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import {
@@ -75,6 +87,10 @@ export class AssetContentGridComponent implements OnInit {
   @Input({ required: true }) kind!: AssetVersionParentKind;
   /** Asset slug. */
   @Input({ required: true }) slug!: string;
+  /** Content granularity of the asset; drives which columns are shown. */
+  readonly template = input<AssetTemplate | null>(null);
+  /** Mushaf layout name, when the asset's template is page-based. */
+  readonly layoutName = input<string | null>(null);
 
   private readonly contentService = inject(AssetContentService);
   private readonly lastLanguage = inject(LastActiveLanguageService);
@@ -95,7 +111,7 @@ export class AssetContentGridComponent implements OnInit {
   /** Bumped on each language load so stale draft/entry responses are ignored. */
   private loadGeneration = 0;
 
-  /** Ayah ids with unsaved edits pending the next autosave flush. */
+  /** Unit ids with unsaved edits pending the next autosave flush. */
   private readonly pendingRows = new Map<number, ContentEntryPatch>();
 
   readonly draftId = signal<number | null>(null);
@@ -172,7 +188,7 @@ export class AssetContentGridComponent implements OnInit {
     filter: false,
   };
 
-  readonly columnDefs = signal<ColDef<ContentEntry>[]>(this.buildColumnDefs());
+  readonly columnDefs = computed(() => this.buildColumnDefs());
 
   ngOnInit(): void {
     this.autosave$
@@ -192,8 +208,8 @@ export class AssetContentGridComponent implements OnInit {
 
   onCellValueChanged(event: CellValueChangedEvent<ContentEntry>): void {
     const row = event.data;
-    this.pendingRows.set(row.ayah_id, {
-      ayah_id: row.ayah_id,
+    this.pendingRows.set(row.unit_id, {
+      unit_id: row.unit_id,
       text: row.text ?? '',
     });
     this.dirty.set(true);
@@ -218,12 +234,22 @@ export class AssetContentGridComponent implements OnInit {
     this.canRedo.set((this.gridApi?.getCurrentRedoSize() ?? 0) > 0);
   }
 
+  /** Localized surah name for a sura id, resolved from the static Quran metadata. */
+  private surahName(sura: number | null): string | null {
+    if (sura === null) return null;
+    const meta = SURAHS_METADATA.find((s) => s.id === sura);
+    if (!meta) return null;
+    return this.translate.currentLang === 'ar' ? meta.name_ar : meta.name_en;
+  }
+
   /** Build the distinct surah list (ordered by sura number) for the dropdown. */
   private buildSurahOptions(rows: ContentEntry[]): void {
     const suraByName = new Map<string, number>();
     for (const row of rows) {
-      if (row.surah_name && !suraByName.has(row.surah_name)) {
-        suraByName.set(row.surah_name, row.sura);
+      if (row.sura === null) continue;
+      const name = this.surahName(row.sura);
+      if (name && !suraByName.has(name)) {
+        suraByName.set(name, row.sura);
       }
     }
     const options: SurahOption[] = [...suraByName.entries()]
@@ -290,9 +316,9 @@ export class AssetContentGridComponent implements OnInit {
   }
 
   /**
-   * Copy the selected rows to the clipboard as CSV (`surah,ayah,text` with a
-   * header) — the same shape as the per-version download. Pasting back into a
-   * Text cell is header-aware and writes only the text column.
+   * Copy the selected rows to the clipboard as CSV (`label,reference_text,text`
+   * with a header). Pasting back into a Text cell is header-aware and writes
+   * only the text column.
    */
   copySelectedToCsv(): void {
     const api = this.gridApi;
@@ -302,10 +328,10 @@ export class AssetContentGridComponent implements OnInit {
       this.message.info(this.translate.instant('ADMIN.CONTENT_EDITOR.COPY.NONE_SELECTED'));
       return;
     }
-    selected.sort((a, b) => a.order - b.order || a.ayah_id - b.ayah_id);
+    selected.sort((a, b) => a.order - b.order || a.unit_id - b.unit_id);
     const table: string[][] = [
-      ['surah', 'ayah', 'text'],
-      ...selected.map((r) => [String(r.sura), String(r.aya), r.text ?? '']),
+      ['label', 'reference_text', 'text'],
+      ...selected.map((r) => [r.label, r.reference_text, r.text ?? '']),
     ];
     const csv = serializeCsv(table);
     navigator.clipboard.writeText(csv).then(
@@ -351,8 +377,6 @@ export class AssetContentGridComponent implements OnInit {
     }
     const generation = ++this.loadGeneration;
     this.loading.set(true);
-    // Rebuild columns so the source-reference column appears/disappears.
-    this.columnDefs.set(this.buildColumnDefs());
     this.contentService
       .createDraft(this.kind, this.slug, language)
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -487,8 +511,8 @@ export class AssetContentGridComponent implements OnInit {
               this.activePatchError = true;
               // Re-queue the failed batch so nothing is silently lost.
               for (const patch of batch) {
-                if (!this.pendingRows.has(patch.ayah_id)) {
-                  this.pendingRows.set(patch.ayah_id, patch);
+                if (!this.pendingRows.has(patch.unit_id)) {
+                  this.pendingRows.set(patch.unit_id, patch);
                 }
               }
               this.showError(err);
@@ -648,73 +672,82 @@ export class AssetContentGridComponent implements OnInit {
     return this.translate.instant(`ADMIN.CONTENT_EDITOR.COLUMNS.${key}`);
   }
 
-  private buildColumnDefs(): ColDef<ContentEntry>[] {
-    return [
+  /**
+   * Column set is driven by the asset's content template:
+   *  - every template shows the pinned unit label and the editable text;
+   *  - `reference_text` (the Quranic text being annotated) is shown for every
+   *    template except `page`, which carries none;
+   *  - the surah dropdown floating filter only means something where every
+   *    row belongs to a single sura, i.e. the `ayah` template — `word` moves
+   *    to a server-side filter in a later task, and `surah`/`page` rows don't
+   *    share a common sura to filter by;
+   *  - `source_text` (the source language for the same unit) is shown
+   *    read-only whenever a non-source language is being edited.
+   */
+  buildColumnDefs(): ColDef<ContentEntry>[] {
+    const template = this.template();
+    const columns: ColDef<ContentEntry>[] = [
       {
-        field: 'sura',
-        headerName: this.colHeader('SURA'),
-        width: 110,
+        field: 'label',
+        headerName: this.colHeader('UNIT'),
+        width: 140,
         editable: false,
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
+        pinned: this.rtl() ? 'right' : 'left',
+        ...(template === 'ayah'
+          ? {
+              filter: 'agTextColumnFilter',
+              filterValueGetter: (params: ValueGetterParams<ContentEntry>) =>
+                this.surahName(params.data?.sura ?? null),
+              floatingFilter: true,
+              floatingFilterComponent: SurahFloatingFilterComponent,
+              floatingFilterComponentParams: {
+                optionsProvider: () => this.surahOptions(),
+              },
+            }
+          : {}),
       },
-      {
-        field: 'aya',
-        headerName: this.colHeader('AYA'),
-        width: 110,
-        editable: false,
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-      },
-      {
-        field: 'surah_name',
-        headerName: this.colHeader('SURAH'),
-        width: 170,
-        editable: false,
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        floatingFilterComponent: SurahFloatingFilterComponent,
-        floatingFilterComponentParams: {
-          optionsProvider: () => this.surahOptions(),
-        },
-      },
-      {
-        field: 'uthmani',
-        headerName: this.colHeader('UTHMANI'),
+    ];
+
+    if (template !== 'page') {
+      columns.push({
+        field: 'reference_text',
+        headerName: this.colHeader('REFERENCE'),
         flex: 1,
         editable: false,
         cellStyle: { direction: 'rtl', fontFamily: 'serif' },
         wrapText: true,
         autoHeight: true,
-      },
-      // When editing a translation, show the source language read-only alongside.
-      ...(this.isEditingSource()
-        ? []
-        : [
-            {
-              field: 'source_text',
-              headerName: this.sourceColHeader(),
-              flex: 2,
-              editable: false,
-              cellStyle: { direction: this.sourceTextDirection() },
-              wrapText: true,
-              autoHeight: true,
-            } as ColDef<ContentEntry>,
-          ]),
-      {
-        field: 'text',
-        headerName: this.colHeader('TEXT'),
+      });
+    }
+
+    // When editing a translation, show the source language read-only alongside.
+    if (!this.isEditingSource()) {
+      columns.push({
+        field: 'source_text',
+        headerName: this.sourceColHeader(),
         flex: 2,
-        editable: true,
-        cellEditor: 'agLargeTextCellEditor',
-        cellEditorPopup: true,
-        // agLargeTextCellEditor defaults to maxLength 200; ayah text is far longer,
-        // so raise the cap and enlarge the popup textarea.
-        cellEditorParams: { maxLength: 100000, rows: 12, cols: 60 },
+        editable: false,
+        cellStyle: { direction: this.sourceTextDirection() },
         wrapText: true,
         autoHeight: true,
-      },
-    ];
+      });
+    }
+
+    columns.push({
+      field: 'text',
+      headerName: this.colHeader('TEXT'),
+      flex: 2,
+      editable: true,
+      cellEditor: 'agLargeTextCellEditor',
+      cellEditorPopup: true,
+      // agLargeTextCellEditor defaults to maxLength 200; unit text can be far longer,
+      // so raise the cap and enlarge the popup textarea.
+      cellEditorParams: { maxLength: 100000, rows: 12, cols: 60 },
+      wrapText: true,
+      autoHeight: true,
+    });
+
+    return columns;
   }
 
   /** Header for the read-only source-reference column (shows the source language). */
