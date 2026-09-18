@@ -10,6 +10,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -18,6 +19,8 @@ import type {
   ColDef,
   GridReadyEvent,
   GridApi,
+  IDatasource,
+  IGetRowsParams,
   RowSelectionOptions,
   ValueGetterParams,
 } from 'ag-grid-community';
@@ -30,7 +33,6 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime } from 'rxjs';
 import type {
   AssetLanguage,
@@ -63,6 +65,13 @@ const RTL_LANGUAGE_CODES = new Set(['ar', 'fa', 'ur', 'ps', 'ku', 'he', 'yi', 's
 
 const ENTRIES_PAGE_SIZE = 500;
 const AUTOSAVE_DEBOUNCE_MS = 800;
+/**
+ * Rows per infinite-scroll block for the word template. Must equal the
+ * `cacheBlockSize` bound in the template: AG Grid always requests blocks
+ * aligned to that size, so `endRow - startRow` derives the page size safely
+ * from it — pin both to this one constant instead of hardcoding it twice.
+ */
+const WORD_CACHE_BLOCK_SIZE = 100;
 
 @Component({
   selector: 'app-asset-content-grid',
@@ -108,6 +117,22 @@ export class AssetContentGridComponent implements OnInit {
   /** The template to actually build columns from: the explicit input, falling
    *  back to the value derived from the loaded rows. */
   readonly effectiveTemplate = computed(() => this.template() ?? this.derivedTemplate());
+
+  /**
+   * Word assets have 77,431 units — far too many to hold client-side — so
+   * they scroll through server-fetched blocks. Every other template stays on
+   * the client-side model, which is what keeps undo/redo and the surah
+   * floating filter working for the editors that already rely on them.
+   * Driven by `effectiveTemplate`, not the raw `template` input: in the real
+   * UI the input is unbound and the template only becomes known once the
+   * first page of rows has loaded.
+   */
+  readonly rowModelType = computed<'infinite' | 'clientSide'>(() =>
+    this.effectiveTemplate() === 'word' ? 'infinite' : 'clientSide'
+  );
+
+  /** Rows per infinite-scroll block; bind the same value to `cacheBlockSize`. */
+  readonly wordCacheBlockSize = WORD_CACHE_BLOCK_SIZE;
 
   private readonly contentService = inject(AssetContentService);
   private readonly lastLanguage = inject(LastActiveLanguageService);
@@ -187,8 +212,23 @@ export class AssetContentGridComponent implements OnInit {
   readonly canRedo = signal(false);
   /** Distinct surahs present in the data, for the Surah dropdown filter. */
   readonly surahOptions = signal<SurahOption[]>([]);
+  /** Server-side surah filter for the word template (`null` = all surahs). */
+  readonly suraFilter = signal<number | null>(null);
 
   readonly rtl = computed(() => this.translate.currentLang === 'ar');
+
+  /**
+   * Full surah list for the word template's toolbar filter. Unlike
+   * `surahOptions`, this can't be derived from loaded rows — the word grid
+   * never holds its full row set client-side — so it's built once from the
+   * static Quran metadata.
+   */
+  readonly wordSurahOptions = computed(() =>
+    SURAHS_METADATA.map((s) => ({
+      id: s.id,
+      label: `${s.id}. ${this.rtl() ? s.name_ar : s.name_en}`,
+    }))
+  );
 
   readonly theme = themeQuartz;
 
@@ -250,6 +290,56 @@ export class AssetContentGridComponent implements OnInit {
     this.canUndo.set((this.gridApi?.getCurrentUndoSize() ?? 0) > 0);
     this.canRedo.set((this.gridApi?.getCurrentRedoSize() ?? 0) > 0);
   }
+
+  /** Change the word template's server-side surah filter and refetch. */
+  onSuraFilterChange(sura: number | null): void {
+    this.suraFilter.set(sura);
+    // A new filter invalidates every cached block.
+    this.gridApi?.refreshInfiniteCache();
+  }
+
+  /**
+   * An AG Grid infinite datasource backed by the paginated entries endpoint.
+   * AG Grid always requests blocks aligned to `cacheBlockSize` (bound to
+   * `wordCacheBlockSize` in the template), so `endRow - startRow` recovers
+   * that same page size instead of a second hardcoded constant that could
+   * drift from it — and `page` is 1-indexed to match the endpoint, which
+   * rejects `page=0` with a 400.
+   */
+  buildWordDatasource(): IDatasource {
+    return {
+      getRows: (params: IGetRowsParams) => {
+        const versionId = this.draftId();
+        if (versionId === null) {
+          params.failCallback();
+          return;
+        }
+        const pageSize = params.endRow - params.startRow;
+        const page = Math.floor(params.startRow / pageSize) + 1;
+        this.contentService
+          .getEntries(
+            this.kind,
+            this.slug,
+            versionId,
+            page,
+            pageSize,
+            this.suraFilter() ?? undefined
+          )
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: (response) => params.successCallback(response.results, response.count),
+            error: () => params.failCallback(),
+          });
+      },
+    };
+  }
+
+  /** Rebuilt whenever the draft changes (e.g. switching language), so AG Grid
+   *  drops blocks cached from the previous draft instead of showing them. */
+  readonly wordDatasource = computed<IDatasource>(() => {
+    this.draftId();
+    return this.buildWordDatasource();
+  });
 
   /** Localized surah name for a sura id, resolved from the static Quran metadata. */
   private surahName(sura: number | null): string | null {
@@ -469,6 +559,14 @@ export class AssetContentGridComponent implements OnInit {
       });
   }
 
+  /**
+   * Loads entries page by page to build the client-side row set. The word
+   * template never finishes this loop — its 77,431 units scroll through the
+   * infinite datasource instead — so the template is derived from the first
+   * page's `unit_type` and the loop bails out as soon as `word` is detected,
+   * rather than paginating through the entire dataset just to learn a value
+   * that was already on the first response.
+   */
   private loadAllEntries(
     page: number,
     acc: ContentEntry[] = [],
@@ -483,13 +581,18 @@ export class AssetContentGridComponent implements OnInit {
         next: (response) => {
           if (generation !== this.loadGeneration) return;
           const merged = acc.concat(response.results);
+          this.derivedTemplate.set(merged[0]?.unit_type ?? null);
+          if (merged[0]?.unit_type === 'word') {
+            this.rows.set([]);
+            this.loading.set(false);
+            return;
+          }
           if (merged.length < response.count && response.results.length > 0) {
             this.loadAllEntries(page + 1, merged, generation);
           } else {
             this.rows.set(merged);
             this.entriesTotal.set(response.count);
             this.buildSurahOptions(merged);
-            this.derivedTemplate.set(merged[0]?.unit_type ?? null);
             this.loading.set(false);
           }
         },
@@ -698,9 +801,9 @@ export class AssetContentGridComponent implements OnInit {
    *  - `reference_text` (the Quranic text being annotated) is shown for every
    *    template except `page`, which carries none;
    *  - the surah dropdown floating filter only means something where every
-   *    row belongs to a single sura, i.e. the `ayah` template — `word` moves
-   *    to a server-side filter in a later task, and `surah`/`page` rows don't
-   *    share a common sura to filter by;
+   *    row belongs to a single sura, i.e. the `ayah` template — `word` has a
+   *    server-side surah filter in the toolbar instead (see `suraFilter`),
+   *    and `surah`/`page` rows don't share a common sura to filter by;
    *  - `source_text` (the source language for the same unit) is shown
    *    read-only whenever a non-source language is being edited.
    */
