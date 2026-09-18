@@ -116,6 +116,28 @@ describe('AudioPlayback', () => {
     expect(playback.positionMs()).toBe(12_345);
   });
 
+  it('reads the track length from the element once metadata lands', () => {
+    const media = fakeMedia({ duration: 61.5 });
+    const playback = new AudioPlayback();
+    playback.attach(media);
+
+    playback.onLoadedMetadata();
+
+    expect(playback.mediaDurationMs()).toBe(61_500);
+  });
+
+  it('reports no duration for a source that has not loaded or does not end', () => {
+    const playback = new AudioPlayback();
+    playback.attach(fakeMedia({ duration: NaN }));
+
+    playback.onLoadedMetadata();
+    expect(playback.mediaDurationMs()).toBeNull();
+
+    playback.attach(fakeMedia({ duration: Infinity }));
+    playback.onLoadedMetadata();
+    expect(playback.mediaDurationMs()).toBeNull();
+  });
+
   it('tracks play and pause events from the element', () => {
     const playback = new AudioPlayback();
 

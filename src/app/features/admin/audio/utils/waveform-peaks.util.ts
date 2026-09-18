@@ -61,7 +61,13 @@ export async function loadWaveformPeaks(
 ): Promise<WaveformPeaks> {
   const resolution = options.resolution ?? PEAKS_RESOLUTION_PER_SECOND;
   const encoded = await fetchAudioBytes(url, options.signal);
+
+  // `decodeAudioData` cannot be interrupted, but the caller may have navigated away while it
+  // ran. Checking on both sides of it keeps an abandoned load from scanning every sample of a
+  // two-hour surah and from resolving with a result nothing is waiting for.
+  options.signal?.throwIfAborted();
   const buffer = await decodeToLowRateMono(encoded);
+  options.signal?.throwIfAborted();
 
   return {
     durationMs: Math.round(buffer.duration * 1_000),

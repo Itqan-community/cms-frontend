@@ -66,6 +66,9 @@ const TRACK_LOOKUP_PAGE_SIZE = 114;
 const SEEK_STEP_MS = 1_000;
 const SEEK_STEP_LARGE_MS = 5_000;
 
+/** Keys a focused control activates itself with — the global bindings must not take them. */
+const ACTIVATION_KEYS = new Set([' ', 'Enter']);
+
 /**
  * Ayah timestamp editor.
  *
@@ -138,7 +141,19 @@ export class TimestampEditorComponent implements OnInit {
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPLOAD_TIMING)
   );
 
-  readonly durationMs = computed(() => this.track()?.duration_ms ?? 0);
+  /**
+   * `duration_ms` on the catalogue row is nullable, and a zero duration is not a harmless
+   * default: every clamp collapses to 0, so one nudge would rewrite a marker to the start of
+   * the track and a save would persist it. The decoded peaks and the media element both know
+   * the real length, so they stand in when the row does not.
+   */
+  readonly durationMs = computed(
+    () =>
+      this.track()?.duration_ms ?? this.peaks()?.durationMs ?? this.playback.mediaDurationMs() ?? 0
+  );
+
+  /** Permission alone is not enough to move a marker — the track length must be known too. */
+  readonly canMoveMarkers = computed(() => this.canEdit() && this.durationMs() > 0);
 
   readonly selectedMarker = computed(() => {
     const id = this.selectedId();
@@ -152,7 +167,14 @@ export class TimestampEditorComponent implements OnInit {
 
   readonly dirty = computed(() => hasUnsavedChanges(this.markers()));
 
-  readonly issues = computed(() => validateMarkers(this.markers(), this.durationMs()));
+  // An unknown duration has no upper bound to test against. Passing 0 would flag every marker
+  // as out of range and bury the length and overlap faults that are still worth reporting.
+  readonly issues = computed(() =>
+    validateMarkers(
+      this.markers(),
+      this.durationMs() > 0 ? this.durationMs() : Number.POSITIVE_INFINITY
+    )
+  );
 
   /** Ayah rows for the list beside the transport, in recitation order. */
   readonly ayahRows = computed(() => groupByAyah(this.markers()));
@@ -218,6 +240,7 @@ export class TimestampEditorComponent implements OnInit {
     try {
       this.peaks.set(await loadWaveformPeaks(url, { signal: this.peaksAbort.signal }));
       this.peaksError.set(null);
+      this.adoptDiscoveredDuration();
     } catch (error) {
       if (error instanceof DOMException && error.name === 'AbortError') return;
 
@@ -226,6 +249,17 @@ export class TimestampEditorComponent implements OnInit {
     } finally {
       this.peaksLoading.set(false);
     }
+  }
+
+  /**
+   * The initial view was clamped against whatever duration was known when the track loaded.
+   * With none on the row that was a 200 ms window over the entire track, so it is opened up
+   * once a real duration arrives from the decode or from the element's metadata.
+   */
+  private adoptDiscoveredDuration(): void {
+    if (this.track()?.duration_ms != null) return;
+
+    this.resetZoom();
   }
 
   /** One request covers a whole recitation, so finding the track never needs to page. */
@@ -282,6 +316,11 @@ export class TimestampEditorComponent implements OnInit {
     this.playback.onTimeUpdate();
   }
 
+  onLoadedMetadata(): void {
+    this.playback.onLoadedMetadata();
+    this.adoptDiscoveredDuration();
+  }
+
   seekTo(ms: number): void {
     this.playback.seekTo(ms, this.durationMs());
   }
@@ -305,7 +344,7 @@ export class TimestampEditorComponent implements OnInit {
 
   nudge(deltaMs: number): void {
     const id = this.selectedId();
-    if (!id || !this.canEdit()) return;
+    if (!id || !this.canMoveMarkers()) return;
 
     this.markers.update((markers) => nudgeMarker(markers, id, deltaMs, this.durationMs()));
   }
@@ -313,14 +352,14 @@ export class TimestampEditorComponent implements OnInit {
   /** Moves the selected marker to wherever playback currently sits. */
   snapToPlayhead(): void {
     const id = this.selectedId();
-    if (!id || !this.canEdit()) return;
+    if (!id || !this.canMoveMarkers()) return;
 
     this.markers.update((markers) => moveMarker(markers, id, this.playheadMs(), this.durationMs()));
   }
 
   /** The canvas proposes a position; the marker rules decide what is actually legal. */
   onMarkerDragged({ markerId, ms }: MarkerDragEvent): void {
-    if (!this.canEdit()) return;
+    if (!this.canMoveMarkers()) return;
 
     this.markers.update((markers) => moveMarker(markers, markerId, ms, this.durationMs()));
   }
@@ -434,6 +473,11 @@ export class TimestampEditorComponent implements OnInit {
 
     if (event.metaKey || event.ctrlKey || event.altKey) return;
 
+    // Space and Enter belong to whatever holds focus. Claiming them globally would stop every
+    // button on the page — nudge, zoom, save, each ayah bound — from responding to a keyboard,
+    // since `preventDefault` here cancels the activation the browser would have performed.
+    if (ACTIVATION_KEYS.has(event.key) && isActivationTarget(event.target)) return;
+
     const handler = this.keyBindings[event.key];
     if (!handler) return;
 
@@ -468,6 +512,13 @@ class TrackNotFoundError extends Error {}
 
 function isSaveShortcut(event: KeyboardEvent): boolean {
   return (event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's';
+}
+
+/** Controls the browser activates on Space or Enter without any help from us. */
+function isActivationTarget(target: EventTarget | null): boolean {
+  if (!(target instanceof HTMLElement)) return false;
+
+  return !!target.closest('button, summary, a[href], [role="button"], [role="link"]');
 }
 
 function isTypingTarget(target: EventTarget | null): boolean {

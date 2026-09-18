@@ -112,7 +112,26 @@ describe('neighbourBounds', () => {
   it('leaves surah bounds free of the ayah chain', () => {
     const markers = buildMarkers(makeTimestamps());
 
+    // Fenced by the surah start, not by the last ayah: the recitation may close after it.
     expect(neighbourBounds(markers, 'surah-end', DURATION_MS)).toEqual({
+      min: 0 + MIN_MARKER_GAP_MS,
+      max: DURATION_MS,
+    });
+  });
+
+  it('fences each surah bound against its counterpart', () => {
+    const markers = buildMarkers(makeTimestamps());
+
+    expect(neighbourBounds(markers, 'surah-start', DURATION_MS)).toEqual({
+      min: 0,
+      max: 40_000 - MIN_MARKER_GAP_MS,
+    });
+  });
+
+  it('frees a surah bound that has no counterpart to collide with', () => {
+    const markers = buildMarkers(makeTimestamps()).filter((m) => m.kind !== 'surah-end');
+
+    expect(neighbourBounds(markers, 'surah-start', DURATION_MS)).toEqual({
       min: 0,
       max: DURATION_MS,
     });
@@ -162,6 +181,18 @@ describe('moveMarker', () => {
     expect(after.filter((m) => m.id !== 'ayah-2-start')).toEqual(
       before.filter((m) => m.id !== 'ayah-2-start')
     );
+  });
+
+  it('refuses to drag the surah start past the surah end', () => {
+    const markers = moveMarker(buildMarkers(makeTimestamps()), 'surah-start', 50_000, DURATION_MS);
+
+    expect(markers.find((m) => m.id === 'surah-start')?.ms).toBe(40_000 - MIN_MARKER_GAP_MS);
+  });
+
+  it('refuses to drag the surah end back past the surah start', () => {
+    const markers = moveMarker(buildMarkers(makeTimestamps()), 'surah-end', 0, DURATION_MS);
+
+    expect(markers.find((m) => m.id === 'surah-end')?.ms).toBe(0 + MIN_MARKER_GAP_MS);
   });
 
   it('ignores an unknown marker id', () => {
@@ -301,6 +332,26 @@ describe('validateMarkers', () => {
 
     expect(validateMarkers(markers, DURATION_MS)).toEqual([
       { markerId: 'ayah-1-end', reason: 'zero-length' },
+    ]);
+  });
+
+  it('flags loaded surah bounds that are the wrong way round', () => {
+    const markers = buildMarkers(
+      makeTimestamps({ surah: { start_ms: 30_000, end_ms: 20_000 }, ayahs: [] })
+    );
+
+    expect(validateMarkers(markers, DURATION_MS)).toEqual([
+      { markerId: 'surah-end', reason: 'crosses-neighbour' },
+    ]);
+  });
+
+  it('flags a surah range with no measurable length', () => {
+    const markers = buildMarkers(
+      makeTimestamps({ surah: { start_ms: 20_000, end_ms: 20_002 }, ayahs: [] })
+    );
+
+    expect(validateMarkers(markers, DURATION_MS)).toEqual([
+      { markerId: 'surah-end', reason: 'zero-length' },
     ]);
   });
 

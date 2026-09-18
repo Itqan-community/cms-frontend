@@ -139,18 +139,24 @@ export class WaveformRenderer {
    * ayah N stopped — and, since reciters pause between ayahs, where a correct boundary belongs.
    */
   private drawPauseBands({ markers, view }: WaveformScene): void {
-    const spans = groupByAyah(markers).filter(
-      (group): group is Required<typeof group> => !!group.start && !!group.end
-    );
-    if (spans.length === 0) return;
+    const groups = groupByAyah(markers);
+    if (groups.length < 2) return;
 
     this.ctx.save();
     this.ctx.fillStyle = this.theme.pauseBand;
     this.ctx.globalAlpha = PAUSE_BAND_ALPHA;
 
-    for (let i = 1; i < spans.length; i++) {
-      const from = msToX(spans[i - 1].end.ms, view, this.width);
-      const to = msToX(spans[i].start.ms, view, this.width);
+    for (let i = 1; i < groups.length; i++) {
+      const previous = groups[i - 1];
+      const current = groups[i];
+
+      // Only the gap between two consecutive ayahs is silence. Dropping incomplete or absent
+      // ayahs from the list first would shade from ayah 1's end to ayah 3's start and so mark
+      // the whole of ayah 2 as a pause.
+      if (!previous.end || !current.start || current.ayah !== previous.ayah + 1) continue;
+
+      const from = msToX(previous.end.ms, view, this.width);
+      const to = msToX(current.start.ms, view, this.width);
 
       if (to < 0 || from > this.width || to <= from) continue;
 

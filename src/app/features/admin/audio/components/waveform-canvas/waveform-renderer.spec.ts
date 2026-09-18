@@ -265,6 +265,50 @@ describe('WaveformRenderer', () => {
     expect(rects.some((r) => r.fill === 'pause')).toBeFalse();
   });
 
+  it('does not shade across an ayah that is missing a boundary', () => {
+    const { ctx, rects } = stubContext();
+    const renderer = new WaveformRenderer(ctx, THEME);
+    renderer.resize(100, 50, 1);
+
+    renderer.draw(
+      scene({
+        markers: [
+          marker('a1-start', 0, { ayah: 1 }),
+          marker('a1-end', 200, { kind: 'ayah-end', ayah: 1 }),
+          // Ayah 2 never closes, so nothing is known about the pause that follows it.
+          marker('a2-start', 400, { ayah: 2 }),
+          marker('a3-start', 800, { ayah: 3 }),
+          marker('a3-end', 900, { kind: 'ayah-end', ayah: 3 }),
+        ],
+      })
+    );
+
+    const bands = rects.filter((r) => r.fill === 'pause');
+    // Only ayah 1's close → ayah 2's open. Never 200 ms → 800 ms, which would paint over ayah 2.
+    expect(bands.length).toBe(1);
+    expect(bands[0].x).toBeCloseTo(20, 0);
+    expect(bands[0].w).toBeCloseTo(20, 0);
+  });
+
+  it('does not shade the gap left by an ayah that is absent altogether', () => {
+    const { ctx, rects } = stubContext();
+    const renderer = new WaveformRenderer(ctx, THEME);
+    renderer.resize(100, 50, 1);
+
+    renderer.draw(
+      scene({
+        markers: [
+          marker('a1-start', 0, { ayah: 1 }),
+          marker('a1-end', 200, { kind: 'ayah-end', ayah: 1 }),
+          marker('a3-start', 800, { ayah: 3 }),
+          marker('a3-end', 900, { kind: 'ayah-end', ayah: 3 }),
+        ],
+      })
+    );
+
+    expect(rects.some((r) => r.fill === 'pause')).toBeFalse();
+  });
+
   it('drops labels when markers crowd together', () => {
     const { ctx, texts } = stubContext();
     const renderer = new WaveformRenderer(ctx, THEME);

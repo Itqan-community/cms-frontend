@@ -1,5 +1,10 @@
 import type { WaveformPeaks } from './waveform-peaks.util';
-import { PEAKS_RESOLUTION_PER_SECOND, computePeaks, peaksForWindow } from './waveform-peaks.util';
+import {
+  PEAKS_RESOLUTION_PER_SECOND,
+  computePeaks,
+  loadWaveformPeaks,
+  peaksForWindow,
+} from './waveform-peaks.util';
 
 /** One second of a sine at `sampleRate`, scaled to `amplitude`. */
 function tone(sampleRate: number, seconds: number, amplitude: number): Float32Array {
@@ -128,5 +133,25 @@ describe('peaksForWindow', () => {
 
     expect(columns.length).toBe(4);
     expect(Number.isFinite(columns[0])).toBe(true);
+  });
+});
+
+describe('loadWaveformPeaks', () => {
+  it('gives up after the fetch when the caller has aborted meanwhile', async () => {
+    const controller = new AbortController();
+    // Aborting as the response lands is the real case: the admin navigates away while the
+    // bytes are in flight, and the decode that follows cannot be interrupted.
+    spyOn(window, 'fetch').and.callFake(() => {
+      controller.abort();
+      return Promise.resolve(new Response(new ArrayBuffer(8)));
+    });
+
+    try {
+      await loadWaveformPeaks('https://example.com/001.mp3', { signal: controller.signal });
+      fail('expected the aborted load to reject');
+    } catch (error) {
+      // Not a decode failure: the 8 bytes above are never handed to decodeAudioData at all.
+      expect((error as DOMException).name).toBe('AbortError');
+    }
   });
 });

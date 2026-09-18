@@ -59,13 +59,17 @@ export function applyMarkers(
 
 /**
  * How far a marker may travel before it collides with its neighbours.
- * Surah bounds are excluded from the ayah chain — they wrap it rather than sit in it.
+ * Surah bounds are excluded from the ayah chain — they wrap it rather than sit in it, so each
+ * one is fenced by its own counterpart instead.
  */
 export function neighbourBounds(
   markers: readonly EditorMarker[],
   markerId: string,
   durationMs: number
 ): { min: number; max: number } {
+  const marker = markers.find((m) => m.id === markerId);
+  if (marker && isSurahBound(marker.kind)) return surahBoundRange(markers, marker, durationMs);
+
   const chain = ayahChain(markers);
   const index = chain.findIndex((m) => m.id === markerId);
 
@@ -78,6 +82,27 @@ export function neighbourBounds(
     min: previous ? previous.ms + MIN_MARKER_GAP_MS : 0,
     max: next ? next.ms - MIN_MARKER_GAP_MS : durationMs,
   };
+}
+
+/**
+ * A surah bound is fenced by the other surah bound and by nothing else: the recitation may
+ * open before the first ayah and close after the last. Without this the pair could be dragged
+ * past each other into a reversed or zero-length range, which `applyMarkers` would then save.
+ */
+function surahBoundRange(
+  markers: readonly EditorMarker[],
+  marker: EditorMarker,
+  durationMs: number
+): { min: number; max: number } {
+  const counterpart = markers.find(
+    (m) => m.kind === (marker.kind === 'surah-start' ? 'surah-end' : 'surah-start')
+  );
+
+  if (!counterpart) return { min: 0, max: durationMs };
+
+  return marker.kind === 'surah-start'
+    ? { min: 0, max: counterpart.ms - MIN_MARKER_GAP_MS }
+    : { min: counterpart.ms + MIN_MARKER_GAP_MS, max: durationMs };
 }
 
 /** Moves one marker to an absolute position, clamped to its neighbours and the track. */
@@ -152,6 +177,7 @@ export function validateMarkers(
 
   return [
     ...outOfRangeIssues(markers, durationMs),
+    ...surahBoundsIssues(markers),
     ...ayahLengthIssues(ayahs),
     ...ayahOverlapIssues(ayahs),
   ];
@@ -168,6 +194,22 @@ function outOfRangeIssues(markers: readonly EditorMarker[], durationMs: number):
   return markers
     .filter((m) => m.ms < 0 || m.ms > durationMs)
     .map((m) => issue(m.id, 'out-of-range'));
+}
+
+/**
+ * The same two faults as `ayahLengthIssues`, for the surah range. Clamping guards live edits
+ * only — a timing file can arrive with its bounds already reversed or collapsed.
+ */
+function surahBoundsIssues(markers: readonly EditorMarker[]): MarkerIssue[] {
+  const start = markers.find((m) => m.kind === 'surah-start');
+  const end = markers.find((m) => m.kind === 'surah-end');
+  if (!start || !end) return [];
+
+  const length = end.ms - start.ms;
+
+  if (length < 0) return [issue(end.id, 'crosses-neighbour')];
+  if (length < MIN_MARKER_GAP_MS) return [issue(end.id, 'zero-length')];
+  return [];
 }
 
 function ayahLengthIssues(ayahs: readonly AyahGroup[]): MarkerIssue[] {
@@ -239,6 +281,10 @@ function isComplete(group: AyahGroup): group is CompleteAyahGroup {
 
 function issue(markerId: string, reason: MarkerIssue['reason']): MarkerIssue {
   return { markerId, reason };
+}
+
+function isSurahBound(kind: MarkerKind): boolean {
+  return kind === 'surah-start' || kind === 'surah-end';
 }
 
 function clamp(value: number, min: number, max: number): number {

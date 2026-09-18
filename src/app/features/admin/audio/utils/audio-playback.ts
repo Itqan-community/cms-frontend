@@ -13,6 +13,8 @@ export interface PlayableMedia {
   paused: boolean;
   /** Seconds, as the media API reports it. */
   currentTime: number;
+  /** Seconds. `NaN` until metadata has loaded, `Infinity` for a stream. */
+  readonly duration?: number;
   play(): Promise<void>;
   pause(): void;
 }
@@ -25,6 +27,8 @@ export class AudioPlayback {
   readonly isPlaying = signal(false);
   /** Where playback currently sits, in milliseconds. */
   readonly positionMs = signal(0);
+  /** What the element reports once its metadata lands, in ms — null while still unknown. */
+  readonly mediaDurationMs = signal<number | null>(null);
 
   /** Called once the template's element exists. */
   attach(media: PlayableMedia | null): void {
@@ -66,5 +70,19 @@ export class AudioPlayback {
 
   onTimeUpdate(): void {
     if (this.media) this.positionMs.set(Math.round(this.media.currentTime * MS_PER_SECOND));
+  }
+
+  /**
+   * The element is the last resort for track length, used when the catalogue row carries none.
+   * A stream reports `Infinity` and an unloaded source `NaN`; neither is a duration.
+   */
+  onLoadedMetadata(): void {
+    const seconds = this.media?.duration;
+
+    this.mediaDurationMs.set(
+      typeof seconds === 'number' && Number.isFinite(seconds) && seconds > 0
+        ? Math.round(seconds * MS_PER_SECOND)
+        : null
+    );
   }
 }

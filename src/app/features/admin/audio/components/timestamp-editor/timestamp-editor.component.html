@@ -10,7 +10,7 @@
     <header class="timestamp-editor__head">
       <div class="timestamp-editor__title-block">
         <a [routerLink]="backLink()" class="timestamp-editor__breadcrumb hoverable-link">
-          <ng-icon name="lucideArrowRight" />
+          <ng-icon name="lucideArrowRight" class="ltr-flip" />
           {{ 'ADMIN.AUDIO.TIMESTAMPS.BACK_TO_RECITATION' | translate }}
         </a>
         <h1 class="timestamp-editor__title">
@@ -73,6 +73,7 @@
       (play)="onPlay()"
       (pause)="onPause()"
       (timeupdate)="onTimeUpdate()"
+      (loadedmetadata)="onLoadedMetadata()"
     ></audio>
 
     @if (peaksError()) {
@@ -122,7 +123,7 @@
         [playheadMs]="playheadMs()"
         [durationMs]="durationMs()"
         [view]="view()"
-        [editable]="canEdit()"
+        [editable]="canMoveMarkers()"
         [ariaLabel]="'ADMIN.AUDIO.TIMESTAMPS.WAVEFORM' | translate"
         (seek)="seekTo($event)"
         (markerGrabbed)="selectMarker($event)"
@@ -187,7 +188,7 @@
             nz-button
             type="button"
             class="timestamp-editor__nudge"
-            [disabled]="!canEdit() || !selectedMarker()"
+            [disabled]="!canMoveMarkers() || !selectedMarker()"
             (click)="nudge(step)"
           >
             {{ formatNudge(step) }}
@@ -196,7 +197,7 @@
         <button
           nz-button
           type="button"
-          [disabled]="!canEdit() || !selectedMarker()"
+          [disabled]="!canMoveMarkers() || !selectedMarker()"
           (click)="snapToPlayhead()"
         >
           {{ 'ADMIN.AUDIO.TIMESTAMPS.SNAP' | translate }}
