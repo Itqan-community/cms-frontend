@@ -795,7 +795,7 @@
     },
     "CONTENT_EDITOR": {
       "TITLE": "Edit content",
-      "HINT": "Edit the text ayah by ayah. Changes autosave to a draft; publish to create a new version. Tip: select a Text cell and paste (Ctrl+V) CSV/spreadsheet rows to fill cells downward.",
+      "HINT": "Edit the text unit by unit. Changes autosave to a draft; publish to create a new version. Tip: select a Text cell and paste (Ctrl+V) CSV/spreadsheet rows to fill cells downward.",
       "BACK": "Back to details",
       "SAVE": "Save & publish",
       "SAVE_DRAFT": "Save draft",

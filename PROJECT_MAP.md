@@ -331,8 +331,14 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   (font/mushaf/tafsir/translation)
 - `asset-versions-manager/` — Version CRUD (tafsir/translation/mushaf/font; program when
   re-enabled); CSV `export/` then `file_url` fallback
-- `asset-content-editor/` + `asset-content-grid/` — Per-ayah draft editor; flush before publish;
-  leave blocked if PATCH fails
+- `asset-content-editor/` + `asset-content-grid/` — Per-unit draft editor (surah/ayah/word/page
+  content templates); flush before publish; leave blocked if PATCH fails. Column set and row model
+  are driven by `effectiveTemplate()` (the `template` input, falling back to the template derived
+  from loaded rows' `unit_type`): `word` uses AG Grid's infinite row model with a server-side
+  `buildWordDatasource()` (paginated `entries/` endpoint, `cacheBlockSize` pinned to the datasource's
+  page size, server-side surah filter via `refreshInfiniteCache()`, undo/redo hidden); `surah`/`ayah`/
+  `page` stay on the client-side row model with full undo/redo and (for `ayah` only) the client-side
+  surah floating filter
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`
 - `search-panel/` — Search UI

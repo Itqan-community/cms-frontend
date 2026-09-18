@@ -53,26 +53,42 @@
     </div>
 
     <div class="content-grid__actions">
-      <button
-        nz-button
-        nzType="default"
-        nz-tooltip
-        [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.UNDO' | translate"
-        [disabled]="!canUndo()"
-        (click)="undo()"
-      >
-        <ng-icon name="lucideUndo2" />
-      </button>
-      <button
-        nz-button
-        nzType="default"
-        nz-tooltip
-        [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.REDO' | translate"
-        [disabled]="!canRedo()"
-        (click)="redo()"
-      >
-        <ng-icon name="lucideRedo2" />
-      </button>
+      @if (effectiveTemplate() === 'word') {
+        <nz-select
+          class="content-grid__surah-filter"
+          nzAllowClear
+          nzShowSearch
+          [nzPlaceHolder]="'ADMIN.CONTENT_EDITOR.FILTER_ALL' | translate"
+          [ngModel]="suraFilter()"
+          (ngModelChange)="onSuraFilterChange($event)"
+        >
+          @for (opt of wordSurahOptions(); track opt.id) {
+            <nz-option [nzValue]="opt.id" [nzLabel]="opt.label"></nz-option>
+          }
+        </nz-select>
+      }
+      @if (rowModelType() === 'clientSide') {
+        <button
+          nz-button
+          nzType="default"
+          nz-tooltip
+          [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.UNDO' | translate"
+          [disabled]="!canUndo()"
+          (click)="undo()"
+        >
+          <ng-icon name="lucideUndo2" />
+        </button>
+        <button
+          nz-button
+          nzType="default"
+          nz-tooltip
+          [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.REDO' | translate"
+          [disabled]="!canRedo()"
+          (click)="redo()"
+        >
+          <ng-icon name="lucideRedo2" />
+        </button>
+      }
       <button
         nz-button
         nzType="default"
@@ -119,7 +135,10 @@
     <ag-grid-angular
       class="content-grid__table"
       [theme]="theme"
-      [rowData]="rows()"
+      [rowModelType]="rowModelType()"
+      [rowData]="rowModelType() === 'clientSide' ? rows() : undefined"
+      [datasource]="rowModelType() === 'infinite' ? wordDatasource() : undefined"
+      [cacheBlockSize]="wordCacheBlockSize"
       [columnDefs]="columnDefs()"
       [defaultColDef]="defaultColDef"
       [enableRtl]="rtl()"
