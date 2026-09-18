@@ -87,10 +87,27 @@ export class AssetContentGridComponent implements OnInit {
   @Input({ required: true }) kind!: AssetVersionParentKind;
   /** Asset slug. */
   @Input({ required: true }) slug!: string;
-  /** Content granularity of the asset; drives which columns are shown. */
+  /** Content granularity of the asset; drives which columns are shown. Optional
+   *  override — when unset, the template is derived from the loaded rows
+   *  themselves (see `derivedTemplate`). Task 17 and tests bind this directly. */
   readonly template = input<AssetTemplate | null>(null);
   /** Mushaf layout name, when the asset's template is page-based. */
   readonly layoutName = input<string | null>(null);
+
+  /**
+   * Template as declared by the asset, derived from the rows themselves.
+   *
+   * Every entry carries `unit_type`, and the endpoint always returns the
+   * template's full canonical unit set, so row 0 always exists and every row
+   * agrees (the template is immutable per asset). This avoids a second
+   * request purely to learn something already on the wire — the host
+   * component has no `asset.template` to bind today.
+   */
+  private readonly derivedTemplate = signal<AssetTemplate | null>(null);
+
+  /** The template to actually build columns from: the explicit input, falling
+   *  back to the value derived from the loaded rows. */
+  readonly effectiveTemplate = computed(() => this.template() ?? this.derivedTemplate());
 
   private readonly contentService = inject(AssetContentService);
   private readonly lastLanguage = inject(LastActiveLanguageService);
@@ -472,6 +489,7 @@ export class AssetContentGridComponent implements OnInit {
             this.rows.set(merged);
             this.entriesTotal.set(response.count);
             this.buildSurahOptions(merged);
+            this.derivedTemplate.set(merged[0]?.unit_type ?? null);
             this.loading.set(false);
           }
         },
@@ -673,7 +691,9 @@ export class AssetContentGridComponent implements OnInit {
   }
 
   /**
-   * Column set is driven by the asset's content template:
+   * Column set is driven by the asset's content template (the explicit
+   * `template` input when bound, otherwise `derivedTemplate` from the loaded
+   * rows — see `effectiveTemplate`):
    *  - every template shows the pinned unit label and the editable text;
    *  - `reference_text` (the Quranic text being annotated) is shown for every
    *    template except `page`, which carries none;
@@ -685,7 +705,7 @@ export class AssetContentGridComponent implements OnInit {
    *    read-only whenever a non-source language is being edited.
    */
   buildColumnDefs(): ColDef<ContentEntry>[] {
-    const template = this.template();
+    const template = this.effectiveTemplate();
     const columns: ColDef<ContentEntry>[] = [
       {
         field: 'label',
