@@ -13,9 +13,10 @@ import type {
 } from '../models/asset-content.models';
 
 /**
- * Per-ayah content editing for translations & tafsirs. Mirrors the portal
- * `/content/{category}/{slug}/…` draft flow: get-or-create a draft, load/patch
- * its entries, then publish (save) or discard.
+ * Per-unit content editing for translations & tafsirs. The unit granularity
+ * (surah, ayah, word, or page) is fixed by the asset's template. Mirrors the
+ * portal `/content/{category}/{slug}/…` draft flow: get-or-create a draft,
+ * load/patch its entries, then publish (save) or discard.
  */
 @Injectable({ providedIn: 'root' })
 export class AssetContentService {
@@ -64,17 +65,21 @@ export class AssetContentService {
     return this.http.post<ContentDraftVersion>(`${this.draftBase(kind, slug)}draft/`, { language });
   }
 
-  /** Load a page of per-ayah entries for a version. */
+  /** Load a page of per-unit entries for a version, optionally filtered to one surah. */
   getEntries(
     kind: AssetVersionParentKind,
     slug: string,
     versionId: number,
     page: number,
-    pageSize: number
+    pageSize: number,
+    sura?: number
   ): Observable<ContentEntriesResponse> {
-    const params = new HttpParams()
+    let params = new HttpParams()
       .set('page', page.toString())
       .set('page_size', pageSize.toString());
+    if (sura != null) {
+      params = params.set('sura', sura.toString());
+    }
     return this.http.get<ContentEntriesResponse>(
       `${this.versionBase(kind, slug, versionId)}entries/`,
       { params }
