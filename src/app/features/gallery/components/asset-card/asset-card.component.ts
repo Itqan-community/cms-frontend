@@ -5,12 +5,21 @@ import { NgIcon } from '@ng-icons/core';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { Categories } from '../../../../core/enums/categories.enum';
+import { AssetTemplateBadgeComponent } from '../../../../shared/components/asset-template-badge/asset-template-badge.component';
 import { LicenseTagComponent } from '../../../../shared/components/license-tag/license-tag.component';
 import { Asset } from '../../models/assets.model';
 
 @Component({
   selector: 'app-asset-card',
-  imports: [LicenseTagComponent, TranslatePipe, RouterLink, NzButtonComponent, NgIcon, NzTagModule],
+  imports: [
+    LicenseTagComponent,
+    AssetTemplateBadgeComponent,
+    TranslatePipe,
+    RouterLink,
+    NzButtonComponent,
+    NgIcon,
+    NzTagModule,
+  ],
   styleUrl: './asset-card.component.less',
   template: `
     <div class="asset-card">
@@ -18,6 +27,10 @@ import { Asset } from '../../models/assets.model';
         <ng-icon [name]="categoryIconName" />
         <div class="asset-card__header-license">
           <app-license-tag [license]="asset().license" [muted]="true" />
+          <app-asset-template-badge
+            [template]="asset().template"
+            [layoutName]="asset().mushaf_layout?.name ?? null"
+          />
         </div>
       </div>
       <div class="asset-card__content">
