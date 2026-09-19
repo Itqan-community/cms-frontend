@@ -938,6 +938,13 @@
         "GENERIC": "Something went wrong. Please try again."
       }
     },
+    "ASSET_TEMPLATE": {
+      "SURAH": "Surah based",
+      "AYAH": "Ayah based",
+      "WORD": "Word based",
+      "PAGE": "Page based",
+      "PAGE_WITH_LAYOUT": "Page based ({{layout}})"
+    },
     "COMMON": {
       "ADD": "Add",
       "TOOLTIP_VIEW": "View",
