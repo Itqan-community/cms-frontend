@@ -914,6 +914,13 @@
         "GENERIC": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
       }
     },
+    "ASSET_TEMPLATE": {
+      "SURAH": "حسب السورة",
+      "AYAH": "حسب الآية",
+      "WORD": "حسب الكلمة",
+      "PAGE": "حسب الصفحة",
+      "PAGE_WITH_LAYOUT": "حسب الصفحة ({{layout}})"
+    },
     "COMMON": {
       "ADD": "إضافة",
       "TOOLTIP_VIEW": "عرض",

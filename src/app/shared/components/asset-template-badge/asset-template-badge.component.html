@@ -1,0 +1,5 @@
+@if (template()) {
+  <nz-tag class="asset-template-badge" [class]="'asset-template-badge--' + template()">
+    {{ translationKey() | translate: translationParams() }}
+  </nz-tag>
+}
