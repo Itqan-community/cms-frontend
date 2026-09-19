@@ -30,6 +30,10 @@
         </div>
 
         <div class="admin-hero-meta">
+          <app-asset-template-badge
+            [template]="translation()!.template"
+            [layoutName]="translation()!.mushaf_layout?.name ?? null"
+          />
           <nz-tag [nzColor]="getLicenseColor(translation()!.license)">{{
             translation()!.license
           }}</nz-tag>

@@ -1,4 +1,5 @@
 import { Licenses } from '../../../../core/enums/licenses.enum';
+import type { AssetTemplate } from '../../models/asset-content.models';
 
 export type AssetSortingQuery =
   | 'id'
@@ -41,6 +42,8 @@ export interface TranslationItem {
   is_external: boolean;
   is_open_access: boolean;
   restricted_for_tenant: boolean;
+  template: AssetTemplate | null;
+  mushaf_layout: { id: number; name: string; page_count: number } | null;
   created_at: string;
 }
 
@@ -62,6 +65,8 @@ export interface TranslationDetails {
   is_open_access: boolean;
   restricted_for_tenant: boolean;
   external_url: string | null;
+  template: AssetTemplate | null;
+  mushaf_layout: { id: number; name: string; page_count: number } | null;
   versions: AssetVersion[];
   created_at: string;
 }

@@ -10,6 +10,7 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
+import { AssetTemplateBadgeComponent } from '../../../../../shared/components/asset-template-badge/asset-template-badge.component';
 import { AssetVersionsManagerComponent } from '../../../components/asset-versions-manager/asset-versions-manager.component';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../../services/admin-auth.service';
@@ -34,6 +35,7 @@ import { TranslationsService } from '../../services/translations.service';
     NzToolTipModule,
     TranslateModule,
     AssetVersionsManagerComponent,
+    AssetTemplateBadgeComponent,
   ],
   templateUrl: './translation-detail.component.html',
   styleUrl: './translation-detail.component.less',
