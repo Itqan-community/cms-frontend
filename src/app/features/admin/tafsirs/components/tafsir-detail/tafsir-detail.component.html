@@ -30,6 +30,10 @@
         </div>
 
         <div class="admin-hero-meta">
+          <app-asset-template-badge
+            [template]="tafsir()!.template"
+            [layoutName]="tafsir()!.mushaf_layout?.name ?? null"
+          />
           <nz-tag [nzColor]="getLicenseColor(tafsir()!.license)">{{ tafsir()!.license }}</nz-tag>
           @if (tafsir()!.language) {
             <nz-tag>{{ languageLabel(tafsir()!.language) }}</nz-tag>

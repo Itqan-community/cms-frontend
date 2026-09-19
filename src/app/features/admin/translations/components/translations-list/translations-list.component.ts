@@ -11,6 +11,7 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
+import { AssetTemplateBadgeComponent } from '../../../../../shared/components/asset-template-badge/asset-template-badge.component';
 import {
   AdminColumnPickerComponent,
   AdminTableColumnOption,
@@ -43,6 +44,7 @@ import { AdminListBase } from '../../../utils/admin-list-base';
     TranslationFiltersComponent,
     AdminColumnPickerComponent,
     TranslateModule,
+    AssetTemplateBadgeComponent,
   ],
   templateUrl: './translations-list.component.html',
   styleUrl: './translations-list.component.less',
