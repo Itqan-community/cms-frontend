@@ -943,7 +943,11 @@
       "AYAH": "Ayah based",
       "WORD": "Word based",
       "PAGE": "Page based",
-      "PAGE_WITH_LAYOUT": "Page based ({{layout}})"
+      "PAGE_WITH_LAYOUT": "Page based ({{layout}})",
+      "LABEL": "Content template",
+      "LAYOUT_LABEL": "Mushaf layout",
+      "LAYOUT_PLACEHOLDER": "Select a mushaf layout",
+      "IMMUTABLE_HINT": "The template is set when the asset is created and cannot be changed afterwards."
     },
     "COMMON": {
       "ADD": "Add",

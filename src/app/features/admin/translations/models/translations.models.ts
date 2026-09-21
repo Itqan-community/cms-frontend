@@ -103,6 +103,10 @@ export interface TranslationFormValue {
   is_open_access: boolean;
   restricted_for_tenant: boolean;
   external_url?: string | null;
+  /** Create-only: fixed at creation, immutable afterwards. */
+  template?: AssetTemplate;
+  /** Create-only: required iff template === 'page'. */
+  mushaf_layout_id?: number | null;
   /** Create-only: first version metadata + content file. */
   version_name?: string;
   version_summary?: string;

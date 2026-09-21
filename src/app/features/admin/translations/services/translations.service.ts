@@ -76,6 +76,8 @@ export class TranslationsService {
     data.append('is_open_access', String(payload.is_open_access));
     data.append('restricted_for_tenant', String(payload.restricted_for_tenant));
     append('external_url', payload.external_url);
+    append('template', payload.template);
+    append('mushaf_layout_id', payload.mushaf_layout_id);
     append('version_name', payload.version_name);
     append('version_summary', payload.version_summary);
     if (payload.file) {

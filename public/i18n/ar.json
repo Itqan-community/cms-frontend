@@ -919,7 +919,11 @@
       "AYAH": "حسب الآية",
       "WORD": "حسب الكلمة",
       "PAGE": "حسب الصفحة",
-      "PAGE_WITH_LAYOUT": "حسب الصفحة ({{layout}})"
+      "PAGE_WITH_LAYOUT": "حسب الصفحة ({{layout}})",
+      "LABEL": "قالب المحتوى",
+      "LAYOUT_LABEL": "تخطيط المصحف",
+      "LAYOUT_PLACEHOLDER": "اختر تخطيط المصحف",
+      "IMMUTABLE_HINT": "يتم تحديد القالب عند إنشاء الأصل ولا يمكن تغييره لاحقًا."
     },
     "COMMON": {
       "ADD": "إضافة",

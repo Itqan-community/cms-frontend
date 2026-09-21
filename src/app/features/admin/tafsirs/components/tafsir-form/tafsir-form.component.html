@@ -196,6 +196,63 @@
         </div>
 
         <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+            <nz-form-item>
+              <nz-form-label [nzRequired]="!isEditMode()">
+                {{ 'ADMIN.ASSET_TEMPLATE.LABEL' | translate }}
+              </nz-form-label>
+              <nz-form-control
+                [nzExtra]="isEditMode() ? ('ADMIN.ASSET_TEMPLATE.IMMUTABLE_HINT' | translate) : undefined"
+              >
+                <nz-select
+                  formControlName="template"
+                  [nzPlaceHolder]="'ADMIN.ASSET_TEMPLATE.LABEL' | translate"
+                >
+                  <nz-option
+                    nzValue="surah"
+                    [nzLabel]="'ADMIN.ASSET_TEMPLATE.SURAH' | translate"
+                  ></nz-option>
+                  <nz-option
+                    nzValue="ayah"
+                    [nzLabel]="'ADMIN.ASSET_TEMPLATE.AYAH' | translate"
+                  ></nz-option>
+                  <nz-option
+                    nzValue="word"
+                    [nzLabel]="'ADMIN.ASSET_TEMPLATE.WORD' | translate"
+                  ></nz-option>
+                  <nz-option
+                    nzValue="page"
+                    [nzLabel]="'ADMIN.ASSET_TEMPLATE.PAGE' | translate"
+                  ></nz-option>
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+          @if (form.controls.template.value === 'page') {
+            <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
+              <nz-form-item>
+                <nz-form-label nzRequired>
+                  {{ 'ADMIN.ASSET_TEMPLATE.LAYOUT_LABEL' | translate }}
+                </nz-form-label>
+                <nz-form-control>
+                  <nz-select
+                    formControlName="mushaf_layout_id"
+                    [nzPlaceHolder]="'ADMIN.ASSET_TEMPLATE.LAYOUT_PLACEHOLDER' | translate"
+                  >
+                    @for (layout of layouts(); track layout.id) {
+                      <nz-option
+                        [nzValue]="layout.id"
+                        [nzLabel]="layout.name + ' (' + layout.page_count + ')'"
+                      ></nz-option>
+                    }
+                  </nz-select>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          }
+        </div>
+
+        <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="8" [nzXs]="24" [nzSm]="8">
             <nz-form-item>
               <nz-form-label>{{ 'ADMIN.TAFSIRS.FORM.LABEL_EXTERNAL' | translate }}</nz-form-label>
