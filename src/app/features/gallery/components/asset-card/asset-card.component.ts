@@ -27,10 +27,6 @@ import { Asset } from '../../models/assets.model';
         <ng-icon [name]="categoryIconName" />
         <div class="asset-card__header-license">
           <app-license-tag [license]="asset().license" [muted]="true" />
-          <app-asset-template-badge
-            [template]="asset().template"
-            [layoutName]="asset().mushaf_layout?.name ?? null"
-          />
         </div>
       </div>
       <div class="asset-card__content">
@@ -38,6 +34,11 @@ import { Asset } from '../../models/assets.model';
           <div class="main-content">
             <div class="text-content">
               <h3>{{ asset().name }}</h3>
+              <app-asset-template-badge
+                class="asset-card__template"
+                [template]="asset().template"
+                [layoutName]="asset().mushaf_layout?.name ?? null"
+              />
               <p>{{ asset().description }}</p>
             </div>
             <div class="publisher-info">

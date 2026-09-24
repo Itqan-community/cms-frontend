@@ -22,6 +22,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { Licenses } from '../../../../core/enums/licenses.enum';
+import { AssetTemplateBadgeComponent } from '../../../../shared/components/asset-template-badge/asset-template-badge.component';
 import { JsonLdService } from '../../../../core/services/json-ld.service';
 import { SeoService } from '../../../../core/services/seo.service';
 import { AssetDetailSkeletonComponent } from '../../../../shared/components/asset-detail-skeleton/asset-detail-skeleton.component';
@@ -43,6 +44,7 @@ import { AssetsService } from '../../services/assets.service';
     ImageCarouselComponent,
     BreadcrumbComponent,
     LicenseTagComponent,
+    AssetTemplateBadgeComponent,
     StateMessageComponent,
     AssetDetailSkeletonComponent,
     TranslateModule,
