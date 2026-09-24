@@ -31,9 +31,7 @@ function flushDraft(httpMock: HttpTestingController, slug: string, id: number): 
     entries_count: 0,
     created_at: '2026-01-01T00:00:00Z',
   };
-  httpMock
-    .expectOne((r) => r.url.includes('draft/') && r.url.includes(slug))
-    .flush(draft);
+  httpMock.expectOne((r) => r.url.includes('draft/') && r.url.includes(slug)).flush(draft);
 }
 
 describe('AssetContentGridComponent word datasource', () => {
@@ -96,21 +94,23 @@ describe('AssetContentGridComponent word datasource', () => {
     // draft id and a word-shaped first page so it derives the template and
     // stops (word never finishes the client-side pagination loop).
     flushDraft(httpMock, 'a-translation', 7);
-    httpMock.expectOne((r) => r.url.includes('entries/')).flush({
-      results: [
-        {
-          unit_type: 'word',
-          unit_id: 1,
-          label: '1:1:1',
-          reference_text: '',
-          sura: 1,
-          aya: 1,
-          text: '',
-          order: 1,
-        },
-      ],
-      count: 77431,
-    });
+    httpMock
+      .expectOne((r) => r.url.includes('entries/'))
+      .flush({
+        results: [
+          {
+            unit_type: 'word',
+            unit_id: 1,
+            label: '1:1:1',
+            reference_text: '',
+            sura: 1,
+            aya: 1,
+            text: '',
+            order: 1,
+          },
+        ],
+        count: 77431,
+      });
 
     const datasource = fixture.componentInstance.buildWordDatasource();
     const successCallback = jasmine.createSpy('successCallback');
