@@ -835,8 +835,8 @@
       "ALL_SAVED": "All changes saved to draft",
       "OPEN_BUTTON": "Edit content",
       "COLUMNS": {
-        "SURA": "Sura",
-        "AYA": "Aya",
+        "SURA": "Surah no.",
+        "AYA": "Ayah no.",
         "SURAH": "Surah",
         "UTHMANI": "Ayah (Uthmani)",
         "UNIT": "Reference",

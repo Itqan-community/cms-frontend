@@ -837,6 +837,32 @@ export class AssetContentGridComponent implements OnInit {
       },
     ];
 
+    // Ayah and word units belong to one surah and ayah: show their numbers so the
+    // grid can be scanned and sorted by them. Ayah rows are all loaded
+    // client-side, so number filters work in place; the word grid loads page by
+    // page (a column filter would only see the loaded block), so it keeps the
+    // toolbar's server-side surah filter instead.
+    if (template === 'ayah' || template === 'word') {
+      const numberFilter =
+        template === 'ayah' ? { filter: 'agNumberColumnFilter', floatingFilter: true } : {};
+      columns.push(
+        {
+          field: 'sura',
+          headerName: this.colHeader('SURA'),
+          width: 110,
+          editable: false,
+          ...numberFilter,
+        },
+        {
+          field: 'aya',
+          headerName: this.colHeader('AYA'),
+          width: 110,
+          editable: false,
+          ...numberFilter,
+        }
+      );
+    }
+
     if (template !== 'page') {
       columns.push({
         field: 'reference_text',
