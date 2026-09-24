@@ -76,6 +76,8 @@
             <ng-icon name="lucideSquarePen" />
             {{ 'ADMIN.COMMON.EDIT' | translate }}
           </button>
+        }
+        @if (canEditContent()) {
           <button
             nz-button
             nzType="default"

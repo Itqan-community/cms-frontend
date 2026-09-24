@@ -52,6 +52,10 @@ export class TafsirDetailComponent implements OnInit {
   readonly canUpdateTafsir = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR)
   );
+  /** Editing the text is its own permission, separate from editing metadata. */
+  readonly canEditContent = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_EDIT_TAFSIR_CONTENT)
+  );
 
   readonly canDeleteTafsir = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TAFSIR)

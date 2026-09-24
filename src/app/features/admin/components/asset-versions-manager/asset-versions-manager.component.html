@@ -59,7 +59,7 @@
           </button>
         }
       }
-      @if (canMutateVersions()) {
+      @if (canEditContent()) {
         <button nz-button nzType="primary" type="button" (click)="openCreateModal()">
           <ng-icon name="lucidePlus" />
           {{ t('ADD_BUTTON') | translate }}
@@ -149,35 +149,38 @@
             ></textarea>
           </nz-form-control>
         </nz-form-item>
-        <div class="asset-versions-manager__upload">
-          <input
-            #modalFileInput
-            type="file"
-            class="asset-versions-manager__file-input"
-            (change)="onPickFile($event)"
-          />
-          <div class="asset-versions-manager__upload-actions">
-            <button nz-button nzType="default" type="button" (click)="modalFileInput.click()">
-              <ng-icon name="lucideFolderOpen" />
-              {{ t('CHOOSE_FILE') | translate }}
-            </button>
-            @if (selectedFileName()) {
-              <button nz-button nzType="default" nzDanger type="button" (click)="clearFile()">
-                <ng-icon name="lucideX" />
-                {{ t('CLEAR_FILE') | translate }}
+        <!-- Replacing the file changes the text, so it needs the content permission. -->
+        @if (canEditContent()) {
+          <div class="asset-versions-manager__upload">
+            <input
+              #modalFileInput
+              type="file"
+              class="asset-versions-manager__file-input"
+              (change)="onPickFile($event)"
+            />
+            <div class="asset-versions-manager__upload-actions">
+              <button nz-button nzType="default" type="button" (click)="modalFileInput.click()">
+                <ng-icon name="lucideFolderOpen" />
+                {{ t('CHOOSE_FILE') | translate }}
               </button>
+              @if (selectedFileName()) {
+                <button nz-button nzType="default" nzDanger type="button" (click)="clearFile()">
+                  <ng-icon name="lucideX" />
+                  {{ t('CLEAR_FILE') | translate }}
+                </button>
+              }
+            </div>
+            @if (selectedFileName()) {
+              <p class="asset-versions-manager__file-preview">
+                <span class="admin-mono">{{ selectedFileName() }}</span>
+              </p>
+            } @else if (modalMode() === 'edit') {
+              <p class="asset-versions-manager__hint">{{ t('EDIT_FILE_HINT') | translate }}</p>
+            } @else {
+              <p class="asset-versions-manager__hint">{{ t('FILE_REQUIRED_HINT') | translate }}</p>
             }
           </div>
-          @if (selectedFileName()) {
-            <p class="asset-versions-manager__file-preview">
-              <span class="admin-mono">{{ selectedFileName() }}</span>
-            </p>
-          } @else if (modalMode() === 'edit') {
-            <p class="asset-versions-manager__hint">{{ t('EDIT_FILE_HINT') | translate }}</p>
-          } @else {
-            <p class="asset-versions-manager__hint">{{ t('FILE_REQUIRED_HINT') | translate }}</p>
-          }
-        </div>
+        }
       </form>
     </ng-container>
     <ng-container *nzModalFooter>
@@ -316,10 +319,10 @@
                       <ng-icon name="lucideDownload" aria-hidden="true" />
                     </button>
                   </div>
-                  @if (canMutateVersions() || canDeleteVersions()) {
+                  @if (canEditContent() || canMutateVersions() || canDeleteVersions()) {
                     <span class="asset-versions-manager__divider" aria-hidden="true"></span>
                     <div class="asset-versions-manager__action-group">
-                      @if (supportsLanguages() && canMutateVersions() && !ver.is_active) {
+                      @if (supportsLanguages() && canEditContent() && !ver.is_active) {
                         <button
                           type="button"
                           nz-button

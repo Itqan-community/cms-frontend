@@ -52,6 +52,10 @@ export class TranslationDetailComponent implements OnInit {
   readonly canUpdateTranslation = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION)
   );
+  /** Editing the text is its own permission, separate from editing metadata. */
+  readonly canEditContent = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_EDIT_TRANSLATION_CONTENT)
+  );
 
   readonly canDeleteTranslation = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TRANSLATION)
