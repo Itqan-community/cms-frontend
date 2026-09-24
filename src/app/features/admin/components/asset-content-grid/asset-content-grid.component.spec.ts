@@ -63,6 +63,45 @@ describe('AssetContentGridComponent column definitions', () => {
     expect(reference?.headerName).toBe('ADMIN.CONTENT_EDITOR.COLUMNS.REFERENCE');
   });
 
+  it('adds filterable surah and ayah number columns for the ayah template', () => {
+    // Arrange / Act
+    const columns = componentFor('ayah').buildColumnDefs();
+    const sura = columns.find((col: { field?: string }) => col.field === 'sura');
+    const aya = columns.find((col: { field?: string }) => col.field === 'aya');
+
+    // Assert — rows are all loaded client-side, so number filters work in place
+    expect(sura?.filter).toBe('agNumberColumnFilter');
+    expect(sura?.floatingFilter).toBeTrue();
+    expect(aya?.filter).toBe('agNumberColumnFilter');
+    expect(aya?.floatingFilter).toBeTrue();
+  });
+
+  it('shows surah and ayah number columns for the word template without client-side filters', () => {
+    // Arrange / Act
+    const columns = componentFor('word').buildColumnDefs();
+    const sura = columns.find((col: { field?: string }) => col.field === 'sura');
+    const aya = columns.find((col: { field?: string }) => col.field === 'aya');
+
+    // Assert — the word grid loads page by page, so a column filter would only
+    // see the loaded block; the toolbar's server-side surah filter stays instead
+    expect(sura).toBeDefined();
+    expect(aya).toBeDefined();
+    expect(sura?.filter).toBeFalsy();
+    expect(aya?.filter).toBeFalsy();
+  });
+
+  it('keeps surah and ayah number columns off the surah and page templates', () => {
+    // Arrange / Act
+    const fields = (template: string) =>
+      componentFor(template)
+        .buildColumnDefs()
+        .map((col: { field?: string }) => col.field);
+
+    // Assert
+    expect(fields('surah')).not.toContain('aya');
+    expect(fields('page')).not.toContain('sura');
+  });
+
   it('keeps the surah floating filter off the page template', () => {
     // Arrange / Act
     const columns = componentFor('page').buildColumnDefs();
