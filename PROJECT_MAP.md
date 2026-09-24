@@ -335,10 +335,10 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   content templates); flush before publish; leave blocked if PATCH fails. Column set and row model
   are driven by `effectiveTemplate()` (the `template` input, falling back to the template derived
   from loaded rows' `unit_type`): `word` uses AG Grid's infinite row model with a server-side
-  `buildWordDatasource()` (paginated `entries/` endpoint, `cacheBlockSize` pinned to the datasource's
-  page size, server-side surah filter via `refreshInfiniteCache()`, undo/redo hidden); `surah`/`ayah`/
-  `page` stay on the client-side row model with full undo/redo and (for `ayah` only) the client-side
-  surah floating filter
+  `buildWordDatasource()` (paginated `entries/` endpoint, `cacheBlockSize` pinned to the
+  datasource's page size, server-side surah filter via `refreshInfiniteCache()`, undo/redo hidden);
+  `surah`/`ayah`/ `page` stay on the client-side row model with full undo/redo and (for `ayah` only)
+  the client-side surah floating filter
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`
 - `search-panel/` — Search UI

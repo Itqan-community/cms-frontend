@@ -207,7 +207,9 @@
                 {{ 'ADMIN.ASSET_TEMPLATE.LABEL' | translate }}
               </nz-form-label>
               <nz-form-control
-                [nzExtra]="isEditMode() ? ('ADMIN.ASSET_TEMPLATE.IMMUTABLE_HINT' | translate) : undefined"
+                [nzExtra]="
+                  isEditMode() ? ('ADMIN.ASSET_TEMPLATE.IMMUTABLE_HINT' | translate) : undefined
+                "
               >
                 <nz-select
                   formControlName="template"

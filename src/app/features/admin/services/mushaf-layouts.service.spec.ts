@@ -25,7 +25,10 @@ describe('MushafLayoutsService', () => {
     // Act
     service.list().subscribe((layouts) => (received = layouts));
     const req = httpMock.expectOne((r) => r.url.endsWith('mushaf-layouts/'));
-    req.flush({ results: [{ id: 1, name: 'Madani 604', page_count: 604, assets_count: 0 }], count: 1 });
+    req.flush({
+      results: [{ id: 1, name: 'Madani 604', page_count: 604, assets_count: 0 }],
+      count: 1,
+    });
 
     // Assert
     expect(received).toEqual([{ id: 1, name: 'Madani 604', page_count: 604, assets_count: 0 }]);
