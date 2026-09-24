@@ -11,6 +11,7 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
+import { AssetTemplateBadgeComponent } from '../../../../../shared/components/asset-template-badge/asset-template-badge.component';
 import {
   AdminColumnPickerComponent,
   AdminTableColumnOption,
@@ -39,6 +40,7 @@ import { AdminAuthService } from '../../../services/admin-auth.service';
     TafsirFiltersComponent,
     AdminColumnPickerComponent,
     TranslateModule,
+    AssetTemplateBadgeComponent,
   ],
   templateUrl: './tafsirs-list.component.html',
   styleUrl: './tafsirs-list.component.less',

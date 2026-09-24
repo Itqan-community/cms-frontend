@@ -90,6 +90,10 @@
                   >
                     {{ tr.name }}
                   </a>
+                  <app-asset-template-badge
+                    [template]="tr.template"
+                    [layoutName]="tr.mushaf_layout?.name ?? null"
+                  />
                 </td>
               }
               @if (showCol('access')) {

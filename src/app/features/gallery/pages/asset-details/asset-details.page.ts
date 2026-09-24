@@ -22,6 +22,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { Licenses } from '../../../../core/enums/licenses.enum';
+import { AssetTemplateBadgeComponent } from '../../../../shared/components/asset-template-badge/asset-template-badge.component';
 import { JsonLdService } from '../../../../core/services/json-ld.service';
 import { SeoService } from '../../../../core/services/seo.service';
 import { AssetDetailSkeletonComponent } from '../../../../shared/components/asset-detail-skeleton/asset-detail-skeleton.component';
@@ -43,6 +44,7 @@ import { AssetsService } from '../../services/assets.service';
     ImageCarouselComponent,
     BreadcrumbComponent,
     LicenseTagComponent,
+    AssetTemplateBadgeComponent,
     StateMessageComponent,
     AssetDetailSkeletonComponent,
     TranslateModule,
@@ -512,16 +514,17 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
     const language = this.selectedLanguage();
     const params = language ? new HttpParams().set('language', language) : undefined;
     this.http
-      .get<{ download_url: string }>(`${environment.API_BASE_URL}/assets/${assetId}/download/`, {
-        params,
-      })
+      .get<{ download_url: string; filename?: string }>(
+        `${environment.API_BASE_URL}/assets/${assetId}/download/`,
+        { params }
+      )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           this.isDownloading.set(false);
           const downloadUrl = response.download_url;
-          // Extract filename from URL path
-          const filename = this.extractFilenameFromPath(downloadUrl);
+          // The backend names the file {name}-{language}-{version}; fall back to the URL path.
+          const filename = response.filename || this.extractFilenameFromPath(downloadUrl);
           // Step 2: Download the actual file
           this.downloadFileFromUrl(downloadUrl, filename);
         },

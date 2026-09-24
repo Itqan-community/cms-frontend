@@ -10,6 +10,7 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { LicensesColors } from '../../../../../core/enums/licenses.enum';
+import { AssetTemplateBadgeComponent } from '../../../../../shared/components/asset-template-badge/asset-template-badge.component';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import {
@@ -34,6 +35,7 @@ import { TafsirsService } from '../../services/tafsirs.service';
     NzToolTipModule,
     TranslateModule,
     AssetVersionsManagerComponent,
+    AssetTemplateBadgeComponent,
   ],
   templateUrl: './tafsir-detail.component.html',
   styleUrl: './tafsir-detail.component.less',
@@ -49,6 +51,10 @@ export class TafsirDetailComponent implements OnInit {
 
   readonly canUpdateTafsir = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR)
+  );
+  /** Editing the text is its own permission, separate from editing metadata. */
+  readonly canEditContent = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_EDIT_TAFSIR_CONTENT)
   );
 
   readonly canDeleteTafsir = computed(() =>

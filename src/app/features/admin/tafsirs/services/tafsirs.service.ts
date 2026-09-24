@@ -85,6 +85,8 @@ export class TafsirsService {
     if (payload.thumbnail) {
       data.append('thumbnail', payload.thumbnail);
     }
+    append('template', payload.template);
+    append('mushaf_layout_id', payload.mushaf_layout_id);
     append('version_name', payload.version_name);
     append('version_summary', payload.version_summary);
     if (payload.file) {

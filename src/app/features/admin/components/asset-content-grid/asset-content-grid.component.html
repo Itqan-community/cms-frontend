@@ -53,26 +53,42 @@
     </div>
 
     <div class="content-grid__actions">
-      <button
-        nz-button
-        nzType="default"
-        nz-tooltip
-        [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.UNDO' | translate"
-        [disabled]="!canUndo()"
-        (click)="undo()"
-      >
-        <ng-icon name="lucideUndo2" />
-      </button>
-      <button
-        nz-button
-        nzType="default"
-        nz-tooltip
-        [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.REDO' | translate"
-        [disabled]="!canRedo()"
-        (click)="redo()"
-      >
-        <ng-icon name="lucideRedo2" />
-      </button>
+      @if (effectiveTemplate() === 'word') {
+        <nz-select
+          class="content-grid__surah-filter"
+          nzAllowClear
+          nzShowSearch
+          [nzPlaceHolder]="'ADMIN.CONTENT_EDITOR.FILTER_ALL' | translate"
+          [ngModel]="suraFilter()"
+          (ngModelChange)="onSuraFilterChange($event)"
+        >
+          @for (opt of wordSurahOptions(); track opt.id) {
+            <nz-option [nzValue]="opt.id" [nzLabel]="opt.label"></nz-option>
+          }
+        </nz-select>
+      }
+      @if (rowModelType() === 'clientSide') {
+        <button
+          nz-button
+          nzType="default"
+          nz-tooltip
+          [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.UNDO' | translate"
+          [disabled]="!canUndo()"
+          (click)="undo()"
+        >
+          <ng-icon name="lucideUndo2" />
+        </button>
+        <button
+          nz-button
+          nzType="default"
+          nz-tooltip
+          [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.REDO' | translate"
+          [disabled]="!canRedo()"
+          (click)="redo()"
+        >
+          <ng-icon name="lucideRedo2" />
+        </button>
+      }
       <button
         nz-button
         nzType="default"
@@ -115,22 +131,27 @@
     </div>
   </div>
 
-  <nz-spin [nzSpinning]="loading()" (paste)="onPaste($event)">
-    <ag-grid-angular
-      class="content-grid__table"
-      [theme]="theme"
-      [rowData]="rows()"
-      [columnDefs]="columnDefs()"
-      [defaultColDef]="defaultColDef"
-      [enableRtl]="rtl()"
-      [stopEditingWhenCellsLoseFocus]="true"
-      [rowSelection]="rowSelection"
-      [undoRedoCellEditing]="true"
-      [undoRedoCellEditingLimit]="50"
-      (gridReady)="onGridReady($event)"
-      (cellValueChanged)="onCellValueChanged($event)"
-      (selectionChanged)="onSelectionChanged()"
-    ></ag-grid-angular>
+  <nz-spin class="content-grid__spin" [nzSpinning]="loading()" (paste)="onPaste($event)">
+    @if (canCreateGrid()) {
+      <ag-grid-angular
+        class="content-grid__table"
+        [theme]="theme"
+        [rowModelType]="rowModelType()"
+        [rowData]="rowModelType() === 'clientSide' ? rows() : undefined"
+        [datasource]="rowModelType() === 'infinite' ? wordDatasource() : undefined"
+        [cacheBlockSize]="rowModelType() === 'infinite' ? wordCacheBlockSize : undefined"
+        [columnDefs]="columnDefs()"
+        [defaultColDef]="defaultColDef"
+        [enableRtl]="rtl()"
+        [stopEditingWhenCellsLoseFocus]="true"
+        [rowSelection]="rowSelection"
+        [undoRedoCellEditing]="true"
+        [undoRedoCellEditingLimit]="50"
+        (gridReady)="onGridReady($event)"
+        (cellValueChanged)="onCellValueChanged($event)"
+        (selectionChanged)="onSelectionChanged()"
+      ></ag-grid-angular>
+    }
   </nz-spin>
 
   <nz-modal
@@ -198,6 +219,7 @@
 
   <nz-modal
     [nzVisible]="commitDialogVisible()"
+    nzWidth="820px"
     [nzTitle]="'ADMIN.CONTENT_EDITOR.COMMIT.TITLE' | translate"
     [nzOkText]="'ADMIN.CONTENT_EDITOR.COMMIT.CONFIRM' | translate"
     [nzOkLoading]="committing()"
@@ -227,32 +249,12 @@
             {{ 'ADMIN.CONTENT_EDITOR.COMMIT.REVIEW_ERROR' | translate }}
           </span>
         } @else {
-          <p class="content-grid__commit-summary">
-            <span class="content-grid__diff-added">+{{ pendingCounts().added }}</span>
-            <span class="content-grid__diff-modified">~{{ pendingCounts().modified }}</span>
-            <span class="content-grid__diff-removed">−{{ pendingCounts().removed }}</span>
+          <h4 class="content-grid__commit-summary">
             {{ 'ADMIN.CONTENT_EDITOR.COMMIT.REVIEW' | translate }}
-          </p>
-          <ul class="content-grid__commit-changes">
-            @for (change of pendingChanges(); track change.ayah_id) {
-              <li>
-                <span
-                  [class.content-grid__diff-added]="change.change_type === 'added'"
-                  [class.content-grid__diff-modified]="change.change_type === 'modified'"
-                  [class.content-grid__diff-removed]="change.change_type === 'removed'"
-                >
-                  {{
-                    change.change_type === 'added'
-                      ? '+'
-                      : change.change_type === 'removed'
-                        ? '−'
-                        : '~'
-                  }}
-                  {{ change.sura }}:{{ change.aya }}
-                </span>
-              </li>
-            }
-          </ul>
+          </h4>
+          <div class="content-grid__commit-changes">
+            <app-content-changes [changes]="pendingChanges()" />
+          </div>
         }
       </div>
     </ng-container>

@@ -58,7 +58,7 @@
         >
           <thead>
             <tr>
-              <th nzWidth="120px">{{ 'ADMIN.REVIEW.COLUMN.AYAH' | translate }}</th>
+              <th nzWidth="120px">{{ 'ADMIN.REVIEW.COLUMN.UNIT' | translate }}</th>
               <th nzWidth="90px">{{ 'ADMIN.REVIEW.COLUMN.TYPE' | translate }}</th>
               <th>{{ 'ADMIN.REVIEW.COLUMN.CHANGE' | translate }}</th>
               <th nzWidth="90px">{{ 'ADMIN.REVIEW.COLUMN.COMMIT' | translate }}</th>
@@ -69,7 +69,7 @@
           <tbody>
             @for (row of reviewTable.data; track row.id) {
               <tr>
-                <td>{{ row.surah_name }} {{ row.sura }}:{{ row.aya }}</td>
+                <td>{{ row.label }}</td>
                 <td>{{ typeKey(row.change_type) | translate }}</td>
                 <td>
                   <div class="asset-review-grid__change" dir="auto">

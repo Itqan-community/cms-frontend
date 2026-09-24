@@ -18,6 +18,8 @@ import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { TafsirFormValue } from '../../models/tafsirs.models';
 import { TafsirsService } from '../../services/tafsirs.service';
 import { AdminTenantService } from '../../../services/admin-tenant.service';
+import { MushafLayoutsService } from '../../../services/mushaf-layouts.service';
+import { AssetTemplate, MushafLayout } from '../../../models/asset-content.models';
 import {
   createDisplayLocalizationLabels,
   localizeLanguageCode,
@@ -54,6 +56,7 @@ export class TafsirFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly tafsirsService = inject(TafsirsService);
   private readonly tenantService = inject(AdminTenantService);
+  private readonly layoutsService = inject(MushafLayoutsService);
   private readonly message = inject(NzMessageService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
@@ -66,6 +69,7 @@ export class TafsirFormComponent implements OnInit {
   readonly thumbnailPreview = signal<string | null>(null);
   readonly fileList = signal<NzUploadFile[]>([]);
   readonly versionFile = signal<File | null>(null);
+  readonly layouts = signal<MushafLayout[]>([]);
 
   readonly licenseOptions = Object.values(Licenses);
 
@@ -74,8 +78,8 @@ export class TafsirFormComponent implements OnInit {
     name_en: [''],
     description_ar: ['', [Validators.required]],
     description_en: ['', [Validators.required]],
-    long_description_ar: ['', [Validators.required]],
-    long_description_en: ['', [Validators.required]],
+    long_description_ar: [''],
+    long_description_en: [''],
     license: ['', [Validators.required]],
     language: ['', [Validators.required]],
     publisher_id: [null as number | null, [Validators.required]],
@@ -83,6 +87,8 @@ export class TafsirFormComponent implements OnInit {
     external_url: [''],
     is_open_access: [false],
     restricted_for_tenant: [false],
+    template: [null as AssetTemplate | null, [Validators.required]],
+    mushaf_layout_id: [null as number | null],
     version_name: [''],
     version_summary: [''],
   });
@@ -90,11 +96,29 @@ export class TafsirFormComponent implements OnInit {
   private editSlug: string | null = null;
 
   ngOnInit(): void {
+    this.layoutsService
+      .list()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((layouts) => this.layouts.set(layouts));
+
+    this.form.controls.template.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((template) => {
+        const layout = this.form.controls.mushaf_layout_id;
+        layout.setValidators(template === 'page' ? [Validators.required] : []);
+        if (template !== 'page') {
+          layout.setValue(null);
+        }
+        layout.updateValueAndValidity();
+      });
+
     const slugParam = this.route.snapshot.params['slug'];
     if (slugParam) {
       this.isEditMode.set(true);
       this.editSlug = slugParam;
       this.loadForEdit();
+      this.form.controls.template.disable();
+      this.form.controls.mushaf_layout_id.disable();
     } else {
       this.form.controls.version_name.setValidators([Validators.maxLength(255)]);
       this.form.controls.version_name.updateValueAndValidity();
@@ -190,6 +214,9 @@ export class TafsirFormComponent implements OnInit {
     };
 
     if (!this.isEditMode()) {
+      body.template = v.template ?? undefined;
+      body.mushaf_layout_id = v.mushaf_layout_id ?? null;
+
       const versionName = v.version_name?.trim();
       const versionSummary = v.version_summary?.trim();
       if (versionName) body.version_name = versionName;
@@ -229,6 +256,8 @@ export class TafsirFormComponent implements OnInit {
             is_open_access: data.is_open_access,
             restricted_for_tenant: data.restricted_for_tenant,
             external_url: data.external_url ?? '',
+            template: data.template,
+            mushaf_layout_id: data.mushaf_layout?.id ?? null,
           });
           this.publisherDisplayName.set(data.publisher.name);
 

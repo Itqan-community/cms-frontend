@@ -59,9 +59,9 @@ describe('AssetReviewService', () => {
         results: [
           {
             id: 10,
-            sura: 1,
-            aya: 1,
-            surah_name: 'الفاتحة',
+            unit_type: 'ayah',
+            unit_id: 1,
+            label: '1:1',
             change_type: 'modified',
             old_text: 'old',
             new_text: 'new',
@@ -118,9 +118,9 @@ describe('AssetReviewService', () => {
     it('should send a patch request to update review state and comment', (done) => {
       const mockUpdated: ReviewChange = {
         id: 42,
-        sura: 2,
-        aya: 255,
-        surah_name: 'البقرة',
+        unit_type: 'ayah',
+        unit_id: 262,
+        label: '2:255',
         change_type: 'modified',
         old_text: 'prev',
         new_text: 'curr',
