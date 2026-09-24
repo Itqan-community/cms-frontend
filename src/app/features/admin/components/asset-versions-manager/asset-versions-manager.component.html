@@ -219,7 +219,7 @@
             <th>{{ t('COL_SUMMARY') | translate }}</th>
             <th nzWidth="100px">{{ t('COL_SIZE') | translate }}</th>
             <th nzWidth="120px">{{ t('COL_DATE') | translate }}</th>
-            <th nzWidth="150px">{{ t('COL_ACTIONS') | translate }}</th>
+            <th nzWidth="180px">{{ t('COL_ACTIONS') | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -252,6 +252,20 @@
               <td>{{ ver.created_at | date: 'dd/MM/yyyy' }}</td>
               <td>
                 <div class="admin-list-actions">
+                  @if (ver.file_url) {
+                    <button
+                      type="button"
+                      nz-button
+                      nzType="text"
+                      class="action-icon"
+                      nz-tooltip
+                      [nzTooltipTitle]="'ADMIN.PREVIEW.OPEN_FILE' | translate"
+                      [attr.aria-label]="'ADMIN.PREVIEW.OPEN_FILE' | translate"
+                      (click)="openPreview(ver)"
+                    >
+                      <ng-icon name="lucideEye" aria-hidden="true" />
+                    </button>
+                  }
                   @if (supportsLanguages()) {
                     <button
                       type="button"
@@ -419,5 +433,33 @@
       (pageChange)="onPageChange($event)"
       (pageSizeChange)="onPageSizeChange($event)"
     />
+  }
+
+  @if (previewVersion(); as version) {
+    <nz-modal
+      [(nzVisible)]="previewModalVisible"
+      [nzTitle]="version.name"
+      (nzOnCancel)="closePreview()"
+      nzWidth="900px"
+      nzCentered
+      [nzMaskClosable]="true"
+      [nzClosable]="true"
+      [nzFooter]="null"
+    >
+      <ng-container *nzModalContent>
+        @if (previewDiffLoading()) {
+          <div class="preview-loading" aria-live="polite">
+            {{ 'ADMIN.PREVIEW.LOADING' | translate }}
+          </div>
+        }
+
+        <app-universal-asset-previewer
+          [fileUrl]="version.file_url"
+          [fileName]="version.name"
+          [originalText]="previewOriginalText()"
+          [modifiedText]="previewModifiedText()"
+        />
+      </ng-container>
+    </nz-modal>
   }
 </section>

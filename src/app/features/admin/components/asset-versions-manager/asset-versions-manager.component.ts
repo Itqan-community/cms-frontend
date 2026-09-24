@@ -1,5 +1,5 @@
 import { DatePipe } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Component, DestroyRef, Input, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -16,7 +16,8 @@ import { AdminTablePaginationComponent } from '../admin-table-pagination/admin-t
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import { Subject, debounceTime, distinctUntilChanged, finalize, takeUntil } from 'rxjs';
+import { UniversalAssetPreviewerComponent } from '../universal-asset-previewer/universal-asset-previewer.component';
+import { Subject, debounceTime, distinctUntilChanged, finalize, forkJoin, takeUntil } from 'rxjs';
 import type { AssetVersion, AssetVersionParentKind } from '../../models/asset-versions.models';
 import type { AssetLanguage, ContentChange } from '../../models/asset-content.models';
 import { AssetVersionsService } from '../../services/asset-versions.service';
@@ -47,12 +48,14 @@ const DEFAULT_PAGE_SIZE = 10;
     NzSpinModule,
     NzTableModule,
     NzToolTipModule,
+    UniversalAssetPreviewerComponent,
   ],
   templateUrl: './asset-versions-manager.component.html',
   styleUrl: './asset-versions-manager.component.less',
 })
 export class AssetVersionsManagerComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly http = inject(HttpClient);
   private readonly assetVersionsService = inject(AssetVersionsService);
   private readonly assetContentService = inject(AssetContentService);
   private readonly message = inject(NzMessageService);
@@ -67,6 +70,8 @@ export class AssetVersionsManagerComponent implements OnInit {
   /** Emits to abort the in-flight versions request, so a slower earlier response
    *  can never overwrite the list of the language/page now selected. */
   private readonly cancelInFlightList$ = new Subject<void>();
+  /** Emits to abort preview requests. */
+  private readonly cancelPreview$ = new Subject<void>();
 
   /** Parent asset kind — drives API paths. */
   @Input({ required: true }) kind!: AssetVersionParentKind;
@@ -92,6 +97,14 @@ export class AssetVersionsManagerComponent implements OnInit {
    *  reporting the empty diff as "no changes". */
   readonly diffError = signal(false);
   readonly diff = signal<ContentChange[]>([]);
+
+  /** Preview modal state. */
+  readonly previewModalVisible = signal(false);
+  readonly previewDiffLoading = signal(false);
+  readonly previewOriginalText = signal<string | null>(null);
+  readonly previewModifiedText = signal<string | null>(null);
+  readonly previewVersion = signal<AssetVersion | null>(null);
+  readonly previewPreviousVersion = signal<AssetVersion | null>(null);
 
   /** Multi-language assets (translations/tafsirs) let the versions be filtered by language. */
   readonly languages = signal<AssetLanguage[]>([]);
@@ -441,6 +454,100 @@ export class AssetVersionsManagerComponent implements OnInit {
           });
         }),
     });
+  }
+
+  /** Preview modal handlers. */
+  openPreview(row: AssetVersion): void {
+    this.cancelPreview$.next();
+    this.previewVersion.set(row);
+    this.previewPreviousVersion.set(null);
+    this.previewOriginalText.set(null);
+    this.previewModifiedText.set(null);
+    this.previewModalVisible.set(true);
+
+    this.assetVersionsService
+      .listAll(this.kind, this.slug)
+      .pipe(takeUntil(this.cancelPreview$), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          const versions = response.results;
+          const previousVersion = this.findPreviousVersion(row, versions);
+          this.previewPreviousVersion.set(previousVersion);
+
+          if (
+            !previousVersion ||
+            !row.file_url ||
+            !this.isTextPreviewable(row.file_url) ||
+            !previousVersion.file_url ||
+            !this.isTextPreviewable(previousVersion.file_url)
+          ) {
+            this.previewDiffLoading.set(false);
+            return;
+          }
+
+          this.loadTextDiff(row, previousVersion);
+        },
+        error: () => {
+          this.previewDiffLoading.set(false);
+        },
+      });
+  }
+
+  closePreview(): void {
+    this.cancelPreview$.next();
+    this.previewModalVisible.set(false);
+    this.previewDiffLoading.set(false);
+    this.previewOriginalText.set(null);
+    this.previewModifiedText.set(null);
+    this.previewVersion.set(null);
+    this.previewPreviousVersion.set(null);
+  }
+
+  private findPreviousVersion(
+    current: AssetVersion,
+    versions: AssetVersion[]
+  ): AssetVersion | null {
+    const orderedVersions = [...versions].sort(
+      (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    const currentIndex = orderedVersions.findIndex((version) => version.id === current.id);
+    if (currentIndex === -1 || currentIndex >= orderedVersions.length - 1) {
+      return null;
+    }
+    return orderedVersions[currentIndex + 1] ?? null;
+  }
+
+  private loadTextDiff(current: AssetVersion, previous: AssetVersion): void {
+    this.previewDiffLoading.set(true);
+    forkJoin({
+      original: this.http.get(previous.file_url!, { responseType: 'text' }),
+      modified: this.http.get(current.file_url!, { responseType: 'text' }),
+    })
+      .pipe(takeUntil(this.cancelPreview$), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ original, modified }) => {
+          this.previewOriginalText.set(original);
+          this.previewModifiedText.set(modified);
+          this.previewDiffLoading.set(false);
+        },
+        error: () => {
+          this.previewOriginalText.set(null);
+          this.previewModifiedText.set(null);
+          this.previewDiffLoading.set(false);
+        },
+      });
+  }
+
+  private isTextPreviewable(fileUrl: string | null | undefined): boolean {
+    if (!fileUrl) return false;
+    const cleanUrl = fileUrl.split('?')[0].toLowerCase();
+    return (
+      cleanUrl.endsWith('.txt') ||
+      cleanUrl.endsWith('.json') ||
+      cleanUrl.endsWith('.xml') ||
+      cleanUrl.endsWith('.csv') ||
+      cleanUrl.endsWith('.md')
+    );
   }
 
   /** Toggle a commit's diff panel, lazy-loading the diff on first expand. */

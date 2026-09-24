@@ -1,0 +1,456 @@
+<div class="asset-previewer">
+
+  <div class="preview-header">
+    <h3>{{ fileName() }}</h3>
+  </div>
+
+  @if (previewType() === 'audio') {
+    <div class="preview-content audio-preview">
+      @if (binaryError()) {
+        <div class="preview-message preview-message--error">
+          <p>
+            {{ 'ADMIN.PREVIEW.AUDIO_ERROR' | translate }}
+          </p>
+
+          <a [href]="fileUrl()" target="_blank" rel="noopener">
+            {{ 'ADMIN.PREVIEW.OPEN_AUDIO' | translate }}
+          </a>
+        </div>
+      } @else {
+        <audio
+          controls
+          preload="metadata"
+          [src]="fileUrl()"
+          [attr.aria-label]="'ADMIN.PREVIEW.AUDIO_ARIA' | translate"
+          (error)="onAudioError()"
+        ></audio>
+      }
+    </div>
+  } @else if (previewType() === 'image') {
+    <div class="preview-content image-preview">
+      @if (imageError() || binaryError()) {
+        <div class="preview-message preview-message--error">
+          <p>
+            {{ 'ADMIN.PREVIEW.IMAGE_ERROR' | translate }}
+          </p>
+
+          <a [href]="fileUrl()" target="_blank" rel="noopener">
+            {{ 'ADMIN.PREVIEW.OPEN_IMAGE' | translate }}
+          </a>
+        </div>
+      } @else {
+        <div
+          class="image-controls"
+          [attr.aria-label]="'ADMIN.PREVIEW.IMAGE_ZOOM_CONTROLS' | translate"
+        >
+          <button
+            type="button"
+            nz-button
+            nzType="default"
+            (click)="zoomOut()"
+            [disabled]="imageZoom() <= 0.5"
+            [attr.aria-label]="'ADMIN.PREVIEW.ZOOM_OUT' | translate"
+            [attr.title]="'ADMIN.PREVIEW.ZOOM_OUT' | translate"
+          >
+            −
+          </button>
+
+          <button
+            type="button"
+            nz-button
+            nzType="default"
+            (click)="resetZoom()"
+            [attr.aria-label]="'ADMIN.PREVIEW.RESET_ZOOM' | translate"
+            [attr.title]="'ADMIN.PREVIEW.RESET_ZOOM' | translate"
+          >
+            {{ imageZoom() * 100 }}%
+          </button>
+
+          <button
+            type="button"
+            nz-button
+            nzType="default"
+            (click)="zoomIn()"
+            [disabled]="imageZoom() >= 3"
+            [attr.aria-label]="'ADMIN.PREVIEW.ZOOM_IN' | translate"
+            [attr.title]="'ADMIN.PREVIEW.ZOOM_IN' | translate"
+          >
+            +
+          </button>
+        </div>
+
+        <div class="image-container">
+          <img
+            [src]="fileUrl()"
+            [alt]="fileName()"
+            [style.transform]="'scale(' + imageZoom() + ')'"
+            (load)="onImageLoad()"
+            (error)="onImageError()"
+          />
+        </div>
+      }
+    </div>
+  } @else if (previewType() === 'pdf') {
+
+    <div class="preview-content pdf-preview">
+
+      @if (binaryLoading()) {
+
+        <div
+          class="preview-message"
+          aria-live="polite"
+        >
+          <span>
+            {{ 'ADMIN.PREVIEW.LOADING' | translate }}
+          </span>
+        </div>
+
+      } @else if (binaryError()) {
+
+        <div
+          class="preview-message preview-message--error"
+        >
+
+          <p>
+            {{ 'ADMIN.PREVIEW.PDF_ERROR' | translate }}
+          </p>
+
+          <a
+            [href]="fileUrl()"
+            target="_blank"
+            rel="noopener"
+          >
+            {{ 'ADMIN.PREVIEW.OPEN_PDF' | translate }}
+          </a>
+
+        </div>
+
+      } @else {
+
+        <iframe
+          [src]="safeFileUrl()"
+          [title]="fileName()"
+          (error)="onPdfError()"
+        ></iframe>
+
+        <a
+          class="pdf-fallback-link"
+          [href]="fileUrl()"
+          target="_blank"
+          rel="noopener"
+        >
+          {{ 'ADMIN.PREVIEW.OPEN_PDF' | translate }}
+        </a>
+
+      }
+
+    </div>
+
+  } @else if (previewType() === 'csv') {
+
+    <div class="preview-content csv-preview">
+
+      @if (loading()) {
+
+        <div
+          class="preview-message"
+          aria-live="polite"
+        >
+          <span>
+            {{ 'ADMIN.PREVIEW.LOADING' | translate }}
+          </span>
+        </div>
+
+      } @else if (error()) {
+
+        <div
+          class="preview-message preview-message--error"
+        >
+
+          <p>
+            {{ 'ADMIN.PREVIEW.FILE_ERROR' | translate }}
+          </p>
+
+          <a
+            [href]="fileUrl()"
+            target="_blank"
+            rel="noopener"
+          >
+            {{ 'ADMIN.PREVIEW.OPEN_FILE' | translate }}
+          </a>
+
+        </div>
+
+      } @else if (csvHeaders().length > 0) {
+
+        <div class="csv-table-wrapper">
+
+          <nz-table
+            [nzData]="csvPageRows()"
+            [nzFrontPagination]="false"
+            nzSize="middle"
+          >
+
+            <thead>
+
+              <tr>
+
+                @for (
+                  header of csvHeaders();
+                  track $index
+                ) {
+
+                  <th>
+                    {{ header }}
+                  </th>
+
+                }
+
+              </tr>
+
+            </thead>
+
+            <tbody>
+
+              @for (
+                row of csvPageRows();
+                track $index
+              ) {
+
+                <tr>
+
+                  @for (
+                    cell of row;
+                    track $index
+                  ) {
+
+                    <td>
+                      {{ cell }}
+                    </td>
+
+                  }
+
+                </tr>
+
+              }
+
+            </tbody>
+
+          </nz-table>
+
+        </div>
+
+        <div class="csv-pagination">
+
+          <nz-pagination
+            [nzPageIndex]="csvPage()"
+            [nzTotal]="csvDataRows().length"
+            [nzPageSize]="csvPageSize()"
+            [nzShowSizeChanger]="true"
+            [nzPageSizeOptions]="[
+              10,
+              25,
+              50,
+              100
+            ]"
+            nzShowQuickJumper
+            (nzPageIndexChange)="
+              onCsvPageChange($event)
+            "
+            (nzPageSizeChange)="
+              onCsvPageSizeChange($event)
+            "
+          />
+
+        </div>
+
+      } @else {
+
+        <div class="preview-message">
+
+          <p>
+            {{ 'ADMIN.PREVIEW.NO_CSV_DATA' | translate }}
+          </p>
+
+        </div>
+
+      }
+
+    </div>
+
+  } @else if (previewType() === 'code') {
+    <div class="preview-content file-preview">
+      @if (diffMode()) {
+        <div
+          class="preview-tabs"
+          role="tablist"
+          [attr.aria-label]="'ADMIN.PREVIEW.VIEW_MODE' | translate"
+        >
+          <button
+            type="button"
+            class="preview-tab"
+            [class.preview-tab--active]="previewMode() === 'preview'"
+            role="tab"
+            [attr.aria-selected]="previewMode() === 'preview'"
+            aria-controls="preview-panel"
+            (click)="setPreviewMode('preview')"
+          >
+            {{ 'ADMIN.PREVIEW.FILE_PREVIEW' | translate }}
+          </button>
+
+          <button
+            type="button"
+            class="preview-tab"
+            [class.preview-tab--active]="previewMode() === 'diff'"
+            role="tab"
+            [attr.aria-selected]="previewMode() === 'diff'"
+            aria-controls="diff-panel"
+            (click)="setPreviewMode('diff')"
+          >
+            {{ 'ADMIN.PREVIEW.DIFF_VIEW' | translate }}
+          </button>
+        </div>
+      }
+
+      @if (diffMode() && previewMode() === 'diff') {
+        <div id="diff-panel" class="diff-content" role="tabpanel">
+          <div class="diff-header">
+            <span>
+              {{ 'ADMIN.PREVIEW.TEXT_DIFF' | translate }}
+            </span>
+          </div>
+
+          @if (diffTooLarge()) {
+            <div class="preview-message" aria-live="polite">
+              <p>
+                {{ 'ADMIN.PREVIEW.DIFF_TOO_LARGE' | translate }}
+              </p>
+            </div>
+          } @else {
+            <pre
+              class="file-content diff-content__body"
+            ><code>{{ diffLines().join('\n') }}</code></pre>
+          }
+        </div>
+      } @else if (loading()) {
+        <div class="preview-message" aria-live="polite">
+          <span>
+            {{ 'ADMIN.PREVIEW.LOADING' | translate }}
+          </span>
+        </div>
+      } @else if (error()) {
+        <div class="preview-message preview-message--error">
+          <p>
+            {{ 'ADMIN.PREVIEW.FILE_ERROR' | translate }}
+          </p>
+
+          <a [href]="fileUrl()" target="_blank" rel="noopener">
+            {{ 'ADMIN.PREVIEW.OPEN_FILE' | translate }}
+          </a>
+        </div>
+      } @else {
+        <div id="preview-panel" role="tabpanel">
+          <pre class="file-content code-highlight"><code
+            class="hljs"
+            [innerHTML]="highlightedCode()"
+          ></code></pre>
+        </div>
+      }
+    </div>
+  } @else if (previewType() === 'text') {
+    <div class="preview-content file-preview">
+      @if (diffMode()) {
+        <div
+          class="preview-tabs"
+          role="tablist"
+          [attr.aria-label]="'ADMIN.PREVIEW.VIEW_MODE' | translate"
+        >
+          <button
+            type="button"
+            class="preview-tab"
+            [class.preview-tab--active]="previewMode() === 'preview'"
+            role="tab"
+            [attr.aria-selected]="previewMode() === 'preview'"
+            aria-controls="preview-panel"
+            (click)="setPreviewMode('preview')"
+          >
+            {{ 'ADMIN.PREVIEW.FILE_PREVIEW' | translate }}
+          </button>
+
+          <button
+            type="button"
+            class="preview-tab"
+            [class.preview-tab--active]="previewMode() === 'diff'"
+            role="tab"
+            [attr.aria-selected]="previewMode() === 'diff'"
+            aria-controls="diff-panel"
+            (click)="setPreviewMode('diff')"
+          >
+            {{ 'ADMIN.PREVIEW.DIFF_VIEW' | translate }}
+          </button>
+        </div>
+      }
+
+      @if (diffMode() && previewMode() === 'diff') {
+        <div id="diff-panel" class="diff-content" role="tabpanel">
+          <div class="diff-header">
+            <span>
+              {{ 'ADMIN.PREVIEW.TEXT_DIFF' | translate }}
+            </span>
+          </div>
+
+          @if (diffTooLarge()) {
+            <div class="preview-message" aria-live="polite">
+              <p>
+                {{ 'ADMIN.PREVIEW.DIFF_TOO_LARGE' | translate }}
+              </p>
+            </div>
+          } @else {
+            <pre
+              class="file-content diff-content__body"
+            ><code>{{ diffLines().join('\n') }}</code></pre>
+          }
+        </div>
+      } @else if (loading()) {
+        <div class="preview-message" aria-live="polite">
+          <span>
+            {{ 'ADMIN.PREVIEW.LOADING' | translate }}
+          </span>
+        </div>
+      } @else if (error()) {
+        <div class="preview-message preview-message--error">
+          <p>
+            {{ 'ADMIN.PREVIEW.FILE_ERROR' | translate }}
+          </p>
+
+          <a [href]="fileUrl()" target="_blank" rel="noopener">
+            {{ 'ADMIN.PREVIEW.OPEN_FILE' | translate }}
+          </a>
+        </div>
+      } @else {
+        <div id="preview-panel" role="tabpanel">
+          <pre class="file-content"><code>{{ textContent() }}</code></pre>
+        </div>
+      }
+    </div>
+  } @else {
+
+    <div class="preview-content unsupported-preview">
+
+      <p>
+        ⚠️ {{ 'ADMIN.PREVIEW.UNSUPPORTED' | translate }}
+      </p>
+
+      <a
+        [href]="fileUrl()"
+        target="_blank"
+        rel="noopener"
+      >
+        {{ 'ADMIN.PREVIEW.OPEN_DOWNLOAD' | translate }}
+      </a>
+
+    </div>
+
+  }
+
+</div>

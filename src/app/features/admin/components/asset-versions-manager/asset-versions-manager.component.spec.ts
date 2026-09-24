@@ -1,3 +1,5 @@
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -62,6 +64,8 @@ describe('AssetVersionsManagerComponent', () => {
     await TestBed.configureTestingModule({
       imports: [AssetVersionsManagerComponent, TranslateModule.forRoot()],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: AssetVersionsService, useValue: versionsService },
         { provide: AssetContentService, useValue: contentService },
         { provide: NzMessageService, useValue: message },
