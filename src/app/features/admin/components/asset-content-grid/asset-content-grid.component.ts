@@ -840,7 +840,8 @@ export class AssetContentGridComponent implements OnInit {
     if (template !== 'page') {
       columns.push({
         field: 'reference_text',
-        headerName: this.colHeader('REFERENCE'),
+        // Surah assets annotate a whole surah: its "reference" is the surah's name.
+        headerName: this.colHeader(template === 'surah' ? 'SURAH_NAME' : 'REFERENCE'),
         flex: 1,
         editable: false,
         cellStyle: { direction: 'rtl', fontFamily: 'serif' },

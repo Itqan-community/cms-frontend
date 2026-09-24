@@ -840,6 +840,7 @@
         "SURAH": "Surah",
         "UTHMANI": "Ayah (Uthmani)",
         "UNIT": "Reference",
+        "SURAH_NAME": "Surah name",
         "REFERENCE": "Quran text",
         "TEXT": "Content",
         "SOURCE": "Source"

@@ -43,6 +43,26 @@ describe('AssetContentGridComponent column definitions', () => {
     expect(fields).toContain('reference_text');
   });
 
+  it('labels the reference column as the surah name for the surah template', () => {
+    // Arrange / Act
+    const reference = componentFor('surah')
+      .buildColumnDefs()
+      .find((col: { field?: string }) => col.field === 'reference_text');
+
+    // Assert — for surah assets the reference text is the surah's name, not Quran text
+    expect(reference?.headerName).toBe('ADMIN.CONTENT_EDITOR.COLUMNS.SURAH_NAME');
+  });
+
+  it('keeps the Quran text label for the ayah template', () => {
+    // Arrange / Act
+    const reference = componentFor('ayah')
+      .buildColumnDefs()
+      .find((col: { field?: string }) => col.field === 'reference_text');
+
+    // Assert
+    expect(reference?.headerName).toBe('ADMIN.CONTENT_EDITOR.COLUMNS.REFERENCE');
+  });
+
   it('keeps the surah floating filter off the page template', () => {
     // Arrange / Act
     const columns = componentFor('page').buildColumnDefs();
