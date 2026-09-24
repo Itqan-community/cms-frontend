@@ -44,9 +44,7 @@ export class AssetVersionsService {
     pageSize = 100
   ): Observable<AssetVersionsListResponse> {
     const effectivePageSize =
-      Number.isFinite(pageSize) && pageSize > 0
-        ? Math.min(pageSize, 1000)
-        : 100;
+      Number.isFinite(pageSize) && pageSize > 0 ? Math.min(pageSize, 1000) : 100;
 
     const firstPageParams = new HttpParams()
       .set('page', '1')
@@ -77,10 +75,7 @@ export class AssetVersionsService {
 
           return forkJoin(remainingRequests).pipe(
             map((responses) => ({
-              results: [
-                ...firstPage.results,
-                ...responses.flatMap((response) => response.results),
-              ],
+              results: [...firstPage.results, ...responses.flatMap((response) => response.results)],
               count: firstPage.count,
             }))
           );

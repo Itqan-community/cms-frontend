@@ -52,9 +52,7 @@
       "prettier --write",
       "node scripts/check-arabic-translations.js"
     ],
-    "*.{json,html,css,less,md}": [
-      "prettier --write"
-    ]
+    "*.{json,html,css,less,md}": ["prettier --write"]
   },
   "private": true,
   "dependencies": {
