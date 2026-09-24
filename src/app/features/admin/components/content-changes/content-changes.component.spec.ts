@@ -91,4 +91,22 @@ describe('ContentChangesComponent', () => {
     );
     expect(el.querySelector('.content-changes__filters')).toBeNull();
   });
+
+  it("shows a reviewer's comment, who left it, and the review outcome", () => {
+    const reviewed: ContentChange = {
+      ...change(1, 'modified', 'old', 'new'),
+      review_state: 'commented',
+      review_comment: 'Spelling of the first word',
+      reviewed_by: 'Aisha',
+      reviewed_at: '2026-09-24T10:00:00Z',
+    };
+    const fixture = render([reviewed, change(2, 'added', '', 'fresh')]);
+    const el: HTMLElement = fixture.nativeElement;
+
+    const reviews = el.querySelectorAll('.content-changes__review');
+    expect(reviews.length).toBe(1);
+    expect(reviews[0].textContent).toContain('Spelling of the first word');
+    expect(reviews[0].textContent).toContain('Aisha');
+    expect(reviews[0].textContent).toContain('ADMIN.REVIEW.STATE.COMMENTED');
+  });
 });

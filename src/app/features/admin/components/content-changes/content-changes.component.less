@@ -194,6 +194,61 @@
     font-weight: 500;
   }
 
+  // The reviewer's outcome, set apart from the text so it reads as a note on it.
+  &__review {
+    margin-top: 10px;
+    padding: 8px 10px;
+    border: 1px dashed var(--admin-border-200, #e5e7eb);
+    border-radius: 6px;
+    background: var(--admin-surface-white, #fff);
+
+    &--commented {
+      border-color: #ffd591;
+      background: #fffbf0;
+    }
+
+    &--approved {
+      border-color: var(--color-primary-200, #d1e1d9);
+      background: var(--color-primary-50, #f0f5f2);
+    }
+  }
+
+  &__review-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+
+    ng-icon {
+      width: 14px;
+      height: 14px;
+      color: var(--admin-text-500, #6b7280);
+    }
+  }
+
+  &__review-state {
+    font-weight: 600;
+
+    .content-changes__review--commented & {
+      color: @modified;
+    }
+
+    .content-changes__review--approved & {
+      color: var(--color-primary-700, #527c66);
+    }
+  }
+
+  &__review-meta {
+    color: var(--admin-text-500, #6b7280);
+  }
+
+  &__review-comment {
+    margin: 6px 0 0;
+    color: var(--admin-text-900, #111827);
+    white-space: pre-line;
+  }
+
   &__empty {
     color: var(--admin-text-400, #9ca3af);
     font-style: italic;

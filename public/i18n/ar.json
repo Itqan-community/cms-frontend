@@ -765,6 +765,8 @@
   },
   "ADMIN": {
     "CONTENT_CHANGES": {
+      "COMMENTS_COUNT": "تعليقات: {{count}}",
+      "COMMENTS_HINT": "تعليقات المراجعين — افتح التغييرات لقراءتها",
       "BUTTON": "التغييرات",
       "PANEL_TITLE": "التغييرات في {{name}}",
       "NONE": "لا توجد تغييرات.",

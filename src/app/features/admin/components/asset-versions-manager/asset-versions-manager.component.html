@@ -241,6 +241,19 @@
               </td>
               <td class="asset-versions-manager__summary-cell">
                 {{ truncate(ver.summary) }}
+                @if (ver.review_comments_count) {
+                  <span
+                    class="asset-versions-manager__comments"
+                    nz-tooltip
+                    [nzTooltipTitle]="'ADMIN.CONTENT_CHANGES.COMMENTS_HINT' | translate"
+                  >
+                    <ng-icon name="lucideMessageSquareText" aria-hidden="true" />
+                    {{
+                      'ADMIN.CONTENT_CHANGES.COMMENTS_COUNT'
+                        | translate: { count: ver.review_comments_count }
+                    }}
+                  </span>
+                }
                 @if (ver.change_counts; as counts) {
                   <span class="asset-versions-manager__counts">
                     @if (counts.added) {

@@ -765,6 +765,8 @@
   },
   "ADMIN": {
     "CONTENT_CHANGES": {
+      "COMMENTS_COUNT": "Comments: {{count}}",
+      "COMMENTS_HINT": "Reviewer comments — open Changes to read them",
       "BUTTON": "Changes",
       "PANEL_TITLE": "Changes in {{name}}",
       "NONE": "No changes.",

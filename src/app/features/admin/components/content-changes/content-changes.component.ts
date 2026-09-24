@@ -1,4 +1,6 @@
+import { DatePipe } from '@angular/common';
 import { Component, computed, input, linkedSignal } from '@angular/core';
+import { NgIcon } from '@ng-icons/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 
@@ -20,7 +22,7 @@ const PAGE_SIZE = 50;
 @Component({
   selector: 'app-content-changes',
   standalone: true,
-  imports: [TranslateModule, NzButtonModule],
+  imports: [DatePipe, NgIcon, TranslateModule, NzButtonModule],
   templateUrl: './content-changes.component.html',
   styleUrl: './content-changes.component.less',
 })

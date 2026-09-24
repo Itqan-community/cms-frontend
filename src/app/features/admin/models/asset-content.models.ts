@@ -69,6 +69,11 @@ export interface ContentChange {
   change_type: 'added' | 'modified' | 'removed';
   old_text: string;
   new_text: string;
+  /** A reviewer's outcome (committed versions only; absent on pending diffs). */
+  review_state?: 'unreviewed' | 'approved' | 'commented';
+  review_comment?: string;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
 }
 
 export type { AssetVersionParentKind };
