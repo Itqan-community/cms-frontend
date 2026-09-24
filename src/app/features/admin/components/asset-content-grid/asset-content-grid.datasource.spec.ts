@@ -175,4 +175,33 @@ describe('AssetContentGridComponent word datasource', () => {
     expect(block.request.params.get('page_size')).toBe('100');
     block.flush({ results: [], count: 77431 });
   });
+
+  it('reports the total unit count for a word asset in the page title', () => {
+    const fixture = TestBed.createComponent(AssetContentGridComponent);
+    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('slug', 'a-counted-tafsir');
+    fixture.detectChanges();
+    flushDraft(httpMock, 'a-counted-tafsir', 4);
+
+    httpMock
+      .expectOne((r) => r.url.includes('entries/'))
+      .flush({
+        results: [
+          {
+            unit_type: 'word',
+            unit_id: 1,
+            label: '1:1:1',
+            reference_text: 'بِسْمِ',
+            sura: 1,
+            aya: 1,
+            text: '',
+            order: 1,
+          },
+        ],
+        count: 77432,
+      });
+
+    expect(fixture.componentInstance.entriesTotal()).toBe(77432);
+    fixture.destroy();
+  });
 });

@@ -592,6 +592,7 @@ export class AssetContentGridComponent implements OnInit {
           this.derivedTemplate.set(merged[0]?.unit_type ?? null);
           if (merged[0]?.unit_type === 'word') {
             this.rows.set([]);
+            this.entriesTotal.set(response.count);
             this.loading.set(false);
             return;
           }
