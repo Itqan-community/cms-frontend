@@ -914,7 +914,7 @@
         "UNREVIEW": "Unreview"
       },
       "COLUMN": {
-        "AYAH": "Ayah",
+        "UNIT": "Reference",
         "TYPE": "Type",
         "CHANGE": "Change",
         "COMMIT": "Commit",
