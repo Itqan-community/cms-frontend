@@ -36,6 +36,10 @@
               <ng-icon [name]="getCategoryIcon(asset()!.category)" />
               <span>{{ 'CATEGORIES.' + asset()!.category | translate }}</span>
             </nz-tag>
+            <app-asset-template-badge
+              [template]="asset()!.template"
+              [layoutName]="asset()!.mushaf_layout?.name ?? null"
+            />
             @if (asset()!.is_open_access) {
               <nz-tag nzColor="green">{{ 'GALLERY.OPEN_ACCESS_BADGE' | translate }}</nz-tag>
             }

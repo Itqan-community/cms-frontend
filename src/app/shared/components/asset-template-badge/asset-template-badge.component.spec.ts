@@ -55,4 +55,10 @@ describe('AssetTemplateBadgeComponent', () => {
     expect(fixture.nativeElement.textContent.trim()).toBe('');
     expect(fixture.nativeElement.querySelector('nz-tag')).toBeNull();
   });
+
+  it('marks the label with a layers icon so it reads as the content template', () => {
+    const fixture = componentFor('surah');
+
+    expect(fixture.nativeElement.querySelector('ng-icon[name="lucideLayers"]')).not.toBeNull();
+  });
 });

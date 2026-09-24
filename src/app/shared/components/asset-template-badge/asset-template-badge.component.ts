@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { NgIcon } from '@ng-icons/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 
@@ -14,7 +15,7 @@ import type { AssetTemplate } from '../../../features/admin/models/asset-content
 @Component({
   selector: 'app-asset-template-badge',
   standalone: true,
-  imports: [NzTagModule, TranslateModule],
+  imports: [NgIcon, NzTagModule, TranslateModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './asset-template-badge.component.html',
   styleUrls: ['./asset-template-badge.component.less'],
