@@ -20,9 +20,9 @@ describe('AssetReviewGridComponent', () => {
 
   const mockChange: ReviewChange = {
     id: 1,
-    sura: 1,
-    aya: 1,
-    surah_name: 'الفاتحة',
+    unit_type: 'ayah',
+    unit_id: 1,
+    label: '1:1',
     change_type: 'modified',
     old_text: 'old text',
     new_text: 'new text',
@@ -249,5 +249,20 @@ describe('AssetReviewGridComponent', () => {
 
     expect(component.changes().map((c) => c.id)).toEqual([2]);
     expect(component.loading()).toBeFalse();
+  });
+
+  it('should label each row by its template unit, not an ayah reference', () => {
+    const wordChange: ReviewChange = {
+      ...mockChange,
+      unit_type: 'word',
+      unit_id: 4021,
+      label: '2:255:4',
+    };
+    reviewServiceSpy.listChanges.and.returnValue(of({ count: 1, results: [wordChange] }));
+
+    fixture.detectChanges();
+
+    const firstCell: HTMLElement = fixture.nativeElement.querySelector('tbody tr td');
+    expect(firstCell.textContent?.trim()).toBe('2:255:4');
   });
 });
