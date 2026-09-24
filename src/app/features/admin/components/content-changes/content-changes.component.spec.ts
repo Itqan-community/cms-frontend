@@ -60,6 +60,31 @@ describe('ContentChangesComponent', () => {
     expect(modified.querySelector('.content-changes__word--added')?.textContent).toBe('Allah');
   });
 
+  it('folds long unchanged text around an edit and shows it all on request', () => {
+    const words = (from: number, to: number) =>
+      Array.from({ length: to - from }, (_, i) => `w${from + i}`).join(' ');
+    const fixture = render([
+      change(
+        1,
+        'modified',
+        `${words(0, 40)} God ${words(40, 80)}`,
+        `${words(0, 40)} Allah ${words(40, 80)}`
+      ),
+    ]);
+    const el: HTMLElement = fixture.nativeElement;
+    const after = () => el.querySelector('.content-changes__text--after')!;
+
+    expect(after().querySelectorAll('.content-changes__gap').length).toBe(2);
+    expect(after().textContent).not.toContain('w0 ');
+    expect(after().querySelector('.content-changes__word--added')?.textContent).toBe('Allah');
+
+    el.querySelector<HTMLButtonElement>('.content-changes__toggle')!.click();
+    fixture.detectChanges();
+
+    expect(after().querySelector('.content-changes__gap')).toBeNull();
+    expect(after().textContent).toContain('w0 ');
+  });
+
   it('filters the list to one kind of change', () => {
     const fixture = render([change(1, 'added', '', 'new'), change(2, 'removed', 'gone', '')]);
 

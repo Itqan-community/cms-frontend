@@ -778,7 +778,9 @@
       "BEFORE": "قبل",
       "AFTER": "بعد",
       "EMPTY_TEXT": "(فارغ)",
-      "SHOW_MORE": "عرض {{count}} أخرى"
+      "SHOW_MORE": "عرض {{count}} أخرى",
+      "SHOW_FULL_TEXT": "عرض النص كاملًا",
+      "SHOW_CHANGES_ONLY": "عرض التغييرات فقط"
     },
     "HOME": {
       "LABEL": "الرئيسية",

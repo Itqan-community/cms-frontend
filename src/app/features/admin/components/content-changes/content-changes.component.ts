@@ -17,7 +17,7 @@ const PAGE_SIZE = 50;
  * Readable list of content changes for non-technical reviewers: counts per
  * kind (which double as filters), then one card per changed unit showing the
  * added text, the removed text, or a before/after comparison with the exact
- * words that changed highlighted.
+ * words that changed highlighted and long unchanged stretches folded away.
  */
 @Component({
   selector: 'app-content-changes',
@@ -71,6 +71,12 @@ export class ContentChangesComponent {
       }))
   );
 
+  /** Edits shown in full; the rest fold long unchanged stretches into "…". */
+  readonly expanded = linkedSignal<ContentChange[], ReadonlySet<number>>({
+    source: this.changes,
+    computation: () => new Set(),
+  });
+
   readonly remaining = computed(() => this.filtered().length - this.visible().length);
 
   countFor(key: ChangeFilter): number {
@@ -83,6 +89,14 @@ export class ContentChangesComponent {
 
   setFilter(key: ChangeFilter): void {
     this.filter.set(key);
+  }
+
+  toggleExpanded(unitId: number): void {
+    this.expanded.update((ids) => {
+      const next = new Set(ids);
+      if (!next.delete(unitId)) next.add(unitId);
+      return next;
+    });
   }
 
   showMore(): void {
