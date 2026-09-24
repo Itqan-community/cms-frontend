@@ -778,7 +778,9 @@
       "BEFORE": "Before",
       "AFTER": "After",
       "EMPTY_TEXT": "(empty)",
-      "SHOW_MORE": "Show {{count}} more"
+      "SHOW_MORE": "Show {{count}} more",
+      "SHOW_FULL_TEXT": "Show full text",
+      "SHOW_CHANGES_ONLY": "Show changes only"
     },
     "PREVIEW": {
       "LOADING": "Loading preview…",

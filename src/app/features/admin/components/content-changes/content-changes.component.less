@@ -130,6 +130,10 @@
     }
   }
 
+  &__toggle {
+    margin-inline-start: auto;
+  }
+
   &__label {
     color: var(--admin-text-700, #374151);
     font-weight: 600;
@@ -178,6 +182,24 @@
       color: var(--admin-text-500, #6b7280);
       text-decoration: line-through;
     }
+  }
+
+  // Unchanged words are muted so the highlighted changes stand out.
+  &__word--same {
+    color: var(--admin-text-500, #6b7280);
+  }
+
+  // A folded stretch of unchanged text.
+  &__gap {
+    display: inline-block;
+    margin-inline: 4px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--admin-border-200, #e5e7eb);
+    color: var(--admin-text-500, #6b7280);
+    font-size: 12px;
+    line-height: 18px;
+    vertical-align: middle;
   }
 
   &__word--removed {

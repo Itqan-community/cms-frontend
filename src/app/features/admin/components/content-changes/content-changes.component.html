@@ -30,6 +30,24 @@
               typeLabel(item.change.change_type) | translate
             }}</span>
             <span class="content-changes__label" dir="auto">{{ item.change.label }}</span>
+            @if (item.words?.folded) {
+              <button
+                nz-button
+                nzType="link"
+                nzSize="small"
+                type="button"
+                class="content-changes__toggle"
+                [attr.aria-expanded]="expanded().has(item.change.unit_id)"
+                (click)="toggleExpanded(item.change.unit_id)"
+              >
+                {{
+                  (expanded().has(item.change.unit_id)
+                    ? 'ADMIN.CONTENT_CHANGES.SHOW_CHANGES_ONLY'
+                    : 'ADMIN.CONTENT_CHANGES.SHOW_FULL_TEXT'
+                  ) | translate
+                }}
+              </button>
+            }
           </div>
 
           @switch (item.change.change_type) {
@@ -67,10 +85,17 @@
                         'ADMIN.CONTENT_CHANGES.EMPTY_TEXT' | translate
                       }}</span>
                     } @else if (item.words; as words) {
-                      @for (seg of words.before; track $index) {
-                        <span [class.content-changes__word--removed]="seg.kind === 'removed'">{{
-                          seg.text
-                        }}</span>
+                      @for (
+                        seg of (expanded().has(item.change.unit_id)
+                          ? null
+                          : words.folded?.before) ?? words.before;
+                        track $index
+                      ) {
+                        @if (seg.kind === 'gap') {
+                          <span class="content-changes__gap">…</span>
+                        } @else {
+                          <span class="content-changes__word--{{ seg.kind }}">{{ seg.text }}</span>
+                        }
                       }
                     } @else {
                       {{ item.change.old_text }}
@@ -87,10 +112,16 @@
                         'ADMIN.CONTENT_CHANGES.EMPTY_TEXT' | translate
                       }}</span>
                     } @else if (item.words; as words) {
-                      @for (seg of words.after; track $index) {
-                        <span [class.content-changes__word--added]="seg.kind === 'added'">{{
-                          seg.text
-                        }}</span>
+                      @for (
+                        seg of (expanded().has(item.change.unit_id) ? null : words.folded?.after) ??
+                          words.after;
+                        track $index
+                      ) {
+                        @if (seg.kind === 'gap') {
+                          <span class="content-changes__gap">…</span>
+                        } @else {
+                          <span class="content-changes__word--{{ seg.kind }}">{{ seg.text }}</span>
+                        }
                       }
                     } @else {
                       {{ item.change.new_text }}
