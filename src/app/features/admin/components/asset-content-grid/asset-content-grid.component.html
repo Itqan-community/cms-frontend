@@ -253,7 +253,7 @@
             {{ 'ADMIN.CONTENT_EDITOR.COMMIT.REVIEW' | translate }}
           </p>
           <ul class="content-grid__commit-changes">
-            @for (change of pendingChanges(); track change.ayah_id) {
+            @for (change of pendingChanges(); track change.unit_id) {
               <li>
                 <span
                   [class.content-grid__diff-added]="change.change_type === 'added'"
@@ -267,7 +267,7 @@
                         ? '−'
                         : '~'
                   }}
-                  {{ change.sura }}:{{ change.aya }}
+                  {{ change.label }}
                 </span>
               </li>
             }

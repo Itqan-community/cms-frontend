@@ -363,7 +363,7 @@
                     </span>
                   } @else {
                     <ul class="asset-versions-manager__diff-list">
-                      @for (change of diff(); track change.ayah_id) {
+                      @for (change of diff(); track change.unit_id) {
                         <li class="asset-versions-manager__diff-item">
                           <span
                             class="asset-versions-manager__diff-ref"
@@ -384,7 +384,7 @@
                                   ? '−'
                                   : '~'
                             }}
-                            {{ change.sura }}:{{ change.aya }}
+                            {{ change.label }}
                           </span>
                           @if (
                             change.change_type !== 'added' &&
