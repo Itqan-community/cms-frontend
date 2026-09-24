@@ -1868,6 +1868,7 @@
       },
       "ASSIGNED_LANGUAGES": {
         "TITLE": "Assigned languages — {{name}}",
+        "SCOPE": "Applies to tafsirs and translations only. Recitations, mushafs, fonts and other assets are not limited by language.",
         "HINT": "Select the languages this member works in. They can only edit and review content in the languages assigned here.",
         "PLACEHOLDER": "Select languages",
         "SUBMIT": "Save",

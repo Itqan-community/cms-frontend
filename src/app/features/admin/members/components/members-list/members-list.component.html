@@ -275,6 +275,12 @@
     (nzOnOk)="submitLanguages()"
   >
     <ng-container *nzModalContent>
+      <nz-alert
+        nzType="info"
+        nzShowIcon
+        class="members-list__lang-scope"
+        [nzMessage]="'ADMIN.MEMBERS.ASSIGNED_LANGUAGES.SCOPE' | translate"
+      />
       <p class="members-list__lang-hint">
         {{ 'ADMIN.MEMBERS.ASSIGNED_LANGUAGES.HINT' | translate }}
       </p>
