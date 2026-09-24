@@ -131,6 +131,14 @@ export class AssetContentGridComponent implements OnInit {
     this.effectiveTemplate() === 'word' ? 'infinite' : 'clientSide'
   );
 
+  /**
+   * `rowModelType` is an @initial AG Grid option — changing it after the grid
+   * exists is ignored — so the grid is only created once its row model is
+   * known: when the template is (bound or derived from the first page), or
+   * when loading ended without one (no rows / load error).
+   */
+  readonly canCreateGrid = computed(() => this.effectiveTemplate() !== null || !this.loading());
+
   /** Rows per infinite-scroll block; bind the same value to `cacheBlockSize`. */
   readonly wordCacheBlockSize = WORD_CACHE_BLOCK_SIZE;
 

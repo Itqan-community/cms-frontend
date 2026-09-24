@@ -131,25 +131,27 @@
     </div>
   </div>
 
-  <nz-spin [nzSpinning]="loading()" (paste)="onPaste($event)">
-    <ag-grid-angular
-      class="content-grid__table"
-      [theme]="theme"
-      [rowModelType]="rowModelType()"
-      [rowData]="rowModelType() === 'clientSide' ? rows() : undefined"
-      [datasource]="rowModelType() === 'infinite' ? wordDatasource() : undefined"
-      [cacheBlockSize]="rowModelType() === 'infinite' ? wordCacheBlockSize : undefined"
-      [columnDefs]="columnDefs()"
-      [defaultColDef]="defaultColDef"
-      [enableRtl]="rtl()"
-      [stopEditingWhenCellsLoseFocus]="true"
-      [rowSelection]="rowSelection"
-      [undoRedoCellEditing]="true"
-      [undoRedoCellEditingLimit]="50"
-      (gridReady)="onGridReady($event)"
-      (cellValueChanged)="onCellValueChanged($event)"
-      (selectionChanged)="onSelectionChanged()"
-    ></ag-grid-angular>
+  <nz-spin class="content-grid__spin" [nzSpinning]="loading()" (paste)="onPaste($event)">
+    @if (canCreateGrid()) {
+      <ag-grid-angular
+        class="content-grid__table"
+        [theme]="theme"
+        [rowModelType]="rowModelType()"
+        [rowData]="rowModelType() === 'clientSide' ? rows() : undefined"
+        [datasource]="rowModelType() === 'infinite' ? wordDatasource() : undefined"
+        [cacheBlockSize]="rowModelType() === 'infinite' ? wordCacheBlockSize : undefined"
+        [columnDefs]="columnDefs()"
+        [defaultColDef]="defaultColDef"
+        [enableRtl]="rtl()"
+        [stopEditingWhenCellsLoseFocus]="true"
+        [rowSelection]="rowSelection"
+        [undoRedoCellEditing]="true"
+        [undoRedoCellEditingLimit]="50"
+        (gridReady)="onGridReady($event)"
+        (cellValueChanged)="onCellValueChanged($event)"
+        (selectionChanged)="onSelectionChanged()"
+      ></ag-grid-angular>
+    }
   </nz-spin>
 
   <nz-modal

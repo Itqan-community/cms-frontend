@@ -135,4 +135,44 @@ describe('AssetContentGridComponent word datasource', () => {
     expect(req.request.params.get('page_size')).toBe('100');
     expect(successCallback).toHaveBeenCalledWith([{ unit_id: 101, text: '' }], 77431);
   });
+
+  it('scrolls a word asset through the infinite datasource when the template input is unbound', async () => {
+    // Arrange — the real editor page binds no `template`, so the grid only
+    // learns it from the first page of rows. `rowModelType` is an @initial AG
+    // Grid option: the live grid must be created *after* that, or it stays
+    // client-side with no rows and never asks the datasource for a block.
+    const fixture = TestBed.createComponent(AssetContentGridComponent);
+    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('slug', 'a-word-tafsir');
+    fixture.detectChanges();
+    flushDraft(httpMock, 'a-word-tafsir', 3);
+    httpMock
+      .expectOne((r) => r.url.includes('entries/'))
+      .flush({
+        results: [
+          {
+            unit_type: 'word',
+            unit_id: 1,
+            label: '1:1:1',
+            reference_text: 'بِسْمِ',
+            sura: 1,
+            aya: 1,
+            text: '',
+            order: 1,
+          },
+        ],
+        count: 77431,
+      });
+
+    // Act
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // Assert — the live grid requested its first block from the datasource.
+    const block = httpMock.expectOne((r) => r.url.includes('entries/'));
+    expect(block.request.params.get('page')).toBe('1');
+    expect(block.request.params.get('page_size')).toBe('100');
+    block.flush({ results: [], count: 77431 });
+  });
 });
