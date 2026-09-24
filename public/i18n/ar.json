@@ -764,6 +764,18 @@
     }
   },
   "ADMIN": {
+    "CONTENT_CHANGES": {
+      "NONE": "لا توجد تغييرات.",
+      "FILTER_LABEL": "تصفية التغييرات",
+      "ALL": "الكل",
+      "ADDED": "مُضاف",
+      "MODIFIED": "مُعدَّل",
+      "REMOVED": "محذوف",
+      "BEFORE": "قبل",
+      "AFTER": "بعد",
+      "EMPTY_TEXT": "(فارغ)",
+      "SHOW_MORE": "عرض {{count}} أخرى"
+    },
     "HOME": {
       "LABEL": "الرئيسية",
       "TITLE": "نظرة عامة",
@@ -784,7 +796,7 @@
         "TITLE": "حفظ التغييرات",
         "MESSAGE_LABEL": "رسالة التغيير",
         "MESSAGE_PLACEHOLDER": "صِف ما قمت بتغييره…",
-        "REVIEW": "سيتم حفظها",
+        "REVIEW": "التغييرات التي سيتم حفظها",
         "REVIEW_LOADING": "جارٍ مراجعة التغييرات…",
         "REVIEW_ERROR": "تعذّر تحميل مراجعة التغييرات. أغلق النافذة وحاول مرة أخرى.",
         "CONFIRM": "حفظ",

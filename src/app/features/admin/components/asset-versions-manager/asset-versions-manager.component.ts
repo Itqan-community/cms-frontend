@@ -16,6 +16,7 @@ import { AdminTablePaginationComponent } from '../admin-table-pagination/admin-t
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { ContentChangesComponent } from '../content-changes/content-changes.component';
 import { UniversalAssetPreviewerComponent } from '../universal-asset-previewer/universal-asset-previewer.component';
 import { Subject, debounceTime, distinctUntilChanged, finalize, forkJoin, takeUntil } from 'rxjs';
 import type { AssetVersion, AssetVersionParentKind } from '../../models/asset-versions.models';
@@ -49,6 +50,7 @@ const DEFAULT_PAGE_SIZE = 10;
     NzTableModule,
     NzToolTipModule,
     UniversalAssetPreviewerComponent,
+    ContentChangesComponent,
   ],
   templateUrl: './asset-versions-manager.component.html',
   styleUrl: './asset-versions-manager.component.less',

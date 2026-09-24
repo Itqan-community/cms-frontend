@@ -219,6 +219,7 @@
 
   <nz-modal
     [nzVisible]="commitDialogVisible()"
+    nzWidth="820px"
     [nzTitle]="'ADMIN.CONTENT_EDITOR.COMMIT.TITLE' | translate"
     [nzOkText]="'ADMIN.CONTENT_EDITOR.COMMIT.CONFIRM' | translate"
     [nzOkLoading]="committing()"
@@ -248,32 +249,12 @@
             {{ 'ADMIN.CONTENT_EDITOR.COMMIT.REVIEW_ERROR' | translate }}
           </span>
         } @else {
-          <p class="content-grid__commit-summary">
-            <span class="content-grid__diff-added">+{{ pendingCounts().added }}</span>
-            <span class="content-grid__diff-modified">~{{ pendingCounts().modified }}</span>
-            <span class="content-grid__diff-removed">−{{ pendingCounts().removed }}</span>
+          <h4 class="content-grid__commit-summary">
             {{ 'ADMIN.CONTENT_EDITOR.COMMIT.REVIEW' | translate }}
-          </p>
-          <ul class="content-grid__commit-changes">
-            @for (change of pendingChanges(); track change.unit_id) {
-              <li>
-                <span
-                  [class.content-grid__diff-added]="change.change_type === 'added'"
-                  [class.content-grid__diff-modified]="change.change_type === 'modified'"
-                  [class.content-grid__diff-removed]="change.change_type === 'removed'"
-                >
-                  {{
-                    change.change_type === 'added'
-                      ? '+'
-                      : change.change_type === 'removed'
-                        ? '−'
-                        : '~'
-                  }}
-                  {{ change.label }}
-                </span>
-              </li>
-            }
-          </ul>
+          </h4>
+          <div class="content-grid__commit-changes">
+            <app-content-changes [changes]="pendingChanges()" />
+          </div>
         }
       </div>
     </ng-container>

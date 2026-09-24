@@ -78,22 +78,35 @@
   }
 
   &__counts {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
     margin-inline-start: 8px;
-    font-family: monospace;
+    vertical-align: middle;
+  }
+
+  &__count {
+    padding: 0 6px;
+    border-radius: 4px;
     font-size: 12px;
+    font-weight: 500;
+    line-height: 20px;
     white-space: nowrap;
-  }
 
-  &__diff-added {
-    color: #389e0d;
-  }
+    &--added {
+      color: #389e0d;
+      background: #f6ffed;
+    }
 
-  &__diff-modified {
-    color: #d46b08;
-  }
+    &--modified {
+      color: #d46b08;
+      background: #fff7e6;
+    }
 
-  &__diff-removed {
-    color: #cf1322;
+    &--removed {
+      color: #cf1322;
+      background: #fff1f0;
+    }
   }
 
   &__diff-row > td {
@@ -102,41 +115,6 @@
 
   &__diff-error {
     color: #cf1322;
-  }
-
-  &__diff-list {
-    margin: 0;
-    padding-inline-start: 0;
-    list-style: none;
-    max-height: 320px;
-    overflow-y: auto;
-  }
-
-  &__diff-item {
-    display: grid;
-    grid-template-columns: 90px 1fr;
-    gap: 4px 12px;
-    padding: 4px 0;
-    border-bottom: 1px solid #f0f0f0;
-    align-items: start;
-  }
-
-  &__diff-ref {
-    font-family: monospace;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  &__diff-old {
-    grid-column: 2;
-    color: #cf1322;
-    text-decoration: line-through;
-    opacity: 0.75;
-  }
-
-  &__diff-new {
-    grid-column: 2;
-    color: #389e0d;
   }
 
   &__modal-form {

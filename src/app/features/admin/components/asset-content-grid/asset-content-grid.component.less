@@ -115,8 +115,9 @@
   }
 
   &__commit-summary {
-    margin: 0 0 8px;
-    font-weight: 500;
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 600;
   }
 
   &__commit-error {
@@ -124,28 +125,9 @@
   }
 
   &__commit-changes {
-    max-height: 220px;
+    max-height: 55vh;
     overflow-y: auto;
-    margin: 0;
-    padding-inline-start: 0;
-    list-style: none;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 12px;
-    font-family: monospace;
-    font-size: 12px;
-  }
-
-  &__diff-added {
-    color: #389e0d;
-  }
-
-  &__diff-modified {
-    color: #d46b08;
-  }
-
-  &__diff-removed {
-    color: #cf1322;
+    padding-inline-end: 4px;
   }
 }
 
