@@ -1,0 +1,119 @@
+<div class="content-changes">
+  @if (changes().length === 0) {
+    <p class="content-changes__none">{{ 'ADMIN.CONTENT_CHANGES.NONE' | translate }}</p>
+  } @else {
+    <div
+      class="content-changes__filters"
+      role="group"
+      [attr.aria-label]="'ADMIN.CONTENT_CHANGES.FILTER_LABEL' | translate"
+    >
+      @for (opt of filters; track opt.key) {
+        <button
+          type="button"
+          class="content-changes__chip content-changes__chip--{{ opt.key }}"
+          [class.content-changes__chip--active]="filter() === opt.key"
+          [attr.aria-pressed]="filter() === opt.key"
+          [disabled]="opt.key !== 'all' && countFor(opt.key) === 0"
+          (click)="setFilter(opt.key)"
+        >
+          {{ opt.label | translate }}
+          <span class="content-changes__chip-count">{{ countFor(opt.key) }}</span>
+        </button>
+      }
+    </div>
+
+    <ul class="content-changes__list">
+      @for (item of visible(); track item.change.unit_id) {
+        <li class="content-changes__item content-changes__item--{{ item.change.change_type }}">
+          <div class="content-changes__head">
+            <span class="content-changes__badge">{{
+              typeLabel(item.change.change_type) | translate
+            }}</span>
+            <span class="content-changes__label" dir="auto">{{ item.change.label }}</span>
+          </div>
+
+          @switch (item.change.change_type) {
+            @case ('added') {
+              <p class="content-changes__text content-changes__text--added" dir="auto">
+                @if (item.change.new_text) {
+                  {{ item.change.new_text }}
+                } @else {
+                  <span class="content-changes__empty">{{
+                    'ADMIN.CONTENT_CHANGES.EMPTY_TEXT' | translate
+                  }}</span>
+                }
+              </p>
+            }
+            @case ('removed') {
+              <p class="content-changes__text content-changes__text--removed" dir="auto">
+                @if (item.change.old_text) {
+                  {{ item.change.old_text }}
+                } @else {
+                  <span class="content-changes__empty">{{
+                    'ADMIN.CONTENT_CHANGES.EMPTY_TEXT' | translate
+                  }}</span>
+                }
+              </p>
+            }
+            @default {
+              <div class="content-changes__compare">
+                <div class="content-changes__side">
+                  <span class="content-changes__side-title">{{
+                    'ADMIN.CONTENT_CHANGES.BEFORE' | translate
+                  }}</span>
+                  <p class="content-changes__text content-changes__text--before" dir="auto">
+                    @if (!item.change.old_text) {
+                      <span class="content-changes__empty">{{
+                        'ADMIN.CONTENT_CHANGES.EMPTY_TEXT' | translate
+                      }}</span>
+                    } @else if (item.words; as words) {
+                      @for (seg of words.before; track $index) {
+                        <span [class.content-changes__word--removed]="seg.kind === 'removed'">{{
+                          seg.text
+                        }}</span>
+                      }
+                    } @else {
+                      {{ item.change.old_text }}
+                    }
+                  </p>
+                </div>
+                <div class="content-changes__side">
+                  <span class="content-changes__side-title">{{
+                    'ADMIN.CONTENT_CHANGES.AFTER' | translate
+                  }}</span>
+                  <p class="content-changes__text content-changes__text--after" dir="auto">
+                    @if (!item.change.new_text) {
+                      <span class="content-changes__empty">{{
+                        'ADMIN.CONTENT_CHANGES.EMPTY_TEXT' | translate
+                      }}</span>
+                    } @else if (item.words; as words) {
+                      @for (seg of words.after; track $index) {
+                        <span [class.content-changes__word--added]="seg.kind === 'added'">{{
+                          seg.text
+                        }}</span>
+                      }
+                    } @else {
+                      {{ item.change.new_text }}
+                    }
+                  </p>
+                </div>
+              </div>
+            }
+          }
+        </li>
+      }
+    </ul>
+
+    @if (remaining() > 0) {
+      <button
+        nz-button
+        nzType="link"
+        type="button"
+        class="content-changes__more"
+        (click)="showMore()"
+      >
+        {{ 'ADMIN.CONTENT_CHANGES.SHOW_MORE' | translate: { count: remaining() } }}
+      </button>
+    }
+  }
+</div>

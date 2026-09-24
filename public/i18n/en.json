@@ -764,6 +764,18 @@
     }
   },
   "ADMIN": {
+    "CONTENT_CHANGES": {
+      "NONE": "No changes.",
+      "FILTER_LABEL": "Filter changes",
+      "ALL": "All",
+      "ADDED": "Added",
+      "MODIFIED": "Changed",
+      "REMOVED": "Removed",
+      "BEFORE": "Before",
+      "AFTER": "After",
+      "EMPTY_TEXT": "(empty)",
+      "SHOW_MORE": "Show {{count}} more"
+    },
     "PREVIEW": {
       "LOADING": "Loading preview…",
       "AUDIO_ERROR": "Unable to load this audio file.",
@@ -808,7 +820,7 @@
         "TITLE": "Commit changes",
         "MESSAGE_LABEL": "Commit message",
         "MESSAGE_PLACEHOLDER": "Describe what you changed…",
-        "REVIEW": "to be committed",
+        "REVIEW": "Changes in this commit",
         "REVIEW_LOADING": "Reviewing changes…",
         "REVIEW_ERROR": "Could not load the change review. Close this dialog and try again.",
         "CONFIRM": "Commit",

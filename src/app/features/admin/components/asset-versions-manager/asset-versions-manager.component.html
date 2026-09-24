@@ -240,11 +240,26 @@
                 {{ truncate(ver.summary) }}
                 @if (ver.change_counts; as counts) {
                   <span class="asset-versions-manager__counts">
-                    <span class="asset-versions-manager__diff-added">+{{ counts.added }}</span>
-                    <span class="asset-versions-manager__diff-modified"
-                      >~{{ counts.modified }}</span
-                    >
-                    <span class="asset-versions-manager__diff-removed">−{{ counts.removed }}</span>
+                    @if (counts.added) {
+                      <span
+                        class="asset-versions-manager__count asset-versions-manager__count--added"
+                        >{{ 'ADMIN.CONTENT_CHANGES.ADDED' | translate }} {{ counts.added }}</span
+                      >
+                    }
+                    @if (counts.modified) {
+                      <span
+                        class="asset-versions-manager__count asset-versions-manager__count--modified"
+                        >{{ 'ADMIN.CONTENT_CHANGES.MODIFIED' | translate }}
+                        {{ counts.modified }}</span
+                      >
+                    }
+                    @if (counts.removed) {
+                      <span
+                        class="asset-versions-manager__count asset-versions-manager__count--removed"
+                        >{{ 'ADMIN.CONTENT_CHANGES.REMOVED' | translate }}
+                        {{ counts.removed }}</span
+                      >
+                    }
                   </span>
                 }
               </td>
@@ -362,51 +377,7 @@
                       {{ t('DIFF_EMPTY') | translate }}
                     </span>
                   } @else {
-                    <ul class="asset-versions-manager__diff-list">
-                      @for (change of diff(); track change.unit_id) {
-                        <li class="asset-versions-manager__diff-item">
-                          <span
-                            class="asset-versions-manager__diff-ref"
-                            [class.asset-versions-manager__diff-added]="
-                              change.change_type === 'added'
-                            "
-                            [class.asset-versions-manager__diff-modified]="
-                              change.change_type === 'modified'
-                            "
-                            [class.asset-versions-manager__diff-removed]="
-                              change.change_type === 'removed'
-                            "
-                          >
-                            {{
-                              change.change_type === 'added'
-                                ? '+'
-                                : change.change_type === 'removed'
-                                  ? '−'
-                                  : '~'
-                            }}
-                            {{ change.label }}
-                          </span>
-                          @if (
-                            change.change_type !== 'added' &&
-                            change.old_text !== null &&
-                            change.old_text !== undefined
-                          ) {
-                            <span class="asset-versions-manager__diff-old">{{
-                              change.old_text
-                            }}</span>
-                          }
-                          @if (
-                            change.change_type !== 'removed' &&
-                            change.new_text !== null &&
-                            change.new_text !== undefined
-                          ) {
-                            <span class="asset-versions-manager__diff-new">{{
-                              change.new_text
-                            }}</span>
-                          }
-                        </li>
-                      }
-                    </ul>
+                    <app-content-changes [changes]="diff()" />
                   }
                 </td>
               </tr>

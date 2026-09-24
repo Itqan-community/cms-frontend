@@ -53,6 +53,7 @@ import {
   serializeCsv,
 } from '../../utils/clipboard-table.util';
 import { ISO_639_LANGUAGES, localizedLanguageName } from '../../utils/iso-639.util';
+import { ContentChangesComponent } from '../content-changes/content-changes.component';
 import { SurahFloatingFilterComponent, type SurahOption } from './surah-floating-filter.component';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -78,6 +79,7 @@ const WORD_CACHE_BLOCK_SIZE = 100;
   standalone: true,
   imports: [
     AgGridAngular,
+    ContentChangesComponent,
     TranslateModule,
     NgIcon,
     FormsModule,
@@ -209,11 +211,6 @@ export class AssetContentGridComponent implements OnInit {
   readonly pendingChanges = signal<ContentChange[]>([]);
   private activePatchesCount = 0;
   private activePatchError = false;
-  readonly pendingCounts = computed(() => {
-    const counts = { added: 0, modified: 0, removed: 0 };
-    for (const change of this.pendingChanges()) counts[change.change_type]++;
-    return counts;
-  });
   readonly selectedCount = signal(0);
   readonly entriesTotal = signal(0);
   readonly canUndo = signal(false);
