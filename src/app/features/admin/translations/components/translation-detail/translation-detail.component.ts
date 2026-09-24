@@ -55,6 +55,10 @@ export class TranslationDetailComponent implements OnInit {
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TRANSLATION)
   );
 
+  readonly canReview = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_REVIEW_CONTENT)
+  );
+
   readonly translation = signal<TranslationDetails | null>(null);
   readonly loading = signal(true);
   readonly licensesColors = LicensesColors;

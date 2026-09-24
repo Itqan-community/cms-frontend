@@ -765,29 +765,29 @@
   },
   "ADMIN": {
     "PREVIEW": {
-  "LOADING": "Loading preview…",
-  "AUDIO_ERROR": "Unable to load this audio file.",
-  "OPEN_AUDIO": "Open audio",
-  "IMAGE_ERROR": "Unable to display this image.",
-  "OPEN_IMAGE": "Open image",
-  "IMAGE_ZOOM_CONTROLS": "Image zoom controls",
-  "ZOOM_OUT": "Zoom out",
-  "RESET_ZOOM": "Reset zoom",
-  "ZOOM_IN": "Zoom in",
-  "PDF_ERROR": "Unable to display this PDF.",
-  "OPEN_PDF": "Open PDF in a new tab",
-  "FILE_ERROR": "Unable to load this file for preview.",
-  "OPEN_FILE": "Open file",
-  "NO_CSV_DATA": "No CSV data available.",
-  "TEXT_DIFF": "Text diff",
-  "VIEW_MODE": "View mode",
-  "FILE_PREVIEW": "File preview",
-  "DIFF_VIEW": "Diff",
-  "DIFF_TOO_LARGE": "The comparison cannot be displayed because this file is too large.",
-  "UNSUPPORTED": "This file type is not supported for preview.",
-  "OPEN_DOWNLOAD": "Open / Download file",
-  "AUDIO_ARIA": "Audio preview"
-},
+      "LOADING": "Loading preview…",
+      "AUDIO_ERROR": "Unable to load this audio file.",
+      "OPEN_AUDIO": "Open audio",
+      "IMAGE_ERROR": "Unable to display this image.",
+      "OPEN_IMAGE": "Open image",
+      "IMAGE_ZOOM_CONTROLS": "Image zoom controls",
+      "ZOOM_OUT": "Zoom out",
+      "RESET_ZOOM": "Reset zoom",
+      "ZOOM_IN": "Zoom in",
+      "PDF_ERROR": "Unable to display this PDF.",
+      "OPEN_PDF": "Open PDF in a new tab",
+      "FILE_ERROR": "Unable to load this file for preview.",
+      "OPEN_FILE": "Open file",
+      "NO_CSV_DATA": "No CSV data available.",
+      "TEXT_DIFF": "Text diff",
+      "VIEW_MODE": "View mode",
+      "FILE_PREVIEW": "File preview",
+      "DIFF_VIEW": "Diff",
+      "DIFF_TOO_LARGE": "The comparison cannot be displayed because this file is too large.",
+      "UNSUPPORTED": "This file type is not supported for preview.",
+      "OPEN_DOWNLOAD": "Open / Download file",
+      "AUDIO_ARIA": "Audio preview"
+    },
     "HOME": {
       "LABEL": "Home",
       "TITLE": "Overview",
@@ -810,6 +810,7 @@
         "MESSAGE_PLACEHOLDER": "Describe what you changed…",
         "REVIEW": "to be committed",
         "REVIEW_LOADING": "Reviewing changes…",
+        "REVIEW_ERROR": "Could not load the change review. Close this dialog and try again.",
         "CONFIRM": "Commit",
         "CANCEL": "Cancel"
       },
@@ -878,6 +879,61 @@
         "TAFSIR_NOT_FOUND": "Tafsir not found.",
         "CONTENT_FILE_UNPARSEABLE": "The uploaded file could not be parsed.",
         "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "Publish a version for this language before making it available."
+      }
+    },
+    "REVIEW": {
+      "TITLE": "Review changes",
+      "PAGE_TITLE": "Review changes",
+      "OPEN_BUTTON": "Review",
+      "BACK": "Back to asset",
+      "HINT": "Approve each change or leave a comment. You can only review languages assigned to you, and you cannot edit the content here.",
+      "NO_ASSIGNED_LANGUAGES": "You have no languages assigned to review for this asset.",
+      "NO_CHANGES": "No changes to show.",
+      "RETRY": "Retry",
+      "FILTER": {
+        "ALL": "All",
+        "UNREVIEWED": "Unreviewed",
+        "APPROVED": "Approved",
+        "COMMENTED": "Needs changes"
+      },
+      "STATE": {
+        "UNREVIEWED": "Unreviewed",
+        "APPROVED": "Approved",
+        "COMMENTED": "Needs changes"
+      },
+      "TYPE": {
+        "ADDED": "Added",
+        "MODIFIED": "Modified",
+        "REMOVED": "Removed"
+      },
+      "ACTION": {
+        "APPROVE": "Approve",
+        "COMMENT": "Comment",
+        "UNREVIEW": "Unreview"
+      },
+      "COLUMN": {
+        "AYAH": "Ayah",
+        "TYPE": "Type",
+        "CHANGE": "Change",
+        "COMMIT": "Commit",
+        "STATE": "Review",
+        "ACTIONS": "Actions"
+      },
+      "COMMENT_DIALOG": {
+        "TITLE": "Request changes",
+        "PLACEHOLDER": "Describe what needs to change…",
+        "CONFIRM": "Save comment",
+        "CANCEL": "Cancel"
+      },
+      "MESSAGES": {
+        "APPROVED": "Change approved.",
+        "COMMENTED": "Comment saved.",
+        "UNREVIEWED": "Marked as unreviewed."
+      },
+      "ERRORS": {
+        "REVIEW_COMMENT_REQUIRED": "A comment is required when requesting changes.",
+        "LANGUAGE_NOT_ASSIGNED": "You are not assigned to review this language.",
+        "GENERIC": "Something went wrong. Please try again."
       }
     },
     "COMMON": {
@@ -1137,6 +1193,7 @@
           "TOOLTIP_DIFF": "Show changes",
           "DIFF_LOADING": "Loading changes…",
           "DIFF_EMPTY": "No per-ayah changes recorded for this version.",
+          "DIFF_ERROR": "Could not load the changes for this version.",
           "RESTORE_CONFIRM_TITLE": "Restore this version?",
           "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
           "RESTORE_OK": "Restore",
@@ -1297,6 +1354,7 @@
           "TOOLTIP_DIFF": "Show changes",
           "DIFF_LOADING": "Loading changes…",
           "DIFF_EMPTY": "No per-ayah changes recorded for this version.",
+          "DIFF_ERROR": "Could not load the changes for this version.",
           "RESTORE_CONFIRM_TITLE": "Restore this version?",
           "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
           "RESTORE_OK": "Restore",
@@ -1729,11 +1787,13 @@
       "TOOLTIP_RESEND": "Resend invitation",
       "TOOLTIP_CANCEL": "Cancel invitation",
       "TOOLTIP_REMOVE": "Remove member",
+      "TOOLTIP_ASSIGNED_LANGUAGES": "Assign languages",
       "COLUMNS": {
         "NAME": "Name",
         "EMAIL": "Email",
         "GROUP": "Group",
         "STATUS": "Status",
+        "ASSIGNED_LANGUAGES": "Languages",
         "CREATED_AT": "Added",
         "ACTIONS": "Actions"
       },
@@ -1781,6 +1841,14 @@
         "CONFIRM_TITLE": "Resend invitation?",
         "CONFIRM_BODY": "{{name}} — the previous link will stop working immediately.",
         "CONFIRM_OK": "Resend"
+      },
+      "ASSIGNED_LANGUAGES": {
+        "TITLE": "Assigned languages — {{name}}",
+        "HINT": "Select the languages this member works in. They can only edit and review content in the languages assigned here.",
+        "PLACEHOLDER": "Select languages",
+        "SUBMIT": "Save",
+        "SAVED": "Assigned languages updated",
+        "SAVE_ERROR": "Could not update assigned languages"
       },
       "MESSAGES": {
         "INVITE_SUCCESS": "Invitation sent",

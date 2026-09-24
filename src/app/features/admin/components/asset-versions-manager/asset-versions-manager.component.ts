@@ -67,7 +67,8 @@ export class AssetVersionsManagerComponent implements OnInit {
   private readonly search$ = new Subject<string>();
   /** Emits to abort the in-flight create/update HTTP request (unsubscribe → browser abort). */
   private readonly cancelInFlightSubmit$ = new Subject<void>();
-  /** Emits to abort the in-flight versions request. */
+  /** Emits to abort the in-flight versions request, so a slower earlier response
+   *  can never overwrite the list of the language/page now selected. */
   private readonly cancelInFlightList$ = new Subject<void>();
   /** Emits to abort preview requests. */
   private readonly cancelPreview$ = new Subject<void>();
@@ -92,6 +93,9 @@ export class AssetVersionsManagerComponent implements OnInit {
   /** Expanded commit's diff panel state. */
   readonly expandedId = signal<number | null>(null);
   readonly diffLoading = signal(false);
+  /** Set when the diff request failed, so the panel says so instead of
+   *  reporting the empty diff as "no changes". */
+  readonly diffError = signal(false);
   readonly diff = signal<ContentChange[]>([]);
 
   /** Preview modal state. */
@@ -113,6 +117,8 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly selectedLanguageObj = computed(() =>
     this.languages().find((l) => l.language === this.selectedLanguage())
   );
+  /** The source language's availability follows the asset's own status, so only
+   *  translations expose a manual availability toggle here. */
   readonly canToggleAvailability = computed(
     () => this.canMutateVersions() && this.selectedLanguageObj()?.is_source === false
   );
@@ -131,10 +137,13 @@ export class AssetVersionsManagerComponent implements OnInit {
 
   /** Create/edit popup visibility. */
   readonly versionModalOpen = signal(false);
+  /** Full i18n key for modal title (set when opening). */
   readonly versionModalTitleKey = signal('');
   readonly modalMode = signal<'create' | 'edit'>('create');
   readonly editingId = signal<number | null>(null);
+  /** Language chosen for a newly uploaded version (translations/tafsirs). */
   readonly versionLanguage = signal<string | null>(null);
+  /** A language-aware upload needs a language; the list may still be loading or have failed. */
   readonly missingVersionLanguage = computed(
     () => this.modalMode() === 'create' && this.supportsLanguages() && !this.versionLanguage()
   );
@@ -144,6 +153,7 @@ export class AssetVersionsManagerComponent implements OnInit {
     summary: ['', [Validators.required]],
   });
 
+  /** Only translations and tafsirs carry per-language content/versions. */
   supportsLanguages(): boolean {
     return this.kind === 'translation' || this.kind === 'tafsir';
   }
@@ -156,7 +166,6 @@ export class AssetVersionsManagerComponent implements OnInit {
         this.page.set(1);
         this.loadList();
       });
-
     if (this.supportsLanguages()) {
       this.loadLanguages();
     } else {
@@ -164,40 +173,29 @@ export class AssetVersionsManagerComponent implements OnInit {
     }
   }
 
+  /** Load the asset's languages, restoring the last-active one (else the source),
+   *  then load its versions. */
   private loadLanguages(): void {
     this.assetContentService
-      .getLanguages(this.kind, this.slug)
+      .listLanguages(this.kind, this.slug)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (langs) => {
           this.languages.set(langs);
-          if (langs.length === 0) {
-            this.selectedLanguage.set(null);
-            this.versionLanguage.set(null);
-            this.loadList();
-            return;
-          }
-          const stored = this.lastLanguage.getLanguage(this.kind, this.slug);
-          const remembered = stored && langs.some((l) => l.language === stored) ? stored : null;
-          const defaultLang = remembered ?? langs[0].language;
-          this.selectedLanguage.set(defaultLang);
-          this.versionLanguage.set(defaultLang);
+          const source = langs.find((l) => l.is_source) ?? langs[0];
+          const remembered = this.lastLanguage.get(this.kind, this.slug);
+          const initial = langs.find((l) => l.language === remembered) ?? source;
+          this.selectedLanguage.set(initial?.language ?? null);
           this.loadList();
         },
-        error: () => {
-          this.languages.set([]);
-          this.selectedLanguage.set(null);
-          this.versionLanguage.set(null);
-          this.loadList();
-        },
+        // If languages can't be loaded, still show the (unfiltered) versions.
+        error: () => this.loadList(),
       });
   }
 
-  onLanguageChange(lang: string): void {
-    if (this.selectedLanguage() === lang) return;
-    this.selectedLanguage.set(lang);
-    this.versionLanguage.set(lang);
-    this.lastLanguage.setLanguage(this.kind, this.slug, lang);
+  onLanguageChange(language: string): void {
+    this.selectedLanguage.set(language);
+    this.lastLanguage.set(this.kind, this.slug, language);
     this.page.set(1);
     this.loadList();
   }
@@ -206,127 +204,175 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.search$.next(value);
   }
 
+  loadList(): void {
+    if (!this.slug) return;
+    this.cancelInFlightList$.next();
+    this.loading.set(true);
+    this.assetVersionsService
+      .list(this.kind, this.slug, {
+        page: this.page(),
+        page_size: this.pageSize(),
+        search: this.searchTerm() || undefined,
+        language: this.supportsLanguages() ? this.selectedLanguage() || undefined : undefined,
+      })
+      .pipe(takeUntil(this.cancelInFlightList$), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.list.set(res.results);
+          this.total.set(res.count);
+          this.loading.set(false);
+        },
+        error: () => {
+          this.loading.set(false);
+          this.message.error(this.translate.instant(`${this.i18nPrefix}.MESSAGES.LOAD_ERROR`));
+        },
+      });
+  }
+
   onPageChange(p: number): void {
-    if (p === this.page()) return;
     this.page.set(p);
     this.loadList();
   }
 
   onPageSizeChange(size: number): void {
-    if (size === this.pageSize()) return;
     this.pageSize.set(size);
     this.page.set(1);
     this.loadList();
   }
 
-  private loadList(): void {
-    this.cancelInFlightList$.next();
-    this.loading.set(true);
-    const lang = this.supportsLanguages() ? (this.selectedLanguage() ?? undefined) : undefined;
-    this.assetVersionsService
-      .list(this.kind, this.slug, {
-        page: this.page(),
-        page_size: this.pageSize(),
-        search: this.searchTerm(),
-        language: lang,
-      })
-      .pipe(
-        takeUntil(this.cancelInFlightList$),
-        takeUntilDestroyed(this.destroyRef),
-        finalize(() => this.loading.set(false))
-      )
-      .subscribe({
-        next: (res) => {
-          this.list.set(res.results);
-          this.total.set(res.count);
-        },
-        error: (err: HttpErrorResponse) => {
-          this.list.set([]);
-          this.total.set(0);
-          const name: string | undefined = err?.error?.error_name;
-          const key = name ? `ADMIN.CONTENT_EDITOR.ERRORS.${name.toUpperCase()}` : '';
-          const translated = key ? this.translate.instant(key) : '';
-          this.message.error(
-            translated && translated !== key
-              ? translated
-              : this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC')
-          );
-        },
-      });
+  canMutateVersions(): boolean {
+    switch (this.kind) {
+      case 'tafsir':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR);
+      case 'mushaf':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_MUSHAF);
+      case 'font':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_FONT);
+      case 'program':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_PROGRAM);
+      case 'translation':
+      default:
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION);
+    }
+  }
+
+  canDeleteVersions(): boolean {
+    switch (this.kind) {
+      case 'tafsir':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TAFSIR);
+      case 'mushaf':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_MUSHAF);
+      case 'font':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_FONT);
+      case 'program':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_PROGRAM);
+      case 'translation':
+      default:
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TRANSLATION);
+    }
   }
 
   openCreateModal(): void {
-    if (!this.canMutateVersions()) return;
+    if (!this.canMutateVersions()) {
+      return;
+    }
     this.modalMode.set('create');
     this.editingId.set(null);
-    this.versionModalTitleKey.set(this.t('CREATE_TITLE'));
-    this.selectedFileName.set(null);
-    this.selectedFile = null;
-
-    if (this.supportsLanguages()) {
-      const activeLang = this.selectedLanguage();
-      const validActive = activeLang && this.languages().some((l) => l.language === activeLang);
-      const fallback = validActive ? activeLang : (this.languages()[0]?.language ?? null);
-      this.versionLanguage.set(fallback);
-    } else {
-      this.versionLanguage.set(null);
-    }
-
     this.form.reset({ name: '', summary: '' });
+    this.clearFile();
+    // Default the upload to the language currently being viewed, else the source.
+    const source = this.languages().find((l) => l.is_source) ?? this.languages()[0];
+    this.versionLanguage.set(this.selectedLanguage() ?? source?.language ?? null);
+    this.versionModalTitleKey.set(`${this.i18nPrefix}.MODAL_TITLE_CREATE`);
     this.versionModalOpen.set(true);
   }
 
   openEditModal(row: AssetVersion): void {
-    if (!this.canMutateVersions()) return;
+    if (!this.canMutateVersions()) {
+      return;
+    }
     this.modalMode.set('edit');
     this.editingId.set(row.id);
-    this.versionModalTitleKey.set(this.t('EDIT_TITLE'));
-    this.selectedFileName.set(null);
-    this.selectedFile = null;
-    this.versionLanguage.set(row.language ?? null);
-    this.form.reset({ name: row.name, summary: row.summary });
+    this.form.patchValue({
+      name: row.name,
+      summary: row.summary ?? '',
+    });
+    this.clearFile();
+    this.versionModalTitleKey.set(`${this.i18nPrefix}.MODAL_TITLE_EDIT`);
     this.versionModalOpen.set(true);
   }
 
+  onVersionModalVisibleChange(visible: boolean): void {
+    this.versionModalOpen.set(visible);
+    if (!visible) {
+      this.abortInFlightSave();
+      this.resetModalFormState();
+    }
+  }
+
   closeVersionModal(): void {
-    if (this.saving()) return;
     this.abortInFlightSave();
     this.versionModalOpen.set(false);
+    this.resetModalFormState();
   }
 
-  onVersionModalVisibleChange(visible: boolean): void {
-    if (!visible) this.closeVersionModal();
+  /** Unsubscribes active save request so Angular HttpClient aborts the network call. */
+  private abortInFlightSave(): void {
+    this.cancelInFlightSubmit$.next();
   }
 
-  onFileSelected(ev: Event): void {
-    const input = ev.target as HTMLInputElement;
-    const file = input.files?.[0];
+  private resetModalFormState(): void {
+    this.editingId.set(null);
+    this.form.reset({ name: '', summary: '' });
+    this.clearFile();
+  }
+
+  onPickFile(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    input.value = '';
     if (!file) return;
     this.selectedFile = file;
     this.selectedFileName.set(file.name);
   }
 
+  clearFile(): void {
+    this.selectedFile = null;
+    this.selectedFileName.set(null);
+  }
+
   submit(): void {
-    if (!this.canMutateVersions() || this.missingVersionLanguage()) return;
-    if (this.form.invalid) {
-      Object.values(this.form.controls).forEach((c) => c.markAsTouched());
+    if (!this.canMutateVersions()) {
       return;
     }
-    if (this.modalMode() === 'create' && !this.selectedFile) {
-      this.message.error(this.translate.instant(this.t('FILE_REQUIRED_ERR')));
+    if (this.form.invalid) {
+      Object.values(this.form.controls).forEach((c) => {
+        c.markAsDirty();
+        c.updateValueAndValidity({ onlySelf: true });
+      });
+      return;
+    }
+    const id = this.editingId();
+    if (id == null && !this.selectedFile) {
+      this.message.warning(this.translate.instant(`${this.i18nPrefix}.MESSAGES.FILE_REQUIRED`));
+      return;
+    }
+    if (id == null && this.supportsLanguages() && !this.versionLanguage()) {
+      this.message.warning(this.translate.instant(`${this.i18nPrefix}.MESSAGES.LANGUAGE_REQUIRED`));
       return;
     }
 
-    const id = this.editingId();
     const payload = {
       asset_id: this.assetId,
       name: this.form.getRawValue().name,
       summary: this.form.getRawValue().summary,
       file: this.selectedFile ?? undefined,
+      // Language only applies when creating a new (uploaded) version.
       language:
         id == null && this.supportsLanguages() ? (this.versionLanguage() ?? undefined) : undefined,
     };
 
+    // Abort any previous in-flight save (e.g. double submit).
     this.abortInFlightSave();
     this.saving.set(true);
 
@@ -338,71 +384,74 @@ export class AssetVersionsManagerComponent implements OnInit {
     req$
       .pipe(
         takeUntil(this.cancelInFlightSubmit$),
-        takeUntilDestroyed(this.destroyRef),
         finalize(() => this.saving.set(false))
       )
       .subscribe({
         next: () => {
-          this.message.success(
-            this.translate.instant(
-              id == null ? this.t('MESSAGES.CREATE_SUCCESS') : this.t('MESSAGES.EDIT_SUCCESS')
-            )
-          );
-          this.closeVersionModal();
+          const msgKey =
+            id == null
+              ? `${this.i18nPrefix}.MESSAGES.CREATE_SUCCESS`
+              : `${this.i18nPrefix}.MESSAGES.UPDATE_SUCCESS`;
+          this.message.success(this.translate.instant(msgKey));
+          this.closeVersionModalWithoutCancelEmit();
+          if (id == null && this.supportsLanguages() && this.versionLanguage()) {
+            const targetLang = this.versionLanguage()!;
+            if (targetLang !== this.selectedLanguage()) {
+              this.selectedLanguage.set(targetLang);
+              this.lastLanguage.set(this.kind, this.slug, targetLang);
+              this.page.set(1);
+            }
+          }
           this.loadList();
         },
-        error: (err: HttpErrorResponse) => {
-          const name: string | undefined = err?.error?.error_name;
-          const key = name ? `ADMIN.CONTENT_EDITOR.ERRORS.${name.toUpperCase()}` : '';
-          const translated = key ? this.translate.instant(key) : '';
-          this.message.error(
-            translated && translated !== key
-              ? translated
-              : this.translate.instant(this.t('MESSAGES.SAVE_ERROR'))
-          );
+        error: (err: unknown) => {
+          if (err instanceof HttpErrorResponse && err.status === 0) return;
+          this.message.error(this.translate.instant(`${this.i18nPrefix}.MESSAGES.SAVE_ERROR`));
         },
       });
   }
 
-  private abortInFlightSave(): void {
-    this.cancelInFlightSubmit$.next();
+  /** Close modal after success without re-emitting cancel (save already finished). */
+  private closeVersionModalWithoutCancelEmit(): void {
+    this.versionModalOpen.set(false);
+    this.resetModalFormState();
   }
 
   deleteRow(row: AssetVersion): void {
-    if (!this.canDeleteVersions()) return;
+    if (!this.canDeleteVersions()) {
+      return;
+    }
+    const dir = this.translate.currentLang === 'ar' ? 'rtl' : 'ltr';
     this.modal.confirm({
-      nzTitle: this.translate.instant(this.t('DELETE_CONFIRM_TITLE')),
-      nzContent: this.translate.instant(this.t('DELETE_CONFIRM_BODY'), { name: row.name }),
-      nzOkText: this.translate.instant(this.t('DELETE_OK')),
+      nzTitle: this.translate.instant(`${this.i18nPrefix}.DELETE_CONFIRM_TITLE`),
+      nzContent: this.translate.instant(`${this.i18nPrefix}.DELETE_CONFIRM_BODY`, {
+        name: row.name,
+      }),
+      nzOkText: this.translate.instant(`${this.i18nPrefix}.DELETE_OK`),
+      nzOkType: 'primary',
       nzOkDanger: true,
       nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
-      nzDirection: this.modalDirection(),
+      nzDirection: dir,
       nzOnOk: () =>
         new Promise<void>((resolve, reject) => {
-          this.assetVersionsService
-            .delete(this.kind, this.slug, row.id)
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-              next: () => {
-                this.message.success(this.translate.instant(this.t('MESSAGES.DELETE_SUCCESS')));
-                if (this.list().length === 1 && this.page() > 1) {
-                  this.page.update((p) => p - 1);
-                }
-                this.loadList();
-                resolve();
-              },
-              error: (err: HttpErrorResponse) => {
-                const name: string | undefined = err?.error?.error_name;
-                const key = name ? `ADMIN.CONTENT_EDITOR.ERRORS.${name.toUpperCase()}` : '';
-                const translated = key ? this.translate.instant(key) : '';
-                this.message.error(
-                  translated && translated !== key
-                    ? translated
-                    : this.translate.instant(this.t('MESSAGES.DELETE_ERROR'))
-                );
-                reject();
-              },
-            });
+          this.assetVersionsService.delete(this.kind, this.slug, row.id).subscribe({
+            next: () => {
+              this.message.success(
+                this.translate.instant(`${this.i18nPrefix}.MESSAGES.DELETE_SUCCESS`)
+              );
+              if (this.versionModalOpen() && this.editingId() === row.id) {
+                this.closeVersionModal();
+              }
+              this.loadList();
+              resolve();
+            },
+            error: () => {
+              this.message.error(
+                this.translate.instant(`${this.i18nPrefix}.MESSAGES.DELETE_ERROR`)
+              );
+              reject();
+            },
+          });
         }),
     });
   }
@@ -501,7 +550,7 @@ export class AssetVersionsManagerComponent implements OnInit {
     );
   }
 
-  /** Toggle a commit's diff panel. */
+  /** Toggle a commit's diff panel, lazy-loading the diff on first expand. */
   toggleDiff(row: AssetVersion): void {
     if (this.expandedId() === row.id) {
       this.expandedId.set(null);
@@ -509,6 +558,7 @@ export class AssetVersionsManagerComponent implements OnInit {
     }
     this.expandedId.set(row.id);
     this.diff.set([]);
+    this.diffError.set(false);
     this.diffLoading.set(true);
     this.loadAllVersionDiffs(row.id, 1, []);
   }
@@ -531,14 +581,18 @@ export class AssetVersionsManagerComponent implements OnInit {
         error: () => {
           if (this.expandedId() === versionId) {
             this.diffLoading.set(false);
+            this.diffError.set(true);
           }
         },
       });
   }
 
+  /** Mark the selected translation available (READY) or pending (DRAFT) to consumers. */
   toggleSelectedLanguageAvailability(): void {
     const lang = this.selectedLanguageObj();
-    if (!lang || !this.canToggleAvailability() || this.togglingAvailability()) return;
+    if (!lang || !this.canToggleAvailability() || this.togglingAvailability()) {
+      return;
+    }
     const next = !lang.is_available;
     this.togglingAvailability.set(true);
     this.assetContentService
@@ -572,8 +626,11 @@ export class AssetVersionsManagerComponent implements OnInit {
       });
   }
 
+  /** Restore a version as a new published version, making it the active one. */
   restoreVersion(row: AssetVersion): void {
-    if (!this.canMutateVersions() || this.restoringId() !== null) return;
+    if (!this.canMutateVersions() || this.restoringId() !== null) {
+      return;
+    }
     this.modal.confirm({
       nzTitle: this.translate.instant(this.t('RESTORE_CONFIRM_TITLE')),
       nzContent: this.translate.instant(this.t('RESTORE_CONFIRM_BODY'), { name: row.name }),
@@ -604,8 +661,22 @@ export class AssetVersionsManagerComponent implements OnInit {
     });
   }
 
+  /** Download a version's content (CSV of its per-ayah entries, or its file). */
   downloadVersion(row: AssetVersion): void {
-    if (this.downloadingId() !== null) return;
+    if (this.downloadingId() !== null) {
+      return;
+    }
+    // For assets that don't support per-ayah content (mushafs, fonts, programs),
+    // download directly from file_url without attempting translation export.
+    if (!this.supportsLanguages()) {
+      if (row.file_url) {
+        this.triggerDownload(row.file_url, this.exportBaseName(row));
+      } else {
+        this.message.error(this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC'));
+      }
+      return;
+    }
+
     this.downloadingId.set(row.id);
     this.assetContentService
       .exportVersion(this.kind, this.slug, row.id)
@@ -629,6 +700,7 @@ export class AssetVersionsManagerComponent implements OnInit {
       });
   }
 
+  /** Exported file base name: {english name}-{language}-{version}, sanitized. */
   private exportBaseName(row: AssetVersion): string {
     const parts = [this.assetNameEn?.trim() || this.slug, row.language, row.name].filter(Boolean);
     return parts.join('-').replace(/\s+/g, '_');
@@ -642,32 +714,25 @@ export class AssetVersionsManagerComponent implements OnInit {
     anchor.click();
   }
 
-  truncate(summary: string): string {
-    if (!summary) return '—';
-    return summary.length > 90 ? `${summary.slice(0, 90)}...` : summary;
+  formatBytes(n: number | null | undefined): string {
+    if (n == null || n <= 0) return this.translate.instant('COMMON.EM_DASH');
+    if (n < 1024) return `${n} B`;
+    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+    return `${(n / (1024 * 1024)).toFixed(2)} MB`;
   }
 
-  formatBytes(bytes: number | null | undefined): string {
-    if (bytes == null || isNaN(bytes) || bytes === 0) return '—';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(1))} ${sizes[i]}`;
+  truncate(text: string | null | undefined, max = 80): string {
+    if (text == null || text === '') return this.translate.instant('COMMON.EM_DASH');
+    const t = text.trim();
+    if (t.length <= max) return t;
+    return `${t.slice(0, max)}…`;
   }
 
-  t(subKey: string): string {
-    return `${this.i18nPrefix}.${subKey}`;
+  t(key: string): string {
+    return `${this.i18nPrefix}.${key}`;
   }
 
   modalDirection(): 'rtl' | 'ltr' {
     return this.translate.currentLang === 'ar' ? 'rtl' : 'ltr';
-  }
-
-  canMutateVersions(): boolean {
-    return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.CATALOG_MUTATE);
-  }
-
-  canDeleteVersions(): boolean {
-    return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.CATALOG_DELETE);
   }
 }

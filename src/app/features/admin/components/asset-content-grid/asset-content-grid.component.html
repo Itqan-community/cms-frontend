@@ -22,15 +22,17 @@
           ></nz-option>
         }
       </nz-select>
-      <button
-        nz-button
-        nzType="default"
-        (click)="openAddLanguage()"
-        [disabled]="loading() || saving() || publishing() || savingDraft()"
-      >
-        <ng-icon name="lucidePlus" />
-        {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD' | translate }}
-      </button>
+      @if (canAddLanguage()) {
+        <button
+          nz-button
+          nzType="default"
+          (click)="openAddLanguage()"
+          [disabled]="loading() || saving() || publishing() || savingDraft()"
+        >
+          <ng-icon name="lucidePlus" />
+          {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD' | translate }}
+        </button>
+      }
     </div>
 
     <div class="content-grid__status">
@@ -220,6 +222,10 @@
       <div class="content-grid__commit-review">
         @if (pendingLoading()) {
           <span>{{ 'ADMIN.CONTENT_EDITOR.COMMIT.REVIEW_LOADING' | translate }}</span>
+        } @else if (pendingError()) {
+          <span class="content-grid__commit-error">
+            {{ 'ADMIN.CONTENT_EDITOR.COMMIT.REVIEW_ERROR' | translate }}
+          </span>
         } @else {
           <p class="content-grid__commit-summary">
             <span class="content-grid__diff-added">+{{ pendingCounts().added }}</span>
