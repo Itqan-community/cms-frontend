@@ -514,16 +514,17 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
     const language = this.selectedLanguage();
     const params = language ? new HttpParams().set('language', language) : undefined;
     this.http
-      .get<{ download_url: string }>(`${environment.API_BASE_URL}/assets/${assetId}/download/`, {
-        params,
-      })
+      .get<{ download_url: string; filename?: string }>(
+        `${environment.API_BASE_URL}/assets/${assetId}/download/`,
+        { params }
+      )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           this.isDownloading.set(false);
           const downloadUrl = response.download_url;
-          // Extract filename from URL path
-          const filename = this.extractFilenameFromPath(downloadUrl);
+          // The backend names the file {name}-{language}-{version}; fall back to the URL path.
+          const filename = response.filename || this.extractFilenameFromPath(downloadUrl);
           // Step 2: Download the actual file
           this.downloadFileFromUrl(downloadUrl, filename);
         },
