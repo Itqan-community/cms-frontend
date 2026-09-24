@@ -1,3 +1,4 @@
+import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -34,11 +35,17 @@ function page(language: string): AssetVersionsListResponse {
 }
 
 describe('AssetVersionsManagerComponent', () => {
+  /** Permissions the user holds; `null` grants everything. */
+  let granted: Set<string> | null;
   let fixture: ComponentFixture<AssetVersionsManagerComponent>;
   let component: AssetVersionsManagerComponent;
   let versionsService: jasmine.SpyObj<AssetVersionsService>;
   let contentService: jasmine.SpyObj<AssetContentService>;
   let message: jasmine.SpyObj<NzMessageService>;
+
+  beforeEach(() => {
+    granted = null;
+  });
 
   beforeEach(async () => {
     versionsService = jasmine.createSpyObj<AssetVersionsService>('AssetVersionsService', [
@@ -69,7 +76,10 @@ describe('AssetVersionsManagerComponent', () => {
         { provide: AssetVersionsService, useValue: versionsService },
         { provide: AssetContentService, useValue: contentService },
         { provide: NzMessageService, useValue: message },
-        { provide: AdminAuthService, useValue: { hasPermission: () => true } },
+        {
+          provide: AdminAuthService,
+          useValue: { hasPermission: (perm: string) => granted === null || granted.has(perm) },
+        },
       ],
     })
       // The behaviour under test is in the class; an empty template keeps the
@@ -158,6 +168,35 @@ describe('AssetVersionsManagerComponent', () => {
 
       expect(component.list()[0].language).toBe('fr');
       expect(component.loading()).toBeFalse();
+    });
+  });
+
+  describe('content permission', () => {
+    function withPermissions(...perms: string[]): void {
+      granted = new Set(perms);
+      fixture.detectChanges();
+    }
+
+    it('keeps uploading and restoring for users who can edit the content', () => {
+      withPermissions(
+        PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION,
+        PORTAL_PERMISSIONS.PORTAL_EDIT_TRANSLATION_CONTENT
+      );
+
+      component.openCreateModal();
+
+      expect(component.canEditContent()).toBeTrue();
+      expect(component.versionModalOpen()).toBeTrue();
+    });
+
+    it('lets metadata-only editors rename versions but not upload, replace files or restore', () => {
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION);
+
+      component.openCreateModal();
+
+      expect(component.canEditContent()).toBeFalse();
+      expect(component.canMutateVersions()).toBeTrue();
+      expect(component.versionModalOpen()).toBeFalse();
     });
   });
 });
