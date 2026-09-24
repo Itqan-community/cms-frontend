@@ -177,4 +177,27 @@ describe('TafsirFormComponent template controls', () => {
     expect(body.template).toBe('page');
     expect(body.mushaf_layout_id).toBe(1);
   });
+
+  it('creates without long descriptions, which are optional', () => {
+    configure({});
+    tafsirsServiceMock.create.and.returnValue(of(detail));
+    const fixture = TestBed.createComponent(TafsirFormComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.form.patchValue({
+      name_ar: 'اسم',
+      description_ar: 'وصف',
+      description_en: 'Description',
+      license: Licenses.CC0,
+      language: 'ar',
+      publisher_id: 1,
+      template: 'ayah',
+    });
+
+    fixture.componentInstance.onSubmit();
+
+    expect(fixture.componentInstance.form.controls.long_description_ar.valid).toBeTrue();
+    expect(fixture.componentInstance.form.controls.long_description_en.valid).toBeTrue();
+    expect(tafsirsServiceMock.create).toHaveBeenCalled();
+  });
 });
