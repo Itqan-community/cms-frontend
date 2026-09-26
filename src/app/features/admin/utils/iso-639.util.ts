@@ -200,16 +200,32 @@ const ISO_639_1_CODES: readonly string[] = [
   'zu',
 ];
 
+const displayNamesCache = new Map<string, Intl.DisplayNames | null>();
+
 function displayNames(
   locale: string,
   fallback: 'code' | 'none' = 'code'
 ): Intl.DisplayNames | null {
+  const cacheKey = `${locale}:${fallback}`;
+  if (displayNamesCache.has(cacheKey)) {
+    return displayNamesCache.get(cacheKey) ?? null;
+  }
   try {
-    return new Intl.DisplayNames([locale], { type: 'language', fallback });
+    const instance = new Intl.DisplayNames([locale], { type: 'language', fallback });
+    displayNamesCache.set(cacheKey, instance);
+    return instance;
   } catch {
+    displayNamesCache.set(cacheKey, null);
     return null;
   }
 }
+
+/** Codes outside ISO 639-1 that the picker offered before the list was derived
+ *  from `Intl.DisplayNames`. Kept so existing options never disappear; the
+ *  curated names are the fallback when the platform has no name for the code. */
+const SUPPLEMENTAL_LANGUAGES: readonly IsoLanguage[] = [
+  { code: 'fil', name: 'Filipino', native: 'Filipino' },
+];
 
 function buildLanguages(): IsoLanguage[] {
   // `fallback: 'none'` returns undefined when the platform has no name for a
@@ -221,6 +237,12 @@ function buildLanguages(): IsoLanguage[] {
     if (!name) continue; // no real name → skip
     const native = displayNames(code)?.of(code) ?? name;
     languages.push({ code, name, native: native || name });
+  }
+  for (const fallback of SUPPLEMENTAL_LANGUAGES) {
+    if (languages.some((l) => l.code === fallback.code)) continue;
+    const name = (en ? en.of(fallback.code) : null) || fallback.name;
+    const native = displayNames(fallback.code)?.of(fallback.code) || fallback.native;
+    languages.push({ code: fallback.code, name, native });
   }
   return languages.sort((a, b) => a.name.localeCompare(b.name));
 }
@@ -241,11 +263,14 @@ export function languageLabel(code: string): string {
  */
 export function localizedLanguageName(code: string, uiLang: string): string {
   if (!code) return code;
-  try {
-    const name = new Intl.DisplayNames([uiLang], { type: 'language' }).of(code);
-    if (name && name.toLowerCase() !== code.toLowerCase()) return name;
-  } catch {
-    // Intl.DisplayNames unavailable or bad code — fall through to the curated list.
+  const dn = displayNames(uiLang, 'code');
+  if (dn) {
+    try {
+      const name = dn.of(code);
+      if (name && name.toLowerCase() !== code.toLowerCase()) return name;
+    } catch {
+      // Intl.DisplayNames unhandled or bad code — fall through to the curated list.
+    }
   }
   const found = ISO_639_LANGUAGES.find((l) => l.code === code);
   return found ? found.native : code;

@@ -1,5 +1,4 @@
 <div class="asset-previewer">
-
   <div class="preview-header">
     <h3>{{ fileName() }}</h3>
   </div>
@@ -91,193 +90,96 @@
       }
     </div>
   } @else if (previewType() === 'pdf') {
-
     <div class="preview-content pdf-preview">
-
       @if (binaryLoading()) {
-
-        <div
-          class="preview-message"
-          aria-live="polite"
-        >
+        <div class="preview-message" aria-live="polite">
           <span>
             {{ 'ADMIN.PREVIEW.LOADING' | translate }}
           </span>
         </div>
-
       } @else if (binaryError()) {
-
-        <div
-          class="preview-message preview-message--error"
-        >
-
+        <div class="preview-message preview-message--error">
           <p>
             {{ 'ADMIN.PREVIEW.PDF_ERROR' | translate }}
           </p>
 
-          <a
-            [href]="fileUrl()"
-            target="_blank"
-            rel="noopener"
-          >
+          <a [href]="fileUrl()" target="_blank" rel="noopener">
             {{ 'ADMIN.PREVIEW.OPEN_PDF' | translate }}
           </a>
-
         </div>
-
       } @else {
+        <iframe [src]="safeFileUrl()" [title]="fileName()" (error)="onPdfError()"></iframe>
 
-        <iframe
-          [src]="safeFileUrl()"
-          [title]="fileName()"
-          (error)="onPdfError()"
-        ></iframe>
-
-        <a
-          class="pdf-fallback-link"
-          [href]="fileUrl()"
-          target="_blank"
-          rel="noopener"
-        >
+        <a class="pdf-fallback-link" [href]="fileUrl()" target="_blank" rel="noopener">
           {{ 'ADMIN.PREVIEW.OPEN_PDF' | translate }}
         </a>
-
       }
-
     </div>
-
   } @else if (previewType() === 'csv') {
-
     <div class="preview-content csv-preview">
-
       @if (loading()) {
-
-        <div
-          class="preview-message"
-          aria-live="polite"
-        >
+        <div class="preview-message" aria-live="polite">
           <span>
             {{ 'ADMIN.PREVIEW.LOADING' | translate }}
           </span>
         </div>
-
       } @else if (error()) {
-
-        <div
-          class="preview-message preview-message--error"
-        >
-
+        <div class="preview-message preview-message--error">
           <p>
             {{ 'ADMIN.PREVIEW.FILE_ERROR' | translate }}
           </p>
 
-          <a
-            [href]="fileUrl()"
-            target="_blank"
-            rel="noopener"
-          >
+          <a [href]="fileUrl()" target="_blank" rel="noopener">
             {{ 'ADMIN.PREVIEW.OPEN_FILE' | translate }}
           </a>
-
         </div>
-
       } @else if (csvHeaders().length > 0) {
-
         <div class="csv-table-wrapper">
-
-          <nz-table
-            [nzData]="csvPageRows()"
-            [nzFrontPagination]="false"
-            nzSize="middle"
-          >
-
+          <nz-table [nzData]="csvPageRows()" [nzFrontPagination]="false" nzSize="middle">
             <thead>
-
               <tr>
-
-                @for (
-                  header of csvHeaders();
-                  track $index
-                ) {
-
+                @for (header of csvHeaders(); track $index) {
                   <th>
                     {{ header }}
                   </th>
-
                 }
-
               </tr>
-
             </thead>
 
             <tbody>
-
-              @for (
-                row of csvPageRows();
-                track $index
-              ) {
-
+              @for (row of csvPageRows(); track $index) {
                 <tr>
-
-                  @for (
-                    cell of row;
-                    track $index
-                  ) {
-
+                  @for (cell of row; track $index) {
                     <td>
                       {{ cell }}
                     </td>
-
                   }
-
                 </tr>
-
               }
-
             </tbody>
-
           </nz-table>
-
         </div>
 
         <div class="csv-pagination">
-
           <nz-pagination
             [nzPageIndex]="csvPage()"
             [nzTotal]="csvDataRows().length"
             [nzPageSize]="csvPageSize()"
             [nzShowSizeChanger]="true"
-            [nzPageSizeOptions]="[
-              10,
-              25,
-              50,
-              100
-            ]"
+            [nzPageSizeOptions]="[10, 25, 50, 100]"
             nzShowQuickJumper
-            (nzPageIndexChange)="
-              onCsvPageChange($event)
-            "
-            (nzPageSizeChange)="
-              onCsvPageSizeChange($event)
-            "
+            (nzPageIndexChange)="onCsvPageChange($event)"
+            (nzPageSizeChange)="onCsvPageSizeChange($event)"
           />
-
         </div>
-
       } @else {
-
         <div class="preview-message">
-
           <p>
             {{ 'ADMIN.PREVIEW.NO_CSV_DATA' | translate }}
           </p>
-
         </div>
-
       }
-
     </div>
-
   } @else if (previewType() === 'code') {
     <div class="preview-content file-preview">
       @if (diffMode()) {
@@ -434,23 +336,12 @@
       }
     </div>
   } @else {
-
     <div class="preview-content unsupported-preview">
+      <p>⚠️ {{ 'ADMIN.PREVIEW.UNSUPPORTED' | translate }}</p>
 
-      <p>
-        ⚠️ {{ 'ADMIN.PREVIEW.UNSUPPORTED' | translate }}
-      </p>
-
-      <a
-        [href]="fileUrl()"
-        target="_blank"
-        rel="noopener"
-      >
+      <a [href]="fileUrl()" target="_blank" rel="noopener">
         {{ 'ADMIN.PREVIEW.OPEN_DOWNLOAD' | translate }}
       </a>
-
     </div>
-
   }
-
 </div>

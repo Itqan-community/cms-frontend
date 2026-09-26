@@ -52,6 +52,15 @@ export const translationRoutes: Routes = [
           ),
       },
       {
+        path: ':slug/review',
+        canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_REVIEW_CONTENT] })],
+        data: { kind: 'translation' },
+        loadComponent: () =>
+          import('../components/asset-review-page/asset-review-page.component').then(
+            (m) => m.AssetReviewPageComponent
+          ),
+      },
+      {
         path: ':slug',
         canActivate: [
           permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_READ_TRANSLATION] }),
