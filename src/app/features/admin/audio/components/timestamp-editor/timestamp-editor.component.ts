@@ -284,7 +284,9 @@ export class TimestampEditorComponent implements OnInit {
   private resolveFolderId(folders: RecitationDetailFolderRef[] | undefined): number | null {
     if (!this.folder) return null;
 
-    return folders?.find((f) => f.slug === this.folder)?.id ?? null;
+    const match = folders?.find((f) => f.slug === this.folder || f.name === this.folder);
+    if (!match) throw new TrackNotFoundError();
+    return match.id;
   }
 
   /** One request covers a whole recitation, so finding the track never needs to page. */
