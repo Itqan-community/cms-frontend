@@ -2500,6 +2500,54 @@
         "DELETE_SUCCESS": "Program deleted successfully",
         "ERROR": "An error occurred. Please try again."
       }
+    },
+    "AUDIO": {
+      "TIMESTAMPS": {
+        "TITLE": "Ayah timestamps",
+        "SUBTITLE": "Surah {{surah}} — {{filename}}",
+        "BACK_TO_RECITATION": "Back to recitation",
+        "SAVE": "Save timestamps",
+        "DISCARD": "Discard changes",
+        "READ_ONLY": "You can review these timestamps but not change them.",
+        "ISSUES": "{{count}} boundary issue(s) found in the loaded data.",
+        "PLAY": "Play",
+        "PAUSE": "Pause",
+        "PREVIOUS_MARKER": "Previous boundary",
+        "NEXT_MARKER": "Next boundary",
+        "NUDGE_LABEL": "Nudge",
+        "SNAP": "Snap to playhead",
+        "SELECTED": "Selected",
+        "SELECT_HINT": "Select a boundary to adjust it.",
+        "AYAH_LIST": "Ayah boundaries",
+        "AYAH": "Ayah {{number}}",
+        "EMPTY_TITLE": "No timestamps yet",
+        "EMPTY_SUBTITLE": "Upload a timing file for this recitation, then reopen this editor.",
+        "LEAVE": {
+          "TITLE": "Leave without saving?",
+          "CONTENT": "Your timestamp changes will be lost.",
+          "OK": "Leave",
+          "CANCEL": "Stay"
+        },
+        "ERRORS": {
+          "MISSING_CONTEXT": "Open this editor from the recitation page so it knows which track to load.",
+          "TRACK_NOT_FOUND": "This audio track could not be found in the recitation.",
+          "TRACK_LOAD_FAILED": "Could not load the audio track.",
+          "TIMESTAMPS_LOAD_FAILED": "Could not load the ayah timestamps. The audio still plays.",
+          "TRACK_TOO_LONG": "This track is too long to draw a waveform for. Boundaries are still editable.",
+          "WAVEFORM_FAILED": "The waveform could not be drawn. Boundaries are still editable."
+        },
+        "MESSAGES": {
+          "SAVE_OK": "Timestamps saved.",
+          "SAVE_ERROR": "Could not save the timestamps. Try again.",
+          "SAVE_REJECTED": "Some of the timestamps were not applied."
+        },
+        "WAVEFORM": "Waveform",
+        "WAVEFORM_LOADING": "Decoding audio…",
+        "WAVEFORM_HINT": "Drag a boundary to move it. Click the waveform to seek. Ctrl/Cmd + scroll to zoom.",
+        "ZOOM_IN": "Zoom in",
+        "ZOOM_OUT": "Zoom out",
+        "ZOOM_RESET": "Fit track"
+      }
     }
   },
   "USAGE": {

@@ -11,23 +11,56 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { AdminTitleCountComponent } from '../admin-title-count/admin-title-count.component';
-import { AdminTablePaginationComponent } from '../admin-table-pagination/admin-table-pagination.component';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import { UniversalAssetPreviewerComponent } from '../universal-asset-previewer/universal-asset-previewer.component';
 import { Subject, debounceTime, distinctUntilChanged, finalize, forkJoin, takeUntil } from 'rxjs';
-import type { AssetVersion, AssetVersionParentKind } from '../../models/asset-versions.models';
+import {
+  PORTAL_PERMISSIONS,
+  type PortalPermissionCode,
+} from '../../constants/portal-permission.constants';
 import type { AssetLanguage, ContentChange } from '../../models/asset-content.models';
-import { AssetVersionsService } from '../../services/asset-versions.service';
+import type { AssetVersion, AssetVersionParentKind } from '../../models/asset-versions.models';
+import { AdminAuthService } from '../../services/admin-auth.service';
 import { AssetContentService } from '../../services/asset-content.service';
+import { AssetVersionsService } from '../../services/asset-versions.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { localizedLanguageName } from '../../utils/iso-639.util';
-import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
-import { AdminAuthService } from '../../services/admin-auth.service';
+import { AdminTablePaginationComponent } from '../admin-table-pagination/admin-table-pagination.component';
+import { AdminTitleCountComponent } from '../admin-title-count/admin-title-count.component';
+import { UniversalAssetPreviewerComponent } from '../universal-asset-previewer/universal-asset-previewer.component';
 
 const DEFAULT_PAGE_SIZE = 10;
+
+/**
+ * Version management is gated per asset type: the backend `PermissionChoice` set has no
+ * catalogue-wide code, so each kind maps to its own update/delete permission.
+ */
+const VERSION_PERMISSIONS: Record<
+  AssetVersionParentKind,
+  { mutate: PortalPermissionCode; delete: PortalPermissionCode }
+> = {
+  tafsir: {
+    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR,
+    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_TAFSIR,
+  },
+  translation: {
+    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION,
+    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_TRANSLATION,
+  },
+  mushaf: {
+    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_MUSHAF,
+    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_MUSHAF,
+  },
+  font: {
+    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_FONT,
+    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_FONT,
+  },
+  program: {
+    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_PROGRAM,
+    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_PROGRAM,
+  },
+};
 
 @Component({
   selector: 'app-asset-versions-manager',
@@ -182,20 +215,33 @@ export class AssetVersionsManagerComponent implements OnInit {
       .subscribe({
         next: (langs) => {
           this.languages.set(langs);
-          const source = langs.find((l) => l.is_source) ?? langs[0];
-          const remembered = this.lastLanguage.get(this.kind, this.slug);
-          const initial = langs.find((l) => l.language === remembered) ?? source;
-          this.selectedLanguage.set(initial?.language ?? null);
+          if (langs.length === 0) {
+            this.selectedLanguage.set(null);
+            this.versionLanguage.set(null);
+            this.loadList();
+            return;
+          }
+          const stored = this.lastLanguage.get(this.kind, this.slug);
+          const remembered = stored && langs.some((l) => l.language === stored) ? stored : null;
+          const defaultLang = remembered ?? langs[0].language;
+          this.selectedLanguage.set(defaultLang);
+          this.versionLanguage.set(defaultLang);
           this.loadList();
         },
-        // If languages can't be loaded, still show the (unfiltered) versions.
-        error: () => this.loadList(),
+        error: () => {
+          this.languages.set([]);
+          this.selectedLanguage.set(null);
+          this.versionLanguage.set(null);
+          this.loadList();
+        },
       });
   }
 
-  onLanguageChange(language: string): void {
-    this.selectedLanguage.set(language);
-    this.lastLanguage.set(this.kind, this.slug, language);
+  onLanguageChange(lang: string): void {
+    if (this.selectedLanguage() === lang) return;
+    this.selectedLanguage.set(lang);
+    this.versionLanguage.set(lang);
+    this.lastLanguage.set(this.kind, this.slug, lang);
     this.page.set(1);
     this.loadList();
   }
@@ -238,38 +284,6 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.pageSize.set(size);
     this.page.set(1);
     this.loadList();
-  }
-
-  canMutateVersions(): boolean {
-    switch (this.kind) {
-      case 'tafsir':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR);
-      case 'mushaf':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_MUSHAF);
-      case 'font':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_FONT);
-      case 'program':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_PROGRAM);
-      case 'translation':
-      default:
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION);
-    }
-  }
-
-  canDeleteVersions(): boolean {
-    switch (this.kind) {
-      case 'tafsir':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TAFSIR);
-      case 'mushaf':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_MUSHAF);
-      case 'font':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_FONT);
-      case 'program':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_PROGRAM);
-      case 'translation':
-      default:
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TRANSLATION);
-    }
   }
 
   openCreateModal(): void {
@@ -734,5 +748,13 @@ export class AssetVersionsManagerComponent implements OnInit {
 
   modalDirection(): 'rtl' | 'ltr' {
     return this.translate.currentLang === 'ar' ? 'rtl' : 'ltr';
+  }
+
+  canMutateVersions(): boolean {
+    return this.adminAuth.hasPermission(VERSION_PERMISSIONS[this.kind].mutate);
+  }
+
+  canDeleteVersions(): boolean {
+    return this.adminAuth.hasPermission(VERSION_PERMISSIONS[this.kind].delete);
   }
 }

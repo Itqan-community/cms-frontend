@@ -64,6 +64,7 @@ describe('AssetVersionsManagerComponent', () => {
     await TestBed.configureTestingModule({
       imports: [AssetVersionsManagerComponent, TranslateModule.forRoot()],
       providers: [
+        // The component injects HttpClient directly for its own file requests.
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: AssetVersionsService, useValue: versionsService },
