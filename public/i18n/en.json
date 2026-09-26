@@ -2470,7 +2470,8 @@
         },
         "MESSAGES": {
           "SAVE_OK": "Timestamps saved.",
-          "SAVE_ERROR": "Could not save the timestamps. Try again."
+          "SAVE_ERROR": "Could not save the timestamps. Try again.",
+          "SAVE_REJECTED": "Some of the timestamps were not applied."
         },
         "WAVEFORM": "Waveform",
         "WAVEFORM_LOADING": "Decoding audio…",

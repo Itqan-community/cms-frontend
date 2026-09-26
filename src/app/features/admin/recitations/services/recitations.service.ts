@@ -262,6 +262,7 @@ export class RecitationsService {
       duration_ms: row.duration_ms,
       size_bytes: row.size_bytes,
       audio_url: row.audio_url ?? '',
+      available_ayah_timings_url: row.available_ayah_timings_url ?? null,
     };
   }
 }

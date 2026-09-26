@@ -154,18 +154,34 @@ out-of-range and zero-length boundaries so an admin sees the fault rather than i
 
 ---
 
-## Backend contract — UNCONFIRMED
+## Backend contract
 
-`audio-timestamps.service.ts` currently calls `${ADMIN_API_BASE_URL}/audio/timestamps/`. This is a
-placeholder following the portal convention. Three questions are open:
+Timings are stored as a **file**, so reads and writes go to different places:
 
-1. Is the save path `…/portal/audio/timestamps/`, or something else?
-2. Is there a GET, or should the editor read `ayah_timings_url` — the JSON file the existing
-   `POST /portal/timing/upload/` flow already produces?
-3. Does the payload replace a whole track, or patch individual boundaries?
+| Direction | Where                                                                   |
+| --------- | ----------------------------------------------------------------------- |
+| Load      | `GET track.available_ayah_timings_url` — the timing JSON, read directly |
+| Save      | `POST /portal/timing/upload/` — the same ingest the bulk upload uses    |
 
-Until they are answered the load call fails and the editor shows its warning banner. **Answering
-them is a one-file change** — no component touches HTTP.
+There is no per-track write endpoint. A save re-uploads the track's timing file as multipart
+`asset_id` + `files`, and answers with `RecitationTimingUploadOut`.
+
+Three consequences worth knowing before changing any of it:
+
+- **The timings URL is absolute and off-origin**, so no interceptor touches it — no tenant header,
+  no credentials, no global error toast. It needs CORS on the bucket, like the audio.
+- **The filename carries the match.** The ingest pairs a file with a track by the surah in its name,
+  so a save reuses the audio file's own stem (`001.mp3` → `001.json`). Get that wrong and the surah
+  comes back in `missing_tracks`.
+- **A 200 is not a success.** The ingest reports per-file outcomes in the body, so a file it could
+  not place returns `missing_tracks` or `file_errors` with an otherwise healthy response.
+  `AudioTimestampsService` throws `TimingUploadRejectedError` on those, and the editor shows the
+  report rather than "try again".
+
+The one part still inferred is the **body** of the timing file. `parseTimingFile` and
+`serializeTimingFile` in `audio-timestamps.service.ts` are the only code that depends on it, and
+they sit together so a correction is one edit and a save always writes what a load can read. The
+reader accepts a single-surah file and a recitation-wide file keyed by surah number.
 
 ---
 

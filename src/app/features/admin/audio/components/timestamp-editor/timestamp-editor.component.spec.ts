@@ -6,6 +6,8 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { of, throwError } from 'rxjs';
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import { RecitationsService } from '../../../recitations/services/recitations.service';
+import type { RecitationDetails } from '../../../recitations/models/recitations.models';
+import type { RecitationTimingUploadOut } from '../../../recitations/models/recitation-timings.models';
 import type { RecitationSurahTrackListItem } from '../../../recitations/models/recitation-tracks.models';
 import type { TrackTimestamps } from '../../models/audio-timestamps.models';
 import { AudioTimestampsService } from '../../services/audio-timestamps.service';
@@ -13,12 +15,33 @@ import { TimestampEditorComponent } from './timestamp-editor.component';
 
 const TRACK: RecitationSurahTrackListItem = {
   id: 12,
-  asset_id: 0,
+  asset_id: 7,
   surah_number: 1,
   filename: '001.mp3',
   duration_ms: 60_000,
   size_bytes: 1_024,
   audio_url: 'https://example.com/001.mp3',
+  available_ayah_timings_url: 'https://example.com/timings/001.json',
+};
+
+/** Only the fields the editor reads off the recitation: the asset id and the folder ids. */
+const RECITATION = {
+  id: 7,
+  folders: [
+    { id: 3, name: 'Default', slug: 'default', is_default: true },
+    { id: 9, name: '128kbps', slug: '128kbps', is_default: false },
+  ],
+} as RecitationDetails;
+
+const UPLOAD_OK: RecitationTimingUploadOut = {
+  asset_id: 7,
+  created_total: 0,
+  updated_total: 1,
+  skipped_total: 0,
+  missing_tracks: [],
+  file_errors: [],
+  synced_file_url: 'https://example.com/timings/001.json',
+  synced_filename: '001.json',
 };
 
 const TIMESTAMPS: TrackTimestamps = {
@@ -45,7 +68,9 @@ describe('TimestampEditorComponent', () => {
   ): Promise<void> {
     recitations = jasmine.createSpyObj<RecitationsService>('RecitationsService', [
       'recitationTracksList',
+      'getDetail',
     ]);
+    recitations.getDetail.and.returnValue(of(RECITATION));
     timestamps = jasmine.createSpyObj<AudioTimestampsService>('AudioTimestampsService', [
       'load',
       'save',
@@ -286,7 +311,7 @@ describe('TimestampEditorComponent', () => {
   describe('saving', () => {
     it('sends the edited boundaries and clears the dirty flag', async () => {
       await setup({ recitation: 'sample-recitation' });
-      timestamps.save.and.returnValue(of(TIMESTAMPS));
+      timestamps.save.and.returnValue(of(UPLOAD_OK));
 
       component.selectMarker('ayah-2-start');
       component.nudge(-100);
@@ -294,6 +319,32 @@ describe('TimestampEditorComponent', () => {
 
       expect(timestamps.save).toHaveBeenCalled();
       expect(component.dirty()).toBeFalse();
+    });
+
+    it('saves against the recitation id and the folder the route names', async () => {
+      await setup({ recitation: 'sample-recitation', folder: '128kbps' });
+      timestamps.save.and.returnValue(of(UPLOAD_OK));
+
+      component.selectMarker('ayah-2-start');
+      component.nudge(-100);
+      await component.save();
+
+      const input = timestamps.save.calls.mostRecent().args[0];
+      expect(input.assetId).toBe(7);
+      expect(input.folderId).toBe(9);
+      expect(input.track.id).toBe(12);
+      expect(input.timestamps.ayahs[1].start_ms).toBe(9_900);
+    });
+
+    it('falls back to the default folder when the route names none', async () => {
+      await setup({ recitation: 'sample-recitation' });
+      timestamps.save.and.returnValue(of(UPLOAD_OK));
+
+      component.selectMarker('ayah-2-start');
+      component.nudge(-100);
+      await component.save();
+
+      expect(timestamps.save.calls.mostRecent().args[0].folderId).toBeNull();
     });
 
     it('does not call the API when nothing has changed', async () => {

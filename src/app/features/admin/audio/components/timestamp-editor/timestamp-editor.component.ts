@@ -22,7 +22,9 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { firstValueFrom } from 'rxjs';
 import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
+import type { RecitationDetailFolderRef } from '../../../recitations/models/recitation-folders.models';
 import type { RecitationSurahTrackListItem } from '../../../recitations/models/recitation-tracks.models';
+import { buildTimingUploadSuccessDescription } from '../../../recitations/utils/timing-upload-result.format';
 import { RecitationsService } from '../../../recitations/services/recitations.service';
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import type { EditorMarker, TrackTimestamps } from '../../models/audio-timestamps.models';
@@ -41,7 +43,10 @@ import {
   WaveformCanvasComponent,
   type MarkerDragEvent,
 } from '../waveform-canvas/waveform-canvas.component';
-import { AudioTimestampsService } from '../../services/audio-timestamps.service';
+import {
+  AudioTimestampsService,
+  TimingUploadRejectedError,
+} from '../../services/audio-timestamps.service';
 import { AudioPlayback } from '../../utils/audio-playback';
 import { formatDrift, formatNudgeStep, formatTimestamp } from '../../utils/timestamp-format.util';
 import {
@@ -136,6 +141,10 @@ export class TimestampEditorComponent implements OnInit {
   private recitationSlug = '';
   private folder: string | null = null;
   private loadedTimestamps: TrackTimestamps | null = null;
+  /** Recitation id — what `POST /portal/timing/upload/` calls `asset_id`. Resolved on load. */
+  private assetId = 0;
+  /** Id of the folder named by the `folder` query param; null saves into the default folder. */
+  private folderId: number | null = null;
 
   readonly canEdit = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPLOAD_TIMING)
@@ -206,6 +215,11 @@ export class TimestampEditorComponent implements OnInit {
     this.loading.set(true);
 
     try {
+      // The recitation carries both ids the save needs, so it is fetched before the track
+      // rather than on demand: a save must not be the first call that can fail on them.
+      const recitation = await firstValueFrom(this.recitations.getDetail(this.recitationSlug));
+      this.assetId = recitation.id;
+      this.folderId = this.resolveFolderId(recitation.folders);
       this.track.set(await this.fetchTrack(trackId));
     } catch (error) {
       this.loadError.set(this.errorMessage(error, 'ERRORS.TRACK_LOAD_FAILED'));
@@ -217,7 +231,7 @@ export class TimestampEditorComponent implements OnInit {
     this.view.set(clampView({ startMs: 0, endMs: this.durationMs() }, this.durationMs()));
     this.destroyRef.onDestroy(() => this.peaksAbort?.abort());
 
-    await this.loadTimestamps(trackId);
+    await this.loadTimestamps();
     void this.loadPeaks();
   }
 
@@ -262,12 +276,23 @@ export class TimestampEditorComponent implements OnInit {
     this.resetZoom();
   }
 
+  /**
+   * The route carries a folder slug; the upload API wants its id. A slug that matches nothing
+   * resolves to null, which saves into the default folder — the same folder the track lookup
+   * falls back to, so the read and the write stay on the same set of tracks.
+   */
+  private resolveFolderId(folders: RecitationDetailFolderRef[] | undefined): number | null {
+    if (!this.folder) return null;
+
+    return folders?.find((f) => f.slug === this.folder)?.id ?? null;
+  }
+
   /** One request covers a whole recitation, so finding the track never needs to page. */
   private async fetchTrack(trackId: number): Promise<RecitationSurahTrackListItem> {
     const page = await firstValueFrom(
       this.recitations.recitationTracksList({
         recitation_slug: this.recitationSlug,
-        asset_id: 0,
+        asset_id: this.assetId,
         page: 1,
         page_size: TRACK_LOOKUP_PAGE_SIZE,
         folder: this.folder ?? undefined,
@@ -284,9 +309,12 @@ export class TimestampEditorComponent implements OnInit {
    * Boundary data is loaded separately and failure is not fatal: an admin can still play the
    * track and see its metadata, which is exactly what they need while the API contract settles.
    */
-  private async loadTimestamps(trackId: number): Promise<void> {
+  private async loadTimestamps(): Promise<void> {
+    const track = this.track();
+    if (!track) return;
+
     try {
-      const loaded = await firstValueFrom(this.timestamps.load(trackId));
+      const loaded = await firstValueFrom(this.timestamps.load(track));
 
       this.loadedTimestamps = loaded;
       this.markers.set(buildMarkers(loaded));
@@ -395,12 +423,24 @@ export class TimestampEditorComponent implements OnInit {
 
   async save(): Promise<void> {
     const base = this.loadedTimestamps;
-    if (!base || !this.canEdit() || this.saving() || !this.dirty()) return;
+    const track = this.track();
+    if (!base || !track || !this.canEdit() || this.saving() || !this.dirty()) return;
+
+    const saved = applyMarkers(this.markers(), base);
 
     this.saving.set(true);
     try {
-      const saved = await firstValueFrom(this.timestamps.save(applyMarkers(this.markers(), base)));
+      await firstValueFrom(
+        this.timestamps.save({
+          assetId: this.assetId,
+          folderId: this.folderId,
+          track,
+          timestamps: saved,
+        })
+      );
 
+      // The ingest answers with a per-file report, not with the stored timings, so what was
+      // just sent becomes the new baseline. Re-reading the file would race its own write.
       this.loadedTimestamps = saved;
       this.markers.set(buildMarkers(saved));
       this.selectedId.set(null);
@@ -497,6 +537,15 @@ export class TimestampEditorComponent implements OnInit {
   private errorMessage(error: unknown, fallbackKey: string): string {
     if (error instanceof TrackNotFoundError) {
       return this.translate.instant('ADMIN.AUDIO.TIMESTAMPS.ERRORS.TRACK_NOT_FOUND');
+    }
+
+    // A rejected upload answered 200, so there is no API error body to resolve — the reason
+    // is in the report itself, and saying "try again" over it would be wrong advice.
+    if (error instanceof TimingUploadRejectedError) {
+      const detail = buildTimingUploadSuccessDescription(error.result, this.translate);
+      const headline = this.translate.instant('ADMIN.AUDIO.TIMESTAMPS.MESSAGES.SAVE_REJECTED');
+
+      return detail ? `${headline}\n${detail}` : headline;
     }
 
     return resolveApiErrorMessage(
