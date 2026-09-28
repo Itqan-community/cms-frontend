@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 declare module 'highlight.js/lib/core' {
   const hljs: any;
   export default hljs;

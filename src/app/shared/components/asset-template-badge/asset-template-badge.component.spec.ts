@@ -1,12 +1,14 @@
 import { TestBed } from '@angular/core/testing';
+import { provideIcons } from '@ng-icons/core';
+import { lucideLayers } from '@ng-icons/lucide';
 import { TranslateModule } from '@ngx-translate/core';
-
 import { AssetTemplateBadgeComponent } from './asset-template-badge.component';
 
 describe('AssetTemplateBadgeComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AssetTemplateBadgeComponent, TranslateModule.forRoot()],
+      providers: [provideIcons({ lucideLayers })],
     }).compileComponents();
   });
 
