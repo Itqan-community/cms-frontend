@@ -5,6 +5,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { catchError, Observable, throwError } from 'rxjs';
 import { isHeadlessAppAuthUrl } from '../auth/headless/headless-api-path.util';
 import {
+  fallbackKeyForHttpStatus,
   resolveApiErrorMessage,
   shouldSuppressGlobalErrorToast,
 } from '../../shared/utils/api-error-resolver.util';
@@ -43,7 +44,7 @@ export function errorInterceptor(
       }
 
       if (!shouldSuppressGlobalErrorToast(error)) {
-        const fallbackKey = error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR';
+        const fallbackKey = fallbackKeyForHttpStatus(error.status);
         const errorMessage = resolveApiErrorMessage(error, { fallbackKey }, translate);
         message.error(errorMessage);
       }

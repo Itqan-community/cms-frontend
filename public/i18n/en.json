@@ -481,7 +481,10 @@
       "CTA": "Back to library"
     },
     "RESTRICTED_FOR_TENANT_CONFLICT": "This asset has pending access requests. Resolve them before enabling tenant restriction.",
-    "TENANT_REQUIRED": "Select a publisher before continuing."
+    "TENANT_REQUIRED": "Select a publisher before continuing.",
+    "REQUEST_FAILED": "The request could not be completed. Please review and try again.",
+    "FIELD_REQUIRED": "{{field}} is required.",
+    "FIELD_INVALID": "{{field}} is invalid."
   },
   "PROFILE": {
     "HUB_ARIA": "Account management",
