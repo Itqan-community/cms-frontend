@@ -30,6 +30,10 @@
         </div>
 
         <div class="admin-hero-meta">
+          <app-asset-template-badge
+            [template]="tafsir()!.template"
+            [layoutName]="tafsir()!.mushaf_layout?.name ?? null"
+          />
           <nz-tag [nzColor]="getLicenseColor(tafsir()!.license)">{{ tafsir()!.license }}</nz-tag>
           @if (tafsir()!.language) {
             <nz-tag>{{ languageLabel(tafsir()!.language) }}</nz-tag>
@@ -70,6 +74,8 @@
             <ng-icon name="lucideSquarePen" />
             {{ 'ADMIN.COMMON.EDIT' | translate }}
           </button>
+        }
+        @if (canEditContent()) {
           <button nz-button nzType="default" (click)="onEditContent()">
             <ng-icon name="lucideLayoutGrid" />
             {{ 'ADMIN.CONTENT_EDITOR.OPEN_BUTTON' | translate }}

@@ -59,7 +59,7 @@
           </button>
         }
       }
-      @if (canMutateVersions()) {
+      @if (canEditContent()) {
         <button nz-button nzType="primary" type="button" (click)="openCreateModal()">
           <ng-icon name="lucidePlus" />
           {{ t('ADD_BUTTON') | translate }}
@@ -149,35 +149,38 @@
             ></textarea>
           </nz-form-control>
         </nz-form-item>
-        <div class="asset-versions-manager__upload">
-          <input
-            #modalFileInput
-            type="file"
-            class="asset-versions-manager__file-input"
-            (change)="onPickFile($event)"
-          />
-          <div class="asset-versions-manager__upload-actions">
-            <button nz-button nzType="default" type="button" (click)="modalFileInput.click()">
-              <ng-icon name="lucideFolderOpen" />
-              {{ t('CHOOSE_FILE') | translate }}
-            </button>
-            @if (selectedFileName()) {
-              <button nz-button nzType="default" nzDanger type="button" (click)="clearFile()">
-                <ng-icon name="lucideX" />
-                {{ t('CLEAR_FILE') | translate }}
+        <!-- Replacing the file changes the text, so it needs the content permission. -->
+        @if (canEditContent()) {
+          <div class="asset-versions-manager__upload">
+            <input
+              #modalFileInput
+              type="file"
+              class="asset-versions-manager__file-input"
+              (change)="onPickFile($event)"
+            />
+            <div class="asset-versions-manager__upload-actions">
+              <button nz-button nzType="default" type="button" (click)="modalFileInput.click()">
+                <ng-icon name="lucideFolderOpen" />
+                {{ t('CHOOSE_FILE') | translate }}
               </button>
+              @if (selectedFileName()) {
+                <button nz-button nzType="default" nzDanger type="button" (click)="clearFile()">
+                  <ng-icon name="lucideX" />
+                  {{ t('CLEAR_FILE') | translate }}
+                </button>
+              }
+            </div>
+            @if (selectedFileName()) {
+              <p class="asset-versions-manager__file-preview">
+                <span class="admin-mono">{{ selectedFileName() }}</span>
+              </p>
+            } @else if (modalMode() === 'edit') {
+              <p class="asset-versions-manager__hint">{{ t('EDIT_FILE_HINT') | translate }}</p>
+            } @else {
+              <p class="asset-versions-manager__hint">{{ t('FILE_REQUIRED_HINT') | translate }}</p>
             }
           </div>
-          @if (selectedFileName()) {
-            <p class="asset-versions-manager__file-preview">
-              <span class="admin-mono">{{ selectedFileName() }}</span>
-            </p>
-          } @else if (modalMode() === 'edit') {
-            <p class="asset-versions-manager__hint">{{ t('EDIT_FILE_HINT') | translate }}</p>
-          } @else {
-            <p class="asset-versions-manager__hint">{{ t('FILE_REQUIRED_HINT') | translate }}</p>
-          }
-        </div>
+        }
       </form>
     </ng-container>
     <ng-container *nzModalFooter>
@@ -219,12 +222,12 @@
             <th>{{ t('COL_SUMMARY') | translate }}</th>
             <th nzWidth="100px">{{ t('COL_SIZE') | translate }}</th>
             <th nzWidth="120px">{{ t('COL_DATE') | translate }}</th>
-            <th nzWidth="180px">{{ t('COL_ACTIONS') | translate }}</th>
+            <th nzWidth="290px">{{ t('COL_ACTIONS') | translate }}</th>
           </tr>
         </thead>
         <tbody>
           @for (ver of versionsTable.data; track ver.id) {
-            <tr>
+            <tr [class.asset-versions-manager__row--expanded]="expandedId() === ver.id">
               <td>
                 {{ ver.name }}
                 @if (supportsLanguages() && ver.is_active) {
@@ -238,117 +241,155 @@
               </td>
               <td class="asset-versions-manager__summary-cell">
                 {{ truncate(ver.summary) }}
+                @if (ver.review_comments_count) {
+                  <span
+                    class="asset-versions-manager__comments"
+                    nz-tooltip
+                    [nzTooltipTitle]="'ADMIN.CONTENT_CHANGES.COMMENTS_HINT' | translate"
+                  >
+                    <ng-icon name="lucideMessageSquareText" aria-hidden="true" />
+                    {{
+                      'ADMIN.CONTENT_CHANGES.COMMENTS_COUNT'
+                        | translate: { count: ver.review_comments_count }
+                    }}
+                  </span>
+                }
                 @if (ver.change_counts; as counts) {
                   <span class="asset-versions-manager__counts">
-                    <span class="asset-versions-manager__diff-added">+{{ counts.added }}</span>
-                    <span class="asset-versions-manager__diff-modified"
-                      >~{{ counts.modified }}</span
-                    >
-                    <span class="asset-versions-manager__diff-removed">−{{ counts.removed }}</span>
+                    @if (counts.added) {
+                      <span
+                        class="asset-versions-manager__count asset-versions-manager__count--added"
+                        >{{ 'ADMIN.CONTENT_CHANGES.ADDED' | translate }} {{ counts.added }}</span
+                      >
+                    }
+                    @if (counts.modified) {
+                      <span
+                        class="asset-versions-manager__count asset-versions-manager__count--modified"
+                        >{{ 'ADMIN.CONTENT_CHANGES.MODIFIED' | translate }}
+                        {{ counts.modified }}</span
+                      >
+                    }
+                    @if (counts.removed) {
+                      <span
+                        class="asset-versions-manager__count asset-versions-manager__count--removed"
+                        >{{ 'ADMIN.CONTENT_CHANGES.REMOVED' | translate }}
+                        {{ counts.removed }}</span
+                      >
+                    }
                   </span>
                 }
               </td>
               <td>{{ formatBytes(ver.size_bytes) }}</td>
               <td>{{ ver.created_at | date: 'dd/MM/yyyy' }}</td>
               <td>
-                <div class="admin-list-actions">
-                  @if (ver.file_url) {
-                    <button
-                      type="button"
-                      nz-button
-                      nzType="text"
-                      class="action-icon"
-                      nz-tooltip
-                      [nzTooltipTitle]="'ADMIN.PREVIEW.OPEN_FILE' | translate"
-                      [attr.aria-label]="'ADMIN.PREVIEW.OPEN_FILE' | translate"
-                      (click)="openPreview(ver)"
-                    >
-                      <ng-icon name="lucideEye" aria-hidden="true" />
-                    </button>
-                  }
+                <div class="asset-versions-manager__actions">
                   @if (supportsLanguages()) {
                     <button
                       type="button"
-                      nz-button
-                      nzType="text"
-                      class="action-icon"
-                      nz-tooltip
-                      [nzTooltipTitle]="t('TOOLTIP_DIFF') | translate"
-                      [attr.aria-label]="t('TOOLTIP_DIFF') | translate"
+                      class="asset-versions-manager__changes-btn"
+                      [class.asset-versions-manager__changes-btn--open]="expandedId() === ver.id"
+                      [attr.aria-expanded]="expandedId() === ver.id"
+                      [attr.aria-controls]="'version-changes-' + ver.id"
                       (click)="toggleDiff(ver)"
                     >
+                      <ng-icon name="lucideHistory" aria-hidden="true" />
+                      {{ 'ADMIN.CONTENT_CHANGES.BUTTON' | translate }}
                       <ng-icon
-                        [name]="
-                          expandedId() === ver.id ? 'lucideChevronDown' : 'lucideChevronRight'
-                        "
+                        name="lucideChevronDown"
+                        class="asset-versions-manager__changes-chevron"
                         aria-hidden="true"
                       />
                     </button>
+                    <span class="asset-versions-manager__divider" aria-hidden="true"></span>
                   }
-                  <button
-                    type="button"
-                    nz-button
-                    nzType="text"
-                    class="action-icon"
-                    nz-tooltip
-                    [nzTooltipTitle]="'ADMIN.COMMON.DOWNLOAD' | translate"
-                    [attr.aria-label]="'ADMIN.COMMON.DOWNLOAD' | translate"
-                    [nzLoading]="downloadingId() === ver.id"
-                    [disabled]="downloadingId() !== null"
-                    (click)="downloadVersion(ver)"
-                  >
-                    <ng-icon name="lucideDownload" aria-hidden="true" />
-                  </button>
-                  @if (supportsLanguages() && canMutateVersions() && !ver.is_active) {
+                  <div class="asset-versions-manager__action-group">
+                    @if (ver.file_url) {
+                      <button
+                        type="button"
+                        nz-button
+                        nzType="text"
+                        class="action-icon action-icon--view"
+                        nz-tooltip
+                        [nzTooltipTitle]="'ADMIN.PREVIEW.OPEN_FILE' | translate"
+                        [attr.aria-label]="'ADMIN.PREVIEW.OPEN_FILE' | translate"
+                        (click)="openPreview(ver)"
+                      >
+                        <ng-icon name="lucideEye" aria-hidden="true" />
+                      </button>
+                    }
                     <button
                       type="button"
                       nz-button
                       nzType="text"
-                      class="action-icon"
+                      class="action-icon action-icon--view"
                       nz-tooltip
-                      [nzTooltipTitle]="t('TOOLTIP_RESTORE') | translate"
-                      [attr.aria-label]="t('TOOLTIP_RESTORE') | translate"
-                      [nzLoading]="restoringId() === ver.id"
-                      [disabled]="restoringId() !== null"
-                      (click)="restoreVersion(ver)"
+                      [nzTooltipTitle]="'ADMIN.COMMON.DOWNLOAD' | translate"
+                      [attr.aria-label]="'ADMIN.COMMON.DOWNLOAD' | translate"
+                      [nzLoading]="downloadingId() === ver.id"
+                      [disabled]="downloadingId() !== null"
+                      (click)="downloadVersion(ver)"
                     >
-                      <ng-icon name="lucideHistory" aria-hidden="true" />
+                      <ng-icon name="lucideDownload" aria-hidden="true" />
                     </button>
-                  }
-                  @if (canMutateVersions()) {
-                    <button
-                      type="button"
-                      nz-button
-                      nzType="text"
-                      class="action-icon action-icon--edit"
-                      nz-tooltip
-                      [nzTooltipTitle]="t('TOOLTIP_EDIT') | translate"
-                      [attr.aria-label]="t('TOOLTIP_EDIT') | translate"
-                      (click)="openEditModal(ver)"
-                    >
-                      <ng-icon name="lucideSquarePen" aria-hidden="true" />
-                    </button>
-                  }
-                  @if (canDeleteVersions()) {
-                    <button
-                      type="button"
-                      nz-button
-                      nzType="text"
-                      class="action-icon action-icon--delete"
-                      nz-tooltip
-                      [nzTooltipTitle]="t('TOOLTIP_DELETE') | translate"
-                      [attr.aria-label]="t('TOOLTIP_DELETE') | translate"
-                      (click)="deleteRow(ver)"
-                    >
-                      <ng-icon name="lucideTrash2" aria-hidden="true" />
-                    </button>
+                  </div>
+                  @if (canEditContent() || canMutateVersions() || canDeleteVersions()) {
+                    <span class="asset-versions-manager__divider" aria-hidden="true"></span>
+                    <div class="asset-versions-manager__action-group">
+                      @if (supportsLanguages() && canEditContent() && !ver.is_active) {
+                        <button
+                          type="button"
+                          nz-button
+                          nzType="text"
+                          class="action-icon asset-versions-manager__restore"
+                          nz-tooltip
+                          [nzTooltipTitle]="t('TOOLTIP_RESTORE') | translate"
+                          [attr.aria-label]="t('TOOLTIP_RESTORE') | translate"
+                          [nzLoading]="restoringId() === ver.id"
+                          [disabled]="restoringId() !== null"
+                          (click)="restoreVersion(ver)"
+                        >
+                          <ng-icon name="lucideRotateCcw" aria-hidden="true" />
+                        </button>
+                      }
+                      @if (canMutateVersions()) {
+                        <button
+                          type="button"
+                          nz-button
+                          nzType="text"
+                          class="action-icon action-icon--edit"
+                          nz-tooltip
+                          [nzTooltipTitle]="t('TOOLTIP_EDIT') | translate"
+                          [attr.aria-label]="t('TOOLTIP_EDIT') | translate"
+                          (click)="openEditModal(ver)"
+                        >
+                          <ng-icon name="lucideSquarePen" aria-hidden="true" />
+                        </button>
+                      }
+                      @if (canDeleteVersions()) {
+                        <button
+                          type="button"
+                          nz-button
+                          nzType="text"
+                          class="action-icon action-icon--delete"
+                          nz-tooltip
+                          [nzTooltipTitle]="t('TOOLTIP_DELETE') | translate"
+                          [attr.aria-label]="t('TOOLTIP_DELETE') | translate"
+                          (click)="deleteRow(ver)"
+                        >
+                          <ng-icon name="lucideTrash2" aria-hidden="true" />
+                        </button>
+                      }
+                    </div>
                   }
                 </div>
               </td>
             </tr>
             @if (expandedId() === ver.id) {
-              <tr class="asset-versions-manager__diff-row">
+              <tr class="asset-versions-manager__diff-row" [id]="'version-changes-' + ver.id">
                 <td colspan="5">
+                  <h4 class="asset-versions-manager__diff-title">
+                    {{ 'ADMIN.CONTENT_CHANGES.PANEL_TITLE' | translate: { name: ver.name } }}
+                  </h4>
                   @if (diffLoading()) {
                     <span class="asset-versions-manager__diff-loading">
                       {{ t('DIFF_LOADING') | translate }}
@@ -362,51 +403,7 @@
                       {{ t('DIFF_EMPTY') | translate }}
                     </span>
                   } @else {
-                    <ul class="asset-versions-manager__diff-list">
-                      @for (change of diff(); track change.ayah_id) {
-                        <li class="asset-versions-manager__diff-item">
-                          <span
-                            class="asset-versions-manager__diff-ref"
-                            [class.asset-versions-manager__diff-added]="
-                              change.change_type === 'added'
-                            "
-                            [class.asset-versions-manager__diff-modified]="
-                              change.change_type === 'modified'
-                            "
-                            [class.asset-versions-manager__diff-removed]="
-                              change.change_type === 'removed'
-                            "
-                          >
-                            {{
-                              change.change_type === 'added'
-                                ? '+'
-                                : change.change_type === 'removed'
-                                  ? '−'
-                                  : '~'
-                            }}
-                            {{ change.sura }}:{{ change.aya }}
-                          </span>
-                          @if (
-                            change.change_type !== 'added' &&
-                            change.old_text !== null &&
-                            change.old_text !== undefined
-                          ) {
-                            <span class="asset-versions-manager__diff-old">{{
-                              change.old_text
-                            }}</span>
-                          }
-                          @if (
-                            change.change_type !== 'removed' &&
-                            change.new_text !== null &&
-                            change.new_text !== undefined
-                          ) {
-                            <span class="asset-versions-manager__diff-new">{{
-                              change.new_text
-                            }}</span>
-                          }
-                        </li>
-                      }
-                    </ul>
+                    <app-content-changes [changes]="diff()" />
                   }
                 </td>
               </tr>

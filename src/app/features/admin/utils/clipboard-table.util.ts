@@ -79,13 +79,15 @@ export function serializeCsv(rows: string[][]): string {
   return rows.map((row) => row.map((cell) => csvField(cell ?? '')).join(',')).join('\n');
 }
 
-const CSV_ID_HEADERS = new Set(['surah', 'sura', 'ayah', 'aya']);
+const CSV_ID_HEADERS = new Set(['surah', 'sura', 'ayah', 'aya', 'label', 'word_id', 'page']);
 const CSV_TEXT_HEADERS = new Set(['text']);
 
 /**
- * When clipboard data is a content CSV export (`surah,ayah,text` or legacy
- * `sura,aya,text`), return only the text column (no header) so positional paste
- * into a Text cell cannot overwrite ayah text with identifiers.
+ * When clipboard data is a content CSV export (the grid's `label,reference_text,text`
+ * copy, or a per-template download such as `surah,ayah,text`, `sura,text`,
+ * `word_id,sura,aya,word,text` or `page,text`), return only the text column (no
+ * header) so positional paste into a Text cell cannot overwrite unit text with
+ * identifiers.
  * Raw single-column / spreadsheet pastes are returned unchanged.
  */
 export function normalizeClipboardForTextPaste(table: string[][]): string[][] {

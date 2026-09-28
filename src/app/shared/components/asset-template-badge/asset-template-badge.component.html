@@ -1,0 +1,6 @@
+@if (template()) {
+  <nz-tag class="asset-template-badge" [class]="'asset-template-badge--' + template()">
+    <ng-icon name="lucideLayers" class="asset-template-badge__icon" aria-hidden="true" />
+    {{ translationKey() | translate: translationParams() }}
+  </nz-tag>
+}

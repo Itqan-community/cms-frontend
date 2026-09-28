@@ -30,6 +30,10 @@
         </div>
 
         <div class="admin-hero-meta">
+          <app-asset-template-badge
+            [template]="translation()!.template"
+            [layoutName]="translation()!.mushaf_layout?.name ?? null"
+          />
           <nz-tag [nzColor]="getLicenseColor(translation()!.license)">{{
             translation()!.license
           }}</nz-tag>
@@ -72,6 +76,8 @@
             <ng-icon name="lucideSquarePen" />
             {{ 'ADMIN.COMMON.EDIT' | translate }}
           </button>
+        }
+        @if (canEditContent()) {
           <button
             nz-button
             nzType="default"

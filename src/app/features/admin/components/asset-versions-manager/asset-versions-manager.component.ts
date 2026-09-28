@@ -16,6 +16,7 @@ import { AdminTablePaginationComponent } from '../admin-table-pagination/admin-t
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
+import { ContentChangesComponent } from '../content-changes/content-changes.component';
 import { UniversalAssetPreviewerComponent } from '../universal-asset-previewer/universal-asset-previewer.component';
 import { Subject, debounceTime, distinctUntilChanged, finalize, forkJoin, takeUntil } from 'rxjs';
 import type { AssetVersion, AssetVersionParentKind } from '../../models/asset-versions.models';
@@ -49,6 +50,7 @@ const DEFAULT_PAGE_SIZE = 10;
     NzTableModule,
     NzToolTipModule,
     UniversalAssetPreviewerComponent,
+    ContentChangesComponent,
   ],
   templateUrl: './asset-versions-manager.component.html',
   styleUrl: './asset-versions-manager.component.less',
@@ -256,6 +258,19 @@ export class AssetVersionsManagerComponent implements OnInit {
     }
   }
 
+  /** Uploading, replacing a file and restoring change the text. Translations and
+   *  tafsirs have their own content permission; other kinds use their update one. */
+  canEditContent(): boolean {
+    switch (this.kind) {
+      case 'tafsir':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_EDIT_TAFSIR_CONTENT);
+      case 'translation':
+        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_EDIT_TRANSLATION_CONTENT);
+      default:
+        return this.canMutateVersions();
+    }
+  }
+
   canDeleteVersions(): boolean {
     switch (this.kind) {
       case 'tafsir':
@@ -273,7 +288,7 @@ export class AssetVersionsManagerComponent implements OnInit {
   }
 
   openCreateModal(): void {
-    if (!this.canMutateVersions()) {
+    if (!this.canEditContent()) {
       return;
     }
     this.modalMode.set('create');
@@ -342,7 +357,8 @@ export class AssetVersionsManagerComponent implements OnInit {
   }
 
   submit(): void {
-    if (!this.canMutateVersions()) {
+    const creating = this.editingId() == null;
+    if (creating ? !this.canEditContent() : !this.canMutateVersions()) {
       return;
     }
     if (this.form.invalid) {
@@ -628,7 +644,7 @@ export class AssetVersionsManagerComponent implements OnInit {
 
   /** Restore a version as a new published version, making it the active one. */
   restoreVersion(row: AssetVersion): void {
-    if (!this.canMutateVersions() || this.restoringId() !== null) {
+    if (!this.canEditContent() || this.restoringId() !== null) {
       return;
     }
     this.modal.confirm({

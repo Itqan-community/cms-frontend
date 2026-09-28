@@ -1,0 +1,25 @@
+:host {
+  display: inline-flex;
+  align-items: center;
+}
+
+// Brand-tinted so the template reads as its own fact about the asset, not as
+// part of the neutral license tag it often sits near.
+.asset-template-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  border-color: var(--color-primary-200, #d1e1d9);
+  background: var(--color-primary-50, #f0f5f2);
+  color: var(--color-primary-800, #3d5d4d);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 20px;
+  white-space: nowrap;
+
+  &__icon {
+    width: 12px;
+    height: 12px;
+  }
+}

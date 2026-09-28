@@ -92,6 +92,29 @@ describe('normalizeClipboardForTextPaste', () => {
     expect(normalizeClipboardForTextPaste(table)).toEqual([['In the name'], ['Praise be']]);
   });
 
+  it("extracts the text column from the grid's label/reference_text copy", () => {
+    const table = [
+      ['label', 'reference_text', 'text'],
+      ['2:255', 'ٱللَّهُ لَآ إِلَٰهَ', 'Allah - there is no deity'],
+    ];
+    expect(normalizeClipboardForTextPaste(table)).toEqual([['Allah - there is no deity']]);
+  });
+
+  it('extracts the text column from word and page template exports', () => {
+    expect(
+      normalizeClipboardForTextPaste([
+        ['word_id', 'sura', 'aya', 'word', 'text'],
+        ['1', '1', '1', '1', 'In the name'],
+      ])
+    ).toEqual([['In the name']]);
+    expect(
+      normalizeClipboardForTextPaste([
+        ['page', 'text'],
+        ['42', 'Page note'],
+      ])
+    ).toEqual([['Page note']]);
+  });
+
   it('accepts legacy sura/aya headers', () => {
     const table = [
       ['sura', 'aya', 'text'],
