@@ -26,10 +26,13 @@ describe('AssetContentGridComponent column definitions', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideNoopAnimations(),
-        { provide: NzMessageService, useValue: { success: () => {}, error: () => {}, info: () => {} } },
-        { provide: NzModalService, useValue: { confirm: () => {}, info: () => {} } },
+        {
+          provide: NzMessageService,
+          useValue: { success: () => void 0, error: () => void 0, info: () => void 0 },
+        },
+        { provide: NzModalService, useValue: { confirm: () => void 0, info: () => void 0 } },
         { provide: AdminAuthService, useValue: { hasPermission: () => true } },
-        { provide: LastActiveLanguageService, useValue: { get: () => null, set: () => {} } },
+        { provide: LastActiveLanguageService, useValue: { get: () => null, set: () => void 0 } },
         { provide: Router, useValue: { navigate: () => Promise.resolve(true) } },
       ],
     }).compileComponents();
