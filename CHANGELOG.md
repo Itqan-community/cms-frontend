@@ -345,6 +345,52 @@ Release 1.8.0.
 
 ---
 
+## [1.9.0] - 2026-09-06
+
+Release 1.9.0.
+
+## Changes
+
+- fix(admin): keep Home sidenav active only on /admin
+- fix(admin): expose content editor grid ref for template count
+- feat(admin): show listing counts in page headings
+- fix(recitations): allow folder variant edits regardless of track count
+- feat(recitations): enable folder hide/show and set-default actions
+- feat(recitations): migrate folder tabs to nz-tabset and default variant rules
+- ci: add cloudflare pages config for staging preview
+- feat(none): empty commit to trigger deployment
+- style: apply Prettier formatting to fix CI format check
+- feat(mushaf): hide mushaf reader for now
+- feat(mushaf): enhance mushaf reader, enhance asset editor
+- feat(admin): enhance content editor with CSV copy/paste, undo/redo, and filtering
+- feat(build): empty commit to re-deploy
+- feat(build): empty commit to re-deploy
+- style: format admin layout files for CI prettier check
+- fix: linting
+- fix: Linting
+- feat(build): empty commit
+- feat(build): empty commit
+- refactor(recitations): improve code formatting and readability in various files
+- feat(recitations): add 'Add' label to admin common section and improve folder switcher styles
+- feat: add layout grid icon for /admin route polishing the sidebar tabs
+- feat: add all the links as the sideNav with the same permissions
+- fix: removing TAB_HOME from the sidebar revirting ADMIN.HOME
+- feat(recitations): prevent folder deletion when conditions are not met
+- fix(recitations): harden folder tab a11y and folder-switch race conditions
+- feat(recitations): add tab-style recitation folder switcher and default selection (fixes #208)
+- fix: correct object path handling in JSON update logic
+- feat: Admin portal home/landing page (section cards)
+- chore: revert unintentional formatting changes to auth and publisher files
+- fix: Collabse Side Bar
+- fix: add to localization files with English and Arabic translation strings
+- feat: extract Content Ops layout and sidebar
+- feat: editing part1
+- feat(mushaf): infinite-scroll surah view and drop per-ayah navigation
+- feat(mushaf): render mushaf as SVG pages from quranpedia CDN
+- feat(mushaf): add ayah-by-ayah Quran reader
+
+---
+
 ## [Unreleased]
 
 ### Added
