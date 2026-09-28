@@ -34,11 +34,13 @@ import { Asset } from '../../models/assets.model';
           <div class="main-content">
             <div class="text-content">
               <h3>{{ asset().name }}</h3>
-              <app-asset-template-badge
-                class="asset-card__template"
-                [template]="asset().template"
-                [layoutName]="asset().mushaf_layout?.name ?? null"
-              />
+              @if (asset().template) {
+                <app-asset-template-badge
+                  class="asset-card__template"
+                  [template]="asset().template"
+                  [layoutName]="asset().mushaf_layout?.name ?? null"
+                />
+              }
               <p>{{ asset().description }}</p>
             </div>
             <div class="publisher-info">

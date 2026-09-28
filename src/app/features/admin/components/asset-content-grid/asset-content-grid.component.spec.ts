@@ -4,6 +4,11 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 
+import { Router } from '@angular/router';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzModalService } from 'ng-zorro-antd/modal';
+import { AdminAuthService } from '../../services/admin-auth.service';
+import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { AssetContentGridComponent } from './asset-content-grid.component';
 
 describe('AssetContentGridComponent column definitions', () => {
@@ -17,7 +22,16 @@ describe('AssetContentGridComponent column definitions', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AssetContentGridComponent, TranslateModule.forRoot()],
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideNoopAnimations()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideNoopAnimations(),
+        { provide: NzMessageService, useValue: { success: () => {}, error: () => {}, info: () => {} } },
+        { provide: NzModalService, useValue: { confirm: () => {}, info: () => {} } },
+        { provide: AdminAuthService, useValue: { hasPermission: () => true } },
+        { provide: LastActiveLanguageService, useValue: { get: () => null, set: () => {} } },
+        { provide: Router, useValue: { navigate: () => Promise.resolve(true) } },
+      ],
     }).compileComponents();
   });
 

@@ -95,11 +95,11 @@ export class TranslationFormComponent implements OnInit {
 
   private editSlug: string | null = null;
 
+  readonly layoutsLoading = signal(false);
+  readonly layoutsError = signal(false);
+
   ngOnInit(): void {
-    this.layoutsService
-      .list()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((layouts) => this.layouts.set(layouts));
+    this.loadLayouts();
 
     this.form.controls.template.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -124,6 +124,24 @@ export class TranslationFormComponent implements OnInit {
       this.form.controls.version_name.updateValueAndValidity();
       this.bindTenantPublisher();
     }
+  }
+
+  loadLayouts(): void {
+    this.layoutsLoading.set(true);
+    this.layoutsError.set(false);
+    this.layoutsService
+      .list()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (layouts) => {
+          this.layouts.set(layouts);
+          this.layoutsLoading.set(false);
+        },
+        error: () => {
+          this.layoutsLoading.set(false);
+          this.layoutsError.set(true);
+        },
+      });
   }
 
   beforeUpload = (file: NzUploadFile): boolean => {

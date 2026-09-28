@@ -145,7 +145,7 @@
         [enableRtl]="rtl()"
         [stopEditingWhenCellsLoseFocus]="true"
         [rowSelection]="rowSelection"
-        [undoRedoCellEditing]="true"
+        [undoRedoCellEditing]="rowModelType() === 'clientSide'"
         [undoRedoCellEditingLimit]="50"
         (gridReady)="onGridReady($event)"
         (cellValueChanged)="onCellValueChanged($event)"

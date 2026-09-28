@@ -298,9 +298,12 @@ export class AssetContentGridComponent implements OnInit {
 
   /** Change the word template's server-side surah filter and refetch. */
   onSuraFilterChange(sura: number | null): void {
-    this.suraFilter.set(sura);
-    // A new filter invalidates every cached block.
-    this.gridApi?.refreshInfiniteCache();
+    void this.flushPending().then((ok) => {
+      if (!ok) return;
+      this.suraFilter.set(sura);
+      // A new filter invalidates every cached block.
+      this.gridApi?.refreshInfiniteCache();
+    });
   }
 
   /**
@@ -343,6 +346,7 @@ export class AssetContentGridComponent implements OnInit {
    *  drops blocks cached from the previous draft instead of showing them. */
   readonly wordDatasource = computed<IDatasource>(() => {
     this.draftId();
+    this.suraFilter();
     return this.buildWordDatasource();
   });
 
