@@ -391,6 +391,72 @@ Release 1.9.0.
 
 ---
 
+## [1.10.0] - 2026-09-28
+
+Release 1.10.0.
+
+## Changes
+
+- fix(ci): fix prettier formatting and eslint rules for lint-and-test workflow
+- fix(admin): address PR #246 code review feedback
+- feat(admin): fold long unchanged text in content changes by default
+- feat(admin): say language assignment covers tafsirs and translations only
+- feat(admin): bring back surah and ayah number columns in the editor
+- fix(admin): label the surah template's reference column 'Surah name'
+- feat(admin): show review comments in the version list
+- feat(admin): gate content editing behind its own permission
+- fix(gallery): save downloads under the name the backend gives
+- feat(gallery): show each asset's content template
+- feat(admin): clarify the version list actions and changes panel
+- feat(admin): show content changes in a readable before/after layout
+- fix(admin): show the unit count for word assets in the editor title
+- fix(admin): make long descriptions optional on asset forms
+- fix(admin): create the content grid once its row model is known
+- style: apply prettier to asset-templates files
+- feat: render review changes by template unit label
+- fix(admin): render commit diffs by template unit label
+- feat: add template and layout selectors to asset create forms
+- feat: show the content template badge on gallery asset cards
+- feat: show the content template badge on translation and tafsir assets
+- feat: add asset template badge component
+- fix: gate cacheBlockSize on the infinite row model
+- feat: add infinite row model for word based content editing
+- fix: derive content grid template from loaded rows when unbound
+- feat: drive content grid columns from the asset template
+- feat: add template-shaped content models and mushaf layouts service
+- style: apply prettier to files merged from staging
+- fix(admin): normalize asset version page size
+- fix(admin): address final previewer review comments
+- style: apply prettier to members-list component
+- fix(admin): address review feedback on the review grid PR
+- feat(admin): add language support for asset versions (#240)
+- feat(admin): add language assignment for members with permission checks
+- fix(admin): enhance review grid UX, language persistence, and tests
+- feat(admin): show last-approved to current diff in review grid
+- feat(admin): move translation review to a dedicated full-screen page
+- feat(admin): surface review grid on asset detail with i18n
+- feat(admin): translation review grid component
+- feat(admin): review models, service, and permission constant
+- fix(admin): clamp asset version page size
+- fix(admin): address universal asset previewer review feedback
+- fix(admin): remove unrelated save error reload
+- fix(admin): address asset previewer review feedback
+- feat(admin): add commit functionality with change review support
+- fix(auth): reject protocol-relative redirect targets in readNextQueryParam
+- fix(admin): address asset previewer review feedback
+- feat(admin): add universal asset previewer
+- chore: restore environment configuration
+- fix(auth): preserve redirect after login
+- feat(admin): add file upload for seeding new languages and version restoration
+- feat(admin): add language support for asset versions
+- fix(admin): harden multilingual content editor against data loss
+- fix(admin): standardize CSV column headers in asset grid (surah/ayah)
+- feat(admin): add language management to content editor
+- feat(content-editor): remove footnotes from editable fields and update related hints
+- feat(admin): handle "no_changes_to_publish" error with friendly popup
+
+---
+
 ## [Unreleased]
 
 ### Added
