@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import {
   MemberInviteIn,
@@ -9,6 +9,12 @@ import {
   MemberUpdateIn,
   PagedMemberOut,
 } from '../models/members.models';
+
+/** `languages` is optional on older/partial API responses; normalize it so
+ *  consumers can read `.length` without guarding every call site. */
+function withLanguages(member: MemberOut): MemberOut {
+  return member.languages ? member : { ...member, languages: [] };
+}
 
 @Injectable({
   providedIn: 'root',
@@ -35,11 +41,13 @@ export class MembersService {
       params = params.set('search', filters.search);
     }
 
-    return this.http.get<PagedMemberOut>(`${this.baseUrl}/`, { params });
+    return this.http
+      .get<PagedMemberOut>(`${this.baseUrl}/`, { params })
+      .pipe(map((res) => ({ ...res, results: res.results.map(withLanguages) })));
   }
 
   get(id: number): Observable<MemberOut> {
-    return this.http.get<MemberOut>(`${this.baseUrl}/${id}/`);
+    return this.http.get<MemberOut>(`${this.baseUrl}/${id}/`).pipe(map(withLanguages));
   }
 
   invite(body: MemberInviteIn): Observable<MemberOut> {
@@ -48,6 +56,11 @@ export class MembersService {
 
   update(id: number, body: MemberUpdateIn): Observable<MemberOut> {
     return this.http.patch<MemberOut>(`${this.baseUrl}/${id}/`, body);
+  }
+
+  /** Replace the languages this member works in (editing and reviewing alike). */
+  setMemberLanguages(id: number, languages: string[]): Observable<MemberOut> {
+    return this.http.put<MemberOut>(`${this.baseUrl}/${id}/languages/`, { languages });
   }
 
   remove(id: number): Observable<void> {

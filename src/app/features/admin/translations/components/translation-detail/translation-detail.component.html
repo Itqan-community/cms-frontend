@@ -30,6 +30,10 @@
         </div>
 
         <div class="admin-hero-meta">
+          <app-asset-template-badge
+            [template]="translation()!.template"
+            [layoutName]="translation()!.mushaf_layout?.name ?? null"
+          />
           <nz-tag [nzColor]="getLicenseColor(translation()!.license)">{{
             translation()!.license
           }}</nz-tag>
@@ -72,6 +76,8 @@
             <ng-icon name="lucideSquarePen" />
             {{ 'ADMIN.COMMON.EDIT' | translate }}
           </button>
+        }
+        @if (canEditContent()) {
           <button
             nz-button
             nzType="default"
@@ -79,6 +85,16 @@
           >
             <ng-icon name="lucideLayoutGrid" />
             {{ 'ADMIN.CONTENT_EDITOR.OPEN_BUTTON' | translate }}
+          </button>
+        }
+        @if (canReview()) {
+          <button
+            nz-button
+            nzType="default"
+            [routerLink]="['/admin/translations', routeSlug, 'review']"
+          >
+            <ng-icon name="lucideCheck" />
+            {{ 'ADMIN.REVIEW.OPEN_BUTTON' | translate }}
           </button>
         }
         @if (canDeleteTranslation()) {
@@ -121,6 +137,7 @@
       kind="translation"
       [slug]="translation()!.slug ?? routeSlug"
       [assetId]="translation()!.id"
+      [assetNameEn]="translation()!.name_en"
       i18nPrefix="ADMIN.TRANSLATIONS.DETAIL.VERSIONS"
       sectionTitleKey="ADMIN.TRANSLATIONS.DETAIL.VERSIONS_TITLE"
     />

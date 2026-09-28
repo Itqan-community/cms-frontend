@@ -87,6 +87,10 @@
                   <a class="hoverable-link" [routerLink]="['/admin/tafsirs', tafsir.slug]">
                     {{ tafsir.name }}
                   </a>
+                  <app-asset-template-badge
+                    [template]="tafsir.template"
+                    [layoutName]="tafsir.mushaf_layout?.name ?? null"
+                  />
                 </td>
               }
               @if (showCol('access')) {

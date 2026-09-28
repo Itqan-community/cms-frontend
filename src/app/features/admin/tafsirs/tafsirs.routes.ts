@@ -35,12 +35,23 @@ export const tafsirRoutes: Routes = [
       },
       {
         path: ':slug/edit-content',
-        canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR] })],
+        canActivate: [
+          permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_EDIT_TAFSIR_CONTENT] }),
+        ],
         canDeactivate: [unsavedContentGuard],
         data: { kind: 'tafsir' },
         loadComponent: () =>
           import('../components/asset-content-editor/asset-content-editor.component').then(
             (m) => m.AssetContentEditorComponent
+          ),
+      },
+      {
+        path: ':slug/review',
+        canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_REVIEW_CONTENT] })],
+        data: { kind: 'tafsir' },
+        loadComponent: () =>
+          import('../components/asset-review-page/asset-review-page.component').then(
+            (m) => m.AssetReviewPageComponent
           ),
       },
       {

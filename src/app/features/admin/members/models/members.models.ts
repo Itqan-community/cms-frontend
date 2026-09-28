@@ -10,6 +10,8 @@ export interface MemberOut {
   publisher_id: number;
   expires_at: string | null;
   created_at: string;
+  /** Languages this member is assigned to review (content review phase). */
+  languages: string[];
 }
 
 export interface PagedMemberOut {

@@ -580,7 +580,8 @@
       "ERROR": "Could not submit issue report",
       "FORBIDDEN": "You do not have permission to submit this report",
       "LOGIN_REQUIRED": "Please log in to report an issue"
-    }
+    },
+    "DOWNLOAD_LANGUAGE": "Download language"
   },
   "UI": {
     "FILTERS": "Filters",
@@ -763,6 +764,48 @@
     }
   },
   "ADMIN": {
+    "CONTENT_CHANGES": {
+      "COMMENTS_COUNT": "Comments: {{count}}",
+      "COMMENTS_HINT": "Reviewer comments — open Changes to read them",
+      "BUTTON": "Changes",
+      "PANEL_TITLE": "Changes in {{name}}",
+      "NONE": "No changes.",
+      "FILTER_LABEL": "Filter changes",
+      "ALL": "All",
+      "ADDED": "Added",
+      "MODIFIED": "Changed",
+      "REMOVED": "Removed",
+      "BEFORE": "Before",
+      "AFTER": "After",
+      "EMPTY_TEXT": "(empty)",
+      "SHOW_MORE": "Show {{count}} more",
+      "SHOW_FULL_TEXT": "Show full text",
+      "SHOW_CHANGES_ONLY": "Show changes only"
+    },
+    "PREVIEW": {
+      "LOADING": "Loading preview…",
+      "AUDIO_ERROR": "Unable to load this audio file.",
+      "OPEN_AUDIO": "Open audio",
+      "IMAGE_ERROR": "Unable to display this image.",
+      "OPEN_IMAGE": "Open image",
+      "IMAGE_ZOOM_CONTROLS": "Image zoom controls",
+      "ZOOM_OUT": "Zoom out",
+      "RESET_ZOOM": "Reset zoom",
+      "ZOOM_IN": "Zoom in",
+      "PDF_ERROR": "Unable to display this PDF.",
+      "OPEN_PDF": "Open PDF in a new tab",
+      "FILE_ERROR": "Unable to load this file for preview.",
+      "OPEN_FILE": "Open file",
+      "NO_CSV_DATA": "No CSV data available.",
+      "TEXT_DIFF": "Text diff",
+      "VIEW_MODE": "View mode",
+      "FILE_PREVIEW": "File preview",
+      "DIFF_VIEW": "Diff",
+      "DIFF_TOO_LARGE": "The comparison cannot be displayed because this file is too large.",
+      "UNSUPPORTED": "This file type is not supported for preview.",
+      "OPEN_DOWNLOAD": "Open / Download file",
+      "AUDIO_ARIA": "Audio preview"
+    },
     "HOME": {
       "LABEL": "Home",
       "TITLE": "Overview",
@@ -770,7 +813,7 @@
     },
     "CONTENT_EDITOR": {
       "TITLE": "Edit content",
-      "HINT": "Edit the text ayah by ayah. Changes autosave to a draft; publish to create a new version. Tip: select a Text or Footnotes cell and paste (Ctrl+V) CSV/spreadsheet rows to fill cells downward.",
+      "HINT": "Edit the text unit by unit. Changes autosave to a draft; publish to create a new version. Tip: select a Text cell and paste (Ctrl+V) CSV/spreadsheet rows to fill cells downward.",
       "BACK": "Back to details",
       "SAVE": "Save & publish",
       "SAVE_DRAFT": "Save draft",
@@ -778,24 +821,60 @@
       "UNDO": "Undo",
       "REDO": "Redo",
       "FILTER_ALL": "All surahs",
+      "COMMIT": {
+        "BUTTON": "Commit",
+        "TITLE": "Commit changes",
+        "MESSAGE_LABEL": "Commit message",
+        "MESSAGE_PLACEHOLDER": "Describe what you changed…",
+        "REVIEW": "Changes in this commit",
+        "REVIEW_LOADING": "Reviewing changes…",
+        "REVIEW_ERROR": "Could not load the change review. Close this dialog and try again.",
+        "CONFIRM": "Commit",
+        "CANCEL": "Cancel"
+      },
       "SAVING": "Saving…",
       "UNSAVED": "Unsaved changes",
       "ALL_SAVED": "All changes saved to draft",
       "OPEN_BUTTON": "Edit content",
       "COLUMNS": {
-        "SURA": "Sura",
-        "AYA": "Aya",
+        "SURA": "Surah no.",
+        "AYA": "Ayah no.",
         "SURAH": "Surah",
         "UTHMANI": "Ayah (Uthmani)",
-        "TEXT": "Text",
-        "FOOTNOTES": "Footnotes"
+        "UNIT": "Reference",
+        "SURAH_NAME": "Surah name",
+        "REFERENCE": "Quran text",
+        "TEXT": "Content",
+        "SOURCE": "Source"
+      },
+      "LANGUAGE": {
+        "LABEL": "Editing language",
+        "SOURCE": "Source",
+        "ADD": "Add language",
+        "ADD_TITLE": "Add a translation language",
+        "ADD_CONFIRM": "Add",
+        "ADD_CANCEL": "Cancel",
+        "PICK": "Choose a language",
+        "FILE_LABEL": "Content file (optional)",
+        "FILE_CHOOSE": "Choose file",
+        "FILE_CLEAR": "Remove",
+        "FILE_HINT": "Optionally upload a CSV to publish this language's content now."
+      },
+      "AVAILABILITY": {
+        "AVAILABLE": "Available",
+        "PENDING": "Pending",
+        "MARK_AVAILABLE": "Mark available",
+        "MARK_PENDING": "Mark pending",
+        "HINT": "Available languages can be downloaded by consumers. Pending languages stay hidden until you make them available.",
+        "MARKED_AVAILABLE": "Language is now available to consumers.",
+        "MARKED_PENDING": "Language is now hidden from consumers."
       },
       "MESSAGES": {
         "PUBLISHED": "New version published",
         "DRAFT_SAVED": "Draft saved"
       },
       "PASTE": {
-        "SELECT_EDITABLE": "Select a Text or Footnotes cell first, then paste.",
+        "SELECT_EDITABLE": "Select a Text cell first, then paste.",
         "APPLIED": "Pasted into {{count}} cell(s)."
       },
       "COPY": {
@@ -812,11 +891,82 @@
       },
       "ERRORS": {
         "GENERIC": "Something went wrong. Please try again.",
+        "OK": "Got it",
+        "NO_CHANGES_TO_PUBLISH_TITLE": "No changes to publish",
+        "NO_CHANGES_TO_PUBLISH": "You haven't edited anything in this draft yet. Make a change first, then save and publish a new version.",
         "VERSION_NOT_EDITABLE": "This version can no longer be edited.",
+        "COMMIT_MESSAGE_REQUIRED": "A commit message is required.",
         "TRANSLATION_NOT_FOUND": "Translation not found.",
         "TAFSIR_NOT_FOUND": "Tafsir not found.",
-        "CONTENT_FILE_UNPARSEABLE": "The uploaded file could not be parsed."
+        "CONTENT_FILE_UNPARSEABLE": "The uploaded file could not be parsed.",
+        "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "Publish a version for this language before making it available."
       }
+    },
+    "REVIEW": {
+      "TITLE": "Review changes",
+      "PAGE_TITLE": "Review changes",
+      "OPEN_BUTTON": "Review",
+      "BACK": "Back to asset",
+      "HINT": "Approve each change or leave a comment. You can only review languages assigned to you, and you cannot edit the content here.",
+      "NO_ASSIGNED_LANGUAGES": "You have no languages assigned to review for this asset.",
+      "NO_CHANGES": "No changes to show.",
+      "RETRY": "Retry",
+      "FILTER": {
+        "ALL": "All",
+        "UNREVIEWED": "Unreviewed",
+        "APPROVED": "Approved",
+        "COMMENTED": "Needs changes"
+      },
+      "STATE": {
+        "UNREVIEWED": "Unreviewed",
+        "APPROVED": "Approved",
+        "COMMENTED": "Needs changes"
+      },
+      "TYPE": {
+        "ADDED": "Added",
+        "MODIFIED": "Modified",
+        "REMOVED": "Removed"
+      },
+      "ACTION": {
+        "APPROVE": "Approve",
+        "COMMENT": "Comment",
+        "UNREVIEW": "Unreview"
+      },
+      "COLUMN": {
+        "UNIT": "Reference",
+        "TYPE": "Type",
+        "CHANGE": "Change",
+        "COMMIT": "Commit",
+        "STATE": "Review",
+        "ACTIONS": "Actions"
+      },
+      "COMMENT_DIALOG": {
+        "TITLE": "Request changes",
+        "PLACEHOLDER": "Describe what needs to change…",
+        "CONFIRM": "Save comment",
+        "CANCEL": "Cancel"
+      },
+      "MESSAGES": {
+        "APPROVED": "Change approved.",
+        "COMMENTED": "Comment saved.",
+        "UNREVIEWED": "Marked as unreviewed."
+      },
+      "ERRORS": {
+        "REVIEW_COMMENT_REQUIRED": "A comment is required when requesting changes.",
+        "LANGUAGE_NOT_ASSIGNED": "You are not assigned to review this language.",
+        "GENERIC": "Something went wrong. Please try again."
+      }
+    },
+    "ASSET_TEMPLATE": {
+      "SURAH": "Surah based",
+      "AYAH": "Ayah based",
+      "WORD": "Word based",
+      "PAGE": "Page based",
+      "PAGE_WITH_LAYOUT": "Page based ({{layout}})",
+      "LABEL": "Content template",
+      "LAYOUT_LABEL": "Mushaf layout",
+      "LAYOUT_PLACEHOLDER": "Select a mushaf layout",
+      "IMMUTABLE_HINT": "The template is set when the asset is created and cannot be changed afterwards."
     },
     "COMMON": {
       "ADD": "Add",
@@ -861,6 +1011,7 @@
         "SECTION_TITLE": "Initial version",
         "SECTION_HINT": "Optionally attach the first file version now. You can add versions later from the asset detail page.",
         "FORM_NAME": "Version name",
+        "FORM_LANGUAGE": "Version language",
         "FORM_SUMMARY": "Summary",
         "FORM_FILE": "File",
         "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
@@ -980,8 +1131,6 @@
         "ERR_NAME_AR": "Arabic name is required",
         "ERR_DESC_AR": "Arabic description is required",
         "ERR_DESC_EN": "English description is required",
-        "ERR_LONG_AR": "Arabic long description is required",
-        "ERR_LONG_EN": "English long description is required",
         "ERR_LICENSE": "License is required",
         "ERR_LANGUAGE": "Language is required",
         "ERR_PUBLISHER": "Publisher is required",
@@ -1045,6 +1194,7 @@
           "MODAL_TITLE_CREATE": "Add new version",
           "MODAL_TITLE_EDIT": "Edit version",
           "FORM_NAME": "Version name",
+          "FORM_LANGUAGE": "Version language",
           "FORM_SUMMARY": "Summary",
           "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
           "PLACEHOLDER_SUMMARY": "Short notes about this file…",
@@ -1057,6 +1207,7 @@
           "CLEAR_FILE": "Remove file",
           "EDIT_FILE_HINT": "Optional: choose a new file to replace the current one.",
           "FILE_REQUIRED_HINT": "Select a file to upload.",
+          "LANGUAGES_UNAVAILABLE_HINT": "Languages could not be loaded. Reload the page before uploading a new version.",
           "LIST_TITLE": "Published versions",
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
@@ -1066,7 +1217,15 @@
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
           "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_RESTORE": "Restore as active version",
           "TOOLTIP_DELETE": "Delete",
+          "ACTIVE_BADGE": "Active",
+          "DIFF_LOADING": "Loading changes…",
+          "DIFF_EMPTY": "No per-ayah changes recorded for this version.",
+          "DIFF_ERROR": "Could not load the changes for this version.",
+          "RESTORE_CONFIRM_TITLE": "Restore this version?",
+          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
+          "RESTORE_OK": "Restore",
           "EMPTY_TITLE": "No versions yet",
           "EMPTY_SUBTITLE": "Use “Add new version” to upload a file.",
           "DELETE_CONFIRM_TITLE": "Delete this version?",
@@ -1079,7 +1238,10 @@
             "UPDATE_SUCCESS": "Version updated.",
             "DELETE_SUCCESS": "Version deleted.",
             "DELETE_ERROR": "Could not delete version.",
-            "FILE_REQUIRED": "Choose a file to upload."
+            "RESTORE_SUCCESS": "Version restored as the active version.",
+            "RESTORE_ERROR": "Could not restore version.",
+            "FILE_REQUIRED": "Choose a file to upload.",
+            "LANGUAGE_REQUIRED": "Choose the version language."
           }
         }
       },
@@ -1127,8 +1289,6 @@
         "ERR_NAME_AR": "Arabic name is required",
         "ERR_DESC_AR": "Arabic description is required",
         "ERR_DESC_EN": "English description is required",
-        "ERR_LONG_AR": "Arabic long description is required",
-        "ERR_LONG_EN": "English long description is required",
         "ERR_LICENSE": "License is required",
         "ERR_LANGUAGE": "Language is required",
         "ERR_PUBLISHER": "Publisher is required",
@@ -1192,6 +1352,7 @@
           "MODAL_TITLE_CREATE": "Add new version",
           "MODAL_TITLE_EDIT": "Edit version",
           "FORM_NAME": "Version name",
+          "FORM_LANGUAGE": "Version language",
           "FORM_SUMMARY": "Summary",
           "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
           "PLACEHOLDER_SUMMARY": "Short notes about this file…",
@@ -1204,6 +1365,7 @@
           "CLEAR_FILE": "Remove file",
           "EDIT_FILE_HINT": "Optional: choose a new file to replace the current one.",
           "FILE_REQUIRED_HINT": "Select a file to upload.",
+          "LANGUAGES_UNAVAILABLE_HINT": "Languages could not be loaded. Reload the page before uploading a new version.",
           "LIST_TITLE": "Published versions",
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
@@ -1213,7 +1375,15 @@
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
           "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_RESTORE": "Restore as active version",
           "TOOLTIP_DELETE": "Delete",
+          "ACTIVE_BADGE": "Active",
+          "DIFF_LOADING": "Loading changes…",
+          "DIFF_EMPTY": "No per-ayah changes recorded for this version.",
+          "DIFF_ERROR": "Could not load the changes for this version.",
+          "RESTORE_CONFIRM_TITLE": "Restore this version?",
+          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
+          "RESTORE_OK": "Restore",
           "EMPTY_TITLE": "No versions yet",
           "EMPTY_SUBTITLE": "Use “Add new version” to upload a file.",
           "DELETE_CONFIRM_TITLE": "Delete this version?",
@@ -1226,7 +1396,10 @@
             "UPDATE_SUCCESS": "Version updated.",
             "DELETE_SUCCESS": "Version deleted.",
             "DELETE_ERROR": "Could not delete version.",
-            "FILE_REQUIRED": "Choose a file to upload."
+            "RESTORE_SUCCESS": "Version restored as the active version.",
+            "RESTORE_ERROR": "Could not restore version.",
+            "FILE_REQUIRED": "Choose a file to upload.",
+            "LANGUAGE_REQUIRED": "Choose the version language."
           }
         }
       },
@@ -1640,11 +1813,13 @@
       "TOOLTIP_RESEND": "Resend invitation",
       "TOOLTIP_CANCEL": "Cancel invitation",
       "TOOLTIP_REMOVE": "Remove member",
+      "TOOLTIP_ASSIGNED_LANGUAGES": "Assign languages",
       "COLUMNS": {
         "NAME": "Name",
         "EMAIL": "Email",
         "GROUP": "Group",
         "STATUS": "Status",
+        "ASSIGNED_LANGUAGES": "Languages",
         "CREATED_AT": "Added",
         "ACTIONS": "Actions"
       },
@@ -1692,6 +1867,15 @@
         "CONFIRM_TITLE": "Resend invitation?",
         "CONFIRM_BODY": "{{name}} — the previous link will stop working immediately.",
         "CONFIRM_OK": "Resend"
+      },
+      "ASSIGNED_LANGUAGES": {
+        "TITLE": "Assigned languages — {{name}}",
+        "SCOPE": "Applies to tafsirs and translations only. Recitations, mushafs, fonts and other assets are not limited by language.",
+        "HINT": "Select the languages this member works in. They can only edit and review content in the languages assigned here.",
+        "PLACEHOLDER": "Select languages",
+        "SUBMIT": "Save",
+        "SAVED": "Assigned languages updated",
+        "SAVE_ERROR": "Could not update assigned languages"
       },
       "MESSAGES": {
         "INVITE_SUCCESS": "Invitation sent",
@@ -1891,8 +2075,6 @@
         "ERR_NAME_AR": "Arabic name is required",
         "ERR_DESC_AR": "Arabic description is required",
         "ERR_DESC_EN": "English description is required",
-        "ERR_LONG_AR": "Arabic long description is required",
-        "ERR_LONG_EN": "English long description is required",
         "ERR_LICENSE": "License is required",
         "ERR_LANGUAGE": "Language is required",
         "ERR_PUBLISHER": "Publisher is required",
@@ -1956,6 +2138,7 @@
           "MODAL_TITLE_CREATE": "Add new version",
           "MODAL_TITLE_EDIT": "Edit version",
           "FORM_NAME": "Version name",
+          "FORM_LANGUAGE": "Version language",
           "FORM_SUMMARY": "Summary",
           "PLACEHOLDER_NAME": "e.g. v1.0 — complete text",
           "PLACEHOLDER_SUMMARY": "Short notes about this file…",
@@ -1977,7 +2160,14 @@
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
           "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_RESTORE": "Restore as active version",
           "TOOLTIP_DELETE": "Delete",
+          "ACTIVE_BADGE": "Active",
+          "DIFF_LOADING": "Loading changes…",
+          "DIFF_EMPTY": "No per-ayah changes recorded for this version.",
+          "RESTORE_CONFIRM_TITLE": "Restore this version?",
+          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
+          "RESTORE_OK": "Restore",
           "EMPTY_TITLE": "No versions yet",
           "EMPTY_SUBTITLE": "Use “Add new version” to upload a file.",
           "DELETE_CONFIRM_TITLE": "Delete this version?",
@@ -1990,6 +2180,8 @@
             "UPDATE_SUCCESS": "Version updated.",
             "DELETE_SUCCESS": "Version deleted.",
             "DELETE_ERROR": "Could not delete version.",
+            "RESTORE_SUCCESS": "Version restored as the active version.",
+            "RESTORE_ERROR": "Could not restore version.",
             "FILE_REQUIRED": "Choose a file to upload."
           }
         }
@@ -2054,8 +2246,6 @@
         "ERR_NAME_AR": "Arabic name is required",
         "ERR_DESC_AR": "Arabic description is required",
         "ERR_DESC_EN": "English description is required",
-        "ERR_LONG_AR": "Arabic long description is required",
-        "ERR_LONG_EN": "English long description is required",
         "ERR_LICENSE": "License is required",
         "ERR_LANGUAGE": "Language is required",
         "ERR_PUBLISHER": "Publisher is required",
@@ -2119,6 +2309,7 @@
           "MODAL_TITLE_CREATE": "Add new version",
           "MODAL_TITLE_EDIT": "Edit version",
           "FORM_NAME": "Version name",
+          "FORM_LANGUAGE": "Version language",
           "FORM_SUMMARY": "Summary",
           "PLACEHOLDER_NAME": "e.g. v1.0 — Regular WOFF2",
           "PLACEHOLDER_SUMMARY": "Short notes about this font file…",
@@ -2140,7 +2331,14 @@
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
           "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_RESTORE": "Restore as active version",
           "TOOLTIP_DELETE": "Delete",
+          "ACTIVE_BADGE": "Active",
+          "DIFF_LOADING": "Loading changes…",
+          "DIFF_EMPTY": "No per-ayah changes recorded for this version.",
+          "RESTORE_CONFIRM_TITLE": "Restore this version?",
+          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
+          "RESTORE_OK": "Restore",
           "EMPTY_TITLE": "No versions yet",
           "EMPTY_SUBTITLE": "Use “Add new version” to upload a font file.",
           "DELETE_CONFIRM_TITLE": "Delete this version?",
@@ -2153,6 +2351,8 @@
             "UPDATE_SUCCESS": "Version updated.",
             "DELETE_SUCCESS": "Version deleted.",
             "DELETE_ERROR": "Could not delete version.",
+            "RESTORE_SUCCESS": "Version restored as the active version.",
+            "RESTORE_ERROR": "Could not restore version.",
             "FILE_REQUIRED": "Choose a font file to upload."
           }
         }
@@ -2201,8 +2401,6 @@
         "ERR_NAME_AR": "Arabic name is required",
         "ERR_DESC_AR": "Arabic description is required",
         "ERR_DESC_EN": "English description is required",
-        "ERR_LONG_AR": "Arabic long description is required",
-        "ERR_LONG_EN": "English long description is required",
         "ERR_LICENSE": "License is required",
         "ERR_LANGUAGE": "Language is required",
         "ERR_PUBLISHER": "Publisher is required",
@@ -2266,6 +2464,7 @@
           "MODAL_TITLE_CREATE": "Add new version",
           "MODAL_TITLE_EDIT": "Edit version",
           "FORM_NAME": "Version name",
+          "FORM_LANGUAGE": "Version language",
           "FORM_SUMMARY": "Summary",
           "PLACEHOLDER_NAME": "e.g. v3.2 — Android release",
           "PLACEHOLDER_SUMMARY": "Short release notes for this build…",
@@ -2287,7 +2486,14 @@
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
           "TOOLTIP_EDIT": "Edit",
+          "TOOLTIP_RESTORE": "Restore as active version",
           "TOOLTIP_DELETE": "Delete",
+          "ACTIVE_BADGE": "Active",
+          "DIFF_LOADING": "Loading changes…",
+          "DIFF_EMPTY": "No per-ayah changes recorded for this version.",
+          "RESTORE_CONFIRM_TITLE": "Restore this version?",
+          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
+          "RESTORE_OK": "Restore",
           "EMPTY_TITLE": "No versions yet",
           "EMPTY_SUBTITLE": "Use “Add new version” to upload a release package.",
           "DELETE_CONFIRM_TITLE": "Delete this version?",
@@ -2300,6 +2506,8 @@
             "UPDATE_SUCCESS": "Version updated.",
             "DELETE_SUCCESS": "Version deleted.",
             "DELETE_ERROR": "Could not delete version.",
+            "RESTORE_SUCCESS": "Version restored as the active version.",
+            "RESTORE_ERROR": "Could not restore version.",
             "FILE_REQUIRED": "Choose a release file to upload."
           }
         }

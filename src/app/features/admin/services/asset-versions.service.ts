@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import type {
   AssetVersion,
@@ -26,9 +26,61 @@ export class AssetVersionsService {
     if (params.search?.trim()) {
       httpParams = httpParams.set('search', params.search.trim());
     }
+    if (params.language) {
+      httpParams = httpParams.set('language', params.language);
+    }
     return this.http.get<AssetVersionsListResponse>(this.listUrl(kind, slug), {
       params: httpParams,
     });
+  }
+
+  /**
+   * Load the complete version list for preview / diff.
+   * Search is intentionally not passed because we need the real previous version from the full history.
+   */
+  listAll(
+    kind: AssetVersionParentKind,
+    slug: string,
+    pageSize = 100
+  ): Observable<AssetVersionsListResponse> {
+    const effectivePageSize =
+      Number.isFinite(pageSize) && pageSize > 0 ? Math.min(pageSize, 1000) : 100;
+
+    const firstPageParams = new HttpParams()
+      .set('page', '1')
+      .set('page_size', effectivePageSize.toString());
+
+    return this.http
+      .get<AssetVersionsListResponse>(this.listUrl(kind, slug), {
+        params: firstPageParams,
+      })
+      .pipe(
+        switchMap((firstPage) => {
+          const totalPages = Math.ceil(firstPage.count / effectivePageSize);
+
+          if (totalPages <= 1) {
+            return of(firstPage);
+          }
+
+          const remainingRequests = Array.from({ length: totalPages - 1 }, (_, index) => {
+            const page = index + 2;
+            const params = new HttpParams()
+              .set('page', page.toString())
+              .set('page_size', effectivePageSize.toString());
+
+            return this.http.get<AssetVersionsListResponse>(this.listUrl(kind, slug), {
+              params,
+            });
+          });
+
+          return forkJoin(remainingRequests).pipe(
+            map((responses) => ({
+              results: [...firstPage.results, ...responses.flatMap((response) => response.results)],
+              count: firstPage.count,
+            }))
+          );
+        })
+      );
   }
 
   create(
@@ -91,6 +143,9 @@ export class AssetVersionsService {
     data.append('summary', payload.summary);
     if (payload.file) {
       data.append('file', payload.file);
+    }
+    if (payload.language) {
+      data.append('language', payload.language);
     }
     return data;
   }

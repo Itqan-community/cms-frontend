@@ -1,7 +1,7 @@
 import { Component, inject, input, output } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { TranslatePipe } from '@ngx-translate/core';
+import { Router, RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { UserAvatarComponent } from '../../components/user-avatar/user-avatar.component';
@@ -35,7 +35,12 @@ import { UserAvatarComponent } from '../../components/user-avatar/user-avatar.co
         </button>
       </div>
     } @else {
-      <a [routerLink]="['/account/login']" nz-button class="ant-btn-floating">
+      <a
+        [routerLink]="['/account/login']"
+        [queryParams]="loginQueryParams"
+        nz-button
+        class="ant-btn-floating"
+      >
         {{ 'AUTH.LOGIN.SUBMIT_BUTTON' | translate }}
       </a>
     }
@@ -43,6 +48,7 @@ import { UserAvatarComponent } from '../../components/user-avatar/user-avatar.co
 })
 export class UserActionsComponent {
   readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   mobileMode = input(false);
 
@@ -50,6 +56,16 @@ export class UserActionsComponent {
 
   /** Mobile drawer closes when user opens account from avatar */
   avatarNavigate = output<void>();
+
+  /** Pass the current page as `next` so login redirects back here after success. */
+  get loginQueryParams(): Record<string, string> | null {
+    const url = this.router.url;
+    // Don't add next= when already on an auth page — it would create a circular redirect.
+    if (url.startsWith('/account/') || url.startsWith('/login') || url.startsWith('/register')) {
+      return null;
+    }
+    return { next: url };
+  }
 
   onLogout(): void {
     this.logoutClicked.emit();

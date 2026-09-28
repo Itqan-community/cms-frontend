@@ -1,5 +1,40 @@
 <div class="content-grid" [attr.dir]="rtl() ? 'rtl' : 'ltr'">
   <div class="content-grid__toolbar">
+    <div class="content-grid__language">
+      <span class="content-grid__language-label">
+        {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.LABEL' | translate }}
+      </span>
+      <nz-select
+        class="content-grid__language-select"
+        [ngModel]="selectedLanguage()"
+        (ngModelChange)="onLanguageChange($event)"
+        [nzDisabled]="loading() || saving() || publishing() || savingDraft()"
+      >
+        @for (lang of languages(); track lang.language) {
+          <nz-option
+            [nzValue]="lang.language"
+            [nzLabel]="
+              langName(lang.language) +
+              (lang.is_source
+                ? ' (' + ('ADMIN.CONTENT_EDITOR.LANGUAGE.SOURCE' | translate) + ')'
+                : '')
+            "
+          ></nz-option>
+        }
+      </nz-select>
+      @if (canAddLanguage()) {
+        <button
+          nz-button
+          nzType="default"
+          (click)="openAddLanguage()"
+          [disabled]="loading() || saving() || publishing() || savingDraft()"
+        >
+          <ng-icon name="lucidePlus" />
+          {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD' | translate }}
+        </button>
+      }
+    </div>
+
     <div class="content-grid__status">
       @if (saving()) {
         <span class="content-grid__saving">
@@ -18,26 +53,42 @@
     </div>
 
     <div class="content-grid__actions">
-      <button
-        nz-button
-        nzType="default"
-        nz-tooltip
-        [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.UNDO' | translate"
-        [disabled]="!canUndo()"
-        (click)="undo()"
-      >
-        <ng-icon name="lucideUndo2" />
-      </button>
-      <button
-        nz-button
-        nzType="default"
-        nz-tooltip
-        [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.REDO' | translate"
-        [disabled]="!canRedo()"
-        (click)="redo()"
-      >
-        <ng-icon name="lucideRedo2" />
-      </button>
+      @if (effectiveTemplate() === 'word') {
+        <nz-select
+          class="content-grid__surah-filter"
+          nzAllowClear
+          nzShowSearch
+          [nzPlaceHolder]="'ADMIN.CONTENT_EDITOR.FILTER_ALL' | translate"
+          [ngModel]="suraFilter()"
+          (ngModelChange)="onSuraFilterChange($event)"
+        >
+          @for (opt of wordSurahOptions(); track opt.id) {
+            <nz-option [nzValue]="opt.id" [nzLabel]="opt.label"></nz-option>
+          }
+        </nz-select>
+      }
+      @if (rowModelType() === 'clientSide') {
+        <button
+          nz-button
+          nzType="default"
+          nz-tooltip
+          [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.UNDO' | translate"
+          [disabled]="!canUndo()"
+          (click)="undo()"
+        >
+          <ng-icon name="lucideUndo2" />
+        </button>
+        <button
+          nz-button
+          nzType="default"
+          nz-tooltip
+          [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.REDO' | translate"
+          [disabled]="!canRedo()"
+          (click)="redo()"
+        >
+          <ng-icon name="lucideRedo2" />
+        </button>
+      }
       <button
         nz-button
         nzType="default"
@@ -73,28 +124,139 @@
         nzType="primary"
         [nzLoading]="publishing()"
         [disabled]="draftId() === null || savingDraft() || saving()"
-        (click)="publish()"
+        (click)="openCommit()"
       >
-        {{ 'ADMIN.CONTENT_EDITOR.SAVE' | translate }}
+        {{ 'ADMIN.CONTENT_EDITOR.COMMIT.BUTTON' | translate }}
       </button>
     </div>
   </div>
 
-  <nz-spin [nzSpinning]="loading()" (paste)="onPaste($event)">
-    <ag-grid-angular
-      class="content-grid__table"
-      [theme]="theme"
-      [rowData]="rows()"
-      [columnDefs]="columnDefs"
-      [defaultColDef]="defaultColDef"
-      [enableRtl]="rtl()"
-      [stopEditingWhenCellsLoseFocus]="true"
-      [rowSelection]="rowSelection"
-      [undoRedoCellEditing]="true"
-      [undoRedoCellEditingLimit]="50"
-      (gridReady)="onGridReady($event)"
-      (cellValueChanged)="onCellValueChanged($event)"
-      (selectionChanged)="onSelectionChanged()"
-    ></ag-grid-angular>
+  <nz-spin class="content-grid__spin" [nzSpinning]="loading()" (paste)="onPaste($event)">
+    @if (canCreateGrid()) {
+      <ag-grid-angular
+        class="content-grid__table"
+        [theme]="theme"
+        [rowModelType]="rowModelType()"
+        [rowData]="rowModelType() === 'clientSide' ? rows() : undefined"
+        [datasource]="rowModelType() === 'infinite' ? wordDatasource() : undefined"
+        [cacheBlockSize]="rowModelType() === 'infinite' ? wordCacheBlockSize : undefined"
+        [columnDefs]="columnDefs()"
+        [defaultColDef]="defaultColDef"
+        [enableRtl]="rtl()"
+        [stopEditingWhenCellsLoseFocus]="true"
+        [rowSelection]="rowSelection"
+        [undoRedoCellEditing]="rowModelType() === 'clientSide'"
+        [undoRedoCellEditingLimit]="50"
+        (gridReady)="onGridReady($event)"
+        (cellValueChanged)="onCellValueChanged($event)"
+        (selectionChanged)="onSelectionChanged()"
+      ></ag-grid-angular>
+    }
   </nz-spin>
+
+  <nz-modal
+    [nzVisible]="addLanguageVisible()"
+    [nzTitle]="'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD_TITLE' | translate"
+    [nzOkText]="'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD_CONFIRM' | translate"
+    [nzOkLoading]="addLanguageBusy()"
+    [nzOkDisabled]="!newLanguage()"
+    [nzCancelText]="'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD_CANCEL' | translate"
+    (nzOnOk)="confirmAddLanguage()"
+    (nzOnCancel)="addLanguageVisible.set(false)"
+  >
+    <ng-container *nzModalContent>
+      <p>{{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.PICK' | translate }}</p>
+      <nz-select
+        class="content-grid__add-language-select"
+        nzShowSearch
+        [nzPlaceHolder]="'ADMIN.CONTENT_EDITOR.LANGUAGE.PICK' | translate"
+        [ngModel]="newLanguage()"
+        (ngModelChange)="newLanguage.set($event)"
+      >
+        @for (lang of addableLanguages(); track lang.code) {
+          <nz-option [nzValue]="lang.code" [nzLabel]="lang.label"></nz-option>
+        }
+      </nz-select>
+
+      <div class="content-grid__add-language-file">
+        <p class="content-grid__add-language-file-label">
+          {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.FILE_LABEL' | translate }}
+        </p>
+        <input
+          #addLanguageFileInput
+          type="file"
+          class="content-grid__file-input"
+          (change)="onPickNewLanguageFile($event)"
+        />
+        <div class="content-grid__add-language-file-actions">
+          <button nz-button nzType="default" type="button" (click)="addLanguageFileInput.click()">
+            <ng-icon name="lucideFolderOpen" />
+            {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.FILE_CHOOSE' | translate }}
+          </button>
+          @if (newLanguageFileName()) {
+            <button
+              nz-button
+              nzType="default"
+              nzDanger
+              type="button"
+              (click)="clearNewLanguageFile()"
+            >
+              <ng-icon name="lucideX" />
+              {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.FILE_CLEAR' | translate }}
+            </button>
+          }
+        </div>
+        @if (newLanguageFileName()) {
+          <p class="content-grid__add-language-file-name admin-mono">{{ newLanguageFileName() }}</p>
+        } @else {
+          <p class="content-grid__add-language-file-hint">
+            {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.FILE_HINT' | translate }}
+          </p>
+        }
+      </div>
+    </ng-container>
+  </nz-modal>
+
+  <nz-modal
+    [nzVisible]="commitDialogVisible()"
+    nzWidth="820px"
+    [nzTitle]="'ADMIN.CONTENT_EDITOR.COMMIT.TITLE' | translate"
+    [nzOkText]="'ADMIN.CONTENT_EDITOR.COMMIT.CONFIRM' | translate"
+    [nzOkLoading]="committing()"
+    [nzOkDisabled]="!commitMessage().trim() || pendingLoading() || pendingError()"
+    [nzCancelText]="'ADMIN.CONTENT_EDITOR.COMMIT.CANCEL' | translate"
+    (nzOnOk)="confirmCommit()"
+    (nzOnCancel)="commitDialogVisible.set(false)"
+  >
+    <ng-container *nzModalContent>
+      <label class="content-grid__commit-label" for="content-grid-commit-message">
+        {{ 'ADMIN.CONTENT_EDITOR.COMMIT.MESSAGE_LABEL' | translate }}
+      </label>
+      <textarea
+        id="content-grid-commit-message"
+        nz-input
+        [ngModel]="commitMessage()"
+        (ngModelChange)="commitMessage.set($event)"
+        [nzAutosize]="{ minRows: 2, maxRows: 5 }"
+        [placeholder]="'ADMIN.CONTENT_EDITOR.COMMIT.MESSAGE_PLACEHOLDER' | translate"
+      ></textarea>
+
+      <div class="content-grid__commit-review">
+        @if (pendingLoading()) {
+          <span>{{ 'ADMIN.CONTENT_EDITOR.COMMIT.REVIEW_LOADING' | translate }}</span>
+        } @else if (pendingError()) {
+          <span class="content-grid__commit-error">
+            {{ 'ADMIN.CONTENT_EDITOR.COMMIT.REVIEW_ERROR' | translate }}
+          </span>
+        } @else {
+          <h4 class="content-grid__commit-summary">
+            {{ 'ADMIN.CONTENT_EDITOR.COMMIT.REVIEW' | translate }}
+          </h4>
+          <div class="content-grid__commit-changes">
+            <app-content-changes [changes]="pendingChanges()" />
+          </div>
+        }
+      </div>
+    </ng-container>
+  </nz-modal>
 </div>

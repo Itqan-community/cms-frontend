@@ -1,6 +1,16 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, Input, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  Input,
+  OnInit,
+  computed,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -9,42 +19,74 @@ import type {
   ColDef,
   GridReadyEvent,
   GridApi,
+  IDatasource,
+  IGetRowsParams,
   RowSelectionOptions,
+  ValueGetterParams,
 } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from 'ag-grid-community';
 import { AgGridAngular } from 'ag-grid-angular';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
+import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { Subject, debounceTime } from 'rxjs';
 import type {
+  AssetLanguage,
+  AssetTemplate,
   AssetVersionParentKind,
+  ContentChange,
   ContentEntry,
   ContentEntryPatch,
 } from '../../models/asset-content.models';
+import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
+import { AdminAuthService } from '../../services/admin-auth.service';
+import { SURAHS_METADATA } from '../../models/quran-metadata';
 import { AssetContentService } from '../../services/asset-content.service';
-import { parseClipboardTable, serializeCsv } from '../../utils/clipboard-table.util';
+import { LastActiveLanguageService } from '../../services/last-active-language.service';
+import {
+  normalizeClipboardForTextPaste,
+  parseClipboardTable,
+  serializeCsv,
+} from '../../utils/clipboard-table.util';
+import { ISO_639_LANGUAGES, localizedLanguageName } from '../../utils/iso-639.util';
+import { ContentChangesComponent } from '../content-changes/content-changes.component';
 import { SurahFloatingFilterComponent, type SurahOption } from './surah-floating-filter.component';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 /** Columns the positional paste is allowed to write into. */
-const EDITABLE_FIELDS = new Set<string>(['text', 'footnotes']);
+const EDITABLE_FIELDS = new Set<string>(['text']);
+
+/** Language codes that should render with RTL direction in the source column. */
+const RTL_LANGUAGE_CODES = new Set(['ar', 'fa', 'ur', 'ps', 'ku', 'he', 'yi', 'sd', 'ug']);
 
 const ENTRIES_PAGE_SIZE = 500;
 const AUTOSAVE_DEBOUNCE_MS = 800;
+/**
+ * Rows per infinite-scroll block for the word template. Must equal the
+ * `cacheBlockSize` bound in the template: AG Grid always requests blocks
+ * aligned to that size, so `endRow - startRow` derives the page size safely
+ * from it — pin both to this one constant instead of hardcoding it twice.
+ */
+const WORD_CACHE_BLOCK_SIZE = 100;
 
 @Component({
   selector: 'app-asset-content-grid',
   standalone: true,
   imports: [
     AgGridAngular,
+    ContentChangesComponent,
     TranslateModule,
     NgIcon,
+    FormsModule,
     NzButtonModule,
+    NzInputModule,
     NzModalModule,
+    NzSelectModule,
     NzSpinModule,
     NzToolTipModule,
   ],
@@ -56,35 +98,142 @@ export class AssetContentGridComponent implements OnInit {
   @Input({ required: true }) kind!: AssetVersionParentKind;
   /** Asset slug. */
   @Input({ required: true }) slug!: string;
+  /** Content granularity of the asset; drives which columns are shown. Optional
+   *  override — when unset, the template is derived from the loaded rows
+   *  themselves (see `derivedTemplate`). Task 17 and tests bind this directly. */
+  readonly template = input<AssetTemplate | null>(null);
+  /** Mushaf layout name, when the asset's template is page-based. */
+  readonly layoutName = input<string | null>(null);
+
+  /**
+   * Template as declared by the asset, derived from the rows themselves.
+   *
+   * Every entry carries `unit_type`, and the endpoint always returns the
+   * template's full canonical unit set, so row 0 always exists and every row
+   * agrees (the template is immutable per asset). This avoids a second
+   * request purely to learn something already on the wire — the host
+   * component has no `asset.template` to bind today.
+   */
+  private readonly derivedTemplate = signal<AssetTemplate | null>(null);
+
+  /** The template to actually build columns from: the explicit input, falling
+   *  back to the value derived from the loaded rows. */
+  readonly effectiveTemplate = computed(() => this.template() ?? this.derivedTemplate());
+
+  /**
+   * Word assets have 77,431 units — far too many to hold client-side — so
+   * they scroll through server-fetched blocks. Every other template stays on
+   * the client-side model, which is what keeps undo/redo and the surah
+   * floating filter working for the editors that already rely on them.
+   * Driven by `effectiveTemplate`, not the raw `template` input: in the real
+   * UI the input is unbound and the template only becomes known once the
+   * first page of rows has loaded.
+   */
+  readonly rowModelType = computed<'infinite' | 'clientSide'>(() =>
+    this.effectiveTemplate() === 'word' ? 'infinite' : 'clientSide'
+  );
+
+  /**
+   * `rowModelType` is an @initial AG Grid option — changing it after the grid
+   * exists is ignored — so the grid is only created once its row model is
+   * known: when the template is (bound or derived from the first page), or
+   * when loading ended without one (no rows / load error).
+   */
+  readonly canCreateGrid = computed(() => this.effectiveTemplate() !== null || !this.loading());
+
+  /** Rows per infinite-scroll block; bind the same value to `cacheBlockSize`. */
+  readonly wordCacheBlockSize = WORD_CACHE_BLOCK_SIZE;
 
   private readonly contentService = inject(AssetContentService);
+  private readonly lastLanguage = inject(LastActiveLanguageService);
   private readonly message = inject(NzMessageService);
   private readonly modal = inject(NzModalService);
   private readonly translate = inject(TranslateService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly adminAuth = inject(AdminAuthService);
+
+  /** Starting a new language is controlled separately from editing one. */
+  readonly canAddLanguage = computed(() =>
+    this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ADD_ASSET_LANGUAGE)
+  );
 
   private gridApi?: GridApi<ContentEntry>;
   private readonly autosave$ = new Subject<void>();
+  /** Bumped on each language load so stale draft/entry responses are ignored. */
+  private loadGeneration = 0;
 
-  /** Ayah ids with unsaved edits pending the next autosave flush. */
+  /** Unit ids with unsaved edits pending the next autosave flush. */
   private readonly pendingRows = new Map<number, ContentEntryPatch>();
 
   readonly draftId = signal<number | null>(null);
   readonly rows = signal<ContentEntry[]>([]);
   readonly loading = signal(true);
+
+  /** Languages the asset provides content in (source first). */
+  readonly languages = signal<AssetLanguage[]>([]);
+  /** The language currently being edited (exactly one at a time). */
+  readonly selectedLanguage = signal<string | null>(null);
+  /** True when editing the source language (no reference column, no seeding). */
+  readonly isEditingSource = computed(() => {
+    const sel = this.selectedLanguage();
+    return this.languages().find((l) => l.language === sel)?.is_source ?? true;
+  });
+  /** Localized language name for the current UI language (e.g. fr → "الفرنسية"). */
+  readonly langName = (code: string): string =>
+    localizedLanguageName(code, this.translate.currentLang || 'en');
+
+  /** "Add language" modal state. */
+  readonly addLanguageVisible = signal(false);
+  readonly addLanguageBusy = signal(false);
+  readonly newLanguage = signal<string | null>(null);
+  /** Optional file to seed the new language with (uploaded as its first version). */
+  private newLanguageFile: File | null = null;
+  readonly newLanguageFileName = signal<string | null>(null);
+  /** ISO options not already on the asset, labelled + sorted in the UI language. */
+  readonly addableLanguages = computed(() => {
+    const existing = new Set(this.languages().map((l) => l.language));
+    return ISO_639_LANGUAGES.filter((l) => !existing.has(l.code))
+      .map((l) => ({ code: l.code, label: this.langName(l.code) }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  });
   readonly saving = signal(false);
   readonly publishing = signal(false);
   readonly savingDraft = signal(false);
   readonly dirty = signal(false);
+
+  /** Commit dialog state (required message + change review). */
+  readonly commitDialogVisible = signal(false);
+  readonly commitMessage = signal('');
+  readonly committing = signal(false);
+  readonly pendingLoading = signal(false);
+  readonly pendingError = signal(false);
+  readonly pendingChanges = signal<ContentChange[]>([]);
+  private activePatchesCount = 0;
+  private activePatchError = false;
   readonly selectedCount = signal(0);
   readonly entriesTotal = signal(0);
   readonly canUndo = signal(false);
   readonly canRedo = signal(false);
   /** Distinct surahs present in the data, for the Surah dropdown filter. */
   readonly surahOptions = signal<SurahOption[]>([]);
+  /** Server-side surah filter for the word template (`null` = all surahs). */
+  readonly suraFilter = signal<number | null>(null);
 
   readonly rtl = computed(() => this.translate.currentLang === 'ar');
+
+  /**
+   * Full surah list for the word template's toolbar filter. Unlike
+   * `surahOptions`, this can't be derived from loaded rows — the word grid
+   * never holds its full row set client-side — so it's built once from the
+   * static Quran metadata.
+   */
+  readonly wordSurahOptions = computed(() =>
+    SURAHS_METADATA.map((s) => ({
+      id: s.id,
+      label: `${s.id}. ${this.rtl() ? s.name_ar : s.name_en}`,
+    }))
+  );
 
   readonly theme = themeQuartz;
 
@@ -101,13 +250,13 @@ export class AssetContentGridComponent implements OnInit {
     filter: false,
   };
 
-  readonly columnDefs: ColDef<ContentEntry>[] = this.buildColumnDefs();
+  readonly columnDefs = computed(() => this.buildColumnDefs());
 
   ngOnInit(): void {
     this.autosave$
       .pipe(debounceTime(AUTOSAVE_DEBOUNCE_MS), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => void this.flushPending());
-    this.initDraft();
+    this.loadLanguages();
   }
 
   /** True while there are edits not yet persisted to the draft. */
@@ -121,10 +270,9 @@ export class AssetContentGridComponent implements OnInit {
 
   onCellValueChanged(event: CellValueChangedEvent<ContentEntry>): void {
     const row = event.data;
-    this.pendingRows.set(row.ayah_id, {
-      ayah_id: row.ayah_id,
+    this.pendingRows.set(row.unit_id, {
+      unit_id: row.unit_id,
       text: row.text ?? '',
-      footnotes: row.footnotes ?? '',
     });
     this.dirty.set(true);
     this.autosave$.next();
@@ -148,12 +296,76 @@ export class AssetContentGridComponent implements OnInit {
     this.canRedo.set((this.gridApi?.getCurrentRedoSize() ?? 0) > 0);
   }
 
+  /** Change the word template's server-side surah filter and refetch. */
+  onSuraFilterChange(sura: number | null): void {
+    void this.flushPending().then((ok) => {
+      if (!ok) return;
+      this.suraFilter.set(sura);
+      // A new filter invalidates every cached block.
+      this.gridApi?.refreshInfiniteCache();
+    });
+  }
+
+  /**
+   * An AG Grid infinite datasource backed by the paginated entries endpoint.
+   * AG Grid always requests blocks aligned to `cacheBlockSize` (bound to
+   * `wordCacheBlockSize` in the template), so `endRow - startRow` recovers
+   * that same page size instead of a second hardcoded constant that could
+   * drift from it — and `page` is 1-indexed to match the endpoint, which
+   * rejects `page=0` with a 400.
+   */
+  buildWordDatasource(): IDatasource {
+    return {
+      getRows: (params: IGetRowsParams) => {
+        const versionId = this.draftId();
+        if (versionId === null) {
+          params.failCallback();
+          return;
+        }
+        const pageSize = params.endRow - params.startRow;
+        const page = Math.floor(params.startRow / pageSize) + 1;
+        this.contentService
+          .getEntries(
+            this.kind,
+            this.slug,
+            versionId,
+            page,
+            pageSize,
+            this.suraFilter() ?? undefined
+          )
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: (response) => params.successCallback(response.results, response.count),
+            error: () => params.failCallback(),
+          });
+      },
+    };
+  }
+
+  /** Rebuilt whenever the draft changes (e.g. switching language), so AG Grid
+   *  drops blocks cached from the previous draft instead of showing them. */
+  readonly wordDatasource = computed<IDatasource>(() => {
+    this.draftId();
+    this.suraFilter();
+    return this.buildWordDatasource();
+  });
+
+  /** Localized surah name for a sura id, resolved from the static Quran metadata. */
+  private surahName(sura: number | null): string | null {
+    if (sura === null) return null;
+    const meta = SURAHS_METADATA.find((s) => s.id === sura);
+    if (!meta) return null;
+    return this.translate.currentLang === 'ar' ? meta.name_ar : meta.name_en;
+  }
+
   /** Build the distinct surah list (ordered by sura number) for the dropdown. */
   private buildSurahOptions(rows: ContentEntry[]): void {
     const suraByName = new Map<string, number>();
     for (const row of rows) {
-      if (row.surah_name && !suraByName.has(row.surah_name)) {
-        suraByName.set(row.surah_name, row.sura);
+      if (row.sura === null) continue;
+      const name = this.surahName(row.sura);
+      if (name && !suraByName.has(name)) {
+        suraByName.set(name, row.sura);
       }
     }
     const options: SurahOption[] = [...suraByName.entries()]
@@ -183,7 +395,11 @@ export class AssetContentGridComponent implements OnInit {
     }
 
     const text = event.clipboardData?.getData('text/plain') ?? '';
-    const table = parseClipboardTable(text);
+    const parsed = parseClipboardTable(text);
+    if (parsed.length === 0) return;
+    // Exported CSV includes surah/ayah columns; strip those so paste into Text
+    // only writes the text values (avoids autosaving identifiers as ayah text).
+    const table = normalizeClipboardForTextPaste(parsed);
     if (table.length === 0) return;
     event.preventDefault();
 
@@ -216,9 +432,9 @@ export class AssetContentGridComponent implements OnInit {
   }
 
   /**
-   * Copy the selected rows to the clipboard as CSV (`sura,aya,text,footnotes`
-   * with a header) — the same shape as the per-version download, so it can be
-   * saved to a .csv file or pasted back in.
+   * Copy the selected rows to the clipboard as CSV (`label,reference_text,text`
+   * with a header). Pasting back into a Text cell is header-aware and writes
+   * only the text column.
    */
   copySelectedToCsv(): void {
     const api = this.gridApi;
@@ -228,10 +444,10 @@ export class AssetContentGridComponent implements OnInit {
       this.message.info(this.translate.instant('ADMIN.CONTENT_EDITOR.COPY.NONE_SELECTED'));
       return;
     }
-    selected.sort((a, b) => a.order - b.order || a.ayah_id - b.ayah_id);
+    selected.sort((a, b) => a.order - b.order || a.unit_id - b.unit_id);
     const table: string[][] = [
-      ['sura', 'aya', 'text', 'footnotes'],
-      ...selected.map((r) => [String(r.sura), String(r.aya), r.text ?? '', r.footnotes ?? '']),
+      ['label', 'reference_text', 'text'],
+      ...selected.map((r) => [r.label, r.reference_text, r.text ?? '']),
     ];
     const csv = serializeCsv(table);
     navigator.clipboard.writeText(csv).then(
@@ -245,15 +461,21 @@ export class AssetContentGridComponent implements OnInit {
     );
   }
 
-  private initDraft(): void {
+  /** Load the asset's languages, restoring the last-active one (else the source),
+   *  then open its draft. */
+  private loadLanguages(): void {
     this.loading.set(true);
     this.contentService
-      .createDraft(this.kind, this.slug)
+      .listLanguages(this.kind, this.slug)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (draft) => {
-          this.draftId.set(draft.id);
-          this.loadAllEntries(1);
+        next: (langs) => {
+          this.languages.set(langs);
+          const source = langs.find((l) => l.is_source) ?? langs[0];
+          const remembered = this.lastLanguage.get(this.kind, this.slug);
+          const initial = langs.find((l) => l.language === remembered) ?? source;
+          this.selectedLanguage.set(initial?.language ?? null);
+          this.loadForLanguage();
         },
         error: (err: HttpErrorResponse) => {
           this.loading.set(false);
@@ -262,7 +484,103 @@ export class AssetContentGridComponent implements OnInit {
       });
   }
 
-  private loadAllEntries(page: number, acc: ContentEntry[] = []): void {
+  /** Open (get-or-create) the draft for the selected language and load its rows. */
+  private loadForLanguage(): void {
+    const language = this.selectedLanguage();
+    if (!language) {
+      this.loading.set(false);
+      return;
+    }
+    const generation = ++this.loadGeneration;
+    this.loading.set(true);
+    this.contentService
+      .createDraft(this.kind, this.slug, language)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (draft) => {
+          if (generation !== this.loadGeneration) return;
+          this.draftId.set(draft.id);
+          this.loadAllEntries(1, [], generation);
+        },
+        error: (err: HttpErrorResponse) => {
+          if (generation !== this.loadGeneration) return;
+          this.loading.set(false);
+          this.showError(err);
+        },
+      });
+  }
+
+  /** Switch the edited language: flush pending edits, then reload for the new one. */
+  onLanguageChange(language: string): void {
+    if (language === this.selectedLanguage()) return;
+    void this.flushPending().then((ok) => {
+      if (!ok) return;
+      this.pendingRows.clear();
+      this.dirty.set(false);
+      this.rows.set([]);
+      this.selectedLanguage.set(language);
+      this.lastLanguage.set(this.kind, this.slug, language);
+      this.loadForLanguage();
+    });
+  }
+
+  /** Open the "add language" modal. */
+  openAddLanguage(): void {
+    this.newLanguage.set(null);
+    this.clearNewLanguageFile();
+    this.addLanguageVisible.set(true);
+  }
+
+  /** Pick the optional seed file for the new language. */
+  onPickNewLanguageFile(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    input.value = '';
+    this.newLanguageFile = file;
+    this.newLanguageFileName.set(file?.name ?? null);
+  }
+
+  clearNewLanguageFile(): void {
+    this.newLanguageFile = null;
+    this.newLanguageFileName.set(null);
+  }
+
+  /** Confirm adding a translation language (optionally seeded from a file) and edit it. */
+  confirmAddLanguage(): void {
+    const language = this.newLanguage();
+    if (!language) return;
+    this.addLanguageBusy.set(true);
+    this.contentService
+      .addLanguage(this.kind, this.slug, language, this.newLanguageFile)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (added) => {
+          this.addLanguageBusy.set(false);
+          this.addLanguageVisible.set(false);
+          this.clearNewLanguageFile();
+          this.languages.update((ls) => [...ls, added]);
+          this.onLanguageChange(added.language);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.addLanguageBusy.set(false);
+          this.showError(err);
+        },
+      });
+  }
+
+  /**
+   * Loads entries page by page to build the client-side row set. The word
+   * template never finishes this loop — its 77,431 units scroll through the
+   * infinite datasource instead — so the template is derived from the first
+   * page's `unit_type` and the loop bails out as soon as `word` is detected,
+   * rather than paginating through the entire dataset just to learn a value
+   * that was already on the first response.
+   */
+  private loadAllEntries(
+    page: number,
+    acc: ContentEntry[] = [],
+    generation = this.loadGeneration
+  ): void {
     const versionId = this.draftId();
     if (versionId === null) return;
     this.contentService
@@ -270,9 +588,17 @@ export class AssetContentGridComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
+          if (generation !== this.loadGeneration) return;
           const merged = acc.concat(response.results);
+          this.derivedTemplate.set(merged[0]?.unit_type ?? null);
+          if (merged[0]?.unit_type === 'word') {
+            this.rows.set([]);
+            this.entriesTotal.set(response.count);
+            this.loading.set(false);
+            return;
+          }
           if (merged.length < response.count && response.results.length > 0) {
-            this.loadAllEntries(page + 1, merged);
+            this.loadAllEntries(page + 1, merged, generation);
           } else {
             this.rows.set(merged);
             this.entriesTotal.set(response.count);
@@ -281,6 +607,7 @@ export class AssetContentGridComponent implements OnInit {
           }
         },
         error: (err: HttpErrorResponse) => {
+          if (generation !== this.loadGeneration) return;
           this.loading.set(false);
           this.showError(err);
         },
@@ -288,39 +615,55 @@ export class AssetContentGridComponent implements OnInit {
   }
 
   /** Persist any pending edits to the draft. `true` on success/nothing to save. */
-  private flushPending(): Promise<boolean> {
+  private async flushPending(): Promise<boolean> {
     const versionId = this.draftId();
-    if (versionId === null || this.pendingRows.size === 0) {
-      return Promise.resolve(true);
+    if (versionId === null) {
+      return true;
     }
-    const batch = Array.from(this.pendingRows.values());
-    this.pendingRows.clear();
-    this.saving.set(true);
-    return new Promise<boolean>((resolve) => {
-      this.contentService
-        .patchEntries(this.kind, this.slug, versionId, batch)
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({
-          next: () => {
-            this.saving.set(false);
-            if (this.pendingRows.size === 0) {
-              this.dirty.set(false);
-            }
-            resolve(true);
-          },
-          error: (err: HttpErrorResponse) => {
-            // Re-queue the failed batch so nothing is silently lost.
-            for (const patch of batch) {
-              if (!this.pendingRows.has(patch.ayah_id)) {
-                this.pendingRows.set(patch.ayah_id, patch);
+    if (this.pendingRows.size > 0) {
+      const batch = Array.from(this.pendingRows.values());
+      this.pendingRows.clear();
+      this.saving.set(true);
+      this.activePatchesCount++;
+      await new Promise<void>((resolve) => {
+        this.contentService
+          .patchEntries(this.kind, this.slug, versionId, batch)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe({
+            next: () => {
+              this.activePatchesCount--;
+              if (this.pendingRows.size === 0) {
+                this.dirty.set(false);
               }
-            }
-            this.saving.set(false);
-            this.showError(err);
-            resolve(false);
-          },
-        });
-    });
+              resolve();
+            },
+            error: (err: HttpErrorResponse) => {
+              this.activePatchesCount--;
+              this.activePatchError = true;
+              // Re-queue the failed batch so nothing is silently lost.
+              for (const patch of batch) {
+                if (!this.pendingRows.has(patch.unit_id)) {
+                  this.pendingRows.set(patch.unit_id, patch);
+                }
+              }
+              this.showError(err);
+              resolve();
+            },
+          });
+      });
+    }
+
+    // Wait if there are still active in-flight patch requests.
+    while (this.activePatchesCount > 0) {
+      await new Promise((r) => setTimeout(r, 50));
+    }
+    this.saving.set(false);
+
+    if (this.activePatchError || this.pendingRows.size > 0) {
+      this.activePatchError = false;
+      return false;
+    }
+    return true;
   }
 
   /** Save the current edits to the draft and return to the detail page, keeping
@@ -341,34 +684,66 @@ export class AssetContentGridComponent implements OnInit {
     return this.flushPending();
   }
 
-  /** Save = publish the draft as a new version. Flushes pending edits first. */
-  publish(): void {
+  /** Open the commit dialog: flush pending edits, then load the change review. */
+  openCommit(): void {
     const versionId = this.draftId();
     if (versionId === null) return;
     this.publishing.set(true);
     void this.flushPending().then((ok) => {
-      if (!ok) {
-        this.publishing.set(false);
-        return;
-      }
+      this.publishing.set(false);
+      if (!ok) return;
+      this.commitMessage.set('');
+      this.pendingChanges.set([]);
+      this.pendingError.set(false);
+      this.commitDialogVisible.set(true);
+      this.pendingLoading.set(true);
       this.contentService
-        .publish(this.kind, this.slug, versionId)
+        .pendingChanges(this.kind, this.slug, versionId)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
-          next: () => {
-            this.publishing.set(false);
-            this.dirty.set(false);
-            this.pendingRows.clear();
-            this.draftId.set(null);
-            this.message.success(this.translate.instant('ADMIN.CONTENT_EDITOR.MESSAGES.PUBLISHED'));
-            void this.router.navigate(['/admin', this.listSegment(), this.slug]);
+          next: (res) => {
+            this.pendingChanges.set(res.results);
+            this.pendingLoading.set(false);
           },
           error: (err: HttpErrorResponse) => {
-            this.publishing.set(false);
+            this.pendingLoading.set(false);
+            this.pendingError.set(true);
             this.showError(err);
           },
         });
     });
+  }
+
+  /** Confirm the commit: publish the draft with the (required) message. */
+  confirmCommit(): void {
+    const versionId = this.draftId();
+    if (
+      versionId === null ||
+      !this.commitMessage().trim() ||
+      this.pendingLoading() ||
+      this.pendingError()
+    ) {
+      return;
+    }
+    this.committing.set(true);
+    this.contentService
+      .commit(this.kind, this.slug, versionId, this.commitMessage().trim())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => {
+          this.committing.set(false);
+          this.commitDialogVisible.set(false);
+          this.dirty.set(false);
+          this.pendingRows.clear();
+          this.draftId.set(null);
+          this.message.success(this.translate.instant('ADMIN.CONTENT_EDITOR.MESSAGES.PUBLISHED'));
+          void this.router.navigate(['/admin', this.listSegment(), this.slug]);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.committing.set(false);
+          this.showError(err);
+        },
+      });
   }
 
   /** Confirm, then discard the draft and leave. */
@@ -428,79 +803,149 @@ export class AssetContentGridComponent implements OnInit {
     return this.translate.instant(`ADMIN.CONTENT_EDITOR.COLUMNS.${key}`);
   }
 
-  private buildColumnDefs(): ColDef<ContentEntry>[] {
-    return [
+  /**
+   * Column set is driven by the asset's content template (the explicit
+   * `template` input when bound, otherwise `derivedTemplate` from the loaded
+   * rows — see `effectiveTemplate`):
+   *  - every template shows the pinned unit label and the editable text;
+   *  - `reference_text` (the Quranic text being annotated) is shown for every
+   *    template except `page`, which carries none;
+   *  - the surah dropdown floating filter only means something where every
+   *    row belongs to a single sura, i.e. the `ayah` template — `word` has a
+   *    server-side surah filter in the toolbar instead (see `suraFilter`),
+   *    and `surah`/`page` rows don't share a common sura to filter by;
+   *  - `source_text` (the source language for the same unit) is shown
+   *    read-only whenever a non-source language is being edited.
+   */
+  buildColumnDefs(): ColDef<ContentEntry>[] {
+    const template = this.effectiveTemplate();
+    const columns: ColDef<ContentEntry>[] = [
       {
-        field: 'sura',
-        headerName: this.colHeader('SURA'),
-        width: 110,
+        field: 'label',
+        headerName: this.colHeader('UNIT'),
+        width: 140,
         editable: false,
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
+        pinned: this.rtl() ? 'right' : 'left',
+        ...(template === 'ayah'
+          ? {
+              filter: 'agTextColumnFilter',
+              filterValueGetter: (params: ValueGetterParams<ContentEntry>) =>
+                this.surahName(params.data?.sura ?? null),
+              floatingFilter: true,
+              floatingFilterComponent: SurahFloatingFilterComponent,
+              floatingFilterComponentParams: {
+                optionsProvider: () => this.surahOptions(),
+              },
+            }
+          : {}),
       },
-      {
-        field: 'aya',
-        headerName: this.colHeader('AYA'),
-        width: 110,
-        editable: false,
-        filter: 'agNumberColumnFilter',
-        floatingFilter: true,
-      },
-      {
-        field: 'surah_name',
-        headerName: this.colHeader('SURAH'),
-        width: 170,
-        editable: false,
-        filter: 'agTextColumnFilter',
-        floatingFilter: true,
-        floatingFilterComponent: SurahFloatingFilterComponent,
-        floatingFilterComponentParams: {
-          optionsProvider: () => this.surahOptions(),
+    ];
+
+    // Ayah and word units belong to one surah and ayah: show their numbers so the
+    // grid can be scanned and sorted by them. Ayah rows are all loaded
+    // client-side, so number filters work in place; the word grid loads page by
+    // page (a column filter would only see the loaded block), so it keeps the
+    // toolbar's server-side surah filter instead.
+    if (template === 'ayah' || template === 'word') {
+      const numberFilter =
+        template === 'ayah' ? { filter: 'agNumberColumnFilter', floatingFilter: true } : {};
+      columns.push(
+        {
+          field: 'sura',
+          headerName: this.colHeader('SURA'),
+          width: 110,
+          editable: false,
+          ...numberFilter,
         },
-      },
-      {
-        field: 'uthmani',
-        headerName: this.colHeader('UTHMANI'),
+        {
+          field: 'aya',
+          headerName: this.colHeader('AYA'),
+          width: 110,
+          editable: false,
+          ...numberFilter,
+        }
+      );
+    }
+
+    if (template !== 'page') {
+      columns.push({
+        field: 'reference_text',
+        // Surah assets annotate a whole surah: its "reference" is the surah's name.
+        headerName: this.colHeader(template === 'surah' ? 'SURAH_NAME' : 'REFERENCE'),
         flex: 1,
         editable: false,
         cellStyle: { direction: 'rtl', fontFamily: 'serif' },
         wrapText: true,
         autoHeight: true,
-      },
-      {
-        field: 'text',
-        headerName: this.colHeader('TEXT'),
+      });
+    }
+
+    // When editing a translation, show the source language read-only alongside.
+    if (!this.isEditingSource()) {
+      columns.push({
+        field: 'source_text',
+        headerName: this.sourceColHeader(),
         flex: 2,
-        editable: true,
-        cellEditor: 'agLargeTextCellEditor',
-        cellEditorPopup: true,
-        // agLargeTextCellEditor defaults to maxLength 200; ayah text is far longer,
-        // so raise the cap and enlarge the popup textarea.
-        cellEditorParams: { maxLength: 100000, rows: 12, cols: 60 },
+        editable: false,
+        cellStyle: { direction: this.sourceTextDirection() },
         wrapText: true,
         autoHeight: true,
-      },
-      {
-        field: 'footnotes',
-        headerName: this.colHeader('FOOTNOTES'),
-        flex: 1,
-        editable: true,
-        cellEditor: 'agLargeTextCellEditor',
-        cellEditorPopup: true,
-        cellEditorParams: { maxLength: 100000, rows: 10, cols: 50 },
-        wrapText: true,
-        autoHeight: true,
-      },
-    ];
+      });
+    }
+
+    columns.push({
+      field: 'text',
+      headerName: this.colHeader('TEXT'),
+      flex: 2,
+      editable: true,
+      cellEditor: 'agLargeTextCellEditor',
+      cellEditorPopup: true,
+      // agLargeTextCellEditor defaults to maxLength 200; unit text can be far longer,
+      // so raise the cap and enlarge the popup textarea.
+      cellEditorParams: { maxLength: 100000, rows: 12, cols: 60 },
+      wrapText: true,
+      autoHeight: true,
+    });
+
+    return columns;
+  }
+
+  /** Header for the read-only source-reference column (shows the source language). */
+  private sourceColHeader(): string {
+    const source = this.languages().find((l) => l.is_source);
+    const label = source ? this.langName(source.language) : this.colHeader('SOURCE');
+    return `${this.colHeader('SOURCE')} · ${label}`;
+  }
+
+  /** Text direction for the source-reference column based on the source language. */
+  private sourceTextDirection(): 'rtl' | 'ltr' {
+    const code =
+      this.languages()
+        .find((l) => l.is_source)
+        ?.language?.toLowerCase() ?? 'ar';
+    return RTL_LANGUAGE_CODES.has(code) ? 'rtl' : 'ltr';
   }
 
   private showError(err: HttpErrorResponse): void {
-    const name = err?.error?.error_name;
+    const name: string | undefined = err?.error?.error_name;
+
+    // "Nothing changed" isn't really a failure — show it as a friendly popup
+    // rather than a red error toast.
+    if (name === 'no_changes_to_publish') {
+      this.modal.info({
+        nzTitle: this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.NO_CHANGES_TO_PUBLISH_TITLE'),
+        nzContent: this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.NO_CHANGES_TO_PUBLISH'),
+        nzOkText: this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.OK'),
+        nzDirection: this.translate.currentLang === 'ar' ? 'rtl' : 'ltr',
+      });
+      return;
+    }
+
+    const key = name ? `ADMIN.CONTENT_EDITOR.ERRORS.${name.toUpperCase()}` : '';
+    const translated = key ? this.translate.instant(key) : '';
     this.message.error(
-      name
-        ? this.translate.instant(`ADMIN.CONTENT_EDITOR.ERRORS.${name.toUpperCase()}`, {
-            default: this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC'),
-          })
+      translated && translated !== key
+        ? translated
         : this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC')
     );
   }

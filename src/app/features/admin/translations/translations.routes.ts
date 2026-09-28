@@ -42,13 +42,22 @@ export const translationRoutes: Routes = [
       {
         path: ':slug/edit-content',
         canActivate: [
-          permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION] }),
+          permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_EDIT_TRANSLATION_CONTENT] }),
         ],
         canDeactivate: [unsavedContentGuard],
         data: { kind: 'translation' },
         loadComponent: () =>
           import('../components/asset-content-editor/asset-content-editor.component').then(
             (m) => m.AssetContentEditorComponent
+          ),
+      },
+      {
+        path: ':slug/review',
+        canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_REVIEW_CONTENT] })],
+        data: { kind: 'translation' },
+        loadComponent: () =>
+          import('../components/asset-review-page/asset-review-page.component').then(
+            (m) => m.AssetReviewPageComponent
           ),
       },
       {

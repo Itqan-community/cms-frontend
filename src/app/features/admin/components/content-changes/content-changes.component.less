@@ -1,0 +1,288 @@
+// Semantic change colours (Ant Design green / orange / red) — the same hues the
+// rest of the admin uses for additions, edits and deletions.
+@added: #389e0d;
+@added-bg: #f6ffed;
+@added-mark: #d9f7be;
+@modified: #d46b08;
+@modified-bg: #fff7e6;
+@removed: #cf1322;
+@removed-bg: #fff1f0;
+@removed-mark: #ffccc7;
+
+.content-changes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &__filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  &__chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    border: 1px solid var(--admin-border-200, #e5e7eb);
+    border-radius: 999px;
+    background: var(--admin-surface-white, #fff);
+    color: var(--admin-text-700, #374151);
+    font-size: 13px;
+    line-height: 20px;
+    cursor: pointer;
+    transition:
+      border-color 0.15s,
+      background 0.15s;
+
+    &:disabled {
+      cursor: default;
+      opacity: 0.45;
+    }
+
+    &:not(:disabled):hover {
+      border-color: var(--admin-text-400, #9ca3af);
+    }
+
+    &--active {
+      border-color: var(--admin-text-700, #374151);
+      background: var(--admin-text-700, #374151);
+      color: #fff;
+    }
+
+    &--added.content-changes__chip--active {
+      border-color: @added;
+      background: @added;
+    }
+
+    &--modified.content-changes__chip--active {
+      border-color: @modified;
+      background: @modified;
+    }
+
+    &--removed.content-changes__chip--active {
+      border-color: @removed;
+      background: @removed;
+    }
+  }
+
+  &__chip-count {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__item {
+    padding: 10px 14px;
+    border: 1px solid var(--admin-border-200, #e5e7eb);
+    border-inline-start-width: 4px;
+    border-radius: var(--radius-md, 8px);
+    background: var(--admin-surface-white, #fff);
+
+    &--added {
+      border-inline-start-color: @added;
+    }
+
+    &--modified {
+      border-inline-start-color: @modified;
+    }
+
+    &--removed {
+      border-inline-start-color: @removed;
+    }
+  }
+
+  &__head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  &__badge {
+    padding: 1px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+
+    .content-changes__item--added & {
+      color: @added;
+      background: @added-bg;
+    }
+
+    .content-changes__item--modified & {
+      color: @modified;
+      background: @modified-bg;
+    }
+
+    .content-changes__item--removed & {
+      color: @removed;
+      background: @removed-bg;
+    }
+  }
+
+  &__toggle {
+    margin-inline-start: auto;
+  }
+
+  &__label {
+    color: var(--admin-text-700, #374151);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__side {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  &__side-title {
+    color: var(--admin-text-500, #6b7280);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  &__text {
+    margin: 0;
+    padding: 8px 10px;
+    border-radius: 6px;
+    background: #fafafa;
+    color: var(--admin-text-900, #111827);
+    line-height: 1.8;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+
+    &--added {
+      background: @added-bg;
+    }
+
+    &--removed {
+      background: @removed-bg;
+      color: var(--admin-text-500, #6b7280);
+      text-decoration: line-through;
+    }
+  }
+
+  // Unchanged words are muted so the highlighted changes stand out.
+  &__word--same {
+    color: var(--admin-text-500, #6b7280);
+  }
+
+  // A folded stretch of unchanged text.
+  &__gap {
+    display: inline-block;
+    margin-inline: 4px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--admin-border-200, #e5e7eb);
+    color: var(--admin-text-500, #6b7280);
+    font-size: 12px;
+    line-height: 18px;
+    vertical-align: middle;
+  }
+
+  &__word--removed {
+    border-radius: 3px;
+    background: @removed-mark;
+    color: @removed;
+    text-decoration: line-through;
+  }
+
+  &__word--added {
+    border-radius: 3px;
+    background: @added-mark;
+    color: @added;
+    font-weight: 500;
+  }
+
+  // The reviewer's outcome, set apart from the text so it reads as a note on it.
+  &__review {
+    margin-top: 10px;
+    padding: 8px 10px;
+    border: 1px dashed var(--admin-border-200, #e5e7eb);
+    border-radius: 6px;
+    background: var(--admin-surface-white, #fff);
+
+    &--commented {
+      border-color: #ffd591;
+      background: #fffbf0;
+    }
+
+    &--approved {
+      border-color: var(--color-primary-200, #d1e1d9);
+      background: var(--color-primary-50, #f0f5f2);
+    }
+  }
+
+  &__review-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+
+    ng-icon {
+      width: 14px;
+      height: 14px;
+      color: var(--admin-text-500, #6b7280);
+    }
+  }
+
+  &__review-state {
+    font-weight: 600;
+
+    .content-changes__review--commented & {
+      color: @modified;
+    }
+
+    .content-changes__review--approved & {
+      color: var(--color-primary-700, #527c66);
+    }
+  }
+
+  &__review-meta {
+    color: var(--admin-text-500, #6b7280);
+  }
+
+  &__review-comment {
+    margin: 6px 0 0;
+    color: var(--admin-text-900, #111827);
+    white-space: pre-line;
+  }
+
+  &__empty {
+    color: var(--admin-text-400, #9ca3af);
+    font-style: italic;
+    text-decoration: none;
+  }
+
+  &__none {
+    margin: 0;
+    color: var(--admin-text-500, #6b7280);
+  }
+
+  &__more {
+    align-self: center;
+  }
+}

@@ -580,7 +580,8 @@
       "ERROR": "تعذّر إرسال بلاغ المشكلة",
       "FORBIDDEN": "ليس لديك صلاحية لإرسال هذا البلاغ",
       "LOGIN_REQUIRED": "يرجى تسجيل الدخول للإبلاغ عن مشكلة"
-    }
+    },
+    "DOWNLOAD_LANGUAGE": "لغة التحميل"
   },
   "UI": {
     "FILTERS": "تصفية",
@@ -763,6 +764,24 @@
     }
   },
   "ADMIN": {
+    "CONTENT_CHANGES": {
+      "COMMENTS_COUNT": "تعليقات: {{count}}",
+      "COMMENTS_HINT": "تعليقات المراجعين — افتح التغييرات لقراءتها",
+      "BUTTON": "التغييرات",
+      "PANEL_TITLE": "التغييرات في {{name}}",
+      "NONE": "لا توجد تغييرات.",
+      "FILTER_LABEL": "تصفية التغييرات",
+      "ALL": "الكل",
+      "ADDED": "مُضاف",
+      "MODIFIED": "مُعدَّل",
+      "REMOVED": "محذوف",
+      "BEFORE": "قبل",
+      "AFTER": "بعد",
+      "EMPTY_TEXT": "(فارغ)",
+      "SHOW_MORE": "عرض {{count}} أخرى",
+      "SHOW_FULL_TEXT": "عرض النص كاملًا",
+      "SHOW_CHANGES_ONLY": "عرض التغييرات فقط"
+    },
     "HOME": {
       "LABEL": "الرئيسية",
       "TITLE": "نظرة عامة",
@@ -770,7 +789,7 @@
     },
     "CONTENT_EDITOR": {
       "TITLE": "تحرير المحتوى",
-      "HINT": "حرّر النص آيةً آية. تُحفظ التغييرات تلقائيًا كمسودة؛ انشر لإنشاء نسخة جديدة. تلميح: اختر خلية النص أو الهامش والصق (Ctrl+V) صفوف CSV أو جدول بيانات لتعبئة الخلايا للأسفل.",
+      "HINT": "حرّر النص وحدةً تلو الأخرى. تُحفظ التغييرات تلقائيًا كمسودة؛ انشر لإنشاء نسخة جديدة. تلميح: اختر خلية النص والصق (Ctrl+V) صفوف CSV أو جدول بيانات لتعبئة الخلايا للأسفل.",
       "BACK": "العودة إلى التفاصيل",
       "SAVE": "حفظ ونشر",
       "SAVE_DRAFT": "حفظ كمسودة",
@@ -778,24 +797,60 @@
       "UNDO": "تراجع",
       "REDO": "إعادة",
       "FILTER_ALL": "كل السور",
+      "COMMIT": {
+        "BUTTON": "حفظ التغييرات",
+        "TITLE": "حفظ التغييرات",
+        "MESSAGE_LABEL": "رسالة التغيير",
+        "MESSAGE_PLACEHOLDER": "صِف ما قمت بتغييره…",
+        "REVIEW": "التغييرات التي سيتم حفظها",
+        "REVIEW_LOADING": "جارٍ مراجعة التغييرات…",
+        "REVIEW_ERROR": "تعذّر تحميل مراجعة التغييرات. أغلق النافذة وحاول مرة أخرى.",
+        "CONFIRM": "حفظ",
+        "CANCEL": "إلغاء"
+      },
       "SAVING": "جارٍ الحفظ…",
       "UNSAVED": "تغييرات غير محفوظة",
       "ALL_SAVED": "تم حفظ جميع التغييرات في المسودة",
       "OPEN_BUTTON": "تحرير المحتوى",
       "COLUMNS": {
-        "SURA": "السورة",
-        "AYA": "الآية",
+        "SURA": "رقم السورة",
+        "AYA": "رقم الآية",
         "SURAH": "السورة",
         "UTHMANI": "الآية (عثماني)",
-        "TEXT": "النص",
-        "FOOTNOTES": "الحواشي"
+        "UNIT": "الموضع",
+        "SURAH_NAME": "اسم السورة",
+        "REFERENCE": "نص القرآن",
+        "TEXT": "المحتوى",
+        "SOURCE": "المصدر"
+      },
+      "LANGUAGE": {
+        "LABEL": "لغة التحرير",
+        "SOURCE": "المصدر",
+        "ADD": "إضافة لغة",
+        "ADD_TITLE": "إضافة لغة ترجمة",
+        "ADD_CONFIRM": "إضافة",
+        "ADD_CANCEL": "إلغاء",
+        "PICK": "اختر لغة",
+        "FILE_LABEL": "ملف المحتوى (اختياري)",
+        "FILE_CHOOSE": "اختر ملفًا",
+        "FILE_CLEAR": "إزالة",
+        "FILE_HINT": "يمكنك اختياريًا رفع ملف CSV لنشر محتوى هذه اللغة الآن."
+      },
+      "AVAILABILITY": {
+        "AVAILABLE": "متاحة",
+        "PENDING": "قيد الانتظار",
+        "MARK_AVAILABLE": "جعلها متاحة",
+        "MARK_PENDING": "جعلها قيد الانتظار",
+        "HINT": "اللغات المتاحة يمكن للمستخدمين تنزيلها. تبقى اللغات قيد الانتظار مخفية حتى تجعلها متاحة.",
+        "MARKED_AVAILABLE": "أصبحت اللغة متاحة للمستخدمين الآن.",
+        "MARKED_PENDING": "أصبحت اللغة مخفية عن المستخدمين الآن."
       },
       "MESSAGES": {
         "PUBLISHED": "تم نشر نسخة جديدة",
         "DRAFT_SAVED": "تم حفظ المسودة"
       },
       "PASTE": {
-        "SELECT_EDITABLE": "اختر خلية النص أو الهامش أولًا، ثم الصق.",
+        "SELECT_EDITABLE": "اختر خلية النص أولًا، ثم الصق.",
         "APPLIED": "تم اللصق في {{count}} خلية."
       },
       "COPY": {
@@ -812,11 +867,82 @@
       },
       "ERRORS": {
         "GENERIC": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+        "OK": "حسنًا",
+        "NO_CHANGES_TO_PUBLISH_TITLE": "لا توجد تغييرات للنشر",
+        "NO_CHANGES_TO_PUBLISH": "لم تُجرِ أي تعديل على هذه المسودة بعد. قم بإجراء تغيير أولًا، ثم احفظ وانشر نسخة جديدة.",
         "VERSION_NOT_EDITABLE": "لم يعد بالإمكان تحرير هذه النسخة.",
+        "COMMIT_MESSAGE_REQUIRED": "رسالة التغيير مطلوبة.",
         "TRANSLATION_NOT_FOUND": "الترجمة غير موجودة.",
         "TAFSIR_NOT_FOUND": "التفسير غير موجود.",
-        "CONTENT_FILE_UNPARSEABLE": "تعذّر تحليل الملف المرفوع."
+        "CONTENT_FILE_UNPARSEABLE": "تعذّر تحليل الملف المرفوع.",
+        "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "انشر نسخة لهذه اللغة قبل جعلها متاحة."
       }
+    },
+    "REVIEW": {
+      "TITLE": "مراجعة التغييرات",
+      "PAGE_TITLE": "مراجعة التغييرات",
+      "OPEN_BUTTON": "مراجعة",
+      "BACK": "العودة إلى المورد",
+      "HINT": "اعتمد كل تغيير أو اترك تعليقًا. يمكنك مراجعة اللغات المُكلَّف بها فقط، ولا يمكنك تعديل المحتوى هنا.",
+      "NO_ASSIGNED_LANGUAGES": "لا توجد لغات مُكلَّف بمراجعتها لهذا المورد.",
+      "NO_CHANGES": "لا توجد تغييرات لعرضها.",
+      "RETRY": "إعادة المحاولة",
+      "FILTER": {
+        "ALL": "الكل",
+        "UNREVIEWED": "غير مُراجَع",
+        "APPROVED": "معتمد",
+        "COMMENTED": "يحتاج إلى تعديل"
+      },
+      "STATE": {
+        "UNREVIEWED": "غير مُراجَع",
+        "APPROVED": "معتمد",
+        "COMMENTED": "يحتاج إلى تعديل"
+      },
+      "TYPE": {
+        "ADDED": "مضاف",
+        "MODIFIED": "معدّل",
+        "REMOVED": "محذوف"
+      },
+      "ACTION": {
+        "APPROVE": "اعتماد",
+        "COMMENT": "تعليق",
+        "UNREVIEW": "إلغاء المراجعة"
+      },
+      "COLUMN": {
+        "UNIT": "الموضع",
+        "TYPE": "النوع",
+        "CHANGE": "التغيير",
+        "COMMIT": "الإصدار",
+        "STATE": "المراجعة",
+        "ACTIONS": "إجراءات"
+      },
+      "COMMENT_DIALOG": {
+        "TITLE": "طلب تعديلات",
+        "PLACEHOLDER": "صف ما الذي يحتاج إلى تغيير…",
+        "CONFIRM": "حفظ التعليق",
+        "CANCEL": "إلغاء"
+      },
+      "MESSAGES": {
+        "APPROVED": "تم اعتماد التغيير.",
+        "COMMENTED": "تم حفظ التعليق.",
+        "UNREVIEWED": "تم وضعه كغير مُراجَع."
+      },
+      "ERRORS": {
+        "REVIEW_COMMENT_REQUIRED": "التعليق مطلوب عند طلب إجراء تعديلات.",
+        "LANGUAGE_NOT_ASSIGNED": "لست مُكلَّفًا بمراجعة هذه اللغة.",
+        "GENERIC": "حدث خطأ ما. يرجى المحاولة مرة أخرى."
+      }
+    },
+    "ASSET_TEMPLATE": {
+      "SURAH": "حسب السورة",
+      "AYAH": "حسب الآية",
+      "WORD": "حسب الكلمة",
+      "PAGE": "حسب الصفحة",
+      "PAGE_WITH_LAYOUT": "حسب الصفحة ({{layout}})",
+      "LABEL": "قالب المحتوى",
+      "LAYOUT_LABEL": "تخطيط المصحف",
+      "LAYOUT_PLACEHOLDER": "اختر تخطيط المصحف",
+      "IMMUTABLE_HINT": "يتم تحديد القالب عند إنشاء الأصل ولا يمكن تغييره لاحقًا."
     },
     "COMMON": {
       "ADD": "إضافة",
@@ -861,6 +987,7 @@
         "SECTION_TITLE": "الإصدار الأولي",
         "SECTION_HINT": "يمكنك إرفاق ملف الإصدار الأول الآن اختياريًا. يمكنك إضافة الإصدارات لاحقًا من صفحة تفاصيل الأصل.",
         "FORM_NAME": "اسم الإصدار",
+        "FORM_LANGUAGE": "لغة الإصدار",
         "FORM_SUMMARY": "الملخص",
         "FORM_FILE": "الملف",
         "PLACEHOLDER_NAME": "مثال: v1.0 — النص الكامل",
@@ -872,6 +999,31 @@
         "FILE_OPTIONAL_HINT": "اختياري — اختر ملفًا لرفعه مع هذا الأصل."
       }
     },
+    "PREVIEW": {
+      "LOADING": "جاري تحميل المعاينة…",
+      "AUDIO_ERROR": "تعذّر تحميل الملف الصوتي.",
+      "OPEN_AUDIO": "فتح الصوت",
+      "IMAGE_ERROR": "تعذّر عرض الصورة.",
+      "OPEN_IMAGE": "فتح الصورة",
+      "IMAGE_ZOOM_CONTROLS": "أدوات تكبير الصورة",
+      "ZOOM_OUT": "تصغير",
+      "RESET_ZOOM": "إعادة ضبط التكبير",
+      "ZOOM_IN": "تكبير",
+      "PDF_ERROR": "تعذّر عرض ملف PDF.",
+      "OPEN_PDF": "فتح PDF في علامة تبويب جديدة",
+      "FILE_ERROR": "تعذّر تحميل الملف للمعاينة.",
+      "OPEN_FILE": "فتح الملف",
+      "NO_CSV_DATA": "لا توجد بيانات CSV متاحة.",
+      "TEXT_DIFF": "مقارنة النص",
+      "VIEW_MODE": "طريقة العرض",
+      "FILE_PREVIEW": "معاينة الملف",
+      "DIFF_VIEW": "المقارنة",
+      "DIFF_TOO_LARGE": "يتعذّر عرض المقارنة لهذا الملف لأنه كبير جدًا.",
+      "UNSUPPORTED": "نوع الملف هذا غير مدعوم للمعاينة.",
+      "OPEN_DOWNLOAD": "فتح / تنزيل الملف",
+      "AUDIO_ARIA": "معاينة صوتية"
+    },
+
     "TENANT": {
       "ARIA_LABEL": "محدد نطاق الناشر",
       "PLACEHOLDER": "اختر الناشر",
@@ -980,8 +1132,6 @@
         "ERR_NAME_AR": "الاسم بالعربية مطلوب",
         "ERR_DESC_AR": "الوصف بالعربية مطلوب",
         "ERR_DESC_EN": "الوصف بالإنجليزية مطلوب",
-        "ERR_LONG_AR": "الوصف المطوّل بالعربية مطلوب",
-        "ERR_LONG_EN": "الوصف المطوّل بالإنجليزية مطلوب",
         "ERR_LICENSE": "الترخيص مطلوب",
         "ERR_LANGUAGE": "اللغة مطلوبة",
         "ERR_PUBLISHER": "الناشر مطلوب",
@@ -1045,6 +1195,7 @@
           "MODAL_TITLE_CREATE": "إضافة إصدار جديد",
           "MODAL_TITLE_EDIT": "تعديل الإصدار",
           "FORM_NAME": "اسم الإصدار",
+          "FORM_LANGUAGE": "لغة الإصدار",
           "FORM_SUMMARY": "الملخص",
           "PLACEHOLDER_NAME": "مثال: v1.0 — النص الكامل",
           "PLACEHOLDER_SUMMARY": "ملاحظات قصيرة عن هذا الملف…",
@@ -1057,6 +1208,7 @@
           "CLEAR_FILE": "إزالة الملف",
           "EDIT_FILE_HINT": "اختياري: اختر ملفًا جديدًا لاستبدال الحالي.",
           "FILE_REQUIRED_HINT": "اختر ملفًا للرفع.",
+          "LANGUAGES_UNAVAILABLE_HINT": "تعذّر تحميل اللغات. أعد تحميل الصفحة قبل رفع إصدار جديد.",
           "LIST_TITLE": "الإصدارات المنشورة",
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
@@ -1066,7 +1218,15 @@
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
           "TOOLTIP_EDIT": "تعديل",
+          "TOOLTIP_RESTORE": "استعادة كإصدار نشط",
           "TOOLTIP_DELETE": "حذف",
+          "ACTIVE_BADGE": "نشط",
+          "DIFF_LOADING": "جارٍ تحميل التغييرات…",
+          "DIFF_EMPTY": "لا توجد تغييرات مسجّلة على مستوى الآيات لهذه النسخة.",
+          "DIFF_ERROR": "تعذّر تحميل تغييرات هذا الإصدار.",
+          "RESTORE_CONFIRM_TITLE": "استعادة هذا الإصدار؟",
+          "RESTORE_CONFIRM_BODY": "سيتم استعادة <b>{{name}}</b> كإصدار جديد ونشط.",
+          "RESTORE_OK": "استعادة",
           "EMPTY_TITLE": "لا توجد إصدارات بعد",
           "EMPTY_SUBTITLE": "استخدم «إضافة إصدار جديد» لرفع ملف.",
           "DELETE_CONFIRM_TITLE": "حذف هذا الإصدار؟",
@@ -1079,7 +1239,10 @@
             "UPDATE_SUCCESS": "تم تحديث الإصدار.",
             "DELETE_SUCCESS": "تم حذف الإصدار.",
             "DELETE_ERROR": "تعذّر حذف الإصدار.",
-            "FILE_REQUIRED": "اختر ملفًا للرفع."
+            "RESTORE_SUCCESS": "تمت استعادة الإصدار كإصدار نشط.",
+            "RESTORE_ERROR": "تعذّر استعادة الإصدار.",
+            "FILE_REQUIRED": "اختر ملفًا للرفع.",
+            "LANGUAGE_REQUIRED": "اختر لغة الإصدار."
           }
         }
       },
@@ -1127,8 +1290,6 @@
         "ERR_NAME_AR": "الاسم بالعربية مطلوب",
         "ERR_DESC_AR": "الوصف بالعربية مطلوب",
         "ERR_DESC_EN": "الوصف بالإنجليزية مطلوب",
-        "ERR_LONG_AR": "الوصف المطوّل بالعربية مطلوب",
-        "ERR_LONG_EN": "الوصف المطوّل بالإنجليزية مطلوب",
         "ERR_LICENSE": "الترخيص مطلوب",
         "ERR_LANGUAGE": "اللغة مطلوبة",
         "ERR_PUBLISHER": "الناشر مطلوب",
@@ -1192,6 +1353,7 @@
           "MODAL_TITLE_CREATE": "إضافة إصدار جديد",
           "MODAL_TITLE_EDIT": "تعديل الإصدار",
           "FORM_NAME": "اسم الإصدار",
+          "FORM_LANGUAGE": "لغة الإصدار",
           "FORM_SUMMARY": "الملخص",
           "PLACEHOLDER_NAME": "مثال: v1.0 — النص الكامل",
           "PLACEHOLDER_SUMMARY": "ملاحظات قصيرة عن هذا الملف…",
@@ -1204,6 +1366,7 @@
           "CLEAR_FILE": "إزالة الملف",
           "EDIT_FILE_HINT": "اختياري: اختر ملفًا جديدًا لاستبدال الحالي.",
           "FILE_REQUIRED_HINT": "اختر ملفًا للرفع.",
+          "LANGUAGES_UNAVAILABLE_HINT": "تعذّر تحميل اللغات. أعد تحميل الصفحة قبل رفع إصدار جديد.",
           "LIST_TITLE": "الإصدارات المنشورة",
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
@@ -1213,7 +1376,15 @@
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
           "TOOLTIP_EDIT": "تعديل",
+          "TOOLTIP_RESTORE": "استعادة كإصدار نشط",
           "TOOLTIP_DELETE": "حذف",
+          "ACTIVE_BADGE": "نشط",
+          "DIFF_LOADING": "جارٍ تحميل التغييرات…",
+          "DIFF_EMPTY": "لا توجد تغييرات مسجّلة على مستوى الآيات لهذه النسخة.",
+          "DIFF_ERROR": "تعذّر تحميل تغييرات هذا الإصدار.",
+          "RESTORE_CONFIRM_TITLE": "استعادة هذا الإصدار؟",
+          "RESTORE_CONFIRM_BODY": "سيتم استعادة <b>{{name}}</b> كإصدار جديد ونشط.",
+          "RESTORE_OK": "استعادة",
           "EMPTY_TITLE": "لا توجد إصدارات بعد",
           "EMPTY_SUBTITLE": "استخدم «إضافة إصدار جديد» لرفع ملف.",
           "DELETE_CONFIRM_TITLE": "حذف هذا الإصدار؟",
@@ -1226,7 +1397,10 @@
             "UPDATE_SUCCESS": "تم تحديث الإصدار.",
             "DELETE_SUCCESS": "تم حذف الإصدار.",
             "DELETE_ERROR": "تعذّر حذف الإصدار.",
-            "FILE_REQUIRED": "اختر ملفًا للرفع."
+            "RESTORE_SUCCESS": "تمت استعادة الإصدار كإصدار نشط.",
+            "RESTORE_ERROR": "تعذّر استعادة الإصدار.",
+            "FILE_REQUIRED": "اختر ملفًا للرفع.",
+            "LANGUAGE_REQUIRED": "اختر لغة الإصدار."
           }
         }
       },
@@ -1640,11 +1814,13 @@
       "TOOLTIP_RESEND": "إعادة إرسال الدعوة",
       "TOOLTIP_CANCEL": "إلغاء الدعوة",
       "TOOLTIP_REMOVE": "إزالة العضو",
+      "TOOLTIP_ASSIGNED_LANGUAGES": "تعيين اللغات",
       "COLUMNS": {
         "NAME": "الاسم",
         "EMAIL": "البريد الإلكتروني",
         "GROUP": "المجموعة",
         "STATUS": "الحالة",
+        "ASSIGNED_LANGUAGES": "اللغات",
         "CREATED_AT": "تاريخ الإضافة",
         "ACTIONS": "الإجراءات"
       },
@@ -1692,6 +1868,15 @@
         "CONFIRM_TITLE": "إعادة إرسال الدعوة؟",
         "CONFIRM_BODY": "{{name}} — سيتوقف الرابط السابق عن العمل فوراً.",
         "CONFIRM_OK": "إعادة الإرسال"
+      },
+      "ASSIGNED_LANGUAGES": {
+        "TITLE": "اللغات المعيّنة — {{name}}",
+        "SCOPE": "ينطبق هذا الإعداد على التفاسير والترجمات فقط، ولا تتقيّد التلاوات والمصاحف والخطوط وبقية الأصول باللغة.",
+        "HINT": "اختر اللغات التي يعمل بها هذا العضو. لن يتمكن من تحرير أو مراجعة المحتوى إلا في اللغات المعيّنة هنا.",
+        "PLACEHOLDER": "اختر اللغات",
+        "SUBMIT": "حفظ",
+        "SAVED": "تم تحديث اللغات المعيّنة",
+        "SAVE_ERROR": "تعذر تحديث اللغات المعيّنة"
       },
       "MESSAGES": {
         "INVITE_SUCCESS": "تم إرسال الدعوة",
@@ -1891,8 +2076,6 @@
         "ERR_NAME_AR": "الاسم بالعربية مطلوب",
         "ERR_DESC_AR": "الوصف بالعربية مطلوب",
         "ERR_DESC_EN": "الوصف بالإنجليزية مطلوب",
-        "ERR_LONG_AR": "الوصف المطوّل بالعربية مطلوب",
-        "ERR_LONG_EN": "الوصف المطوّل بالإنجليزية مطلوب",
         "ERR_LICENSE": "الترخيص مطلوب",
         "ERR_LANGUAGE": "اللغة مطلوبة",
         "ERR_PUBLISHER": "الناشر مطلوب",
@@ -1956,6 +2139,7 @@
           "MODAL_TITLE_CREATE": "إضافة إصدار جديد",
           "MODAL_TITLE_EDIT": "تعديل الإصدار",
           "FORM_NAME": "اسم الإصدار",
+          "FORM_LANGUAGE": "لغة الإصدار",
           "FORM_SUMMARY": "الملخص",
           "PLACEHOLDER_NAME": "مثال: v1.0 — النص الكامل",
           "PLACEHOLDER_SUMMARY": "ملاحظات قصيرة عن هذا الملف…",
@@ -1977,7 +2161,14 @@
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
           "TOOLTIP_EDIT": "تعديل",
+          "TOOLTIP_RESTORE": "استعادة كإصدار نشط",
           "TOOLTIP_DELETE": "حذف",
+          "ACTIVE_BADGE": "نشط",
+          "DIFF_LOADING": "جارٍ تحميل التغييرات…",
+          "DIFF_EMPTY": "لا توجد تغييرات مسجّلة على مستوى الآيات لهذه النسخة.",
+          "RESTORE_CONFIRM_TITLE": "استعادة هذا الإصدار؟",
+          "RESTORE_CONFIRM_BODY": "سيتم استعادة <b>{{name}}</b> كإصدار جديد ونشط.",
+          "RESTORE_OK": "استعادة",
           "EMPTY_TITLE": "لا توجد إصدارات بعد",
           "EMPTY_SUBTITLE": "استخدم «إضافة إصدار جديد» لرفع ملف.",
           "DELETE_CONFIRM_TITLE": "حذف هذا الإصدار؟",
@@ -1990,6 +2181,8 @@
             "UPDATE_SUCCESS": "تم تحديث الإصدار.",
             "DELETE_SUCCESS": "تم حذف الإصدار.",
             "DELETE_ERROR": "تعذّر حذف الإصدار.",
+            "RESTORE_SUCCESS": "تمت استعادة الإصدار كإصدار نشط.",
+            "RESTORE_ERROR": "تعذّر استعادة الإصدار.",
             "FILE_REQUIRED": "اختر ملفًا للرفع."
           }
         }
@@ -2054,8 +2247,6 @@
         "ERR_NAME_AR": "الاسم بالعربية مطلوب",
         "ERR_DESC_AR": "الوصف بالعربية مطلوب",
         "ERR_DESC_EN": "الوصف بالإنجليزية مطلوب",
-        "ERR_LONG_AR": "الوصف المطوّل بالعربية مطلوب",
-        "ERR_LONG_EN": "الوصف المطوّل بالإنجليزية مطلوب",
         "ERR_LICENSE": "الترخيص مطلوب",
         "ERR_LANGUAGE": "اللغة مطلوبة",
         "ERR_PUBLISHER": "الناشر مطلوب",
@@ -2119,6 +2310,7 @@
           "MODAL_TITLE_CREATE": "إضافة إصدار جديد",
           "MODAL_TITLE_EDIT": "تعديل الإصدار",
           "FORM_NAME": "اسم الإصدار",
+          "FORM_LANGUAGE": "لغة الإصدار",
           "FORM_SUMMARY": "الملخص",
           "PLACEHOLDER_NAME": "مثال: v1.0 — ملف WOFF2 عادي",
           "PLACEHOLDER_SUMMARY": "ملاحظات قصيرة عن ملف الخط…",
@@ -2140,7 +2332,14 @@
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
           "TOOLTIP_EDIT": "تعديل",
+          "TOOLTIP_RESTORE": "استعادة كإصدار نشط",
           "TOOLTIP_DELETE": "حذف",
+          "ACTIVE_BADGE": "نشط",
+          "DIFF_LOADING": "جارٍ تحميل التغييرات…",
+          "DIFF_EMPTY": "لا توجد تغييرات مسجّلة على مستوى الآيات لهذه النسخة.",
+          "RESTORE_CONFIRM_TITLE": "استعادة هذا الإصدار؟",
+          "RESTORE_CONFIRM_BODY": "سيتم استعادة <b>{{name}}</b> كإصدار جديد ونشط.",
+          "RESTORE_OK": "استعادة",
           "EMPTY_TITLE": "لا توجد إصدارات بعد",
           "EMPTY_SUBTITLE": "استخدم «إضافة إصدار جديد» لرفع ملف خط.",
           "DELETE_CONFIRM_TITLE": "حذف هذا الإصدار؟",
@@ -2153,6 +2352,8 @@
             "UPDATE_SUCCESS": "تم تحديث الإصدار.",
             "DELETE_SUCCESS": "تم حذف الإصدار.",
             "DELETE_ERROR": "تعذّر حذف الإصدار.",
+            "RESTORE_SUCCESS": "تمت استعادة الإصدار كإصدار نشط.",
+            "RESTORE_ERROR": "تعذّر استعادة الإصدار.",
             "FILE_REQUIRED": "اختر ملف خط للرفع."
           }
         }
@@ -2201,8 +2402,6 @@
         "ERR_NAME_AR": "الاسم بالعربية مطلوب",
         "ERR_DESC_AR": "الوصف بالعربية مطلوب",
         "ERR_DESC_EN": "الوصف بالإنجليزية مطلوب",
-        "ERR_LONG_AR": "الوصف المطوّل بالعربية مطلوب",
-        "ERR_LONG_EN": "الوصف المطوّل بالإنجليزية مطلوب",
         "ERR_LICENSE": "الترخيص مطلوب",
         "ERR_LANGUAGE": "اللغة مطلوبة",
         "ERR_PUBLISHER": "الناشر مطلوب",
@@ -2266,6 +2465,7 @@
           "MODAL_TITLE_CREATE": "إضافة إصدار جديد",
           "MODAL_TITLE_EDIT": "تعديل الإصدار",
           "FORM_NAME": "اسم الإصدار",
+          "FORM_LANGUAGE": "لغة الإصدار",
           "FORM_SUMMARY": "الملخص",
           "PLACEHOLDER_NAME": "مثال: v3.2 — إصدار أندرويد",
           "PLACEHOLDER_SUMMARY": "ملاحظات قصيرة عن هذا الإصدار…",
@@ -2287,7 +2487,14 @@
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
           "TOOLTIP_EDIT": "تعديل",
+          "TOOLTIP_RESTORE": "استعادة كإصدار نشط",
           "TOOLTIP_DELETE": "حذف",
+          "ACTIVE_BADGE": "نشط",
+          "DIFF_LOADING": "جارٍ تحميل التغييرات…",
+          "DIFF_EMPTY": "لا توجد تغييرات مسجّلة على مستوى الآيات لهذه النسخة.",
+          "RESTORE_CONFIRM_TITLE": "استعادة هذا الإصدار؟",
+          "RESTORE_CONFIRM_BODY": "سيتم استعادة <b>{{name}}</b> كإصدار جديد ونشط.",
+          "RESTORE_OK": "استعادة",
           "EMPTY_TITLE": "لا توجد إصدارات بعد",
           "EMPTY_SUBTITLE": "استخدم «إضافة إصدار جديد» لرفع حزمة إصدار.",
           "DELETE_CONFIRM_TITLE": "حذف هذا الإصدار؟",
@@ -2300,6 +2507,8 @@
             "UPDATE_SUCCESS": "تم تحديث الإصدار.",
             "DELETE_SUCCESS": "تم حذف الإصدار.",
             "DELETE_ERROR": "تعذّر حذف الإصدار.",
+            "RESTORE_SUCCESS": "تمت استعادة الإصدار كإصدار نشط.",
+            "RESTORE_ERROR": "تعذّر استعادة الإصدار.",
             "FILE_REQUIRED": "اختر ملف إصدار للرفع."
           }
         }

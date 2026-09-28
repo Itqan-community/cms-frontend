@@ -29,6 +29,7 @@ import { GroupListOut } from '../../models/groups.models';
 import { MemberOut, MemberStatus, MemberUiFilters } from '../../models/members.models';
 import { GroupsService } from '../../services/groups.service';
 import { MembersService } from '../../services/members.service';
+import { ISO_639_LANGUAGES, localizedLanguageName } from '../../../utils/iso-639.util';
 
 type FormModalMode = 'invite' | 'edit';
 
@@ -88,6 +89,17 @@ export class MembersListComponent extends AdminListBase<MemberOut, MemberUiFilte
   readonly groupOptions = signal<GroupListOut[]>([]);
   readonly groupsLoading = signal(false);
   readonly groupsLoadFailed = signal(false);
+
+  // Language-assignment modal (languages the member works in).
+  readonly langModalVisible = signal(false);
+  readonly langSubmitting = signal(false);
+  readonly langMember = signal<MemberOut | null>(null);
+  readonly selectedLanguages = signal<string[]>([]);
+  readonly languageOptions = ISO_639_LANGUAGES;
+
+  langName(code: string): string {
+    return localizedLanguageName(code, this.translate.currentLang || 'en');
+  }
 
   readonly membersTableStorageKey = 'admin-list-members';
 
@@ -197,6 +209,51 @@ export class MembersListComponent extends AdminListBase<MemberOut, MemberUiFilte
       return;
     }
     this.formModalVisible.set(true);
+  }
+
+  openLanguagesModal(member: MemberOut): void {
+    this.langMember.set(member);
+    this.selectedLanguages.set([...(member.languages ?? [])]);
+    this.langModalVisible.set(true);
+  }
+
+  closeLangModal(): void {
+    if (this.langSubmitting()) {
+      return;
+    }
+    this.langModalVisible.set(false);
+    this.langMember.set(null);
+  }
+
+  onLangModalVisibleChange(visible: boolean): void {
+    if (!visible) {
+      this.closeLangModal();
+      return;
+    }
+    this.langModalVisible.set(true);
+  }
+
+  submitLanguages(): void {
+    const member = this.langMember();
+    if (!member) {
+      return;
+    }
+    this.langSubmitting.set(true);
+    this.membersService.setMemberLanguages(member.id, this.selectedLanguages()).subscribe({
+      next: () => {
+        this.langSubmitting.set(false);
+        this.langModalVisible.set(false);
+        this.langMember.set(null);
+        this.message.success(this.translate.instant('ADMIN.MEMBERS.ASSIGNED_LANGUAGES.SAVED'));
+        this.load();
+      },
+      error: (err) => {
+        this.langSubmitting.set(false);
+        this.message.error(
+          this.apiErrorMessage(err, 'ADMIN.MEMBERS.ASSIGNED_LANGUAGES.SAVE_ERROR')
+        );
+      },
+    });
   }
 
   submitFormModal(): boolean {

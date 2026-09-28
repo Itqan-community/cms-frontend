@@ -12,6 +12,17 @@
     flex-wrap: wrap;
   }
 
+  &__language {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  &__language-select {
+    min-width: 240px;
+  }
+
   &__status {
     font-size: 13px;
     min-height: 22px;
@@ -38,7 +49,19 @@
 
   &__actions {
     display: flex;
+    align-items: center;
     gap: 8px;
+  }
+
+  &__surah-filter {
+    min-width: 180px;
+  }
+
+  // Holds the grid's space (and keeps the spinner visible) while the grid
+  // waits to be created until its row model is known.
+  &__spin {
+    display: block;
+    min-height: 480px;
   }
 
   &__table {
@@ -46,6 +69,65 @@
     width: 100%;
     height: 70vh;
     min-height: 480px;
+  }
+
+  // Fill the modal width so long language labels aren't clipped.
+  &__add-language-select {
+    width: 100%;
+  }
+
+  &__add-language-file {
+    margin-top: 16px;
+  }
+
+  &__add-language-file-label {
+    margin: 0 0 6px;
+    font-weight: 500;
+  }
+
+  &__add-language-file-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  &__add-language-file-name {
+    margin: 8px 0 0;
+  }
+
+  &__add-language-file-hint {
+    margin: 8px 0 0;
+    color: rgba(0, 0, 0, 0.45);
+    font-size: 12px;
+  }
+
+  &__file-input {
+    display: none;
+  }
+
+  &__commit-label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  &__commit-review {
+    margin-top: 16px;
+  }
+
+  &__commit-summary {
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  &__commit-error {
+    color: #cf1322;
+  }
+
+  &__commit-changes {
+    max-height: 55vh;
+    overflow-y: auto;
+    padding-inline-end: 4px;
   }
 }
 
