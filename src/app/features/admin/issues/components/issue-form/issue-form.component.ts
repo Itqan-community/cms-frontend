@@ -188,6 +188,11 @@ export class IssueFormComponent implements OnInit {
               description: '',
               publisher: { id: 0, name: '' },
               license: Licenses.CC0,
+              // The issue record carries only the asset's id and name, so the
+              // content template is genuinely unknown here. Null is honest: the
+              // badge renders nothing rather than guessing a template.
+              template: null,
+              mushaf_layout: null,
             },
           ]);
           this.loadingDetail.set(false);

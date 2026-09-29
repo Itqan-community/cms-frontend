@@ -12,6 +12,8 @@ export interface AssetVersion {
   created_by?: string | null;
   /** Per-type change tallies for this commit (null for legacy/pre-feature versions). */
   change_counts?: { added: number; modified: number; removed: number } | null;
+  /** Changes in this version a reviewer left a comment on (translations/tafsirs). */
+  review_comments_count?: number;
   file_url: string;
   size_bytes: number;
   created_at: string;

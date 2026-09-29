@@ -78,65 +78,157 @@
   }
 
   &__counts {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 4px;
     margin-inline-start: 8px;
-    font-family: monospace;
-    font-size: 12px;
-    white-space: nowrap;
+    vertical-align: middle;
   }
 
-  &__diff-added {
-    color: #389e0d;
-  }
-
-  &__diff-modified {
+  &__comments {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-inline-start: 8px;
+    padding: 0 6px;
+    border-radius: 4px;
+    background: #fffbf0;
     color: #d46b08;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 20px;
+    vertical-align: middle;
+    white-space: nowrap;
+
+    ng-icon {
+      width: 12px;
+      height: 12px;
+    }
   }
 
-  &__diff-removed {
-    color: #cf1322;
+  &__count {
+    padding: 0 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 20px;
+    white-space: nowrap;
+
+    &--added {
+      color: #389e0d;
+      background: #f6ffed;
+    }
+
+    &--modified {
+      color: #d46b08;
+      background: #fff7e6;
+    }
+
+    &--removed {
+      color: #cf1322;
+      background: #fff1f0;
+    }
+  }
+
+  // An open version and its changes read as one thread: the row takes the
+  // brand tint and the panel below carries a rail on the inline-start edge.
+  &__row--expanded > td {
+    background: var(--color-primary-50);
   }
 
   &__diff-row > td {
-    background: #fafafa;
+    background: var(--color-primary-50);
+    border-inline-start: 3px solid var(--color-primary-600);
+    padding: 12px 16px 16px;
+  }
+
+  &__diff-title {
+    margin: 0 0 12px;
+    color: var(--color-primary-800);
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__action-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  &__divider {
+    width: 1px;
+    height: 20px;
+    background: var(--admin-border-200);
+  }
+
+  // The one labelled action: it opens the version's history of changes.
+  &__changes-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 10px;
+    border: 1px solid var(--admin-border-200);
+    border-radius: var(--radius-md);
+    background: var(--admin-surface-white);
+    color: var(--admin-text-700);
+    font-size: 13px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      border-color 0.15s ease,
+      color 0.15s ease;
+
+    ng-icon {
+      width: 1rem;
+      height: 1rem;
+    }
+
+    &:hover {
+      border-color: var(--color-primary-400);
+      color: var(--color-primary-700);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary-400);
+      outline-offset: 2px;
+    }
+
+    &--open {
+      border-color: var(--color-primary-600);
+      background: var(--color-primary-100);
+      color: var(--color-primary-800);
+    }
+  }
+
+  &__changes-chevron {
+    transition: transform 0.2s ease;
+
+    .asset-versions-manager__changes-btn--open & {
+      transform: rotate(180deg);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+    }
+  }
+
+  &__restore:hover {
+    background: var(--color-primary-50);
+    color: var(--color-primary-700);
   }
 
   &__diff-error {
     color: #cf1322;
-  }
-
-  &__diff-list {
-    margin: 0;
-    padding-inline-start: 0;
-    list-style: none;
-    max-height: 320px;
-    overflow-y: auto;
-  }
-
-  &__diff-item {
-    display: grid;
-    grid-template-columns: 90px 1fr;
-    gap: 4px 12px;
-    padding: 4px 0;
-    border-bottom: 1px solid #f0f0f0;
-    align-items: start;
-  }
-
-  &__diff-ref {
-    font-family: monospace;
-    font-size: 12px;
-    font-weight: 600;
-  }
-
-  &__diff-old {
-    grid-column: 2;
-    color: #cf1322;
-    text-decoration: line-through;
-    opacity: 0.75;
-  }
-
-  &__diff-new {
-    grid-column: 2;
-    color: #389e0d;
   }
 
   &__modal-form {

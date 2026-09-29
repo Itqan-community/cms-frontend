@@ -35,7 +35,9 @@ export const tafsirRoutes: Routes = [
       },
       {
         path: ':slug/edit-content',
-        canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR] })],
+        canActivate: [
+          permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_EDIT_TAFSIR_CONTENT] }),
+        ],
         canDeactivate: [unsavedContentGuard],
         data: { kind: 'tafsir' },
         loadComponent: () =>

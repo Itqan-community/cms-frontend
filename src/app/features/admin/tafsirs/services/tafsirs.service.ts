@@ -59,7 +59,8 @@ export class TafsirsService {
   private toFormData(payload: Partial<TafsirFormValue>): FormData {
     const data = new FormData();
     const append = (key: string, value: string | number | boolean | null | undefined): void => {
-      if (value === null || value === undefined || value === '') return;
+      if (value === null || value === undefined) return;
+      if (value === '' && key !== 'long_description_ar' && key !== 'long_description_en') return;
       data.append(key, String(value));
     };
 
@@ -85,6 +86,8 @@ export class TafsirsService {
     if (payload.thumbnail) {
       data.append('thumbnail', payload.thumbnail);
     }
+    append('template', payload.template);
+    append('mushaf_layout_id', payload.mushaf_layout_id);
     append('version_name', payload.version_name);
     append('version_summary', payload.version_summary);
     if (payload.file) {

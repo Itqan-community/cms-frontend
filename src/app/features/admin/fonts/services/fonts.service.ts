@@ -54,7 +54,8 @@ export class FontsService {
   private toFormData(payload: Partial<FontFormValue>): FormData {
     const data = new FormData();
     const append = (key: string, value: string | number | boolean | null | undefined): void => {
-      if (value === null || value === undefined || value === '') return;
+      if (value === null || value === undefined) return;
+      if (value === '' && key !== 'long_description_ar' && key !== 'long_description_en') return;
       data.append(key, String(value));
     };
 
