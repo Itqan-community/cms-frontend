@@ -168,6 +168,14 @@ describe('AssetContentGridComponent column definitions', () => {
     ).toBe(false);
   });
 
+  it('localizes the grid loading overlay through the app translations', () => {
+    // Arrange / Act — no translations are loaded in tests, so the key comes back as-is
+    const localeText = componentFor('ayah').localeText();
+
+    // Assert
+    expect(localeText['loadingOoo']).toBe('COMMON.LOADING');
+  });
+
   it('derives the template from the loaded rows when the input is left unbound', () => {
     // Arrange
     const fixture = TestBed.createComponent(AssetContentGridComponent);

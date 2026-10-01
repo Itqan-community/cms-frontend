@@ -24,6 +24,7 @@ import type {
   IGetRowsParams,
   INumberFilterParams,
   ITextFilterParams,
+  LocaleText,
   RowSelectionOptions,
 } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from 'ag-grid-community';
@@ -242,6 +243,12 @@ export class AssetContentGridComponent implements OnInit {
   readonly rtl = computed(() => this.translate.currentLang === 'ar');
 
   readonly theme = themeQuartz;
+
+  /** Grid-owned text in the UI language. `localeText` is an @initial grid
+   *  option, read once when the grid is created (after translations load). */
+  readonly localeText = computed<LocaleText>(() => ({
+    loadingOoo: this.translate.instant('COMMON.LOADING'),
+  }));
 
   /** Checkbox multi-row selection (Community feature). */
   readonly rowSelection: RowSelectionOptions = {
