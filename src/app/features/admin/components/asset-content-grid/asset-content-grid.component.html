@@ -45,7 +45,7 @@
         <span class="content-grid__unsaved">
           {{ 'ADMIN.CONTENT_EDITOR.UNSAVED' | translate }}
         </span>
-      } @else if (draftId() !== null) {
+      } @else if (savedOnce()) {
         <span class="content-grid__saved">
           {{ 'ADMIN.CONTENT_EDITOR.ALL_SAVED' | translate }}
         </span>

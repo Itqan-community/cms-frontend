@@ -883,7 +883,8 @@
       "TEXT_EDITOR": {
         "HINT": "Enter للتطبيق · Shift+Enter لسطر جديد · Esc للإلغاء",
         "CANCEL": "إلغاء",
-        "DONE": "تم"
+        "DONE": "تم",
+        "CLOSE": "إغلاق"
       },
       "GRID": {
         "equals": "يساوي",

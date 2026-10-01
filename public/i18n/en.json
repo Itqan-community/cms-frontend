@@ -907,7 +907,8 @@
       "TEXT_EDITOR": {
         "HINT": "Enter to apply · Shift+Enter for a new line · Esc to cancel",
         "CANCEL": "Cancel",
-        "DONE": "Done"
+        "DONE": "Done",
+        "CLOSE": "Close"
       },
       "GRID": {
         "equals": "Equals",

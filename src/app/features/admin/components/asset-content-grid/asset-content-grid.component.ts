@@ -56,7 +56,10 @@ import {
 } from '../../utils/clipboard-table.util';
 import { ISO_639_LANGUAGES, localizedLanguageName } from '../../utils/iso-639.util';
 import { ContentChangesComponent } from '../content-changes/content-changes.component';
-import { ContentTextCellEditorComponent } from './content-text-cell-editor.component';
+import {
+  ContentTextCellEditorComponent,
+  type ContentTextEditorParams,
+} from './content-text-cell-editor.component';
 import { SurahFloatingFilterComponent } from './surah-floating-filter.component';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -188,6 +191,10 @@ export class AssetContentGridComponent implements OnInit {
   private readonly redoStack: CellEdit[] = [];
 
   readonly draftId = signal<number | null>(null);
+  /** True once an edit has been saved to the draft since the editor opened
+   *  (or the language changed). Opening always loads a draft, so `draftId`
+   *  alone would show "all changes saved" before anything was edited. */
+  readonly savedOnce = signal(false);
   /** First-block requests in flight — the initial load, or a refetch after a
    *  filter change resets the grid to row 0. Scroll blocks don't count. */
   private readonly firstBlocksInFlight = signal(0);
@@ -564,6 +571,7 @@ export class AssetContentGridComponent implements OnInit {
       if (!ok) return;
       this.pendingRows.clear();
       this.dirty.set(false);
+      this.savedOnce.set(false);
       this.clearHistory();
       this.selectedLanguage.set(language);
       this.lastLanguage.set(this.kind, this.slug, language);
@@ -659,6 +667,7 @@ export class AssetContentGridComponent implements OnInit {
           .subscribe({
             next: () => {
               this.activePatchesCount--;
+              this.savedOnce.set(true);
               if (this.pendingRows.size === 0) {
                 this.dirty.set(false);
               }
@@ -918,7 +927,12 @@ export class AssetContentGridComponent implements OnInit {
         field: 'source_text',
         headerName: this.sourceColHeader(),
         flex: 2,
-        editable: false,
+        // "Editable" only so a cell opens the text popup in read-only mode:
+        // rows are one line tall, and this is the only way to read it all.
+        editable: true,
+        cellEditor: ContentTextCellEditorComponent,
+        cellEditorPopup: true,
+        cellEditorParams: { readOnly: true } satisfies ContentTextEditorParams,
         cellStyle: { direction: this.sourceTextDirection() },
         ...textFilter,
       });
@@ -931,6 +945,7 @@ export class AssetContentGridComponent implements OnInit {
       editable: true,
       cellEditor: ContentTextCellEditorComponent,
       cellEditorPopup: true,
+      cellEditorParams: { sourceTitle: this.sourceColHeader() } satisfies ContentTextEditorParams,
       ...textFilter,
     });
 

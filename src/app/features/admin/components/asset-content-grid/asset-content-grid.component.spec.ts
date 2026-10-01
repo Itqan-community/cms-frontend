@@ -10,6 +10,7 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { AssetContentGridComponent } from './asset-content-grid.component';
+import { ContentTextCellEditorComponent } from './content-text-cell-editor.component';
 
 describe('AssetContentGridComponent column definitions', () => {
   function componentFor(template: string) {
@@ -122,6 +123,27 @@ describe('AssetContentGridComponent column definitions', () => {
       expect(col.wrapText).withContext(String(col.field)).toBeFalsy();
       expect(col.autoHeight).withContext(String(col.field)).toBeFalsy();
     }
+  });
+
+  it('opens the source column in the read-only text popup', () => {
+    // Arrange
+    const grid = componentFor('ayah');
+    grid.languages.set([
+      { language: 'en', is_source: true, is_available: true },
+      { language: 'ar', is_source: false, is_available: true },
+    ] as never);
+    grid.selectedLanguage.set('ar');
+
+    // Act
+    const columns = grid.buildColumnDefs();
+    const source = columns.find((col) => col.field === 'source_text');
+    const text = columns.find((col) => col.field === 'text');
+
+    // Assert — the source cell opens read-only; the text editor gets its heading
+    expect(source?.editable).toBeTrue();
+    expect(source?.cellEditor).toBe(ContentTextCellEditorComponent);
+    expect(source?.cellEditorParams).toEqual(jasmine.objectContaining({ readOnly: true }));
+    expect(text?.cellEditorParams?.sourceTitle).toContain('ADMIN.CONTENT_EDITOR.COLUMNS.SOURCE');
   });
 
   it('undoes and redoes a text edit by queueing the restored value for autosave', () => {
