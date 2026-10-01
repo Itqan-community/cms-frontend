@@ -186,6 +186,11 @@ export class AssetContentGridComponent implements OnInit {
   private readonly redoStack: CellEdit[] = [];
 
   readonly draftId = signal<number | null>(null);
+  /** First-block requests in flight — the initial load, or a refetch after a
+   *  filter change resets the grid to row 0. Scroll blocks don't count. */
+  private readonly firstBlocksInFlight = signal(0);
+  /** Drives the grid's loading overlay while the first block is on its way. */
+  readonly refreshing = computed(() => this.firstBlocksInFlight() > 0);
   readonly loading = signal(true);
 
   /** Languages the asset provides content in (source first). */
@@ -367,16 +372,23 @@ export class AssetContentGridComponent implements OnInit {
         }
         const pageSize = params.endRow - params.startRow;
         const page = Math.floor(params.startRow / pageSize) + 1;
+        const firstBlock = params.startRow === 0;
+        if (firstBlock) this.firstBlocksInFlight.update((n) => n + 1);
+        const done = () => {
+          if (firstBlock) this.firstBlocksInFlight.update((n) => n - 1);
+        };
         void this.flushPending().then(() => {
           this.contentService
             .getEntries(this.kind, this.slug, versionId, page, pageSize, params.filterModel)
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
               next: (response) => {
+                done();
                 this.entriesTotal.set(response.count);
                 params.successCallback(response.results, response.count);
               },
               error: (err: HttpErrorResponse) => {
+                done();
                 params.failCallback();
                 this.showError(err);
               },

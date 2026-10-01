@@ -152,6 +152,48 @@ describe('AssetContentGridComponent word datasource', () => {
     drainEntries();
   });
 
+  it('shows the loading overlay while a first block (e.g. after a filter change) is in flight', async () => {
+    // Arrange
+    const fixture = TestBed.createComponent(AssetContentGridComponent);
+    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('slug', 'a-loading-tafsir');
+    fixture.componentRef.setInput('template', 'ayah');
+    fixture.detectChanges();
+    flushDraft(httpMock, 'a-loading-tafsir', 11);
+    httpMock.expectOne((r) => r.url.includes('entries/')).flush({ results: [], count: 6236 });
+    await new Promise((resolve) => setTimeout(resolve));
+    drainEntries();
+    const grid = fixture.componentInstance;
+    const getRows = (startRow: number) =>
+      grid.buildDatasource().getRows({
+        api: {} as GridApi,
+        context: {},
+        startRow,
+        endRow: startRow + 100,
+        successCallback: jasmine.createSpy('successCallback'),
+        failCallback: jasmine.createSpy('failCallback'),
+        sortModel: [],
+        filterModel: { text: { filterType: 'text', type: 'contains', filter: 'x' } },
+      });
+
+    // Act — a scroll block alone doesn't show the overlay
+    getRows(100);
+    await new Promise((resolve) => setTimeout(resolve));
+    const scrollLoading = grid.refreshing();
+    httpMock.expectOne((r) => r.url.includes('entries/')).flush({ results: [], count: 1 });
+
+    // Act — a first block does, until its response arrives
+    getRows(0);
+    const loadingBeforeResponse = grid.refreshing();
+    await new Promise((resolve) => setTimeout(resolve));
+    httpMock.expectOne((r) => r.url.includes('entries/')).flush({ results: [], count: 1 });
+
+    // Assert
+    expect(scrollLoading).toBeFalse();
+    expect(loadingBeforeResponse).toBeTrue();
+    expect(grid.refreshing()).toBeFalse();
+  });
+
   it('scrolls an ayah asset through the infinite datasource too', async () => {
     // Arrange — no template bound: the one-row probe tells the grid it's ayah
     const fixture = TestBed.createComponent(AssetContentGridComponent);
