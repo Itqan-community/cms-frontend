@@ -879,6 +879,11 @@
         "TAFSIR_NOT_FOUND": "التفسير غير موجود.",
         "CONTENT_FILE_UNPARSEABLE": "تعذّر تحليل الملف المرفوع.",
         "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "انشر نسخة لهذه اللغة قبل جعلها متاحة."
+      },
+      "TEXT_EDITOR": {
+        "HINT": "Enter للتطبيق · Shift+Enter لسطر جديد · Esc للإلغاء",
+        "CANCEL": "إلغاء",
+        "DONE": "تم"
       }
     },
     "REVIEW": {

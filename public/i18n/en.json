@@ -903,6 +903,11 @@
         "TAFSIR_NOT_FOUND": "Tafsir not found.",
         "CONTENT_FILE_UNPARSEABLE": "The uploaded file could not be parsed.",
         "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "Publish a version for this language before making it available."
+      },
+      "TEXT_EDITOR": {
+        "HINT": "Enter to apply · Shift+Enter for a new line · Esc to cancel",
+        "CANCEL": "Cancel",
+        "DONE": "Done"
       }
     },
     "REVIEW": {

@@ -56,6 +56,7 @@ import {
 } from '../../utils/clipboard-table.util';
 import { ISO_639_LANGUAGES, localizedLanguageName } from '../../utils/iso-639.util';
 import { ContentChangesComponent } from '../content-changes/content-changes.component';
+import { ContentTextCellEditorComponent } from './content-text-cell-editor.component';
 import { SurahFloatingFilterComponent } from './surah-floating-filter.component';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -921,11 +922,8 @@ export class AssetContentGridComponent implements OnInit {
       headerName: this.colHeader('TEXT'),
       flex: 2,
       editable: true,
-      cellEditor: 'agLargeTextCellEditor',
+      cellEditor: ContentTextCellEditorComponent,
       cellEditorPopup: true,
-      // agLargeTextCellEditor defaults to maxLength 200; unit text can be far longer,
-      // so raise the cap and enlarge the popup textarea.
-      cellEditorParams: { maxLength: 100000, rows: 12, cols: 60 },
       ...textFilter,
     });
 
