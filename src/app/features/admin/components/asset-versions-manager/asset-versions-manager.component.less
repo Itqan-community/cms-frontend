@@ -140,6 +140,15 @@
     background: var(--color-primary-50);
     border-inline-start: 3px solid var(--color-primary-600);
     padding: 12px 16px 16px;
+
+    // Fill the row without adding to the table's width: otherwise the
+    // auto-layout table grows to the longest unwrapped line of changed text
+    // and scrolls sideways instead of wrapping it.
+    app-content-changes {
+      display: block;
+      width: 0;
+      min-width: 100%;
+    }
   }
 
   &__diff-title {

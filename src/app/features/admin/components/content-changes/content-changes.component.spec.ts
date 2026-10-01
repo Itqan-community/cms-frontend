@@ -21,9 +21,10 @@ function change(
 }
 
 describe('ContentChangesComponent', () => {
-  function render(changes: ContentChange[]) {
+  function render(changes: ContentChange[], compact = false) {
     const fixture = TestBed.createComponent(ContentChangesComponent);
     fixture.componentRef.setInput('changes', changes);
+    fixture.componentRef.setInput('compact', compact);
     fixture.detectChanges();
     return fixture;
   }
@@ -83,6 +84,40 @@ describe('ContentChangesComponent', () => {
 
     expect(after().querySelector('.content-changes__gap')).toBeNull();
     expect(after().textContent).toContain('w0 ');
+  });
+
+  describe('compact (versions list)', () => {
+    const words = (from: number, to: number) =>
+      Array.from({ length: to - from }, (_, i) => `w${from + i}`).join(' ');
+    const edit = () =>
+      change(
+        1,
+        'modified',
+        `${words(0, 40)} God ${words(40, 80)}`,
+        `${words(0, 40)} Allah ${words(40, 80)}`
+      );
+
+    it('stacks before above after', () => {
+      const el: HTMLElement = render([edit()], true).nativeElement;
+
+      expect(el.querySelector('.content-changes__compare--stacked')).not.toBeNull();
+    });
+
+    it('keeps only a couple of words around each change', () => {
+      const el: HTMLElement = render([edit()], true).nativeElement;
+      const after = el.querySelector('.content-changes__text--after')!;
+
+      expect(after.textContent).toContain('w38 w39 Allah w40 w41');
+      expect(after.textContent).not.toContain('w37');
+      expect(after.textContent).not.toContain('w42');
+    });
+
+    it('leaves the default layout and context alone', () => {
+      const el: HTMLElement = render([edit()]).nativeElement;
+
+      expect(el.querySelector('.content-changes__compare--stacked')).toBeNull();
+      expect(el.querySelector('.content-changes__text--after')!.textContent).toContain('w34');
+    });
   });
 
   it('filters the list to one kind of change', () => {

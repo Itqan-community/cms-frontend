@@ -299,6 +299,13 @@ export class AssetContentGridComponent implements OnInit {
 
   onCellValueChanged(event: CellValueChangedEvent<ContentEntry>): void {
     const row = event.data;
+    // Assume the edit differs from the published text until the autosave
+    // response says otherwise (see `applySavedRows`).
+    row.changed = true;
+    // `force`: the grid has already drawn the new value, so a plain refresh skips it.
+    if (event.node) {
+      this.gridApi?.refreshCells({ rowNodes: [event.node], columns: ['text'], force: true });
+    }
     this.pendingRows.set(row.unit_id, {
       unit_id: row.unit_id,
       text: row.text ?? '',
@@ -649,6 +656,23 @@ export class AssetContentGridComponent implements OnInit {
       });
   }
 
+  /** Copy the server's `changed` flag onto the saved rows, so a cell edited
+   *  back to its published text loses its highlight. Rows edited again since
+   *  this save keep their mark until their own save answers. */
+  private applySavedRows(saved: ContentEntry[]): void {
+    const api = this.gridApi;
+    if (!api) return;
+    const nodes = [];
+    for (const row of saved) {
+      if (this.pendingRows.has(row.unit_id)) continue;
+      const node = api.getRowNode(String(row.unit_id));
+      if (!node?.data) continue;
+      node.data.changed = row.changed ?? false;
+      nodes.push(node);
+    }
+    if (nodes.length > 0) api.refreshCells({ rowNodes: nodes, columns: ['text'], force: true });
+  }
+
   /** Persist any pending edits to the draft. `true` on success/nothing to save. */
   private async flushPending(): Promise<boolean> {
     const versionId = this.draftId();
@@ -665,8 +689,9 @@ export class AssetContentGridComponent implements OnInit {
           .patchEntries(this.kind, this.slug, versionId, batch)
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe({
-            next: () => {
+            next: (saved) => {
               this.activePatchesCount--;
+              this.applySavedRows(saved);
               this.savedOnce.set(true);
               if (this.pendingRows.size === 0) {
                 this.dirty.set(false);
@@ -946,6 +971,8 @@ export class AssetContentGridComponent implements OnInit {
       cellEditor: ContentTextCellEditorComponent,
       cellEditorPopup: true,
       cellEditorParams: { sourceTitle: this.sourceColHeader() } satisfies ContentTextEditorParams,
+      // Yellow when the draft differs from the published version.
+      cellClassRules: { 'content-grid__cell--changed': (p) => !!p.data?.changed },
       ...textFilter,
     });
 

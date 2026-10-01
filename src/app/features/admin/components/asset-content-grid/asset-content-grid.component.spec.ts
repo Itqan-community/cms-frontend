@@ -146,6 +146,54 @@ describe('AssetContentGridComponent column definitions', () => {
     expect(text?.cellEditorParams?.sourceTitle).toContain('ADMIN.CONTENT_EDITOR.COLUMNS.SOURCE');
   });
 
+  it('paints text cells the draft changed since the last publish', () => {
+    // Arrange
+    const text = componentFor('ayah')
+      .buildColumnDefs()
+      .find((col) => col.field === 'text');
+    const rule = text?.cellClassRules?.['content-grid__cell--changed'] as (p: unknown) => boolean;
+
+    // Act / Assert
+    expect(rule({ data: { changed: true } })).toBeTrue();
+    expect(rule({ data: { changed: false } })).toBeFalse();
+  });
+
+  it('marks an edited cell as changed right away', () => {
+    // Arrange
+    const grid = componentFor('ayah');
+    const row = { unit_id: 5, text: 'new', changed: false };
+
+    // Act
+    grid.onCellValueChanged({ data: row, oldValue: 'old', source: 'edit' } as never);
+
+    // Assert
+    expect(row.changed).toBeTrue();
+  });
+
+  it('takes the changed flag from the autosave response', async () => {
+    // Arrange — the user typed the published text back in
+    const grid = componentFor('ayah');
+    const httpMock = TestBed.inject(HttpTestingController);
+    const row = { unit_id: 5, text: 'published', changed: false };
+    const refreshCells = jasmine.createSpy('refreshCells');
+    grid.onGridReady({
+      api: { getRowNode: (id: string) => (id === '5' ? { data: row } : undefined), refreshCells },
+    } as never);
+    grid.draftId.set(7);
+    grid.onCellValueChanged({ data: row, oldValue: 'edited', source: 'edit' } as never);
+
+    // Act
+    const saved = grid.keepDraftOnLeave();
+    httpMock
+      .expectOne((r) => r.method === 'PATCH')
+      .flush([{ unit_id: 5, text: 'published', changed: false }]);
+    await saved;
+
+    // Assert
+    expect(row.changed).toBeFalse();
+    expect(refreshCells).toHaveBeenCalled();
+  });
+
   it('undoes and redoes a text edit by queueing the restored value for autosave', () => {
     // Arrange
     const grid = componentFor('ayah');

@@ -47,6 +47,8 @@ export interface ContentEntry {
   /** Source-language text for the same unit (translations only; read-only). */
   source_text?: string | null;
   order: number;
+  /** Draft text differs from the latest published version (drafts only). */
+  changed?: boolean;
 }
 
 /** Paginated entries response (Django Ninja pagination shape). */
