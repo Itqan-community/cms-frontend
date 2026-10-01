@@ -850,7 +850,7 @@ export class AssetContentGridComponent implements OnInit {
       {
         field: 'label',
         headerName: this.colHeader('UNIT'),
-        width: 170,
+        width: 120,
         editable: false,
         pinned: this.rtl() ? 'right' : 'left',
         ...(template !== 'page'
@@ -875,7 +875,7 @@ export class AssetContentGridComponent implements OnInit {
         {
           field: 'sura',
           headerName: this.colHeader('SURA'),
-          width: 130,
+          width: 100,
           editable: false,
           filter: 'agNumberColumnFilter',
           filterParams: NUMBER_FILTER_PARAMS,
@@ -884,7 +884,7 @@ export class AssetContentGridComponent implements OnInit {
         {
           field: 'aya',
           headerName: this.colHeader('AYA'),
-          width: 130,
+          width: 100,
           editable: false,
           filter: 'agNumberColumnFilter',
           filterParams: NUMBER_FILTER_PARAMS,
