@@ -61,11 +61,99 @@ function resolveCodeI18nKey(code: string | undefined): string | null {
   return CMS_ERROR_CODE_I18N[code] ?? null;
 }
 
+/** django-ninja `loc` prefixes that are not part of the user-facing field name. */
+const VALIDATION_LOC_PREFIXES = new Set([
+  'body',
+  'query',
+  'path',
+  'header',
+  'cookie',
+  'form',
+  'file',
+  'payload',
+]);
+
+interface PydanticErrorItem {
+  type?: unknown;
+  loc?: unknown;
+  msg?: unknown;
+}
+
+/** Field name from a pydantic `loc` (`['body', 'payload', 'name_ar']` → `name ar`). */
+function validationFieldLabel(loc: unknown): string {
+  if (!Array.isArray(loc)) {
+    return '';
+  }
+  const field = [...loc]
+    .reverse()
+    .find((part) => typeof part === 'string' && !VALIDATION_LOC_PREFIXES.has(part));
+  return typeof field === 'string' ? field.replace(/_/g, ' ') : '';
+}
+
+/**
+ * django-ninja `validation_error` → per-field message. `extra` is pydantic's error list
+ * (`{ type, loc, msg }[]`, English `msg`) or, for Django `ValidationError`, a list of strings.
+ */
+function resolveValidationErrorMessage(
+  error: unknown,
+  uiLang: string,
+  translate: ApiErrorTranslator
+): string | null {
+  if (!(error instanceof HttpErrorResponse) || extractErrorName(error) !== 'validation_error') {
+    return null;
+  }
+  const extra = (error.error as { extra?: unknown }).extra;
+  if (!Array.isArray(extra)) {
+    return null;
+  }
+
+  const parts = extra
+    .map((item: unknown): string => {
+      if (typeof item === 'string') {
+        return isMessageLocalizedForUi(item, uiLang) ? item.trim() : '';
+      }
+      if (!item || typeof item !== 'object') {
+        return '';
+      }
+      const { type, loc, msg } = item as PydanticErrorItem;
+      const field = validationFieldLabel(loc);
+      if (!field) {
+        return '';
+      }
+      if (typeof msg === 'string' && msg.trim() && isMessageLocalizedForUi(msg, uiLang)) {
+        return `${field}: ${msg.trim().replace(/\.?$/, '.')}`;
+      }
+      const key = type === 'missing' ? 'ERRORS.FIELD_REQUIRED' : 'ERRORS.FIELD_INVALID';
+      return translate.instant(key, { field });
+    })
+    .filter(Boolean);
+
+  return parts.length ? [...new Set(parts)].join(' ') : null;
+}
+
+/** Status-appropriate fallback so client errors (4xx) are not reported as server errors. */
+export function fallbackKeyForHttpStatus(status: number): string {
+  if (status === 0) {
+    return 'ERRORS.NETWORK_ERROR';
+  }
+  if (status === 400 || status === 422) {
+    return 'ERRORS.VALIDATION_ERROR';
+  }
+  if (status === 404) {
+    return 'ERRORS.NOT_FOUND';
+  }
+  if (status >= 400 && status < 500) {
+    return 'ERRORS.REQUEST_FAILED';
+  }
+  return 'ERRORS.SERVER_ERROR';
+}
+
 /**
  * Resolve a user-facing CMS/portal API error string:
  * 1. Known `error_name` or `errors[].code` → client i18n
- * 2. Backend `message` when localized for UI language
- * 3. Fallback i18n key
+ * 2. django-ninja `validation_error` field details
+ * 3. Backend `message` when localized for UI language
+ * 4. Fallback i18n key
  */
 export function resolveApiErrorMessage(
   error: unknown,
@@ -79,6 +167,11 @@ export function resolveApiErrorMessage(
   const errorNameKey = resolveErrorNameI18nKey(errorName);
   if (errorNameKey) {
     return translate.instant(errorNameKey);
+  }
+
+  const validationMessage = resolveValidationErrorMessage(error, uiLang, translate);
+  if (validationMessage) {
+    return validationMessage;
   }
 
   const items = extractAllauthErrorItems(error);

@@ -491,9 +491,12 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 - **CI gate:** `npm run check:i18n` validates every key in the union of `en.json` + `ar.json` has a
   non-empty Arabic value in `ar.json` (runs in CI `lint-and-test` and via lint-staged on i18n edits)
 - **API errors:** Hybrid resolver in `shared/utils/api-error-resolver.util.ts` — maps `error_name` /
-  known codes to i18n, shows backend `message` when language matches UI, else fallback key; global
-  `error.interceptor.ts` uses it; component-level handlers dedupe via
-  `shouldSuppressGlobalErrorToast`
+  known codes to i18n, then django-ninja `validation_error` field details (pydantic `extra[]`
+  `{type, loc, msg}` → `field: msg` in `en`, else `ERRORS.FIELD_REQUIRED`/`FIELD_INVALID`; Django
+  string `extra[]` when localized), then backend `message` when language matches UI, else fallback
+  key; `fallbackKeyForHttpStatus()` picks the fallback by status (0 network, 400/422 validation, 404
+  not found, other 4xx `REQUEST_FAILED`, 5xx server); global `error.interceptor.ts` uses it;
+  component-level handlers dedupe via `shouldSuppressGlobalErrorToast`
 - **Auth errors:** `shared/utils/auth-error-resolver.util.ts` (django-allauth code catalog)
 - **Backend handoff:** Portal validate-upload `message`, timing upload `file_errors[]`, and generic
   error `message` fields should localize via `Accept-Language` (sent by `global.interceptor.ts`)
