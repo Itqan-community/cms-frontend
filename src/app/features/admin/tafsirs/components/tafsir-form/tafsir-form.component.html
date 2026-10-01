@@ -343,6 +343,9 @@
         <app-asset-initial-version-fields
           [versionFile]="versionFile()"
           (versionFileChange)="versionFile.set($event)"
+          contentKind="tafsir"
+          [contentTemplate]="form.controls.template.value"
+          [mushafLayoutId]="form.controls.mushaf_layout_id.value"
         />
       }
 

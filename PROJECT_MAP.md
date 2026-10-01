@@ -328,7 +328,12 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
 
 - `admin-column-picker/` — Column visibility toggles for tables
 - `asset-initial-version-fields/` — Optional first version (name/summary/file) on asset create forms
-  (font/mushaf/tafsir/translation)
+  (font/mushaf/tafsir/translation); tafsir/translation pass `contentKind`/`contentTemplate`/
+  `mushafLayoutId` to offer the empty CSV template for the chosen template
+- `csv-template-download/` — "Download CSV template" button (tafsir/translation): an empty fill-in
+  sheet, one row per unit with a blank `text` column. By template on create
+  (`content/{category}/csv-template/?template=&mushaf_layout_id=`), by asset in the version
+  upload/edit modal (`content/{category}/{slug}/csv-template/`)
 - `asset-versions-manager/` — Version CRUD (tafsir/translation/mushaf/font; program when
   re-enabled); CSV `export/` then `file_url` fallback
 - `asset-content-editor/` + `asset-content-grid/` — Per-unit draft editor (surah/ayah/word/page
