@@ -227,7 +227,9 @@ describe('AssetContentGridComponent word datasource', () => {
     // Assert — the live grid asked the datasource for its first block
     const block = httpMock.expectOne((r) => r.url.includes('entries/'));
     expect(block.request.params.get('page')).toBe('1');
-    expect(block.request.params.get('page_size')).toBe('100');
+    expect(block.request.params.get('page_size')).toBe(
+      String(fixture.componentInstance.cacheBlockSize)
+    );
     block.flush({ results: [], count: 6236 });
   });
 
@@ -267,7 +269,9 @@ describe('AssetContentGridComponent word datasource', () => {
     // Assert — the live grid requested its first block from the datasource.
     const block = httpMock.expectOne((r) => r.url.includes('entries/'));
     expect(block.request.params.get('page')).toBe('1');
-    expect(block.request.params.get('page_size')).toBe('100');
+    expect(block.request.params.get('page_size')).toBe(
+      String(fixture.componentInstance.cacheBlockSize)
+    );
     block.flush({ results: [], count: 77431 });
   });
 

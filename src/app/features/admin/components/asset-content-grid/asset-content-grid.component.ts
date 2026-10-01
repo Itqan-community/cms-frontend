@@ -74,7 +74,7 @@ const AUTOSAVE_DEBOUNCE_MS = 800;
  * `endRow - startRow` derives the page size safely from it — pin both to
  * this one constant instead of hardcoding it twice.
  */
-const CACHE_BLOCK_SIZE = 100;
+const CACHE_BLOCK_SIZE = 50;
 /** Edits kept for undo/redo. */
 const UNDO_LIMIT = 50;
 /** `setDataValue` source for undo/redo, so replayed edits aren't recorded again. */
@@ -246,10 +246,17 @@ export class AssetContentGridComponent implements OnInit {
   readonly theme = themeQuartz;
 
   /** Grid-owned text in the UI language. `localeText` is an @initial grid
-   *  option, read once when the grid is created (after translations load). */
-  readonly localeText = computed<LocaleText>(() => ({
-    loadingOoo: this.translate.instant('COMMON.LOADING'),
-  }));
+   *  option, read once when the grid is created (after translations load;
+   *  switching language reloads the page). `ADMIN.CONTENT_EDITOR.GRID` holds
+   *  the filter UI texts under AG Grid's own locale keys (`equals`, …). */
+  readonly localeText = computed<LocaleText>(() => {
+    const grid: unknown = this.translate.instant('ADMIN.CONTENT_EDITOR.GRID');
+    return {
+      loadingOoo: this.translate.instant('COMMON.LOADING'),
+      // instant() echoes the key string when the block is missing.
+      ...(typeof grid === 'object' && grid !== null ? (grid as LocaleText) : {}),
+    };
+  });
 
   /** Checkbox multi-row selection (Community feature). */
   readonly rowSelection: RowSelectionOptions = {
