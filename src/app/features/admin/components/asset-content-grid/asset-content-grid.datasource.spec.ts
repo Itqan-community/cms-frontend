@@ -47,42 +47,14 @@ describe('AssetContentGridComponent word datasource', () => {
 
   afterEach(() => httpMock.verify());
 
-  it('uses the infinite row model only for the word template', () => {
-    // Arrange — a template never actually flips on one live asset instance
-    // (it's immutable per asset, per Task 13); two fixtures model that
-    // instead of toggling the input on a single already-rendered grid, which
-    // would force AG Grid through a rowModelType transition it doesn't
-    // support post-init.
-    const wordFixture = TestBed.createComponent(AssetContentGridComponent);
-    wordFixture.componentRef.setInput('kind', 'translation');
-    wordFixture.componentRef.setInput('slug', 'a-word-translation');
-    wordFixture.componentRef.setInput('template', 'word');
-
-    const ayahFixture = TestBed.createComponent(AssetContentGridComponent);
-    ayahFixture.componentRef.setInput('kind', 'translation');
-    ayahFixture.componentRef.setInput('slug', 'an-ayah-translation');
-    ayahFixture.componentRef.setInput('template', 'ayah');
-
-    // Act
-    wordFixture.detectChanges();
-    const wordModel = wordFixture.componentInstance.rowModelType();
-    ayahFixture.detectChanges();
-    const ayahModel = ayahFixture.componentInstance.rowModelType();
-
-    // Assert
-    expect(wordModel).toBe('infinite');
-    expect(ayahModel).toBe('clientSide');
-
-    // Drain the draft + first-page requests that ngOnInit kicked off on
-    // each fixture.
-    flushDraft(httpMock, 'a-word-translation', 1);
-    flushDraft(httpMock, 'an-ayah-translation', 2);
+  /** Answer any other pending entries request (e.g. the live grid's own first block). */
+  function drainEntries(): void {
     httpMock
       .match((r) => r.url.includes('entries/'))
       .forEach((req) => req.flush({ results: [], count: 0 }));
-  });
+  }
 
-  it('translates a block request into a page request and reports the total', () => {
+  it('translates a block request into a page request and reports the total', async () => {
     // Arrange
     const fixture = TestBed.createComponent(AssetContentGridComponent);
     fixture.componentRef.setInput('kind', 'translation');
@@ -112,7 +84,7 @@ describe('AssetContentGridComponent word datasource', () => {
         count: 77431,
       });
 
-    const datasource = fixture.componentInstance.buildWordDatasource();
+    const datasource = fixture.componentInstance.buildDatasource();
     const successCallback = jasmine.createSpy('successCallback');
     const params: IGetRowsParams = {
       api: {} as GridApi,
@@ -125,15 +97,96 @@ describe('AssetContentGridComponent word datasource', () => {
       filterModel: {},
     };
 
-    // Act
+    // Act — getRows saves pending edits first, then fetches
     datasource.getRows(params);
-    const req = httpMock.expectOne((r) => r.url.includes('entries/'));
+    await new Promise((resolve) => setTimeout(resolve));
+    // The live grid (template bound) also fetched its own first block; drain it.
+    const req = httpMock.expectOne(
+      (r) => r.url.includes('entries/') && r.params.get('page') === '2'
+    );
     req.flush({ results: [{ unit_id: 101, text: '' }], count: 77431 });
+    drainEntries();
 
     // Assert
     expect(req.request.params.get('page')).toBe('2');
     expect(req.request.params.get('page_size')).toBe('100');
+    expect(req.request.params.has('filters')).toBeFalse();
     expect(successCallback).toHaveBeenCalledWith([{ unit_id: 101, text: '' }], 77431);
+  });
+
+  it('sends the grid filter model to the server and reports the filtered total', async () => {
+    // Arrange
+    const fixture = TestBed.createComponent(AssetContentGridComponent);
+    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('slug', 'a-filtered-tafsir');
+    fixture.componentRef.setInput('template', 'ayah');
+    fixture.detectChanges();
+    flushDraft(httpMock, 'a-filtered-tafsir', 9);
+    httpMock.expectOne((r) => r.url.includes('entries/')).flush({ results: [], count: 6236 });
+    const filterModel = {
+      sura: { filterType: 'number', type: 'equals', filter: 2 },
+      text: { filterType: 'text', type: 'contains', filter: 'mercy' },
+    };
+    const successCallback = jasmine.createSpy('successCallback');
+
+    // Act
+    fixture.componentInstance.buildDatasource().getRows({
+      api: {} as GridApi,
+      context: {},
+      startRow: 0,
+      endRow: 100,
+      successCallback,
+      failCallback: jasmine.createSpy('failCallback'),
+      sortModel: [],
+      filterModel,
+    });
+    await new Promise((resolve) => setTimeout(resolve));
+    // The live grid (template bound) also fetched its own first block; drain it.
+    const req = httpMock.expectOne((r) => r.url.includes('entries/') && r.params.has('filters'));
+    req.flush({ results: [], count: 12 });
+
+    // Assert
+    expect(JSON.parse(req.request.params.get('filters') ?? 'null')).toEqual(filterModel);
+    expect(successCallback).toHaveBeenCalledWith([], 12);
+    expect(fixture.componentInstance.entriesTotal()).toBe(12);
+    drainEntries();
+  });
+
+  it('scrolls an ayah asset through the infinite datasource too', async () => {
+    // Arrange — no template bound: the one-row probe tells the grid it's ayah
+    const fixture = TestBed.createComponent(AssetContentGridComponent);
+    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('slug', 'an-ayah-tafsir');
+    fixture.detectChanges();
+    flushDraft(httpMock, 'an-ayah-tafsir', 5);
+    const probe = httpMock.expectOne((r) => r.url.includes('entries/'));
+    expect(probe.request.params.get('page_size')).toBe('1');
+    probe.flush({
+      results: [
+        {
+          unit_type: 'ayah',
+          unit_id: 1,
+          label: '1:1',
+          reference_text: '',
+          sura: 1,
+          aya: 1,
+          text: '',
+          order: 1,
+        },
+      ],
+      count: 6236,
+    });
+
+    // Act
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // Assert — the live grid asked the datasource for its first block
+    const block = httpMock.expectOne((r) => r.url.includes('entries/'));
+    expect(block.request.params.get('page')).toBe('1');
+    expect(block.request.params.get('page_size')).toBe('100');
+    block.flush({ results: [], count: 6236 });
   });
 
   it('scrolls a word asset through the infinite datasource when the template input is unbound', async () => {

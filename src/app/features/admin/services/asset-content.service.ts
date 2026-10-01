@@ -73,13 +73,15 @@ export class AssetContentService {
     versionId: number,
     page: number,
     pageSize: number,
-    sura?: number
+    filterModel?: Record<string, unknown>
   ): Observable<ContentEntriesResponse> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('page_size', pageSize.toString());
-    if (sura != null) {
-      params = params.set('sura', sura.toString());
+    // The grid's AG Grid filter model, sent whole; the backend filters every
+    // unit by it before paging, so `count` is the filtered total.
+    if (filterModel && Object.keys(filterModel).length > 0) {
+      params = params.set('filters', JSON.stringify(filterModel));
     }
     return this.http.get<ContentEntriesResponse>(
       `${this.versionBase(kind, slug, versionId)}entries/`,

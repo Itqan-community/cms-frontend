@@ -337,13 +337,14 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
 - `asset-versions-manager/` — Version CRUD (tafsir/translation/mushaf/font; program when
   re-enabled); CSV `export/` then `file_url` fallback
 - `asset-content-editor/` + `asset-content-grid/` — Per-unit draft editor (surah/ayah/word/page
-  content templates); flush before publish; leave blocked if PATCH fails. Column set and row model
-  are driven by `effectiveTemplate()` (the `template` input, falling back to the template derived
-  from loaded rows' `unit_type`): `word` uses AG Grid's infinite row model with a server-side
-  `buildWordDatasource()` (paginated `entries/` endpoint, `cacheBlockSize` pinned to the
-  datasource's page size, server-side surah filter via `refreshInfiniteCache()`, undo/redo hidden);
-  `surah`/`ayah`/ `page` stay on the client-side row model with full undo/redo and (for `ayah` only)
-  the client-side surah floating filter
+  content templates); flush before publish; leave blocked if PATCH fails. Column set is driven by
+  `effectiveTemplate()` (the `template` input, falling back to a one-row probe's `unit_type`). Every
+  template uses AG Grid's infinite row model via `buildDatasource()` (paginated `entries/`,
+  `cacheBlockSize` pinned to the page size, sorting off, one-line rows with truncated text). Column
+  filters run server-side: the grid's `filterModel` is sent as the JSON `filters` param — text
+  filters on `text`/`reference_text`/`source_text`, number filters on `sura`/`aya`, and a surah-name
+  dropdown (`SurahFloatingFilterComponent`) on the unit column (`colId: 'surah'`). Undo/redo is a
+  custom stack (AG Grid's only covers the client-side model), replayed via `getRowId`
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`
 - `search-panel/` — Search UI

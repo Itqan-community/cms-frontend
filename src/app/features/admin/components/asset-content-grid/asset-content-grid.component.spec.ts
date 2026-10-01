@@ -80,31 +80,70 @@ describe('AssetContentGridComponent column definitions', () => {
     expect(reference?.headerName).toBe('ADMIN.CONTENT_EDITOR.COLUMNS.REFERENCE');
   });
 
-  it('adds filterable surah and ayah number columns for the ayah template', () => {
-    // Arrange / Act
-    const columns = componentFor('ayah').buildColumnDefs();
-    const sura = columns.find((col: { field?: string }) => col.field === 'sura');
-    const aya = columns.find((col: { field?: string }) => col.field === 'aya');
+  it('gives the ayah and word templates server-side surah and ayah number filters', () => {
+    for (const template of ['ayah', 'word']) {
+      // Arrange / Act
+      const columns = componentFor(template).buildColumnDefs();
+      const sura = columns.find((col) => col.field === 'sura');
+      const aya = columns.find((col) => col.field === 'aya');
 
-    // Assert — rows are all loaded client-side, so number filters work in place
-    expect(sura?.filter).toBe('agNumberColumnFilter');
-    expect(sura?.floatingFilter).toBeTrue();
-    expect(aya?.filter).toBe('agNumberColumnFilter');
-    expect(aya?.floatingFilter).toBeTrue();
+      // Assert — plain number filters; the surah-name dropdown sits on the unit column
+      expect(sura?.filter).withContext(template).toBe('agNumberColumnFilter');
+      expect(sura?.floatingFilterComponent).withContext(template).toBeUndefined();
+      expect(aya?.filter).withContext(template).toBe('agNumberColumnFilter');
+      expect(aya?.floatingFilter).withContext(template).toBeTrue();
+    }
   });
 
-  it('shows surah and ayah number columns for the word template without client-side filters', () => {
-    // Arrange / Act
-    const columns = componentFor('word').buildColumnDefs();
-    const sura = columns.find((col: { field?: string }) => col.field === 'sura');
-    const aya = columns.find((col: { field?: string }) => col.field === 'aya');
+  it('puts the surah-name dropdown on the unit column wherever units have a surah', () => {
+    for (const template of ['surah', 'ayah', 'word']) {
+      // Arrange / Act
+      const label = componentFor(template)
+        .buildColumnDefs()
+        .find((col) => col.field === 'label');
 
-    // Assert — the word grid loads page by page, so a column filter would only
-    // see the loaded block; the toolbar's server-side surah filter stays instead
-    expect(sura).toBeDefined();
-    expect(aya).toBeDefined();
-    expect(sura?.filter).toBeFalsy();
-    expect(aya?.filter).toBeFalsy();
+      // Assert — keyed `surah` so the server filters the surah number, not the label text
+      expect(label?.colId).withContext(template).toBe('surah');
+      expect(label?.filter).withContext(template).toBe('agNumberColumnFilter');
+      expect(label?.floatingFilterComponent).withContext(template).toBeTruthy();
+    }
+  });
+
+  it('gives every text column a text filter and keeps rows one line tall', () => {
+    // Arrange / Act
+    const textColumns = componentFor('ayah')
+      .buildColumnDefs()
+      .filter((col) => col.field === 'reference_text' || col.field === 'text');
+
+    // Assert — long text is cut off in the cell rather than growing the row
+    expect(textColumns.length).toBe(2);
+    for (const col of textColumns) {
+      expect(col.filter).withContext(String(col.field)).toBe('agTextColumnFilter');
+      expect(col.wrapText).withContext(String(col.field)).toBeFalsy();
+      expect(col.autoHeight).withContext(String(col.field)).toBeFalsy();
+    }
+  });
+
+  it('undoes and redoes a text edit by queueing the restored value for autosave', () => {
+    // Arrange
+    const grid = componentFor('ayah');
+    const row = { unit_id: 5, text: 'new' } as never;
+    grid.onCellValueChanged({ data: row, oldValue: 'old', source: 'edit' } as never);
+
+    // Act
+    grid.undo();
+
+    // Assert
+    expect(grid.canUndo()).toBeFalse();
+    expect(grid.canRedo()).toBeTrue();
+    expect(grid.hasUnsavedWork()).toBeTrue();
+
+    // Act
+    grid.redo();
+
+    // Assert
+    expect(grid.canUndo()).toBeTrue();
+    expect(grid.canRedo()).toBeFalse();
   });
 
   it('keeps surah and ayah number columns off the surah and page templates', () => {
