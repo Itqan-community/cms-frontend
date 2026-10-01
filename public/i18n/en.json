@@ -907,7 +907,8 @@
       "TEXT_EDITOR": {
         "HINT": "Enter to apply · Shift+Enter for a new line · Esc to cancel",
         "CANCEL": "Cancel",
-        "DONE": "Done"
+        "DONE": "Done",
+        "CLOSE": "Close"
       },
       "GRID": {
         "equals": "Equals",
@@ -1252,7 +1253,6 @@
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
           "COL_SUMMARY": "Summary",
-          "COL_SIZE": "Size",
           "COL_DATE": "Date added",
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
@@ -1410,7 +1410,6 @@
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
           "COL_SUMMARY": "Summary",
-          "COL_SIZE": "Size",
           "COL_DATE": "Date added",
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
@@ -2195,7 +2194,6 @@
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
           "COL_SUMMARY": "Summary",
-          "COL_SIZE": "Size",
           "COL_DATE": "Date added",
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
@@ -2366,7 +2364,6 @@
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
           "COL_SUMMARY": "Summary",
-          "COL_SIZE": "Size",
           "COL_DATE": "Date added",
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
@@ -2521,7 +2518,6 @@
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
           "COL_SUMMARY": "Summary",
-          "COL_SIZE": "Size",
           "COL_DATE": "Date added",
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",

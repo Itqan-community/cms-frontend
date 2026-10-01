@@ -5,6 +5,16 @@ import type { ICellEditorParams } from 'ag-grid-community';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import type { ContentEntry } from '../../models/asset-content.models';
 
+/** Extra `cellEditorParams` this editor reads. */
+export interface ContentTextEditorParams {
+  /** Show the cell's full text without letting it change (read-only columns). */
+  readOnly?: boolean;
+  /** Heading over the unit's source-language text, shown while editing a translation. */
+  sourceTitle?: string;
+}
+
+type Params = ICellEditorParams<ContentEntry, string> & ContentTextEditorParams;
+
 /** Keys the textarea keeps for itself instead of letting the grid navigate. */
 const TEXTAREA_KEYS = new Set(['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown']);
 
@@ -15,6 +25,11 @@ const TEXTAREA_KEYS = new Set(['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'
  * Keys follow agLargeTextCellEditor: Enter commits, Shift+Enter is a new
  * line, Esc cancels, and clicking outside commits (the grid's
  * `stopEditingWhenCellsLoseFocus` makes popup editors modal).
+ *
+ * When editing a translation, the source-language text is shown between the
+ * Quran text and the textarea. With `readOnly` it only displays the cell (the
+ * source column has no other way to show text longer than one line): the
+ * textarea can't change, the only button closes, and the edit always cancels.
  */
 @Component({
   selector: 'app-content-text-cell-editor',
@@ -27,24 +42,37 @@ const TEXTAREA_KEYS = new Set(['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'
           <p class="text-editor__reference" dir="rtl">{{ reference }}</p>
         }
       </header>
+      @if (source) {
+        <section class="text-editor__source">
+          <span class="text-editor__source-title">{{ sourceTitle }}</span>
+          <p class="text-editor__source-text" dir="auto">{{ source }}</p>
+        </section>
+      }
       <textarea
         #input
         class="text-editor__input"
         dir="auto"
+        [readOnly]="readOnly"
         [value]="value"
         (input)="value = $any($event.target).value"
         (keydown)="onKeydown($event)"
       ></textarea>
       <footer class="text-editor__footer">
-        <span class="text-editor__hint">{{
-          'ADMIN.CONTENT_EDITOR.TEXT_EDITOR.HINT' | translate
-        }}</span>
-        <button nz-button nzType="default" type="button" (click)="cancel()">
-          {{ 'ADMIN.CONTENT_EDITOR.TEXT_EDITOR.CANCEL' | translate }}
-        </button>
-        <button nz-button nzType="primary" type="button" (click)="done()">
-          {{ 'ADMIN.CONTENT_EDITOR.TEXT_EDITOR.DONE' | translate }}
-        </button>
+        @if (readOnly) {
+          <button nz-button nzType="primary" type="button" (click)="cancel()">
+            {{ 'ADMIN.CONTENT_EDITOR.TEXT_EDITOR.CLOSE' | translate }}
+          </button>
+        } @else {
+          <span class="text-editor__hint">{{
+            'ADMIN.CONTENT_EDITOR.TEXT_EDITOR.HINT' | translate
+          }}</span>
+          <button nz-button nzType="default" type="button" (click)="cancel()">
+            {{ 'ADMIN.CONTENT_EDITOR.TEXT_EDITOR.CANCEL' | translate }}
+          </button>
+          <button nz-button nzType="primary" type="button" (click)="done()">
+            {{ 'ADMIN.CONTENT_EDITOR.TEXT_EDITOR.DONE' | translate }}
+          </button>
+        }
       </footer>
     </div>
   `,
@@ -65,7 +93,7 @@ const TEXTAREA_KEYS = new Set(['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'
       }
       .text-editor__header {
         flex: none;
-        max-height: 30%;
+        max-height: 25%;
         overflow-y: auto;
         user-select: text;
       }
@@ -79,6 +107,26 @@ const TEXTAREA_KEYS = new Set(['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'
         font-size: 22px;
         line-height: 1.9;
       }
+      .text-editor__source {
+        flex: none;
+        max-height: 30%;
+        overflow-y: auto;
+        padding: 10px 12px;
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.03);
+        user-select: text;
+      }
+      .text-editor__source-title {
+        font-size: 12px;
+        font-weight: 600;
+        color: rgba(0, 0, 0, 0.55);
+      }
+      .text-editor__source-text {
+        margin: 4px 0 0;
+        font-size: 15px;
+        line-height: 1.7;
+        white-space: pre-wrap;
+      }
       .text-editor__input {
         flex: 1;
         width: 100%;
@@ -91,10 +139,14 @@ const TEXTAREA_KEYS = new Set(['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'
         font-size: 16px;
         line-height: 1.7;
       }
+      .text-editor__input[readonly] {
+        background: rgba(0, 0, 0, 0.02);
+      }
       .text-editor__footer {
         flex: none;
         display: flex;
         align-items: center;
+        justify-content: flex-end;
         gap: 8px;
       }
       .text-editor__hint {
@@ -108,17 +160,29 @@ const TEXTAREA_KEYS = new Set(['ArrowLeft', 'ArrowUp', 'ArrowRight', 'ArrowDown'
 })
 export class ContentTextCellEditorComponent implements ICellEditorAngularComp {
   private readonly input = viewChild.required<ElementRef<HTMLTextAreaElement>>('input');
-  private params!: ICellEditorParams<ContentEntry, string>;
+  private params!: Params;
 
   label = '';
   reference = '';
+  source = '';
+  sourceTitle = '';
+  readOnly = false;
   value = '';
   private cancelled = false;
 
-  agInit(params: ICellEditorParams<ContentEntry, string>): void {
+  agInit(params: Params): void {
     this.params = params;
     this.label = params.data?.label ?? '';
     this.reference = params.data?.reference_text ?? '';
+    this.readOnly = params.readOnly ?? false;
+    if (this.readOnly) {
+      // Read-only: always the cell as-is, whichever key opened it.
+      this.value = params.value ?? '';
+      this.cancelled = true;
+      return;
+    }
+    this.source = params.data?.source_text ?? '';
+    this.sourceTitle = params.sourceTitle ?? '';
     // Same start value as agLargeTextCellEditor: Backspace/Delete clears,
     // a printable key replaces the text, anything else keeps the cell value.
     const { eventKey } = params;
@@ -148,7 +212,8 @@ export class ContentTextCellEditorComponent implements ICellEditorAngularComp {
     const textarea = this.input().nativeElement;
     textarea.focus();
     // Start at the top of long text unless the edit began by typing.
-    const caret = this.params.eventKey?.length === 1 ? textarea.value.length : 0;
+    const typed = !this.readOnly && this.params.eventKey?.length === 1;
+    const caret = typed ? textarea.value.length : 0;
     textarea.setSelectionRange(caret, caret);
     textarea.scrollTop = 0;
   }

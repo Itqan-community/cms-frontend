@@ -12,12 +12,16 @@ type ChangeFilter = 'all' | ChangeType;
 
 /** How many change cards render at once; "Show more" reveals the next batch. */
 const PAGE_SIZE = 50;
+/** Unchanged words kept around each change in `compact` mode. */
+const COMPACT_CONTEXT_WORDS = 2;
 
 /**
  * Readable list of content changes for non-technical reviewers: counts per
  * kind (which double as filters), then one card per changed unit showing the
  * added text, the removed text, or a before/after comparison with the exact
  * words that changed highlighted and long unchanged stretches folded away.
+ * `compact` (the versions list) stacks before above after and keeps only a
+ * couple of words around each change.
  */
 @Component({
   selector: 'app-content-changes',
@@ -28,6 +32,7 @@ const PAGE_SIZE = 50;
 })
 export class ContentChangesComponent {
   readonly changes = input.required<ContentChange[]>();
+  readonly compact = input(false);
 
   readonly filters: { key: ChangeFilter; label: string }[] = [
     { key: 'all', label: 'ADMIN.CONTENT_CHANGES.ALL' },
@@ -66,7 +71,11 @@ export class ContentChangesComponent {
         change,
         words:
           change.change_type === 'modified'
-            ? diffWords(change.old_text ?? '', change.new_text ?? '')
+            ? diffWords(
+                change.old_text ?? '',
+                change.new_text ?? '',
+                this.compact() ? { contextWords: COMPACT_CONTEXT_WORDS } : {}
+              )
             : null,
       }))
   );

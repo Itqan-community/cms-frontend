@@ -10,6 +10,7 @@ import { NzModalService } from 'ng-zorro-antd/modal';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { AssetContentGridComponent } from './asset-content-grid.component';
+import { ContentTextCellEditorComponent } from './content-text-cell-editor.component';
 
 describe('AssetContentGridComponent column definitions', () => {
   function componentFor(template: string) {
@@ -122,6 +123,75 @@ describe('AssetContentGridComponent column definitions', () => {
       expect(col.wrapText).withContext(String(col.field)).toBeFalsy();
       expect(col.autoHeight).withContext(String(col.field)).toBeFalsy();
     }
+  });
+
+  it('opens the source column in the read-only text popup', () => {
+    // Arrange
+    const grid = componentFor('ayah');
+    grid.languages.set([
+      { language: 'en', is_source: true, is_available: true },
+      { language: 'ar', is_source: false, is_available: true },
+    ] as never);
+    grid.selectedLanguage.set('ar');
+
+    // Act
+    const columns = grid.buildColumnDefs();
+    const source = columns.find((col) => col.field === 'source_text');
+    const text = columns.find((col) => col.field === 'text');
+
+    // Assert — the source cell opens read-only; the text editor gets its heading
+    expect(source?.editable).toBeTrue();
+    expect(source?.cellEditor).toBe(ContentTextCellEditorComponent);
+    expect(source?.cellEditorParams).toEqual(jasmine.objectContaining({ readOnly: true }));
+    expect(text?.cellEditorParams?.sourceTitle).toContain('ADMIN.CONTENT_EDITOR.COLUMNS.SOURCE');
+  });
+
+  it('paints text cells the draft changed since the last publish', () => {
+    // Arrange
+    const text = componentFor('ayah')
+      .buildColumnDefs()
+      .find((col) => col.field === 'text');
+    const rule = text?.cellClassRules?.['content-grid__cell--changed'] as (p: unknown) => boolean;
+
+    // Act / Assert
+    expect(rule({ data: { changed: true } })).toBeTrue();
+    expect(rule({ data: { changed: false } })).toBeFalse();
+  });
+
+  it('marks an edited cell as changed right away', () => {
+    // Arrange
+    const grid = componentFor('ayah');
+    const row = { unit_id: 5, text: 'new', changed: false };
+
+    // Act
+    grid.onCellValueChanged({ data: row, oldValue: 'old', source: 'edit' } as never);
+
+    // Assert
+    expect(row.changed).toBeTrue();
+  });
+
+  it('takes the changed flag from the autosave response', async () => {
+    // Arrange — the user typed the published text back in
+    const grid = componentFor('ayah');
+    const httpMock = TestBed.inject(HttpTestingController);
+    const row = { unit_id: 5, text: 'published', changed: false };
+    const refreshCells = jasmine.createSpy('refreshCells');
+    grid.onGridReady({
+      api: { getRowNode: (id: string) => (id === '5' ? { data: row } : undefined), refreshCells },
+    } as never);
+    grid.draftId.set(7);
+    grid.onCellValueChanged({ data: row, oldValue: 'edited', source: 'edit' } as never);
+
+    // Act
+    const saved = grid.keepDraftOnLeave();
+    httpMock
+      .expectOne((r) => r.method === 'PATCH')
+      .flush([{ unit_id: 5, text: 'published', changed: false }]);
+    await saved;
+
+    // Assert
+    expect(row.changed).toBeFalse();
+    expect(refreshCells).toHaveBeenCalled();
   });
 
   it('undoes and redoes a text edit by queueing the restored value for autosave', () => {

@@ -56,7 +56,10 @@ import {
 } from '../../utils/clipboard-table.util';
 import { ISO_639_LANGUAGES, localizedLanguageName } from '../../utils/iso-639.util';
 import { ContentChangesComponent } from '../content-changes/content-changes.component';
-import { ContentTextCellEditorComponent } from './content-text-cell-editor.component';
+import {
+  ContentTextCellEditorComponent,
+  type ContentTextEditorParams,
+} from './content-text-cell-editor.component';
 import { SurahFloatingFilterComponent } from './surah-floating-filter.component';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -188,6 +191,10 @@ export class AssetContentGridComponent implements OnInit {
   private readonly redoStack: CellEdit[] = [];
 
   readonly draftId = signal<number | null>(null);
+  /** True once an edit has been saved to the draft since the editor opened
+   *  (or the language changed). Opening always loads a draft, so `draftId`
+   *  alone would show "all changes saved" before anything was edited. */
+  readonly savedOnce = signal(false);
   /** First-block requests in flight — the initial load, or a refetch after a
    *  filter change resets the grid to row 0. Scroll blocks don't count. */
   private readonly firstBlocksInFlight = signal(0);
@@ -292,6 +299,13 @@ export class AssetContentGridComponent implements OnInit {
 
   onCellValueChanged(event: CellValueChangedEvent<ContentEntry>): void {
     const row = event.data;
+    // Assume the edit differs from the published text until the autosave
+    // response says otherwise (see `applySavedRows`).
+    row.changed = true;
+    // `force`: the grid has already drawn the new value, so a plain refresh skips it.
+    if (event.node) {
+      this.gridApi?.refreshCells({ rowNodes: [event.node], columns: ['text'], force: true });
+    }
     this.pendingRows.set(row.unit_id, {
       unit_id: row.unit_id,
       text: row.text ?? '',
@@ -564,6 +578,7 @@ export class AssetContentGridComponent implements OnInit {
       if (!ok) return;
       this.pendingRows.clear();
       this.dirty.set(false);
+      this.savedOnce.set(false);
       this.clearHistory();
       this.selectedLanguage.set(language);
       this.lastLanguage.set(this.kind, this.slug, language);
@@ -641,6 +656,23 @@ export class AssetContentGridComponent implements OnInit {
       });
   }
 
+  /** Copy the server's `changed` flag onto the saved rows, so a cell edited
+   *  back to its published text loses its highlight. Rows edited again since
+   *  this save keep their mark until their own save answers. */
+  private applySavedRows(saved: ContentEntry[]): void {
+    const api = this.gridApi;
+    if (!api) return;
+    const nodes = [];
+    for (const row of saved) {
+      if (this.pendingRows.has(row.unit_id)) continue;
+      const node = api.getRowNode(String(row.unit_id));
+      if (!node?.data) continue;
+      node.data.changed = row.changed ?? false;
+      nodes.push(node);
+    }
+    if (nodes.length > 0) api.refreshCells({ rowNodes: nodes, columns: ['text'], force: true });
+  }
+
   /** Persist any pending edits to the draft. `true` on success/nothing to save. */
   private async flushPending(): Promise<boolean> {
     const versionId = this.draftId();
@@ -657,8 +689,10 @@ export class AssetContentGridComponent implements OnInit {
           .patchEntries(this.kind, this.slug, versionId, batch)
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe({
-            next: () => {
+            next: (saved) => {
               this.activePatchesCount--;
+              this.applySavedRows(saved);
+              this.savedOnce.set(true);
               if (this.pendingRows.size === 0) {
                 this.dirty.set(false);
               }
@@ -918,7 +952,12 @@ export class AssetContentGridComponent implements OnInit {
         field: 'source_text',
         headerName: this.sourceColHeader(),
         flex: 2,
-        editable: false,
+        // "Editable" only so a cell opens the text popup in read-only mode:
+        // rows are one line tall, and this is the only way to read it all.
+        editable: true,
+        cellEditor: ContentTextCellEditorComponent,
+        cellEditorPopup: true,
+        cellEditorParams: { readOnly: true } satisfies ContentTextEditorParams,
         cellStyle: { direction: this.sourceTextDirection() },
         ...textFilter,
       });
@@ -931,6 +970,9 @@ export class AssetContentGridComponent implements OnInit {
       editable: true,
       cellEditor: ContentTextCellEditorComponent,
       cellEditorPopup: true,
+      cellEditorParams: { sourceTitle: this.sourceColHeader() } satisfies ContentTextEditorParams,
+      // Yellow when the draft differs from the published version.
+      cellClassRules: { 'content-grid__cell--changed': (p) => !!p.data?.changed },
       ...textFilter,
     });
 

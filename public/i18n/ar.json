@@ -883,7 +883,8 @@
       "TEXT_EDITOR": {
         "HINT": "Enter للتطبيق · Shift+Enter لسطر جديد · Esc للإلغاء",
         "CANCEL": "إلغاء",
-        "DONE": "تم"
+        "DONE": "تم",
+        "CLOSE": "إغلاق"
       },
       "GRID": {
         "equals": "يساوي",
@@ -1252,7 +1253,6 @@
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
           "COL_SUMMARY": "الملخص",
-          "COL_SIZE": "الحجم",
           "COL_DATE": "تاريخ الإضافة",
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
@@ -1410,7 +1410,6 @@
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
           "COL_SUMMARY": "الملخص",
-          "COL_SIZE": "الحجم",
           "COL_DATE": "تاريخ الإضافة",
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
@@ -2195,7 +2194,6 @@
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
           "COL_SUMMARY": "الملخص",
-          "COL_SIZE": "الحجم",
           "COL_DATE": "تاريخ الإضافة",
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
@@ -2366,7 +2364,6 @@
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
           "COL_SUMMARY": "الملخص",
-          "COL_SIZE": "الحجم",
           "COL_DATE": "تاريخ الإضافة",
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
@@ -2521,7 +2518,6 @@
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
           "COL_SUMMARY": "الملخص",
-          "COL_SIZE": "الحجم",
           "COL_DATE": "تاريخ الإضافة",
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",

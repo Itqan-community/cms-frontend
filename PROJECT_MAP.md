@@ -346,8 +346,10 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   dropdown (`SurahFloatingFilterComponent`) on the unit column (`colId: 'surah'`). Undo/redo is a
   custom stack (AG Grid's only covers the client-side model), replayed via `getRowId`. The text
   column edits in `ContentTextCellEditorComponent`: a near-fullscreen popup showing the unit label
-  and `reference_text`; an outside click commits it (`stopEditingWhenCellsLoseFocus`), and the page
-  behind is `visibility: hidden` so find-in-page only searches the popup
+  and `reference_text` (plus `source_text` when editing a translation); an outside click commits it
+  (`stopEditingWhenCellsLoseFocus`), and the page behind is `visibility: hidden` so find-in-page
+  only searches the popup. The read-only `source_text` column opens the same popup with
+  `readOnly: true` (always cancels) so its full text is readable
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`
 - `search-panel/` — Search UI

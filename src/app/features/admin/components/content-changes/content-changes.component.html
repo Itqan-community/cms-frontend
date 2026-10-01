@@ -74,7 +74,10 @@
               </p>
             }
             @default {
-              <div class="content-changes__compare">
+              <div
+                class="content-changes__compare"
+                [class.content-changes__compare--stacked]="compact()"
+              >
                 <div class="content-changes__side">
                   <span class="content-changes__side-title">{{
                     'ADMIN.CONTENT_CHANGES.BEFORE' | translate

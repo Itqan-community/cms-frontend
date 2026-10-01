@@ -194,6 +194,38 @@ describe('AssetContentGridComponent word datasource', () => {
     expect(grid.refreshing()).toBeFalse();
   });
 
+  it('shows "all changes saved" only after an edit is saved, not on open', async () => {
+    // Arrange — opening the editor always creates or reuses a draft
+    const fixture = TestBed.createComponent(AssetContentGridComponent);
+    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('slug', 'a-saved-tafsir');
+    fixture.detectChanges();
+    flushDraft(httpMock, 'a-saved-tafsir', 9);
+    httpMock.expectOne((r) => r.url.includes('entries/')).flush({ results: [], count: 0 });
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    for (const req of httpMock.match((r) => r.method === 'GET' && r.url.includes('entries/'))) {
+      req.flush({ results: [], count: 0 });
+    }
+    fixture.detectChanges();
+    const el = fixture.nativeElement as HTMLElement;
+
+    // Assert — nothing was edited, so nothing claims to be saved
+    expect(el.querySelector('.content-grid__saved')).toBeNull();
+
+    // Act — edit a cell and let it save
+    const grid = fixture.componentInstance;
+    grid.onCellValueChanged({ data: { unit_id: 1, text: 'new' }, oldValue: '' } as never);
+    const saved = grid.keepDraftOnLeave();
+    httpMock.expectOne((r) => r.method === 'PATCH' && r.url.includes('entries/')).flush([]);
+    expect(await saved).toBeTrue();
+    fixture.detectChanges();
+
+    // Assert
+    expect(el.querySelector('.content-grid__saved')).not.toBeNull();
+  });
+
   it('scrolls an ayah asset through the infinite datasource too', async () => {
     // Arrange — no template bound: the one-row probe tells the grid it's ayah
     const fixture = TestBed.createComponent(AssetContentGridComponent);
