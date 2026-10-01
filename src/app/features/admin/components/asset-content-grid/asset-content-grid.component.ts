@@ -56,6 +56,7 @@ import {
 } from '../../utils/clipboard-table.util';
 import { ISO_639_LANGUAGES, localizedLanguageName } from '../../utils/iso-639.util';
 import { ContentChangesComponent } from '../content-changes/content-changes.component';
+import { ContentTextCellEditorComponent } from './content-text-cell-editor.component';
 import { SurahFloatingFilterComponent } from './surah-floating-filter.component';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -73,7 +74,7 @@ const AUTOSAVE_DEBOUNCE_MS = 800;
  * `endRow - startRow` derives the page size safely from it — pin both to
  * this one constant instead of hardcoding it twice.
  */
-const CACHE_BLOCK_SIZE = 100;
+const CACHE_BLOCK_SIZE = 50;
 /** Edits kept for undo/redo. */
 const UNDO_LIMIT = 50;
 /** `setDataValue` source for undo/redo, so replayed edits aren't recorded again. */
@@ -245,10 +246,17 @@ export class AssetContentGridComponent implements OnInit {
   readonly theme = themeQuartz;
 
   /** Grid-owned text in the UI language. `localeText` is an @initial grid
-   *  option, read once when the grid is created (after translations load). */
-  readonly localeText = computed<LocaleText>(() => ({
-    loadingOoo: this.translate.instant('COMMON.LOADING'),
-  }));
+   *  option, read once when the grid is created (after translations load;
+   *  switching language reloads the page). `ADMIN.CONTENT_EDITOR.GRID` holds
+   *  the filter UI texts under AG Grid's own locale keys (`equals`, …). */
+  readonly localeText = computed<LocaleText>(() => {
+    const grid: unknown = this.translate.instant('ADMIN.CONTENT_EDITOR.GRID');
+    return {
+      loadingOoo: this.translate.instant('COMMON.LOADING'),
+      // instant() echoes the key string when the block is missing.
+      ...(typeof grid === 'object' && grid !== null ? (grid as LocaleText) : {}),
+    };
+  });
 
   /** Checkbox multi-row selection (Community feature). */
   readonly rowSelection: RowSelectionOptions = {
@@ -849,7 +857,7 @@ export class AssetContentGridComponent implements OnInit {
       {
         field: 'label',
         headerName: this.colHeader('UNIT'),
-        width: 170,
+        width: 120,
         editable: false,
         pinned: this.rtl() ? 'right' : 'left',
         ...(template !== 'page'
@@ -874,7 +882,7 @@ export class AssetContentGridComponent implements OnInit {
         {
           field: 'sura',
           headerName: this.colHeader('SURA'),
-          width: 130,
+          width: 100,
           editable: false,
           filter: 'agNumberColumnFilter',
           filterParams: NUMBER_FILTER_PARAMS,
@@ -883,7 +891,7 @@ export class AssetContentGridComponent implements OnInit {
         {
           field: 'aya',
           headerName: this.colHeader('AYA'),
-          width: 130,
+          width: 100,
           editable: false,
           filter: 'agNumberColumnFilter',
           filterParams: NUMBER_FILTER_PARAMS,
@@ -921,11 +929,8 @@ export class AssetContentGridComponent implements OnInit {
       headerName: this.colHeader('TEXT'),
       flex: 2,
       editable: true,
-      cellEditor: 'agLargeTextCellEditor',
+      cellEditor: ContentTextCellEditorComponent,
       cellEditorPopup: true,
-      // agLargeTextCellEditor defaults to maxLength 200; unit text can be far longer,
-      // so raise the cap and enlarge the popup textarea.
-      cellEditorParams: { maxLength: 100000, rows: 12, cols: 60 },
       ...textFilter,
     });
 

@@ -344,7 +344,10 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   filters run server-side: the grid's `filterModel` is sent as the JSON `filters` param — text
   filters on `text`/`reference_text`/`source_text`, number filters on `sura`/`aya`, and a surah-name
   dropdown (`SurahFloatingFilterComponent`) on the unit column (`colId: 'surah'`). Undo/redo is a
-  custom stack (AG Grid's only covers the client-side model), replayed via `getRowId`
+  custom stack (AG Grid's only covers the client-side model), replayed via `getRowId`. The text
+  column edits in `ContentTextCellEditorComponent`: a near-fullscreen popup showing the unit label
+  and `reference_text`; an outside click commits it (`stopEditingWhenCellsLoseFocus`), and the page
+  behind is `visibility: hidden` so find-in-page only searches the popup
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`
 - `search-panel/` — Search UI

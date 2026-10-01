@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -230,5 +230,33 @@ describe('AssetContentGridComponent column definitions', () => {
     expect(fields).toEqual(['label', 'text']);
 
     httpMock.verify();
+  });
+
+  it('localizes the grid filter UI from the translation files', () => {
+    // Arrange
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('ar', {
+      COMMON: { LOADING: 'جارٍ التحميل...' },
+      ADMIN: { CONTENT_EDITOR: { GRID: { equals: 'يساوي', greaterThan: 'أكبر من' } } },
+    });
+    translate.use('ar');
+
+    // Act
+    const localeText = componentFor('ayah').localeText();
+
+    // Assert
+    expect(localeText).toEqual({
+      loadingOoo: 'جارٍ التحميل...',
+      equals: 'يساوي',
+      greaterThan: 'أكبر من',
+    });
+  });
+
+  it('falls back to the grid defaults when the filter texts are missing', () => {
+    // Arrange / Act — no translations loaded, so instant() echoes the key
+    const localeText = componentFor('ayah').localeText();
+
+    // Assert
+    expect(Object.keys(localeText)).toEqual(['loadingOoo']);
   });
 });
