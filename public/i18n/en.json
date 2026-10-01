@@ -2521,6 +2521,11 @@
         "DELETE_SUCCESS": "Program deleted successfully",
         "ERROR": "An error occurred. Please try again."
       }
+    },
+    "CSV_TEMPLATE": {
+      "DOWNLOAD": "Download CSV template",
+      "HINT": "An empty sheet with one row per unit. Fill in the text column and upload it here.",
+      "PICK_TEMPLATE_FIRST": "Choose the content template (and the mushaf layout for pages) to download its CSV template."
     }
   },
   "USAGE": {

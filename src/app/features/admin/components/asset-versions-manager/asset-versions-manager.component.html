@@ -152,6 +152,13 @@
         <!-- Replacing the file changes the text, so it needs the content permission. -->
         @if (canEditContent()) {
           <div class="asset-versions-manager__upload">
+            @if (supportsLanguages()) {
+              <app-csv-template-download
+                [kind]="kind"
+                [slug]="slug"
+                [assetName]="assetNameEn ?? null"
+              />
+            }
             <input
               #modalFileInput
               type="file"

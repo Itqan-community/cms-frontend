@@ -27,6 +27,7 @@ import { LastActiveLanguageService } from '../../services/last-active-language.s
 import { localizedLanguageName } from '../../utils/iso-639.util';
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../services/admin-auth.service';
+import { CsvTemplateDownloadComponent } from '../csv-template-download/csv-template-download.component';
 
 const DEFAULT_PAGE_SIZE = 10;
 
@@ -35,6 +36,7 @@ const DEFAULT_PAGE_SIZE = 10;
   standalone: true,
   imports: [
     DatePipe,
+    CsvTemplateDownloadComponent,
     ReactiveFormsModule,
     TranslateModule,
     NgIcon,

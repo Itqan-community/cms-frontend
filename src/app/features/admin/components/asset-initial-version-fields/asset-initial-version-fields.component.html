@@ -30,6 +30,13 @@
 
   <div class="asset-initial-version-fields__upload">
     <nz-form-label>{{ i18n + '.FORM_FILE' | translate }}</nz-form-label>
+    @if (contentKind(); as kind) {
+      <app-csv-template-download
+        [kind]="kind"
+        [template]="contentTemplate()"
+        [mushafLayoutId]="mushafLayoutId()"
+      />
+    }
     <input
       #versionFileInput
       type="file"
