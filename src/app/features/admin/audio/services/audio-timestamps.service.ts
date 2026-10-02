@@ -41,14 +41,24 @@ export class AudioTimestampsService {
   private readonly recitations = inject(RecitationsService);
 
   /**
-   * Current ayah boundaries for one track, read from the timing file the track points at.
+   * Current ayah boundaries for one track.
+   *
+   * Read from the track's own timing file when it has one, and otherwise from
+   * `recitationTimingsUrl` — the recitation-wide file the ingest actually maintains. That
+   * fallback is not a nicety: the upload merges every surah into one file per recitation, and
+   * `available_ayah_timings_url` on a track row comes back absent even once timings exist, so
+   * without it a freshly uploaded surah opens as an empty editor. `parseTimingFile` narrows the
+   * recitation-wide array down to this track's surah.
    *
    * The URL is absolute and outside the API origin, so none of the app's interceptors touch
-   * it — no tenant header, no credentials, no error toast. A track with no timings yet has no
-   * URL, and that is an empty editor rather than a failure.
+   * it — no tenant header, no credentials, no error toast. A track with neither URL genuinely
+   * has no timings, and that is an empty editor rather than a failure.
    */
-  load(track: TimestampTrackRef): Observable<TrackTimestamps> {
-    const url = track.available_ayah_timings_url;
+  load(
+    track: TimestampTrackRef,
+    recitationTimingsUrl?: string | null
+  ): Observable<TrackTimestamps> {
+    const url = track.available_ayah_timings_url ?? recitationTimingsUrl;
     if (!url) return of(emptyTimestamps(track));
 
     return this.http
@@ -96,15 +106,46 @@ function emptyTimestamps(track: TimestampTrackRef): TrackTimestamps {
   return { track_id: track.id, surah_number: track.surah_number, surah: null, ayahs: [] };
 }
 
+const MS_PER_SECOND = 1000;
+
 // --- timing file codec ---------------------------------------------------------------------
 // The only code that knows what is inside a timing file. Both directions live together so a
 // change to the format is one edit, and so a save always writes back what a load can read.
 
-/** The file body, as written by `serializeTimingFile`. */
+/**
+ * One ayah entry on the wire: `ayah_number`, `start`, `end` — none of which match the internal
+ * `ayah` / `start_ms` / `end_ms`. Each name was learnt from a bare KeyError in `file_errors`
+ * (`'ayah_number'`, then `'start'`).
+ *
+ * **`start` and `end` are seconds**, not milliseconds. Uploading `start: 400` stored
+ * `start_ms: 400000`, so the ingest multiplies by 1000 — the missing `_ms` suffix is literal.
+ * Sending milliseconds puts every boundary 1000× past the end of the track, which the ingest
+ * counts as `skipped_total` rather than an error.
+ */
+interface TimingFileAyah {
+  ayah_number: number;
+  /** Seconds. */
+  start: number;
+  /** Seconds. */
+  end: number;
+}
+
+/**
+ * The file body, as written by `serializeTimingFile`.
+ *
+ * Two key names are confirmed by rejections from the ingest rather than by a schema:
+ * `surah_id` (not `surah_number`) and each entry's `ayah_number` (not `ayah`). The reader below
+ * still accepts the other spellings, since files written before this was known are in the wild.
+ */
 interface TimingFile {
-  surah_number: number;
-  surah?: { start_ms: number; end_ms: number } | null;
-  ayahs: AyahTimestamp[];
+  /** The **surah number** (1–114), not a track id — see `serializeTimingFile`. */
+  surah_id: number;
+  /**
+   * Seconds, spelled like the ayah entries. The stored file carries no surah bounds at all, so
+   * this is written for symmetry with the reader and appears to be ignored.
+   */
+  surah?: { start: number; end: number } | null;
+  ayahs: TimingFileAyah[];
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -114,24 +155,38 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 /**
  * Reads one track's boundaries out of a timing file.
  *
- * Two layouts are accepted because both exist in the wild: a file holding a single surah, and
- * a recitation-wide file keyed by surah number. The second is narrowed to this track's surah.
+ * Three layouts are accepted, because the file that is read is not the file that was written.
+ * A save uploads one surah; the ingest merges it into a **recitation-wide array** and serves
+ * that back, in its own vocabulary (`ayahs_timings`, `ayah_key`, real `start_ms`). So the
+ * reader has to understand the stored shape as well as its own.
  */
 function parseTimingFile(raw: unknown, track: TimestampTrackRef): TrackTimestamps {
   const body = selectSurah(raw, track.surah_number);
 
   return {
     track_id: track.id,
-    surah_number: readNumber(body?.['surah_number']) ?? track.surah_number,
+    surah_number: readNumber(body?.['surah_id'] ?? body?.['surah_number']) ?? track.surah_number,
     surah: readBounds(body?.['surah']),
-    ayahs: readAyahs(body?.['ayahs'] ?? body?.['verses']),
+    ayahs: readAyahs(body?.['ayahs_timings'] ?? body?.['ayahs'] ?? body?.['verses']),
   };
 }
 
-/** Unwraps a surah-keyed container; a single-surah file is returned as-is. */
+/**
+ * Narrows a container down to this track's surah. Handles the stored recitation-wide array,
+ * an object keyed by surah number, and a file holding a single surah.
+ */
 function selectSurah(raw: unknown, surahNumber: number): Record<string, unknown> | null {
+  if (Array.isArray(raw)) {
+    return (
+      raw
+        .filter(isRecord)
+        .find((entry) => readNumber(entry['surah_number'] ?? entry['surah_id']) === surahNumber) ??
+      null
+    );
+  }
+
   if (!isRecord(raw)) return null;
-  if ('ayahs' in raw || 'verses' in raw) return raw;
+  if ('ayahs_timings' in raw || 'ayahs' in raw || 'verses' in raw) return raw;
 
   const keyed = raw[String(surahNumber)];
   return isRecord(keyed) ? keyed : null;
@@ -143,19 +198,40 @@ function readAyahs(raw: unknown): AyahTimestamp[] {
   return raw
     .filter(isRecord)
     .map((entry) => ({
-      ayah: readNumber(entry['ayah'] ?? entry['ayah_number'] ?? entry['verse']) ?? 0,
-      start_ms: readNumber(entry['start_ms'] ?? entry['start']) ?? 0,
-      end_ms: readNumber(entry['end_ms'] ?? entry['end']) ?? 0,
+      ayah: readAyahNumber(entry),
+      start_ms: readMilliseconds(entry, 'start') ?? 0,
+      end_ms: readMilliseconds(entry, 'end') ?? 0,
     }))
     .filter((entry) => entry.ayah > 0)
     .sort((a, b) => a.ayah - b.ayah);
 }
 
+/** The stored file identifies an ayah as `"114:1"`; an uploaded one as a plain number. */
+function readAyahNumber(entry: Record<string, unknown>): number {
+  const key = entry['ayah_key'];
+  if (typeof key === 'string') return readNumber(key.split(':').at(-1)) ?? 0;
+
+  return readNumber(entry['ayah_number'] ?? entry['ayah'] ?? entry['verse']) ?? 0;
+}
+
+/**
+ * Reads one bound as milliseconds, whichever vocabulary it arrived in. The suffix carries the
+ * unit and is the only thing that does: `start_ms` is already milliseconds, a bare `start` is
+ * seconds — that asymmetry is the ingest's, not ours.
+ */
+function readMilliseconds(entry: Record<string, unknown>, bound: 'start' | 'end'): number | null {
+  const ms = readNumber(entry[`${bound}_ms`]);
+  if (ms != null) return ms;
+
+  const seconds = readNumber(entry[bound]);
+  return seconds == null ? null : Math.round(seconds * MS_PER_SECOND);
+}
+
 function readBounds(raw: unknown): { start_ms: number; end_ms: number } | null {
   if (!isRecord(raw)) return null;
 
-  const start = readNumber(raw['start_ms'] ?? raw['start']);
-  const end = readNumber(raw['end_ms'] ?? raw['end']);
+  const start = readMilliseconds(raw, 'start');
+  const end = readMilliseconds(raw, 'end');
 
   return start == null || end == null ? null : { start_ms: start, end_ms: end };
 }
@@ -172,19 +248,42 @@ function readNumber(value: unknown): number | null {
 /**
  * Writes one track's boundaries back out as the file the ingest expects.
  *
- * The name carries the match: the ingest pairs a timing file with a track the same way the
- * audio upload did, by the surah in the filename, so reusing the audio file's own stem is the
- * pairing that is already known to work. A track with no filename falls back to the padded
- * surah number, which is the convention the stems follow anyway.
+ * **The body carries the match, not the filename.** `surah_id` is what the ingest pairs with a
+ * track, and it wants a *surah number* — a file named `001.json` carrying `surah_id: 522` came
+ * back as `missing_tracks: [522]`, echoing the body and ignoring the name. `missing_tracks` is
+ * a list of surah numbers for the same reason, which is what `assertAccepted` checks against.
+ *
+ * The filename still follows the audio stem (`114.mp3` → `114.json`) because that is how the
+ * files are recognisable to a human in the bucket, not because the pairing depends on it.
  */
 function serializeTimingFile(timestamps: TrackTimestamps, track: TimestampTrackRef): File {
   const body: TimingFile = {
-    surah_number: timestamps.surah_number || track.surah_number,
-    surah: timestamps.surah,
-    ayahs: timestamps.ayahs,
+    surah_id: timestamps.surah_number || track.surah_number,
+    surah: timestamps.surah && {
+      start: toSeconds(timestamps.surah.start_ms),
+      end: toSeconds(timestamps.surah.end_ms),
+    },
+    ayahs: timestamps.ayahs.map(toWireAyah),
   };
 
   return new File([JSON.stringify(body)], timingFilename(track), { type: 'application/json' });
+}
+
+/** Internal names → the ingest's; the only place the two vocabularies meet. */
+function toWireAyah(ayah: AyahTimestamp): TimingFileAyah {
+  return {
+    ayah_number: ayah.ayah,
+    start: toSeconds(ayah.start_ms),
+    end: toSeconds(ayah.end_ms),
+  };
+}
+
+/**
+ * Milliseconds → the seconds the ingest wants, at millisecond precision. Rounded to three
+ * decimals so a float artefact never reaches the file as `7.527999999999999`.
+ */
+function toSeconds(ms: number): number {
+  return Number((ms / MS_PER_SECOND).toFixed(3));
 }
 
 function timingFilename(track: TimestampTrackRef): string {

@@ -170,18 +170,61 @@ Three consequences worth knowing before changing any of it:
 
 - **The timings URL is absolute and off-origin**, so no interceptor touches it — no tenant header,
   no credentials, no global error toast. It needs CORS on the bucket, like the audio.
-- **The filename carries the match.** The ingest pairs a file with a track by the surah in its name,
-  so a save reuses the audio file's own stem (`001.mp3` → `001.json`). Get that wrong and the surah
-  comes back in `missing_tracks`.
+- **The body carries the match, not the filename.** The ingest pairs a file with a track by its
+  `surah_id`, which is a _surah number_ — `001.json` carrying `surah_id: 522` came back as
+  `missing_tracks: [522]`, echoing the body and ignoring the name. Put a track id in there and the
+  track is never found. A save still names the file after the audio stem (`114.mp3` → `114.json`),
+  for legibility in the bucket rather than for the pairing.
 - **A 200 is not a success.** The ingest reports per-file outcomes in the body, so a file it could
   not place returns `missing_tracks` or `file_errors` with an otherwise healthy response.
   `AudioTimestampsService` throws `TimingUploadRejectedError` on those, and the editor shows the
   report rather than "try again".
 
-The one part still inferred is the **body** of the timing file. `parseTimingFile` and
-`serializeTimingFile` in `audio-timestamps.service.ts` are the only code that depends on it, and
-they sit together so a correction is one edit and a save always writes what a load can read. The
-reader accepts a single-surah file and a recitation-wide file keyed by surah number.
+The body of the timing file is **partly confirmed**, one rejection at a time. Two key names are now
+known, and both differ from what the editor calls them internally:
+
+| In the file                         | Internally     | How it was established                    |
+| ----------------------------------- | -------------- | ----------------------------------------- |
+| `surah_id`                          | `surah_number` | `Missing surah_id in uploaded JSON`       |
+| ↳ its value: a surah number (1–114) |                | `surah_id: 522` → `missing_tracks: [522]` |
+| `ayah_number`                       | `ayah`         | bare `'ayah_number'` KeyError             |
+| `start`                             | `start_ms`     | bare `'start'` KeyError                   |
+| `end`                               | `end_ms`       | pairs with `start`                        |
+| ↳ their unit: **seconds**           |                | `start: 400` → stored `start_ms: 400000`  |
+
+Not one of those names matches the internal one, so `toWireAyah` translates and nothing above the
+codec ever sees the wire vocabulary.
+
+Sending milliseconds is not an error — it is a **silent wrong answer**. Every boundary lands 1000×
+past the end of the track, and the ingest reports that as `skipped_total`, not in `file_errors`.
+That is what `toSeconds` at the codec edge exists to prevent.
+
+### The file you read is not the file you wrote
+
+A save uploads one surah. The ingest merges it into a **recitation-wide array** and serves that back
+from `available_ayah_timings_url`, in a third vocabulary again:
+
+```json
+[
+  {
+    "surah_number": 114,
+    "ayahs_count": 6,
+    "ayahs_timings": [{ "ayah_key": "114:1", "start_ms": 400, "end_ms": 6703 }]
+  }
+]
+```
+
+So `parseTimingFile` accepts three layouts — that array, an object keyed by surah number, and a
+single-surah file — and `readMilliseconds` treats the `_ms` suffix as the unit marker: `start_ms` is
+already milliseconds, a bare `start` is seconds. That asymmetry is the ingest's, not ours.
+
+The `surah` bounds object remains unverified: the stored file carries no surah bounds at all, so it
+looks ignored.
+
+`parseTimingFile` and `serializeTimingFile` in `audio-timestamps.service.ts` are the only code that
+depends on it, and they sit together so a correction is one edit and a save always writes what a
+load can read. The reader accepts a single-surah file and a recitation-wide file keyed by surah
+number.
 
 ---
 

@@ -24,6 +24,7 @@ import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-re
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 import type { RecitationDetailFolderRef } from '../../../recitations/models/recitation-folders.models';
 import type { RecitationSurahTrackListItem } from '../../../recitations/models/recitation-tracks.models';
+import type { RecitationDetails } from '../../../recitations/models/recitations.models';
 import { buildTimingUploadSuccessDescription } from '../../../recitations/utils/timing-upload-result.format';
 import { RecitationsService } from '../../../recitations/services/recitations.service';
 import { AdminAuthService } from '../../../services/admin-auth.service';
@@ -145,6 +146,8 @@ export class TimestampEditorComponent implements OnInit {
   private assetId = 0;
   /** Id of the folder named by the `folder` query param; null saves into the default folder. */
   private folderId: number | null = null;
+  /** Recitation-wide timing file, used when the track row carries no URL of its own. */
+  private recitationTimingsUrl: string | null = null;
 
   readonly canEdit = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPLOAD_TIMING)
@@ -220,6 +223,7 @@ export class TimestampEditorComponent implements OnInit {
       const recitation = await firstValueFrom(this.recitations.getDetail(this.recitationSlug));
       this.assetId = recitation.id;
       this.folderId = this.resolveFolderId(recitation.folders);
+      this.recitationTimingsUrl = this.resolveRecitationTimingsUrl(recitation);
       this.track.set(await this.fetchTrack(trackId));
     } catch (error) {
       this.loadError.set(this.errorMessage(error, 'ERRORS.TRACK_LOAD_FAILED'));
@@ -289,6 +293,25 @@ export class TimestampEditorComponent implements OnInit {
     return match.id;
   }
 
+  /**
+   * The recitation-wide timing file to fall back on, or null when it would be the wrong one.
+   *
+   * `ayah_timings_url` is the **default folder's** export — the model says so, and the detail
+   * page's download button treats it the same way. A non-default folder's timings are not on
+   * that field, so reading it there would show another folder's boundaries, which is worse than
+   * showing none.
+   */
+  private resolveRecitationTimingsUrl(recitation: RecitationDetails): string | null {
+    // No folder in the route means the track lookup itself falls back to the default folder.
+    if (!this.folder) return recitation.ayah_timings_url ?? null;
+
+    const active = recitation.folders?.find(
+      (f) => f.slug === this.folder || f.name === this.folder
+    );
+
+    return active?.is_default ? (recitation.ayah_timings_url ?? null) : null;
+  }
+
   /** One request covers a whole recitation, so finding the track never needs to page. */
   private async fetchTrack(trackId: number): Promise<RecitationSurahTrackListItem> {
     const page = await firstValueFrom(
@@ -316,7 +339,7 @@ export class TimestampEditorComponent implements OnInit {
     if (!track) return;
 
     try {
-      const loaded = await firstValueFrom(this.timestamps.load(track));
+      const loaded = await firstValueFrom(this.timestamps.load(track, this.recitationTimingsUrl));
 
       this.loadedTimestamps = loaded;
       this.markers.set(buildMarkers(loaded));
