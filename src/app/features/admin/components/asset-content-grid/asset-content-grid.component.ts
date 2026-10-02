@@ -17,12 +17,15 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import type {
   CellValueChangedEvent,
   ColDef,
+  GetRowIdParams,
   GridReadyEvent,
   GridApi,
   IDatasource,
   IGetRowsParams,
+  INumberFilterParams,
+  ITextFilterParams,
+  LocaleText,
   RowSelectionOptions,
-  ValueGetterParams,
 } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from 'ag-grid-community';
 import { AgGridAngular } from 'ag-grid-angular';
@@ -44,7 +47,6 @@ import type {
 } from '../../models/asset-content.models';
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../services/admin-auth.service';
-import { SURAHS_METADATA } from '../../models/quran-metadata';
 import { AssetContentService } from '../../services/asset-content.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import {
@@ -54,7 +56,11 @@ import {
 } from '../../utils/clipboard-table.util';
 import { ISO_639_LANGUAGES, localizedLanguageName } from '../../utils/iso-639.util';
 import { ContentChangesComponent } from '../content-changes/content-changes.component';
-import { SurahFloatingFilterComponent, type SurahOption } from './surah-floating-filter.component';
+import {
+  ContentTextCellEditorComponent,
+  type ContentTextEditorParams,
+} from './content-text-cell-editor.component';
+import { SurahFloatingFilterComponent } from './surah-floating-filter.component';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -64,15 +70,34 @@ const EDITABLE_FIELDS = new Set<string>(['text']);
 /** Language codes that should render with RTL direction in the source column. */
 const RTL_LANGUAGE_CODES = new Set(['ar', 'fa', 'ur', 'ps', 'ku', 'he', 'yi', 'sd', 'ug']);
 
-const ENTRIES_PAGE_SIZE = 500;
 const AUTOSAVE_DEBOUNCE_MS = 800;
 /**
- * Rows per infinite-scroll block for the word template. Must equal the
- * `cacheBlockSize` bound in the template: AG Grid always requests blocks
- * aligned to that size, so `endRow - startRow` derives the page size safely
- * from it — pin both to this one constant instead of hardcoding it twice.
+ * Rows per infinite-scroll block. Must equal the `cacheBlockSize` bound in
+ * the template: AG Grid always requests blocks aligned to that size, so
+ * `endRow - startRow` derives the page size safely from it — pin both to
+ * this one constant instead of hardcoding it twice.
  */
-const WORD_CACHE_BLOCK_SIZE = 100;
+const CACHE_BLOCK_SIZE = 50;
+/** Edits kept for undo/redo. */
+const UNDO_LIMIT = 50;
+/** `setDataValue` source for undo/redo, so replayed edits aren't recorded again. */
+const HISTORY_SOURCE = 'history';
+
+/** A text-cell edit, replayable by undo/redo. */
+interface CellEdit {
+  unitId: number;
+  oldValue: string;
+  newValue: string;
+}
+
+/** Server-side text filter: every AG Grid text option, case-insensitive on the backend. */
+const TEXT_FILTER_PARAMS: ITextFilterParams = { maxNumConditions: 2, trimInput: true };
+/** Server-side number filter over whole numbers; `inRange` is inclusive on the backend. */
+const NUMBER_FILTER_PARAMS: INumberFilterParams = {
+  maxNumConditions: 2,
+  inRangeInclusive: true,
+  allowedCharPattern: '\\d',
+};
 
 @Component({
   selector: 'app-asset-content-grid',
@@ -121,28 +146,22 @@ export class AssetContentGridComponent implements OnInit {
   readonly effectiveTemplate = computed(() => this.template() ?? this.derivedTemplate());
 
   /**
-   * Word assets have 77,431 units — far too many to hold client-side — so
-   * they scroll through server-fetched blocks. Every other template stays on
-   * the client-side model, which is what keeps undo/redo and the surah
-   * floating filter working for the editors that already rely on them.
-   * Driven by `effectiveTemplate`, not the raw `template` input: in the real
-   * UI the input is unbound and the template only becomes known once the
-   * first page of rows has loaded.
-   */
-  readonly rowModelType = computed<'infinite' | 'clientSide'>(() =>
-    this.effectiveTemplate() === 'word' ? 'infinite' : 'clientSide'
-  );
-
-  /**
-   * `rowModelType` is an @initial AG Grid option — changing it after the grid
-   * exists is ignored — so the grid is only created once its row model is
-   * known: when the template is (bound or derived from the first page), or
-   * when loading ended without one (no rows / load error).
+   * Every template scrolls through server-fetched blocks (AG Grid's infinite
+   * row model), with sorting off and filters applied on the server — the grid
+   * never holds the whole asset. Rows keep one fixed line height, so long
+   * text is cut off in the cell and read in full in the cell editor.
+   *
+   * The grid is only created once the template is known (bound, or derived
+   * from a one-row probe), or loading ended without one (no rows / load
+   * error), so its first columns — and their filters — are already right.
    */
   readonly canCreateGrid = computed(() => this.effectiveTemplate() !== null || !this.loading());
 
   /** Rows per infinite-scroll block; bind the same value to `cacheBlockSize`. */
-  readonly wordCacheBlockSize = WORD_CACHE_BLOCK_SIZE;
+  readonly cacheBlockSize = CACHE_BLOCK_SIZE;
+
+  /** Stable row ids, so undo/redo can find a row again by its unit. */
+  readonly getRowId = (params: GetRowIdParams<ContentEntry>): string => String(params.data.unit_id);
 
   private readonly contentService = inject(AssetContentService);
   private readonly lastLanguage = inject(LastActiveLanguageService);
@@ -166,8 +185,21 @@ export class AssetContentGridComponent implements OnInit {
   /** Unit ids with unsaved edits pending the next autosave flush. */
   private readonly pendingRows = new Map<number, ContentEntryPatch>();
 
+  /** Undo/redo history. AG Grid's built-in undo only covers the client-side
+   *  row model, so text edits are tracked here instead. */
+  private readonly undoStack: CellEdit[] = [];
+  private readonly redoStack: CellEdit[] = [];
+
   readonly draftId = signal<number | null>(null);
-  readonly rows = signal<ContentEntry[]>([]);
+  /** True once an edit has been saved to the draft since the editor opened
+   *  (or the language changed). Opening always loads a draft, so `draftId`
+   *  alone would show "all changes saved" before anything was edited. */
+  readonly savedOnce = signal(false);
+  /** First-block requests in flight — the initial load, or a refetch after a
+   *  filter change resets the grid to row 0. Scroll blocks don't count. */
+  private readonly firstBlocksInFlight = signal(0);
+  /** Drives the grid's loading overlay while the first block is on its way. */
+  readonly refreshing = computed(() => this.firstBlocksInFlight() > 0);
   readonly loading = signal(true);
 
   /** Languages the asset provides content in (source first). */
@@ -215,27 +247,23 @@ export class AssetContentGridComponent implements OnInit {
   readonly entriesTotal = signal(0);
   readonly canUndo = signal(false);
   readonly canRedo = signal(false);
-  /** Distinct surahs present in the data, for the Surah dropdown filter. */
-  readonly surahOptions = signal<SurahOption[]>([]);
-  /** Server-side surah filter for the word template (`null` = all surahs). */
-  readonly suraFilter = signal<number | null>(null);
 
   readonly rtl = computed(() => this.translate.currentLang === 'ar');
 
-  /**
-   * Full surah list for the word template's toolbar filter. Unlike
-   * `surahOptions`, this can't be derived from loaded rows — the word grid
-   * never holds its full row set client-side — so it's built once from the
-   * static Quran metadata.
-   */
-  readonly wordSurahOptions = computed(() =>
-    SURAHS_METADATA.map((s) => ({
-      id: s.id,
-      label: `${s.id}. ${this.rtl() ? s.name_ar : s.name_en}`,
-    }))
-  );
-
   readonly theme = themeQuartz;
+
+  /** Grid-owned text in the UI language. `localeText` is an @initial grid
+   *  option, read once when the grid is created (after translations load;
+   *  switching language reloads the page). `ADMIN.CONTENT_EDITOR.GRID` holds
+   *  the filter UI texts under AG Grid's own locale keys (`equals`, …). */
+  readonly localeText = computed<LocaleText>(() => {
+    const grid: unknown = this.translate.instant('ADMIN.CONTENT_EDITOR.GRID');
+    return {
+      loadingOoo: this.translate.instant('COMMON.LOADING'),
+      // instant() echoes the key string when the block is missing.
+      ...(typeof grid === 'object' && grid !== null ? (grid as LocaleText) : {}),
+    };
+  });
 
   /** Checkbox multi-row selection (Community feature). */
   readonly rowSelection: RowSelectionOptions = {
@@ -246,7 +274,8 @@ export class AssetContentGridComponent implements OnInit {
 
   readonly defaultColDef: ColDef<ContentEntry> = {
     resizable: true,
-    sortable: true,
+    // Rows come back in canonical order; the endpoint has no sort to apply.
+    sortable: false,
     filter: false,
   };
 
@@ -270,51 +299,99 @@ export class AssetContentGridComponent implements OnInit {
 
   onCellValueChanged(event: CellValueChangedEvent<ContentEntry>): void {
     const row = event.data;
+    // Assume the edit differs from the published text until the autosave
+    // response says otherwise (see `applySavedRows`).
+    row.changed = true;
+    // `force`: the grid has already drawn the new value, so a plain refresh skips it.
+    if (event.node) {
+      this.gridApi?.refreshCells({ rowNodes: [event.node], columns: ['text'], force: true });
+    }
     this.pendingRows.set(row.unit_id, {
       unit_id: row.unit_id,
       text: row.text ?? '',
     });
     this.dirty.set(true);
     this.autosave$.next();
+    if (event.source !== HISTORY_SOURCE) {
+      this.undoStack.push({
+        unitId: row.unit_id,
+        oldValue: (event.oldValue as string | null) ?? '',
+        newValue: row.text ?? '',
+      });
+      if (this.undoStack.length > UNDO_LIMIT) this.undoStack.shift();
+      this.redoStack.length = 0;
+    }
     this.refreshUndoState();
   }
 
   /** Undo the last cell edit (autosaves the reverted value). */
   undo(): void {
-    this.gridApi?.undoCellEditing();
-    this.refreshUndoState();
+    this.replay(this.undoStack, this.redoStack, 'oldValue');
   }
 
   /** Redo the last undone cell edit. */
   redo(): void {
-    this.gridApi?.redoCellEditing();
-    this.refreshUndoState();
+    this.replay(this.redoStack, this.undoStack, 'newValue');
+  }
+
+  /** Ctrl/Cmd+Z undoes, Ctrl/Cmd+Shift+Z or Ctrl/Cmd+Y redoes — outside a cell editor,
+   *  whose textarea keeps its own undo. */
+  onKeydown(event: KeyboardEvent): void {
+    if (!(event.ctrlKey || event.metaKey) || (this.gridApi?.getEditingCells().length ?? 0) > 0) {
+      return;
+    }
+    const key = event.key.toLowerCase();
+    if (key === 'z' && !event.shiftKey) {
+      event.preventDefault();
+      this.undo();
+    } else if (key === 'y' || (key === 'z' && event.shiftKey)) {
+      event.preventDefault();
+      this.redo();
+    }
+  }
+
+  /**
+   * Re-apply one edit's `old`/`new` value. A row scrolled or filtered out of
+   * the loaded blocks has no node to update, so its value is queued for
+   * autosave directly — the server copy is what the grid shows next time.
+   */
+  private replay(from: CellEdit[], to: CellEdit[], value: 'oldValue' | 'newValue'): void {
+    const edit = from.pop();
+    if (!edit) return;
+    to.push(edit);
+    const node = this.gridApi?.getRowNode(String(edit.unitId));
+    if (node?.data) {
+      node.setDataValue('text', edit[value], HISTORY_SOURCE); // -> onCellValueChanged
+    } else {
+      this.pendingRows.set(edit.unitId, { unit_id: edit.unitId, text: edit[value] });
+      this.dirty.set(true);
+      this.autosave$.next();
+      this.refreshUndoState();
+    }
   }
 
   private refreshUndoState(): void {
-    this.canUndo.set((this.gridApi?.getCurrentUndoSize() ?? 0) > 0);
-    this.canRedo.set((this.gridApi?.getCurrentRedoSize() ?? 0) > 0);
+    this.canUndo.set(this.undoStack.length > 0);
+    this.canRedo.set(this.redoStack.length > 0);
   }
 
-  /** Change the word template's server-side surah filter and refetch. */
-  onSuraFilterChange(sura: number | null): void {
-    void this.flushPending().then((ok) => {
-      if (!ok) return;
-      this.suraFilter.set(sura);
-      // A new filter invalidates every cached block.
-      this.gridApi?.refreshInfiniteCache();
-    });
+  private clearHistory(): void {
+    this.undoStack.length = 0;
+    this.redoStack.length = 0;
+    this.refreshUndoState();
   }
 
   /**
    * An AG Grid infinite datasource backed by the paginated entries endpoint.
    * AG Grid always requests blocks aligned to `cacheBlockSize` (bound to
-   * `wordCacheBlockSize` in the template), so `endRow - startRow` recovers
-   * that same page size instead of a second hardcoded constant that could
-   * drift from it — and `page` is 1-indexed to match the endpoint, which
-   * rejects `page=0` with a 400.
+   * `cacheBlockSize` in the template), so `endRow - startRow` recovers that
+   * same page size instead of a second hardcoded constant that could drift
+   * from it — and `page` is 1-indexed to match the endpoint, which rejects
+   * `page=0` with a 400. The grid's filter model goes to the server as-is.
+   * Pending edits are saved first, so a refetched block (after a filter
+   * change) never shows text older than what was typed.
    */
-  buildWordDatasource(): IDatasource {
+  buildDatasource(): IDatasource {
     return {
       getRows: (params: IGetRowsParams) => {
         const versionId = this.draftId();
@@ -324,55 +401,38 @@ export class AssetContentGridComponent implements OnInit {
         }
         const pageSize = params.endRow - params.startRow;
         const page = Math.floor(params.startRow / pageSize) + 1;
-        this.contentService
-          .getEntries(
-            this.kind,
-            this.slug,
-            versionId,
-            page,
-            pageSize,
-            this.suraFilter() ?? undefined
-          )
-          .pipe(takeUntilDestroyed(this.destroyRef))
-          .subscribe({
-            next: (response) => params.successCallback(response.results, response.count),
-            error: () => params.failCallback(),
-          });
+        const firstBlock = params.startRow === 0;
+        if (firstBlock) this.firstBlocksInFlight.update((n) => n + 1);
+        const done = () => {
+          if (firstBlock) this.firstBlocksInFlight.update((n) => n - 1);
+        };
+        void this.flushPending().then(() => {
+          this.contentService
+            .getEntries(this.kind, this.slug, versionId, page, pageSize, params.filterModel)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: (response) => {
+                done();
+                this.entriesTotal.set(response.count);
+                params.successCallback(response.results, response.count);
+              },
+              error: (err: HttpErrorResponse) => {
+                done();
+                params.failCallback();
+                this.showError(err);
+              },
+            });
+        });
       },
     };
   }
 
   /** Rebuilt whenever the draft changes (e.g. switching language), so AG Grid
    *  drops blocks cached from the previous draft instead of showing them. */
-  readonly wordDatasource = computed<IDatasource>(() => {
+  readonly datasource = computed<IDatasource>(() => {
     this.draftId();
-    this.suraFilter();
-    return this.buildWordDatasource();
+    return this.buildDatasource();
   });
-
-  /** Localized surah name for a sura id, resolved from the static Quran metadata. */
-  private surahName(sura: number | null): string | null {
-    if (sura === null) return null;
-    const meta = SURAHS_METADATA.find((s) => s.id === sura);
-    if (!meta) return null;
-    return this.translate.currentLang === 'ar' ? meta.name_ar : meta.name_en;
-  }
-
-  /** Build the distinct surah list (ordered by sura number) for the dropdown. */
-  private buildSurahOptions(rows: ContentEntry[]): void {
-    const suraByName = new Map<string, number>();
-    for (const row of rows) {
-      if (row.sura === null) continue;
-      const name = this.surahName(row.sura);
-      if (name && !suraByName.has(name)) {
-        suraByName.set(name, row.sura);
-      }
-    }
-    const options: SurahOption[] = [...suraByName.entries()]
-      .sort((a, b) => a[1] - b[1])
-      .map(([name, sura]) => ({ value: name, label: `${sura}. ${name}` }));
-    this.surahOptions.set(options);
-  }
 
   /**
    * Positional paste: with a cell focused (and not being edited), Ctrl+V fills
@@ -410,7 +470,8 @@ export class AssetContentGridComponent implements OnInit {
     let changed = 0;
     table.forEach((values, r) => {
       const node = api.getDisplayedRowAtIndex(focused.rowIndex + r);
-      if (!node) return;
+      // Rows past the loaded blocks have no data yet; paste stops there.
+      if (!node?.data) return;
       values.forEach((value, c) => {
         const col = displayedCols[startColIdx + c];
         const field = col?.getColDef().field;
@@ -500,7 +561,7 @@ export class AssetContentGridComponent implements OnInit {
         next: (draft) => {
           if (generation !== this.loadGeneration) return;
           this.draftId.set(draft.id);
-          this.loadAllEntries(1, [], generation);
+          this.loadTemplate(generation);
         },
         error: (err: HttpErrorResponse) => {
           if (generation !== this.loadGeneration) return;
@@ -517,7 +578,8 @@ export class AssetContentGridComponent implements OnInit {
       if (!ok) return;
       this.pendingRows.clear();
       this.dirty.set(false);
-      this.rows.set([]);
+      this.savedOnce.set(false);
+      this.clearHistory();
       this.selectedLanguage.set(language);
       this.lastLanguage.set(this.kind, this.slug, language);
       this.loadForLanguage();
@@ -569,42 +631,22 @@ export class AssetContentGridComponent implements OnInit {
   }
 
   /**
-   * Loads entries page by page to build the client-side row set. The word
-   * template never finishes this loop — its 77,431 units scroll through the
-   * infinite datasource instead — so the template is derived from the first
-   * page's `unit_type` and the loop bails out as soon as `word` is detected,
-   * rather than paginating through the entire dataset just to learn a value
-   * that was already on the first response.
+   * Learns the template from a one-row probe of the entries endpoint (every
+   * entry carries `unit_type`) so the grid is created with the right columns;
+   * the rows themselves are then scrolled in by the infinite datasource.
    */
-  private loadAllEntries(
-    page: number,
-    acc: ContentEntry[] = [],
-    generation = this.loadGeneration
-  ): void {
+  private loadTemplate(generation = this.loadGeneration): void {
     const versionId = this.draftId();
     if (versionId === null) return;
     this.contentService
-      .getEntries(this.kind, this.slug, versionId, page, ENTRIES_PAGE_SIZE)
+      .getEntries(this.kind, this.slug, versionId, 1, 1)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           if (generation !== this.loadGeneration) return;
-          const merged = acc.concat(response.results);
-          this.derivedTemplate.set(merged[0]?.unit_type ?? null);
-          if (merged[0]?.unit_type === 'word') {
-            this.rows.set([]);
-            this.entriesTotal.set(response.count);
-            this.loading.set(false);
-            return;
-          }
-          if (merged.length < response.count && response.results.length > 0) {
-            this.loadAllEntries(page + 1, merged, generation);
-          } else {
-            this.rows.set(merged);
-            this.entriesTotal.set(response.count);
-            this.buildSurahOptions(merged);
-            this.loading.set(false);
-          }
+          this.derivedTemplate.set(response.results[0]?.unit_type ?? null);
+          this.entriesTotal.set(response.count);
+          this.loading.set(false);
         },
         error: (err: HttpErrorResponse) => {
           if (generation !== this.loadGeneration) return;
@@ -612,6 +654,23 @@ export class AssetContentGridComponent implements OnInit {
           this.showError(err);
         },
       });
+  }
+
+  /** Copy the server's `changed` flag onto the saved rows, so a cell edited
+   *  back to its published text loses its highlight. Rows edited again since
+   *  this save keep their mark until their own save answers. */
+  private applySavedRows(saved: ContentEntry[]): void {
+    const api = this.gridApi;
+    if (!api) return;
+    const nodes = [];
+    for (const row of saved) {
+      if (this.pendingRows.has(row.unit_id)) continue;
+      const node = api.getRowNode(String(row.unit_id));
+      if (!node?.data) continue;
+      node.data.changed = row.changed ?? false;
+      nodes.push(node);
+    }
+    if (nodes.length > 0) api.refreshCells({ rowNodes: nodes, columns: ['text'], force: true });
   }
 
   /** Persist any pending edits to the draft. `true` on success/nothing to save. */
@@ -630,8 +689,10 @@ export class AssetContentGridComponent implements OnInit {
           .patchEntries(this.kind, this.slug, versionId, batch)
           .pipe(takeUntilDestroyed(this.destroyRef))
           .subscribe({
-            next: () => {
+            next: (saved) => {
               this.activePatchesCount--;
+              this.applySavedRows(saved);
+              this.savedOnce.set(true);
               if (this.pendingRows.size === 0) {
                 this.dirty.set(false);
               }
@@ -810,59 +871,65 @@ export class AssetContentGridComponent implements OnInit {
    *  - every template shows the pinned unit label and the editable text;
    *  - `reference_text` (the Quranic text being annotated) is shown for every
    *    template except `page`, which carries none;
-   *  - the surah dropdown floating filter only means something where every
-   *    row belongs to a single sura, i.e. the `ayah` template — `word` has a
-   *    server-side surah filter in the toolbar instead (see `suraFilter`),
-   *    and `surah`/`page` rows don't share a common sura to filter by;
+   *  - `sura` / `aya` number columns where every unit belongs to one ayah
+   *    (`ayah`, `word`); `surah`/`page` units don't;
    *  - `source_text` (the source language for the same unit) is shown
    *    read-only whenever a non-source language is being edited.
+   * Every filter runs on the server over the whole asset (see
+   * `buildDatasource`): text columns get the text filter, `sura` / `aya` the
+   * number filter, and the unit column a dropdown of surah names (column id
+   * `surah`, a number filter on the surah) wherever units belong to a surah.
    */
   buildColumnDefs(): ColDef<ContentEntry>[] {
     const template = this.effectiveTemplate();
+    const textFilter: ColDef<ContentEntry> = {
+      filter: 'agTextColumnFilter',
+      filterParams: TEXT_FILTER_PARAMS,
+      floatingFilter: true,
+    };
     const columns: ColDef<ContentEntry>[] = [
       {
         field: 'label',
         headerName: this.colHeader('UNIT'),
-        width: 140,
+        width: 120,
         editable: false,
         pinned: this.rtl() ? 'right' : 'left',
-        ...(template === 'ayah'
+        ...(template !== 'page'
           ? {
-              filter: 'agTextColumnFilter',
-              filterValueGetter: (params: ValueGetterParams<ContentEntry>) =>
-                this.surahName(params.data?.sura ?? null),
+              // Filters the surah, not the label text: the backend reads the
+              // `surah` filter-model key as a surah-number filter.
+              colId: 'surah',
+              filter: 'agNumberColumnFilter',
+              filterParams: NUMBER_FILTER_PARAMS,
               floatingFilter: true,
               floatingFilterComponent: SurahFloatingFilterComponent,
-              floatingFilterComponentParams: {
-                optionsProvider: () => this.surahOptions(),
-              },
+              // The dropdown is the whole filter UI for this column.
+              suppressHeaderFilterButton: true,
+              suppressFloatingFilterButton: true,
             }
           : {}),
       },
     ];
 
-    // Ayah and word units belong to one surah and ayah: show their numbers so the
-    // grid can be scanned and sorted by them. Ayah rows are all loaded
-    // client-side, so number filters work in place; the word grid loads page by
-    // page (a column filter would only see the loaded block), so it keeps the
-    // toolbar's server-side surah filter instead.
     if (template === 'ayah' || template === 'word') {
-      const numberFilter =
-        template === 'ayah' ? { filter: 'agNumberColumnFilter', floatingFilter: true } : {};
       columns.push(
         {
           field: 'sura',
           headerName: this.colHeader('SURA'),
-          width: 110,
+          width: 100,
           editable: false,
-          ...numberFilter,
+          filter: 'agNumberColumnFilter',
+          filterParams: NUMBER_FILTER_PARAMS,
+          floatingFilter: true,
         },
         {
           field: 'aya',
           headerName: this.colHeader('AYA'),
-          width: 110,
+          width: 100,
           editable: false,
-          ...numberFilter,
+          filter: 'agNumberColumnFilter',
+          filterParams: NUMBER_FILTER_PARAMS,
+          floatingFilter: true,
         }
       );
     }
@@ -875,8 +942,7 @@ export class AssetContentGridComponent implements OnInit {
         flex: 1,
         editable: false,
         cellStyle: { direction: 'rtl', fontFamily: 'serif' },
-        wrapText: true,
-        autoHeight: true,
+        ...textFilter,
       });
     }
 
@@ -886,10 +952,14 @@ export class AssetContentGridComponent implements OnInit {
         field: 'source_text',
         headerName: this.sourceColHeader(),
         flex: 2,
-        editable: false,
+        // "Editable" only so a cell opens the text popup in read-only mode:
+        // rows are one line tall, and this is the only way to read it all.
+        editable: true,
+        cellEditor: ContentTextCellEditorComponent,
+        cellEditorPopup: true,
+        cellEditorParams: { readOnly: true } satisfies ContentTextEditorParams,
         cellStyle: { direction: this.sourceTextDirection() },
-        wrapText: true,
-        autoHeight: true,
+        ...textFilter,
       });
     }
 
@@ -898,13 +968,12 @@ export class AssetContentGridComponent implements OnInit {
       headerName: this.colHeader('TEXT'),
       flex: 2,
       editable: true,
-      cellEditor: 'agLargeTextCellEditor',
+      cellEditor: ContentTextCellEditorComponent,
       cellEditorPopup: true,
-      // agLargeTextCellEditor defaults to maxLength 200; unit text can be far longer,
-      // so raise the cap and enlarge the popup textarea.
-      cellEditorParams: { maxLength: 100000, rows: 12, cols: 60 },
-      wrapText: true,
-      autoHeight: true,
+      cellEditorParams: { sourceTitle: this.sourceColHeader() } satisfies ContentTextEditorParams,
+      // Yellow when the draft differs from the published version.
+      cellClassRules: { 'content-grid__cell--changed': (p) => !!p.data?.changed },
+      ...textFilter,
     });
 
     return columns;

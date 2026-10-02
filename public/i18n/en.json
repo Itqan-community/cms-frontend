@@ -481,7 +481,10 @@
       "CTA": "Back to library"
     },
     "RESTRICTED_FOR_TENANT_CONFLICT": "This asset has pending access requests. Resolve them before enabling tenant restriction.",
-    "TENANT_REQUIRED": "Select a publisher before continuing."
+    "TENANT_REQUIRED": "Select a publisher before continuing.",
+    "REQUEST_FAILED": "The request could not be completed. Please review and try again.",
+    "FIELD_REQUIRED": "{{field}} is required.",
+    "FIELD_INVALID": "{{field}} is invalid."
   },
   "PROFILE": {
     "HUB_ARIA": "Account management",
@@ -900,6 +903,44 @@
         "TAFSIR_NOT_FOUND": "Tafsir not found.",
         "CONTENT_FILE_UNPARSEABLE": "The uploaded file could not be parsed.",
         "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "Publish a version for this language before making it available."
+      },
+      "TEXT_EDITOR": {
+        "HINT": "Enter to apply · Shift+Enter for a new line · Esc to cancel",
+        "CANCEL": "Cancel",
+        "DONE": "Done",
+        "CLOSE": "Close"
+      },
+      "GRID": {
+        "equals": "Equals",
+        "notEqual": "Does not equal",
+        "blank": "Blank",
+        "notBlank": "Not blank",
+        "empty": "Choose one",
+        "lessThan": "Less than",
+        "greaterThan": "Greater than",
+        "lessThanOrEqual": "Less than or equal to",
+        "greaterThanOrEqual": "Greater than or equal to",
+        "inRange": "Between",
+        "inRangeStart": "From",
+        "inRangeEnd": "To",
+        "contains": "Contains",
+        "notContains": "Does not contain",
+        "startsWith": "Begins with",
+        "endsWith": "Ends with",
+        "filterOoo": "Filter...",
+        "andCondition": "AND",
+        "orCondition": "OR",
+        "applyFilter": "Apply",
+        "resetFilter": "Reset",
+        "clearFilter": "Clear",
+        "cancelFilter": "Cancel",
+        "noRowsToShow": "No rows to show",
+        "ariaFilterInput": "Filter input",
+        "ariaFilteringOperator": "Filtering operator",
+        "ariaFilterValue": "Filter value",
+        "ariaFilterFromValue": "Filter from value",
+        "ariaFilterToValue": "Filter to value",
+        "ariaFilterMenuOpen": "Open filter menu"
       }
     },
     "REVIEW": {
@@ -1212,7 +1253,6 @@
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
           "COL_SUMMARY": "Summary",
-          "COL_SIZE": "Size",
           "COL_DATE": "Date added",
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
@@ -1370,7 +1410,6 @@
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
           "COL_SUMMARY": "Summary",
-          "COL_SIZE": "Size",
           "COL_DATE": "Date added",
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
@@ -2155,7 +2194,6 @@
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
           "COL_SUMMARY": "Summary",
-          "COL_SIZE": "Size",
           "COL_DATE": "Date added",
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
@@ -2326,7 +2364,6 @@
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
           "COL_SUMMARY": "Summary",
-          "COL_SIZE": "Size",
           "COL_DATE": "Date added",
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
@@ -2481,7 +2518,6 @@
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
           "COL_SUMMARY": "Summary",
-          "COL_SIZE": "Size",
           "COL_DATE": "Date added",
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
@@ -2566,6 +2602,11 @@
         "ZOOM_OUT": "Zoom out",
         "ZOOM_RESET": "Fit track"
       }
+    },
+    "CSV_TEMPLATE": {
+      "DOWNLOAD": "Download CSV template",
+      "HINT": "An empty sheet with one row per unit. Fill in the text column and upload it here.",
+      "PICK_TEMPLATE_FIRST": "Choose the content template (and the mushaf layout for pages) to download its CSV template."
     }
   },
   "USAGE": {

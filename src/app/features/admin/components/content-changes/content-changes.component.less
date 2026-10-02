@@ -148,6 +148,28 @@
     @media (max-width: 640px) {
       grid-template-columns: 1fr;
     }
+
+    &--stacked {
+      grid-template-columns: 1fr;
+      gap: 6px;
+
+      // Label beside its text instead of on its own line.
+      .content-changes__side {
+        flex-direction: row;
+        align-items: baseline;
+        gap: 8px;
+      }
+
+      .content-changes__side-title {
+        flex: none;
+        min-width: 3.5em;
+      }
+
+      .content-changes__text {
+        flex: 1;
+        min-width: 0;
+      }
+    }
   }
 
   &__side {

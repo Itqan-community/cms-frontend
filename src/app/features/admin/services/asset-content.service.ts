@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import type {
   AssetLanguage,
+  AssetTemplate,
   AssetVersionParentKind,
   ContentChange,
   ContentDraftVersion,
@@ -72,13 +73,15 @@ export class AssetContentService {
     versionId: number,
     page: number,
     pageSize: number,
-    sura?: number
+    filterModel?: Record<string, unknown>
   ): Observable<ContentEntriesResponse> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('page_size', pageSize.toString());
-    if (sura != null) {
-      params = params.set('sura', sura.toString());
+    // The grid's AG Grid filter model, sent whole; the backend filters every
+    // unit by it before paging, so `count` is the filtered total.
+    if (filterModel && Object.keys(filterModel).length > 0) {
+      params = params.set('filters', JSON.stringify(filterModel));
     }
     return this.http.get<ContentEntriesResponse>(
       `${this.versionBase(kind, slug, versionId)}entries/`,
@@ -161,6 +164,28 @@ export class AssetContentService {
     return this.http.get(`${this.versionBase(kind, slug, versionId)}export/`, {
       responseType: 'blob',
     });
+  }
+
+  /** An empty CSV to fill in for a template, before the asset exists (one row
+   *  per surah / ayah / word / page, blank text). `page` needs the layout. */
+  downloadCsvTemplate(
+    kind: AssetVersionParentKind,
+    template: AssetTemplate,
+    mushafLayoutId?: number | null
+  ): Observable<Blob> {
+    let params = new HttpParams().set('template', template);
+    if (mushafLayoutId != null) {
+      params = params.set('mushaf_layout_id', mushafLayoutId);
+    }
+    return this.http.get(`${this.base}/content/${this.segment(kind)}/csv-template/`, {
+      params,
+      responseType: 'blob',
+    });
+  }
+
+  /** An empty CSV to fill in for an existing asset's template. */
+  downloadAssetCsvTemplate(kind: AssetVersionParentKind, slug: string): Observable<Blob> {
+    return this.http.get(`${this.draftBase(kind, slug)}csv-template/`, { responseType: 'blob' });
   }
 
   private segment(kind: AssetVersionParentKind): string {

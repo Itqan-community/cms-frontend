@@ -328,17 +328,28 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
 
 - `admin-column-picker/` — Column visibility toggles for tables
 - `asset-initial-version-fields/` — Optional first version (name/summary/file) on asset create forms
-  (font/mushaf/tafsir/translation)
+  (font/mushaf/tafsir/translation); tafsir/translation pass `contentKind`/`contentTemplate`/
+  `mushafLayoutId` to offer the empty CSV template for the chosen template
+- `csv-template-download/` — "Download CSV template" button (tafsir/translation): an empty fill-in
+  sheet, one row per unit with a blank `text` column. By template on create
+  (`content/{category}/csv-template/?template=&mushaf_layout_id=`), by asset in the version
+  upload/edit modal (`content/{category}/{slug}/csv-template/`)
 - `asset-versions-manager/` — Version CRUD (tafsir/translation/mushaf/font; program when
   re-enabled); CSV `export/` then `file_url` fallback
 - `asset-content-editor/` + `asset-content-grid/` — Per-unit draft editor (surah/ayah/word/page
-  content templates); flush before publish; leave blocked if PATCH fails. Column set and row model
-  are driven by `effectiveTemplate()` (the `template` input, falling back to the template derived
-  from loaded rows' `unit_type`): `word` uses AG Grid's infinite row model with a server-side
-  `buildWordDatasource()` (paginated `entries/` endpoint, `cacheBlockSize` pinned to the
-  datasource's page size, server-side surah filter via `refreshInfiniteCache()`, undo/redo hidden);
-  `surah`/`ayah`/ `page` stay on the client-side row model with full undo/redo and (for `ayah` only)
-  the client-side surah floating filter
+  content templates); flush before publish; leave blocked if PATCH fails. Column set is driven by
+  `effectiveTemplate()` (the `template` input, falling back to a one-row probe's `unit_type`). Every
+  template uses AG Grid's infinite row model via `buildDatasource()` (paginated `entries/`,
+  `cacheBlockSize` pinned to the page size, sorting off, one-line rows with truncated text). Column
+  filters run server-side: the grid's `filterModel` is sent as the JSON `filters` param — text
+  filters on `text`/`reference_text`/`source_text`, number filters on `sura`/`aya`, and a surah-name
+  dropdown (`SurahFloatingFilterComponent`) on the unit column (`colId: 'surah'`). Undo/redo is a
+  custom stack (AG Grid's only covers the client-side model), replayed via `getRowId`. The text
+  column edits in `ContentTextCellEditorComponent`: a near-fullscreen popup showing the unit label
+  and `reference_text` (plus `source_text` when editing a translation); an outside click commits it
+  (`stopEditingWhenCellsLoseFocus`), and the page behind is `visibility: hidden` so find-in-page
+  only searches the popup. The read-only `source_text` column opens the same popup with
+  `readOnly: true` (always cancels) so its full text is readable
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`
 - `search-panel/` — Search UI
@@ -491,9 +502,12 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 - **CI gate:** `npm run check:i18n` validates every key in the union of `en.json` + `ar.json` has a
   non-empty Arabic value in `ar.json` (runs in CI `lint-and-test` and via lint-staged on i18n edits)
 - **API errors:** Hybrid resolver in `shared/utils/api-error-resolver.util.ts` — maps `error_name` /
-  known codes to i18n, shows backend `message` when language matches UI, else fallback key; global
-  `error.interceptor.ts` uses it; component-level handlers dedupe via
-  `shouldSuppressGlobalErrorToast`
+  known codes to i18n, then django-ninja `validation_error` field details (pydantic `extra[]`
+  `{type, loc, msg}` → `field: msg` in `en`, else `ERRORS.FIELD_REQUIRED`/`FIELD_INVALID`; Django
+  string `extra[]` when localized), then backend `message` when language matches UI, else fallback
+  key; `fallbackKeyForHttpStatus()` picks the fallback by status (0 network, 400/422 validation, 404
+  not found, other 4xx `REQUEST_FAILED`, 5xx server); global `error.interceptor.ts` uses it;
+  component-level handlers dedupe via `shouldSuppressGlobalErrorToast`
 - **Auth errors:** `shared/utils/auth-error-resolver.util.ts` (django-allauth code catalog)
 - **Backend handoff:** Portal validate-upload `message`, timing upload `file_errors[]`, and generic
   error `message` fields should localize via `Accept-Language` (sent by `global.interceptor.ts`)

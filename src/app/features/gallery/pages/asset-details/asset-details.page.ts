@@ -30,7 +30,10 @@ import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/br
 import { ImageCarouselComponent } from '../../../../shared/components/image-carousel/image-carousel.component';
 import { LicenseTagComponent } from '../../../../shared/components/license-tag/license-tag.component';
 import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
-import { resolveApiErrorMessage } from '../../../../shared/utils/api-error-resolver.util';
+import {
+  fallbackKeyForHttpStatus,
+  resolveApiErrorMessage,
+} from '../../../../shared/utils/api-error-resolver.util';
 import { IssuesService } from '../../../admin/issues/services/issues.service';
 import { localizedLanguageName } from '../../../admin/utils/iso-639.util';
 import { AssetDetails } from '../../models/assets.model';
@@ -532,9 +535,7 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
           this.isDownloading.set(false);
           const errorMessage = resolveApiErrorMessage(
             error,
-            {
-              fallbackKey: error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR',
-            },
+            { fallbackKey: fallbackKeyForHttpStatus(error.status) },
             this.translate
           );
           this.message.error(errorMessage);
@@ -563,9 +564,7 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
           this.isDownloading.set(false);
           const errorMessage = resolveApiErrorMessage(
             error,
-            {
-              fallbackKey: error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'ERRORS.SERVER_ERROR',
-            },
+            { fallbackKey: fallbackKeyForHttpStatus(error.status) },
             this.translate
           );
           this.message.error(errorMessage);

@@ -29,6 +29,7 @@ import { localizedLanguageName } from '../../utils/iso-639.util';
 import { AdminTablePaginationComponent } from '../admin-table-pagination/admin-table-pagination.component';
 import { AdminTitleCountComponent } from '../admin-title-count/admin-title-count.component';
 import { ContentChangesComponent } from '../content-changes/content-changes.component';
+import { CsvTemplateDownloadComponent } from '../csv-template-download/csv-template-download.component';
 import { UniversalAssetPreviewerComponent } from '../universal-asset-previewer/universal-asset-previewer.component';
 
 const DEFAULT_PAGE_SIZE = 10;
@@ -68,6 +69,7 @@ const VERSION_PERMISSIONS: Record<
   standalone: true,
   imports: [
     DatePipe,
+    CsvTemplateDownloadComponent,
     ReactiveFormsModule,
     TranslateModule,
     NgIcon,
@@ -746,13 +748,6 @@ export class AssetVersionsManagerComponent implements OnInit {
     anchor.download = filename;
     anchor.rel = 'noopener';
     anchor.click();
-  }
-
-  formatBytes(n: number | null | undefined): string {
-    if (n == null || n <= 0) return this.translate.instant('COMMON.EM_DASH');
-    if (n < 1024) return `${n} B`;
-    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
-    return `${(n / (1024 * 1024)).toFixed(2)} MB`;
   }
 
   truncate(text: string | null | undefined, max = 80): string {

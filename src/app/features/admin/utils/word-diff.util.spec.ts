@@ -33,6 +33,30 @@ describe('diffWords', () => {
     expect(result.after.map((s) => s.text).join('')).toBe(after);
   });
 
+  it('ignores a switch between Windows and Unix line breaks', () => {
+    // Re-uploads often swap \r\n for \n on every line; only the real edit counts
+    const result = diffWords(
+      'first line\r\nsecond line\r\nthird',
+      'first line\nsecond LINE\nthird'
+    );
+
+    expect(result.before.filter((s) => s.kind === 'removed').map((s) => s.text)).toEqual(['line']);
+    expect(result.after.filter((s) => s.kind === 'added').map((s) => s.text)).toEqual(['LINE']);
+  });
+
+  it('keeps fewer words around each change when asked', () => {
+    const words = Array.from({ length: 40 }, (_, i) => `w${i}`);
+    const edited = [...words];
+    edited[20] = 'CHANGED';
+
+    const result = diffWords(words.join(' '), edited.join(' '), { contextWords: 2 });
+
+    expect(result.folded!.after.filter((s) => s.kind === 'same').map((s) => s.text)).toEqual([
+      ' w18 w19 ',
+      ' w21 w22 ',
+    ]);
+  });
+
   it('highlights edits in a very long single-line text and folds the rest', () => {
     const words = Array.from({ length: 3000 }, (_, i) => `w${i}`);
     const before = words.join(' ');

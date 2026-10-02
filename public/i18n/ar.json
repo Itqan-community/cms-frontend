@@ -481,7 +481,10 @@
       "CTA": "العودة إلى المكتبة"
     },
     "RESTRICTED_FOR_TENANT_CONFLICT": "يوجد طلبات وصول معلقة لهذا الأصل. يرجى معالجتها قبل تفعيل تقييد المستأجر.",
-    "TENANT_REQUIRED": "يرجى اختيار ناشر قبل المتابعة."
+    "TENANT_REQUIRED": "يرجى اختيار ناشر قبل المتابعة.",
+    "REQUEST_FAILED": "تعذر إتمام الطلب. يرجى المراجعة والمحاولة مرة أخرى.",
+    "FIELD_REQUIRED": "الحقل {{field}} مطلوب.",
+    "FIELD_INVALID": "قيمة الحقل {{field}} غير صالحة."
   },
   "PROFILE": {
     "HUB_ARIA": "إدارة الحساب",
@@ -876,6 +879,44 @@
         "TAFSIR_NOT_FOUND": "التفسير غير موجود.",
         "CONTENT_FILE_UNPARSEABLE": "تعذّر تحليل الملف المرفوع.",
         "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "انشر نسخة لهذه اللغة قبل جعلها متاحة."
+      },
+      "TEXT_EDITOR": {
+        "HINT": "Enter للتطبيق · Shift+Enter لسطر جديد · Esc للإلغاء",
+        "CANCEL": "إلغاء",
+        "DONE": "تم",
+        "CLOSE": "إغلاق"
+      },
+      "GRID": {
+        "equals": "يساوي",
+        "notEqual": "لا يساوي",
+        "blank": "فارغ",
+        "notBlank": "غير فارغ",
+        "empty": "اختر",
+        "lessThan": "أقل من",
+        "greaterThan": "أكبر من",
+        "lessThanOrEqual": "أقل من أو يساوي",
+        "greaterThanOrEqual": "أكبر من أو يساوي",
+        "inRange": "بين",
+        "inRangeStart": "من",
+        "inRangeEnd": "إلى",
+        "contains": "يحتوي على",
+        "notContains": "لا يحتوي على",
+        "startsWith": "يبدأ بـ",
+        "endsWith": "ينتهي بـ",
+        "filterOoo": "تصفية...",
+        "andCondition": "و",
+        "orCondition": "أو",
+        "applyFilter": "تطبيق",
+        "resetFilter": "إعادة تعيين",
+        "clearFilter": "مسح",
+        "cancelFilter": "إلغاء",
+        "noRowsToShow": "لا توجد نتائج",
+        "ariaFilterInput": "حقل التصفية",
+        "ariaFilteringOperator": "معامل التصفية",
+        "ariaFilterValue": "قيمة التصفية",
+        "ariaFilterFromValue": "قيمة بداية التصفية",
+        "ariaFilterToValue": "قيمة نهاية التصفية",
+        "ariaFilterMenuOpen": "فتح قائمة التصفية"
       }
     },
     "REVIEW": {
@@ -1039,7 +1080,7 @@
       "HOME_DESC": "لوحة التحكم الرئيسية",
       "MUSHAFS": "المصاحف",
       "MUSHAFS_DESC": "إدارة نسخ وتخطيطات المصاحف",
-      "TAFSIRS": "التفاسير",
+      "TAFSIRS": "التفاسير وعلوم القرآن",
       "TAFSIRS_DESC": "إدارة التفاسير والشروحات القرآنية",
       "TRANSLATIONS": "الترجمات",
       "TRANSLATIONS_DESC": "إدارة تراجم القرآن بلغات مختلفة",
@@ -1212,7 +1253,6 @@
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
           "COL_SUMMARY": "الملخص",
-          "COL_SIZE": "الحجم",
           "COL_DATE": "تاريخ الإضافة",
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
@@ -1370,7 +1410,6 @@
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
           "COL_SUMMARY": "الملخص",
-          "COL_SIZE": "الحجم",
           "COL_DATE": "تاريخ الإضافة",
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
@@ -2155,7 +2194,6 @@
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
           "COL_SUMMARY": "الملخص",
-          "COL_SIZE": "الحجم",
           "COL_DATE": "تاريخ الإضافة",
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
@@ -2326,7 +2364,6 @@
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
           "COL_SUMMARY": "الملخص",
-          "COL_SIZE": "الحجم",
           "COL_DATE": "تاريخ الإضافة",
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
@@ -2481,7 +2518,6 @@
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
           "COL_SUMMARY": "الملخص",
-          "COL_SIZE": "الحجم",
           "COL_DATE": "تاريخ الإضافة",
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
@@ -2566,6 +2602,11 @@
         "ZOOM_OUT": "تصغير",
         "ZOOM_RESET": "ملء المقطع"
       }
+    },
+    "CSV_TEMPLATE": {
+      "DOWNLOAD": "تنزيل قالب CSV",
+      "HINT": "ملف فارغ يحتوي على صف لكل وحدة. املأ عمود النص ثم ارفعه هنا.",
+      "PICK_TEMPLATE_FIRST": "اختر قالب المحتوى (وتخطيط المصحف للصفحات) لتنزيل قالب CSV الخاص به."
     }
   },
   "USAGE": {

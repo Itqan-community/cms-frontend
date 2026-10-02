@@ -53,12 +53,8 @@
     gap: 8px;
   }
 
-  &__surah-filter {
-    min-width: 180px;
-  }
-
   // Holds the grid's space (and keeps the spinner visible) while the grid
-  // waits to be created until its row model is known.
+  // waits to be created until its template (and so its columns) is known.
   &__spin {
     display: block;
     min-height: 480px;
@@ -69,6 +65,21 @@
     width: 100%;
     height: 70vh;
     min-height: 480px;
+  }
+
+  // The text editor pops up under the cell. Unit text can run to thousands of
+  // characters, so pin the popup to the viewport and let it take most of the
+  // screen, dimming the page behind it.
+  ::ng-deep .ag-popup-editor:has(app-content-text-cell-editor) {
+    position: fixed !important;
+    inset: 5vh 5vw !important;
+    z-index: 1000;
+    box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.45);
+  }
+
+  // A text cell whose draft differs from the published version.
+  ::ng-deep .content-grid__cell--changed {
+    background-color: #fff7cc;
   }
 
   // Fill the modal width so long language labels aren't clipped.
@@ -128,6 +139,24 @@
     max-height: 55vh;
     overflow-y: auto;
     padding-inline-end: 4px;
+  }
+}
+
+// While the text editor is open, hide the page behind it: the browser's
+// find-in-page (Ctrl/Cmd+F) skips hidden content, so it only matches the text
+// being edited. `!important` beats components that set their own visibility.
+// <body> itself stays visible and fills the viewport so clicks on the dimmed
+// area land on it: AG Grid treats a click on <html> as inside its popup and
+// wouldn't close the editor.
+::ng-deep body:has(app-content-text-cell-editor) {
+  min-height: 100vh;
+
+  *:not(.ag-popup-editor, .ag-popup-editor *) {
+    visibility: hidden !important;
+  }
+
+  .ag-popup-editor {
+    visibility: visible;
   }
 }
 
