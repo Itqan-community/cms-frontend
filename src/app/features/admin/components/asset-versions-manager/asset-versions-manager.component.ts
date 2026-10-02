@@ -225,7 +225,11 @@ export class AssetVersionsManagerComponent implements OnInit {
           }
           const stored = this.lastLanguage.get(this.kind, this.slug);
           const remembered = stored && langs.some((l) => l.language === stored) ? stored : null;
-          const defaultLang = remembered ?? langs[0].language;
+          // The source language, not whatever the API happened to list first: a response that
+          // returns a translation ahead of the source would otherwise pick that translation as
+          // both the version filter and the upload default.
+          const fallback = langs.find((l) => l.is_source) ?? langs[0];
+          const defaultLang = remembered ?? fallback.language;
           this.selectedLanguage.set(defaultLang);
           this.versionLanguage.set(defaultLang);
           this.loadList();
