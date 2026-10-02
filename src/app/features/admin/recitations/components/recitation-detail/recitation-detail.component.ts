@@ -427,6 +427,19 @@ export class RecitationDetailComponent implements OnInit {
     return this.recitation()?.slug ?? this.slug;
   }
 
+  /**
+   * Opens the ayah timestamp editor for one track. The recitation slug and folder travel as
+   * query params because the editor looks the track up through the recitation-scoped endpoint.
+   */
+  openTimestampEditor(track: RecitationSurahTrackListItem): void {
+    void this.router.navigate(['/admin/audio/timestamps', track.id], {
+      queryParams: {
+        recitation: this.recitationSlug(),
+        folder: this.selectedFolderSlug() ?? undefined,
+      },
+    });
+  }
+
   private loadFoldersThenTracks(): void {
     this.recitationsService.recitationFoldersList(this.recitationSlug()).subscribe({
       next: (list) => {

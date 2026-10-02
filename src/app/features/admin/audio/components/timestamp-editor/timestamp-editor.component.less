@@ -1,0 +1,211 @@
+.timestamp-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  &__back-cta {
+    align-self: flex-start;
+  }
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px 24px;
+  }
+
+  &__title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  &__breadcrumb {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: var(--admin-text-500);
+    max-width: max-content;
+  }
+
+  &__title {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--admin-text-900);
+  }
+
+  &__subtitle {
+    font-size: 13px;
+    color: var(--admin-text-500);
+  }
+
+  &__head-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Playback is driven by the page's own transport, so the native element stays hidden. */
+  &__audio {
+    display: none;
+  }
+
+  &__waveform-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  &__waveform-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px 16px;
+  }
+
+  &__waveform-label {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--admin-text-700);
+  }
+
+  &__zoom {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__waveform-hint {
+    font-size: 12px;
+    color: var(--admin-text-500);
+  }
+
+  &__transport {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px 20px;
+  }
+
+  &__transport-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    /*
+     * Pinned LTR to match the waveform above it: previous/next must sit in the same order as
+     * the timeline they scrub, and "skip back" has to keep pointing toward earlier audio.
+     */
+    direction: ltr;
+  }
+
+  &__clock {
+    font-size: 13px;
+    color: var(--admin-text-700);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__nudges {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__nudges-label {
+    font-size: 12px;
+    color: var(--admin-text-500);
+  }
+
+  &__nudge {
+    font-variant-numeric: tabular-nums;
+    min-width: 62px;
+  }
+
+  &__readout {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 16px;
+    font-size: 13px;
+    color: var(--admin-text-700);
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__drift {
+    color: var(--admin-text-500);
+
+    &--moved {
+      color: var(--color-action-edit);
+      font-weight: 500;
+    }
+  }
+
+  &__hint {
+    color: var(--admin-text-500);
+  }
+
+  &__markers-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--admin-text-900);
+    margin-bottom: 12px;
+  }
+
+  &__rows {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: minmax(96px, 140px) 1fr 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--admin-border-100);
+  }
+
+  &__ayah {
+    font-size: 13px;
+    color: var(--admin-text-700);
+  }
+
+  &__bound {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    padding: 4px 8px;
+    font-size: 13px;
+    color: var(--admin-text-700);
+    cursor: pointer;
+    text-align: start;
+    font-variant-numeric: tabular-nums;
+
+    &:hover {
+      background-color: var(--admin-surface-100);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary-600);
+      outline-offset: 1px;
+    }
+
+    &--selected {
+      border-color: var(--color-primary-600);
+      background-color: var(--color-primary-50);
+      color: var(--color-primary-800);
+      font-weight: 500;
+    }
+  }
+}

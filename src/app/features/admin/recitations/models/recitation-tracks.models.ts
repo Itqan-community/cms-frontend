@@ -139,6 +139,8 @@ export interface RecitationTrackOut {
   duration_ms: number;
   size_bytes: number;
   filename: string | null;
+  /** Direct URL to this track's ayah timing JSON. Null until timings are uploaded for it. */
+  available_ayah_timings_url?: string | null;
 }
 
 /** Paginated list response for recitation-scoped tracks. */
@@ -156,4 +158,6 @@ export interface RecitationSurahTrackListItem {
   duration_ms: number | null;
   size_bytes: number | null;
   audio_url: string;
+  /** Where the timestamp editor reads this track's boundaries from. Null when none exist yet. */
+  available_ayah_timings_url: string | null;
 }
