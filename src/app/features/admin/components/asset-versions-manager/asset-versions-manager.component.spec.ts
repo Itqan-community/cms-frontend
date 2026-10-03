@@ -10,6 +10,7 @@ import type { AssetVersionsListResponse } from '../../models/asset-versions.mode
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { AssetContentService } from '../../services/asset-content.service';
 import { AssetVersionsService } from '../../services/asset-versions.service';
+import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { AssetVersionsManagerComponent } from './asset-versions-manager.component';
 
 const LANGUAGES: AssetLanguage[] = [
@@ -42,6 +43,7 @@ describe('AssetVersionsManagerComponent', () => {
   let versionsService: jasmine.SpyObj<AssetVersionsService>;
   let contentService: jasmine.SpyObj<AssetContentService>;
   let message: jasmine.SpyObj<NzMessageService>;
+  let lastLanguage: jasmine.SpyObj<LastActiveLanguageService>;
 
   beforeEach(() => {
     granted = null;
@@ -65,17 +67,27 @@ describe('AssetVersionsManagerComponent', () => {
       'warning',
     ]);
 
+    lastLanguage = jasmine.createSpyObj<LastActiveLanguageService>('LastActiveLanguageService', [
+      'get',
+      'set',
+    ]);
+    // Backed by sessionStorage in production; stubbed so one test's choice cannot leak into the
+    // next and so the no-remembered-language path is the default under test.
+    lastLanguage.get.and.returnValue(null);
+
     contentService.listLanguages.and.returnValue(of(LANGUAGES));
     versionsService.list.and.returnValue(of(page('ar')));
 
     await TestBed.configureTestingModule({
       imports: [AssetVersionsManagerComponent, TranslateModule.forRoot()],
       providers: [
+        // The component injects HttpClient directly for its own file requests.
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: AssetVersionsService, useValue: versionsService },
         { provide: AssetContentService, useValue: contentService },
         { provide: NzMessageService, useValue: message },
+        { provide: LastActiveLanguageService, useValue: lastLanguage },
         {
           provide: AdminAuthService,
           useValue: { hasPermission: (perm: string) => granted === null || granted.has(perm) },
@@ -126,6 +138,44 @@ describe('AssetVersionsManagerComponent', () => {
 
       expect(component.missingVersionLanguage()).toBeFalse();
       expect(versionsService.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('default language', () => {
+    it('defaults to the source language even when a translation is listed first', () => {
+      // LANGUAGES has the source first, so a `langs[0]` fallback passes by luck; reverse it.
+      contentService.listLanguages.and.returnValue(
+        of([
+          { language: 'fr', is_source: false, is_available: false },
+          { language: 'ar', is_source: true, is_available: true },
+        ])
+      );
+
+      fixture.detectChanges();
+
+      expect(component.selectedLanguage()).toBe('ar');
+      component.openCreateModal();
+      expect(component.versionLanguage()).toBe('ar');
+    });
+
+    it('still prefers a remembered language over the source', () => {
+      lastLanguage.get.and.returnValue('fr');
+      fixture.detectChanges();
+
+      expect(component.selectedLanguage()).toBe('fr');
+    });
+
+    it('falls back to the first entry when no language is the source', () => {
+      contentService.listLanguages.and.returnValue(
+        of([
+          { language: 'fr', is_source: false, is_available: false },
+          { language: 'de', is_source: false, is_available: false },
+        ])
+      );
+
+      fixture.detectChanges();
+
+      expect(component.selectedLanguage()).toBe('fr');
     });
   });
 

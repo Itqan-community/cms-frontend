@@ -1,0 +1,20 @@
+.waveform-canvas {
+  display: block;
+  position: relative;
+  width: 100%;
+  height: 140px;
+  border: 1px solid var(--admin-border-200);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  touch-action: none;
+  cursor: crosshair;
+
+  /* Time runs earlier → later, left → right, in every locale. */
+  direction: ltr;
+
+  &__surface {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
