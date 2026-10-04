@@ -807,8 +807,7 @@
       "AFTER": "بعد",
       "EMPTY_TEXT": "(فارغ)",
       "SHOW_MORE": "عرض {{count}} أخرى",
-      "SHOW_FULL_TEXT": "عرض النص كاملًا",
-      "SHOW_CHANGES_ONLY": "عرض التغييرات فقط"
+      "SHOW_FULL_TEXT": "عرض النص كاملًا"
     },
     "HOME": {
       "LABEL": "الرئيسية",

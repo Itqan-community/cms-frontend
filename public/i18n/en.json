@@ -807,8 +807,7 @@
       "AFTER": "After",
       "EMPTY_TEXT": "(empty)",
       "SHOW_MORE": "Show {{count}} more",
-      "SHOW_FULL_TEXT": "Show full text",
-      "SHOW_CHANGES_ONLY": "Show changes only"
+      "SHOW_FULL_TEXT": "Show full text"
     },
     "PREVIEW": {
       "LOADING": "Loading preview…",

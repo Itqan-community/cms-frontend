@@ -1,11 +1,12 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, input, linkedSignal } from '@angular/core';
+import { Component, computed, input, linkedSignal, signal } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzModalModule } from 'ng-zorro-antd/modal';
 
 import type { ContentChange } from '../../models/asset-content.models';
-import { diffWords } from '../../utils/word-diff.util';
+import { diffWords, type WordDiff } from '../../utils/word-diff.util';
 import { ChangeCompareComponent } from '../change-compare/change-compare.component';
 
 type ChangeType = ContentChange['change_type'];
@@ -13,6 +14,12 @@ type ChangeFilter = 'all' | ChangeType;
 
 /** How many change cards render at once; "Show more" reveals the next batch. */
 const PAGE_SIZE = 50;
+/** One listed change with its word diff (null unless modified). */
+interface VisibleChange {
+  change: ContentChange;
+  words: WordDiff | null;
+}
+
 /** Unchanged words kept around each change in `compact` mode. */
 const COMPACT_CONTEXT_WORDS = 2;
 
@@ -27,7 +34,14 @@ const COMPACT_CONTEXT_WORDS = 2;
 @Component({
   selector: 'app-content-changes',
   standalone: true,
-  imports: [DatePipe, NgIcon, TranslateModule, NzButtonModule, ChangeCompareComponent],
+  imports: [
+    DatePipe,
+    NgIcon,
+    TranslateModule,
+    NzButtonModule,
+    NzModalModule,
+    ChangeCompareComponent,
+  ],
   templateUrl: './content-changes.component.html',
   styleUrl: './content-changes.component.less',
 })
@@ -65,7 +79,7 @@ export class ContentChangesComponent {
     return PAGE_SIZE;
   });
 
-  readonly visible = computed(() =>
+  readonly visible = computed<VisibleChange[]>(() =>
     this.filtered()
       .slice(0, this.limit())
       .map((change) => ({
@@ -81,11 +95,8 @@ export class ContentChangesComponent {
       }))
   );
 
-  /** Edits shown in full; the rest fold long unchanged stretches into "…". */
-  readonly expanded = linkedSignal<ContentChange[], ReadonlySet<number>>({
-    source: this.changes,
-    computation: () => new Set(),
-  });
+  /** The change whose whole text is open in the popup (the list stays folded). */
+  readonly fullTextItem = signal<VisibleChange | null>(null);
 
   readonly remaining = computed(() => this.filtered().length - this.visible().length);
 
@@ -112,12 +123,12 @@ export class ContentChangesComponent {
     this.filter.set(key);
   }
 
-  toggleExpanded(unitId: number): void {
-    this.expanded.update((ids) => {
-      const next = new Set(ids);
-      if (!next.delete(unitId)) next.add(unitId);
-      return next;
-    });
+  openFullText(item: VisibleChange): void {
+    this.fullTextItem.set(item);
+  }
+
+  closeFullText(): void {
+    this.fullTextItem.set(null);
   }
 
   showMore(): void {
