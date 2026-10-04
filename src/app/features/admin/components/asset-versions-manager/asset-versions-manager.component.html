@@ -28,7 +28,7 @@
           }
         </nz-select>
       }
-      @if (supportsLanguages() && selectedLanguageObj() && !selectedLanguageObj()!.is_source) {
+      @if (supportsLanguages() && selectedLanguageObj()) {
         <span
           class="asset-versions-manager__availability"
           [class.asset-versions-manager__availability--available]="selectedLangAvailable()"

@@ -166,10 +166,9 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly selectedLanguageObj = computed(() =>
     this.languages().find((l) => l.language === this.selectedLanguage())
   );
-  /** The source language's availability follows the asset's own status, so only
-   *  translations expose a manual availability toggle here. */
+  /** Every language, the source included, can be shown to or hidden from consumers. */
   readonly canToggleAvailability = computed(
-    () => this.canMutateVersions() && this.selectedLanguageObj()?.is_source === false
+    () => this.canMutateVersions() && this.selectedLanguageObj() !== undefined
   );
   readonly selectedLangAvailable = computed(
     () => this.selectedLanguageObj()?.is_available ?? false

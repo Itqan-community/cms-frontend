@@ -893,7 +893,7 @@
         "PENDING": "Pending",
         "MARK_AVAILABLE": "Mark available",
         "MARK_PENDING": "Mark pending",
-        "HINT": "Available languages can be downloaded by consumers. Pending languages stay hidden until you make them available.",
+        "HINT": "Available languages can be downloaded by consumers. Pending languages stay hidden until you make them available. If no language is available, the asset is hidden from the gallery.",
         "MARKED_AVAILABLE": "Language is now available to consumers.",
         "MARKED_PENDING": "Language is now hidden from consumers."
       },

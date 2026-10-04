@@ -295,6 +295,24 @@ describe('AssetVersionsManagerComponent', () => {
     });
   });
 
+  describe('language availability', () => {
+    it('lets the source language be shown or hidden too', () => {
+      granted = new Set([PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION]);
+      fixture.detectChanges();
+
+      component.onLanguageChange('ar'); // the source
+      expect(component.selectedLanguageObj()?.is_source).toBeTrue();
+      expect(component.canToggleAvailability()).toBeTrue();
+    });
+
+    it('needs the update permission to toggle', () => {
+      granted = new Set<string>();
+      fixture.detectChanges();
+
+      expect(component.canToggleAvailability()).toBeFalse();
+    });
+  });
+
   describe('publishing', () => {
     function version(overrides: Partial<AssetVersion>): AssetVersion {
       return { ...page('ar').results[0], ...overrides };
