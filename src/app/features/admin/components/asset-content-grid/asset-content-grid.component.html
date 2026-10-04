@@ -4,75 +4,83 @@
       <span class="content-grid__language-label">
         {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.LABEL' | translate }}
       </span>
-      <nz-select
-        class="content-grid__language-select"
-        [ngModel]="selectedLanguage()"
-        (ngModelChange)="onLanguageChange($event)"
-        [nzDisabled]="loading() || saving() || publishing() || savingDraft()"
-      >
-        @for (lang of languages(); track lang.language) {
-          <nz-option
-            [nzValue]="lang.language"
-            [nzLabel]="
-              langName(lang.language) +
-              (lang.is_source
-                ? ' (' + ('ADMIN.CONTENT_EDITOR.LANGUAGE.SOURCE' | translate) + ')'
-                : '')
-            "
-          ></nz-option>
+      @if (readOnly()) {
+        <span class="content-grid__language-name">{{ langName(selectedLanguage() ?? '') }}</span>
+      } @else {
+        <nz-select
+          class="content-grid__language-select"
+          [ngModel]="selectedLanguage()"
+          (ngModelChange)="onLanguageChange($event)"
+          [nzDisabled]="loading() || saving() || publishing() || savingDraft()"
+        >
+          @for (lang of languages(); track lang.language) {
+            <nz-option
+              [nzValue]="lang.language"
+              [nzLabel]="
+                langName(lang.language) +
+                (lang.is_source
+                  ? ' (' + ('ADMIN.CONTENT_EDITOR.LANGUAGE.SOURCE' | translate) + ')'
+                  : '')
+              "
+            ></nz-option>
+          }
+        </nz-select>
+        @if (canAddLanguage()) {
+          <button
+            nz-button
+            nzType="default"
+            (click)="openAddLanguage()"
+            [disabled]="loading() || saving() || publishing() || savingDraft()"
+          >
+            <ng-icon name="lucidePlus" />
+            {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD' | translate }}
+          </button>
         }
-      </nz-select>
-      @if (canAddLanguage()) {
+      }
+    </div>
+
+    @if (!readOnly()) {
+      <div class="content-grid__status">
+        @if (saving()) {
+          <span class="content-grid__saving">
+            <ng-icon name="lucideRotateCw" />
+            {{ 'ADMIN.CONTENT_EDITOR.SAVING' | translate }}
+          </span>
+        } @else if (dirty()) {
+          <span class="content-grid__unsaved">
+            {{ 'ADMIN.CONTENT_EDITOR.UNSAVED' | translate }}
+          </span>
+        } @else if (savedOnce()) {
+          <span class="content-grid__saved">
+            {{ 'ADMIN.CONTENT_EDITOR.ALL_SAVED' | translate }}
+          </span>
+        }
+      </div>
+    }
+
+    <div class="content-grid__actions">
+      @if (!readOnly()) {
         <button
           nz-button
           nzType="default"
-          (click)="openAddLanguage()"
-          [disabled]="loading() || saving() || publishing() || savingDraft()"
+          nz-tooltip
+          [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.UNDO' | translate"
+          [disabled]="!canUndo()"
+          (click)="undo()"
         >
-          <ng-icon name="lucidePlus" />
-          {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD' | translate }}
+          <ng-icon name="lucideUndo2" />
+        </button>
+        <button
+          nz-button
+          nzType="default"
+          nz-tooltip
+          [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.REDO' | translate"
+          [disabled]="!canRedo()"
+          (click)="redo()"
+        >
+          <ng-icon name="lucideRedo2" />
         </button>
       }
-    </div>
-
-    <div class="content-grid__status">
-      @if (saving()) {
-        <span class="content-grid__saving">
-          <ng-icon name="lucideRotateCw" />
-          {{ 'ADMIN.CONTENT_EDITOR.SAVING' | translate }}
-        </span>
-      } @else if (dirty()) {
-        <span class="content-grid__unsaved">
-          {{ 'ADMIN.CONTENT_EDITOR.UNSAVED' | translate }}
-        </span>
-      } @else if (savedOnce()) {
-        <span class="content-grid__saved">
-          {{ 'ADMIN.CONTENT_EDITOR.ALL_SAVED' | translate }}
-        </span>
-      }
-    </div>
-
-    <div class="content-grid__actions">
-      <button
-        nz-button
-        nzType="default"
-        nz-tooltip
-        [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.UNDO' | translate"
-        [disabled]="!canUndo()"
-        (click)="undo()"
-      >
-        <ng-icon name="lucideUndo2" />
-      </button>
-      <button
-        nz-button
-        nzType="default"
-        nz-tooltip
-        [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.REDO' | translate"
-        [disabled]="!canRedo()"
-        (click)="redo()"
-      >
-        <ng-icon name="lucideRedo2" />
-      </button>
       <button
         nz-button
         nzType="default"
@@ -85,33 +93,35 @@
           ({{ selectedCount() }})
         }
       </button>
-      <button
-        nz-button
-        nzType="default"
-        nzDanger
-        (click)="confirmDiscard()"
-        [disabled]="publishing() || savingDraft()"
-      >
-        {{ 'ADMIN.CONTENT_EDITOR.DISCARD' | translate }}
-      </button>
-      <button
-        nz-button
-        nzType="default"
-        [nzLoading]="savingDraft()"
-        [disabled]="draftId() === null || publishing() || saving()"
-        (click)="saveDraft()"
-      >
-        {{ 'ADMIN.CONTENT_EDITOR.SAVE_DRAFT' | translate }}
-      </button>
-      <button
-        nz-button
-        nzType="primary"
-        [nzLoading]="publishing()"
-        [disabled]="draftId() === null || savingDraft() || saving()"
-        (click)="openCommit()"
-      >
-        {{ 'ADMIN.CONTENT_EDITOR.COMMIT.BUTTON' | translate }}
-      </button>
+      @if (!readOnly()) {
+        <button
+          nz-button
+          nzType="default"
+          nzDanger
+          (click)="confirmDiscard()"
+          [disabled]="publishing() || savingDraft()"
+        >
+          {{ 'ADMIN.CONTENT_EDITOR.DISCARD' | translate }}
+        </button>
+        <button
+          nz-button
+          nzType="default"
+          [nzLoading]="savingDraft()"
+          [disabled]="draftId() === null || publishing() || saving()"
+          (click)="saveDraft()"
+        >
+          {{ 'ADMIN.CONTENT_EDITOR.SAVE_DRAFT' | translate }}
+        </button>
+        <button
+          nz-button
+          nzType="primary"
+          [nzLoading]="publishing()"
+          [disabled]="draftId() === null || savingDraft() || saving()"
+          (click)="openCommit()"
+        >
+          {{ 'ADMIN.CONTENT_EDITOR.COMMIT.BUTTON' | translate }}
+        </button>
+      }
     </div>
   </div>
 

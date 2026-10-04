@@ -344,7 +344,20 @@
                     <span class="asset-versions-manager__divider" aria-hidden="true"></span>
                   }
                   <div class="asset-versions-manager__action-group">
-                    @if (ver.file_url) {
+                    @if (supportsLanguages()) {
+                      <!-- Every version, pruned or not: the viewer rebuilds its content. -->
+                      <a
+                        nz-button
+                        nzType="text"
+                        class="action-icon action-icon--view"
+                        nz-tooltip
+                        [nzTooltipTitle]="'ADMIN.VERSION_VIEWER.OPEN' | translate"
+                        [attr.aria-label]="'ADMIN.VERSION_VIEWER.OPEN' | translate"
+                        [routerLink]="['/admin', listSegment(), slug, 'versions', ver.id]"
+                      >
+                        <ng-icon name="lucideEye" aria-hidden="true" />
+                      </a>
+                    } @else if (ver.file_url) {
                       <button
                         type="button"
                         nz-button

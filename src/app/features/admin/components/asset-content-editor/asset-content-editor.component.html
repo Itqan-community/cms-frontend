@@ -4,7 +4,13 @@
       &larr; {{ 'ADMIN.CONTENT_EDITOR.BACK' | translate }}
     </a>
     <h1 class="content-editor__title">
-      {{ 'ADMIN.CONTENT_EDITOR.TITLE' | translate }}
+      @if (viewVersionId() === null) {
+        {{ 'ADMIN.CONTENT_EDITOR.TITLE' | translate }}
+      } @else {
+        {{
+          'ADMIN.VERSION_VIEWER.TITLE' | translate: { name: grid()?.viewedVersion()?.name ?? '' }
+        }}
+      }
       @if (grid(); as g) {
         @if (!g.loading()) {
           <app-admin-title-count [count]="g.entriesTotal()" />
@@ -12,9 +18,12 @@
       }
     </h1>
     <p class="content-editor__hint">
-      {{ 'ADMIN.CONTENT_EDITOR.HINT' | translate }}
+      {{
+        (viewVersionId() === null ? 'ADMIN.CONTENT_EDITOR.HINT' : 'ADMIN.VERSION_VIEWER.HINT')
+          | translate
+      }}
     </p>
   </header>
 
-  <app-asset-content-grid [kind]="kind()" [slug]="slug()" />
+  <app-asset-content-grid [kind]="kind()" [slug]="slug()" [viewVersionId]="viewVersionId()" />
 </section>

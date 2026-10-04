@@ -142,6 +142,15 @@ export class AssetContentService {
     );
   }
 
+  /** One version's name and language (any state). */
+  getVersion(
+    kind: AssetVersionParentKind,
+    slug: string,
+    versionId: number
+  ): Observable<ContentDraftVersion> {
+    return this.http.get<ContentDraftVersion>(this.versionBase(kind, slug, versionId));
+  }
+
   /** Discard the draft and all its unsaved entries. */
   discardDraft(kind: AssetVersionParentKind, slug: string, versionId: number): Observable<void> {
     return this.http.delete<void>(this.versionBase(kind, slug, versionId));

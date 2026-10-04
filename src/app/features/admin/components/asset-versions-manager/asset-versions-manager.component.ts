@@ -4,6 +4,7 @@ import { Component, DestroyRef, Input, OnInit, computed, inject, signal } from '
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgIcon } from '@ng-icons/core';
+import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -94,6 +95,7 @@ const VERSION_PERMISSIONS: Record<
     NzToolTipModule,
     UniversalAssetPreviewerComponent,
     ContentChangesComponent,
+    RouterLink,
   ],
   templateUrl: './asset-versions-manager.component.html',
   styleUrl: './asset-versions-manager.component.less',
@@ -200,6 +202,11 @@ export class AssetVersionsManagerComponent implements OnInit {
     name: ['', [Validators.required]],
     summary: ['', [Validators.required]],
   });
+
+  /** Admin route segment of the parent asset list (e.g. `tafsirs`). */
+  listSegment(): string {
+    return this.kind === 'tafsir' ? 'tafsirs' : 'translations';
+  }
 
   /** Only translations and tafsirs carry per-language content/versions. */
   supportsLanguages(): boolean {

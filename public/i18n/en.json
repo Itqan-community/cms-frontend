@@ -785,6 +785,11 @@
       "FILE_UNPARSEABLE_ERROR": "The file could not be read as content rows. Use the CSV template for this asset.",
       "VERSION_IS_PUBLISHED_ERROR": "This version is published. Publish another version before changing its file."
     },
+    "VERSION_VIEWER": {
+      "OPEN": "View this version",
+      "TITLE": "Version {{name}}",
+      "HINT": "A read-only view of this version's content as it was committed. Filter and copy work as in the editor; nothing can be changed here."
+    },
     "CONTENT_CHANGES": {
       "FIRST_VERSION_HINT": "This is the first version of this language, so there is nothing earlier to compare it with: all of its content is listed as added.",
       "LOADING_MORE": "Loading the remaining changes…",

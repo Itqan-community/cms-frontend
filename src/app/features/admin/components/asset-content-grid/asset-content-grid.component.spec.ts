@@ -361,4 +361,75 @@ describe('AssetContentGridComponent column definitions', () => {
     expect(Object.keys(localeText)).toEqual(['loadingOoo']);
   });
 
+  describe('read-only version view', () => {
+    function openViewer() {
+      const fixture = TestBed.createComponent(AssetContentGridComponent);
+      fixture.componentRef.setInput('kind', 'tafsir');
+      fixture.componentRef.setInput('slug', 'demo-tafsir');
+      fixture.componentRef.setInput('viewVersionId', 7);
+      fixture.detectChanges();
+      const httpMock = TestBed.inject(HttpTestingController);
+      httpMock
+        .expectOne((req) => req.url.includes('languages/'))
+        .flush([
+          { language: 'ar', is_source: true, is_available: true },
+          { language: 'fr', is_source: false, is_available: true },
+        ]);
+      httpMock
+        .expectOne((req) => req.method === 'GET' && req.url.endsWith('versions/7/'))
+        .flush({
+          id: 7,
+          asset_id: 1,
+          language: 'fr',
+          name: 'v3',
+          summary: '',
+          state: 'published',
+          entries_count: 1,
+          created_at: '2026-01-01T00:00:00Z',
+        });
+      return { fixture, httpMock };
+    }
+
+    it('loads the given version instead of opening a draft', () => {
+      // Arrange / Act
+      const { fixture, httpMock } = openViewer();
+
+      // Assert — rows come from the viewed version; no draft is created
+      httpMock.expectNone((req) => req.url.includes('draft/'));
+      const entries = httpMock.expectOne((req) => req.url.includes('versions/7/entries/'));
+      expect(entries.request.method).toBe('GET');
+      const grid = fixture.componentInstance;
+      expect(grid.viewedVersion()?.name).toBe('v3');
+      expect(grid.selectedLanguage()).toBe('fr');
+    });
+
+    it('opens text cells read-only and never reports unsaved work', () => {
+      // Arrange
+      const { fixture } = openViewer();
+      const grid = fixture.componentInstance;
+
+      // Act
+      const text = grid.buildColumnDefs().find((col) => col.field === 'text')!;
+
+      // Assert
+      expect(grid.readOnly()).toBeTrue();
+      expect((text.cellEditorParams as { readOnly: boolean }).readOnly).toBeTrue();
+      expect(grid.hasUnsavedWork()).toBeFalse();
+    });
+
+    it('hides every editing control but keeps copying', () => {
+      // Arrange
+      const { fixture } = openViewer();
+      fixture.detectChanges();
+      const toolbar: HTMLElement = fixture.nativeElement.querySelector('.content-grid__toolbar');
+
+      // Assert
+      const labels = Array.from(toolbar.querySelectorAll('button')).map((b) => b.textContent ?? '');
+      expect(labels.some((l) => l.includes('ADMIN.CONTENT_EDITOR.COPY.BUTTON'))).toBeTrue();
+      expect(labels.some((l) => l.includes('ADMIN.CONTENT_EDITOR.COMMIT.BUTTON'))).toBeFalse();
+      expect(labels.some((l) => l.includes('ADMIN.CONTENT_EDITOR.DISCARD'))).toBeFalse();
+      expect(labels.some((l) => l.includes('ADMIN.CONTENT_EDITOR.LANGUAGE.ADD'))).toBeFalse();
+      expect(toolbar.querySelector('nz-select')).toBeNull();
+    });
+  });
 });

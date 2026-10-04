@@ -42,6 +42,7 @@ import type {
   AssetTemplate,
   AssetVersionParentKind,
   ContentChange,
+  ContentDraftVersion,
   ContentEntry,
   ContentEntryPatch,
 } from '../../models/asset-content.models';
@@ -130,6 +131,14 @@ export class AssetContentGridComponent implements OnInit {
   readonly template = input<AssetTemplate | null>(null);
   /** Mushaf layout name, when the asset's template is page-based. */
   readonly layoutName = input<string | null>(null);
+  /**
+   * Read-only mode: show this committed version instead of opening a draft.
+   * Same columns, filters and copy as the editor; nothing can be edited.
+   */
+  readonly viewVersionId = input<number | null>(null);
+  readonly readOnly = computed(() => this.viewVersionId() !== null);
+  /** The version being viewed (read-only mode), once loaded. */
+  readonly viewedVersion = signal<ContentDraftVersion | null>(null);
 
   /**
    * Template as declared by the asset, derived from the rows themselves.
@@ -291,6 +300,7 @@ export class AssetContentGridComponent implements OnInit {
 
   /** True while there are edits not yet persisted to the draft. */
   hasUnsavedWork(): boolean {
+    if (this.readOnly()) return false;
     return this.dirty() || this.pendingRows.size > 0 || this.saving();
   }
 
@@ -338,7 +348,11 @@ export class AssetContentGridComponent implements OnInit {
   /** Ctrl/Cmd+Z undoes, Ctrl/Cmd+Shift+Z or Ctrl/Cmd+Y redoes — outside a cell editor,
    *  whose textarea keeps its own undo. */
   onKeydown(event: KeyboardEvent): void {
-    if (!(event.ctrlKey || event.metaKey) || (this.gridApi?.getEditingCells().length ?? 0) > 0) {
+    if (
+      this.readOnly() ||
+      !(event.ctrlKey || event.metaKey) ||
+      (this.gridApi?.getEditingCells().length ?? 0) > 0
+    ) {
       return;
     }
     const key = event.key.toLowerCase();
@@ -442,7 +456,7 @@ export class AssetContentGridComponent implements OnInit {
    */
   onPaste(event: ClipboardEvent): void {
     const api = this.gridApi;
-    if (!api) return;
+    if (!api || this.readOnly()) return;
     // While a cell editor is open, let the textarea paste normally.
     if (api.getEditingCells().length > 0) return;
 
@@ -533,6 +547,11 @@ export class AssetContentGridComponent implements OnInit {
       .subscribe({
         next: (langs) => {
           this.languages.set(langs);
+          const viewId = this.viewVersionId();
+          if (viewId !== null) {
+            this.loadViewedVersion(viewId);
+            return;
+          }
           const source = langs.find((l) => l.is_source) ?? langs[0];
           const remembered = this.lastLanguage.get(this.kind, this.slug);
           const initial = langs.find((l) => l.language === remembered) ?? source;
@@ -540,6 +559,30 @@ export class AssetContentGridComponent implements OnInit {
           this.loadForLanguage();
         },
         error: (err: HttpErrorResponse) => {
+          this.loading.set(false);
+          this.showError(err);
+        },
+      });
+  }
+
+  /** Read-only mode: load the viewed version's language, then its rows. The
+   *  rows come from the same entries endpoint as a draft's (`draftId` holds the
+   *  viewed version's id), so filters and columns behave identically. */
+  private loadViewedVersion(versionId: number): void {
+    const generation = ++this.loadGeneration;
+    this.contentService
+      .getVersion(this.kind, this.slug, versionId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (version) => {
+          if (generation !== this.loadGeneration) return;
+          this.viewedVersion.set(version);
+          this.selectedLanguage.set(version.language);
+          this.draftId.set(version.id);
+          this.loadTemplate(generation);
+        },
+        error: (err: HttpErrorResponse) => {
+          if (generation !== this.loadGeneration) return;
           this.loading.set(false);
           this.showError(err);
         },
@@ -975,7 +1018,11 @@ export class AssetContentGridComponent implements OnInit {
       editable: true,
       cellEditor: ContentTextCellEditorComponent,
       cellEditorPopup: true,
-      cellEditorParams: { sourceTitle: this.sourceColHeader() } satisfies ContentTextEditorParams,
+      // Read-only mode still opens the popup, to read long text in full.
+      cellEditorParams: {
+        sourceTitle: this.sourceColHeader(),
+        readOnly: this.readOnly(),
+      } satisfies ContentTextEditorParams,
       // Yellow when the draft differs from the published version.
       cellClassRules: { 'content-grid__cell--changed': (p) => !!p.data?.changed },
       ...textFilter,
