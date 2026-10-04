@@ -55,16 +55,60 @@
     }
   }
 
-  &__active-badge {
-    display: inline-block;
+  &__badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
     margin-inline-start: 8px;
     padding: 1px 8px;
     border-radius: 10px;
     font-size: 11px;
     font-weight: 600;
+    vertical-align: middle;
+
+    ng-icon {
+      width: 12px;
+      height: 12px;
+    }
+
+    &--published {
+      color: #389e0d;
+      background: #f6ffed;
+      border: 1px solid #b7eb8f;
+    }
+
+    &--latest {
+      color: rgba(0, 0, 0, 0.65);
+      background: #fafafa;
+      border: 1px solid #d9d9d9;
+    }
+  }
+
+  &__review {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    margin-inline-start: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    vertical-align: middle;
+
+    ng-icon {
+      width: 13px;
+      height: 13px;
+    }
+
+    &--approved {
+      color: #389e0d;
+    }
+
+    &--pending {
+      color: #d46b08;
+    }
+  }
+
+  &__publish:not([disabled]) {
     color: #389e0d;
-    background: #f6ffed;
-    border: 1px solid #b7eb8f;
   }
 
   &__modal-language {

@@ -147,7 +147,7 @@ export class AssetContentService {
     return this.http.delete<void>(this.versionBase(kind, slug, versionId));
   }
 
-  /** Restore a version's content as a new published version (becomes the active one). */
+  /** Restore a version's content as a new committed version (the latest); it is reviewed and published separately. */
   restoreVersion(
     kind: AssetVersionParentKind,
     slug: string,
@@ -155,6 +155,18 @@ export class AssetContentService {
   ): Observable<ContentDraftVersion> {
     return this.http.post<ContentDraftVersion>(
       `${this.versionBase(kind, slug, versionId)}restore/`,
+      {}
+    );
+  }
+
+  /** Make a fully approved version the one consumers see for its language. */
+  setPublishedVersion(
+    kind: AssetVersionParentKind,
+    slug: string,
+    versionId: number
+  ): Observable<ContentDraftVersion> {
+    return this.http.post<ContentDraftVersion>(
+      `${this.versionBase(kind, slug, versionId)}set-published/`,
       {}
     );
   }

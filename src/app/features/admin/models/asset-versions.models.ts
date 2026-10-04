@@ -4,8 +4,14 @@ export interface AssetVersion {
   asset_id: number;
   /** Language code of this version (e.g. 'ar', 'fr'). */
   language?: string;
-  /** True when this is the latest published (active) version for its language. */
+  /** True when this is the latest commit (head) for its language — what the editor builds on. */
   is_active?: boolean;
+  /** True when this is the version consumers are served for its language (translations/tafsirs). */
+  is_published?: boolean;
+  /** True when every change in this version is approved, so it can be published. */
+  is_approved?: boolean;
+  /** Changed units still awaiting approval as of this version (0 when approved). */
+  pending_review_count?: number;
   name: string;
   summary?: string;
   /** Commit author (version creator) display name. */

@@ -34,6 +34,12 @@ import { UniversalAssetPreviewerComponent } from '../universal-asset-previewer/u
 
 const DEFAULT_PAGE_SIZE = 10;
 
+/** Upload/replace rejections that have a more helpful message than the generic save error. */
+const SAVE_ERROR_KEYS: Record<string, string> = {
+  content_file_unparseable: 'ADMIN.VERSION_PUBLISHING.FILE_UNPARSEABLE_ERROR',
+  version_is_published: 'ADMIN.VERSION_PUBLISHING.VERSION_IS_PUBLISHED_ERROR',
+};
+
 /**
  * Version management is gated per asset type: the backend `PermissionChoice` set has no
  * catalogue-wide code, so each kind maps to its own update/delete permission.
@@ -168,6 +174,7 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly saving = signal(false);
   readonly downloadingId = signal<number | null>(null);
   readonly restoringId = signal<number | null>(null);
+  readonly publishingId = signal<number | null>(null);
   readonly searchTerm = signal('');
   readonly selectedFileName = signal<string | null>(null);
   private selectedFile: File | null = null;
@@ -442,7 +449,10 @@ export class AssetVersionsManagerComponent implements OnInit {
         },
         error: (err: unknown) => {
           if (err instanceof HttpErrorResponse && err.status === 0) return;
-          this.message.error(this.translate.instant(`${this.i18nPrefix}.MESSAGES.SAVE_ERROR`));
+          const errorName = err instanceof HttpErrorResponse ? err.error?.error_name : undefined;
+          const key =
+            SAVE_ERROR_KEYS[errorName as string] ?? `${this.i18nPrefix}.MESSAGES.SAVE_ERROR`;
+          this.message.error(this.translate.instant(key));
         },
       });
   }
@@ -697,6 +707,52 @@ export class AssetVersionsManagerComponent implements OnInit {
     });
   }
 
+  /** Make a fully approved version the one consumers see for its language. */
+  publishVersion(row: AssetVersion): void {
+    if (!this.canPublish() || !row.is_approved || this.publishingId() !== null) {
+      return;
+    }
+    this.modal.confirm({
+      nzTitle: this.translate.instant('ADMIN.VERSION_PUBLISHING.CONFIRM_TITLE'),
+      nzContent: this.translate.instant('ADMIN.VERSION_PUBLISHING.CONFIRM_BODY', {
+        name: row.name,
+      }),
+      nzOkText: this.translate.instant('ADMIN.VERSION_PUBLISHING.CONFIRM_OK'),
+      nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
+      nzDirection: this.modalDirection(),
+      nzOnOk: () =>
+        new Promise<void>((resolve, reject) => {
+          this.publishingId.set(row.id);
+          this.assetContentService
+            .setPublishedVersion(this.kind, this.slug, row.id)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: () => {
+                this.publishingId.set(null);
+                this.message.success(
+                  this.translate.instant('ADMIN.VERSION_PUBLISHING.PUBLISH_SUCCESS', {
+                    name: row.name,
+                  })
+                );
+                this.loadList();
+                resolve();
+              },
+              error: (err: HttpErrorResponse) => {
+                this.publishingId.set(null);
+                const key =
+                  err.error?.error_name === 'version_not_approved'
+                    ? 'ADMIN.VERSION_PUBLISHING.NOT_APPROVED_ERROR'
+                    : 'ADMIN.VERSION_PUBLISHING.PUBLISH_ERROR';
+                this.message.error(this.translate.instant(key));
+                // The list may be stale (e.g. a review was withdrawn meanwhile).
+                this.loadList();
+                reject();
+              },
+            });
+        }),
+    });
+  }
+
   /** Download a version's content (CSV of its per-ayah entries, or its file). */
   downloadVersion(row: AssetVersion): void {
     if (this.downloadingId() !== null) {
@@ -767,6 +823,14 @@ export class AssetVersionsManagerComponent implements OnInit {
 
   canMutateVersions(): boolean {
     return this.adminAuth.hasPermission(VERSION_PERMISSIONS[this.kind].mutate);
+  }
+
+  /** Choosing the consumer-visible version applies to translations/tafsirs only. */
+  canPublish(): boolean {
+    return (
+      this.supportsLanguages() &&
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT)
+    );
   }
 
   canDeleteVersions(): boolean {

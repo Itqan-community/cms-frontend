@@ -236,10 +236,46 @@
             <tr [class.asset-versions-manager__row--expanded]="expandedId() === ver.id">
               <td>
                 {{ ver.name }}
-                @if (supportsLanguages() && ver.is_active) {
-                  <span class="asset-versions-manager__active-badge">
-                    {{ t('ACTIVE_BADGE') | translate }}
-                  </span>
+                @if (supportsLanguages()) {
+                  @if (ver.is_published) {
+                    <span
+                      class="asset-versions-manager__badge asset-versions-manager__badge--published"
+                      nz-tooltip
+                      [nzTooltipTitle]="'ADMIN.VERSION_PUBLISHING.PUBLISHED_HINT' | translate"
+                    >
+                      <ng-icon name="lucideGlobe" aria-hidden="true" />
+                      {{ 'ADMIN.VERSION_PUBLISHING.PUBLISHED_BADGE' | translate }}
+                    </span>
+                  }
+                  @if (ver.is_active) {
+                    <span
+                      class="asset-versions-manager__badge asset-versions-manager__badge--latest"
+                      nz-tooltip
+                      [nzTooltipTitle]="'ADMIN.VERSION_PUBLISHING.LATEST_HINT' | translate"
+                    >
+                      {{ t('ACTIVE_BADGE') | translate }}
+                    </span>
+                  }
+                  @if (ver.is_approved) {
+                    <span
+                      class="asset-versions-manager__review asset-versions-manager__review--approved"
+                    >
+                      <ng-icon name="lucideCheck" aria-hidden="true" />
+                      {{ 'ADMIN.VERSION_PUBLISHING.APPROVED' | translate }}
+                    </span>
+                  } @else {
+                    <span
+                      class="asset-versions-manager__review asset-versions-manager__review--pending"
+                      nz-tooltip
+                      [nzTooltipTitle]="'ADMIN.VERSION_PUBLISHING.PENDING_HINT' | translate"
+                    >
+                      <ng-icon name="lucideClock" aria-hidden="true" />
+                      {{
+                        'ADMIN.VERSION_PUBLISHING.PENDING'
+                          | translate: { count: ver.pending_review_count ?? 0 }
+                      }}
+                    </span>
+                  }
                 }
                 @if (ver.created_by) {
                   <span class="asset-versions-manager__author">{{ ver.created_by }}</span>
@@ -337,9 +373,32 @@
                       <ng-icon name="lucideDownload" aria-hidden="true" />
                     </button>
                   </div>
-                  @if (canEditContent() || canMutateVersions() || canDeleteVersions()) {
+                  @if (
+                    canPublish() || canEditContent() || canMutateVersions() || canDeleteVersions()
+                  ) {
                     <span class="asset-versions-manager__divider" aria-hidden="true"></span>
                     <div class="asset-versions-manager__action-group">
+                      @if (canPublish() && !ver.is_published) {
+                        <button
+                          type="button"
+                          nz-button
+                          nzType="text"
+                          class="action-icon asset-versions-manager__publish"
+                          nz-tooltip
+                          [nzTooltipTitle]="
+                            (ver.is_approved
+                              ? 'ADMIN.VERSION_PUBLISHING.TOOLTIP_PUBLISH'
+                              : 'ADMIN.VERSION_PUBLISHING.TOOLTIP_NOT_APPROVED'
+                            ) | translate
+                          "
+                          [attr.aria-label]="'ADMIN.VERSION_PUBLISHING.TOOLTIP_PUBLISH' | translate"
+                          [nzLoading]="publishingId() === ver.id"
+                          [disabled]="!ver.is_approved || publishingId() !== null"
+                          (click)="publishVersion(ver)"
+                        >
+                          <ng-icon name="lucideGlobe" aria-hidden="true" />
+                        </button>
+                      }
                       @if (supportsLanguages() && canEditContent() && !ver.is_active) {
                         <button
                           type="button"
@@ -370,7 +429,7 @@
                           <ng-icon name="lucideSquarePen" aria-hidden="true" />
                         </button>
                       }
-                      @if (canDeleteVersions()) {
+                      @if (canDeleteVersions() && !ver.is_published) {
                         <button
                           type="button"
                           nz-button
