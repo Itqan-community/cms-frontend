@@ -97,6 +97,17 @@ export class ContentChangesComponent {
     return `ADMIN.CONTENT_CHANGES.${type.toUpperCase()}`;
   }
 
+  /**
+   * The review state shown beside a change, or null to show none. Unreviewed is
+   * shown only for committed versions (`compact`, the versions list): the edits
+   * listed elsewhere are not committed yet, so they cannot have been reviewed.
+   */
+  showsReview(change: ContentChange): NonNullable<ContentChange['review_state']> | null {
+    const state = change.review_state;
+    if (state === 'approved' || state === 'commented') return state;
+    return this.compact() && state === 'unreviewed' ? state : null;
+  }
+
   setFilter(key: ChangeFilter): void {
     this.filter.set(key);
   }

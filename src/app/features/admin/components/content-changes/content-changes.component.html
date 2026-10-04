@@ -30,6 +30,31 @@
               typeLabel(item.change.change_type) | translate
             }}</span>
             <span class="content-changes__label" dir="auto">{{ item.change.label }}</span>
+            @if (showsReview(item.change); as state) {
+              <span class="content-changes__review content-changes__review--{{ state }}">
+                <span class="content-changes__review-chip">
+                  <ng-icon
+                    [name]="
+                      state === 'approved'
+                        ? 'lucideCheck'
+                        : state === 'commented'
+                          ? 'lucideMessageSquareText'
+                          : 'lucideClock'
+                    "
+                    aria-hidden="true"
+                  />
+                  {{ 'ADMIN.REVIEW.STATE.' + state.toUpperCase() | translate }}
+                </span>
+                @if (item.change.reviewed_by) {
+                  <span class="content-changes__review-meta">
+                    {{ item.change.reviewed_by }}
+                    @if (item.change.reviewed_at) {
+                      · {{ item.change.reviewed_at | date: 'dd/MM/yyyy' }}
+                    }
+                  </span>
+                }
+              </span>
+            }
             @if (item.words?.folded) {
               <button
                 nz-button
@@ -83,34 +108,10 @@
               />
             }
           }
-          @if (
-            item.change.review_state === 'approved' || item.change.review_state === 'commented'
-          ) {
-            <div
-              class="content-changes__review content-changes__review--{{
-                item.change.review_state
-              }}"
-            >
-              <div class="content-changes__review-head">
-                <ng-icon name="lucideMessageSquareText" aria-hidden="true" />
-                <span class="content-changes__review-state">{{
-                  'ADMIN.REVIEW.STATE.' + item.change.review_state.toUpperCase() | translate
-                }}</span>
-                @if (item.change.reviewed_by) {
-                  <span class="content-changes__review-meta">
-                    · {{ item.change.reviewed_by }}
-                    @if (item.change.reviewed_at) {
-                      · {{ item.change.reviewed_at | date: 'dd/MM/yyyy' }}
-                    }
-                  </span>
-                }
-              </div>
-              @if (item.change.review_comment) {
-                <p class="content-changes__review-comment" dir="auto">
-                  {{ item.change.review_comment }}
-                </p>
-              }
-            </div>
+          @if (item.change.review_comment) {
+            <p class="content-changes__review-comment" dir="auto">
+              {{ item.change.review_comment }}
+            </p>
           }
         </li>
       }

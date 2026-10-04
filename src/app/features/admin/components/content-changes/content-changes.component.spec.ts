@@ -165,8 +165,42 @@ describe('ContentChangesComponent', () => {
 
     const reviews = el.querySelectorAll('.content-changes__review');
     expect(reviews.length).toBe(1);
-    expect(reviews[0].textContent).toContain('Spelling of the first word');
     expect(reviews[0].textContent).toContain('Aisha');
     expect(reviews[0].textContent).toContain('ADMIN.REVIEW.STATE.COMMENTED');
+    expect(el.querySelector('.content-changes__review-comment')?.textContent).toContain(
+      'Spelling of the first word'
+    );
+  });
+
+  it('shows the review outcome on the same line as the change type', () => {
+    const approved: ContentChange = {
+      ...change(1, 'modified', 'old', 'new'),
+      review_state: 'approved',
+      reviewed_by: 'Aisha',
+    };
+    const el: HTMLElement = render([approved], true).nativeElement;
+
+    const head = el.querySelector('.content-changes__head')!;
+    expect(head.querySelector('.content-changes__badge')).not.toBeNull();
+    expect(head.querySelector('.content-changes__review--approved')?.textContent).toContain(
+      'Aisha'
+    );
+  });
+
+  it('marks unreviewed changes of a committed version', () => {
+    const unreviewed: ContentChange = {
+      ...change(1, 'added', '', 'new'),
+      review_state: 'unreviewed',
+    };
+    const el: HTMLElement = render([unreviewed], true).nativeElement;
+
+    expect(el.querySelector('.content-changes__review--unreviewed')).not.toBeNull();
+  });
+
+  it('does not mark uncommitted edits as unreviewed', () => {
+    const pending: ContentChange = { ...change(1, 'added', '', 'new'), review_state: 'unreviewed' };
+    const el: HTMLElement = render([pending]).nativeElement;
+
+    expect(el.querySelector('.content-changes__review')).toBeNull();
   });
 });
