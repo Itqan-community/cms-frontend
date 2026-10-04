@@ -19,6 +19,11 @@
     flex-wrap: wrap;
   }
 
+  // Holds the commit tooltip, which a disabled button cannot show itself.
+  &__commit {
+    display: inline-flex;
+  }
+
   // Read-only mode: the viewed version's language, not a picker.
   &__language-name {
     font-weight: 600;

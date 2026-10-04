@@ -201,6 +201,14 @@ export class AssetContentGridComponent implements OnInit {
   private readonly redoStack: CellEdit[] = [];
 
   readonly draftId = signal<number | null>(null);
+  /** Real differences between the draft and the latest version (server-side,
+   *  so text edited back to its original does not count). `null` = not known yet. */
+  readonly pendingCount = signal<number | null>(null);
+  /** Nothing to commit: the saved draft matches the latest version and no edit
+   *  is waiting to be saved. Unknown counts never block committing. */
+  readonly nothingToCommit = computed(
+    () => this.pendingCount() === 0 && !this.dirty() && !this.saving()
+  );
   /** True once an edit has been saved to the draft since the editor opened
    *  (or the language changed). Opening always loads a draft, so `draftId`
    *  alone would show "all changes saved" before anything was edited. */
@@ -605,6 +613,7 @@ export class AssetContentGridComponent implements OnInit {
         next: (draft) => {
           if (generation !== this.loadGeneration) return;
           this.draftId.set(draft.id);
+          this.refreshPendingCount();
           this.loadTemplate(generation);
         },
         error: (err: HttpErrorResponse) => {
@@ -624,6 +633,7 @@ export class AssetContentGridComponent implements OnInit {
       this.dirty.set(false);
       this.savedOnce.set(false);
       this.clearHistory();
+      this.pendingCount.set(null);
       this.selectedLanguage.set(language);
       this.lastLanguage.set(this.kind, this.slug, language);
       this.loadForLanguage();
@@ -739,6 +749,7 @@ export class AssetContentGridComponent implements OnInit {
               this.savedOnce.set(true);
               if (this.pendingRows.size === 0) {
                 this.dirty.set(false);
+                this.refreshPendingCount();
               }
               resolve();
             },
@@ -787,6 +798,22 @@ export class AssetContentGridComponent implements OnInit {
   /** Guard hook: flush pending edits and allow leaving, keeping the draft. */
   keepDraftOnLeave(): Promise<boolean> {
     return this.flushPending();
+  }
+
+  /** Re-count the draft's real changes (one-row page: only `count` is needed). */
+  private refreshPendingCount(): void {
+    const versionId = this.draftId();
+    if (versionId === null || this.readOnly()) return;
+    this.contentService
+      .pendingChanges(this.kind, this.slug, versionId, 1)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          if (this.draftId() === versionId) this.pendingCount.set(res.count);
+        },
+        // Unknown: leave Commit enabled; the commit dialog reports the real state.
+        error: () => this.pendingCount.set(null),
+      });
   }
 
   /** Open the commit dialog: flush pending edits, then load the change review. */

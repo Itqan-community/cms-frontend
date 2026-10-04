@@ -850,6 +850,7 @@
       "FILTER_ALL": "All surahs",
       "COMMIT": {
         "BUTTON": "Commit",
+        "NO_CHANGES_HINT": "No changes to commit yet. Edit the content first; text changed back to the original doesn't count.",
         "TITLE": "Commit changes",
         "MESSAGE_LABEL": "Commit message",
         "MESSAGE_PLACEHOLDER": "Describe what you changed…",

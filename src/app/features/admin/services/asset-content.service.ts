@@ -118,10 +118,13 @@ export class AssetContentService {
   pendingChanges(
     kind: AssetVersionParentKind,
     slug: string,
-    versionId: number
+    versionId: number,
+    pageSize?: number
   ): Observable<{ results: ContentChange[]; count: number }> {
+    const params = pageSize ? new HttpParams().set('page_size', pageSize) : undefined;
     return this.http.get<{ results: ContentChange[]; count: number }>(
-      `${this.versionBase(kind, slug, versionId)}pending-diff/`
+      `${this.versionBase(kind, slug, versionId)}pending-diff/`,
+      { params }
     );
   }
 

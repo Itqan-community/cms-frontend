@@ -112,15 +112,24 @@
         >
           {{ 'ADMIN.CONTENT_EDITOR.SAVE_DRAFT' | translate }}
         </button>
-        <button
-          nz-button
-          nzType="primary"
-          [nzLoading]="publishing()"
-          [disabled]="draftId() === null || savingDraft() || saving()"
-          (click)="openCommit()"
+        <!-- A disabled button fires no mouse events, so the tooltip sits on a wrapper. -->
+        <span
+          class="content-grid__commit"
+          nz-tooltip
+          [nzTooltipTitle]="
+            nothingToCommit() ? ('ADMIN.CONTENT_EDITOR.COMMIT.NO_CHANGES_HINT' | translate) : null
+          "
         >
-          {{ 'ADMIN.CONTENT_EDITOR.COMMIT.BUTTON' | translate }}
-        </button>
+          <button
+            nz-button
+            nzType="primary"
+            [nzLoading]="publishing()"
+            [disabled]="draftId() === null || savingDraft() || saving() || nothingToCommit()"
+            (click)="openCommit()"
+          >
+            {{ 'ADMIN.CONTENT_EDITOR.COMMIT.BUTTON' | translate }}
+          </button>
+        </span>
       }
     </div>
   </div>

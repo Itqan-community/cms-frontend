@@ -302,6 +302,7 @@ describe('AssetContentGridComponent column definitions', () => {
         entries_count: 1,
         created_at: '2026-01-01T00:00:00Z',
       });
+    httpMock.expectOne((req) => req.url.includes('pending-diff/')).flush({ results: [], count: 0 });
     httpMock
       .expectOne((req) => req.url.includes('entries/'))
       .flush({
@@ -430,6 +431,70 @@ describe('AssetContentGridComponent column definitions', () => {
       expect(labels.some((l) => l.includes('ADMIN.CONTENT_EDITOR.DISCARD'))).toBeFalse();
       expect(labels.some((l) => l.includes('ADMIN.CONTENT_EDITOR.LANGUAGE.ADD'))).toBeFalse();
       expect(toolbar.querySelector('nz-select')).toBeNull();
+    });
+  });
+
+  describe('commit button', () => {
+    function openEditor(pendingCount: number) {
+      const fixture = TestBed.createComponent(AssetContentGridComponent);
+      fixture.componentRef.setInput('kind', 'tafsir');
+      fixture.componentRef.setInput('slug', 'demo-tafsir');
+      fixture.detectChanges();
+      const httpMock = TestBed.inject(HttpTestingController);
+      httpMock
+        .expectOne((req) => req.url.includes('languages/'))
+        .flush([{ language: 'ar', is_source: true, is_available: true }]);
+      httpMock
+        .expectOne((req) => req.url.includes('draft/'))
+        .flush({
+          id: 3,
+          asset_id: 1,
+          language: 'ar',
+          name: 'draft',
+          summary: '',
+          state: 'draft',
+          entries_count: 0,
+          created_at: '2026-01-01T00:00:00Z',
+        });
+      const count = httpMock.expectOne((req) => req.url.includes('pending-diff/'));
+      expect(count.request.params.get('page_size')).toBe('1');
+      count.flush({ results: [], count: pendingCount });
+      fixture.detectChanges();
+      return fixture;
+    }
+
+    function commitButton(fixture: ReturnType<typeof openEditor>): HTMLButtonElement {
+      return fixture.nativeElement.querySelector('.content-grid__commit button');
+    }
+
+    it('is disabled with an explanation when the draft has no changes', () => {
+      // Arrange / Act
+      const fixture = openEditor(0);
+
+      // Assert
+      expect(fixture.componentInstance.nothingToCommit()).toBeTrue();
+      expect(commitButton(fixture).disabled).toBeTrue();
+    });
+
+    it('is enabled when the draft differs from the latest version', () => {
+      // Arrange / Act
+      const fixture = openEditor(2);
+
+      // Assert
+      expect(fixture.componentInstance.nothingToCommit()).toBeFalse();
+      expect(commitButton(fixture).disabled).toBeFalse();
+    });
+
+    it('is enabled as soon as there is an unsaved edit', () => {
+      // Arrange
+      const fixture = openEditor(0);
+
+      // Act — an edit waiting for autosave
+      fixture.componentInstance.dirty.set(true);
+      fixture.detectChanges();
+
+      // Assert
+      expect(commitButton(fixture).disabled).toBeFalse();
     });
   });
 });
