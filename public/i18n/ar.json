@@ -972,8 +972,13 @@
         "TYPE": "النوع",
         "CHANGE": "التغيير",
         "COMMIT": "الإصدار",
+        "EDITOR": "المحرّر",
         "STATE": "المراجعة",
         "ACTIONS": "إجراءات"
+      },
+      "FULL_TEXT_DIALOG": {
+        "TITLE": "النص الكامل — {{label}}",
+        "CLOSE": "إغلاق"
       },
       "COMMENT_DIALOG": {
         "TITLE": "طلب تعديلات",

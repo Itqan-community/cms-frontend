@@ -17,6 +17,8 @@ export interface ReviewChange {
   baseline_text: string;
   commit_ref: string;
   commit_id: number;
+  /** Author of the commit that made this change; null when not recorded. */
+  edited_by: string | null;
   review_state: ReviewState;
   comment: string;
   reviewed_by: string | null;

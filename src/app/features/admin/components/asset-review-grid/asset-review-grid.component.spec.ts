@@ -29,6 +29,7 @@ describe('AssetReviewGridComponent', () => {
     baseline_text: 'baseline text',
     commit_ref: 'c123456',
     commit_id: 10,
+    edited_by: 'Editor Name',
     review_state: 'unreviewed',
     comment: '',
     reviewed_by: null,
@@ -299,22 +300,51 @@ describe('AssetReviewGridComponent', () => {
       ).not.toBeNull();
     });
 
-    it('folds long unchanged text until the full text is requested', () => {
+    it('folds long unchanged text and opens the full text in a popup', () => {
       const words = (from: number, to: number) =>
         Array.from({ length: to - from }, (_, i) => `w${from + i}`).join(' ');
-      const el = render({
+      const row: ReviewChange = {
         ...mockChange,
         baseline_text: `${words(0, 40)} God ${words(40, 80)}`,
         new_text: `${words(0, 40)} Allah ${words(40, 80)}`,
-      });
-      const after = () => el.querySelector('.change-compare__text--after')!;
-      expect(after().querySelectorAll('.change-compare__gap').length).toBe(2);
+      };
+      const el = render(row);
+      const inlineAfter = el.querySelector('.change-compare__text--after')!;
+      expect(inlineAfter.querySelectorAll('.change-compare__gap').length).toBe(2);
 
-      el.querySelector<HTMLButtonElement>('.asset-review-grid__toggle')!.click();
+      el.querySelector<HTMLButtonElement>('.asset-review-grid__full-text')!.click();
       fixture.detectChanges();
 
-      expect(after().querySelector('.change-compare__gap')).toBeNull();
+      expect(component.fullTextRow()?.id).toBe(row.id);
+      // The row itself stays folded; the popup holds the unfolded text.
+      expect(inlineAfter.querySelectorAll('.change-compare__gap').length).toBe(2);
+      component.closeFullText();
+      expect(component.fullTextRow()).toBeNull();
+    });
+
+    it('offers no full-text popup when nothing is folded', () => {
+      const el = render(mockChange);
+
+      expect(el.querySelector('.asset-review-grid__full-text')).toBeNull();
     });
   });
 
+  describe('editor column', () => {
+    it('names the editor who made each change', () => {
+      fixture.detectChanges();
+
+      const cell: HTMLElement = fixture.nativeElement.querySelector('.asset-review-grid__editor');
+      expect(cell.textContent?.trim()).toBe('Editor Name');
+    });
+
+    it('shows a dash when the editor was not recorded', () => {
+      reviewServiceSpy.listChanges.and.returnValue(
+        of({ count: 1, results: [{ ...mockChange, edited_by: null }] })
+      );
+      fixture.detectChanges();
+
+      const cell: HTMLElement = fixture.nativeElement.querySelector('.asset-review-grid__editor');
+      expect(cell.textContent?.trim()).toBe('COMMON.EM_DASH');
+    });
+  });
 });

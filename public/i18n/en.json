@@ -996,8 +996,13 @@
         "TYPE": "Type",
         "CHANGE": "Change",
         "COMMIT": "Commit",
+        "EDITOR": "Editor",
         "STATE": "Review",
         "ACTIONS": "Actions"
+      },
+      "FULL_TEXT_DIALOG": {
+        "TITLE": "Full text — {{label}}",
+        "CLOSE": "Close"
       },
       "COMMENT_DIALOG": {
         "TITLE": "Request changes",

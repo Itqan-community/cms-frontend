@@ -116,15 +116,15 @@ export class AssetReviewGridComponent implements OnInit {
     return byId;
   });
 
-  /** Rows shown in full; the rest fold long unchanged stretches into "…". */
-  readonly expanded = signal<ReadonlySet<number>>(new Set());
+  /** The row whose full before/after text is open in the popup. */
+  readonly fullTextRow = signal<ReviewChange | null>(null);
 
-  toggleExpanded(id: number): void {
-    this.expanded.update((ids) => {
-      const next = new Set(ids);
-      if (!next.delete(id)) next.add(id);
-      return next;
-    });
+  openFullText(row: ReviewChange): void {
+    this.fullTextRow.set(row);
+  }
+
+  closeFullText(): void {
+    this.fullTextRow.set(null);
   }
 
   readonly langName = (code: string): string =>
@@ -194,7 +194,6 @@ export class AssetReviewGridComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.changes.set(res.results);
-          this.expanded.set(new Set());
           this.total.set(res.count);
           this.loading.set(false);
         },

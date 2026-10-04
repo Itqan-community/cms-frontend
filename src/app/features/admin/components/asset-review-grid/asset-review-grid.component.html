@@ -63,8 +63,9 @@
               <th nzWidth="80px">{{ 'ADMIN.REVIEW.COLUMN.TYPE' | translate }}</th>
               <th>{{ 'ADMIN.REVIEW.COLUMN.CHANGE' | translate }}</th>
               <th nzWidth="80px">{{ 'ADMIN.REVIEW.COLUMN.COMMIT' | translate }}</th>
+              <th nzWidth="120px">{{ 'ADMIN.REVIEW.COLUMN.EDITOR' | translate }}</th>
               <th nzWidth="130px">{{ 'ADMIN.REVIEW.COLUMN.STATE' | translate }}</th>
-              <th nzWidth="200px">{{ 'ADMIN.REVIEW.COLUMN.ACTIONS' | translate }}</th>
+              <th nzWidth="180px">{{ 'ADMIN.REVIEW.COLUMN.ACTIONS' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -79,7 +80,6 @@
                       [after]="cmp.after"
                       [words]="cmp.words"
                       [stacked]="true"
-                      [expanded]="expanded().has(row.id)"
                     />
                     @if (cmp.words?.folded) {
                       <button
@@ -87,16 +87,10 @@
                         nzType="link"
                         nzSize="small"
                         type="button"
-                        class="asset-review-grid__toggle"
-                        [attr.aria-expanded]="expanded().has(row.id)"
-                        (click)="toggleExpanded(row.id)"
+                        class="asset-review-grid__full-text"
+                        (click)="openFullText(row)"
                       >
-                        {{
-                          (expanded().has(row.id)
-                            ? 'ADMIN.CONTENT_CHANGES.SHOW_CHANGES_ONLY'
-                            : 'ADMIN.CONTENT_CHANGES.SHOW_FULL_TEXT'
-                          ) | translate
-                        }}
+                        {{ 'ADMIN.CONTENT_CHANGES.SHOW_FULL_TEXT' | translate }}
                       </button>
                     }
                   }
@@ -105,6 +99,9 @@
                   }
                 </td>
                 <td class="admin-mono">{{ row.commit_ref }}</td>
+                <td class="asset-review-grid__editor">
+                  {{ row.edited_by ?? ('COMMON.EM_DASH' | translate) }}
+                </td>
                 <td>
                   <span
                     class="asset-review-grid__state"
@@ -180,6 +177,40 @@
         <p class="asset-review-grid__empty">{{ 'ADMIN.REVIEW.NO_CHANGES' | translate }}</p>
       </ng-template>
     }
+
+    <nz-modal
+      [nzVisible]="fullTextRow() !== null"
+      [nzTitle]="'ADMIN.REVIEW.FULL_TEXT_DIALOG.TITLE' | translate: { label: fullTextRow()?.label }"
+      [nzWidth]="900"
+      [nzBodyStyle]="{ maxHeight: '70vh', overflowY: 'auto' }"
+      [nzFooter]="fullTextFooter"
+      (nzOnCancel)="closeFullText()"
+    >
+      <ng-container *nzModalContent>
+        @if (fullTextRow(); as row) {
+          @if (compare().get(row.id); as cmp) {
+            <div class="asset-review-grid__full-text-meta">
+              <span class="admin-mono">{{ row.commit_ref }}</span>
+              @if (row.edited_by) {
+                <span>· {{ row.edited_by }}</span>
+              }
+            </div>
+            <app-change-compare
+              [before]="cmp.before"
+              [after]="cmp.after"
+              [words]="cmp.words"
+              [stacked]="true"
+              [expanded]="true"
+            />
+          }
+        }
+      </ng-container>
+      <ng-template #fullTextFooter>
+        <button nz-button nzType="default" type="button" (click)="closeFullText()">
+          {{ 'ADMIN.REVIEW.FULL_TEXT_DIALOG.CLOSE' | translate }}
+        </button>
+      </ng-template>
+    </nz-modal>
 
     <nz-modal
       [nzVisible]="commentOpen()"
