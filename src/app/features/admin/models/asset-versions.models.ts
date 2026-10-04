@@ -12,6 +12,8 @@ export interface AssetVersion {
   is_approved?: boolean;
   /** Changed units still awaiting approval as of this version (0 when approved). */
   pending_review_count?: number;
+  /** First committed version of its language: everything in it is listed as added. */
+  is_first?: boolean;
   name: string;
   summary?: string;
   /** Commit author (version creator) display name. */

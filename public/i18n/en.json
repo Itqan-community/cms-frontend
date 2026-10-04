@@ -786,6 +786,8 @@
       "VERSION_IS_PUBLISHED_ERROR": "This version is published. Publish another version before changing its file."
     },
     "CONTENT_CHANGES": {
+      "FIRST_VERSION_HINT": "This is the first version of this language, so there is nothing earlier to compare it with: all of its content is listed as added.",
+      "LOADING_MORE": "Loading the remaining changes…",
       "COMMENTS_COUNT": "Comments: {{count}}",
       "COMMENTS_HINT": "Reviewer comments — open Changes to read them",
       "BUTTON": "Changes",

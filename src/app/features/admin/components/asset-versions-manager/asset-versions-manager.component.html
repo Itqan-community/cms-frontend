@@ -467,7 +467,17 @@
                       {{ t('DIFF_EMPTY') | translate }}
                     </span>
                   } @else {
+                    @if (ver.is_first) {
+                      <p class="asset-versions-manager__diff-hint">
+                        {{ 'ADMIN.CONTENT_CHANGES.FIRST_VERSION_HINT' | translate }}
+                      </p>
+                    }
                     <app-content-changes [changes]="diff()" [compact]="true" />
+                    @if (diffLoadingMore()) {
+                      <span class="asset-versions-manager__diff-loading">
+                        {{ 'ADMIN.CONTENT_CHANGES.LOADING_MORE' | translate }}
+                      </span>
+                    }
                   }
                 </td>
               </tr>

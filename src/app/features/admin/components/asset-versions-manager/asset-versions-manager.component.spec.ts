@@ -6,7 +6,11 @@ import { TranslateModule } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { type ModalOptions, NzModalService } from 'ng-zorro-antd/modal';
 import { Subject, of, throwError } from 'rxjs';
-import type { AssetLanguage, ContentDraftVersion } from '../../models/asset-content.models';
+import type {
+  AssetLanguage,
+  ContentChange,
+  ContentDraftVersion,
+} from '../../models/asset-content.models';
 import type { AssetVersion, AssetVersionsListResponse } from '../../models/asset-versions.models';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { AssetContentService } from '../../services/asset-content.service';
@@ -202,6 +206,34 @@ describe('AssetVersionsManagerComponent', () => {
       expect(component.diffError()).toBeTrue();
       expect(component.diffLoading()).toBeFalse();
       expect(component.diff()).toEqual([]);
+    });
+
+    it('shows the first page of a large diff while the rest is still loading', () => {
+      const added = (id: number): ContentChange => ({
+        unit_type: 'ayah',
+        unit_id: id,
+        label: `1:${id}`,
+        change_type: 'added',
+        old_text: '',
+        new_text: `text ${id}`,
+      });
+      const secondPage$ = new Subject<{ results: ContentChange[]; count: number }>();
+      contentService.versionDiff.and.returnValues(
+        of({ results: [added(1), added(2)], count: 3 }),
+        secondPage$
+      );
+      fixture.detectChanges();
+
+      component.toggleDiff(page('ar').results[0]);
+
+      expect(component.diffLoading()).toBeFalse();
+      expect(component.diffLoadingMore()).toBeTrue();
+      expect(component.diff().length).toBe(2);
+
+      secondPage$.next({ results: [added(3)], count: 3 });
+
+      expect(component.diffLoadingMore()).toBeFalse();
+      expect(component.diff().map((c) => c.unit_id)).toEqual([1, 2, 3]);
     });
 
     it('clears the error when a later diff loads', () => {

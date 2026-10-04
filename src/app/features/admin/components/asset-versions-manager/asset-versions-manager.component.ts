@@ -33,6 +33,8 @@ import { CsvTemplateDownloadComponent } from '../csv-template-download/csv-templ
 import { UniversalAssetPreviewerComponent } from '../universal-asset-previewer/universal-asset-previewer.component';
 
 const DEFAULT_PAGE_SIZE = 10;
+/** Diff rows per request — the API's maximum, so large diffs need few round trips. */
+const DIFF_PAGE_SIZE = 1000;
 
 /** Upload/replace rejections that have a more helpful message than the generic save error. */
 const SAVE_ERROR_KEYS: Record<string, string> = {
@@ -139,6 +141,8 @@ export class AssetVersionsManagerComponent implements OnInit {
   /** Set when the diff request failed, so the panel says so instead of
    *  reporting the empty diff as "no changes". */
   readonly diffError = signal(false);
+  /** The first page is shown; the rest of a large diff is still arriving. */
+  readonly diffLoadingMore = signal(false);
   readonly diff = signal<ContentChange[]>([]);
 
   /** Preview modal state. */
@@ -606,27 +610,35 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.diff.set([]);
     this.diffError.set(false);
     this.diffLoading.set(true);
+    this.diffLoadingMore.set(false);
     this.loadAllVersionDiffs(row.id, 1, []);
   }
 
   private loadAllVersionDiffs(versionId: number, page: number, acc: ContentChange[]): void {
     this.assetContentService
-      .versionDiff(this.kind, this.slug, versionId, page, 100)
+      .versionDiff(this.kind, this.slug, versionId, page, DIFF_PAGE_SIZE)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           if (this.expandedId() !== versionId) return;
           const merged = acc.concat(res.results);
-          if (merged.length < res.count && res.results.length > 0) {
-            this.loadAllVersionDiffs(versionId, page + 1, merged);
-          } else {
+          const more = merged.length < res.count && res.results.length > 0;
+          // Show the first page at once and the full list when it is complete: a
+          // first version lists every unit as added, which can be thousands of rows.
+          // Updating only twice keeps the list's filter from resetting on every page.
+          if (page === 1 || !more) {
             this.diff.set(merged);
-            this.diffLoading.set(false);
+          }
+          this.diffLoading.set(false);
+          this.diffLoadingMore.set(more);
+          if (more) {
+            this.loadAllVersionDiffs(versionId, page + 1, merged);
           }
         },
         error: () => {
           if (this.expandedId() === versionId) {
             this.diffLoading.set(false);
+            this.diffLoadingMore.set(false);
             this.diffError.set(true);
           }
         },
