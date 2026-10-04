@@ -21,12 +21,23 @@ import { AdminAuthService } from '../../services/admin-auth.service';
 import { AssetReviewService } from '../../services/asset-review.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { localizedLanguageName } from '../../utils/iso-639.util';
+import { diffWords, type WordDiff } from '../../utils/word-diff.util';
+import { ChangeCompareComponent } from '../change-compare/change-compare.component';
 
 export type ReviewActionType = 'approve' | 'comment' | 'unreview';
 
 type StateFilter = 'all' | ReviewState;
 
 const DEFAULT_PAGE_SIZE = 25;
+/** Unchanged words kept around each change — the same as the versions list. */
+const CONTEXT_WORDS = 2;
+
+/** What a review row compares: the reviewed text against what it replaces. */
+interface RowCompare {
+  before: string;
+  after: string;
+  words: WordDiff | null;
+}
 
 @Component({
   selector: 'app-asset-review-grid',
@@ -42,6 +53,7 @@ const DEFAULT_PAGE_SIZE = 25;
     NzSpinModule,
     NzTableModule,
     AdminTablePaginationComponent,
+    ChangeCompareComponent,
   ],
   templateUrl: './asset-review-grid.component.html',
   styleUrl: './asset-review-grid.component.less',
@@ -84,6 +96,36 @@ export class AssetReviewGridComponent implements OnInit {
   commentChangeId: number | null = null;
 
   readonly hasLanguages = computed(() => this.languages().length > 0);
+
+  /**
+   * Before/after per row. "Before" is the last-approved text, so the reviewer sees
+   * the net change since the last approval; a unit never approved compares with
+   * the text this commit replaced.
+   */
+  readonly compare = computed(() => {
+    const byId = new Map<number, RowCompare>();
+    for (const row of this.changes()) {
+      const before = row.baseline_text || row.old_text || '';
+      const after = row.new_text || '';
+      const words =
+        before && after && before !== after
+          ? diffWords(before, after, { contextWords: CONTEXT_WORDS })
+          : null;
+      byId.set(row.id, { before, after, words });
+    }
+    return byId;
+  });
+
+  /** Rows shown in full; the rest fold long unchanged stretches into "…". */
+  readonly expanded = signal<ReadonlySet<number>>(new Set());
+
+  toggleExpanded(id: number): void {
+    this.expanded.update((ids) => {
+      const next = new Set(ids);
+      if (!next.delete(id)) next.add(id);
+      return next;
+    });
+  }
 
   readonly langName = (code: string): string =>
     localizedLanguageName(code, this.translate.currentLang || 'en');
@@ -152,6 +194,7 @@ export class AssetReviewGridComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.changes.set(res.results);
+          this.expanded.set(new Set());
           this.total.set(res.count);
           this.loading.set(false);
         },

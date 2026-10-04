@@ -2,12 +2,10 @@
 // rest of the admin uses for additions, edits and deletions.
 @added: #389e0d;
 @added-bg: #f6ffed;
-@added-mark: #d9f7be;
 @modified: #d46b08;
 @modified-bg: #fff7e6;
 @removed: #cf1322;
 @removed-bg: #fff1f0;
-@removed-mark: #ffccc7;
 
 .content-changes {
   display: flex;
@@ -140,51 +138,6 @@
     font-variant-numeric: tabular-nums;
   }
 
-  &__compare {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-
-    @media (max-width: 640px) {
-      grid-template-columns: 1fr;
-    }
-
-    &--stacked {
-      grid-template-columns: 1fr;
-      gap: 6px;
-
-      // Label beside its text instead of on its own line.
-      .content-changes__side {
-        flex-direction: row;
-        align-items: baseline;
-        gap: 8px;
-      }
-
-      .content-changes__side-title {
-        flex: none;
-        min-width: 3.5em;
-      }
-
-      .content-changes__text {
-        flex: 1;
-        min-width: 0;
-      }
-    }
-  }
-
-  &__side {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-  }
-
-  &__side-title {
-    color: var(--admin-text-500, #6b7280);
-    font-size: 12px;
-    font-weight: 500;
-  }
-
   &__text {
     margin: 0;
     padding: 8px 10px;
@@ -206,38 +159,7 @@
     }
   }
 
-  // Unchanged words are muted so the highlighted changes stand out.
-  &__word--same {
-    color: var(--admin-text-500, #6b7280);
-  }
-
-  // A folded stretch of unchanged text.
-  &__gap {
-    display: inline-block;
-    margin-inline: 4px;
-    padding: 0 6px;
-    border-radius: 999px;
-    background: var(--admin-border-200, #e5e7eb);
-    color: var(--admin-text-500, #6b7280);
-    font-size: 12px;
-    line-height: 18px;
-    vertical-align: middle;
-  }
-
-  &__word--removed {
-    border-radius: 3px;
-    background: @removed-mark;
-    color: @removed;
-    text-decoration: line-through;
-  }
-
-  &__word--added {
-    border-radius: 3px;
-    background: @added-mark;
-    color: @added;
-    font-weight: 500;
-  }
-
+  // The reviewer's outcome, set apart from the text so it reads as a note on it.
   // The reviewer's outcome, set apart from the text so it reads as a note on it.
   &__review {
     margin-top: 10px;

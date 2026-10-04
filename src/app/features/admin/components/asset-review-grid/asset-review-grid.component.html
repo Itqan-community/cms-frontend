@@ -54,16 +54,17 @@
           [nzFrontPagination]="false"
           [nzShowPagination]="false"
           nzSize="middle"
+          nzTableLayout="fixed"
           [nzNoResult]="emptyTpl"
         >
           <thead>
             <tr>
-              <th nzWidth="120px">{{ 'ADMIN.REVIEW.COLUMN.UNIT' | translate }}</th>
-              <th nzWidth="90px">{{ 'ADMIN.REVIEW.COLUMN.TYPE' | translate }}</th>
+              <th nzWidth="90px">{{ 'ADMIN.REVIEW.COLUMN.UNIT' | translate }}</th>
+              <th nzWidth="80px">{{ 'ADMIN.REVIEW.COLUMN.TYPE' | translate }}</th>
               <th>{{ 'ADMIN.REVIEW.COLUMN.CHANGE' | translate }}</th>
-              <th nzWidth="90px">{{ 'ADMIN.REVIEW.COLUMN.COMMIT' | translate }}</th>
-              <th nzWidth="150px">{{ 'ADMIN.REVIEW.COLUMN.STATE' | translate }}</th>
-              <th nzWidth="240px">{{ 'ADMIN.REVIEW.COLUMN.ACTIONS' | translate }}</th>
+              <th nzWidth="80px">{{ 'ADMIN.REVIEW.COLUMN.COMMIT' | translate }}</th>
+              <th nzWidth="130px">{{ 'ADMIN.REVIEW.COLUMN.STATE' | translate }}</th>
+              <th nzWidth="200px">{{ 'ADMIN.REVIEW.COLUMN.ACTIONS' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -71,15 +72,34 @@
               <tr>
                 <td>{{ row.label }}</td>
                 <td>{{ typeKey(row.change_type) | translate }}</td>
-                <td>
-                  <div class="asset-review-grid__change" dir="auto">
-                    @if (row.baseline_text) {
-                      <span class="asset-review-grid__old">{{ row.baseline_text }}</span>
+                <td class="asset-review-grid__change">
+                  @if (compare().get(row.id); as cmp) {
+                    <app-change-compare
+                      [before]="cmp.before"
+                      [after]="cmp.after"
+                      [words]="cmp.words"
+                      [stacked]="true"
+                      [expanded]="expanded().has(row.id)"
+                    />
+                    @if (cmp.words?.folded) {
+                      <button
+                        nz-button
+                        nzType="link"
+                        nzSize="small"
+                        type="button"
+                        class="asset-review-grid__toggle"
+                        [attr.aria-expanded]="expanded().has(row.id)"
+                        (click)="toggleExpanded(row.id)"
+                      >
+                        {{
+                          (expanded().has(row.id)
+                            ? 'ADMIN.CONTENT_CHANGES.SHOW_CHANGES_ONLY'
+                            : 'ADMIN.CONTENT_CHANGES.SHOW_FULL_TEXT'
+                          ) | translate
+                        }}
+                      </button>
                     }
-                    @if (row.new_text) {
-                      <span class="asset-review-grid__new">{{ row.new_text }}</span>
-                    }
-                  </div>
+                  }
                   @if (row.comment) {
                     <p class="asset-review-grid__comment" dir="auto">{{ row.comment }}</p>
                   }

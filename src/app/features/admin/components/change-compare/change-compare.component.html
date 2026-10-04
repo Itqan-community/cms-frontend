@@ -1,0 +1,42 @@
+<div class="change-compare" [class.change-compare--stacked]="stacked()">
+  <div class="change-compare__side">
+    <span class="change-compare__side-title">{{ 'ADMIN.CONTENT_CHANGES.BEFORE' | translate }}</span>
+    <p class="change-compare__text change-compare__text--before" dir="auto">
+      @if (!before()) {
+        <span class="change-compare__empty">{{
+          'ADMIN.CONTENT_CHANGES.EMPTY_TEXT' | translate
+        }}</span>
+      } @else if (words(); as words) {
+        @for (seg of (expanded() ? null : words.folded?.before) ?? words.before; track $index) {
+          @if (seg.kind === 'gap') {
+            <span class="change-compare__gap">…</span>
+          } @else {
+            <span class="change-compare__word--{{ seg.kind }}">{{ seg.text }}</span>
+          }
+        }
+      } @else {
+        {{ before() }}
+      }
+    </p>
+  </div>
+  <div class="change-compare__side">
+    <span class="change-compare__side-title">{{ 'ADMIN.CONTENT_CHANGES.AFTER' | translate }}</span>
+    <p class="change-compare__text change-compare__text--after" dir="auto">
+      @if (!after()) {
+        <span class="change-compare__empty">{{
+          'ADMIN.CONTENT_CHANGES.EMPTY_TEXT' | translate
+        }}</span>
+      } @else if (words(); as words) {
+        @for (seg of (expanded() ? null : words.folded?.after) ?? words.after; track $index) {
+          @if (seg.kind === 'gap') {
+            <span class="change-compare__gap">…</span>
+          } @else {
+            <span class="change-compare__word--{{ seg.kind }}">{{ seg.text }}</span>
+          }
+        }
+      } @else {
+        {{ after() }}
+      }
+    </p>
+  </div>
+</div>

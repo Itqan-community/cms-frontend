@@ -6,6 +6,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 
 import type { ContentChange } from '../../models/asset-content.models';
 import { diffWords } from '../../utils/word-diff.util';
+import { ChangeCompareComponent } from '../change-compare/change-compare.component';
 
 type ChangeType = ContentChange['change_type'];
 type ChangeFilter = 'all' | ChangeType;
@@ -26,7 +27,7 @@ const COMPACT_CONTEXT_WORDS = 2;
 @Component({
   selector: 'app-content-changes',
   standalone: true,
-  imports: [DatePipe, NgIcon, TranslateModule, NzButtonModule],
+  imports: [DatePipe, NgIcon, TranslateModule, NzButtonModule, ChangeCompareComponent],
   templateUrl: './content-changes.component.html',
   styleUrl: './content-changes.component.less',
 })

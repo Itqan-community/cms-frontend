@@ -40,19 +40,14 @@
     }
   }
 
+  // Long texts must wrap inside the cell rather than widen the table.
   &__change {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
+    min-width: 0;
+    white-space: normal;
   }
 
-  &__old {
-    color: rgba(0, 0, 0, 0.45);
-    text-decoration: line-through;
-  }
-
-  &__new {
-    color: rgba(0, 0, 0, 0.85);
+  &__toggle {
+    padding-inline: 0;
   }
 
   &__comment {

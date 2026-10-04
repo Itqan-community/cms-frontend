@@ -265,4 +265,56 @@ describe('AssetReviewGridComponent', () => {
     const firstCell: HTMLElement = fixture.nativeElement.querySelector('tbody tr td');
     expect(firstCell.textContent?.trim()).toBe('2:255:4');
   });
+
+  describe('change comparison', () => {
+    function render(change: ReviewChange): HTMLElement {
+      reviewServiceSpy.listChanges.and.returnValue(of({ count: 1, results: [change] }));
+      fixture.detectChanges();
+      return fixture.nativeElement as HTMLElement;
+    }
+
+    it('stacks the last-approved text above the new text, highlighting what changed', () => {
+      const el = render(mockChange);
+
+      expect(el.querySelector('.change-compare--stacked')).not.toBeNull();
+      const before = el.querySelector('.change-compare__text--before')!;
+      const after = el.querySelector('.change-compare__text--after')!;
+      expect(before.textContent).toContain('baseline');
+      expect(before.querySelector('.change-compare__word--removed')?.textContent).toBe('baseline');
+      expect(after.querySelector('.change-compare__word--added')?.textContent).toBe('new');
+    });
+
+    it('compares with the replaced text when the unit was never approved', () => {
+      const el = render({ ...mockChange, baseline_text: '' });
+
+      expect(el.querySelector('.change-compare__text--before')!.textContent).toContain('old text');
+    });
+
+    it('shows a removed unit with its old text before and nothing after', () => {
+      const el = render({ ...mockChange, change_type: 'removed', new_text: '', baseline_text: '' });
+
+      expect(el.querySelector('.change-compare__text--before')!.textContent).toContain('old text');
+      expect(
+        el.querySelector('.change-compare__text--after .change-compare__empty')
+      ).not.toBeNull();
+    });
+
+    it('folds long unchanged text until the full text is requested', () => {
+      const words = (from: number, to: number) =>
+        Array.from({ length: to - from }, (_, i) => `w${from + i}`).join(' ');
+      const el = render({
+        ...mockChange,
+        baseline_text: `${words(0, 40)} God ${words(40, 80)}`,
+        new_text: `${words(0, 40)} Allah ${words(40, 80)}`,
+      });
+      const after = () => el.querySelector('.change-compare__text--after')!;
+      expect(after().querySelectorAll('.change-compare__gap').length).toBe(2);
+
+      el.querySelector<HTMLButtonElement>('.asset-review-grid__toggle')!.click();
+      fixture.detectChanges();
+
+      expect(after().querySelector('.change-compare__gap')).toBeNull();
+    });
+  });
+
 });

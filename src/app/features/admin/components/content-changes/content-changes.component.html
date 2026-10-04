@@ -74,64 +74,13 @@
               </p>
             }
             @default {
-              <div
-                class="content-changes__compare"
-                [class.content-changes__compare--stacked]="compact()"
-              >
-                <div class="content-changes__side">
-                  <span class="content-changes__side-title">{{
-                    'ADMIN.CONTENT_CHANGES.BEFORE' | translate
-                  }}</span>
-                  <p class="content-changes__text content-changes__text--before" dir="auto">
-                    @if (!item.change.old_text) {
-                      <span class="content-changes__empty">{{
-                        'ADMIN.CONTENT_CHANGES.EMPTY_TEXT' | translate
-                      }}</span>
-                    } @else if (item.words; as words) {
-                      @for (
-                        seg of (expanded().has(item.change.unit_id)
-                          ? null
-                          : words.folded?.before) ?? words.before;
-                        track $index
-                      ) {
-                        @if (seg.kind === 'gap') {
-                          <span class="content-changes__gap">…</span>
-                        } @else {
-                          <span class="content-changes__word--{{ seg.kind }}">{{ seg.text }}</span>
-                        }
-                      }
-                    } @else {
-                      {{ item.change.old_text }}
-                    }
-                  </p>
-                </div>
-                <div class="content-changes__side">
-                  <span class="content-changes__side-title">{{
-                    'ADMIN.CONTENT_CHANGES.AFTER' | translate
-                  }}</span>
-                  <p class="content-changes__text content-changes__text--after" dir="auto">
-                    @if (!item.change.new_text) {
-                      <span class="content-changes__empty">{{
-                        'ADMIN.CONTENT_CHANGES.EMPTY_TEXT' | translate
-                      }}</span>
-                    } @else if (item.words; as words) {
-                      @for (
-                        seg of (expanded().has(item.change.unit_id) ? null : words.folded?.after) ??
-                          words.after;
-                        track $index
-                      ) {
-                        @if (seg.kind === 'gap') {
-                          <span class="content-changes__gap">…</span>
-                        } @else {
-                          <span class="content-changes__word--{{ seg.kind }}">{{ seg.text }}</span>
-                        }
-                      }
-                    } @else {
-                      {{ item.change.new_text }}
-                    }
-                  </p>
-                </div>
-              </div>
+              <app-change-compare
+                [before]="item.change.old_text ?? ''"
+                [after]="item.change.new_text ?? ''"
+                [words]="item.words"
+                [stacked]="compact()"
+                [expanded]="expanded().has(item.change.unit_id)"
+              />
             }
           }
           @if (

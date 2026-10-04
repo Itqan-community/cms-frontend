@@ -57,8 +57,8 @@ describe('ContentChangesComponent', () => {
     expect(el.querySelector('.content-changes__item--added')?.textContent).toContain('fresh text');
     expect(el.querySelector('.content-changes__item--removed')?.textContent).toContain('old text');
     const modified = el.querySelector('.content-changes__item--modified')!;
-    expect(modified.querySelector('.content-changes__word--removed')?.textContent).toBe('God');
-    expect(modified.querySelector('.content-changes__word--added')?.textContent).toBe('Allah');
+    expect(modified.querySelector('.change-compare__word--removed')?.textContent).toBe('God');
+    expect(modified.querySelector('.change-compare__word--added')?.textContent).toBe('Allah');
   });
 
   it('folds long unchanged text around an edit and shows it all on request', () => {
@@ -73,16 +73,16 @@ describe('ContentChangesComponent', () => {
       ),
     ]);
     const el: HTMLElement = fixture.nativeElement;
-    const after = () => el.querySelector('.content-changes__text--after')!;
+    const after = () => el.querySelector('.change-compare__text--after')!;
 
-    expect(after().querySelectorAll('.content-changes__gap').length).toBe(2);
+    expect(after().querySelectorAll('.change-compare__gap').length).toBe(2);
     expect(after().textContent).not.toContain('w0 ');
-    expect(after().querySelector('.content-changes__word--added')?.textContent).toBe('Allah');
+    expect(after().querySelector('.change-compare__word--added')?.textContent).toBe('Allah');
 
     el.querySelector<HTMLButtonElement>('.content-changes__toggle')!.click();
     fixture.detectChanges();
 
-    expect(after().querySelector('.content-changes__gap')).toBeNull();
+    expect(after().querySelector('.change-compare__gap')).toBeNull();
     expect(after().textContent).toContain('w0 ');
   });
 
@@ -100,12 +100,12 @@ describe('ContentChangesComponent', () => {
     it('stacks before above after', () => {
       const el: HTMLElement = render([edit()], true).nativeElement;
 
-      expect(el.querySelector('.content-changes__compare--stacked')).not.toBeNull();
+      expect(el.querySelector('.change-compare--stacked')).not.toBeNull();
     });
 
     it('keeps only a couple of words around each change', () => {
       const el: HTMLElement = render([edit()], true).nativeElement;
-      const after = el.querySelector('.content-changes__text--after')!;
+      const after = el.querySelector('.change-compare__text--after')!;
 
       expect(after.textContent).toContain('w38 w39 Allah w40 w41');
       expect(after.textContent).not.toContain('w37');
@@ -115,8 +115,8 @@ describe('ContentChangesComponent', () => {
     it('leaves the default layout and context alone', () => {
       const el: HTMLElement = render([edit()]).nativeElement;
 
-      expect(el.querySelector('.content-changes__compare--stacked')).toBeNull();
-      expect(el.querySelector('.content-changes__text--after')!.textContent).toContain('w34');
+      expect(el.querySelector('.change-compare--stacked')).toBeNull();
+      expect(el.querySelector('.change-compare__text--after')!.textContent).toContain('w34');
     });
   });
 
