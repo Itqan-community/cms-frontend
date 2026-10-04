@@ -96,6 +96,37 @@ describe('AssetContentGridComponent column definitions', () => {
     }
   });
 
+  it('shows the surah name beside its number while filtering on the number', () => {
+    for (const template of ['ayah', 'word']) {
+      // Arrange
+      const sura = componentFor(template)
+        .buildColumnDefs()
+        .find((col) => col.field === 'sura')!;
+      const format = sura.valueFormatter as (params: { value: number | null }) => string;
+
+      // Act / Assert — the filter stays numeric; only the displayed text changes
+      expect(format({ value: 2 }))
+        .withContext(template)
+        .toBe('2. Al-Baqarah');
+      expect(format({ value: null }))
+        .withContext(template)
+        .toBe('');
+      expect(sura.filter).withContext(template).toBe('agNumberColumnFilter');
+    }
+  });
+
+  it('shows the Arabic surah name in the Arabic interface', () => {
+    // Arrange
+    TestBed.inject(TranslateService).use('ar');
+    const sura = componentFor('ayah')
+      .buildColumnDefs()
+      .find((col) => col.field === 'sura')!;
+    const format = sura.valueFormatter as (params: { value: number }) => string;
+
+    // Act / Assert
+    expect(format({ value: 2 })).toBe('2. البقرة');
+  });
+
   it('puts the surah-name dropdown on the unit column wherever units have a surah', () => {
     for (const template of ['surah', 'ayah', 'word']) {
       // Arrange / Act
@@ -329,4 +360,5 @@ describe('AssetContentGridComponent column definitions', () => {
     // Assert
     expect(Object.keys(localeText)).toEqual(['loadingOoo']);
   });
+
 });

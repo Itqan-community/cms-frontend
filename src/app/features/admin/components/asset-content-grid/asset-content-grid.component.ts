@@ -60,6 +60,7 @@ import {
   ContentTextCellEditorComponent,
   type ContentTextEditorParams,
 } from './content-text-cell-editor.component';
+import { surahLabel } from '../../models/quran-metadata';
 import { SurahFloatingFilterComponent } from './surah-floating-filter.component';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -916,8 +917,12 @@ export class AssetContentGridComponent implements OnInit {
         {
           field: 'sura',
           headerName: this.colHeader('SURA'),
-          width: 100,
+          width: 160,
           editable: false,
+          // Shows "2. Al-Baqara"; the filter still matches the surah number (it
+          // reads the raw value, not the formatted text).
+          valueFormatter: ({ value }) =>
+            value == null ? '' : surahLabel(value, this.translate.currentLang === 'ar'),
           filter: 'agNumberColumnFilter',
           filterParams: NUMBER_FILTER_PARAMS,
           floatingFilter: true,
