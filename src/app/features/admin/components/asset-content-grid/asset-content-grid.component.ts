@@ -26,6 +26,7 @@ import type {
   ITextFilterParams,
   LocaleText,
   RowSelectionOptions,
+  SuppressKeyboardEventParams,
 } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from 'ag-grid-community';
 import { AgGridAngular } from 'ag-grid-angular';
@@ -65,6 +66,14 @@ import { surahLabel } from '../../models/quran-metadata';
 import { SurahFloatingFilterComponent } from './surah-floating-filter.component';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
+
+/**
+ * Stops AG Grid clearing a focused cell on Delete/Backspace for a column that is
+ * "editable" only to open its read-only popup. Keys inside an open editor still work.
+ */
+export function suppressClearKeys(params: SuppressKeyboardEventParams<ContentEntry>): boolean {
+  return !params.editing && (params.event.key === 'Delete' || params.event.key === 'Backspace');
+}
 
 /** Columns the positional paste is allowed to write into. */
 const EDITABLE_FIELDS = new Set<string>(['text']);
@@ -1043,6 +1052,8 @@ export class AssetContentGridComponent implements OnInit {
         cellEditor: ContentTextCellEditorComponent,
         cellEditorPopup: true,
         cellEditorParams: { readOnly: true } satisfies ContentTextEditorParams,
+        // Being "editable", AG Grid would clear it on Delete/Backspace without the popup.
+        suppressKeyboardEvent: suppressClearKeys,
         cellStyle: { direction: this.sourceTextDirection() },
         ...textFilter,
       });

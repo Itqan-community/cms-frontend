@@ -9,7 +9,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
-import { AssetContentGridComponent } from './asset-content-grid.component';
+import { AssetContentGridComponent, suppressClearKeys } from './asset-content-grid.component';
 import { ContentTextCellEditorComponent } from './content-text-cell-editor.component';
 
 describe('AssetContentGridComponent column definitions', () => {
@@ -94,6 +94,27 @@ describe('AssetContentGridComponent column definitions', () => {
       expect(aya?.filter).withContext(template).toBe('agNumberColumnFilter');
       expect(aya?.floatingFilter).withContext(template).toBeTrue();
     }
+  });
+
+  it('keeps Delete and Backspace from clearing the read-only source column', () => {
+    // Arrange — the source column of a translation (non-source language) editor
+    const grid = componentFor('ayah');
+    grid.languages.set([
+      { language: 'ar', is_source: true, is_available: true },
+      { language: 'fr', is_source: false, is_available: true },
+    ]);
+    grid.selectedLanguage.set('fr');
+    const source = grid.buildColumnDefs().find((col) => col.field === 'source_text')!;
+    const press = (key: string, editing = false) =>
+      suppressClearKeys({ editing, event: new KeyboardEvent('keydown', { key }) } as never);
+
+    // Act / Assert
+    expect(source.suppressKeyboardEvent).toBe(suppressClearKeys);
+    expect(press('Delete')).toBeTrue();
+    expect(press('Backspace')).toBeTrue();
+    expect(press('Enter')).toBeFalse();
+    // Inside the open popup the keys are left alone
+    expect(press('Delete', true)).toBeFalse();
   });
 
   it('shows the surah name beside its number while filtering on the number', () => {
