@@ -29,3 +29,10 @@ export interface ReviewChangesResponse {
   results: ReviewChange[];
   count: number;
 }
+
+/** A committed version, as offered by the review page's version filter. */
+export interface ReviewVersion {
+  id: number;
+  name: string;
+  created_at: string;
+}

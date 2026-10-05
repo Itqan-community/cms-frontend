@@ -353,6 +353,15 @@ describe('AssetVersionsManagerComponent', () => {
       expect(component.publishingId()).toBeNull();
     });
 
+    it('explains why a version cannot be published', () => {
+      expect(component.publishTooltip(version({ is_approved: true }))).toBe(
+        'ADMIN.VERSION_PUBLISHING.TOOLTIP_PUBLISH'
+      );
+      expect(component.publishTooltip(version({ is_approved: false }))).toBe(
+        'ADMIN.VERSION_PUBLISHING.TOOLTIP_NOT_APPROVED'
+      );
+    });
+
     it('refuses to publish a version with unapproved changes', () => {
       withPermissions(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT);
 

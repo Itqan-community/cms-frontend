@@ -45,6 +45,7 @@ describe('AssetReviewGridComponent', () => {
     reviewServiceSpy = jasmine.createSpyObj('AssetReviewService', [
       'listLanguages',
       'listChanges',
+      'listVersions',
       'setState',
     ]);
     adminAuthSpy = jasmine.createSpyObj('AdminAuthService', ['hasPermission']);
@@ -56,6 +57,12 @@ describe('AssetReviewGridComponent', () => {
     );
     reviewServiceSpy.listLanguages.and.returnValue(of(['en', 'fr']));
     reviewServiceSpy.listChanges.and.returnValue(of(mockResponse));
+    reviewServiceSpy.listVersions.and.returnValue(
+      of([
+        { id: 11, name: 'v2', created_at: '2026-02-01T00:00:00Z' },
+        { id: 10, name: 'v1', created_at: '2026-01-01T00:00:00Z' },
+      ])
+    );
     reviewServiceSpy.setState.and.returnValue(of({ ...mockChange, review_state: 'approved' }));
     lastLanguageSpy.get.and.returnValue(null);
 
@@ -100,7 +107,8 @@ describe('AssetReviewGridComponent', () => {
       'fr',
       1,
       25,
-      'unreviewed'
+      'unreviewed',
+      null
     );
   });
 
@@ -143,7 +151,8 @@ describe('AssetReviewGridComponent', () => {
       'fr',
       1,
       25,
-      'unreviewed'
+      'unreviewed',
+      null
     );
   });
 
@@ -162,7 +171,8 @@ describe('AssetReviewGridComponent', () => {
       'en',
       1,
       25,
-      'approved'
+      'approved',
+      null
     );
   });
 
@@ -265,6 +275,58 @@ describe('AssetReviewGridComponent', () => {
 
     const firstCell: HTMLElement = fixture.nativeElement.querySelector('tbody tr td');
     expect(firstCell.textContent?.trim()).toBe('2:255:4');
+  });
+
+  describe('version filter', () => {
+    it('lists every change until a version is picked, then only what makes it up', () => {
+      // Arrange
+      fixture.detectChanges();
+      expect(reviewServiceSpy.listVersions).toHaveBeenCalledWith('translation', 'en-sahih', 'en');
+      expect(component.versions().map((v) => v.name)).toEqual(['v2', 'v1']);
+      expect(reviewServiceSpy.listChanges.calls.mostRecent().args[6]).toBeNull();
+
+      // Act
+      component.onVersionChange(10);
+
+      // Assert
+      expect(reviewServiceSpy.listChanges.calls.mostRecent().args[6]).toBe(10);
+      expect(component.selectedVersionName()).toBe('v1');
+      expect(component.page()).toBe(1);
+    });
+
+    it('opens on the version and language a link asked for', () => {
+      // Arrange — e.g. the version list's "pending review" link
+      fixture.componentRef.setInput('initialLanguage', 'fr');
+      fixture.componentRef.setInput('initialVersion', 11);
+
+      // Act
+      fixture.detectChanges();
+
+      // Assert
+      expect(component.selectedLanguage()).toBe('fr');
+      expect(component.selectedVersion()).toBe(11);
+      expect(reviewServiceSpy.listChanges.calls.mostRecent().args.slice(2, 7)).toEqual([
+        'fr',
+        1,
+        25,
+        'unreviewed',
+        11,
+      ]);
+    });
+
+    it('drops the version when the language changes', () => {
+      // Arrange
+      fixture.componentRef.setInput('initialLanguage', 'fr');
+      fixture.componentRef.setInput('initialVersion', 11);
+      fixture.detectChanges();
+
+      // Act
+      component.onLanguageChange('en');
+
+      // Assert
+      expect(component.selectedVersion()).toBeNull();
+      expect(reviewServiceSpy.listChanges.calls.mostRecent().args[6]).toBeNull();
+    });
   });
 
   describe('change comparison', () => {

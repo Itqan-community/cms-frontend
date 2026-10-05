@@ -10,7 +10,7 @@ export interface AssetVersion {
   is_published?: boolean;
   /** True when every change in this version is approved, so it can be published. */
   is_approved?: boolean;
-  /** Changed units still awaiting approval as of this version (0 when approved). */
+  /** Unapproved changes still listed on the review page (unreviewed or needing changes). */
   pending_review_count?: number;
   /** First committed version of its language: everything in it is listed as added. */
   is_first?: boolean;

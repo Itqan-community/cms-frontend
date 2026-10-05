@@ -105,6 +105,20 @@
     &--pending {
       color: #d46b08;
     }
+
+    &--link {
+      text-decoration: underline;
+      text-underline-offset: 2px;
+
+      &:hover,
+      &:focus-visible {
+        color: #ad4e00;
+      }
+    }
+  }
+
+  &__publish-wrap {
+    display: inline-flex;
   }
 
   // Row actions carry their meaning in colour at rest, not only on hover:

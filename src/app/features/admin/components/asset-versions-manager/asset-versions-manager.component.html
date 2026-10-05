@@ -263,6 +263,21 @@
                       <ng-icon name="lucideCheck" aria-hidden="true" />
                       {{ 'ADMIN.VERSION_PUBLISHING.APPROVED' | translate }}
                     </span>
+                  } @else if (canReview()) {
+                    <!-- Opens the review page on exactly the changes that make up this version. -->
+                    <a
+                      class="asset-versions-manager__review asset-versions-manager__review--pending asset-versions-manager__review--link"
+                      nz-tooltip
+                      [nzTooltipTitle]="'ADMIN.VERSION_PUBLISHING.PENDING_HINT' | translate"
+                      [routerLink]="['/admin', listSegment(), slug, 'review']"
+                      [queryParams]="{ language: ver.language, version: ver.id }"
+                    >
+                      <ng-icon name="lucideClock" aria-hidden="true" />
+                      {{
+                        'ADMIN.VERSION_PUBLISHING.PENDING'
+                          | translate: { count: ver.pending_review_count ?? 0 }
+                      }}
+                    </a>
                   } @else {
                     <span
                       class="asset-versions-manager__review asset-versions-manager__review--pending"
@@ -392,25 +407,27 @@
                     <span class="asset-versions-manager__divider" aria-hidden="true"></span>
                     <div class="asset-versions-manager__action-group">
                       @if (canPublish() && !ver.is_published) {
-                        <button
-                          type="button"
-                          nz-button
-                          nzType="text"
-                          class="action-icon asset-versions-manager__act asset-versions-manager__act--publish"
+                        <!-- On a wrapper: a disabled button shows no tooltip itself. -->
+                        <span
+                          class="asset-versions-manager__publish-wrap"
                           nz-tooltip
-                          [nzTooltipTitle]="
-                            (ver.is_approved
-                              ? 'ADMIN.VERSION_PUBLISHING.TOOLTIP_PUBLISH'
-                              : 'ADMIN.VERSION_PUBLISHING.TOOLTIP_NOT_APPROVED'
-                            ) | translate
-                          "
-                          [attr.aria-label]="'ADMIN.VERSION_PUBLISHING.TOOLTIP_PUBLISH' | translate"
-                          [nzLoading]="publishingId() === ver.id"
-                          [disabled]="!ver.is_approved || publishingId() !== null"
-                          (click)="publishVersion(ver)"
+                          [nzTooltipTitle]="publishTooltip(ver) | translate"
                         >
-                          <ng-icon name="lucideGlobe" aria-hidden="true" />
-                        </button>
+                          <button
+                            type="button"
+                            nz-button
+                            nzType="text"
+                            class="action-icon asset-versions-manager__act asset-versions-manager__act--publish"
+                            [attr.aria-label]="
+                              'ADMIN.VERSION_PUBLISHING.TOOLTIP_PUBLISH' | translate
+                            "
+                            [nzLoading]="publishingId() === ver.id"
+                            [disabled]="!ver.is_approved || publishingId() !== null"
+                            (click)="publishVersion(ver)"
+                          >
+                            <ng-icon name="lucideGlobe" aria-hidden="true" />
+                          </button>
+                        </span>
                       }
                       @if (supportsLanguages() && canEditContent() && !ver.is_active) {
                         <button

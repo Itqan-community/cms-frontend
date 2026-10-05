@@ -843,6 +843,21 @@ export class AssetVersionsManagerComponent implements OnInit {
     return this.adminAuth.hasPermission(VERSION_PERMISSIONS[this.kind].mutate);
   }
 
+  /** Why the publish action is (un)available for a version. */
+  publishTooltip(ver: AssetVersion): string {
+    return ver.is_approved
+      ? 'ADMIN.VERSION_PUBLISHING.TOOLTIP_PUBLISH'
+      : 'ADMIN.VERSION_PUBLISHING.TOOLTIP_NOT_APPROVED';
+  }
+
+  /** Reviewers can jump from a version's pending count to its changes. */
+  canReview(): boolean {
+    return (
+      this.supportsLanguages() &&
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_REVIEW_CONTENT)
+    );
+  }
+
   /** Choosing the consumer-visible version applies to translations/tafsirs only. */
   canPublish(): boolean {
     return (

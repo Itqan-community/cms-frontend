@@ -977,6 +977,11 @@
       "NO_ASSIGNED_LANGUAGES": "You have no languages assigned to review for this asset.",
       "NO_CHANGES": "No changes to show.",
       "RETRY": "Retry",
+      "VERSION_FILTER": {
+        "ALL": "All changes",
+        "UP_TO": "Making up {{name}}",
+        "HINT": "Showing the changes that make up {{name}}: the latest change to each unit up to that version. Approve all of them to be able to publish it."
+      },
       "FILTER": {
         "ALL": "All",
         "UNREVIEWED": "Unreviewed",

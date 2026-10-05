@@ -14,6 +14,23 @@
             }
           </nz-select>
           <nz-select
+            class="asset-review-grid__version"
+            [ngModel]="selectedVersion() ?? 'all'"
+            (ngModelChange)="onVersionChange($event)"
+            [nzDisabled]="loading()"
+          >
+            <nz-option
+              nzValue="all"
+              [nzLabel]="'ADMIN.REVIEW.VERSION_FILTER.ALL' | translate"
+            ></nz-option>
+            @for (v of versions(); track v.id) {
+              <nz-option
+                [nzValue]="v.id"
+                [nzLabel]="'ADMIN.REVIEW.VERSION_FILTER.UP_TO' | translate: { name: v.name }"
+              ></nz-option>
+            }
+          </nz-select>
+          <nz-select
             class="asset-review-grid__filter"
             [ngModel]="stateFilter()"
             (ngModelChange)="onFilterChange($event)"
@@ -36,6 +53,12 @@
         }
       </div>
     </div>
+
+    @if (selectedVersionName(); as name) {
+      <p class="asset-review-grid__version-hint">
+        {{ 'ADMIN.REVIEW.VERSION_FILTER.HINT' | translate: { name } }}
+      </p>
+    }
 
     @if (languagesError()) {
       <div class="asset-review-grid__error">
