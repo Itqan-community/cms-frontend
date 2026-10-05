@@ -418,6 +418,19 @@ describe('AssetContentGridComponent column definitions', () => {
       expect(grid.hasUnsavedWork()).toBeFalse();
     });
 
+    it('ignores a cell value that changes anyway (e.g. Delete on a focused cell)', () => {
+      // Arrange
+      const { fixture } = openViewer();
+      const grid = fixture.componentInstance;
+
+      // Act — what AG Grid reports when a key clears a cell directly
+      grid.onCellValueChanged({ data: { unit_id: 1, text: '' }, oldValue: 'text' } as never);
+
+      // Assert — nothing is queued for autosave
+      expect(grid.dirty()).toBeFalse();
+      expect(grid.hasUnsavedWork()).toBeFalse();
+    });
+
     it('hides every editing control but keeps copying', () => {
       // Arrange
       const { fixture } = openViewer();

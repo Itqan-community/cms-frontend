@@ -319,6 +319,8 @@ export class AssetContentGridComponent implements OnInit {
   }
 
   onCellValueChanged(event: CellValueChangedEvent<ContentEntry>): void {
+    // A committed version is never edited here (the grid also sets readOnlyEdit).
+    if (this.readOnly()) return;
     const row = event.data;
     // Assume the edit differs from the published text until the autosave
     // response says otherwise (see `applySavedRows`).

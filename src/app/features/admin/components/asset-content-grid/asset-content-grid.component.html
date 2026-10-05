@@ -145,6 +145,7 @@
         class="content-grid__table"
         [theme]="theme"
         rowModelType="infinite"
+        [readOnlyEdit]="readOnly()"
         [datasource]="datasource()"
         [cacheBlockSize]="cacheBlockSize"
         [getRowId]="getRowId"
