@@ -37,7 +37,7 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import { Subject, debounceTime } from 'rxjs';
+import { Subject, debounceTime, takeUntil } from 'rxjs';
 import type {
   AssetLanguage,
   AssetTemplate,
@@ -49,7 +49,9 @@ import type {
 } from '../../models/asset-content.models';
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../services/admin-auth.service';
+import type { VersionBump } from '../../models/asset-versions.models';
 import { AssetContentService } from '../../services/asset-content.service';
+import { AssetVersionsService } from '../../services/asset-versions.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import {
   normalizeClipboardForTextPaste,
@@ -57,7 +59,9 @@ import {
   serializeCsv,
 } from '../../utils/clipboard-table.util';
 import { ISO_639_LANGUAGES, localizedLanguageName } from '../../utils/iso-639.util';
+import { isVersionNumber } from '../../utils/version-number.util';
 import { ContentChangesComponent } from '../content-changes/content-changes.component';
+import { VersionNumberFieldComponent } from '../version-number-field/version-number-field.component';
 import {
   ContentTextCellEditorComponent,
   type ContentTextEditorParams,
@@ -125,6 +129,7 @@ const NUMBER_FILTER_PARAMS: INumberFilterParams = {
     NzSelectModule,
     NzSpinModule,
     NzToolTipModule,
+    VersionNumberFieldComponent,
   ],
   templateUrl: './asset-content-grid.component.html',
   styleUrl: './asset-content-grid.component.less',
@@ -183,6 +188,7 @@ export class AssetContentGridComponent implements OnInit {
   readonly getRowId = (params: GetRowIdParams<ContentEntry>): string => String(params.data.unit_id);
 
   private readonly contentService = inject(AssetContentService);
+  private readonly versionsService = inject(AssetVersionsService);
   private readonly lastLanguage = inject(LastActiveLanguageService);
   private readonly message = inject(NzMessageService);
   private readonly modal = inject(NzModalService);
@@ -251,6 +257,14 @@ export class AssetContentGridComponent implements OnInit {
   /** Optional file to seed the new language with (uploaded as its first version). */
   private newLanguageFile: File | null = null;
   readonly newLanguageFileName = signal<string | null>(null);
+  /** The seed file becomes the language's first version: its name and starting number. */
+  readonly newLanguageLabel = signal('');
+  readonly newLanguageStart = signal('');
+  readonly addLanguageBlocked = computed(
+    () =>
+      !this.newLanguage() ||
+      (this.newLanguageFileName() !== null && !isVersionNumber(this.newLanguageStart()))
+  );
   /** ISO options not already on the asset, labelled + sorted in the UI language. */
   readonly addableLanguages = computed(() => {
     const existing = new Set(this.languages().map((l) => l.language));
@@ -266,6 +280,25 @@ export class AssetContentGridComponent implements OnInit {
   /** Commit dialog state (required message + change review). */
   readonly commitDialogVisible = signal(false);
   readonly commitMessage = signal('');
+  /** The commit's version name (prefilled from the draft) and number choice. */
+  readonly commitLabel = signal('');
+  /** The language's latest version number; null when this commit is its first. */
+  readonly commitLatest = signal<string | null>(null);
+  readonly commitLatestLoading = signal(false);
+  /** The lookup failed: the number can't be derived, so committing is blocked. */
+  readonly commitLatestError = signal(false);
+  /** Emits to drop a lookup that reopening the dialog replaced. */
+  private readonly cancelCommitLatest$ = new Subject<void>();
+  readonly commitStart = signal('');
+  readonly commitBump = signal<VersionBump>('minor');
+  readonly commitNumberIncomplete = computed(
+    () =>
+      this.commitLatestLoading() ||
+      this.commitLatestError() ||
+      (this.commitLatest() === null && !isVersionNumber(this.commitStart()))
+  );
+  /** The open draft's version name, carried over from the version it was seeded from. */
+  private draftLabel = '';
   readonly committing = signal(false);
   readonly pendingLoading = signal(false);
   readonly pendingError = signal(false);
@@ -626,6 +659,7 @@ export class AssetContentGridComponent implements OnInit {
         next: (draft) => {
           if (generation !== this.loadGeneration) return;
           this.draftId.set(draft.id);
+          this.draftLabel = draft.label ?? '';
           this.refreshPendingCount();
           this.loadTemplate(generation);
         },
@@ -656,6 +690,8 @@ export class AssetContentGridComponent implements OnInit {
   /** Open the "add language" modal. */
   openAddLanguage(): void {
     this.newLanguage.set(null);
+    this.newLanguageLabel.set('');
+    this.newLanguageStart.set('');
     this.clearNewLanguageFile();
     this.addLanguageVisible.set(true);
   }
@@ -677,10 +713,13 @@ export class AssetContentGridComponent implements OnInit {
   /** Confirm adding a translation language (optionally seeded from a file) and edit it. */
   confirmAddLanguage(): void {
     const language = this.newLanguage();
-    if (!language) return;
+    if (!language || this.addLanguageBlocked()) return;
     this.addLanguageBusy.set(true);
     this.contentService
-      .addLanguage(this.kind, this.slug, language, this.newLanguageFile)
+      .addLanguage(this.kind, this.slug, language, this.newLanguageFile, {
+        label: this.newLanguageLabel().trim(),
+        number: this.newLanguageStart().trim(),
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (added) => {
@@ -844,6 +883,10 @@ export class AssetContentGridComponent implements OnInit {
       this.publishing.set(false);
       if (!ok) return;
       this.commitMessage.set('');
+      this.commitLabel.set(this.draftLabel);
+      this.commitStart.set('');
+      this.commitBump.set('minor');
+      this.loadCommitLatest();
       this.pendingChanges.set([]);
       this.pendingError.set(false);
       this.commitDialogVisible.set(true);
@@ -865,6 +908,31 @@ export class AssetContentGridComponent implements OnInit {
     });
   }
 
+  /** Look up the number this commit follows: the language's latest version. */
+  private loadCommitLatest(): void {
+    const language = this.selectedLanguage();
+    this.cancelCommitLatest$.next();
+    this.commitLatest.set(null);
+    this.commitLatestLoading.set(false);
+    this.commitLatestError.set(false);
+    if (!language) return;
+    this.commitLatestLoading.set(true);
+    this.versionsService
+      .latestNumber(this.kind, this.slug, language)
+      .pipe(takeUntil(this.cancelCommitLatest$), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (latest) => {
+          this.commitLatest.set(latest);
+          this.commitLatestLoading.set(false);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.commitLatestError.set(true);
+          this.commitLatestLoading.set(false);
+          this.showError(err);
+        },
+      });
+  }
+
   /** Confirm the commit: publish the draft with the (required) message. */
   confirmCommit(): void {
     const versionId = this.draftId();
@@ -872,13 +940,19 @@ export class AssetContentGridComponent implements OnInit {
       versionId === null ||
       !this.commitMessage().trim() ||
       this.pendingLoading() ||
-      this.pendingError()
+      this.pendingError() ||
+      this.commitNumberIncomplete()
     ) {
       return;
     }
     this.committing.set(true);
     this.contentService
-      .commit(this.kind, this.slug, versionId, this.commitMessage().trim())
+      .commit(this.kind, this.slug, versionId, this.commitMessage().trim(), {
+        label: this.commitLabel().trim(),
+        // The number is issued by the server: only how to derive it is sent.
+        ...(this.commitLatest() === null ? { version_number: this.commitStart().trim() } : {}),
+        bump: this.commitBump(),
+      })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {

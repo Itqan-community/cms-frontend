@@ -112,6 +112,8 @@ export interface TafsirFormValue {
   mushaf_layout_id?: number | null;
   /** Create-only: first version metadata + content file. */
   version_name?: string;
+  /** Required with `file`: the first version's number ("major.minor"). */
+  version_number?: string;
   version_summary?: string;
   file?: File;
 }

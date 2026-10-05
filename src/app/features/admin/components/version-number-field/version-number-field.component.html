@@ -1,0 +1,46 @@
+@if (loading()) {
+  <p class="version-number-field__loading">{{ i18n + '.LOADING' | translate }}</p>
+} @else if (error()) {
+  <p class="version-number-field__loading">{{ i18n + '.LOAD_ERROR' | translate }}</p>
+} @else if (latest() === null) {
+  <nz-form-item>
+    <nz-form-label nzRequired>{{ i18n + '.START_LABEL' | translate }}</nz-form-label>
+    <nz-form-control
+      [nzValidateStatus]="startInvalid() ? 'error' : ''"
+      [nzErrorTip]="i18n + '.START_INVALID' | translate"
+      [nzExtra]="i18n + '.START_HINT' | translate"
+    >
+      <input
+        nz-input
+        dir="ltr"
+        inputmode="decimal"
+        [ngModel]="start()"
+        [ngModelOptions]="{ standalone: true }"
+        (ngModelChange)="start.set($event)"
+        [placeholder]="i18n + '.START_PLACEHOLDER' | translate"
+      />
+    </nz-form-control>
+  </nz-form-item>
+} @else {
+  <nz-form-item>
+    <nz-form-label>{{ i18n + '.BUMP_LABEL' | translate }}</nz-form-label>
+    <nz-form-control>
+      <nz-radio-group
+        [ngModel]="bump()"
+        [ngModelOptions]="{ standalone: true }"
+        (ngModelChange)="bump.set($event)"
+      >
+        <!-- nz-radio renders its own input inside this label, which associates them implicitly. -->
+        <!-- eslint-disable-next-line @angular-eslint/template/label-has-associated-control -->
+        <label nz-radio nzValue="minor">
+          {{ i18n + '.MINOR' | translate: { from: latest(), to: nextMinor() } }}
+        </label>
+        <!-- nz-radio renders its own input inside this label, which associates them implicitly. -->
+        <!-- eslint-disable-next-line @angular-eslint/template/label-has-associated-control -->
+        <label nz-radio nzValue="major">
+          {{ i18n + '.MAJOR' | translate: { from: latest(), to: nextMajor() } }}
+        </label>
+      </nz-radio-group>
+    </nz-form-control>
+  </nz-form-item>
+}

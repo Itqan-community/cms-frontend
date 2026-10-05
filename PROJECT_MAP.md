@@ -105,7 +105,8 @@ listings by the backend.
 List  -> GET    /portal/{entity}/
 Detail -> GET   /portal/{entity}/{id}/
 Create -> POST  /portal/{entity}/  (multipart FormData always for font/mushaf/tafsir/translation;
-               optional initial version fields: version_name + version_summary + file)
+               optional initial version fields: version_name + version_summary + file;
+               tafsir/translation send version_name as version_label, plus version_number)
 Update -> PUT   /portal/{entity}/{id}/
 Delete -> DELETE /portal/{entity}/{id}/
 
@@ -329,13 +330,19 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
 - `admin-column-picker/` — Column visibility toggles for tables
 - `asset-initial-version-fields/` — Optional first version (name/summary/file) on asset create forms
   (font/mushaf/tafsir/translation); tafsir/translation pass `contentKind`/`contentTemplate`/
-  `mushafLayoutId` to offer the empty CSV template for the chosen template
+  `mushafLayoutId` to offer the empty CSV template for the chosen template, and get a starting
+  version number field (required once a file is attached)
+- `version-number-field/` — Tafsir/translation version numbering (`major.minor`, issued by the
+  server, per language): a starting number for a language's first version, else a minor/major bump
+  previewed from the latest number (`utils/version-number.util.ts`). Used by the upload modal,
+  restore confirm, commit dialog and add-language dialog
 - `csv-template-download/` — "Download CSV template" button (tafsir/translation): an empty fill-in
   sheet, one row per unit with a blank `text` column. By template on create
   (`content/{category}/csv-template/?template=&mushaf_layout_id=`), by asset in the version
   upload/edit modal (`content/{category}/{slug}/csv-template/`)
 - `asset-versions-manager/` — Version CRUD (tafsir/translation/mushaf/font; program when
-  re-enabled); CSV `export/` then `file_url` fallback
+  re-enabled); CSV `export/` then `file_url` fallback. Tafsir/translation: `name` is the locked
+  version number and `label` the editable version name; mushaf/font/program keep a free-text `name`
 - `asset-content-editor/` + `asset-content-grid/` — Per-unit draft editor (surah/ayah/word/page
   content templates); flush before publish; leave blocked if PATCH fails. Column set is driven by
   `effectiveTemplate()` (the `template` input, falling back to a one-row probe's `unit_type`). Every

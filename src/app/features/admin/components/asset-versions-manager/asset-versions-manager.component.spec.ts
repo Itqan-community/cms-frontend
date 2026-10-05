@@ -58,6 +58,7 @@ describe('AssetVersionsManagerComponent', () => {
   beforeEach(async () => {
     versionsService = jasmine.createSpyObj<AssetVersionsService>('AssetVersionsService', [
       'list',
+      'latestNumber',
       'create',
       'update',
       'delete',
@@ -67,6 +68,7 @@ describe('AssetVersionsManagerComponent', () => {
       'setLanguageAvailability',
       'versionDiff',
       'setPublishedVersion',
+      'restoreVersion',
     ]);
     modal = jasmine.createSpyObj<NzModalService>('NzModalService', ['confirm']);
     // Confirm immediately, as if the user clicked OK; the rejection a failed action
@@ -92,6 +94,8 @@ describe('AssetVersionsManagerComponent', () => {
 
     contentService.listLanguages.and.returnValue(of(LANGUAGES));
     versionsService.list.and.returnValue(of(page('ar')));
+    // An upload numbers after its language's latest version unless that language has none.
+    versionsService.latestNumber.and.returnValue(of('1.0'));
 
     await TestBed.configureTestingModule({
       imports: [AssetVersionsManagerComponent, TranslateModule.forRoot()],
@@ -131,7 +135,7 @@ describe('AssetVersionsManagerComponent', () => {
       fixture.detectChanges();
 
       component.openCreateModal();
-      component.form.setValue({ name: 'v1', summary: 'first upload' });
+      component.form.setValue({ name: '', label: 'v1', summary: 'first upload' });
       component.onPickFile({
         target: { files: [new File(['x'], 'v1.csv')], value: '' },
       } as unknown as Event);
@@ -147,7 +151,7 @@ describe('AssetVersionsManagerComponent', () => {
       fixture.detectChanges();
 
       component.openCreateModal();
-      component.form.setValue({ name: 'v1', summary: 'first upload' });
+      component.form.setValue({ name: '', label: 'v1', summary: 'first upload' });
       component.onPickFile({
         target: { files: [new File(['x'], 'v1.csv')], value: '' },
       } as unknown as Event);
@@ -387,6 +391,129 @@ describe('AssetVersionsManagerComponent', () => {
     });
   });
 
+  describe('version numbering', () => {
+    function pickFile(): void {
+      component.onPickFile({
+        target: { files: [new File(['x'], 'v.csv')], value: '' },
+      } as unknown as Event);
+    }
+
+    it('asks for a starting number when the language has no versions yet', () => {
+      versionsService.latestNumber.and.returnValue(of(null));
+      versionsService.create.and.returnValue(of(page('ar').results[0]));
+      fixture.detectChanges();
+
+      component.openCreateModal();
+      component.form.setValue({ name: '', label: 'First edition', summary: 'first' });
+      pickFile();
+      component.submit();
+
+      expect(component.versionNumberIncomplete()).toBeTrue();
+      expect(versionsService.create).not.toHaveBeenCalled();
+
+      component.versionStart.set('7.0');
+      component.submit();
+
+      expect(versionsService.create).toHaveBeenCalledWith(
+        'translation',
+        'sahih-intl',
+        jasmine.objectContaining({ label: 'First edition', version_number: '7.0', bump: 'minor' })
+      );
+    });
+
+    it('sends the chosen bump, not a number, once the language has versions', () => {
+      versionsService.create.and.returnValue(of(page('ar').results[0]));
+      fixture.detectChanges();
+
+      component.openCreateModal();
+      component.form.setValue({ name: '', label: '', summary: 'next' });
+      component.versionBump.set('major');
+      pickFile();
+      component.submit();
+
+      const payload = versionsService.create.calls.mostRecent().args[2];
+      expect(payload.bump).toBe('major');
+      expect(payload.version_number).toBeUndefined();
+      expect(payload.name).toBeUndefined();
+    });
+
+    it('never sends the version number when editing', () => {
+      versionsService.update.and.returnValue(of(page('ar').results[0]));
+      fixture.detectChanges();
+
+      component.openEditModal({ ...page('ar').results[0], name: '7.1', label: 'Old' });
+      expect(component.editingNumber()).toBe('7.1');
+      component.form.patchValue({ label: 'Renamed', summary: 'notes' });
+      component.submit();
+
+      const payload = versionsService.update.calls.mostRecent().args[3];
+      expect(payload.label).toBe('Renamed');
+      expect(payload.name).toBeUndefined();
+      expect(payload.bump).toBeUndefined();
+    });
+
+    it('blocks the upload when the latest number could not be looked up', () => {
+      versionsService.latestNumber.and.returnValue(throwError(() => new Error('offline')));
+      fixture.detectChanges();
+
+      component.openCreateModal();
+      component.form.setValue({ name: '', label: '', summary: 'next' });
+      // A failed lookup must not read as "first version" and invite a starting number.
+      component.versionStart.set('7.0');
+      pickFile();
+      component.submit();
+
+      expect(component.latestNumberError()).toBeTrue();
+      expect(component.versionNumberIncomplete()).toBeTrue();
+      expect(versionsService.create).not.toHaveBeenCalled();
+    });
+
+    it('ignores a slower lookup for a language the user has moved off', () => {
+      const arLookup = new Subject<string | null>();
+      const frLookup = new Subject<string | null>();
+      versionsService.latestNumber.and.callFake((_kind, _slug, language) =>
+        language === 'ar' ? arLookup : frLookup
+      );
+      fixture.detectChanges();
+
+      component.openCreateModal();
+      component.onVersionLanguageChange('fr');
+      arLookup.next('9.0');
+      arLookup.complete();
+
+      expect(component.latestNumberLoading()).toBeTrue();
+      expect(component.latestNumber()).toBeNull();
+
+      frLookup.next('2.3');
+      frLookup.complete();
+
+      expect(component.latestNumberLoading()).toBeFalse();
+      expect(component.latestNumber()).toBe('2.3');
+    });
+
+    it('restores with the chosen bump', () => {
+      contentService.restoreVersion.and.returnValue(of({} as ContentDraftVersion));
+      fixture.detectChanges();
+      // Choosing the bump happens inside the confirm dialog, before OK.
+      modal.confirm.and.callFake(((options?: ModalOptions) => {
+        component.restoreBump.set('major');
+        const onOk = options?.nzOnOk as (() => Promise<void>) | undefined;
+        onOk?.().catch(() => undefined);
+        return {};
+      }) as unknown as NzModalService['confirm']);
+
+      component.restoreVersion(page('ar').results[0]);
+
+      expect(versionsService.latestNumber).toHaveBeenCalledWith('translation', 'sahih-intl', 'ar');
+      expect(contentService.restoreVersion).toHaveBeenCalledWith(
+        'translation',
+        'sahih-intl',
+        1,
+        'major'
+      );
+    });
+  });
+
   describe('upload rejections', () => {
     it('explains an upload whose file cannot be read as content rows', () => {
       versionsService.create.and.returnValue(
@@ -401,7 +528,7 @@ describe('AssetVersionsManagerComponent', () => {
       fixture.detectChanges();
 
       component.openCreateModal();
-      component.form.setValue({ name: 'v2', summary: 'upload' });
+      component.form.setValue({ name: '', label: 'v2', summary: 'upload' });
       component.onPickFile({
         target: { files: [new File(['x'], 'v2.pdf')], value: '' },
       } as unknown as Event);

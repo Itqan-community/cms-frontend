@@ -15,7 +15,10 @@ export interface ContentDraftVersion {
   asset_id: number;
   /** Language code this draft belongs to. */
   language: string;
+  /** Version number ("major.minor"); empty while a draft. */
   name: string;
+  /** Version name. */
+  label: string;
   summary: string;
   state: 'draft' | 'published';
   entries_count: number;
