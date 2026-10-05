@@ -14,6 +14,23 @@
             }
           </nz-select>
           <nz-select
+            class="asset-review-grid__version"
+            [ngModel]="selectedVersion() ?? 'all'"
+            (ngModelChange)="onVersionChange($event)"
+            [nzDisabled]="loading()"
+          >
+            <nz-option
+              nzValue="all"
+              [nzLabel]="'ADMIN.REVIEW.VERSION_FILTER.ALL' | translate"
+            ></nz-option>
+            @for (v of versions(); track v.id) {
+              <nz-option
+                [nzValue]="v.id"
+                [nzLabel]="'ADMIN.REVIEW.VERSION_FILTER.UP_TO' | translate: { name: v.name }"
+              ></nz-option>
+            }
+          </nz-select>
+          <nz-select
             class="asset-review-grid__filter"
             [ngModel]="stateFilter()"
             (ngModelChange)="onFilterChange($event)"
@@ -37,6 +54,12 @@
       </div>
     </div>
 
+    @if (selectedVersionName(); as name) {
+      <p class="asset-review-grid__version-hint">
+        {{ 'ADMIN.REVIEW.VERSION_FILTER.HINT' | translate: { name } }}
+      </p>
+    }
+
     @if (languagesError()) {
       <div class="asset-review-grid__error">
         <p>{{ 'ADMIN.REVIEW.ERRORS.GENERIC' | translate }}</p>
@@ -54,16 +77,18 @@
           [nzFrontPagination]="false"
           [nzShowPagination]="false"
           nzSize="middle"
+          nzTableLayout="fixed"
           [nzNoResult]="emptyTpl"
         >
           <thead>
             <tr>
-              <th nzWidth="120px">{{ 'ADMIN.REVIEW.COLUMN.UNIT' | translate }}</th>
-              <th nzWidth="90px">{{ 'ADMIN.REVIEW.COLUMN.TYPE' | translate }}</th>
+              <th nzWidth="90px">{{ 'ADMIN.REVIEW.COLUMN.UNIT' | translate }}</th>
+              <th nzWidth="80px">{{ 'ADMIN.REVIEW.COLUMN.TYPE' | translate }}</th>
               <th>{{ 'ADMIN.REVIEW.COLUMN.CHANGE' | translate }}</th>
-              <th nzWidth="90px">{{ 'ADMIN.REVIEW.COLUMN.COMMIT' | translate }}</th>
-              <th nzWidth="150px">{{ 'ADMIN.REVIEW.COLUMN.STATE' | translate }}</th>
-              <th nzWidth="240px">{{ 'ADMIN.REVIEW.COLUMN.ACTIONS' | translate }}</th>
+              <th nzWidth="80px">{{ 'ADMIN.REVIEW.COLUMN.COMMIT' | translate }}</th>
+              <th nzWidth="120px">{{ 'ADMIN.REVIEW.COLUMN.EDITOR' | translate }}</th>
+              <th nzWidth="130px">{{ 'ADMIN.REVIEW.COLUMN.STATE' | translate }}</th>
+              <th nzWidth="180px">{{ 'ADMIN.REVIEW.COLUMN.ACTIONS' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -71,20 +96,35 @@
               <tr>
                 <td>{{ row.label }}</td>
                 <td>{{ typeKey(row.change_type) | translate }}</td>
-                <td>
-                  <div class="asset-review-grid__change" dir="auto">
-                    @if (row.baseline_text) {
-                      <span class="asset-review-grid__old">{{ row.baseline_text }}</span>
+                <td class="asset-review-grid__change">
+                  @if (compare().get(row.id); as cmp) {
+                    <app-change-compare
+                      [before]="cmp.before"
+                      [after]="cmp.after"
+                      [words]="cmp.words"
+                      [stacked]="true"
+                    />
+                    @if (cmp.cut) {
+                      <button
+                        nz-button
+                        nzType="link"
+                        nzSize="small"
+                        type="button"
+                        class="asset-review-grid__full-text"
+                        (click)="openFullText(row)"
+                      >
+                        {{ 'ADMIN.CONTENT_CHANGES.SHOW_FULL_TEXT' | translate }}
+                      </button>
                     }
-                    @if (row.new_text) {
-                      <span class="asset-review-grid__new">{{ row.new_text }}</span>
-                    }
-                  </div>
+                  }
                   @if (row.comment) {
                     <p class="asset-review-grid__comment" dir="auto">{{ row.comment }}</p>
                   }
                 </td>
                 <td class="admin-mono">{{ row.commit_ref }}</td>
+                <td class="asset-review-grid__editor">
+                  {{ row.edited_by ?? ('COMMON.EM_DASH' | translate) }}
+                </td>
                 <td>
                   <span
                     class="asset-review-grid__state"
@@ -160,6 +200,40 @@
         <p class="asset-review-grid__empty">{{ 'ADMIN.REVIEW.NO_CHANGES' | translate }}</p>
       </ng-template>
     }
+
+    <nz-modal
+      [nzVisible]="fullTextRow() !== null"
+      [nzTitle]="'ADMIN.REVIEW.FULL_TEXT_DIALOG.TITLE' | translate: { label: fullTextRow()?.label }"
+      [nzWidth]="900"
+      [nzBodyStyle]="{ maxHeight: '70vh', overflowY: 'auto' }"
+      [nzFooter]="fullTextFooter"
+      (nzOnCancel)="closeFullText()"
+    >
+      <ng-container *nzModalContent>
+        @if (fullTextRow(); as row) {
+          @if (compare().get(row.id); as cmp) {
+            <div class="asset-review-grid__full-text-meta">
+              <span class="admin-mono">{{ row.commit_ref }}</span>
+              @if (row.edited_by) {
+                <span>· {{ row.edited_by }}</span>
+              }
+            </div>
+            <app-change-compare
+              [before]="cmp.before"
+              [after]="cmp.after"
+              [words]="cmp.words"
+              [stacked]="true"
+              [expanded]="true"
+            />
+          }
+        }
+      </ng-container>
+      <ng-template #fullTextFooter>
+        <button nz-button nzType="default" type="button" (click)="closeFullText()">
+          {{ 'ADMIN.REVIEW.FULL_TEXT_DIALOG.CLOSE' | translate }}
+        </button>
+      </ng-template>
+    </nz-modal>
 
     <nz-modal
       [nzVisible]="commentOpen()"

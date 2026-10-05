@@ -61,6 +61,8 @@ export const PORTAL_PERMISSIONS = {
   PORTAL_MANAGE_ACCESS_REQUESTS_SETTINGS: 'portal_manage_access_requests_settings',
 
   PORTAL_REVIEW_CONTENT: 'portal_review_content',
+  /** Choosing which fully approved translation/tafsir version consumers see. */
+  PORTAL_PUBLISH_CONTENT: 'portal_publish_content',
   /** Editing an asset's text (content editor, uploading or restoring a version);
    *  PORTAL_UPDATE_* covers metadata only. */
   PORTAL_EDIT_TRANSLATION_CONTENT: 'portal_edit_translation_content',

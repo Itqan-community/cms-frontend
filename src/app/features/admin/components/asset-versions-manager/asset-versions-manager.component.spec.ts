@@ -1,12 +1,17 @@
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { type ModalOptions, NzModalService } from 'ng-zorro-antd/modal';
 import { Subject, of, throwError } from 'rxjs';
-import type { AssetLanguage } from '../../models/asset-content.models';
-import type { AssetVersionsListResponse } from '../../models/asset-versions.models';
+import type {
+  AssetLanguage,
+  ContentChange,
+  ContentDraftVersion,
+} from '../../models/asset-content.models';
+import type { AssetVersion, AssetVersionsListResponse } from '../../models/asset-versions.models';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { AssetContentService } from '../../services/asset-content.service';
 import { AssetVersionsService } from '../../services/asset-versions.service';
@@ -44,6 +49,7 @@ describe('AssetVersionsManagerComponent', () => {
   let contentService: jasmine.SpyObj<AssetContentService>;
   let message: jasmine.SpyObj<NzMessageService>;
   let lastLanguage: jasmine.SpyObj<LastActiveLanguageService>;
+  let modal: jasmine.SpyObj<NzModalService>;
 
   beforeEach(() => {
     granted = null;
@@ -60,7 +66,16 @@ describe('AssetVersionsManagerComponent', () => {
       'listLanguages',
       'setLanguageAvailability',
       'versionDiff',
+      'setPublishedVersion',
     ]);
+    modal = jasmine.createSpyObj<NzModalService>('NzModalService', ['confirm']);
+    // Confirm immediately, as if the user clicked OK; the rejection a failed action
+    // returns is the modal's to handle.
+    modal.confirm.and.callFake(((options?: ModalOptions) => {
+      const onOk = options?.nzOnOk as (() => Promise<void>) | undefined;
+      onOk?.().catch(() => undefined);
+      return {};
+    }) as unknown as NzModalService['confirm']);
     message = jasmine.createSpyObj<NzMessageService>('NzMessageService', [
       'success',
       'error',
@@ -97,6 +112,8 @@ describe('AssetVersionsManagerComponent', () => {
       // The behaviour under test is in the class; an empty template keeps the
       // spec free of the ng-zorro/icon setup the real markup needs.
       .overrideComponent(AssetVersionsManagerComponent, { set: { template: '' } })
+      // NzModalModule provides its own NzModalService, which a root provider would not replace.
+      .overrideProvider(NzModalService, { useValue: modal })
       .compileComponents();
 
     fixture = TestBed.createComponent(AssetVersionsManagerComponent);
@@ -191,6 +208,34 @@ describe('AssetVersionsManagerComponent', () => {
       expect(component.diff()).toEqual([]);
     });
 
+    it('shows the first page of a large diff while the rest is still loading', () => {
+      const added = (id: number): ContentChange => ({
+        unit_type: 'ayah',
+        unit_id: id,
+        label: `1:${id}`,
+        change_type: 'added',
+        old_text: '',
+        new_text: `text ${id}`,
+      });
+      const secondPage$ = new Subject<{ results: ContentChange[]; count: number }>();
+      contentService.versionDiff.and.returnValues(
+        of({ results: [added(1), added(2)], count: 3 }),
+        secondPage$
+      );
+      fixture.detectChanges();
+
+      component.toggleDiff(page('ar').results[0]);
+
+      expect(component.diffLoading()).toBeFalse();
+      expect(component.diffLoadingMore()).toBeTrue();
+      expect(component.diff().length).toBe(2);
+
+      secondPage$.next({ results: [added(3)], count: 3 });
+
+      expect(component.diffLoadingMore()).toBeFalse();
+      expect(component.diff().map((c) => c.unit_id)).toEqual([1, 2, 3]);
+    });
+
     it('clears the error when a later diff loads', () => {
       contentService.versionDiff.and.returnValue(throwError(() => new Error('boom')));
       fixture.detectChanges();
@@ -247,6 +292,122 @@ describe('AssetVersionsManagerComponent', () => {
       expect(component.canEditContent()).toBeFalse();
       expect(component.canMutateVersions()).toBeTrue();
       expect(component.versionModalOpen()).toBeFalse();
+    });
+  });
+
+  describe('language availability', () => {
+    it('lets the source language be shown or hidden too', () => {
+      granted = new Set([PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION]);
+      fixture.detectChanges();
+
+      component.onLanguageChange('ar'); // the source
+      expect(component.selectedLanguageObj()?.is_source).toBeTrue();
+      expect(component.canToggleAvailability()).toBeTrue();
+    });
+
+    it('needs the update permission to toggle', () => {
+      granted = new Set<string>();
+      fixture.detectChanges();
+
+      expect(component.canToggleAvailability()).toBeFalse();
+    });
+  });
+
+  describe('publishing', () => {
+    function version(overrides: Partial<AssetVersion>): AssetVersion {
+      return { ...page('ar').results[0], ...overrides };
+    }
+
+    function withPermissions(...perms: string[]): void {
+      granted = new Set(perms);
+      fixture.detectChanges();
+    }
+
+    it('lets only holders of the publish permission publish', () => {
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_REVIEW_CONTENT);
+
+      expect(component.canPublish()).toBeFalse();
+    });
+
+    it('does not offer publishing for assets without reviewed content', () => {
+      component.kind = 'mushaf';
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT);
+
+      expect(component.canPublish()).toBeFalse();
+    });
+
+    it('publishes an approved version and reloads the list', () => {
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT);
+      contentService.setPublishedVersion.and.returnValue(of({} as ContentDraftVersion));
+      versionsService.list.calls.reset();
+
+      component.publishVersion(version({ id: 3, is_approved: true }));
+
+      expect(contentService.setPublishedVersion).toHaveBeenCalledWith(
+        'translation',
+        'sahih-intl',
+        3
+      );
+      expect(message.success).toHaveBeenCalled();
+      expect(versionsService.list).toHaveBeenCalled();
+      expect(component.publishingId()).toBeNull();
+    });
+
+    it('explains why a version cannot be published', () => {
+      expect(component.publishTooltip(version({ is_approved: true }))).toBe(
+        'ADMIN.VERSION_PUBLISHING.TOOLTIP_PUBLISH'
+      );
+      expect(component.publishTooltip(version({ is_approved: false }))).toBe(
+        'ADMIN.VERSION_PUBLISHING.TOOLTIP_NOT_APPROVED'
+      );
+    });
+
+    it('refuses to publish a version with unapproved changes', () => {
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT);
+
+      component.publishVersion(version({ id: 3, is_approved: false, pending_review_count: 2 }));
+
+      expect(modal.confirm).not.toHaveBeenCalled();
+      expect(contentService.setPublishedVersion).not.toHaveBeenCalled();
+    });
+
+    it('explains when the server reports unapproved changes', () => {
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT);
+      contentService.setPublishedVersion.and.returnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({ status: 400, error: { error_name: 'version_not_approved' } })
+        )
+      );
+
+      component.publishVersion(version({ id: 3, is_approved: true }));
+
+      expect(message.error).toHaveBeenCalledWith('ADMIN.VERSION_PUBLISHING.NOT_APPROVED_ERROR');
+      expect(component.publishingId()).toBeNull();
+    });
+  });
+
+  describe('upload rejections', () => {
+    it('explains an upload whose file cannot be read as content rows', () => {
+      versionsService.create.and.returnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 400,
+              error: { error_name: 'content_file_unparseable' },
+            })
+        )
+      );
+      fixture.detectChanges();
+
+      component.openCreateModal();
+      component.form.setValue({ name: 'v2', summary: 'upload' });
+      component.onPickFile({
+        target: { files: [new File(['x'], 'v2.pdf')], value: '' },
+      } as unknown as Event);
+      component.submit();
+
+      expect(message.error).toHaveBeenCalledWith('ADMIN.VERSION_PUBLISHING.FILE_UNPARSEABLE_ERROR');
     });
   });
 });

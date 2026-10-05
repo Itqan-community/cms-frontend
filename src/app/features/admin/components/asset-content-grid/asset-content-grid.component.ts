@@ -26,6 +26,7 @@ import type {
   ITextFilterParams,
   LocaleText,
   RowSelectionOptions,
+  SuppressKeyboardEventParams,
 } from 'ag-grid-community';
 import { AllCommunityModule, ModuleRegistry, themeQuartz } from 'ag-grid-community';
 import { AgGridAngular } from 'ag-grid-angular';
@@ -42,6 +43,7 @@ import type {
   AssetTemplate,
   AssetVersionParentKind,
   ContentChange,
+  ContentDraftVersion,
   ContentEntry,
   ContentEntryPatch,
 } from '../../models/asset-content.models';
@@ -60,9 +62,18 @@ import {
   ContentTextCellEditorComponent,
   type ContentTextEditorParams,
 } from './content-text-cell-editor.component';
+import { surahLabel } from '../../models/quran-metadata';
 import { SurahFloatingFilterComponent } from './surah-floating-filter.component';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
+
+/**
+ * Stops AG Grid clearing a focused cell on Delete/Backspace for a column that is
+ * "editable" only to open its read-only popup. Keys inside an open editor still work.
+ */
+export function suppressClearKeys(params: SuppressKeyboardEventParams<ContentEntry>): boolean {
+  return !params.editing && (params.event.key === 'Delete' || params.event.key === 'Backspace');
+}
 
 /** Columns the positional paste is allowed to write into. */
 const EDITABLE_FIELDS = new Set<string>(['text']);
@@ -129,6 +140,14 @@ export class AssetContentGridComponent implements OnInit {
   readonly template = input<AssetTemplate | null>(null);
   /** Mushaf layout name, when the asset's template is page-based. */
   readonly layoutName = input<string | null>(null);
+  /**
+   * Read-only mode: show this committed version instead of opening a draft.
+   * Same columns, filters and copy as the editor; nothing can be edited.
+   */
+  readonly viewVersionId = input<number | null>(null);
+  readonly readOnly = computed(() => this.viewVersionId() !== null);
+  /** The version being viewed (read-only mode), once loaded. */
+  readonly viewedVersion = signal<ContentDraftVersion | null>(null);
 
   /**
    * Template as declared by the asset, derived from the rows themselves.
@@ -181,6 +200,8 @@ export class AssetContentGridComponent implements OnInit {
   private readonly autosave$ = new Subject<void>();
   /** Bumped on each language load so stale draft/entry responses are ignored. */
   private loadGeneration = 0;
+  /** Bumped per change-count request: only the newest answer may set `pendingCount`. */
+  private pendingCountRequest = 0;
 
   /** Unit ids with unsaved edits pending the next autosave flush. */
   private readonly pendingRows = new Map<number, ContentEntryPatch>();
@@ -191,6 +212,14 @@ export class AssetContentGridComponent implements OnInit {
   private readonly redoStack: CellEdit[] = [];
 
   readonly draftId = signal<number | null>(null);
+  /** Real differences between the draft and the latest version (server-side,
+   *  so text edited back to its original does not count). `null` = not known yet. */
+  readonly pendingCount = signal<number | null>(null);
+  /** Nothing to commit: the saved draft matches the latest version and no edit
+   *  is waiting to be saved. Unknown counts never block committing. */
+  readonly nothingToCommit = computed(
+    () => this.pendingCount() === 0 && !this.dirty() && !this.saving()
+  );
   /** True once an edit has been saved to the draft since the editor opened
    *  (or the language changed). Opening always loads a draft, so `draftId`
    *  alone would show "all changes saved" before anything was edited. */
@@ -290,6 +319,7 @@ export class AssetContentGridComponent implements OnInit {
 
   /** True while there are edits not yet persisted to the draft. */
   hasUnsavedWork(): boolean {
+    if (this.readOnly()) return false;
     return this.dirty() || this.pendingRows.size > 0 || this.saving();
   }
 
@@ -298,6 +328,8 @@ export class AssetContentGridComponent implements OnInit {
   }
 
   onCellValueChanged(event: CellValueChangedEvent<ContentEntry>): void {
+    // A committed version is never edited here (the grid also sets readOnlyEdit).
+    if (this.readOnly()) return;
     const row = event.data;
     // Assume the edit differs from the published text until the autosave
     // response says otherwise (see `applySavedRows`).
@@ -337,7 +369,11 @@ export class AssetContentGridComponent implements OnInit {
   /** Ctrl/Cmd+Z undoes, Ctrl/Cmd+Shift+Z or Ctrl/Cmd+Y redoes — outside a cell editor,
    *  whose textarea keeps its own undo. */
   onKeydown(event: KeyboardEvent): void {
-    if (!(event.ctrlKey || event.metaKey) || (this.gridApi?.getEditingCells().length ?? 0) > 0) {
+    if (
+      this.readOnly() ||
+      !(event.ctrlKey || event.metaKey) ||
+      (this.gridApi?.getEditingCells().length ?? 0) > 0
+    ) {
       return;
     }
     const key = event.key.toLowerCase();
@@ -441,7 +477,7 @@ export class AssetContentGridComponent implements OnInit {
    */
   onPaste(event: ClipboardEvent): void {
     const api = this.gridApi;
-    if (!api) return;
+    if (!api || this.readOnly()) return;
     // While a cell editor is open, let the textarea paste normally.
     if (api.getEditingCells().length > 0) return;
 
@@ -532,6 +568,11 @@ export class AssetContentGridComponent implements OnInit {
       .subscribe({
         next: (langs) => {
           this.languages.set(langs);
+          const viewId = this.viewVersionId();
+          if (viewId !== null) {
+            this.loadViewedVersion(viewId);
+            return;
+          }
           const source = langs.find((l) => l.is_source) ?? langs[0];
           const remembered = this.lastLanguage.get(this.kind, this.slug);
           const initial = langs.find((l) => l.language === remembered) ?? source;
@@ -539,6 +580,30 @@ export class AssetContentGridComponent implements OnInit {
           this.loadForLanguage();
         },
         error: (err: HttpErrorResponse) => {
+          this.loading.set(false);
+          this.showError(err);
+        },
+      });
+  }
+
+  /** Read-only mode: load the viewed version's language, then its rows. The
+   *  rows come from the same entries endpoint as a draft's (`draftId` holds the
+   *  viewed version's id), so filters and columns behave identically. */
+  private loadViewedVersion(versionId: number): void {
+    const generation = ++this.loadGeneration;
+    this.contentService
+      .getVersion(this.kind, this.slug, versionId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (version) => {
+          if (generation !== this.loadGeneration) return;
+          this.viewedVersion.set(version);
+          this.selectedLanguage.set(version.language);
+          this.draftId.set(version.id);
+          this.loadTemplate(generation);
+        },
+        error: (err: HttpErrorResponse) => {
+          if (generation !== this.loadGeneration) return;
           this.loading.set(false);
           this.showError(err);
         },
@@ -561,6 +626,7 @@ export class AssetContentGridComponent implements OnInit {
         next: (draft) => {
           if (generation !== this.loadGeneration) return;
           this.draftId.set(draft.id);
+          this.refreshPendingCount();
           this.loadTemplate(generation);
         },
         error: (err: HttpErrorResponse) => {
@@ -580,6 +646,7 @@ export class AssetContentGridComponent implements OnInit {
       this.dirty.set(false);
       this.savedOnce.set(false);
       this.clearHistory();
+      this.pendingCount.set(null);
       this.selectedLanguage.set(language);
       this.lastLanguage.set(this.kind, this.slug, language);
       this.loadForLanguage();
@@ -695,6 +762,7 @@ export class AssetContentGridComponent implements OnInit {
               this.savedOnce.set(true);
               if (this.pendingRows.size === 0) {
                 this.dirty.set(false);
+                this.refreshPendingCount();
               }
               resolve();
             },
@@ -743,6 +811,28 @@ export class AssetContentGridComponent implements OnInit {
   /** Guard hook: flush pending edits and allow leaving, keeping the draft. */
   keepDraftOnLeave(): Promise<boolean> {
     return this.flushPending();
+  }
+
+  /** Re-count the draft's real changes (one-row page: only `count` is needed). */
+  private refreshPendingCount(): void {
+    const versionId = this.draftId();
+    if (versionId === null || this.readOnly()) return;
+    // The count on opening can still be in flight when an autosave asks again; a
+    // late, older answer (e.g. 0) must not overwrite the newer one.
+    const request = ++this.pendingCountRequest;
+    const isLatest = () => request === this.pendingCountRequest && this.draftId() === versionId;
+    this.contentService
+      .pendingChanges(this.kind, this.slug, versionId, 1)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          if (isLatest()) this.pendingCount.set(res.count);
+        },
+        // Unknown: leave Commit enabled; the commit dialog reports the real state.
+        error: () => {
+          if (isLatest()) this.pendingCount.set(null);
+        },
+      });
   }
 
   /** Open the commit dialog: flush pending edits, then load the change review. */
@@ -916,8 +1006,12 @@ export class AssetContentGridComponent implements OnInit {
         {
           field: 'sura',
           headerName: this.colHeader('SURA'),
-          width: 100,
+          width: 160,
           editable: false,
+          // Shows "2. Al-Baqara"; the filter still matches the surah number (it
+          // reads the raw value, not the formatted text).
+          valueFormatter: ({ value }) =>
+            value == null ? '' : surahLabel(value, this.translate.currentLang === 'ar'),
           filter: 'agNumberColumnFilter',
           filterParams: NUMBER_FILTER_PARAMS,
           floatingFilter: true,
@@ -958,6 +1052,8 @@ export class AssetContentGridComponent implements OnInit {
         cellEditor: ContentTextCellEditorComponent,
         cellEditorPopup: true,
         cellEditorParams: { readOnly: true } satisfies ContentTextEditorParams,
+        // Being "editable", AG Grid would clear it on Delete/Backspace without the popup.
+        suppressKeyboardEvent: suppressClearKeys,
         cellStyle: { direction: this.sourceTextDirection() },
         ...textFilter,
       });
@@ -970,7 +1066,11 @@ export class AssetContentGridComponent implements OnInit {
       editable: true,
       cellEditor: ContentTextCellEditorComponent,
       cellEditorPopup: true,
-      cellEditorParams: { sourceTitle: this.sourceColHeader() } satisfies ContentTextEditorParams,
+      // Read-only mode still opens the popup, to read long text in full.
+      cellEditorParams: {
+        sourceTitle: this.sourceColHeader(),
+        readOnly: this.readOnly(),
+      } satisfies ContentTextEditorParams,
       // Yellow when the draft differs from the published version.
       cellClassRules: { 'content-grid__cell--changed': (p) => !!p.data?.changed },
       ...textFilter,

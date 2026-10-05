@@ -32,6 +32,10 @@ function flushDraft(httpMock: HttpTestingController, slug: string, id: number): 
     created_at: '2026-01-01T00:00:00Z',
   };
   httpMock.expectOne((r) => r.url.includes('draft/') && r.url.includes(slug)).flush(draft);
+  // The editor counts the draft's real changes to know whether Commit applies.
+  httpMock
+    .expectOne((r) => r.url.includes('pending-diff/') && r.url.includes(slug))
+    .flush({ results: [], count: 0 });
 }
 
 describe('AssetContentGridComponent word datasource', () => {
@@ -220,6 +224,8 @@ describe('AssetContentGridComponent word datasource', () => {
     const saved = grid.keepDraftOnLeave();
     httpMock.expectOne((r) => r.method === 'PATCH' && r.url.includes('entries/')).flush([]);
     expect(await saved).toBeTrue();
+    // A save re-counts the draft's changes (for the Commit button).
+    httpMock.expectOne((r) => r.url.includes('pending-diff/')).flush({ results: [], count: 1 });
     fixture.detectChanges();
 
     // Assert

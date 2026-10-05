@@ -4,6 +4,7 @@ import { Component, DestroyRef, Input, OnInit, computed, inject, signal } from '
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgIcon } from '@ng-icons/core';
+import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -33,6 +34,14 @@ import { CsvTemplateDownloadComponent } from '../csv-template-download/csv-templ
 import { UniversalAssetPreviewerComponent } from '../universal-asset-previewer/universal-asset-previewer.component';
 
 const DEFAULT_PAGE_SIZE = 10;
+/** Diff rows per request — the API's maximum, so large diffs need few round trips. */
+const DIFF_PAGE_SIZE = 1000;
+
+/** Upload/replace rejections that have a more helpful message than the generic save error. */
+const SAVE_ERROR_KEYS: Record<string, string> = {
+  content_file_unparseable: 'ADMIN.VERSION_PUBLISHING.FILE_UNPARSEABLE_ERROR',
+  version_is_published: 'ADMIN.VERSION_PUBLISHING.VERSION_IS_PUBLISHED_ERROR',
+};
 
 /**
  * Version management is gated per asset type: the backend `PermissionChoice` set has no
@@ -86,6 +95,7 @@ const VERSION_PERMISSIONS: Record<
     NzToolTipModule,
     UniversalAssetPreviewerComponent,
     ContentChangesComponent,
+    RouterLink,
   ],
   templateUrl: './asset-versions-manager.component.html',
   styleUrl: './asset-versions-manager.component.less',
@@ -133,6 +143,8 @@ export class AssetVersionsManagerComponent implements OnInit {
   /** Set when the diff request failed, so the panel says so instead of
    *  reporting the empty diff as "no changes". */
   readonly diffError = signal(false);
+  /** The first page is shown; the rest of a large diff is still arriving. */
+  readonly diffLoadingMore = signal(false);
   readonly diff = signal<ContentChange[]>([]);
 
   /** Preview modal state. */
@@ -154,10 +166,9 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly selectedLanguageObj = computed(() =>
     this.languages().find((l) => l.language === this.selectedLanguage())
   );
-  /** The source language's availability follows the asset's own status, so only
-   *  translations expose a manual availability toggle here. */
+  /** Every language, the source included, can be shown to or hidden from consumers. */
   readonly canToggleAvailability = computed(
-    () => this.canMutateVersions() && this.selectedLanguageObj()?.is_source === false
+    () => this.canMutateVersions() && this.selectedLanguageObj() !== undefined
   );
   readonly selectedLangAvailable = computed(
     () => this.selectedLanguageObj()?.is_available ?? false
@@ -168,6 +179,7 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly saving = signal(false);
   readonly downloadingId = signal<number | null>(null);
   readonly restoringId = signal<number | null>(null);
+  readonly publishingId = signal<number | null>(null);
   readonly searchTerm = signal('');
   readonly selectedFileName = signal<string | null>(null);
   private selectedFile: File | null = null;
@@ -189,6 +201,11 @@ export class AssetVersionsManagerComponent implements OnInit {
     name: ['', [Validators.required]],
     summary: ['', [Validators.required]],
   });
+
+  /** Admin route segment of the parent asset list (e.g. `tafsirs`). */
+  listSegment(): string {
+    return this.kind === 'tafsir' ? 'tafsirs' : 'translations';
+  }
 
   /** Only translations and tafsirs carry per-language content/versions. */
   supportsLanguages(): boolean {
@@ -442,7 +459,10 @@ export class AssetVersionsManagerComponent implements OnInit {
         },
         error: (err: unknown) => {
           if (err instanceof HttpErrorResponse && err.status === 0) return;
-          this.message.error(this.translate.instant(`${this.i18nPrefix}.MESSAGES.SAVE_ERROR`));
+          const errorName = err instanceof HttpErrorResponse ? err.error?.error_name : undefined;
+          const key =
+            SAVE_ERROR_KEYS[errorName as string] ?? `${this.i18nPrefix}.MESSAGES.SAVE_ERROR`;
+          this.message.error(this.translate.instant(key));
         },
       });
   }
@@ -596,27 +616,35 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.diff.set([]);
     this.diffError.set(false);
     this.diffLoading.set(true);
+    this.diffLoadingMore.set(false);
     this.loadAllVersionDiffs(row.id, 1, []);
   }
 
   private loadAllVersionDiffs(versionId: number, page: number, acc: ContentChange[]): void {
     this.assetContentService
-      .versionDiff(this.kind, this.slug, versionId, page, 100)
+      .versionDiff(this.kind, this.slug, versionId, page, DIFF_PAGE_SIZE)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           if (this.expandedId() !== versionId) return;
           const merged = acc.concat(res.results);
-          if (merged.length < res.count && res.results.length > 0) {
-            this.loadAllVersionDiffs(versionId, page + 1, merged);
-          } else {
+          const more = merged.length < res.count && res.results.length > 0;
+          // Show the first page at once and the full list when it is complete: a
+          // first version lists every unit as added, which can be thousands of rows.
+          // Updating only twice keeps the list's filter from resetting on every page.
+          if (page === 1 || !more) {
             this.diff.set(merged);
-            this.diffLoading.set(false);
+          }
+          this.diffLoading.set(false);
+          this.diffLoadingMore.set(more);
+          if (more) {
+            this.loadAllVersionDiffs(versionId, page + 1, merged);
           }
         },
         error: () => {
           if (this.expandedId() === versionId) {
             this.diffLoading.set(false);
+            this.diffLoadingMore.set(false);
             this.diffError.set(true);
           }
         },
@@ -697,6 +725,52 @@ export class AssetVersionsManagerComponent implements OnInit {
     });
   }
 
+  /** Make a fully approved version the one consumers see for its language. */
+  publishVersion(row: AssetVersion): void {
+    if (!this.canPublish() || !row.is_approved || this.publishingId() !== null) {
+      return;
+    }
+    this.modal.confirm({
+      nzTitle: this.translate.instant('ADMIN.VERSION_PUBLISHING.CONFIRM_TITLE'),
+      nzContent: this.translate.instant('ADMIN.VERSION_PUBLISHING.CONFIRM_BODY', {
+        name: row.name,
+      }),
+      nzOkText: this.translate.instant('ADMIN.VERSION_PUBLISHING.CONFIRM_OK'),
+      nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
+      nzDirection: this.modalDirection(),
+      nzOnOk: () =>
+        new Promise<void>((resolve, reject) => {
+          this.publishingId.set(row.id);
+          this.assetContentService
+            .setPublishedVersion(this.kind, this.slug, row.id)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: () => {
+                this.publishingId.set(null);
+                this.message.success(
+                  this.translate.instant('ADMIN.VERSION_PUBLISHING.PUBLISH_SUCCESS', {
+                    name: row.name,
+                  })
+                );
+                this.loadList();
+                resolve();
+              },
+              error: (err: HttpErrorResponse) => {
+                this.publishingId.set(null);
+                const key =
+                  err.error?.error_name === 'version_not_approved'
+                    ? 'ADMIN.VERSION_PUBLISHING.NOT_APPROVED_ERROR'
+                    : 'ADMIN.VERSION_PUBLISHING.PUBLISH_ERROR';
+                this.message.error(this.translate.instant(key));
+                // The list may be stale (e.g. a review was withdrawn meanwhile).
+                this.loadList();
+                reject();
+              },
+            });
+        }),
+    });
+  }
+
   /** Download a version's content (CSV of its per-ayah entries, or its file). */
   downloadVersion(row: AssetVersion): void {
     if (this.downloadingId() !== null) {
@@ -767,6 +841,29 @@ export class AssetVersionsManagerComponent implements OnInit {
 
   canMutateVersions(): boolean {
     return this.adminAuth.hasPermission(VERSION_PERMISSIONS[this.kind].mutate);
+  }
+
+  /** Why the publish action is (un)available for a version. */
+  publishTooltip(ver: AssetVersion): string {
+    return ver.is_approved
+      ? 'ADMIN.VERSION_PUBLISHING.TOOLTIP_PUBLISH'
+      : 'ADMIN.VERSION_PUBLISHING.TOOLTIP_NOT_APPROVED';
+  }
+
+  /** Reviewers can jump from a version's pending count to its changes. */
+  canReview(): boolean {
+    return (
+      this.supportsLanguages() &&
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_REVIEW_CONTENT)
+    );
+  }
+
+  /** Choosing the consumer-visible version applies to translations/tafsirs only. */
+  canPublish(): boolean {
+    return (
+      this.supportsLanguages() &&
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT)
+    );
   }
 
   canDeleteVersions(): boolean {

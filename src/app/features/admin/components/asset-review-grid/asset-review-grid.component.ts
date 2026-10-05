@@ -1,6 +1,15 @@
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, Input, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  Input,
+  OnInit,
+  computed,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -15,18 +24,32 @@ import { NzTableModule } from 'ng-zorro-antd/table';
 
 import { AdminTablePaginationComponent } from '../admin-table-pagination/admin-table-pagination.component';
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
-import type { ReviewChange, ReviewState } from '../../models/asset-review.models';
+import type { ReviewChange, ReviewState, ReviewVersion } from '../../models/asset-review.models';
 import type { AssetVersionParentKind } from '../../models/asset-versions.models';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { AssetReviewService } from '../../services/asset-review.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { localizedLanguageName } from '../../utils/iso-639.util';
+import { isPreviewCut } from '../../utils/text-preview.util';
+import { diffWords, type WordDiff } from '../../utils/word-diff.util';
+import { ChangeCompareComponent } from '../change-compare/change-compare.component';
 
 export type ReviewActionType = 'approve' | 'comment' | 'unreview';
 
 type StateFilter = 'all' | ReviewState;
 
 const DEFAULT_PAGE_SIZE = 25;
+/** Unchanged words kept around each change — the same as the versions list. */
+const CONTEXT_WORDS = 2;
+
+/** What a review row compares: the reviewed text against what it replaces. */
+interface RowCompare {
+  before: string;
+  after: string;
+  words: WordDiff | null;
+  /** Shown cut short inline: offer "Show full text". */
+  cut: boolean;
+}
 
 @Component({
   selector: 'app-asset-review-grid',
@@ -42,6 +65,7 @@ const DEFAULT_PAGE_SIZE = 25;
     NzSpinModule,
     NzTableModule,
     AdminTablePaginationComponent,
+    ChangeCompareComponent,
   ],
   templateUrl: './asset-review-grid.component.html',
   styleUrl: './asset-review-grid.component.less',
@@ -62,6 +86,10 @@ export class AssetReviewGridComponent implements OnInit {
   @Input({ required: true }) kind!: AssetVersionParentKind;
   /** Slug from route (tafsir or translation). */
   @Input({ required: true }) slug!: string;
+  /** Language to open on (e.g. from a version's "pending review" link). */
+  readonly initialLanguage = input<string | null>(null);
+  /** Version to open on: only the changes that make it up are listed. */
+  readonly initialVersion = input<number | null>(null);
 
   readonly canReview = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_REVIEW_CONTENT)
@@ -76,6 +104,13 @@ export class AssetReviewGridComponent implements OnInit {
   readonly loading = signal(false);
   readonly languagesError = signal(false);
   readonly stateFilter = signal<StateFilter>('unreviewed');
+  /** The selected language's committed versions, newest first. */
+  readonly versions = signal<ReviewVersion[]>([]);
+  /** `null`: every change; otherwise the changes that make up this version. */
+  readonly selectedVersion = signal<number | null>(null);
+  readonly selectedVersionName = computed(
+    () => this.versions().find((v) => v.id === this.selectedVersion())?.name ?? null
+  );
   readonly savingAction = signal<{ id: number; action: ReviewActionType } | null>(null);
 
   /** Comment dialog state. */
@@ -84,6 +119,36 @@ export class AssetReviewGridComponent implements OnInit {
   commentChangeId: number | null = null;
 
   readonly hasLanguages = computed(() => this.languages().length > 0);
+
+  /**
+   * Before/after per row. "Before" is the last-approved text, so the reviewer sees
+   * the net change since the last approval; a unit never approved compares with
+   * the text this commit replaced.
+   */
+  readonly compare = computed(() => {
+    const byId = new Map<number, RowCompare>();
+    for (const row of this.changes()) {
+      const before = row.baseline_text || row.old_text || '';
+      const after = row.new_text || '';
+      const words =
+        before && after && before !== after
+          ? diffWords(before, after, { contextWords: CONTEXT_WORDS })
+          : null;
+      byId.set(row.id, { before, after, words, cut: isPreviewCut(before, after, words) });
+    }
+    return byId;
+  });
+
+  /** The row whose full before/after text is open in the popup. */
+  readonly fullTextRow = signal<ReviewChange | null>(null);
+
+  openFullText(row: ReviewChange): void {
+    this.fullTextRow.set(row);
+  }
+
+  closeFullText(): void {
+    this.fullTextRow.set(null);
+  }
 
   readonly langName = (code: string): string =>
     localizedLanguageName(code, this.translate.currentLang || 'en');
@@ -114,10 +179,14 @@ export class AssetReviewGridComponent implements OnInit {
       .subscribe({
         next: (langs) => {
           this.languages.set(langs);
+          const requested = langs.find((l) => l === this.initialLanguage());
           const remembered = this.lastLanguage.get(this.kind, this.slug);
-          const initial = langs.find((l) => l === remembered) ?? langs[0] ?? null;
+          const initial = requested ?? langs.find((l) => l === remembered) ?? langs[0] ?? null;
           this.selectedLanguage.set(initial);
+          // A requested version only applies to the language it was requested with.
+          this.selectedVersion.set(requested ? this.initialVersion() : null);
           if (this.selectedLanguage()) {
+            this.loadVersions();
             this.loadChanges();
           } else {
             this.loading.set(false);
@@ -128,6 +197,22 @@ export class AssetReviewGridComponent implements OnInit {
           this.languagesError.set(true);
           this.showError(err);
         },
+      });
+  }
+
+  /** The version filter's options for the selected language. */
+  private loadVersions(): void {
+    const language = this.selectedLanguage();
+    this.versions.set([]);
+    if (!language) return;
+    this.reviewService
+      .listVersions(this.kind, this.slug, language)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (versions) => {
+          if (this.selectedLanguage() === language) this.versions.set(versions);
+        },
+        error: (err: HttpErrorResponse) => this.showError(err),
       });
   }
 
@@ -146,7 +231,8 @@ export class AssetReviewGridComponent implements OnInit {
         language,
         this.page(),
         this.pageSize(),
-        filter === 'all' ? null : filter
+        filter === 'all' ? null : filter,
+        this.selectedVersion()
       )
       .pipe(takeUntil(this.cancelInFlightChanges$), takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -165,6 +251,15 @@ export class AssetReviewGridComponent implements OnInit {
   onLanguageChange(language: string): void {
     this.selectedLanguage.set(language);
     this.lastLanguage.set(this.kind, this.slug, language);
+    // Versions belong to one language.
+    this.selectedVersion.set(null);
+    this.loadVersions();
+    this.page.set(1);
+    this.loadChanges();
+  }
+
+  onVersionChange(version: number | 'all'): void {
+    this.selectedVersion.set(version === 'all' ? null : version);
     this.page.set(1);
     this.loadChanges();
   }

@@ -7,7 +7,8 @@ import { AdminTitleCountComponent } from '../admin-title-count/admin-title-count
 import { AssetContentGridComponent } from '../asset-content-grid/asset-content-grid.component';
 
 /**
- * Route-hosted editor page for a translation's / tafsir's per-ayah content.
+ * Route-hosted editor page for a translation's / tafsir's per-ayah content —
+ * or, on the version route (`data.readOnly`), a read-only view of one version.
  * `kind` comes from the route's `data`, `slug` from the `:slug` param.
  * Delegates unsaved-work handling to the embedded grid so the route's
  * `unsavedContentGuard` can confirm and discard the draft on exit.
@@ -25,6 +26,8 @@ export class AssetContentEditorComponent implements OnInit, HasUnsavedContent {
 
   readonly kind = signal<AssetVersionParentKind>('translation');
   readonly slug = signal<string>('');
+  /** Set on the read-only version route: the version shown instead of a draft. */
+  readonly viewVersionId = signal<number | null>(null);
 
   get listSegment(): string {
     return this.kind() === 'tafsir' ? 'tafsirs' : 'translations';
@@ -34,6 +37,9 @@ export class AssetContentEditorComponent implements OnInit, HasUnsavedContent {
     const dataKind = this.route.snapshot.data['kind'] as AssetVersionParentKind | undefined;
     this.kind.set(dataKind ?? 'translation');
     this.slug.set(this.route.snapshot.params['slug'] ?? '');
+    if (this.route.snapshot.data['readOnly']) {
+      this.viewVersionId.set(Number(this.route.snapshot.params['versionId']));
+    }
   }
 
   hasUnsavedWork(): boolean {

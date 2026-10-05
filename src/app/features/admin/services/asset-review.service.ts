@@ -7,6 +7,7 @@ import type {
   ReviewChange,
   ReviewChangesResponse,
   ReviewState,
+  ReviewVersion,
 } from '../models/asset-review.models';
 
 /**
@@ -29,14 +30,27 @@ export class AssetReviewService {
     return this.http.get<string[]>(`${this.reviewBase(kind, slug)}languages/`);
   }
 
-  /** Paginated changes for one (asset, language), optionally filtered by state. */
+  /** A language's committed versions, newest first (the version filter). */
+  listVersions(
+    kind: AssetVersionParentKind,
+    slug: string,
+    language: string
+  ): Observable<ReviewVersion[]> {
+    return this.http.get<ReviewVersion[]>(`${this.reviewBase(kind, slug)}versions/`, {
+      params: new HttpParams().set('language', language),
+    });
+  }
+
+  /** Paginated changes for one (asset, language): every change, or with `version`
+   *  only those that make up that version; optionally filtered by state. */
   listChanges(
     kind: AssetVersionParentKind,
     slug: string,
     language: string,
     page: number,
     pageSize: number,
-    state?: ReviewState | null
+    state?: ReviewState | null,
+    version?: number | null
   ): Observable<ReviewChangesResponse> {
     let params = new HttpParams()
       .set('language', language)
@@ -44,6 +58,10 @@ export class AssetReviewService {
       .set('page_size', pageSize.toString());
     if (state) {
       params = params.set('state', state);
+    }
+    if (version != null) {
+      // The changes that make up this version (what decides whether it is approved).
+      params = params.set('version', version.toString());
     }
     return this.http.get<ReviewChangesResponse>(`${this.reviewBase(kind, slug)}changes/`, {
       params,

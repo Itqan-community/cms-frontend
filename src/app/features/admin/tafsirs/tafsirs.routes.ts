@@ -46,6 +46,16 @@ export const tafsirRoutes: Routes = [
           ),
       },
       {
+        // Read-only view of one committed version, in the editor's table.
+        path: ':slug/versions/:versionId',
+        canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_READ_TAFSIR] })],
+        data: { kind: 'tafsir', readOnly: true },
+        loadComponent: () =>
+          import('../components/asset-content-editor/asset-content-editor.component').then(
+            (m) => m.AssetContentEditorComponent
+          ),
+      },
+      {
         path: ':slug/review',
         canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_REVIEW_CONTENT] })],
         data: { kind: 'tafsir' },

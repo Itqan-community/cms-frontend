@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 
 import type { ContentChange } from '../../models/asset-content.models';
@@ -32,6 +33,8 @@ describe('ContentChangesComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [ContentChangesComponent, TranslateModule.forRoot()],
+      // The full-text popup is an animated ng-zorro modal.
+      providers: [provideNoopAnimations()],
     }).compileComponents();
   });
 
@@ -57,11 +60,11 @@ describe('ContentChangesComponent', () => {
     expect(el.querySelector('.content-changes__item--added')?.textContent).toContain('fresh text');
     expect(el.querySelector('.content-changes__item--removed')?.textContent).toContain('old text');
     const modified = el.querySelector('.content-changes__item--modified')!;
-    expect(modified.querySelector('.content-changes__word--removed')?.textContent).toBe('God');
-    expect(modified.querySelector('.content-changes__word--added')?.textContent).toBe('Allah');
+    expect(modified.querySelector('.change-compare__word--removed')?.textContent).toBe('God');
+    expect(modified.querySelector('.change-compare__word--added')?.textContent).toBe('Allah');
   });
 
-  it('folds long unchanged text around an edit and shows it all on request', () => {
+  it('folds long unchanged text around an edit and opens it all in a popup', () => {
     const words = (from: number, to: number) =>
       Array.from({ length: to - from }, (_, i) => `w${from + i}`).join(' ');
     const fixture = render([
@@ -73,17 +76,30 @@ describe('ContentChangesComponent', () => {
       ),
     ]);
     const el: HTMLElement = fixture.nativeElement;
-    const after = () => el.querySelector('.content-changes__text--after')!;
+    const after = () => el.querySelector('.change-compare__text--after')!;
 
-    expect(after().querySelectorAll('.content-changes__gap').length).toBe(2);
+    expect(after().querySelectorAll('.change-compare__gap').length).toBe(2);
     expect(after().textContent).not.toContain('w0 ');
-    expect(after().querySelector('.content-changes__word--added')?.textContent).toBe('Allah');
+    expect(after().querySelector('.change-compare__word--added')?.textContent).toBe('Allah');
 
-    el.querySelector<HTMLButtonElement>('.content-changes__toggle')!.click();
+    el.querySelector<HTMLButtonElement>('.content-changes__full-text')!.click();
     fixture.detectChanges();
 
-    expect(after().querySelector('.content-changes__gap')).toBeNull();
-    expect(after().textContent).toContain('w0 ');
+    // The whole text opens in a popup; the list itself stays folded.
+    expect(fixture.componentInstance.fullTextItem()?.change.unit_id).toBe(1);
+    expect(after().querySelectorAll('.change-compare__gap').length).toBe(2);
+    fixture.componentInstance.closeFullText();
+    expect(fixture.componentInstance.fullTextItem()).toBeNull();
+  });
+
+  it('cuts a long added text short and offers it in full', () => {
+    const longText = Array.from({ length: 400 }, (_, i) => `word${i}`).join(' ');
+    const el: HTMLElement = render([change(1, 'added', '', longText)]).nativeElement;
+
+    const card = el.querySelector('.content-changes__text--added')!;
+    expect(card.textContent!.length).toBeLessThan(longText.length / 2);
+    expect(card.querySelector('.content-changes__gap')).not.toBeNull();
+    expect(el.querySelector('.content-changes__full-text')).not.toBeNull();
   });
 
   describe('compact (versions list)', () => {
@@ -100,12 +116,12 @@ describe('ContentChangesComponent', () => {
     it('stacks before above after', () => {
       const el: HTMLElement = render([edit()], true).nativeElement;
 
-      expect(el.querySelector('.content-changes__compare--stacked')).not.toBeNull();
+      expect(el.querySelector('.change-compare--stacked')).not.toBeNull();
     });
 
     it('keeps only a couple of words around each change', () => {
       const el: HTMLElement = render([edit()], true).nativeElement;
-      const after = el.querySelector('.content-changes__text--after')!;
+      const after = el.querySelector('.change-compare__text--after')!;
 
       expect(after.textContent).toContain('w38 w39 Allah w40 w41');
       expect(after.textContent).not.toContain('w37');
@@ -115,8 +131,8 @@ describe('ContentChangesComponent', () => {
     it('leaves the default layout and context alone', () => {
       const el: HTMLElement = render([edit()]).nativeElement;
 
-      expect(el.querySelector('.content-changes__compare--stacked')).toBeNull();
-      expect(el.querySelector('.content-changes__text--after')!.textContent).toContain('w34');
+      expect(el.querySelector('.change-compare--stacked')).toBeNull();
+      expect(el.querySelector('.change-compare__text--after')!.textContent).toContain('w34');
     });
   });
 
@@ -165,8 +181,42 @@ describe('ContentChangesComponent', () => {
 
     const reviews = el.querySelectorAll('.content-changes__review');
     expect(reviews.length).toBe(1);
-    expect(reviews[0].textContent).toContain('Spelling of the first word');
     expect(reviews[0].textContent).toContain('Aisha');
     expect(reviews[0].textContent).toContain('ADMIN.REVIEW.STATE.COMMENTED');
+    expect(el.querySelector('.content-changes__review-comment')?.textContent).toContain(
+      'Spelling of the first word'
+    );
+  });
+
+  it('shows the review outcome on the same line as the change type', () => {
+    const approved: ContentChange = {
+      ...change(1, 'modified', 'old', 'new'),
+      review_state: 'approved',
+      reviewed_by: 'Aisha',
+    };
+    const el: HTMLElement = render([approved], true).nativeElement;
+
+    const head = el.querySelector('.content-changes__head')!;
+    expect(head.querySelector('.content-changes__badge')).not.toBeNull();
+    expect(head.querySelector('.content-changes__review--approved')?.textContent).toContain(
+      'Aisha'
+    );
+  });
+
+  it('marks unreviewed changes of a committed version', () => {
+    const unreviewed: ContentChange = {
+      ...change(1, 'added', '', 'new'),
+      review_state: 'unreviewed',
+    };
+    const el: HTMLElement = render([unreviewed], true).nativeElement;
+
+    expect(el.querySelector('.content-changes__review--unreviewed')).not.toBeNull();
+  });
+
+  it('does not mark uncommitted edits as unreviewed', () => {
+    const pending: ContentChange = { ...change(1, 'added', '', 'new'), review_state: 'unreviewed' };
+    const el: HTMLElement = render([pending]).nativeElement;
+
+    expect(el.querySelector('.content-changes__review')).toBeNull();
   });
 });

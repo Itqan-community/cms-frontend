@@ -2,7 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import type { IFloatingFilterAngularComp } from 'ag-grid-angular';
 import type { IFloatingFilterParams, NumberFilter } from 'ag-grid-community';
-import { SURAHS_METADATA } from '../../models/quran-metadata';
+import { SURAHS_METADATA, surahLabel } from '../../models/quran-metadata';
 
 /**
  * A dropdown floating filter for the Surah number column. Community edition
@@ -54,7 +54,7 @@ export class SurahFloatingFilterComponent implements IFloatingFilterAngularComp 
     const arabic = this.translate.currentLang === 'ar';
     return SURAHS_METADATA.map((s) => ({
       value: String(s.id),
-      label: `${s.id}. ${arabic ? s.name_ar : s.name_en}`,
+      label: surahLabel(s.id, arabic),
     }));
   });
 

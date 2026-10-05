@@ -9,7 +9,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
-import { AssetContentGridComponent } from './asset-content-grid.component';
+import { AssetContentGridComponent, suppressClearKeys } from './asset-content-grid.component';
 import { ContentTextCellEditorComponent } from './content-text-cell-editor.component';
 
 describe('AssetContentGridComponent column definitions', () => {
@@ -94,6 +94,58 @@ describe('AssetContentGridComponent column definitions', () => {
       expect(aya?.filter).withContext(template).toBe('agNumberColumnFilter');
       expect(aya?.floatingFilter).withContext(template).toBeTrue();
     }
+  });
+
+  it('keeps Delete and Backspace from clearing the read-only source column', () => {
+    // Arrange — the source column of a translation (non-source language) editor
+    const grid = componentFor('ayah');
+    grid.languages.set([
+      { language: 'ar', is_source: true, is_available: true },
+      { language: 'fr', is_source: false, is_available: true },
+    ]);
+    grid.selectedLanguage.set('fr');
+    const source = grid.buildColumnDefs().find((col) => col.field === 'source_text')!;
+    const press = (key: string, editing = false) =>
+      suppressClearKeys({ editing, event: new KeyboardEvent('keydown', { key }) } as never);
+
+    // Act / Assert
+    expect(source.suppressKeyboardEvent).toBe(suppressClearKeys);
+    expect(press('Delete')).toBeTrue();
+    expect(press('Backspace')).toBeTrue();
+    expect(press('Enter')).toBeFalse();
+    // Inside the open popup the keys are left alone
+    expect(press('Delete', true)).toBeFalse();
+  });
+
+  it('shows the surah name beside its number while filtering on the number', () => {
+    for (const template of ['ayah', 'word']) {
+      // Arrange
+      const sura = componentFor(template)
+        .buildColumnDefs()
+        .find((col) => col.field === 'sura')!;
+      const format = sura.valueFormatter as (params: { value: number | null }) => string;
+
+      // Act / Assert — the filter stays numeric; only the displayed text changes
+      expect(format({ value: 2 }))
+        .withContext(template)
+        .toBe('2. Al-Baqarah');
+      expect(format({ value: null }))
+        .withContext(template)
+        .toBe('');
+      expect(sura.filter).withContext(template).toBe('agNumberColumnFilter');
+    }
+  });
+
+  it('shows the Arabic surah name in the Arabic interface', () => {
+    // Arrange
+    TestBed.inject(TranslateService).use('ar');
+    const sura = componentFor('ayah')
+      .buildColumnDefs()
+      .find((col) => col.field === 'sura')!;
+    const format = sura.valueFormatter as (params: { value: number }) => string;
+
+    // Act / Assert
+    expect(format({ value: 2 })).toBe('2. البقرة');
   });
 
   it('puts the surah-name dropdown on the unit column wherever units have a surah', () => {
@@ -271,6 +323,7 @@ describe('AssetContentGridComponent column definitions', () => {
         entries_count: 1,
         created_at: '2026-01-01T00:00:00Z',
       });
+    httpMock.expectOne((req) => req.url.includes('pending-diff/')).flush({ results: [], count: 0 });
     httpMock
       .expectOne((req) => req.url.includes('entries/'))
       .flush({
@@ -328,5 +381,191 @@ describe('AssetContentGridComponent column definitions', () => {
 
     // Assert
     expect(Object.keys(localeText)).toEqual(['loadingOoo']);
+  });
+
+  describe('read-only version view', () => {
+    function openViewer() {
+      const fixture = TestBed.createComponent(AssetContentGridComponent);
+      fixture.componentRef.setInput('kind', 'tafsir');
+      fixture.componentRef.setInput('slug', 'demo-tafsir');
+      fixture.componentRef.setInput('viewVersionId', 7);
+      fixture.detectChanges();
+      const httpMock = TestBed.inject(HttpTestingController);
+      httpMock
+        .expectOne((req) => req.url.includes('languages/'))
+        .flush([
+          { language: 'ar', is_source: true, is_available: true },
+          { language: 'fr', is_source: false, is_available: true },
+        ]);
+      httpMock
+        .expectOne((req) => req.method === 'GET' && req.url.endsWith('versions/7/'))
+        .flush({
+          id: 7,
+          asset_id: 1,
+          language: 'fr',
+          name: 'v3',
+          summary: '',
+          state: 'published',
+          entries_count: 1,
+          created_at: '2026-01-01T00:00:00Z',
+        });
+      return { fixture, httpMock };
+    }
+
+    it('loads the given version instead of opening a draft', () => {
+      // Arrange / Act
+      const { fixture, httpMock } = openViewer();
+
+      // Assert — rows come from the viewed version; no draft is created
+      httpMock.expectNone((req) => req.url.includes('draft/'));
+      const entries = httpMock.expectOne((req) => req.url.includes('versions/7/entries/'));
+      expect(entries.request.method).toBe('GET');
+      const grid = fixture.componentInstance;
+      expect(grid.viewedVersion()?.name).toBe('v3');
+      expect(grid.selectedLanguage()).toBe('fr');
+    });
+
+    it('opens text cells read-only and never reports unsaved work', () => {
+      // Arrange
+      const { fixture } = openViewer();
+      const grid = fixture.componentInstance;
+
+      // Act
+      const text = grid.buildColumnDefs().find((col) => col.field === 'text')!;
+
+      // Assert
+      expect(grid.readOnly()).toBeTrue();
+      expect((text.cellEditorParams as { readOnly: boolean }).readOnly).toBeTrue();
+      expect(grid.hasUnsavedWork()).toBeFalse();
+    });
+
+    it('ignores a cell value that changes anyway (e.g. Delete on a focused cell)', () => {
+      // Arrange
+      const { fixture } = openViewer();
+      const grid = fixture.componentInstance;
+
+      // Act — what AG Grid reports when a key clears a cell directly
+      grid.onCellValueChanged({ data: { unit_id: 1, text: '' }, oldValue: 'text' } as never);
+
+      // Assert — nothing is queued for autosave
+      expect(grid.dirty()).toBeFalse();
+      expect(grid.hasUnsavedWork()).toBeFalse();
+    });
+
+    it('hides every editing control but keeps copying', () => {
+      // Arrange
+      const { fixture } = openViewer();
+      fixture.detectChanges();
+      const toolbar: HTMLElement = fixture.nativeElement.querySelector('.content-grid__toolbar');
+
+      // Assert
+      const labels = Array.from(toolbar.querySelectorAll('button')).map((b) => b.textContent ?? '');
+      expect(labels.some((l) => l.includes('ADMIN.CONTENT_EDITOR.COPY.BUTTON'))).toBeTrue();
+      expect(labels.some((l) => l.includes('ADMIN.CONTENT_EDITOR.COMMIT.BUTTON'))).toBeFalse();
+      expect(labels.some((l) => l.includes('ADMIN.CONTENT_EDITOR.DISCARD'))).toBeFalse();
+      expect(labels.some((l) => l.includes('ADMIN.CONTENT_EDITOR.LANGUAGE.ADD'))).toBeFalse();
+      expect(toolbar.querySelector('nz-select')).toBeNull();
+    });
+  });
+
+  describe('commit button', () => {
+    function openEditor(pendingCount: number) {
+      const fixture = TestBed.createComponent(AssetContentGridComponent);
+      fixture.componentRef.setInput('kind', 'tafsir');
+      fixture.componentRef.setInput('slug', 'demo-tafsir');
+      fixture.detectChanges();
+      const httpMock = TestBed.inject(HttpTestingController);
+      httpMock
+        .expectOne((req) => req.url.includes('languages/'))
+        .flush([{ language: 'ar', is_source: true, is_available: true }]);
+      httpMock
+        .expectOne((req) => req.url.includes('draft/'))
+        .flush({
+          id: 3,
+          asset_id: 1,
+          language: 'ar',
+          name: 'draft',
+          summary: '',
+          state: 'draft',
+          entries_count: 0,
+          created_at: '2026-01-01T00:00:00Z',
+        });
+      const count = httpMock.expectOne((req) => req.url.includes('pending-diff/'));
+      expect(count.request.params.get('page_size')).toBe('1');
+      count.flush({ results: [], count: pendingCount });
+      fixture.detectChanges();
+      return fixture;
+    }
+
+    function commitButton(fixture: ReturnType<typeof openEditor>): HTMLButtonElement {
+      return fixture.nativeElement.querySelector('.content-grid__commit button');
+    }
+
+    it('is disabled with an explanation when the draft has no changes', () => {
+      // Arrange / Act
+      const fixture = openEditor(0);
+
+      // Assert
+      expect(fixture.componentInstance.nothingToCommit()).toBeTrue();
+      expect(commitButton(fixture).disabled).toBeTrue();
+    });
+
+    it('is enabled when the draft differs from the latest version', () => {
+      // Arrange / Act
+      const fixture = openEditor(2);
+
+      // Assert
+      expect(fixture.componentInstance.nothingToCommit()).toBeFalse();
+      expect(commitButton(fixture).disabled).toBeFalse();
+    });
+
+    it('ignores an older count that answers after a newer one', () => {
+      // Arrange — the count on opening is still in flight…
+      const fixture = TestBed.createComponent(AssetContentGridComponent);
+      fixture.componentRef.setInput('kind', 'tafsir');
+      fixture.componentRef.setInput('slug', 'demo-tafsir');
+      fixture.detectChanges();
+      const httpMock = TestBed.inject(HttpTestingController);
+      httpMock
+        .expectOne((req) => req.url.includes('languages/'))
+        .flush([{ language: 'ar', is_source: true, is_available: true }]);
+      httpMock
+        .expectOne((req) => req.url.includes('draft/'))
+        .flush({
+          id: 3,
+          asset_id: 1,
+          language: 'ar',
+          name: 'draft',
+          summary: '',
+          state: 'draft',
+          entries_count: 0,
+          created_at: '2026-01-01T00:00:00Z',
+        });
+      const opening = httpMock.expectOne((req) => req.url.includes('pending-diff/'));
+      // …when a save asks again (as autosave does after it succeeds)
+      (
+        fixture.componentInstance as unknown as { refreshPendingCount(): void }
+      ).refreshPendingCount();
+      const afterSave = httpMock.expectOne((req) => req.url.includes('pending-diff/'));
+
+      // Act — the newer answer arrives first, then the stale one
+      afterSave.flush({ results: [], count: 2 });
+      opening.flush({ results: [], count: 0 });
+
+      // Assert
+      expect(fixture.componentInstance.pendingCount()).toBe(2);
+    });
+
+    it('is enabled as soon as there is an unsaved edit', () => {
+      // Arrange
+      const fixture = openEditor(0);
+
+      // Act — an edit waiting for autosave
+      fixture.componentInstance.dirty.set(true);
+      fixture.detectChanges();
+
+      // Assert
+      expect(commitButton(fixture).disabled).toBeFalse();
+    });
   });
 });
