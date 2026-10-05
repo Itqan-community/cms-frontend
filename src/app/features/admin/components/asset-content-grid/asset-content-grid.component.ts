@@ -191,6 +191,8 @@ export class AssetContentGridComponent implements OnInit {
   private readonly autosave$ = new Subject<void>();
   /** Bumped on each language load so stale draft/entry responses are ignored. */
   private loadGeneration = 0;
+  /** Bumped per change-count request: only the newest answer may set `pendingCount`. */
+  private pendingCountRequest = 0;
 
   /** Unit ids with unsaved edits pending the next autosave flush. */
   private readonly pendingRows = new Map<number, ContentEntryPatch>();
@@ -804,15 +806,21 @@ export class AssetContentGridComponent implements OnInit {
   private refreshPendingCount(): void {
     const versionId = this.draftId();
     if (versionId === null || this.readOnly()) return;
+    // The count on opening can still be in flight when an autosave asks again; a
+    // late, older answer (e.g. 0) must not overwrite the newer one.
+    const request = ++this.pendingCountRequest;
+    const isLatest = () => request === this.pendingCountRequest && this.draftId() === versionId;
     this.contentService
       .pendingChanges(this.kind, this.slug, versionId, 1)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
-          if (this.draftId() === versionId) this.pendingCount.set(res.count);
+          if (isLatest()) this.pendingCount.set(res.count);
         },
         // Unknown: leave Commit enabled; the commit dialog reports the real state.
-        error: () => this.pendingCount.set(null),
+        error: () => {
+          if (isLatest()) this.pendingCount.set(null);
+        },
       });
   }
 

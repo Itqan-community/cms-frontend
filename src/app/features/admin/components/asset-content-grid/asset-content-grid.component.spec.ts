@@ -485,6 +485,43 @@ describe('AssetContentGridComponent column definitions', () => {
       expect(commitButton(fixture).disabled).toBeFalse();
     });
 
+    it('ignores an older count that answers after a newer one', () => {
+      // Arrange — the count on opening is still in flight…
+      const fixture = TestBed.createComponent(AssetContentGridComponent);
+      fixture.componentRef.setInput('kind', 'tafsir');
+      fixture.componentRef.setInput('slug', 'demo-tafsir');
+      fixture.detectChanges();
+      const httpMock = TestBed.inject(HttpTestingController);
+      httpMock
+        .expectOne((req) => req.url.includes('languages/'))
+        .flush([{ language: 'ar', is_source: true, is_available: true }]);
+      httpMock
+        .expectOne((req) => req.url.includes('draft/'))
+        .flush({
+          id: 3,
+          asset_id: 1,
+          language: 'ar',
+          name: 'draft',
+          summary: '',
+          state: 'draft',
+          entries_count: 0,
+          created_at: '2026-01-01T00:00:00Z',
+        });
+      const opening = httpMock.expectOne((req) => req.url.includes('pending-diff/'));
+      // …when a save asks again (as autosave does after it succeeds)
+      (
+        fixture.componentInstance as unknown as { refreshPendingCount(): void }
+      ).refreshPendingCount();
+      const afterSave = httpMock.expectOne((req) => req.url.includes('pending-diff/'));
+
+      // Act — the newer answer arrives first, then the stale one
+      afterSave.flush({ results: [], count: 2 });
+      opening.flush({ results: [], count: 0 });
+
+      // Assert
+      expect(fixture.componentInstance.pendingCount()).toBe(2);
+    });
+
     it('is enabled as soon as there is an unsaved edit', () => {
       // Arrange
       const fixture = openEditor(0);
