@@ -281,9 +281,10 @@ export class TimestampEditorComponent implements OnInit {
   }
 
   /**
-   * The route carries a folder slug; the upload API wants its id. A slug that matches nothing
-   * resolves to null, which saves into the default folder — the same folder the track lookup
-   * falls back to, so the read and the write stay on the same set of tracks.
+   * The route carries a folder slug (or name); the upload API wants its id. No folder means the
+   * default one — the same folder the track lookup falls back to, so the read and the write stay
+   * on the same set of tracks. A folder that matches nothing is an error rather than a silent
+   * save into the default folder.
    */
   private resolveFolderId(folders: RecitationDetailFolderRef[] | undefined): number | null {
     if (!this.folder) return null;

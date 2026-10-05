@@ -157,11 +157,19 @@ describe('TimestampEditorComponent', () => {
     });
 
     it('passes the folder through to the track lookup', async () => {
-      await setup({ recitation: 'sample-recitation', folder: 'high-quality' });
+      // A folder the recitation actually has (see RECITATION.folders).
+      await setup({ recitation: 'sample-recitation', folder: '128kbps' });
 
       expect(recitations.recitationTracksList).toHaveBeenCalledWith(
-        jasmine.objectContaining({ folder: 'high-quality' })
+        jasmine.objectContaining({ folder: '128kbps' })
       );
+    });
+
+    it('refuses a folder the recitation does not have instead of using the default one', async () => {
+      await setup({ recitation: 'sample-recitation', folder: 'high-quality' });
+
+      expect(component.loadError()).toBeTruthy();
+      expect(recitations.recitationTracksList).not.toHaveBeenCalled();
     });
 
     it('reports a track that is not in the recitation', async () => {
