@@ -222,6 +222,20 @@
     white-space: pre-line;
   }
 
+  // The rest of a long added/removed text, cut off (the popup shows it all).
+  &__gap {
+    display: inline-block;
+    margin-inline: 4px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--admin-border-200, #e5e7eb);
+    color: var(--admin-text-500, #6b7280);
+    font-size: 12px;
+    line-height: 18px;
+    text-decoration: none;
+    vertical-align: middle;
+  }
+
   &__empty {
     color: var(--admin-text-400, #9ca3af);
     font-style: italic;

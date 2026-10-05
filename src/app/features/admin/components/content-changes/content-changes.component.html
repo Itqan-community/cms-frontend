@@ -55,7 +55,7 @@
                 }
               </span>
             }
-            @if (item.words?.folded) {
+            @if (item.cut) {
               <button
                 nz-button
                 nzType="link"
@@ -73,7 +73,10 @@
             @case ('added') {
               <p class="content-changes__text content-changes__text--added" dir="auto">
                 @if (item.change.new_text) {
-                  {{ item.change.new_text }}
+                  {{ item.preview.text }}
+                  @if (item.preview.clipped) {
+                    <span class="content-changes__gap">…</span>
+                  }
                 } @else {
                   <span class="content-changes__empty">{{
                     'ADMIN.CONTENT_CHANGES.EMPTY_TEXT' | translate
@@ -84,7 +87,10 @@
             @case ('removed') {
               <p class="content-changes__text content-changes__text--removed" dir="auto">
                 @if (item.change.old_text) {
-                  {{ item.change.old_text }}
+                  {{ item.preview.text }}
+                  @if (item.preview.clipped) {
+                    <span class="content-changes__gap">…</span>
+                  }
                 } @else {
                   <span class="content-changes__empty">{{
                     'ADMIN.CONTENT_CHANGES.EMPTY_TEXT' | translate

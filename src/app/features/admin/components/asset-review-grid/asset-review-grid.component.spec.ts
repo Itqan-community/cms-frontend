@@ -322,6 +322,24 @@ describe('AssetReviewGridComponent', () => {
       expect(component.fullTextRow()).toBeNull();
     });
 
+    it('cuts a whole new text short and offers it in full in the popup', () => {
+      // Arrange — e.g. a newly uploaded language: every unit is a long "added" text
+      const longText = Array.from({ length: 400 }, (_, i) => `word${i}`).join(' ');
+      const el = render({
+        ...mockChange,
+        change_type: 'added',
+        old_text: '',
+        baseline_text: '',
+        new_text: longText,
+      });
+
+      // Assert
+      const after = el.querySelector('.change-compare__text--after')!;
+      expect(after.textContent!.length).toBeLessThan(longText.length / 2);
+      expect(after.querySelector('.change-compare__gap')).not.toBeNull();
+      expect(el.querySelector('.asset-review-grid__full-text')).not.toBeNull();
+    });
+
     it('offers no full-text popup when nothing is folded', () => {
       const el = render(mockChange);
 

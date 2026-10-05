@@ -21,6 +21,7 @@ import { AdminAuthService } from '../../services/admin-auth.service';
 import { AssetReviewService } from '../../services/asset-review.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { localizedLanguageName } from '../../utils/iso-639.util';
+import { isPreviewCut } from '../../utils/text-preview.util';
 import { diffWords, type WordDiff } from '../../utils/word-diff.util';
 import { ChangeCompareComponent } from '../change-compare/change-compare.component';
 
@@ -37,6 +38,8 @@ interface RowCompare {
   before: string;
   after: string;
   words: WordDiff | null;
+  /** Shown cut short inline: offer "Show full text". */
+  cut: boolean;
 }
 
 @Component({
@@ -111,7 +114,7 @@ export class AssetReviewGridComponent implements OnInit {
         before && after && before !== after
           ? diffWords(before, after, { contextWords: CONTEXT_WORDS })
           : null;
-      byId.set(row.id, { before, after, words });
+      byId.set(row.id, { before, after, words, cut: isPreviewCut(before, after, words) });
     }
     return byId;
   });

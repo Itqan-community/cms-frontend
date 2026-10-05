@@ -6,6 +6,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 
 import type { ContentChange } from '../../models/asset-content.models';
+import { clipText, isPreviewCut } from '../../utils/text-preview.util';
 import { diffWords, type WordDiff } from '../../utils/word-diff.util';
 import { ChangeCompareComponent } from '../change-compare/change-compare.component';
 
@@ -18,6 +19,10 @@ const PAGE_SIZE = 50;
 interface VisibleChange {
   change: ContentChange;
   words: WordDiff | null;
+  /** The added/removed card's text, cut to a preview. */
+  preview: { text: string; clipped: boolean };
+  /** Shown cut short inline: offer "Show full text". */
+  cut: boolean;
 }
 
 /** Unchanged words kept around each change in `compact` mode. */
@@ -82,17 +87,26 @@ export class ContentChangesComponent {
   readonly visible = computed<VisibleChange[]>(() =>
     this.filtered()
       .slice(0, this.limit())
-      .map((change) => ({
-        change,
-        words:
+      .map((change) => {
+        const before = change.old_text ?? '';
+        const after = change.new_text ?? '';
+        const words =
           change.change_type === 'modified'
             ? diffWords(
-                change.old_text ?? '',
-                change.new_text ?? '',
+                before,
+                after,
                 this.compact() ? { contextWords: COMPACT_CONTEXT_WORDS } : {}
               )
-            : null,
-      }))
+            : null;
+        // An added/removed card shows one side; cut it to a preview like a diff.
+        const shown = change.change_type === 'added' ? after : before;
+        return {
+          change,
+          words,
+          preview: clipText(shown),
+          cut: isPreviewCut(before, after, words),
+        };
+      })
   );
 
   /** The change whose whole text is open in the popup (the list stays folded). */

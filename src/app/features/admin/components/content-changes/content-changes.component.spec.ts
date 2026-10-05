@@ -92,6 +92,16 @@ describe('ContentChangesComponent', () => {
     expect(fixture.componentInstance.fullTextItem()).toBeNull();
   });
 
+  it('cuts a long added text short and offers it in full', () => {
+    const longText = Array.from({ length: 400 }, (_, i) => `word${i}`).join(' ');
+    const el: HTMLElement = render([change(1, 'added', '', longText)]).nativeElement;
+
+    const card = el.querySelector('.content-changes__text--added')!;
+    expect(card.textContent!.length).toBeLessThan(longText.length / 2);
+    expect(card.querySelector('.content-changes__gap')).not.toBeNull();
+    expect(el.querySelector('.content-changes__full-text')).not.toBeNull();
+  });
+
   describe('compact (versions list)', () => {
     const words = (from: number, to: number) =>
       Array.from({ length: to - from }, (_, i) => `w${from + i}`).join(' ');
