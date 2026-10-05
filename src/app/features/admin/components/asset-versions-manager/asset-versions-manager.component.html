@@ -140,6 +140,7 @@
             <app-version-number-field
               [latest]="latestNumber()"
               [loading]="latestNumberLoading()"
+              [error]="latestNumberError()"
               [start]="versionStart()"
               (startChange)="versionStart.set($event)"
               [bump]="versionBump()"

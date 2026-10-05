@@ -37,7 +37,7 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import { Subject, debounceTime } from 'rxjs';
+import { Subject, debounceTime, takeUntil } from 'rxjs';
 import type {
   AssetLanguage,
   AssetTemplate,
@@ -285,11 +285,16 @@ export class AssetContentGridComponent implements OnInit {
   /** The language's latest version number; null when this commit is its first. */
   readonly commitLatest = signal<string | null>(null);
   readonly commitLatestLoading = signal(false);
+  /** The lookup failed: the number can't be derived, so committing is blocked. */
+  readonly commitLatestError = signal(false);
+  /** Emits to drop a lookup that reopening the dialog replaced. */
+  private readonly cancelCommitLatest$ = new Subject<void>();
   readonly commitStart = signal('');
   readonly commitBump = signal<VersionBump>('minor');
   readonly commitNumberIncomplete = computed(
     () =>
       this.commitLatestLoading() ||
+      this.commitLatestError() ||
       (this.commitLatest() === null && !isVersionNumber(this.commitStart()))
   );
   /** The open draft's version name, carried over from the version it was seeded from. */
@@ -906,18 +911,22 @@ export class AssetContentGridComponent implements OnInit {
   /** Look up the number this commit follows: the language's latest version. */
   private loadCommitLatest(): void {
     const language = this.selectedLanguage();
+    this.cancelCommitLatest$.next();
     this.commitLatest.set(null);
+    this.commitLatestLoading.set(false);
+    this.commitLatestError.set(false);
     if (!language) return;
     this.commitLatestLoading.set(true);
     this.versionsService
       .latestNumber(this.kind, this.slug, language)
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(takeUntil(this.cancelCommitLatest$), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (latest) => {
           this.commitLatest.set(latest);
           this.commitLatestLoading.set(false);
         },
         error: (err: HttpErrorResponse) => {
+          this.commitLatestError.set(true);
           this.commitLatestLoading.set(false);
           this.showError(err);
         },

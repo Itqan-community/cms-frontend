@@ -25,6 +25,8 @@ export class VersionNumberFieldComponent {
   readonly latest = input<string | null>(null);
   /** True while the latest number is being looked up. */
   readonly loading = input(false);
+  /** True when the lookup failed — no number can be chosen until it succeeds. */
+  readonly error = input(false);
   readonly start = model('');
   readonly bump = model<VersionBump>('minor');
 

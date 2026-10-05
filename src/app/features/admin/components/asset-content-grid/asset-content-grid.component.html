@@ -264,6 +264,7 @@
         <app-version-number-field
           [latest]="commitLatest()"
           [loading]="commitLatestLoading()"
+          [error]="commitLatestError()"
           [start]="commitStart()"
           (startChange)="commitStart.set($event)"
           [bump]="commitBump()"

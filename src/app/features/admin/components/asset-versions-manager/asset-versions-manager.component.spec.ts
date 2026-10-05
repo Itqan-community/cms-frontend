@@ -452,6 +452,45 @@ describe('AssetVersionsManagerComponent', () => {
       expect(payload.bump).toBeUndefined();
     });
 
+    it('blocks the upload when the latest number could not be looked up', () => {
+      versionsService.latestNumber.and.returnValue(throwError(() => new Error('offline')));
+      fixture.detectChanges();
+
+      component.openCreateModal();
+      component.form.setValue({ name: '', label: '', summary: 'next' });
+      // A failed lookup must not read as "first version" and invite a starting number.
+      component.versionStart.set('7.0');
+      pickFile();
+      component.submit();
+
+      expect(component.latestNumberError()).toBeTrue();
+      expect(component.versionNumberIncomplete()).toBeTrue();
+      expect(versionsService.create).not.toHaveBeenCalled();
+    });
+
+    it('ignores a slower lookup for a language the user has moved off', () => {
+      const arLookup = new Subject<string | null>();
+      const frLookup = new Subject<string | null>();
+      versionsService.latestNumber.and.callFake((_kind, _slug, language) =>
+        language === 'ar' ? arLookup : frLookup
+      );
+      fixture.detectChanges();
+
+      component.openCreateModal();
+      component.onVersionLanguageChange('fr');
+      arLookup.next('9.0');
+      arLookup.complete();
+
+      expect(component.latestNumberLoading()).toBeTrue();
+      expect(component.latestNumber()).toBeNull();
+
+      frLookup.next('2.3');
+      frLookup.complete();
+
+      expect(component.latestNumberLoading()).toBeFalse();
+      expect(component.latestNumber()).toBe('2.3');
+    });
+
     it('restores with the chosen bump', () => {
       contentService.restoreVersion.and.returnValue(of({} as ContentDraftVersion));
       fixture.detectChanges();

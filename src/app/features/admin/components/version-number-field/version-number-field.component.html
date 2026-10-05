@@ -1,5 +1,7 @@
 @if (loading()) {
   <p class="version-number-field__loading">{{ i18n + '.LOADING' | translate }}</p>
+} @else if (error()) {
+  <p class="version-number-field__loading">{{ i18n + '.LOAD_ERROR' | translate }}</p>
 } @else if (latest() === null) {
   <nz-form-item>
     <nz-form-label nzRequired>{{ i18n + '.START_LABEL' | translate }}</nz-form-label>

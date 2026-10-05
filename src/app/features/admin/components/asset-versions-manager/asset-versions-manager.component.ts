@@ -220,6 +220,10 @@ export class AssetVersionsManagerComponent implements OnInit {
    *  upload's number derives from (null when it will be the language's first). */
   readonly latestNumber = signal<string | null>(null);
   readonly latestNumberLoading = signal(false);
+  /** The lookup failed: the number can't be derived, so uploading is blocked. */
+  readonly latestNumberError = signal(false);
+  /** Emits to drop a lookup that a newer language choice (or closing the modal) replaced. */
+  private readonly cancelLatestLookup$ = new Subject<void>();
   readonly versionStart = signal('');
   readonly versionBump = signal<VersionBump>('minor');
   /** The edited version's number — shown, never editable. */
@@ -231,6 +235,7 @@ export class AssetVersionsManagerComponent implements OnInit {
       this.modalMode() === 'create' &&
       this.numbered() &&
       (this.latestNumberLoading() ||
+        this.latestNumberError() ||
         (this.latestNumber() === null && !isVersionNumber(this.versionStart())))
   );
 
@@ -415,24 +420,31 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.versionLanguage.set(language);
     this.versionStart.set('');
     this.versionBump.set('minor');
-    this.latestNumber.set(null);
+    this.cancelLatestLookup();
     if (!this.numbered() || !language) return;
     this.latestNumberLoading.set(true);
     this.assetVersionsService
       .latestNumber(this.kind, this.slug, language)
-      .pipe(
-        takeUntil(this.cancelInFlightSubmit$),
-        finalize(() => this.latestNumberLoading.set(false)),
-        takeUntilDestroyed(this.destroyRef)
-      )
+      .pipe(takeUntil(this.cancelLatestLookup$), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (latest) => {
-          // Ignore a reply for a language the user has since moved off.
-          if (this.versionLanguage() === language) this.latestNumber.set(latest);
+          this.latestNumber.set(latest);
+          this.latestNumberLoading.set(false);
         },
-        error: () =>
-          this.message.error(this.translate.instant(`${this.i18nPrefix}.MESSAGES.LOAD_ERROR`)),
+        error: () => {
+          this.latestNumberError.set(true);
+          this.latestNumberLoading.set(false);
+          this.message.error(this.translate.instant(`${this.i18nPrefix}.MESSAGES.LOAD_ERROR`));
+        },
       });
+  }
+
+  /** Drop any in-flight lookup and forget its result. */
+  private cancelLatestLookup(): void {
+    this.cancelLatestLookup$.next();
+    this.latestNumber.set(null);
+    this.latestNumberLoading.set(false);
+    this.latestNumberError.set(false);
   }
 
   onVersionModalVisibleChange(visible: boolean): void {
@@ -457,6 +469,7 @@ export class AssetVersionsManagerComponent implements OnInit {
   private resetModalFormState(): void {
     this.editingId.set(null);
     this.editingNumber.set(null);
+    this.cancelLatestLookup();
     this.form.reset({ name: '', label: '', summary: '' });
     this.clearFile();
   }

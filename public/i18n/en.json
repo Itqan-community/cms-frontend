@@ -1111,7 +1111,8 @@
         "MAJOR": "Major change — {{from}} → {{to}}",
         "LOADING": "Checking the latest version number…",
         "NAME_LABEL": "Version name",
-        "NAME_PLACEHOLDER": "e.g. Revised edition"
+        "NAME_PLACEHOLDER": "e.g. Revised edition",
+        "LOAD_ERROR": "Couldn't load the latest version number. Close this dialog and try again."
       }
     },
     "TENANT": {
