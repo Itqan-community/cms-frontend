@@ -3,6 +3,11 @@
 @added-mark: #d9f7be;
 @removed: #cf1322;
 @removed-mark: #ffccc7;
+// Side shades: light enough that the highlighted words still stand out on them.
+@before-bg: #fdf7f6;
+@before-edge: #f3c9c4;
+@after-bg: #f5faf6;
+@after-edge: #bfe0c8;
 
 .change-compare {
   display: grid;
@@ -27,6 +32,12 @@
     .change-compare__side-title {
       flex: none;
       min-width: 3.5em;
+      // Stays in view beside its text while a long side scrolls past
+      // (e.g. in the full-text popup).
+      position: sticky;
+      top: 0;
+      align-self: flex-start;
+      padding-top: 9px;
     }
 
     .change-compare__text {
@@ -48,15 +59,28 @@
     font-weight: 500;
   }
 
+  // Before and after carry faint, different shades — and a coloured edge on the
+  // reading-start side — so where one ends and the other begins stays obvious
+  // when scrolling fast through long text. The hues echo removed/added.
   &__text {
     margin: 0;
     padding: 8px 10px;
+    border-inline-start: 3px solid transparent;
     border-radius: 6px;
-    background: #fafafa;
     color: var(--admin-text-900, #111827);
     line-height: 1.8;
     white-space: pre-line;
     overflow-wrap: anywhere;
+
+    &--before {
+      background: @before-bg;
+      border-inline-start-color: @before-edge;
+    }
+
+    &--after {
+      background: @after-bg;
+      border-inline-start-color: @after-edge;
+    }
   }
 
   // Unchanged words are muted so the highlighted changes stand out.
