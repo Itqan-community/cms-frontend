@@ -927,7 +927,9 @@
         "TRANSLATION_NOT_FOUND": "Translation not found.",
         "TAFSIR_NOT_FOUND": "Tafsir not found.",
         "CONTENT_FILE_UNPARSEABLE": "The uploaded file could not be parsed.",
-        "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "Publish a version for this language before making it available."
+        "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "Publish a version for this language before making it available.",
+        "VERSION_NUMBER_REQUIRED": "Enter a starting version number for the first version.",
+        "VERSION_NUMBER_INVALID": "Version number must be in the form major.minor, e.g. 7.0."
       },
       "TEXT_EDITOR": {
         "HINT": "Enter to apply · Shift+Enter for a new line · Esc to cancel",
@@ -1097,6 +1099,19 @@
         "CHOOSE_FILE": "Choose file",
         "CLEAR_FILE": "Remove file",
         "FILE_OPTIONAL_HINT": "Optional — select a file to upload with this asset."
+      },
+      "VERSION_NUMBER": {
+        "START_LABEL": "Starting version number",
+        "START_PLACEHOLDER": "e.g. 7.0",
+        "START_HINT": "The first version of this language. Later versions count up from it.",
+        "START_INVALID": "Use the form major.minor, e.g. 7.0.",
+        "ERR_REQUIRED": "Enter a starting version number for the first version.",
+        "BUMP_LABEL": "Version number",
+        "MINOR": "Minor change — {{from}} → {{to}}",
+        "MAJOR": "Major change — {{from}} → {{to}}",
+        "LOADING": "Checking the latest version number…",
+        "NAME_LABEL": "Version name",
+        "NAME_PLACEHOLDER": "e.g. Revised edition"
       }
     },
     "TENANT": {
@@ -1317,7 +1332,11 @@
             "RESTORE_ERROR": "Could not restore version.",
             "FILE_REQUIRED": "Choose a file to upload.",
             "LANGUAGE_REQUIRED": "Choose the version language."
-          }
+          },
+          "COL_VERSION": "Version",
+          "FORM_NUMBER": "Version number",
+          "NUMBER_LOCKED_HINT": "Version numbers are fixed once issued.",
+          "PLACEHOLDER_LABEL": "e.g. Revised edition"
         }
       },
       "MESSAGES": {
@@ -1474,7 +1493,11 @@
             "RESTORE_ERROR": "Could not restore version.",
             "FILE_REQUIRED": "Choose a file to upload.",
             "LANGUAGE_REQUIRED": "Choose the version language."
-          }
+          },
+          "COL_VERSION": "Version",
+          "FORM_NUMBER": "Version number",
+          "NUMBER_LOCKED_HINT": "Version numbers are fixed once issued.",
+          "PLACEHOLDER_LABEL": "e.g. Revised edition"
         }
       },
       "MESSAGES": {

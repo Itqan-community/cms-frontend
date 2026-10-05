@@ -903,7 +903,9 @@
         "TRANSLATION_NOT_FOUND": "الترجمة غير موجودة.",
         "TAFSIR_NOT_FOUND": "التفسير غير موجود.",
         "CONTENT_FILE_UNPARSEABLE": "تعذّر تحليل الملف المرفوع.",
-        "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "انشر نسخة لهذه اللغة قبل جعلها متاحة."
+        "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "انشر نسخة لهذه اللغة قبل جعلها متاحة.",
+        "VERSION_NUMBER_REQUIRED": "أدخل رقم الإصدار الابتدائي للإصدار الأول.",
+        "VERSION_NUMBER_INVALID": "يجب أن يكون رقم الإصدار بالصيغة رئيسي.فرعي، مثل 7.0."
       },
       "TEXT_EDITOR": {
         "HINT": "Enter للتطبيق · Shift+Enter لسطر جديد · Esc للإلغاء",
@@ -1073,6 +1075,19 @@
         "CHOOSE_FILE": "اختر ملفًا",
         "CLEAR_FILE": "إزالة الملف",
         "FILE_OPTIONAL_HINT": "اختياري — اختر ملفًا لرفعه مع هذا الأصل."
+      },
+      "VERSION_NUMBER": {
+        "START_LABEL": "رقم الإصدار الابتدائي",
+        "START_PLACEHOLDER": "مثال: 7.0",
+        "START_HINT": "الإصدار الأول لهذه اللغة، وتُرقَّم الإصدارات التالية بدءًا منه.",
+        "START_INVALID": "استخدم الصيغة رئيسي.فرعي، مثل 7.0.",
+        "ERR_REQUIRED": "أدخل رقم الإصدار الابتدائي للإصدار الأول.",
+        "BUMP_LABEL": "رقم الإصدار",
+        "MINOR": "تغيير فرعي — {{from}} ← {{to}}",
+        "MAJOR": "تغيير رئيسي — {{from}} ← {{to}}",
+        "LOADING": "جارٍ التحقق من رقم أحدث إصدار…",
+        "NAME_LABEL": "اسم الإصدار",
+        "NAME_PLACEHOLDER": "مثال: الطبعة المنقحة"
       }
     },
     "PREVIEW": {
@@ -1317,7 +1332,11 @@
             "RESTORE_ERROR": "تعذّر استعادة الإصدار.",
             "FILE_REQUIRED": "اختر ملفًا للرفع.",
             "LANGUAGE_REQUIRED": "اختر لغة الإصدار."
-          }
+          },
+          "COL_VERSION": "الإصدار",
+          "FORM_NUMBER": "رقم الإصدار",
+          "NUMBER_LOCKED_HINT": "لا يمكن تغيير رقم الإصدار بعد إصداره.",
+          "PLACEHOLDER_LABEL": "مثال: الطبعة المنقحة"
         }
       },
       "MESSAGES": {
@@ -1474,7 +1493,11 @@
             "RESTORE_ERROR": "تعذّر استعادة الإصدار.",
             "FILE_REQUIRED": "اختر ملفًا للرفع.",
             "LANGUAGE_REQUIRED": "اختر لغة الإصدار."
-          }
+          },
+          "COL_VERSION": "الإصدار",
+          "FORM_NUMBER": "رقم الإصدار",
+          "NUMBER_LOCKED_HINT": "لا يمكن تغيير رقم الإصدار بعد إصداره.",
+          "PLACEHOLDER_LABEL": "مثال: الطبعة المنقحة"
         }
       },
       "MESSAGES": {

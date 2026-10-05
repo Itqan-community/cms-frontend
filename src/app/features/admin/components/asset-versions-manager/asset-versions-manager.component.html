@@ -111,7 +111,7 @@
                 class="asset-versions-manager__modal-language"
                 [ngModel]="versionLanguage()"
                 [ngModelOptions]="{ standalone: true }"
-                (ngModelChange)="versionLanguage.set($event)"
+                (ngModelChange)="onVersionLanguageChange($event)"
               >
                 @for (lang of languages(); track lang.language) {
                   <nz-option
@@ -128,16 +128,47 @@
             </nz-form-control>
           </nz-form-item>
         }
-        <nz-form-item>
-          <nz-form-label nzRequired>{{ t('FORM_NAME') | translate }}</nz-form-label>
-          <nz-form-control [nzErrorTip]="t('ERR_NAME') | translate">
-            <input
-              nz-input
-              formControlName="name"
-              [placeholder]="t('PLACEHOLDER_NAME') | translate"
+        @if (numbered()) {
+          @if (modalMode() === 'edit') {
+            <nz-form-item>
+              <nz-form-label>{{ t('FORM_NUMBER') | translate }}</nz-form-label>
+              <nz-form-control [nzExtra]="t('NUMBER_LOCKED_HINT') | translate">
+                <input nz-input dir="ltr" [value]="editingNumber()" disabled />
+              </nz-form-control>
+            </nz-form-item>
+          } @else {
+            <app-version-number-field
+              [latest]="latestNumber()"
+              [loading]="latestNumberLoading()"
+              [start]="versionStart()"
+              (startChange)="versionStart.set($event)"
+              [bump]="versionBump()"
+              (bumpChange)="versionBump.set($event)"
             />
-          </nz-form-control>
-        </nz-form-item>
+          }
+          <nz-form-item>
+            <nz-form-label>{{ t('FORM_NAME') | translate }}</nz-form-label>
+            <nz-form-control>
+              <input
+                nz-input
+                formControlName="label"
+                maxlength="255"
+                [placeholder]="t('PLACEHOLDER_LABEL') | translate"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        } @else {
+          <nz-form-item>
+            <nz-form-label nzRequired>{{ t('FORM_NAME') | translate }}</nz-form-label>
+            <nz-form-control [nzErrorTip]="t('ERR_NAME') | translate">
+              <input
+                nz-input
+                formControlName="name"
+                [placeholder]="t('PLACEHOLDER_NAME') | translate"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        }
         <nz-form-item>
           <nz-form-label nzRequired>{{ t('FORM_SUMMARY') | translate }}</nz-form-label>
           <nz-form-control [nzErrorTip]="t('ERR_SUMMARY') | translate">
@@ -200,7 +231,7 @@
           nzType="primary"
           type="button"
           [nzLoading]="saving()"
-          [disabled]="form.invalid || missingVersionLanguage()"
+          [disabled]="form.invalid || missingVersionLanguage() || versionNumberIncomplete()"
           (click)="submit()"
         >
           @if (modalMode() === 'create') {
@@ -225,7 +256,7 @@
       >
         <thead>
           <tr>
-            <th>{{ t('COL_NAME') | translate }}</th>
+            <th>{{ (numbered() ? t('COL_VERSION') : t('COL_NAME')) | translate }}</th>
             <th>{{ t('COL_SUMMARY') | translate }}</th>
             <th nzWidth="120px">{{ t('COL_DATE') | translate }}</th>
             <th nzWidth="290px">{{ t('COL_ACTIONS') | translate }}</th>
@@ -235,7 +266,14 @@
           @for (ver of versionsTable.data; track ver.id) {
             <tr [class.asset-versions-manager__row--expanded]="expandedId() === ver.id">
               <td>
-                {{ ver.name }}
+                @if (numbered()) {
+                  <span class="admin-mono" dir="ltr">{{ ver.name }}</span>
+                  @if (ver.label) {
+                    <span class="asset-versions-manager__label">{{ ver.label }}</span>
+                  }
+                } @else {
+                  {{ ver.name }}
+                }
                 @if (supportsLanguages()) {
                   @if (ver.is_published) {
                     <span
@@ -563,4 +601,15 @@
       </ng-container>
     </nz-modal>
   }
+
+  <ng-template #restoreContentTpl>
+    <p [innerHTML]="t('RESTORE_CONFIRM_BODY') | translate: { name: restoreRow()?.name ?? '' }"></p>
+    @if (numbered()) {
+      <app-version-number-field
+        [latest]="restoreLatest()"
+        [bump]="restoreBump()"
+        (bumpChange)="restoreBump.set($event)"
+      />
+    }
+  </ng-template>
 </section>

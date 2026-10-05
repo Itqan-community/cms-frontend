@@ -1,6 +1,16 @@
 import { DatePipe } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, Input, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  Input,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgIcon } from '@ng-icons/core';
@@ -21,17 +31,23 @@ import {
   type PortalPermissionCode,
 } from '../../constants/portal-permission.constants';
 import type { AssetLanguage, ContentChange } from '../../models/asset-content.models';
-import type { AssetVersion, AssetVersionParentKind } from '../../models/asset-versions.models';
+import type {
+  AssetVersion,
+  AssetVersionParentKind,
+  VersionBump,
+} from '../../models/asset-versions.models';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { AssetContentService } from '../../services/asset-content.service';
 import { AssetVersionsService } from '../../services/asset-versions.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { localizedLanguageName } from '../../utils/iso-639.util';
+import { isVersionNumber } from '../../utils/version-number.util';
 import { AdminTablePaginationComponent } from '../admin-table-pagination/admin-table-pagination.component';
 import { AdminTitleCountComponent } from '../admin-title-count/admin-title-count.component';
 import { ContentChangesComponent } from '../content-changes/content-changes.component';
 import { CsvTemplateDownloadComponent } from '../csv-template-download/csv-template-download.component';
 import { UniversalAssetPreviewerComponent } from '../universal-asset-previewer/universal-asset-previewer.component';
+import { VersionNumberFieldComponent } from '../version-number-field/version-number-field.component';
 
 const DEFAULT_PAGE_SIZE = 10;
 /** Diff rows per request — the API's maximum, so large diffs need few round trips. */
@@ -41,6 +57,8 @@ const DIFF_PAGE_SIZE = 1000;
 const SAVE_ERROR_KEYS: Record<string, string> = {
   content_file_unparseable: 'ADMIN.VERSION_PUBLISHING.FILE_UNPARSEABLE_ERROR',
   version_is_published: 'ADMIN.VERSION_PUBLISHING.VERSION_IS_PUBLISHED_ERROR',
+  version_number_required: 'ADMIN.COMMON.VERSION_NUMBER.ERR_REQUIRED',
+  version_number_invalid: 'ADMIN.COMMON.VERSION_NUMBER.START_INVALID',
 };
 
 /**
@@ -96,6 +114,7 @@ const VERSION_PERMISSIONS: Record<
     UniversalAssetPreviewerComponent,
     ContentChangesComponent,
     RouterLink,
+    VersionNumberFieldComponent,
   ],
   templateUrl: './asset-versions-manager.component.html',
   styleUrl: './asset-versions-manager.component.less',
@@ -197,8 +216,33 @@ export class AssetVersionsManagerComponent implements OnInit {
     () => this.modalMode() === 'create' && this.supportsLanguages() && !this.versionLanguage()
   );
 
+  /** Translations/tafsirs: the language's latest version number, which the new
+   *  upload's number derives from (null when it will be the language's first). */
+  readonly latestNumber = signal<string | null>(null);
+  readonly latestNumberLoading = signal(false);
+  readonly versionStart = signal('');
+  readonly versionBump = signal<VersionBump>('minor');
+  /** The edited version's number — shown, never editable. */
+  readonly editingNumber = signal<string | null>(null);
+  /** Upload can't be numbered yet: still looking up the latest number, or a first
+   *  version without a valid starting number. */
+  readonly versionNumberIncomplete = computed(
+    () =>
+      this.modalMode() === 'create' &&
+      this.numbered() &&
+      (this.latestNumberLoading() ||
+        (this.latestNumber() === null && !isVersionNumber(this.versionStart())))
+  );
+
+  /** Restore confirmation: the restored version and its new number. */
+  @ViewChild('restoreContentTpl', { static: true }) restoreContentTpl!: TemplateRef<unknown>;
+  readonly restoreRow = signal<AssetVersion | null>(null);
+  readonly restoreLatest = signal<string | null>(null);
+  readonly restoreBump = signal<VersionBump>('minor');
+
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required]],
+    label: [''],
     summary: ['', [Validators.required]],
   });
 
@@ -212,7 +256,17 @@ export class AssetVersionsManagerComponent implements OnInit {
     return this.kind === 'translation' || this.kind === 'tafsir';
   }
 
+  /** Translations/tafsirs: `name` is a server-issued version number and `label` the
+   *  version name. Other kinds keep a free-text, editable `name`. */
+  numbered(): boolean {
+    return this.supportsLanguages();
+  }
+
   ngOnInit(): void {
+    if (this.numbered()) {
+      this.form.controls.name.clearValidators();
+      this.form.controls.name.updateValueAndValidity();
+    }
     this.search$
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe((term) => {
@@ -330,11 +384,11 @@ export class AssetVersionsManagerComponent implements OnInit {
     }
     this.modalMode.set('create');
     this.editingId.set(null);
-    this.form.reset({ name: '', summary: '' });
+    this.form.reset({ name: '', label: '', summary: '' });
     this.clearFile();
     // Default the upload to the language currently being viewed, else the source.
     const source = this.languages().find((l) => l.is_source) ?? this.languages()[0];
-    this.versionLanguage.set(this.selectedLanguage() ?? source?.language ?? null);
+    this.onVersionLanguageChange(this.selectedLanguage() ?? source?.language ?? null);
     this.versionModalTitleKey.set(`${this.i18nPrefix}.MODAL_TITLE_CREATE`);
     this.versionModalOpen.set(true);
   }
@@ -347,11 +401,38 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.editingId.set(row.id);
     this.form.patchValue({
       name: row.name,
+      label: row.label ?? '',
       summary: row.summary ?? '',
     });
+    this.editingNumber.set(row.name);
     this.clearFile();
     this.versionModalTitleKey.set(`${this.i18nPrefix}.MODAL_TITLE_EDIT`);
     this.versionModalOpen.set(true);
+  }
+
+  /** Choose the upload's language and look up the number its next version follows. */
+  onVersionLanguageChange(language: string | null): void {
+    this.versionLanguage.set(language);
+    this.versionStart.set('');
+    this.versionBump.set('minor');
+    this.latestNumber.set(null);
+    if (!this.numbered() || !language) return;
+    this.latestNumberLoading.set(true);
+    this.assetVersionsService
+      .latestNumber(this.kind, this.slug, language)
+      .pipe(
+        takeUntil(this.cancelInFlightSubmit$),
+        finalize(() => this.latestNumberLoading.set(false)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: (latest) => {
+          // Ignore a reply for a language the user has since moved off.
+          if (this.versionLanguage() === language) this.latestNumber.set(latest);
+        },
+        error: () =>
+          this.message.error(this.translate.instant(`${this.i18nPrefix}.MESSAGES.LOAD_ERROR`)),
+      });
   }
 
   onVersionModalVisibleChange(visible: boolean): void {
@@ -375,7 +456,8 @@ export class AssetVersionsManagerComponent implements OnInit {
 
   private resetModalFormState(): void {
     this.editingId.set(null);
-    this.form.reset({ name: '', summary: '' });
+    this.editingNumber.set(null);
+    this.form.reset({ name: '', label: '', summary: '' });
     this.clearFile();
   }
 
@@ -414,15 +496,28 @@ export class AssetVersionsManagerComponent implements OnInit {
       this.message.warning(this.translate.instant(`${this.i18nPrefix}.MESSAGES.LANGUAGE_REQUIRED`));
       return;
     }
+    if (this.versionNumberIncomplete()) {
+      return;
+    }
 
+    const { name, label, summary } = this.form.getRawValue();
     const payload = {
       asset_id: this.assetId,
-      name: this.form.getRawValue().name,
-      summary: this.form.getRawValue().summary,
+      ...(this.numbered()
+        ? {
+            label: label.trim(),
+            // The number is issued by the server: only how to derive it is sent.
+            ...(creating && this.latestNumber() === null
+              ? { version_number: this.versionStart().trim() }
+              : {}),
+            ...(creating ? { bump: this.versionBump() } : {}),
+          }
+        : { name }),
+      summary,
       file: this.selectedFile ?? undefined,
       // Language only applies when creating a new (uploaded) version.
       language:
-        id == null && this.supportsLanguages() ? (this.versionLanguage() ?? undefined) : undefined,
+        creating && this.supportsLanguages() ? (this.versionLanguage() ?? undefined) : undefined,
     };
 
     // Abort any previous in-flight save (e.g. double submit).
@@ -692,12 +787,32 @@ export class AssetVersionsManagerComponent implements OnInit {
 
   /** Restore a version as a new published version, making it the active one. */
   restoreVersion(row: AssetVersion): void {
-    if (!this.canEditContent() || this.restoringId() !== null) {
+    if (!this.canEditContent() || this.restoringId() !== null || !row.language) {
       return;
     }
+    // The restored copy is a new version, numbered after its language's latest.
+    this.restoringId.set(row.id);
+    this.assetVersionsService
+      .latestNumber(this.kind, this.slug, row.language)
+      .pipe(
+        finalize(() => this.restoringId.set(null)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: (latest) => {
+          this.restoreRow.set(row);
+          this.restoreLatest.set(latest);
+          this.restoreBump.set('minor');
+          this.confirmRestore(row);
+        },
+        error: () => this.message.error(this.translate.instant(this.t('MESSAGES.RESTORE_ERROR'))),
+      });
+  }
+
+  private confirmRestore(row: AssetVersion): void {
     this.modal.confirm({
       nzTitle: this.translate.instant(this.t('RESTORE_CONFIRM_TITLE')),
-      nzContent: this.translate.instant(this.t('RESTORE_CONFIRM_BODY'), { name: row.name }),
+      nzContent: this.restoreContentTpl,
       nzOkText: this.translate.instant(this.t('RESTORE_OK')),
       nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
       nzDirection: this.modalDirection(),
@@ -705,7 +820,7 @@ export class AssetVersionsManagerComponent implements OnInit {
         new Promise<void>((resolve, reject) => {
           this.restoringId.set(row.id);
           this.assetContentService
-            .restoreVersion(this.kind, this.slug, row.id)
+            .restoreVersion(this.kind, this.slug, row.id, this.restoreBump())
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
               next: () => {

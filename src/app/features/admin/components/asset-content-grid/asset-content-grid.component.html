@@ -168,7 +168,7 @@
     [nzTitle]="'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD_TITLE' | translate"
     [nzOkText]="'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD_CONFIRM' | translate"
     [nzOkLoading]="addLanguageBusy()"
-    [nzOkDisabled]="!newLanguage()"
+    [nzOkDisabled]="addLanguageBlocked()"
     [nzCancelText]="'ADMIN.CONTENT_EDITOR.LANGUAGE.ADD_CANCEL' | translate"
     (nzOnOk)="confirmAddLanguage()"
     (nzOnCancel)="addLanguageVisible.set(false)"
@@ -223,6 +223,26 @@
           </p>
         }
       </div>
+
+      @if (newLanguageFileName()) {
+        <div class="content-grid__version-fields">
+          <app-version-number-field
+            [start]="newLanguageStart()"
+            (startChange)="newLanguageStart.set($event)"
+          />
+          <label class="content-grid__commit-label" for="content-grid-new-language-label">
+            {{ 'ADMIN.COMMON.VERSION_NUMBER.NAME_LABEL' | translate }}
+          </label>
+          <input
+            id="content-grid-new-language-label"
+            nz-input
+            maxlength="255"
+            [ngModel]="newLanguageLabel()"
+            (ngModelChange)="newLanguageLabel.set($event)"
+            [placeholder]="'ADMIN.COMMON.VERSION_NUMBER.NAME_PLACEHOLDER' | translate"
+          />
+        </div>
+      }
     </ng-container>
   </nz-modal>
 
@@ -232,12 +252,35 @@
     [nzTitle]="'ADMIN.CONTENT_EDITOR.COMMIT.TITLE' | translate"
     [nzOkText]="'ADMIN.CONTENT_EDITOR.COMMIT.CONFIRM' | translate"
     [nzOkLoading]="committing()"
-    [nzOkDisabled]="!commitMessage().trim() || pendingLoading() || pendingError()"
+    [nzOkDisabled]="
+      !commitMessage().trim() || pendingLoading() || pendingError() || commitNumberIncomplete()
+    "
     [nzCancelText]="'ADMIN.CONTENT_EDITOR.COMMIT.CANCEL' | translate"
     (nzOnOk)="confirmCommit()"
     (nzOnCancel)="commitDialogVisible.set(false)"
   >
     <ng-container *nzModalContent>
+      <div class="content-grid__version-fields">
+        <app-version-number-field
+          [latest]="commitLatest()"
+          [loading]="commitLatestLoading()"
+          [start]="commitStart()"
+          (startChange)="commitStart.set($event)"
+          [bump]="commitBump()"
+          (bumpChange)="commitBump.set($event)"
+        />
+        <label class="content-grid__commit-label" for="content-grid-commit-label">
+          {{ 'ADMIN.COMMON.VERSION_NUMBER.NAME_LABEL' | translate }}
+        </label>
+        <input
+          id="content-grid-commit-label"
+          nz-input
+          maxlength="255"
+          [ngModel]="commitLabel()"
+          (ngModelChange)="commitLabel.set($event)"
+          [placeholder]="'ADMIN.COMMON.VERSION_NUMBER.NAME_PLACEHOLDER' | translate"
+        />
+      </div>
       <label class="content-grid__commit-label" for="content-grid-commit-message">
         {{ 'ADMIN.CONTENT_EDITOR.COMMIT.MESSAGE_LABEL' | translate }}
       </label>

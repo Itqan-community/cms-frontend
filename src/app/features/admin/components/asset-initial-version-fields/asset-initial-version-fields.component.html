@@ -5,6 +5,27 @@
   </h3>
   <p class="asset-initial-version-fields__hint">{{ i18n + '.SECTION_HINT' | translate }}</p>
 
+  <!-- Translations/tafsirs number their versions: the first one sets the starting number. -->
+  @if (contentKind()) {
+    <nz-form-item>
+      <nz-form-label [nzRequired]="!!versionFile()">
+        {{ 'ADMIN.COMMON.VERSION_NUMBER.START_LABEL' | translate }}
+      </nz-form-label>
+      <nz-form-control
+        [nzErrorTip]="'ADMIN.COMMON.VERSION_NUMBER.START_INVALID' | translate"
+        [nzExtra]="'ADMIN.COMMON.VERSION_NUMBER.START_HINT' | translate"
+      >
+        <input
+          nz-input
+          dir="ltr"
+          inputmode="decimal"
+          formControlName="version_number"
+          [placeholder]="'ADMIN.COMMON.VERSION_NUMBER.START_PLACEHOLDER' | translate"
+        />
+      </nz-form-control>
+    </nz-form-item>
+  }
+
   <nz-form-item>
     <nz-form-label>{{ i18n + '.FORM_NAME' | translate }}</nz-form-label>
     <nz-form-control [nzErrorTip]="i18n + '.ERR_NAME' | translate">

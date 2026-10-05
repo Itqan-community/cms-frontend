@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -24,6 +24,7 @@ import {
   createDisplayLocalizationLabels,
   localizeLanguageCode,
 } from '../../../utils/display-localization.util';
+import { versionNumberValidator } from '../../../utils/version-number.util';
 import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
 import { isRestrictedForTenantConflictError } from '../../../../../shared/utils/error.utils';
 import { AssetInitialVersionFieldsComponent } from '../../../components/asset-initial-version-fields/asset-initial-version-fields.component';
@@ -90,7 +91,17 @@ export class TafsirFormComponent implements OnInit {
     template: [null as AssetTemplate | null, [Validators.required]],
     mushaf_layout_id: [null as number | null],
     version_name: [''],
+    version_number: ['', [versionNumberValidator]],
     version_summary: [''],
+  });
+
+  /** A first version's number is required once a file is attached to the create form. */
+  private readonly versionNumberRequired = effect(() => {
+    const control = this.form.controls.version_number;
+    control.setValidators(
+      this.versionFile() ? [Validators.required, versionNumberValidator] : [versionNumberValidator]
+    );
+    control.updateValueAndValidity();
   });
 
   private editSlug: string | null = null;
@@ -239,7 +250,10 @@ export class TafsirFormComponent implements OnInit {
       const versionSummary = v.version_summary?.trim();
       if (versionName) body.version_name = versionName;
       if (versionSummary) body.version_summary = versionSummary;
-      if (this.versionFile()) body.file = this.versionFile()!;
+      if (this.versionFile()) {
+        body.file = this.versionFile()!;
+        body.version_number = (v.version_number ?? '').trim();
+      }
     }
 
     return body;
