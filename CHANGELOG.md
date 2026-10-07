@@ -457,6 +457,54 @@ Release 1.10.0.
 
 ---
 
+## [1.11.0] - 2026-10-07
+
+Release 1.11.0.
+
+## Changes
+
+- fix(admin): don't treat a failed or stale latest-number lookup as a first version
+- feat(admin): version numbers and names for tafsir and translation versions
+- fix(admin): keep Delete and Backspace from clearing the read-only source column
+- fix(admin): keep the read-only version view from clearing cells
+- fix(admin): ignore an older change count that answers after a newer one
+- test(audio): look up a folder the timestamp editor's recitation has
+- style(admin): shade before and after differently in change comparisons
+- feat(admin): filter the review page by version and link to it from versions
+- feat(admin): cut long changes short wherever diffs are shown
+- feat(admin): disable Commit while the draft has no changes
+- feat(admin): open a version change's full text in a popup
+- feat(admin): colour version actions by what they do
+- feat(admin): let the source language be shown or hidden
+- feat(admin): view any version read-only in the editor's table
+- feat(admin): show surah names beside numbers in the content editor
+- fix(admin): show a first version's changes without waiting for every page
+- feat(admin): show a change's review status as a chip on its header line
+- feat(admin): open review full text in a popup and show each change's editor
+- feat(admin): show review changes as before above after with highlighted words
+- feat(admin): publish approved versions from the version list
+- chore(audio): add an ayah timing fixture generator
+- fix(audio): correct the timing file contract and load timings that exist
+- fix(admin): default version language to the source, not the first listed
+- feat(admin): add compact mode to content changes and highlight draft edits
+- feat(admin): add read-only source column and refine saved-state logic
+- feat(admin): fullscreen content editor with ayah context, narrower grid columns (#252)
+- feat(admin): localize content grid filter UI and reduce cache block size
+- feat(admin): rename the tafsirs sidebar item to "التفاسير وعلوم القرآن"
+- feat(admin): narrow the position, surah and ayah columns in content grid
+- feat(admin): near-fullscreen text editor with ayah context in content grid
+- feat(admin): localize the content grid's loading overlay
+- feat(admin): show a loading overlay while the content grid refetches
+- feat(admin): infinite scrolling and server-side filters in content editor
+- feat(admin): add CSV template download for translations and tafsirs
+- fix(errors): stop reporting 4xx responses as server errors
+- Update src/app/features/admin/audio/components/timestamp-editor/timestamp-editor.component.ts
+- feat(audio): wire timestamp editor to the real timing contract
+- feat: enhance timestamp editor and waveform renderer functionality
+- feat: add waveform geometry utilities and tests
+
+---
+
 ## [Unreleased]
 
 ### Added
