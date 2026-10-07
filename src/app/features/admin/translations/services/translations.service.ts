@@ -79,7 +79,9 @@ export class TranslationsService {
     append('external_url', payload.external_url);
     append('template', payload.template);
     append('mushaf_layout_id', payload.mushaf_layout_id);
-    append('version_name', payload.version_name);
+    // The version name is its label; its number starts the language's numbering.
+    append('version_label', payload.version_name);
+    append('version_number', payload.version_number);
     append('version_summary', payload.version_summary);
     if (payload.file) {
       data.append('file', payload.file);

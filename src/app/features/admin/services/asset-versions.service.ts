@@ -83,6 +83,17 @@ export class AssetVersionsService {
       );
   }
 
+  /** The language's latest version number (translations/tafsirs); null when it has none. */
+  latestNumber(
+    kind: AssetVersionParentKind,
+    slug: string,
+    language: string
+  ): Observable<string | null> {
+    return this.list(kind, slug, { page: 1, page_size: 1, language }).pipe(
+      map((res) => res.results[0]?.name ?? null)
+    );
+  }
+
   create(
     kind: AssetVersionParentKind,
     slug: string,
@@ -139,7 +150,18 @@ export class AssetVersionsService {
   private toFormData(payload: AssetVersionFormPayload): FormData {
     const data = new FormData();
     data.append('asset_id', String(payload.asset_id));
-    data.append('name', payload.name);
+    if (payload.name !== undefined) {
+      data.append('name', payload.name);
+    }
+    if (payload.label !== undefined) {
+      data.append('label', payload.label);
+    }
+    if (payload.version_number) {
+      data.append('version_number', payload.version_number);
+    }
+    if (payload.bump) {
+      data.append('bump', payload.bump);
+    }
     data.append('summary', payload.summary);
     if (payload.file) {
       data.append('file', payload.file);

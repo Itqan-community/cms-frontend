@@ -114,6 +114,41 @@ describe('errorInterceptor', () => {
     req.flush('fail', { status: 404, statusText: 'Not Found' });
   });
 
+  it('shows not-found (not server error) toast for a 404', (done) => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    const url = `${api}/assets/999/`;
+    http.get(url).subscribe({
+      error: () => {
+        expect(messageSpy.error).toHaveBeenCalledWith('ERRORS.NOT_FOUND');
+        done();
+      },
+    });
+    const req = httpMock.expectOne(url);
+    req.flush(
+      { error_name: 'not_found', message: 'لا يوجد' },
+      { status: 404, statusText: 'Not Found' }
+    );
+  });
+
+  it('shows validation toast (not server error) for a 400 without a usable message', (done) => {
+    if (!api) {
+      pending('API_BASE_URL');
+      return;
+    }
+    const url = `${api}/assets/`;
+    http.post(url, {}).subscribe({
+      error: () => {
+        expect(messageSpy.error).toHaveBeenCalledWith('ERRORS.VALIDATION_ERROR');
+        done();
+      },
+    });
+    const req = httpMock.expectOne(url);
+    req.flush(null, { status: 400, statusText: 'Bad Request' });
+  });
+
   it('shows global toast for other server errors', (done) => {
     if (!api) {
       pending('API_BASE_URL');

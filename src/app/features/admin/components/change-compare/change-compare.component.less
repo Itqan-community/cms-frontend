@@ -1,0 +1,123 @@
+// Ant Design green / red — the hues the admin uses for additions and deletions.
+@added: #389e0d;
+@added-mark: #d9f7be;
+@removed: #cf1322;
+@removed-mark: #ffccc7;
+// Side shades: light enough that the highlighted words still stand out on them.
+@before-bg: #fdf7f6;
+@before-edge: #f3c9c4;
+@after-bg: #f5faf6;
+@after-edge: #bfe0c8;
+
+.change-compare {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+
+  &--stacked {
+    grid-template-columns: 1fr;
+    gap: 6px;
+
+    // Label beside its text instead of on its own line.
+    .change-compare__side {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 8px;
+    }
+
+    .change-compare__side-title {
+      flex: none;
+      min-width: 3.5em;
+      // Stays in view beside its text while a long side scrolls past
+      // (e.g. in the full-text popup).
+      position: sticky;
+      top: 0;
+      align-self: flex-start;
+      padding-top: 9px;
+    }
+
+    .change-compare__text {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+
+  &__side {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  &__side-title {
+    color: var(--admin-text-500, #6b7280);
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  // Before and after carry faint, different shades — and a coloured edge on the
+  // reading-start side — so where one ends and the other begins stays obvious
+  // when scrolling fast through long text. The hues echo removed/added.
+  &__text {
+    margin: 0;
+    padding: 8px 10px;
+    border-inline-start: 3px solid transparent;
+    border-radius: 6px;
+    color: var(--admin-text-900, #111827);
+    line-height: 1.8;
+    white-space: pre-line;
+    overflow-wrap: anywhere;
+
+    &--before {
+      background: @before-bg;
+      border-inline-start-color: @before-edge;
+    }
+
+    &--after {
+      background: @after-bg;
+      border-inline-start-color: @after-edge;
+    }
+  }
+
+  // Unchanged words are muted so the highlighted changes stand out.
+  &__word--same {
+    color: var(--admin-text-500, #6b7280);
+  }
+
+  // A folded stretch of unchanged text.
+  &__gap {
+    display: inline-block;
+    margin-inline: 4px;
+    padding: 0 6px;
+    border-radius: 999px;
+    background: var(--admin-border-200, #e5e7eb);
+    color: var(--admin-text-500, #6b7280);
+    font-size: 12px;
+    line-height: 18px;
+    vertical-align: middle;
+  }
+
+  &__word--removed {
+    border-radius: 3px;
+    background: @removed-mark;
+    color: @removed;
+    text-decoration: line-through;
+  }
+
+  &__word--added {
+    border-radius: 3px;
+    background: @added-mark;
+    color: @added;
+    font-weight: 500;
+  }
+
+  &__empty {
+    color: var(--admin-text-400, #9ca3af);
+    font-style: italic;
+    text-decoration: none;
+  }
+}

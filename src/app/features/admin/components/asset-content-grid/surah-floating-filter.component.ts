@@ -1,22 +1,14 @@
-import { Component, signal } from '@angular/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import type { IFloatingFilterAngularComp } from 'ag-grid-angular';
-import type { IFloatingFilterParams, TextFilter } from 'ag-grid-community';
-
-export interface SurahOption {
-  value: string;
-  label: string;
-}
-
-interface SurahFilterParams extends IFloatingFilterParams<TextFilter> {
-  /** Returns the current surah options (kept fresh as grid data loads). */
-  optionsProvider: () => SurahOption[];
-}
+import type { IFloatingFilterParams, NumberFilter } from 'ag-grid-community';
+import { SURAHS_METADATA, surahLabel } from '../../models/quran-metadata';
 
 /**
- * A dropdown floating filter for the Surah column. Community edition has no Set
- * Filter, so this renders a native `<select>` of the surahs present in the data
- * and drives the column's text filter (equals) from the selection.
+ * A dropdown floating filter for the Surah number column. Community edition
+ * has no Set Filter, so this renders a native `<select>` of all 114 surahs
+ * (the grid only holds the loaded blocks, so the list can't come from the
+ * rows) and drives the column's number filter (equals) from the selection.
  */
 @Component({
   selector: 'app-surah-floating-filter',
@@ -25,8 +17,6 @@ interface SurahFilterParams extends IFloatingFilterParams<TextFilter> {
     <select
       class="surah-filter"
       [value]="selected()"
-      (focus)="refreshOptions()"
-      (mousedown)="refreshOptions()"
       (change)="onChange($any($event.target).value)"
     >
       <option value="">{{ 'ADMIN.CONTENT_EDITOR.FILTER_ALL' | translate }}</option>
@@ -56,29 +46,31 @@ interface SurahFilterParams extends IFloatingFilterParams<TextFilter> {
   imports: [TranslateModule],
 })
 export class SurahFloatingFilterComponent implements IFloatingFilterAngularComp {
-  private params!: SurahFilterParams;
+  private readonly translate = inject(TranslateService);
+  private params!: IFloatingFilterParams<NumberFilter>;
 
   readonly selected = signal('');
-  readonly options = signal<SurahOption[]>([]);
+  readonly options = computed(() => {
+    const arabic = this.translate.currentLang === 'ar';
+    return SURAHS_METADATA.map((s) => ({
+      value: String(s.id),
+      label: surahLabel(s.id, arabic),
+    }));
+  });
 
-  agInit(params: SurahFilterParams): void {
+  agInit(params: IFloatingFilterParams<NumberFilter>): void {
     this.params = params;
-    this.refreshOptions();
   }
 
   /** Sync the dropdown when the parent filter model changes elsewhere. */
-  onParentModelChanged(model: { filter?: string } | null): void {
-    this.selected.set(model?.filter ?? '');
-  }
-
-  refreshOptions(): void {
-    this.options.set(this.params.optionsProvider?.() ?? []);
+  onParentModelChanged(model: { filter?: number | null } | null): void {
+    this.selected.set(model?.filter != null ? String(model.filter) : '');
   }
 
   onChange(value: string): void {
     this.selected.set(value);
     this.params.parentFilterInstance((instance) => {
-      (instance as TextFilter).onFloatingFilterChanged(value ? 'equals' : null, value || null);
+      instance.onFloatingFilterChanged(value ? 'equals' : null, value ? Number(value) : null);
     });
   }
 }

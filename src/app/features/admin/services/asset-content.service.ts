@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import type {
   AssetLanguage,
+  AssetTemplate,
   AssetVersionParentKind,
   ContentChange,
   ContentDraftVersion,
@@ -11,6 +12,7 @@ import type {
   ContentEntry,
   ContentEntryPatch,
 } from '../models/asset-content.models';
+import type { VersionBump } from '../models/asset-versions.models';
 
 /**
  * Per-unit content editing for translations & tafsirs. The unit granularity
@@ -33,12 +35,18 @@ export class AssetContentService {
     kind: AssetVersionParentKind,
     slug: string,
     language: string,
-    file?: File | null
+    file?: File | null,
+    version?: { label: string; number: string }
   ): Observable<AssetLanguage> {
     const data = new FormData();
     data.append('language', language);
     if (file) {
       data.append('file', file);
+      // The file becomes the language's first version, which starts its numbering.
+      if (version) {
+        data.append('version_label', version.label);
+        data.append('version_number', version.number);
+      }
     }
     return this.http.post<AssetLanguage>(`${this.draftBase(kind, slug)}languages/`, data);
   }
@@ -72,13 +80,15 @@ export class AssetContentService {
     versionId: number,
     page: number,
     pageSize: number,
-    sura?: number
+    filterModel?: Record<string, unknown>
   ): Observable<ContentEntriesResponse> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('page_size', pageSize.toString());
-    if (sura != null) {
-      params = params.set('sura', sura.toString());
+    // The grid's AG Grid filter model, sent whole; the backend filters every
+    // unit by it before paging, so `count` is the filtered total.
+    if (filterModel && Object.keys(filterModel).length > 0) {
+      params = params.set('filters', JSON.stringify(filterModel));
     }
     return this.http.get<ContentEntriesResponse>(
       `${this.versionBase(kind, slug, versionId)}entries/`,
@@ -103,11 +113,12 @@ export class AssetContentService {
     kind: AssetVersionParentKind,
     slug: string,
     versionId: number,
-    message: string
+    message: string,
+    numbering: { label: string; version_number?: string; bump: VersionBump }
   ): Observable<ContentDraftVersion> {
     return this.http.post<ContentDraftVersion>(
       `${this.versionBase(kind, slug, versionId)}publish/`,
-      { message }
+      { message, ...numbering }
     );
   }
 
@@ -115,10 +126,13 @@ export class AssetContentService {
   pendingChanges(
     kind: AssetVersionParentKind,
     slug: string,
-    versionId: number
+    versionId: number,
+    pageSize?: number
   ): Observable<{ results: ContentChange[]; count: number }> {
+    const params = pageSize ? new HttpParams().set('page_size', pageSize) : undefined;
     return this.http.get<{ results: ContentChange[]; count: number }>(
-      `${this.versionBase(kind, slug, versionId)}pending-diff/`
+      `${this.versionBase(kind, slug, versionId)}pending-diff/`,
+      { params }
     );
   }
 
@@ -139,19 +153,41 @@ export class AssetContentService {
     );
   }
 
+  /** One version's name and language (any state). */
+  getVersion(
+    kind: AssetVersionParentKind,
+    slug: string,
+    versionId: number
+  ): Observable<ContentDraftVersion> {
+    return this.http.get<ContentDraftVersion>(this.versionBase(kind, slug, versionId));
+  }
+
   /** Discard the draft and all its unsaved entries. */
   discardDraft(kind: AssetVersionParentKind, slug: string, versionId: number): Observable<void> {
     return this.http.delete<void>(this.versionBase(kind, slug, versionId));
   }
 
-  /** Restore a version's content as a new published version (becomes the active one). */
+  /** Restore a version's content as a new committed version (the latest); it is reviewed and published separately. */
   restoreVersion(
+    kind: AssetVersionParentKind,
+    slug: string,
+    versionId: number,
+    bump: VersionBump
+  ): Observable<ContentDraftVersion> {
+    return this.http.post<ContentDraftVersion>(
+      `${this.versionBase(kind, slug, versionId)}restore/`,
+      { bump }
+    );
+  }
+
+  /** Make a fully approved version the one consumers see for its language. */
+  setPublishedVersion(
     kind: AssetVersionParentKind,
     slug: string,
     versionId: number
   ): Observable<ContentDraftVersion> {
     return this.http.post<ContentDraftVersion>(
-      `${this.versionBase(kind, slug, versionId)}restore/`,
+      `${this.versionBase(kind, slug, versionId)}set-published/`,
       {}
     );
   }
@@ -161,6 +197,28 @@ export class AssetContentService {
     return this.http.get(`${this.versionBase(kind, slug, versionId)}export/`, {
       responseType: 'blob',
     });
+  }
+
+  /** An empty CSV to fill in for a template, before the asset exists (one row
+   *  per surah / ayah / word / page, blank text). `page` needs the layout. */
+  downloadCsvTemplate(
+    kind: AssetVersionParentKind,
+    template: AssetTemplate,
+    mushafLayoutId?: number | null
+  ): Observable<Blob> {
+    let params = new HttpParams().set('template', template);
+    if (mushafLayoutId != null) {
+      params = params.set('mushaf_layout_id', mushafLayoutId);
+    }
+    return this.http.get(`${this.base}/content/${this.segment(kind)}/csv-template/`, {
+      params,
+      responseType: 'blob',
+    });
+  }
+
+  /** An empty CSV to fill in for an existing asset's template. */
+  downloadAssetCsvTemplate(kind: AssetVersionParentKind, slug: string): Observable<Blob> {
+    return this.http.get(`${this.draftBase(kind, slug)}csv-template/`, { responseType: 'blob' });
   }
 
   private segment(kind: AssetVersionParentKind): string {

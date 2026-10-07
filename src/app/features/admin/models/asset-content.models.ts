@@ -15,7 +15,10 @@ export interface ContentDraftVersion {
   asset_id: number;
   /** Language code this draft belongs to. */
   language: string;
+  /** Version number ("major.minor"); empty while a draft. */
   name: string;
+  /** Version name. */
+  label: string;
   summary: string;
   state: 'draft' | 'published';
   entries_count: number;
@@ -47,6 +50,8 @@ export interface ContentEntry {
   /** Source-language text for the same unit (translations only; read-only). */
   source_text?: string | null;
   order: number;
+  /** Draft text differs from the latest published version (drafts only). */
+  changed?: boolean;
 }
 
 /** Paginated entries response (Django Ninja pagination shape). */

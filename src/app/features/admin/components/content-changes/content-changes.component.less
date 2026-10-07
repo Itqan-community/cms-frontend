@@ -2,12 +2,10 @@
 // rest of the admin uses for additions, edits and deletions.
 @added: #389e0d;
 @added-bg: #f6ffed;
-@added-mark: #d9f7be;
 @modified: #d46b08;
 @modified-bg: #fff7e6;
 @removed: #cf1322;
 @removed-bg: #fff1f0;
-@removed-mark: #ffccc7;
 
 .content-changes {
   display: flex;
@@ -103,6 +101,7 @@
 
   &__head {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     gap: 10px;
     margin-bottom: 8px;
@@ -130,7 +129,7 @@
     }
   }
 
-  &__toggle {
+  &__full-text {
     margin-inline-start: auto;
   }
 
@@ -138,29 +137,6 @@
     color: var(--admin-text-700, #374151);
     font-weight: 600;
     font-variant-numeric: tabular-nums;
-  }
-
-  &__compare {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-
-    @media (max-width: 640px) {
-      grid-template-columns: 1fr;
-    }
-  }
-
-  &__side {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-  }
-
-  &__side-title {
-    color: var(--admin-text-500, #6b7280);
-    font-size: 12px;
-    font-weight: 500;
   }
 
   &__text {
@@ -184,12 +160,69 @@
     }
   }
 
-  // Unchanged words are muted so the highlighted changes stand out.
-  &__word--same {
+  // The reviewer's outcome, set apart from the text so it reads as a note on it.
+  // The reviewer's outcome, on the same line as the change type and reference:
+  // a status chip, then who reviewed it and when.
+  &__review {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    font-size: 12px;
+  }
+
+  &__review-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 8px;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    font-weight: 600;
+    line-height: 18px;
+
+    ng-icon {
+      width: 12px;
+      height: 12px;
+    }
+
+    .content-changes__review--approved & {
+      color: @added;
+      background: @added-bg;
+      border-color: #b7eb8f;
+    }
+
+    .content-changes__review--commented & {
+      color: @modified;
+      background: @modified-bg;
+      border-color: #ffd591;
+    }
+
+    .content-changes__review--unreviewed & {
+      color: var(--admin-text-500, #6b7280);
+      background: #fafafa;
+      border-color: var(--admin-border-200, #e5e7eb);
+    }
+  }
+
+  &__review-meta {
     color: var(--admin-text-500, #6b7280);
   }
 
-  // A folded stretch of unchanged text.
+  // A reviewer's "needs changes" note, kept with the text it is about.
+  &__review-comment {
+    margin: 8px 0 0;
+    padding: 6px 10px;
+    border-inline-start: 3px solid #ffd591;
+    border-radius: 4px;
+    background: #fffbf0;
+    color: var(--admin-text-900, #111827);
+    font-size: 13px;
+    white-space: pre-line;
+  }
+
+  // The rest of a long added/removed text, cut off (the popup shows it all).
   &__gap {
     display: inline-block;
     margin-inline: 4px;
@@ -199,76 +232,8 @@
     color: var(--admin-text-500, #6b7280);
     font-size: 12px;
     line-height: 18px;
+    text-decoration: none;
     vertical-align: middle;
-  }
-
-  &__word--removed {
-    border-radius: 3px;
-    background: @removed-mark;
-    color: @removed;
-    text-decoration: line-through;
-  }
-
-  &__word--added {
-    border-radius: 3px;
-    background: @added-mark;
-    color: @added;
-    font-weight: 500;
-  }
-
-  // The reviewer's outcome, set apart from the text so it reads as a note on it.
-  &__review {
-    margin-top: 10px;
-    padding: 8px 10px;
-    border: 1px dashed var(--admin-border-200, #e5e7eb);
-    border-radius: 6px;
-    background: var(--admin-surface-white, #fff);
-
-    &--commented {
-      border-color: #ffd591;
-      background: #fffbf0;
-    }
-
-    &--approved {
-      border-color: var(--color-primary-200, #d1e1d9);
-      background: var(--color-primary-50, #f0f5f2);
-    }
-  }
-
-  &__review-head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-
-    ng-icon {
-      width: 14px;
-      height: 14px;
-      color: var(--admin-text-500, #6b7280);
-    }
-  }
-
-  &__review-state {
-    font-weight: 600;
-
-    .content-changes__review--commented & {
-      color: @modified;
-    }
-
-    .content-changes__review--approved & {
-      color: var(--color-primary-700, #527c66);
-    }
-  }
-
-  &__review-meta {
-    color: var(--admin-text-500, #6b7280);
-  }
-
-  &__review-comment {
-    margin: 6px 0 0;
-    color: var(--admin-text-900, #111827);
-    white-space: pre-line;
   }
 
   &__empty {

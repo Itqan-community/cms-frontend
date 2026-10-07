@@ -1,9 +1,20 @@
 import { DatePipe } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, Input, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  Input,
+  OnInit,
+  TemplateRef,
+  ViewChild,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NgIcon } from '@ng-icons/core';
+import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
@@ -11,30 +22,81 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { AdminTitleCountComponent } from '../admin-title-count/admin-title-count.component';
-import { AdminTablePaginationComponent } from '../admin-table-pagination/admin-table-pagination.component';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import { ContentChangesComponent } from '../content-changes/content-changes.component';
-import { UniversalAssetPreviewerComponent } from '../universal-asset-previewer/universal-asset-previewer.component';
 import { Subject, debounceTime, distinctUntilChanged, finalize, forkJoin, takeUntil } from 'rxjs';
-import type { AssetVersion, AssetVersionParentKind } from '../../models/asset-versions.models';
+import {
+  PORTAL_PERMISSIONS,
+  type PortalPermissionCode,
+} from '../../constants/portal-permission.constants';
 import type { AssetLanguage, ContentChange } from '../../models/asset-content.models';
-import { AssetVersionsService } from '../../services/asset-versions.service';
+import type {
+  AssetVersion,
+  AssetVersionParentKind,
+  VersionBump,
+} from '../../models/asset-versions.models';
+import { AdminAuthService } from '../../services/admin-auth.service';
 import { AssetContentService } from '../../services/asset-content.service';
+import { AssetVersionsService } from '../../services/asset-versions.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { localizedLanguageName } from '../../utils/iso-639.util';
-import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
-import { AdminAuthService } from '../../services/admin-auth.service';
+import { isVersionNumber } from '../../utils/version-number.util';
+import { AdminTablePaginationComponent } from '../admin-table-pagination/admin-table-pagination.component';
+import { AdminTitleCountComponent } from '../admin-title-count/admin-title-count.component';
+import { ContentChangesComponent } from '../content-changes/content-changes.component';
+import { CsvTemplateDownloadComponent } from '../csv-template-download/csv-template-download.component';
+import { UniversalAssetPreviewerComponent } from '../universal-asset-previewer/universal-asset-previewer.component';
+import { VersionNumberFieldComponent } from '../version-number-field/version-number-field.component';
 
 const DEFAULT_PAGE_SIZE = 10;
+/** Diff rows per request — the API's maximum, so large diffs need few round trips. */
+const DIFF_PAGE_SIZE = 1000;
+
+/** Upload/replace rejections that have a more helpful message than the generic save error. */
+const SAVE_ERROR_KEYS: Record<string, string> = {
+  content_file_unparseable: 'ADMIN.VERSION_PUBLISHING.FILE_UNPARSEABLE_ERROR',
+  version_is_published: 'ADMIN.VERSION_PUBLISHING.VERSION_IS_PUBLISHED_ERROR',
+  version_number_required: 'ADMIN.COMMON.VERSION_NUMBER.ERR_REQUIRED',
+  version_number_invalid: 'ADMIN.COMMON.VERSION_NUMBER.START_INVALID',
+};
+
+/**
+ * Version management is gated per asset type: the backend `PermissionChoice` set has no
+ * catalogue-wide code, so each kind maps to its own update/delete permission.
+ */
+const VERSION_PERMISSIONS: Record<
+  AssetVersionParentKind,
+  { mutate: PortalPermissionCode; delete: PortalPermissionCode }
+> = {
+  tafsir: {
+    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR,
+    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_TAFSIR,
+  },
+  translation: {
+    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION,
+    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_TRANSLATION,
+  },
+  mushaf: {
+    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_MUSHAF,
+    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_MUSHAF,
+  },
+  font: {
+    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_FONT,
+    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_FONT,
+  },
+  program: {
+    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_PROGRAM,
+    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_PROGRAM,
+  },
+};
 
 @Component({
   selector: 'app-asset-versions-manager',
   standalone: true,
   imports: [
     DatePipe,
+    CsvTemplateDownloadComponent,
     ReactiveFormsModule,
     TranslateModule,
     NgIcon,
@@ -51,6 +113,8 @@ const DEFAULT_PAGE_SIZE = 10;
     NzToolTipModule,
     UniversalAssetPreviewerComponent,
     ContentChangesComponent,
+    RouterLink,
+    VersionNumberFieldComponent,
   ],
   templateUrl: './asset-versions-manager.component.html',
   styleUrl: './asset-versions-manager.component.less',
@@ -98,6 +162,8 @@ export class AssetVersionsManagerComponent implements OnInit {
   /** Set when the diff request failed, so the panel says so instead of
    *  reporting the empty diff as "no changes". */
   readonly diffError = signal(false);
+  /** The first page is shown; the rest of a large diff is still arriving. */
+  readonly diffLoadingMore = signal(false);
   readonly diff = signal<ContentChange[]>([]);
 
   /** Preview modal state. */
@@ -119,10 +185,9 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly selectedLanguageObj = computed(() =>
     this.languages().find((l) => l.language === this.selectedLanguage())
   );
-  /** The source language's availability follows the asset's own status, so only
-   *  translations expose a manual availability toggle here. */
+  /** Every language, the source included, can be shown to or hidden from consumers. */
   readonly canToggleAvailability = computed(
-    () => this.canMutateVersions() && this.selectedLanguageObj()?.is_source === false
+    () => this.canMutateVersions() && this.selectedLanguageObj() !== undefined
   );
   readonly selectedLangAvailable = computed(
     () => this.selectedLanguageObj()?.is_available ?? false
@@ -133,6 +198,7 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly saving = signal(false);
   readonly downloadingId = signal<number | null>(null);
   readonly restoringId = signal<number | null>(null);
+  readonly publishingId = signal<number | null>(null);
   readonly searchTerm = signal('');
   readonly selectedFileName = signal<string | null>(null);
   private selectedFile: File | null = null;
@@ -150,17 +216,62 @@ export class AssetVersionsManagerComponent implements OnInit {
     () => this.modalMode() === 'create' && this.supportsLanguages() && !this.versionLanguage()
   );
 
+  /** Translations/tafsirs: the language's latest version number, which the new
+   *  upload's number derives from (null when it will be the language's first). */
+  readonly latestNumber = signal<string | null>(null);
+  readonly latestNumberLoading = signal(false);
+  /** The lookup failed: the number can't be derived, so uploading is blocked. */
+  readonly latestNumberError = signal(false);
+  /** Emits to drop a lookup that a newer language choice (or closing the modal) replaced. */
+  private readonly cancelLatestLookup$ = new Subject<void>();
+  readonly versionStart = signal('');
+  readonly versionBump = signal<VersionBump>('minor');
+  /** The edited version's number — shown, never editable. */
+  readonly editingNumber = signal<string | null>(null);
+  /** Upload can't be numbered yet: still looking up the latest number, or a first
+   *  version without a valid starting number. */
+  readonly versionNumberIncomplete = computed(
+    () =>
+      this.modalMode() === 'create' &&
+      this.numbered() &&
+      (this.latestNumberLoading() ||
+        this.latestNumberError() ||
+        (this.latestNumber() === null && !isVersionNumber(this.versionStart())))
+  );
+
+  /** Restore confirmation: the restored version and its new number. */
+  @ViewChild('restoreContentTpl', { static: true }) restoreContentTpl!: TemplateRef<unknown>;
+  readonly restoreRow = signal<AssetVersion | null>(null);
+  readonly restoreLatest = signal<string | null>(null);
+  readonly restoreBump = signal<VersionBump>('minor');
+
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required]],
+    label: [''],
     summary: ['', [Validators.required]],
   });
+
+  /** Admin route segment of the parent asset list (e.g. `tafsirs`). */
+  listSegment(): string {
+    return this.kind === 'tafsir' ? 'tafsirs' : 'translations';
+  }
 
   /** Only translations and tafsirs carry per-language content/versions. */
   supportsLanguages(): boolean {
     return this.kind === 'translation' || this.kind === 'tafsir';
   }
 
+  /** Translations/tafsirs: `name` is a server-issued version number and `label` the
+   *  version name. Other kinds keep a free-text, editable `name`. */
+  numbered(): boolean {
+    return this.supportsLanguages();
+  }
+
   ngOnInit(): void {
+    if (this.numbered()) {
+      this.form.controls.name.clearValidators();
+      this.form.controls.name.updateValueAndValidity();
+    }
     this.search$
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe((term) => {
@@ -184,20 +295,37 @@ export class AssetVersionsManagerComponent implements OnInit {
       .subscribe({
         next: (langs) => {
           this.languages.set(langs);
-          const source = langs.find((l) => l.is_source) ?? langs[0];
-          const remembered = this.lastLanguage.get(this.kind, this.slug);
-          const initial = langs.find((l) => l.language === remembered) ?? source;
-          this.selectedLanguage.set(initial?.language ?? null);
+          if (langs.length === 0) {
+            this.selectedLanguage.set(null);
+            this.versionLanguage.set(null);
+            this.loadList();
+            return;
+          }
+          const stored = this.lastLanguage.get(this.kind, this.slug);
+          const remembered = stored && langs.some((l) => l.language === stored) ? stored : null;
+          // The source language, not whatever the API happened to list first: a response that
+          // returns a translation ahead of the source would otherwise pick that translation as
+          // both the version filter and the upload default.
+          const fallback = langs.find((l) => l.is_source) ?? langs[0];
+          const defaultLang = remembered ?? fallback.language;
+          this.selectedLanguage.set(defaultLang);
+          this.versionLanguage.set(defaultLang);
           this.loadList();
         },
-        // If languages can't be loaded, still show the (unfiltered) versions.
-        error: () => this.loadList(),
+        error: () => {
+          this.languages.set([]);
+          this.selectedLanguage.set(null);
+          this.versionLanguage.set(null);
+          this.loadList();
+        },
       });
   }
 
-  onLanguageChange(language: string): void {
-    this.selectedLanguage.set(language);
-    this.lastLanguage.set(this.kind, this.slug, language);
+  onLanguageChange(lang: string): void {
+    if (this.selectedLanguage() === lang) return;
+    this.selectedLanguage.set(lang);
+    this.versionLanguage.set(lang);
+    this.lastLanguage.set(this.kind, this.slug, lang);
     this.page.set(1);
     this.loadList();
   }
@@ -242,22 +370,6 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.loadList();
   }
 
-  canMutateVersions(): boolean {
-    switch (this.kind) {
-      case 'tafsir':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR);
-      case 'mushaf':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_MUSHAF);
-      case 'font':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_FONT);
-      case 'program':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_PROGRAM);
-      case 'translation':
-      default:
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION);
-    }
-  }
-
   /** Uploading, replacing a file and restoring change the text. Translations and
    *  tafsirs have their own content permission; other kinds use their update one. */
   canEditContent(): boolean {
@@ -271,33 +383,17 @@ export class AssetVersionsManagerComponent implements OnInit {
     }
   }
 
-  canDeleteVersions(): boolean {
-    switch (this.kind) {
-      case 'tafsir':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TAFSIR);
-      case 'mushaf':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_MUSHAF);
-      case 'font':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_FONT);
-      case 'program':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_PROGRAM);
-      case 'translation':
-      default:
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TRANSLATION);
-    }
-  }
-
   openCreateModal(): void {
     if (!this.canEditContent()) {
       return;
     }
     this.modalMode.set('create');
     this.editingId.set(null);
-    this.form.reset({ name: '', summary: '' });
+    this.form.reset({ name: '', label: '', summary: '' });
     this.clearFile();
     // Default the upload to the language currently being viewed, else the source.
     const source = this.languages().find((l) => l.is_source) ?? this.languages()[0];
-    this.versionLanguage.set(this.selectedLanguage() ?? source?.language ?? null);
+    this.onVersionLanguageChange(this.selectedLanguage() ?? source?.language ?? null);
     this.versionModalTitleKey.set(`${this.i18nPrefix}.MODAL_TITLE_CREATE`);
     this.versionModalOpen.set(true);
   }
@@ -310,11 +406,45 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.editingId.set(row.id);
     this.form.patchValue({
       name: row.name,
+      label: row.label ?? '',
       summary: row.summary ?? '',
     });
+    this.editingNumber.set(row.name);
     this.clearFile();
     this.versionModalTitleKey.set(`${this.i18nPrefix}.MODAL_TITLE_EDIT`);
     this.versionModalOpen.set(true);
+  }
+
+  /** Choose the upload's language and look up the number its next version follows. */
+  onVersionLanguageChange(language: string | null): void {
+    this.versionLanguage.set(language);
+    this.versionStart.set('');
+    this.versionBump.set('minor');
+    this.cancelLatestLookup();
+    if (!this.numbered() || !language) return;
+    this.latestNumberLoading.set(true);
+    this.assetVersionsService
+      .latestNumber(this.kind, this.slug, language)
+      .pipe(takeUntil(this.cancelLatestLookup$), takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (latest) => {
+          this.latestNumber.set(latest);
+          this.latestNumberLoading.set(false);
+        },
+        error: () => {
+          this.latestNumberError.set(true);
+          this.latestNumberLoading.set(false);
+          this.message.error(this.translate.instant(`${this.i18nPrefix}.MESSAGES.LOAD_ERROR`));
+        },
+      });
+  }
+
+  /** Drop any in-flight lookup and forget its result. */
+  private cancelLatestLookup(): void {
+    this.cancelLatestLookup$.next();
+    this.latestNumber.set(null);
+    this.latestNumberLoading.set(false);
+    this.latestNumberError.set(false);
   }
 
   onVersionModalVisibleChange(visible: boolean): void {
@@ -338,7 +468,9 @@ export class AssetVersionsManagerComponent implements OnInit {
 
   private resetModalFormState(): void {
     this.editingId.set(null);
-    this.form.reset({ name: '', summary: '' });
+    this.editingNumber.set(null);
+    this.cancelLatestLookup();
+    this.form.reset({ name: '', label: '', summary: '' });
     this.clearFile();
   }
 
@@ -377,15 +509,28 @@ export class AssetVersionsManagerComponent implements OnInit {
       this.message.warning(this.translate.instant(`${this.i18nPrefix}.MESSAGES.LANGUAGE_REQUIRED`));
       return;
     }
+    if (this.versionNumberIncomplete()) {
+      return;
+    }
 
+    const { name, label, summary } = this.form.getRawValue();
     const payload = {
       asset_id: this.assetId,
-      name: this.form.getRawValue().name,
-      summary: this.form.getRawValue().summary,
+      ...(this.numbered()
+        ? {
+            label: label.trim(),
+            // The number is issued by the server: only how to derive it is sent.
+            ...(creating && this.latestNumber() === null
+              ? { version_number: this.versionStart().trim() }
+              : {}),
+            ...(creating ? { bump: this.versionBump() } : {}),
+          }
+        : { name }),
+      summary,
       file: this.selectedFile ?? undefined,
       // Language only applies when creating a new (uploaded) version.
       language:
-        id == null && this.supportsLanguages() ? (this.versionLanguage() ?? undefined) : undefined,
+        creating && this.supportsLanguages() ? (this.versionLanguage() ?? undefined) : undefined,
     };
 
     // Abort any previous in-flight save (e.g. double submit).
@@ -422,7 +567,10 @@ export class AssetVersionsManagerComponent implements OnInit {
         },
         error: (err: unknown) => {
           if (err instanceof HttpErrorResponse && err.status === 0) return;
-          this.message.error(this.translate.instant(`${this.i18nPrefix}.MESSAGES.SAVE_ERROR`));
+          const errorName = err instanceof HttpErrorResponse ? err.error?.error_name : undefined;
+          const key =
+            SAVE_ERROR_KEYS[errorName as string] ?? `${this.i18nPrefix}.MESSAGES.SAVE_ERROR`;
+          this.message.error(this.translate.instant(key));
         },
       });
   }
@@ -576,27 +724,35 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.diff.set([]);
     this.diffError.set(false);
     this.diffLoading.set(true);
+    this.diffLoadingMore.set(false);
     this.loadAllVersionDiffs(row.id, 1, []);
   }
 
   private loadAllVersionDiffs(versionId: number, page: number, acc: ContentChange[]): void {
     this.assetContentService
-      .versionDiff(this.kind, this.slug, versionId, page, 100)
+      .versionDiff(this.kind, this.slug, versionId, page, DIFF_PAGE_SIZE)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           if (this.expandedId() !== versionId) return;
           const merged = acc.concat(res.results);
-          if (merged.length < res.count && res.results.length > 0) {
-            this.loadAllVersionDiffs(versionId, page + 1, merged);
-          } else {
+          const more = merged.length < res.count && res.results.length > 0;
+          // Show the first page at once and the full list when it is complete: a
+          // first version lists every unit as added, which can be thousands of rows.
+          // Updating only twice keeps the list's filter from resetting on every page.
+          if (page === 1 || !more) {
             this.diff.set(merged);
-            this.diffLoading.set(false);
+          }
+          this.diffLoading.set(false);
+          this.diffLoadingMore.set(more);
+          if (more) {
+            this.loadAllVersionDiffs(versionId, page + 1, merged);
           }
         },
         error: () => {
           if (this.expandedId() === versionId) {
             this.diffLoading.set(false);
+            this.diffLoadingMore.set(false);
             this.diffError.set(true);
           }
         },
@@ -644,12 +800,32 @@ export class AssetVersionsManagerComponent implements OnInit {
 
   /** Restore a version as a new published version, making it the active one. */
   restoreVersion(row: AssetVersion): void {
-    if (!this.canEditContent() || this.restoringId() !== null) {
+    if (!this.canEditContent() || this.restoringId() !== null || !row.language) {
       return;
     }
+    // The restored copy is a new version, numbered after its language's latest.
+    this.restoringId.set(row.id);
+    this.assetVersionsService
+      .latestNumber(this.kind, this.slug, row.language)
+      .pipe(
+        finalize(() => this.restoringId.set(null)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: (latest) => {
+          this.restoreRow.set(row);
+          this.restoreLatest.set(latest);
+          this.restoreBump.set('minor');
+          this.confirmRestore(row);
+        },
+        error: () => this.message.error(this.translate.instant(this.t('MESSAGES.RESTORE_ERROR'))),
+      });
+  }
+
+  private confirmRestore(row: AssetVersion): void {
     this.modal.confirm({
       nzTitle: this.translate.instant(this.t('RESTORE_CONFIRM_TITLE')),
-      nzContent: this.translate.instant(this.t('RESTORE_CONFIRM_BODY'), { name: row.name }),
+      nzContent: this.restoreContentTpl,
       nzOkText: this.translate.instant(this.t('RESTORE_OK')),
       nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
       nzDirection: this.modalDirection(),
@@ -657,7 +833,7 @@ export class AssetVersionsManagerComponent implements OnInit {
         new Promise<void>((resolve, reject) => {
           this.restoringId.set(row.id);
           this.assetContentService
-            .restoreVersion(this.kind, this.slug, row.id)
+            .restoreVersion(this.kind, this.slug, row.id, this.restoreBump())
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
               next: () => {
@@ -670,6 +846,52 @@ export class AssetVersionsManagerComponent implements OnInit {
               error: () => {
                 this.restoringId.set(null);
                 this.message.error(this.translate.instant(this.t('MESSAGES.RESTORE_ERROR')));
+                reject();
+              },
+            });
+        }),
+    });
+  }
+
+  /** Make a fully approved version the one consumers see for its language. */
+  publishVersion(row: AssetVersion): void {
+    if (!this.canPublish() || !row.is_approved || this.publishingId() !== null) {
+      return;
+    }
+    this.modal.confirm({
+      nzTitle: this.translate.instant('ADMIN.VERSION_PUBLISHING.CONFIRM_TITLE'),
+      nzContent: this.translate.instant('ADMIN.VERSION_PUBLISHING.CONFIRM_BODY', {
+        name: row.name,
+      }),
+      nzOkText: this.translate.instant('ADMIN.VERSION_PUBLISHING.CONFIRM_OK'),
+      nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
+      nzDirection: this.modalDirection(),
+      nzOnOk: () =>
+        new Promise<void>((resolve, reject) => {
+          this.publishingId.set(row.id);
+          this.assetContentService
+            .setPublishedVersion(this.kind, this.slug, row.id)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: () => {
+                this.publishingId.set(null);
+                this.message.success(
+                  this.translate.instant('ADMIN.VERSION_PUBLISHING.PUBLISH_SUCCESS', {
+                    name: row.name,
+                  })
+                );
+                this.loadList();
+                resolve();
+              },
+              error: (err: HttpErrorResponse) => {
+                this.publishingId.set(null);
+                const key =
+                  err.error?.error_name === 'version_not_approved'
+                    ? 'ADMIN.VERSION_PUBLISHING.NOT_APPROVED_ERROR'
+                    : 'ADMIN.VERSION_PUBLISHING.PUBLISH_ERROR';
+                this.message.error(this.translate.instant(key));
+                // The list may be stale (e.g. a review was withdrawn meanwhile).
+                this.loadList();
                 reject();
               },
             });
@@ -730,13 +952,6 @@ export class AssetVersionsManagerComponent implements OnInit {
     anchor.click();
   }
 
-  formatBytes(n: number | null | undefined): string {
-    if (n == null || n <= 0) return this.translate.instant('COMMON.EM_DASH');
-    if (n < 1024) return `${n} B`;
-    if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
-    return `${(n / (1024 * 1024)).toFixed(2)} MB`;
-  }
-
   truncate(text: string | null | undefined, max = 80): string {
     if (text == null || text === '') return this.translate.instant('COMMON.EM_DASH');
     const t = text.trim();
@@ -750,5 +965,36 @@ export class AssetVersionsManagerComponent implements OnInit {
 
   modalDirection(): 'rtl' | 'ltr' {
     return this.translate.currentLang === 'ar' ? 'rtl' : 'ltr';
+  }
+
+  canMutateVersions(): boolean {
+    return this.adminAuth.hasPermission(VERSION_PERMISSIONS[this.kind].mutate);
+  }
+
+  /** Why the publish action is (un)available for a version. */
+  publishTooltip(ver: AssetVersion): string {
+    return ver.is_approved
+      ? 'ADMIN.VERSION_PUBLISHING.TOOLTIP_PUBLISH'
+      : 'ADMIN.VERSION_PUBLISHING.TOOLTIP_NOT_APPROVED';
+  }
+
+  /** Reviewers can jump from a version's pending count to its changes. */
+  canReview(): boolean {
+    return (
+      this.supportsLanguages() &&
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_REVIEW_CONTENT)
+    );
+  }
+
+  /** Choosing the consumer-visible version applies to translations/tafsirs only. */
+  canPublish(): boolean {
+    return (
+      this.supportsLanguages() &&
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT)
+    );
+  }
+
+  canDeleteVersions(): boolean {
+    return this.adminAuth.hasPermission(VERSION_PERMISSIONS[this.kind].delete);
   }
 }

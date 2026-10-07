@@ -17,6 +17,8 @@ export interface ReviewChange {
   baseline_text: string;
   commit_ref: string;
   commit_id: number;
+  /** Author of the commit that made this change; null when not recorded. */
+  edited_by: string | null;
   review_state: ReviewState;
   comment: string;
   reviewed_by: string | null;
@@ -26,4 +28,11 @@ export interface ReviewChange {
 export interface ReviewChangesResponse {
   results: ReviewChange[];
   count: number;
+}
+
+/** A committed version, as offered by the review page's version filter. */
+export interface ReviewVersion {
+  id: number;
+  name: string;
+  created_at: string;
 }

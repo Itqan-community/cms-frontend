@@ -481,7 +481,10 @@
       "CTA": "العودة إلى المكتبة"
     },
     "RESTRICTED_FOR_TENANT_CONFLICT": "يوجد طلبات وصول معلقة لهذا الأصل. يرجى معالجتها قبل تفعيل تقييد المستأجر.",
-    "TENANT_REQUIRED": "يرجى اختيار ناشر قبل المتابعة."
+    "TENANT_REQUIRED": "يرجى اختيار ناشر قبل المتابعة.",
+    "REQUEST_FAILED": "تعذر إتمام الطلب. يرجى المراجعة والمحاولة مرة أخرى.",
+    "FIELD_REQUIRED": "الحقل {{field}} مطلوب.",
+    "FIELD_INVALID": "قيمة الحقل {{field}} غير صالحة."
   },
   "PROFILE": {
     "HUB_ARIA": "إدارة الحساب",
@@ -764,7 +767,32 @@
     }
   },
   "ADMIN": {
+    "VERSION_PUBLISHING": {
+      "PUBLISHED_BADGE": "منشور",
+      "PUBLISHED_HINT": "الإصدار الذي يحمّله المستخدمون حاليًا لهذه اللغة.",
+      "LATEST_HINT": "أحدث إصدار محفوظ، وهو الذي يبني عليه المحرر. لا يظهر للمستخدمين حتى يُنشر.",
+      "APPROVED": "معتمد",
+      "PENDING": "بانتظار المراجعة ({{count}})",
+      "PENDING_HINT": "تحتاج تغييرات هذا الإصدار إلى اعتماد المراجع قبل نشره.",
+      "TOOLTIP_PUBLISH": "نشر للمستخدمين",
+      "TOOLTIP_NOT_APPROVED": "يجب اعتماد جميع التغييرات قبل نشر هذا الإصدار",
+      "CONFIRM_TITLE": "نشر هذا الإصدار؟",
+      "CONFIRM_BODY": "سيصبح <b>{{name}}</b> الإصدار الذي يحمّله المستخدمون لهذه اللغة.",
+      "CONFIRM_OK": "نشر",
+      "PUBLISH_SUCCESS": "تم نشر {{name}}.",
+      "PUBLISH_ERROR": "تعذّر نشر الإصدار.",
+      "NOT_APPROVED_ERROR": "يحتوي هذا الإصدار على تغييرات لم تُعتمد بعد.",
+      "FILE_UNPARSEABLE_ERROR": "تعذّرت قراءة الملف كصفوف محتوى. استخدم قالب CSV الخاص بهذا المورد.",
+      "VERSION_IS_PUBLISHED_ERROR": "هذا الإصدار منشور. انشر إصدارًا آخر قبل تغيير ملفه."
+    },
+    "VERSION_VIEWER": {
+      "OPEN": "عرض هذا الإصدار",
+      "TITLE": "الإصدار {{name}}",
+      "HINT": "عرض للقراءة فقط لمحتوى هذا الإصدار كما حُفظ. تعمل التصفية والنسخ كما في المحرر، ولا يمكن تعديل أي شيء هنا."
+    },
     "CONTENT_CHANGES": {
+      "FIRST_VERSION_HINT": "هذا أول إصدار لهذه اللغة، ولا يوجد إصدار سابق للمقارنة به، لذا يظهر كل محتواه كإضافة.",
+      "LOADING_MORE": "جارٍ تحميل بقية التغييرات…",
       "COMMENTS_COUNT": "تعليقات: {{count}}",
       "COMMENTS_HINT": "تعليقات المراجعين — افتح التغييرات لقراءتها",
       "BUTTON": "التغييرات",
@@ -779,8 +807,7 @@
       "AFTER": "بعد",
       "EMPTY_TEXT": "(فارغ)",
       "SHOW_MORE": "عرض {{count}} أخرى",
-      "SHOW_FULL_TEXT": "عرض النص كاملًا",
-      "SHOW_CHANGES_ONLY": "عرض التغييرات فقط"
+      "SHOW_FULL_TEXT": "عرض النص كاملًا"
     },
     "HOME": {
       "LABEL": "الرئيسية",
@@ -799,6 +826,7 @@
       "FILTER_ALL": "كل السور",
       "COMMIT": {
         "BUTTON": "حفظ التغييرات",
+        "NO_CHANGES_HINT": "لا توجد تغييرات لحفظها بعد. عدّل المحتوى أولًا؛ النص الذي أُعيد إلى أصله لا يُحتسب.",
         "TITLE": "حفظ التغييرات",
         "MESSAGE_LABEL": "رسالة التغيير",
         "MESSAGE_PLACEHOLDER": "صِف ما قمت بتغييره…",
@@ -841,12 +869,12 @@
         "PENDING": "قيد الانتظار",
         "MARK_AVAILABLE": "جعلها متاحة",
         "MARK_PENDING": "جعلها قيد الانتظار",
-        "HINT": "اللغات المتاحة يمكن للمستخدمين تنزيلها. تبقى اللغات قيد الانتظار مخفية حتى تجعلها متاحة.",
+        "HINT": "اللغات المتاحة يمكن للمستخدمين تنزيلها. تبقى اللغات قيد الانتظار مخفية حتى تجعلها متاحة. إذا لم تكن أي لغة متاحة، يُخفى المورد من المعرض.",
         "MARKED_AVAILABLE": "أصبحت اللغة متاحة للمستخدمين الآن.",
         "MARKED_PENDING": "أصبحت اللغة مخفية عن المستخدمين الآن."
       },
       "MESSAGES": {
-        "PUBLISHED": "تم نشر نسخة جديدة",
+        "PUBLISHED": "تم حفظ التغييرات. انشر الإصدار بعد اعتماد تغييراته.",
         "DRAFT_SAVED": "تم حفظ المسودة"
       },
       "PASTE": {
@@ -875,7 +903,47 @@
         "TRANSLATION_NOT_FOUND": "الترجمة غير موجودة.",
         "TAFSIR_NOT_FOUND": "التفسير غير موجود.",
         "CONTENT_FILE_UNPARSEABLE": "تعذّر تحليل الملف المرفوع.",
-        "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "انشر نسخة لهذه اللغة قبل جعلها متاحة."
+        "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "انشر نسخة لهذه اللغة قبل جعلها متاحة.",
+        "VERSION_NUMBER_REQUIRED": "أدخل رقم الإصدار الابتدائي للإصدار الأول.",
+        "VERSION_NUMBER_INVALID": "يجب أن يكون رقم الإصدار بالصيغة رئيسي.فرعي، مثل 7.0."
+      },
+      "TEXT_EDITOR": {
+        "HINT": "Enter للتطبيق · Shift+Enter لسطر جديد · Esc للإلغاء",
+        "CANCEL": "إلغاء",
+        "DONE": "تم",
+        "CLOSE": "إغلاق"
+      },
+      "GRID": {
+        "equals": "يساوي",
+        "notEqual": "لا يساوي",
+        "blank": "فارغ",
+        "notBlank": "غير فارغ",
+        "empty": "اختر",
+        "lessThan": "أقل من",
+        "greaterThan": "أكبر من",
+        "lessThanOrEqual": "أقل من أو يساوي",
+        "greaterThanOrEqual": "أكبر من أو يساوي",
+        "inRange": "بين",
+        "inRangeStart": "من",
+        "inRangeEnd": "إلى",
+        "contains": "يحتوي على",
+        "notContains": "لا يحتوي على",
+        "startsWith": "يبدأ بـ",
+        "endsWith": "ينتهي بـ",
+        "filterOoo": "تصفية...",
+        "andCondition": "و",
+        "orCondition": "أو",
+        "applyFilter": "تطبيق",
+        "resetFilter": "إعادة تعيين",
+        "clearFilter": "مسح",
+        "cancelFilter": "إلغاء",
+        "noRowsToShow": "لا توجد نتائج",
+        "ariaFilterInput": "حقل التصفية",
+        "ariaFilteringOperator": "معامل التصفية",
+        "ariaFilterValue": "قيمة التصفية",
+        "ariaFilterFromValue": "قيمة بداية التصفية",
+        "ariaFilterToValue": "قيمة نهاية التصفية",
+        "ariaFilterMenuOpen": "فتح قائمة التصفية"
       }
     },
     "REVIEW": {
@@ -887,6 +955,11 @@
       "NO_ASSIGNED_LANGUAGES": "لا توجد لغات مُكلَّف بمراجعتها لهذا المورد.",
       "NO_CHANGES": "لا توجد تغييرات لعرضها.",
       "RETRY": "إعادة المحاولة",
+      "VERSION_FILTER": {
+        "ALL": "كل التغييرات",
+        "UP_TO": "المكوِّنة لـ {{name}}",
+        "HINT": "تُعرض التغييرات المكوِّنة لـ {{name}}: أحدث تغيير لكل وحدة حتى هذا الإصدار. اعتمدها كلها ليصبح نشره ممكنًا."
+      },
       "FILTER": {
         "ALL": "الكل",
         "UNREVIEWED": "غير مُراجَع",
@@ -913,8 +986,13 @@
         "TYPE": "النوع",
         "CHANGE": "التغيير",
         "COMMIT": "الإصدار",
+        "EDITOR": "المحرّر",
         "STATE": "المراجعة",
         "ACTIONS": "إجراءات"
+      },
+      "FULL_TEXT_DIALOG": {
+        "TITLE": "النص الكامل — {{label}}",
+        "CLOSE": "إغلاق"
       },
       "COMMENT_DIALOG": {
         "TITLE": "طلب تعديلات",
@@ -997,6 +1075,20 @@
         "CHOOSE_FILE": "اختر ملفًا",
         "CLEAR_FILE": "إزالة الملف",
         "FILE_OPTIONAL_HINT": "اختياري — اختر ملفًا لرفعه مع هذا الأصل."
+      },
+      "VERSION_NUMBER": {
+        "START_LABEL": "رقم الإصدار الابتدائي",
+        "START_PLACEHOLDER": "مثال: 7.0",
+        "START_HINT": "الإصدار الأول لهذه اللغة، وتُرقَّم الإصدارات التالية بدءًا منه.",
+        "START_INVALID": "استخدم الصيغة رئيسي.فرعي، مثل 7.0.",
+        "ERR_REQUIRED": "أدخل رقم الإصدار الابتدائي للإصدار الأول.",
+        "BUMP_LABEL": "رقم الإصدار",
+        "MINOR": "تغيير فرعي — {{from}} ← {{to}}",
+        "MAJOR": "تغيير رئيسي — {{from}} ← {{to}}",
+        "LOADING": "جارٍ التحقق من رقم أحدث إصدار…",
+        "NAME_LABEL": "اسم الإصدار",
+        "NAME_PLACEHOLDER": "مثال: الطبعة المنقحة",
+        "LOAD_ERROR": "تعذّر تحميل رقم أحدث إصدار. أغلق هذه النافذة وحاول مرة أخرى."
       }
     },
     "PREVIEW": {
@@ -1023,7 +1115,6 @@
       "OPEN_DOWNLOAD": "فتح / تنزيل الملف",
       "AUDIO_ARIA": "معاينة صوتية"
     },
-
     "TENANT": {
       "ARIA_LABEL": "محدد نطاق الناشر",
       "PLACEHOLDER": "اختر الناشر",
@@ -1040,7 +1131,7 @@
       "HOME_DESC": "لوحة التحكم الرئيسية",
       "MUSHAFS": "المصاحف",
       "MUSHAFS_DESC": "إدارة نسخ وتخطيطات المصاحف",
-      "TAFSIRS": "التفاسير",
+      "TAFSIRS": "التفاسير وعلوم القرآن",
       "TAFSIRS_DESC": "إدارة التفاسير والشروحات القرآنية",
       "TRANSLATIONS": "الترجمات",
       "TRANSLATIONS_DESC": "إدارة تراجم القرآن بلغات مختلفة",
@@ -1209,23 +1300,22 @@
           "EDIT_FILE_HINT": "اختياري: اختر ملفًا جديدًا لاستبدال الحالي.",
           "FILE_REQUIRED_HINT": "اختر ملفًا للرفع.",
           "LANGUAGES_UNAVAILABLE_HINT": "تعذّر تحميل اللغات. أعد تحميل الصفحة قبل رفع إصدار جديد.",
-          "LIST_TITLE": "الإصدارات المنشورة",
+          "LIST_TITLE": "الإصدارات",
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
           "COL_SUMMARY": "الملخص",
-          "COL_SIZE": "الحجم",
           "COL_DATE": "تاريخ الإضافة",
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
           "TOOLTIP_EDIT": "تعديل",
-          "TOOLTIP_RESTORE": "استعادة كإصدار نشط",
+          "TOOLTIP_RESTORE": "استعادة كأحدث إصدار",
           "TOOLTIP_DELETE": "حذف",
-          "ACTIVE_BADGE": "نشط",
+          "ACTIVE_BADGE": "الأحدث",
           "DIFF_LOADING": "جارٍ تحميل التغييرات…",
           "DIFF_EMPTY": "لا توجد تغييرات مسجّلة على مستوى الآيات لهذه النسخة.",
           "DIFF_ERROR": "تعذّر تحميل تغييرات هذا الإصدار.",
           "RESTORE_CONFIRM_TITLE": "استعادة هذا الإصدار؟",
-          "RESTORE_CONFIRM_BODY": "سيتم استعادة <b>{{name}}</b> كإصدار جديد ونشط.",
+          "RESTORE_CONFIRM_BODY": "سيتم استعادة <b>{{name}}</b> كأحدث إصدار. تُراجع تغييراته وتُنشر مثل أي إصدار آخر.",
           "RESTORE_OK": "استعادة",
           "EMPTY_TITLE": "لا توجد إصدارات بعد",
           "EMPTY_SUBTITLE": "استخدم «إضافة إصدار جديد» لرفع ملف.",
@@ -1239,11 +1329,15 @@
             "UPDATE_SUCCESS": "تم تحديث الإصدار.",
             "DELETE_SUCCESS": "تم حذف الإصدار.",
             "DELETE_ERROR": "تعذّر حذف الإصدار.",
-            "RESTORE_SUCCESS": "تمت استعادة الإصدار كإصدار نشط.",
+            "RESTORE_SUCCESS": "تمت استعادة الإصدار كأحدث إصدار.",
             "RESTORE_ERROR": "تعذّر استعادة الإصدار.",
             "FILE_REQUIRED": "اختر ملفًا للرفع.",
             "LANGUAGE_REQUIRED": "اختر لغة الإصدار."
-          }
+          },
+          "COL_VERSION": "الإصدار",
+          "FORM_NUMBER": "رقم الإصدار",
+          "NUMBER_LOCKED_HINT": "لا يمكن تغيير رقم الإصدار بعد إصداره.",
+          "PLACEHOLDER_LABEL": "مثال: الطبعة المنقحة"
         }
       },
       "MESSAGES": {
@@ -1367,23 +1461,22 @@
           "EDIT_FILE_HINT": "اختياري: اختر ملفًا جديدًا لاستبدال الحالي.",
           "FILE_REQUIRED_HINT": "اختر ملفًا للرفع.",
           "LANGUAGES_UNAVAILABLE_HINT": "تعذّر تحميل اللغات. أعد تحميل الصفحة قبل رفع إصدار جديد.",
-          "LIST_TITLE": "الإصدارات المنشورة",
+          "LIST_TITLE": "الإصدارات",
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
           "COL_SUMMARY": "الملخص",
-          "COL_SIZE": "الحجم",
           "COL_DATE": "تاريخ الإضافة",
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
           "TOOLTIP_EDIT": "تعديل",
-          "TOOLTIP_RESTORE": "استعادة كإصدار نشط",
+          "TOOLTIP_RESTORE": "استعادة كأحدث إصدار",
           "TOOLTIP_DELETE": "حذف",
-          "ACTIVE_BADGE": "نشط",
+          "ACTIVE_BADGE": "الأحدث",
           "DIFF_LOADING": "جارٍ تحميل التغييرات…",
           "DIFF_EMPTY": "لا توجد تغييرات مسجّلة على مستوى الآيات لهذه النسخة.",
           "DIFF_ERROR": "تعذّر تحميل تغييرات هذا الإصدار.",
           "RESTORE_CONFIRM_TITLE": "استعادة هذا الإصدار؟",
-          "RESTORE_CONFIRM_BODY": "سيتم استعادة <b>{{name}}</b> كإصدار جديد ونشط.",
+          "RESTORE_CONFIRM_BODY": "سيتم استعادة <b>{{name}}</b> كأحدث إصدار. تُراجع تغييراته وتُنشر مثل أي إصدار آخر.",
           "RESTORE_OK": "استعادة",
           "EMPTY_TITLE": "لا توجد إصدارات بعد",
           "EMPTY_SUBTITLE": "استخدم «إضافة إصدار جديد» لرفع ملف.",
@@ -1397,11 +1490,15 @@
             "UPDATE_SUCCESS": "تم تحديث الإصدار.",
             "DELETE_SUCCESS": "تم حذف الإصدار.",
             "DELETE_ERROR": "تعذّر حذف الإصدار.",
-            "RESTORE_SUCCESS": "تمت استعادة الإصدار كإصدار نشط.",
+            "RESTORE_SUCCESS": "تمت استعادة الإصدار كأحدث إصدار.",
             "RESTORE_ERROR": "تعذّر استعادة الإصدار.",
             "FILE_REQUIRED": "اختر ملفًا للرفع.",
             "LANGUAGE_REQUIRED": "اختر لغة الإصدار."
-          }
+          },
+          "COL_VERSION": "الإصدار",
+          "FORM_NUMBER": "رقم الإصدار",
+          "NUMBER_LOCKED_HINT": "لا يمكن تغيير رقم الإصدار بعد إصداره.",
+          "PLACEHOLDER_LABEL": "مثال: الطبعة المنقحة"
         }
       },
       "MESSAGES": {
@@ -2156,7 +2253,6 @@
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
           "COL_SUMMARY": "الملخص",
-          "COL_SIZE": "الحجم",
           "COL_DATE": "تاريخ الإضافة",
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
@@ -2327,7 +2423,6 @@
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
           "COL_SUMMARY": "الملخص",
-          "COL_SIZE": "الحجم",
           "COL_DATE": "تاريخ الإضافة",
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
@@ -2482,7 +2577,6 @@
           "SEARCH_PLACEHOLDER": "ابحث في الإصدارات…",
           "COL_NAME": "اسم الإصدار",
           "COL_SUMMARY": "الملخص",
-          "COL_SIZE": "الحجم",
           "COL_DATE": "تاريخ الإضافة",
           "COL_FILE": "الملف",
           "COL_ACTIONS": "الإجراءات",
@@ -2519,6 +2613,59 @@
         "DELETE_SUCCESS": "تم حذف البرنامج بنجاح",
         "ERROR": "حدث خطأ. يرجى المحاولة مرة أخرى."
       }
+    },
+    "AUDIO": {
+      "TIMESTAMPS": {
+        "TITLE": "توقيتات الآيات",
+        "SUBTITLE": "سورة {{surah}} — {{filename}}",
+        "BACK_TO_RECITATION": "العودة إلى التلاوة",
+        "SAVE": "حفظ التوقيتات",
+        "DISCARD": "تجاهل التعديلات",
+        "READ_ONLY": "يمكنك مراجعة التوقيتات دون تعديلها.",
+        "ISSUES": "تم العثور على {{count}} مشكلة في حدود الآيات المحمَّلة.",
+        "PLAY": "تشغيل",
+        "PAUSE": "إيقاف مؤقت",
+        "PREVIOUS_MARKER": "الحدّ السابق",
+        "NEXT_MARKER": "الحدّ التالي",
+        "NUDGE_LABEL": "إزاحة",
+        "SNAP": "إلصاق بموضع التشغيل",
+        "SELECTED": "المحدَّد",
+        "SELECT_HINT": "اختر حدًّا لضبطه.",
+        "AYAH_LIST": "حدود الآيات",
+        "AYAH": "الآية {{number}}",
+        "EMPTY_TITLE": "لا توجد توقيتات بعد",
+        "EMPTY_SUBTITLE": "ارفع ملف توقيتات لهذه التلاوة ثم أعد فتح المحرِّر.",
+        "LEAVE": {
+          "TITLE": "المغادرة دون حفظ؟",
+          "CONTENT": "ستفقد تعديلاتك على التوقيتات.",
+          "OK": "مغادرة",
+          "CANCEL": "البقاء"
+        },
+        "ERRORS": {
+          "MISSING_CONTEXT": "افتح المحرِّر من صفحة التلاوة ليعرف أي مقطع يحمّل.",
+          "TRACK_NOT_FOUND": "تعذّر العثور على هذا المقطع الصوتي ضمن التلاوة.",
+          "TRACK_LOAD_FAILED": "تعذّر تحميل المقطع الصوتي.",
+          "TIMESTAMPS_LOAD_FAILED": "تعذّر تحميل توقيتات الآيات، ويبقى تشغيل الصوت متاحًا.",
+          "TRACK_TOO_LONG": "المقطع أطول من أن تُرسم موجته، ويبقى تعديل الحدود متاحًا.",
+          "WAVEFORM_FAILED": "تعذّر رسم الموجة، ويبقى تعديل الحدود متاحًا."
+        },
+        "MESSAGES": {
+          "SAVE_OK": "تم حفظ التوقيتات.",
+          "SAVE_ERROR": "تعذّر حفظ التوقيتات. حاول مرة أخرى.",
+          "SAVE_REJECTED": "لم يتم تطبيق بعض التوقيتات."
+        },
+        "WAVEFORM": "الموجة الصوتية",
+        "WAVEFORM_LOADING": "جارٍ فكّ الصوت…",
+        "WAVEFORM_HINT": "اسحب الحدّ لتحريكه، وانقر على الموجة للانتقال، واضغط Ctrl/Cmd مع التمرير للتكبير.",
+        "ZOOM_IN": "تكبير",
+        "ZOOM_OUT": "تصغير",
+        "ZOOM_RESET": "ملء المقطع"
+      }
+    },
+    "CSV_TEMPLATE": {
+      "DOWNLOAD": "تنزيل قالب CSV",
+      "HINT": "ملف فارغ يحتوي على صف لكل وحدة. املأ عمود النص ثم ارفعه هنا.",
+      "PICK_TEMPLATE_FIRST": "اختر قالب المحتوى (وتخطيط المصحف للصفحات) لتنزيل قالب CSV الخاص به."
     }
   },
   "USAGE": {

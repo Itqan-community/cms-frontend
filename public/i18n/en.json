@@ -481,7 +481,10 @@
       "CTA": "Back to library"
     },
     "RESTRICTED_FOR_TENANT_CONFLICT": "This asset has pending access requests. Resolve them before enabling tenant restriction.",
-    "TENANT_REQUIRED": "Select a publisher before continuing."
+    "TENANT_REQUIRED": "Select a publisher before continuing.",
+    "REQUEST_FAILED": "The request could not be completed. Please review and try again.",
+    "FIELD_REQUIRED": "{{field}} is required.",
+    "FIELD_INVALID": "{{field}} is invalid."
   },
   "PROFILE": {
     "HUB_ARIA": "Account management",
@@ -764,7 +767,32 @@
     }
   },
   "ADMIN": {
+    "VERSION_PUBLISHING": {
+      "PUBLISHED_BADGE": "Published",
+      "PUBLISHED_HINT": "The version consumers currently download for this language.",
+      "LATEST_HINT": "The newest committed version — the one the editor builds on. It is not visible to consumers until it is published.",
+      "APPROVED": "Approved",
+      "PENDING": "Pending review ({{count}})",
+      "PENDING_HINT": "Changes in this version still need a reviewer's approval before it can be published.",
+      "TOOLTIP_PUBLISH": "Publish to consumers",
+      "TOOLTIP_NOT_APPROVED": "All changes must be approved before this version can be published",
+      "CONFIRM_TITLE": "Publish this version?",
+      "CONFIRM_BODY": "<b>{{name}}</b> will become the version consumers download for this language.",
+      "CONFIRM_OK": "Publish",
+      "PUBLISH_SUCCESS": "{{name}} is now published.",
+      "PUBLISH_ERROR": "Could not publish the version.",
+      "NOT_APPROVED_ERROR": "This version has changes that are not approved yet.",
+      "FILE_UNPARSEABLE_ERROR": "The file could not be read as content rows. Use the CSV template for this asset.",
+      "VERSION_IS_PUBLISHED_ERROR": "This version is published. Publish another version before changing its file."
+    },
+    "VERSION_VIEWER": {
+      "OPEN": "View this version",
+      "TITLE": "Version {{name}}",
+      "HINT": "A read-only view of this version's content as it was committed. Filter and copy work as in the editor; nothing can be changed here."
+    },
     "CONTENT_CHANGES": {
+      "FIRST_VERSION_HINT": "This is the first version of this language, so there is nothing earlier to compare it with: all of its content is listed as added.",
+      "LOADING_MORE": "Loading the remaining changes…",
       "COMMENTS_COUNT": "Comments: {{count}}",
       "COMMENTS_HINT": "Reviewer comments — open Changes to read them",
       "BUTTON": "Changes",
@@ -779,8 +807,7 @@
       "AFTER": "After",
       "EMPTY_TEXT": "(empty)",
       "SHOW_MORE": "Show {{count}} more",
-      "SHOW_FULL_TEXT": "Show full text",
-      "SHOW_CHANGES_ONLY": "Show changes only"
+      "SHOW_FULL_TEXT": "Show full text"
     },
     "PREVIEW": {
       "LOADING": "Loading preview…",
@@ -823,6 +850,7 @@
       "FILTER_ALL": "All surahs",
       "COMMIT": {
         "BUTTON": "Commit",
+        "NO_CHANGES_HINT": "No changes to commit yet. Edit the content first; text changed back to the original doesn't count.",
         "TITLE": "Commit changes",
         "MESSAGE_LABEL": "Commit message",
         "MESSAGE_PLACEHOLDER": "Describe what you changed…",
@@ -865,12 +893,12 @@
         "PENDING": "Pending",
         "MARK_AVAILABLE": "Mark available",
         "MARK_PENDING": "Mark pending",
-        "HINT": "Available languages can be downloaded by consumers. Pending languages stay hidden until you make them available.",
+        "HINT": "Available languages can be downloaded by consumers. Pending languages stay hidden until you make them available. If no language is available, the asset is hidden from the gallery.",
         "MARKED_AVAILABLE": "Language is now available to consumers.",
         "MARKED_PENDING": "Language is now hidden from consumers."
       },
       "MESSAGES": {
-        "PUBLISHED": "New version published",
+        "PUBLISHED": "Changes committed. Publish the version once its changes are approved.",
         "DRAFT_SAVED": "Draft saved"
       },
       "PASTE": {
@@ -899,7 +927,47 @@
         "TRANSLATION_NOT_FOUND": "Translation not found.",
         "TAFSIR_NOT_FOUND": "Tafsir not found.",
         "CONTENT_FILE_UNPARSEABLE": "The uploaded file could not be parsed.",
-        "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "Publish a version for this language before making it available."
+        "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "Publish a version for this language before making it available.",
+        "VERSION_NUMBER_REQUIRED": "Enter a starting version number for the first version.",
+        "VERSION_NUMBER_INVALID": "Version number must be in the form major.minor, e.g. 7.0."
+      },
+      "TEXT_EDITOR": {
+        "HINT": "Enter to apply · Shift+Enter for a new line · Esc to cancel",
+        "CANCEL": "Cancel",
+        "DONE": "Done",
+        "CLOSE": "Close"
+      },
+      "GRID": {
+        "equals": "Equals",
+        "notEqual": "Does not equal",
+        "blank": "Blank",
+        "notBlank": "Not blank",
+        "empty": "Choose one",
+        "lessThan": "Less than",
+        "greaterThan": "Greater than",
+        "lessThanOrEqual": "Less than or equal to",
+        "greaterThanOrEqual": "Greater than or equal to",
+        "inRange": "Between",
+        "inRangeStart": "From",
+        "inRangeEnd": "To",
+        "contains": "Contains",
+        "notContains": "Does not contain",
+        "startsWith": "Begins with",
+        "endsWith": "Ends with",
+        "filterOoo": "Filter...",
+        "andCondition": "AND",
+        "orCondition": "OR",
+        "applyFilter": "Apply",
+        "resetFilter": "Reset",
+        "clearFilter": "Clear",
+        "cancelFilter": "Cancel",
+        "noRowsToShow": "No rows to show",
+        "ariaFilterInput": "Filter input",
+        "ariaFilteringOperator": "Filtering operator",
+        "ariaFilterValue": "Filter value",
+        "ariaFilterFromValue": "Filter from value",
+        "ariaFilterToValue": "Filter to value",
+        "ariaFilterMenuOpen": "Open filter menu"
       }
     },
     "REVIEW": {
@@ -911,6 +979,11 @@
       "NO_ASSIGNED_LANGUAGES": "You have no languages assigned to review for this asset.",
       "NO_CHANGES": "No changes to show.",
       "RETRY": "Retry",
+      "VERSION_FILTER": {
+        "ALL": "All changes",
+        "UP_TO": "Making up {{name}}",
+        "HINT": "Showing the changes that make up {{name}}: the latest change to each unit up to that version. Approve all of them to be able to publish it."
+      },
       "FILTER": {
         "ALL": "All",
         "UNREVIEWED": "Unreviewed",
@@ -937,8 +1010,13 @@
         "TYPE": "Type",
         "CHANGE": "Change",
         "COMMIT": "Commit",
+        "EDITOR": "Editor",
         "STATE": "Review",
         "ACTIONS": "Actions"
+      },
+      "FULL_TEXT_DIALOG": {
+        "TITLE": "Full text — {{label}}",
+        "CLOSE": "Close"
       },
       "COMMENT_DIALOG": {
         "TITLE": "Request changes",
@@ -1021,6 +1099,20 @@
         "CHOOSE_FILE": "Choose file",
         "CLEAR_FILE": "Remove file",
         "FILE_OPTIONAL_HINT": "Optional — select a file to upload with this asset."
+      },
+      "VERSION_NUMBER": {
+        "START_LABEL": "Starting version number",
+        "START_PLACEHOLDER": "e.g. 7.0",
+        "START_HINT": "The first version of this language. Later versions count up from it.",
+        "START_INVALID": "Use the form major.minor, e.g. 7.0.",
+        "ERR_REQUIRED": "Enter a starting version number for the first version.",
+        "BUMP_LABEL": "Version number",
+        "MINOR": "Minor change — {{from}} → {{to}}",
+        "MAJOR": "Major change — {{from}} → {{to}}",
+        "LOADING": "Checking the latest version number…",
+        "NAME_LABEL": "Version name",
+        "NAME_PLACEHOLDER": "e.g. Revised edition",
+        "LOAD_ERROR": "Couldn't load the latest version number. Close this dialog and try again."
       }
     },
     "TENANT": {
@@ -1208,23 +1300,22 @@
           "EDIT_FILE_HINT": "Optional: choose a new file to replace the current one.",
           "FILE_REQUIRED_HINT": "Select a file to upload.",
           "LANGUAGES_UNAVAILABLE_HINT": "Languages could not be loaded. Reload the page before uploading a new version.",
-          "LIST_TITLE": "Published versions",
+          "LIST_TITLE": "Versions",
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
           "COL_SUMMARY": "Summary",
-          "COL_SIZE": "Size",
           "COL_DATE": "Date added",
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
           "TOOLTIP_EDIT": "Edit",
-          "TOOLTIP_RESTORE": "Restore as active version",
+          "TOOLTIP_RESTORE": "Restore as the latest version",
           "TOOLTIP_DELETE": "Delete",
-          "ACTIVE_BADGE": "Active",
+          "ACTIVE_BADGE": "Latest",
           "DIFF_LOADING": "Loading changes…",
           "DIFF_EMPTY": "No per-ayah changes recorded for this version.",
           "DIFF_ERROR": "Could not load the changes for this version.",
           "RESTORE_CONFIRM_TITLE": "Restore this version?",
-          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
+          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new latest version. Its changes are reviewed and published like any other version.",
           "RESTORE_OK": "Restore",
           "EMPTY_TITLE": "No versions yet",
           "EMPTY_SUBTITLE": "Use “Add new version” to upload a file.",
@@ -1238,11 +1329,15 @@
             "UPDATE_SUCCESS": "Version updated.",
             "DELETE_SUCCESS": "Version deleted.",
             "DELETE_ERROR": "Could not delete version.",
-            "RESTORE_SUCCESS": "Version restored as the active version.",
+            "RESTORE_SUCCESS": "Version restored as the latest version.",
             "RESTORE_ERROR": "Could not restore version.",
             "FILE_REQUIRED": "Choose a file to upload.",
             "LANGUAGE_REQUIRED": "Choose the version language."
-          }
+          },
+          "COL_VERSION": "Version",
+          "FORM_NUMBER": "Version number",
+          "NUMBER_LOCKED_HINT": "Version numbers are fixed once issued.",
+          "PLACEHOLDER_LABEL": "e.g. Revised edition"
         }
       },
       "MESSAGES": {
@@ -1366,23 +1461,22 @@
           "EDIT_FILE_HINT": "Optional: choose a new file to replace the current one.",
           "FILE_REQUIRED_HINT": "Select a file to upload.",
           "LANGUAGES_UNAVAILABLE_HINT": "Languages could not be loaded. Reload the page before uploading a new version.",
-          "LIST_TITLE": "Published versions",
+          "LIST_TITLE": "Versions",
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
           "COL_SUMMARY": "Summary",
-          "COL_SIZE": "Size",
           "COL_DATE": "Date added",
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
           "TOOLTIP_EDIT": "Edit",
-          "TOOLTIP_RESTORE": "Restore as active version",
+          "TOOLTIP_RESTORE": "Restore as the latest version",
           "TOOLTIP_DELETE": "Delete",
-          "ACTIVE_BADGE": "Active",
+          "ACTIVE_BADGE": "Latest",
           "DIFF_LOADING": "Loading changes…",
           "DIFF_EMPTY": "No per-ayah changes recorded for this version.",
           "DIFF_ERROR": "Could not load the changes for this version.",
           "RESTORE_CONFIRM_TITLE": "Restore this version?",
-          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new, active version.",
+          "RESTORE_CONFIRM_BODY": "<b>{{name}}</b> will be restored as a new latest version. Its changes are reviewed and published like any other version.",
           "RESTORE_OK": "Restore",
           "EMPTY_TITLE": "No versions yet",
           "EMPTY_SUBTITLE": "Use “Add new version” to upload a file.",
@@ -1396,11 +1490,15 @@
             "UPDATE_SUCCESS": "Version updated.",
             "DELETE_SUCCESS": "Version deleted.",
             "DELETE_ERROR": "Could not delete version.",
-            "RESTORE_SUCCESS": "Version restored as the active version.",
+            "RESTORE_SUCCESS": "Version restored as the latest version.",
             "RESTORE_ERROR": "Could not restore version.",
             "FILE_REQUIRED": "Choose a file to upload.",
             "LANGUAGE_REQUIRED": "Choose the version language."
-          }
+          },
+          "COL_VERSION": "Version",
+          "FORM_NUMBER": "Version number",
+          "NUMBER_LOCKED_HINT": "Version numbers are fixed once issued.",
+          "PLACEHOLDER_LABEL": "e.g. Revised edition"
         }
       },
       "MESSAGES": {
@@ -2155,7 +2253,6 @@
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
           "COL_SUMMARY": "Summary",
-          "COL_SIZE": "Size",
           "COL_DATE": "Date added",
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
@@ -2326,7 +2423,6 @@
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
           "COL_SUMMARY": "Summary",
-          "COL_SIZE": "Size",
           "COL_DATE": "Date added",
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
@@ -2481,7 +2577,6 @@
           "SEARCH_PLACEHOLDER": "Search versions…",
           "COL_NAME": "Version name",
           "COL_SUMMARY": "Summary",
-          "COL_SIZE": "Size",
           "COL_DATE": "Date added",
           "COL_FILE": "File",
           "COL_ACTIONS": "Actions",
@@ -2518,6 +2613,59 @@
         "DELETE_SUCCESS": "Program deleted successfully",
         "ERROR": "An error occurred. Please try again."
       }
+    },
+    "AUDIO": {
+      "TIMESTAMPS": {
+        "TITLE": "Ayah timestamps",
+        "SUBTITLE": "Surah {{surah}} — {{filename}}",
+        "BACK_TO_RECITATION": "Back to recitation",
+        "SAVE": "Save timestamps",
+        "DISCARD": "Discard changes",
+        "READ_ONLY": "You can review these timestamps but not change them.",
+        "ISSUES": "{{count}} boundary issue(s) found in the loaded data.",
+        "PLAY": "Play",
+        "PAUSE": "Pause",
+        "PREVIOUS_MARKER": "Previous boundary",
+        "NEXT_MARKER": "Next boundary",
+        "NUDGE_LABEL": "Nudge",
+        "SNAP": "Snap to playhead",
+        "SELECTED": "Selected",
+        "SELECT_HINT": "Select a boundary to adjust it.",
+        "AYAH_LIST": "Ayah boundaries",
+        "AYAH": "Ayah {{number}}",
+        "EMPTY_TITLE": "No timestamps yet",
+        "EMPTY_SUBTITLE": "Upload a timing file for this recitation, then reopen this editor.",
+        "LEAVE": {
+          "TITLE": "Leave without saving?",
+          "CONTENT": "Your timestamp changes will be lost.",
+          "OK": "Leave",
+          "CANCEL": "Stay"
+        },
+        "ERRORS": {
+          "MISSING_CONTEXT": "Open this editor from the recitation page so it knows which track to load.",
+          "TRACK_NOT_FOUND": "This audio track could not be found in the recitation.",
+          "TRACK_LOAD_FAILED": "Could not load the audio track.",
+          "TIMESTAMPS_LOAD_FAILED": "Could not load the ayah timestamps. The audio still plays.",
+          "TRACK_TOO_LONG": "This track is too long to draw a waveform for. Boundaries are still editable.",
+          "WAVEFORM_FAILED": "The waveform could not be drawn. Boundaries are still editable."
+        },
+        "MESSAGES": {
+          "SAVE_OK": "Timestamps saved.",
+          "SAVE_ERROR": "Could not save the timestamps. Try again.",
+          "SAVE_REJECTED": "Some of the timestamps were not applied."
+        },
+        "WAVEFORM": "Waveform",
+        "WAVEFORM_LOADING": "Decoding audio…",
+        "WAVEFORM_HINT": "Drag a boundary to move it. Click the waveform to seek. Ctrl/Cmd + scroll to zoom.",
+        "ZOOM_IN": "Zoom in",
+        "ZOOM_OUT": "Zoom out",
+        "ZOOM_RESET": "Fit track"
+      }
+    },
+    "CSV_TEMPLATE": {
+      "DOWNLOAD": "Download CSV template",
+      "HINT": "An empty sheet with one row per unit. Fill in the text column and upload it here.",
+      "PICK_TEMPLATE_FIRST": "Choose the content template (and the mushaf layout for pages) to download its CSV template."
     }
   },
   "USAGE": {

@@ -29,6 +29,7 @@ describe('AssetReviewGridComponent', () => {
     baseline_text: 'baseline text',
     commit_ref: 'c123456',
     commit_id: 10,
+    edited_by: 'Editor Name',
     review_state: 'unreviewed',
     comment: '',
     reviewed_by: null,
@@ -44,6 +45,7 @@ describe('AssetReviewGridComponent', () => {
     reviewServiceSpy = jasmine.createSpyObj('AssetReviewService', [
       'listLanguages',
       'listChanges',
+      'listVersions',
       'setState',
     ]);
     adminAuthSpy = jasmine.createSpyObj('AdminAuthService', ['hasPermission']);
@@ -55,6 +57,12 @@ describe('AssetReviewGridComponent', () => {
     );
     reviewServiceSpy.listLanguages.and.returnValue(of(['en', 'fr']));
     reviewServiceSpy.listChanges.and.returnValue(of(mockResponse));
+    reviewServiceSpy.listVersions.and.returnValue(
+      of([
+        { id: 11, name: 'v2', created_at: '2026-02-01T00:00:00Z' },
+        { id: 10, name: 'v1', created_at: '2026-01-01T00:00:00Z' },
+      ])
+    );
     reviewServiceSpy.setState.and.returnValue(of({ ...mockChange, review_state: 'approved' }));
     lastLanguageSpy.get.and.returnValue(null);
 
@@ -99,7 +107,8 @@ describe('AssetReviewGridComponent', () => {
       'fr',
       1,
       25,
-      'unreviewed'
+      'unreviewed',
+      null
     );
   });
 
@@ -142,7 +151,8 @@ describe('AssetReviewGridComponent', () => {
       'fr',
       1,
       25,
-      'unreviewed'
+      'unreviewed',
+      null
     );
   });
 
@@ -161,7 +171,8 @@ describe('AssetReviewGridComponent', () => {
       'en',
       1,
       25,
-      'approved'
+      'approved',
+      null
     );
   });
 
@@ -264,5 +275,156 @@ describe('AssetReviewGridComponent', () => {
 
     const firstCell: HTMLElement = fixture.nativeElement.querySelector('tbody tr td');
     expect(firstCell.textContent?.trim()).toBe('2:255:4');
+  });
+
+  describe('version filter', () => {
+    it('lists every change until a version is picked, then only what makes it up', () => {
+      // Arrange
+      fixture.detectChanges();
+      expect(reviewServiceSpy.listVersions).toHaveBeenCalledWith('translation', 'en-sahih', 'en');
+      expect(component.versions().map((v) => v.name)).toEqual(['v2', 'v1']);
+      expect(reviewServiceSpy.listChanges.calls.mostRecent().args[6]).toBeNull();
+
+      // Act
+      component.onVersionChange(10);
+
+      // Assert
+      expect(reviewServiceSpy.listChanges.calls.mostRecent().args[6]).toBe(10);
+      expect(component.selectedVersionName()).toBe('v1');
+      expect(component.page()).toBe(1);
+    });
+
+    it('opens on the version and language a link asked for', () => {
+      // Arrange — e.g. the version list's "pending review" link
+      fixture.componentRef.setInput('initialLanguage', 'fr');
+      fixture.componentRef.setInput('initialVersion', 11);
+
+      // Act
+      fixture.detectChanges();
+
+      // Assert
+      expect(component.selectedLanguage()).toBe('fr');
+      expect(component.selectedVersion()).toBe(11);
+      expect(reviewServiceSpy.listChanges.calls.mostRecent().args.slice(2, 7)).toEqual([
+        'fr',
+        1,
+        25,
+        'unreviewed',
+        11,
+      ]);
+    });
+
+    it('drops the version when the language changes', () => {
+      // Arrange
+      fixture.componentRef.setInput('initialLanguage', 'fr');
+      fixture.componentRef.setInput('initialVersion', 11);
+      fixture.detectChanges();
+
+      // Act
+      component.onLanguageChange('en');
+
+      // Assert
+      expect(component.selectedVersion()).toBeNull();
+      expect(reviewServiceSpy.listChanges.calls.mostRecent().args[6]).toBeNull();
+    });
+  });
+
+  describe('change comparison', () => {
+    function render(change: ReviewChange): HTMLElement {
+      reviewServiceSpy.listChanges.and.returnValue(of({ count: 1, results: [change] }));
+      fixture.detectChanges();
+      return fixture.nativeElement as HTMLElement;
+    }
+
+    it('stacks the last-approved text above the new text, highlighting what changed', () => {
+      const el = render(mockChange);
+
+      expect(el.querySelector('.change-compare--stacked')).not.toBeNull();
+      const before = el.querySelector('.change-compare__text--before')!;
+      const after = el.querySelector('.change-compare__text--after')!;
+      expect(before.textContent).toContain('baseline');
+      expect(before.querySelector('.change-compare__word--removed')?.textContent).toBe('baseline');
+      expect(after.querySelector('.change-compare__word--added')?.textContent).toBe('new');
+    });
+
+    it('compares with the replaced text when the unit was never approved', () => {
+      const el = render({ ...mockChange, baseline_text: '' });
+
+      expect(el.querySelector('.change-compare__text--before')!.textContent).toContain('old text');
+    });
+
+    it('shows a removed unit with its old text before and nothing after', () => {
+      const el = render({ ...mockChange, change_type: 'removed', new_text: '', baseline_text: '' });
+
+      expect(el.querySelector('.change-compare__text--before')!.textContent).toContain('old text');
+      expect(
+        el.querySelector('.change-compare__text--after .change-compare__empty')
+      ).not.toBeNull();
+    });
+
+    it('folds long unchanged text and opens the full text in a popup', () => {
+      const words = (from: number, to: number) =>
+        Array.from({ length: to - from }, (_, i) => `w${from + i}`).join(' ');
+      const row: ReviewChange = {
+        ...mockChange,
+        baseline_text: `${words(0, 40)} God ${words(40, 80)}`,
+        new_text: `${words(0, 40)} Allah ${words(40, 80)}`,
+      };
+      const el = render(row);
+      const inlineAfter = el.querySelector('.change-compare__text--after')!;
+      expect(inlineAfter.querySelectorAll('.change-compare__gap').length).toBe(2);
+
+      el.querySelector<HTMLButtonElement>('.asset-review-grid__full-text')!.click();
+      fixture.detectChanges();
+
+      expect(component.fullTextRow()?.id).toBe(row.id);
+      // The row itself stays folded; the popup holds the unfolded text.
+      expect(inlineAfter.querySelectorAll('.change-compare__gap').length).toBe(2);
+      component.closeFullText();
+      expect(component.fullTextRow()).toBeNull();
+    });
+
+    it('cuts a whole new text short and offers it in full in the popup', () => {
+      // Arrange — e.g. a newly uploaded language: every unit is a long "added" text
+      const longText = Array.from({ length: 400 }, (_, i) => `word${i}`).join(' ');
+      const el = render({
+        ...mockChange,
+        change_type: 'added',
+        old_text: '',
+        baseline_text: '',
+        new_text: longText,
+      });
+
+      // Assert
+      const after = el.querySelector('.change-compare__text--after')!;
+      expect(after.textContent!.length).toBeLessThan(longText.length / 2);
+      expect(after.querySelector('.change-compare__gap')).not.toBeNull();
+      expect(el.querySelector('.asset-review-grid__full-text')).not.toBeNull();
+    });
+
+    it('offers no full-text popup when nothing is folded', () => {
+      const el = render(mockChange);
+
+      expect(el.querySelector('.asset-review-grid__full-text')).toBeNull();
+    });
+  });
+
+  describe('editor column', () => {
+    it('names the editor who made each change', () => {
+      fixture.detectChanges();
+
+      const cell: HTMLElement = fixture.nativeElement.querySelector('.asset-review-grid__editor');
+      expect(cell.textContent?.trim()).toBe('Editor Name');
+    });
+
+    it('shows a dash when the editor was not recorded', () => {
+      reviewServiceSpy.listChanges.and.returnValue(
+        of({ count: 1, results: [{ ...mockChange, edited_by: null }] })
+      );
+      fixture.detectChanges();
+
+      const cell: HTMLElement = fixture.nativeElement.querySelector('.asset-review-grid__editor');
+      expect(cell.textContent?.trim()).toBe('COMMON.EM_DASH');
+    });
   });
 });

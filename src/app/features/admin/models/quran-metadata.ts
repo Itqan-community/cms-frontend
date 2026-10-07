@@ -123,6 +123,13 @@ export const SURAHS_METADATA: SurahMetadata[] = [
   { id: 114, name_ar: 'الناس', name_en: 'An-Nas', type: 'meccan', ayahs: 6 },
 ];
 
+/** "2. Al-Baqara" (or the Arabic name when `arabic`); the bare number when unknown. */
+export function surahLabel(id: number, arabic: boolean): string {
+  const surah = SURAHS_METADATA[id - 1];
+  if (surah?.id !== id) return String(id);
+  return `${id}. ${arabic ? surah.name_ar : surah.name_en}`;
+}
+
 /**
  * Mapping of Juz number to its starting page in the standard 604-page Madani Mushaf.
  */

@@ -40,19 +40,40 @@
     }
   }
 
+  &__version {
+    min-width: 200px;
+  }
+
+  // What the version filter is showing, and why it matters.
+  &__version-hint {
+    margin: 0 0 12px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    background: var(--color-primary-50, #f0f5f2);
+    color: var(--admin-text-700, #374151);
+    font-size: 13px;
+  }
+
+  // Long texts must wrap inside the cell rather than widen the table.
   &__change {
+    min-width: 0;
+    white-space: normal;
+  }
+
+  &__full-text {
+    padding-inline: 0;
+  }
+
+  &__full-text-meta {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    gap: 6px;
+    margin-bottom: 12px;
+    color: var(--admin-text-500, #6b7280);
+    font-size: 12px;
   }
 
-  &__old {
-    color: rgba(0, 0, 0, 0.45);
-    text-decoration: line-through;
-  }
-
-  &__new {
-    color: rgba(0, 0, 0, 0.85);
+  &__editor {
+    overflow-wrap: anywhere;
   }
 
   &__comment {

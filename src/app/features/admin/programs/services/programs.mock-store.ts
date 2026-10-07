@@ -374,7 +374,7 @@ export function mockCreateVersion(
   const version: AssetVersion = {
     id: nextVersionId++,
     asset_id: payload.asset_id,
-    name: payload.name,
+    name: payload.name ?? '',
     summary: payload.summary,
     file_url: payload.file
       ? `https://example.com/programs/${slug}/${payload.file.name}`
@@ -401,7 +401,7 @@ export function mockUpdateVersion(
   const existing = list[idx];
   const updated: AssetVersion = {
     ...existing,
-    name: payload.name,
+    name: payload.name ?? '',
     summary: payload.summary,
     file_url: payload.file
       ? `https://example.com/programs/${slug}/${payload.file.name}`

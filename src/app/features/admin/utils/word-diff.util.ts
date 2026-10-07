@@ -26,10 +26,15 @@ export interface WordDiff {
  * differing middle is shown as one removed run and one added run.
  */
 const MAX_EDITS = 1_000;
-/** Unchanged words kept on each side of a change in the folded view. */
+/** Default unchanged words kept on each side of a change in the folded view. */
 const CONTEXT_WORDS = 6;
 /** Shorter unchanged stretches stay visible — a "…" would save nothing. */
 const MIN_FOLD_WORDS = 4;
+
+export interface DiffWordsOptions {
+  /** Unchanged words kept on each side of a change in the folded view. */
+  contextWords?: number;
+}
 
 interface Op {
   token: string;
@@ -38,14 +43,16 @@ interface Op {
 
 /**
  * Word-level diff of two texts (Myers' shortest edit script over word and
- * whitespace tokens). Joining each side's segments reproduces its text exactly.
+ * whitespace tokens). Joining each side's segments reproduces its text, with
+ * Windows line breaks (`\r\n`) read as `\n`: re-uploads often switch them on
+ * every line, which would otherwise mark each line as changed.
  */
-export function diffWords(before: string, after: string): WordDiff {
-  const a = tokenize(before);
-  const b = tokenize(after);
+export function diffWords(before: string, after: string, options: DiffWordsOptions = {}): WordDiff {
+  const a = tokenize(before.replace(/\r\n/g, '\n'));
+  const b = tokenize(after.replace(/\r\n/g, '\n'));
   const ops = myers(a, b) ?? coarse(a, b);
 
-  const hidden = foldMask(ops);
+  const hidden = foldMask(ops, options.contextWords ?? CONTEXT_WORDS);
   return {
     ...build(ops, null),
     folded: hidden ? build(ops, hidden) : null,
@@ -65,10 +72,10 @@ function build(ops: Op[], hidden: boolean[] | null): Pick<WordDiff, 'before' | '
 }
 
 /**
- * Which unchanged ops sit more than `CONTEXT_WORDS` words from every change,
+ * Which unchanged ops sit more than `contextWords` words from every change,
  * in stretches of at least `MIN_FOLD_WORDS` words. `null` when none do.
  */
-function foldMask(ops: Op[]): boolean[] | null {
+function foldMask(ops: Op[], contextWords: number): boolean[] | null {
   if (ops.every((op) => op.kind === 'same')) return null;
   const isWord = (op: Op) => op.kind === 'same' && /\S/.test(op.token);
   // Distance in words to the nearest change, looking backwards then forwards.
@@ -85,7 +92,7 @@ function foldMask(ops: Op[]): boolean[] | null {
     }
   }
 
-  const hidden = dist.map((d) => d > CONTEXT_WORDS);
+  const hidden = dist.map((d) => d > contextWords);
   // Un-hide stretches too short to be worth a gap.
   let folds = false;
   for (let k = 0; k < ops.length; ) {

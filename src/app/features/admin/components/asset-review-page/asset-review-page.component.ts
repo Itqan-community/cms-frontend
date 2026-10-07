@@ -22,6 +22,9 @@ export class AssetReviewPageComponent implements OnInit {
 
   readonly kind = signal<AssetVersionParentKind>('translation');
   readonly slug = signal<string>('');
+  /** From a version's "pending review" link: open on that language and version. */
+  readonly language = signal<string | null>(null);
+  readonly version = signal<number | null>(null);
 
   get listSegment(): string {
     return this.kind() === 'tafsir' ? 'tafsirs' : 'translations';
@@ -31,5 +34,9 @@ export class AssetReviewPageComponent implements OnInit {
     const dataKind = this.route.snapshot.data['kind'] as AssetVersionParentKind | undefined;
     this.kind.set(dataKind ?? 'translation');
     this.slug.set(this.route.snapshot.params['slug'] ?? '');
+    const query = this.route.snapshot.queryParamMap;
+    this.language.set(query.get('language'));
+    const version = Number(query.get('version'));
+    this.version.set(Number.isInteger(version) && version > 0 ? version : null);
   }
 }
