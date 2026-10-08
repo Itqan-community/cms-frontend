@@ -169,6 +169,9 @@ export class AssetVersionsService {
     if (payload.language) {
       data.append('language', payload.language);
     }
+    if (payload.pre_approved) {
+      data.append('pre_approved', 'true');
+    }
     return data;
   }
 }

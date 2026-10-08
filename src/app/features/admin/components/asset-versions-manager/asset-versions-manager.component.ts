@@ -17,6 +17,7 @@ import { NgIcon } from '@ng-icons/core';
 import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -102,6 +103,7 @@ const VERSION_PERMISSIONS: Record<
     NgIcon,
     FormsModule,
     NzButtonModule,
+    NzCheckboxModule,
     NzFormModule,
     NzInputModule,
     NzModalModule,
@@ -226,6 +228,8 @@ export class AssetVersionsManagerComponent implements OnInit {
   private readonly cancelLatestLookup$ = new Subject<void>();
   readonly versionStart = signal('');
   readonly versionBump = signal<VersionBump>('minor');
+  /** Reviewers uploading a version can approve its changes on upload. */
+  readonly preApproved = signal(false);
   /** The edited version's number — shown, never editable. */
   readonly editingNumber = signal<string | null>(null);
   /** Upload can't be numbered yet: still looking up the latest number, or a first
@@ -391,6 +395,7 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.editingId.set(null);
     this.form.reset({ name: '', label: '', summary: '' });
     this.clearFile();
+    this.preApproved.set(false);
     // Default the upload to the language currently being viewed, else the source.
     const source = this.languages().find((l) => l.is_source) ?? this.languages()[0];
     this.onVersionLanguageChange(this.selectedLanguage() ?? source?.language ?? null);
@@ -472,6 +477,7 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.cancelLatestLookup();
     this.form.reset({ name: '', label: '', summary: '' });
     this.clearFile();
+    this.preApproved.set(false);
   }
 
   onPickFile(event: Event): void {
@@ -531,6 +537,7 @@ export class AssetVersionsManagerComponent implements OnInit {
       // Language only applies when creating a new (uploaded) version.
       language:
         creating && this.supportsLanguages() ? (this.versionLanguage() ?? undefined) : undefined,
+      ...(creating && this.canReview() && this.preApproved() ? { pre_approved: true } : {}),
     };
 
     // Abort any previous in-flight save (e.g. double submit).
