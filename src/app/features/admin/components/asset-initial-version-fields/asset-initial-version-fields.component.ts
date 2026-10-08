@@ -4,6 +4,7 @@ import { NgIcon } from '@ng-icons/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import type { AssetTemplate, AssetVersionParentKind } from '../../models/asset-content.models';
 import { CsvTemplateDownloadComponent } from '../csv-template-download/csv-template-download.component';
@@ -19,6 +20,7 @@ const I18N = 'ADMIN.COMMON.INITIAL_VERSION';
     NgIcon,
     NzButtonModule,
     NzFormModule,
+    NzGridModule,
     NzInputModule,
     CsvTemplateDownloadComponent,
   ],

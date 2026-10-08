@@ -230,17 +230,36 @@
             [start]="newLanguageStart()"
             (startChange)="newLanguageStart.set($event)"
           />
-          <label class="content-grid__commit-label" for="content-grid-new-language-label">
-            {{ 'ADMIN.COMMON.VERSION_NUMBER.NAME_LABEL' | translate }}
-          </label>
-          <input
-            id="content-grid-new-language-label"
-            nz-input
-            maxlength="255"
-            [ngModel]="newLanguageLabel()"
-            (ngModelChange)="newLanguageLabel.set($event)"
-            [placeholder]="'ADMIN.COMMON.VERSION_NUMBER.NAME_PLACEHOLDER' | translate"
-          />
+          <div class="content-grid__text-pair">
+            <div>
+              <label class="content-grid__commit-label" for="content-grid-new-language-label-ar">
+                {{ 'ADMIN.COMMON.VERSION_TEXT.NAME_AR' | translate }}
+              </label>
+              <input
+                id="content-grid-new-language-label-ar"
+                nz-input
+                maxlength="255"
+                [ngModel]="newLanguageLabels().label_ar"
+                (ngModelChange)="setNewLanguageLabel('label_ar', $event)"
+                [placeholder]="'ADMIN.COMMON.VERSION_NUMBER.NAME_PLACEHOLDER' | translate"
+                dir="rtl"
+              />
+            </div>
+            <div>
+              <label class="content-grid__commit-label" for="content-grid-new-language-label-en">
+                {{ 'ADMIN.COMMON.VERSION_TEXT.NAME_EN' | translate }}
+              </label>
+              <input
+                id="content-grid-new-language-label-en"
+                nz-input
+                maxlength="255"
+                [ngModel]="newLanguageLabels().label_en"
+                (ngModelChange)="setNewLanguageLabel('label_en', $event)"
+                [placeholder]="'ADMIN.COMMON.VERSION_NUMBER.NAME_PLACEHOLDER' | translate"
+                dir="ltr"
+              />
+            </div>
+          </div>
         </div>
       }
     </ng-container>
@@ -253,7 +272,7 @@
     [nzOkText]="'ADMIN.CONTENT_EDITOR.COMMIT.CONFIRM' | translate"
     [nzOkLoading]="committing()"
     [nzOkDisabled]="
-      !commitMessage().trim() || pendingLoading() || pendingError() || commitNumberIncomplete()
+      !commitHasMessage() || pendingLoading() || pendingError() || commitNumberIncomplete()
     "
     [nzCancelText]="'ADMIN.CONTENT_EDITOR.COMMIT.CANCEL' | translate"
     (nzOnOk)="confirmCommit()"
@@ -270,29 +289,72 @@
           [bump]="commitBump()"
           (bumpChange)="commitBump.set($event)"
         />
-        <label class="content-grid__commit-label" for="content-grid-commit-label">
-          {{ 'ADMIN.COMMON.VERSION_NUMBER.NAME_LABEL' | translate }}
-        </label>
-        <input
-          id="content-grid-commit-label"
-          nz-input
-          maxlength="255"
-          [ngModel]="commitLabel()"
-          (ngModelChange)="commitLabel.set($event)"
-          [placeholder]="'ADMIN.COMMON.VERSION_NUMBER.NAME_PLACEHOLDER' | translate"
-        />
+        <div class="content-grid__text-pair">
+          <div>
+            <label class="content-grid__commit-label" for="content-grid-commit-label-ar">
+              {{ 'ADMIN.COMMON.VERSION_TEXT.NAME_AR' | translate }}
+            </label>
+            <input
+              id="content-grid-commit-label-ar"
+              nz-input
+              maxlength="255"
+              [ngModel]="commitText().label_ar"
+              (ngModelChange)="setCommitText('label_ar', $event)"
+              [placeholder]="'ADMIN.COMMON.VERSION_NUMBER.NAME_PLACEHOLDER' | translate"
+              dir="rtl"
+            />
+          </div>
+          <div>
+            <label class="content-grid__commit-label" for="content-grid-commit-label-en">
+              {{ 'ADMIN.COMMON.VERSION_TEXT.NAME_EN' | translate }}
+            </label>
+            <input
+              id="content-grid-commit-label-en"
+              nz-input
+              maxlength="255"
+              [ngModel]="commitText().label_en"
+              (ngModelChange)="setCommitText('label_en', $event)"
+              [placeholder]="'ADMIN.COMMON.VERSION_NUMBER.NAME_PLACEHOLDER' | translate"
+              dir="ltr"
+            />
+          </div>
+        </div>
       </div>
-      <label class="content-grid__commit-label" for="content-grid-commit-message">
-        {{ 'ADMIN.CONTENT_EDITOR.COMMIT.MESSAGE_LABEL' | translate }}
-      </label>
-      <textarea
-        id="content-grid-commit-message"
-        nz-input
-        [ngModel]="commitMessage()"
-        (ngModelChange)="commitMessage.set($event)"
-        [nzAutosize]="{ minRows: 2, maxRows: 5 }"
-        [placeholder]="'ADMIN.CONTENT_EDITOR.COMMIT.MESSAGE_PLACEHOLDER' | translate"
-      ></textarea>
+      <div class="content-grid__text-pair">
+        <div>
+          <label class="content-grid__commit-label" for="content-grid-commit-message-ar">
+            {{ 'ADMIN.COMMON.VERSION_TEXT.MESSAGE_AR' | translate }}
+          </label>
+          <textarea
+            id="content-grid-commit-message-ar"
+            nz-input
+            [ngModel]="commitText().summary_ar"
+            (ngModelChange)="setCommitText('summary_ar', $event)"
+            [nzAutosize]="{ minRows: 2, maxRows: 5 }"
+            [placeholder]="'ADMIN.CONTENT_EDITOR.COMMIT.MESSAGE_PLACEHOLDER' | translate"
+            dir="rtl"
+          ></textarea>
+        </div>
+        <div>
+          <label class="content-grid__commit-label" for="content-grid-commit-message-en">
+            {{ 'ADMIN.COMMON.VERSION_TEXT.MESSAGE_EN' | translate }}
+          </label>
+          <textarea
+            id="content-grid-commit-message-en"
+            nz-input
+            [ngModel]="commitText().summary_en"
+            (ngModelChange)="setCommitText('summary_en', $event)"
+            [nzAutosize]="{ minRows: 2, maxRows: 5 }"
+            [placeholder]="'ADMIN.CONTENT_EDITOR.COMMIT.MESSAGE_PLACEHOLDER' | translate"
+            dir="ltr"
+          ></textarea>
+        </div>
+      </div>
+      @if (!commitHasMessage()) {
+        <p class="content-grid__commit-hint">
+          {{ 'ADMIN.COMMON.VERSION_TEXT.MESSAGE_REQUIRED' | translate }}
+        </p>
+      }
 
       <div class="content-grid__commit-review">
         @if (pendingLoading()) {

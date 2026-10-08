@@ -89,9 +89,11 @@ export class TafsirsService {
     append('template', payload.template);
     append('mushaf_layout_id', payload.mushaf_layout_id);
     // The version name is its label; its number starts the language's numbering.
-    append('version_label', payload.version_name);
+    append('version_label_en', payload.version_name_en);
+    append('version_label_ar', payload.version_name_ar);
     append('version_number', payload.version_number);
-    append('version_summary', payload.version_summary);
+    append('version_summary_en', payload.version_summary_en);
+    append('version_summary_ar', payload.version_summary_ar);
     if (payload.file) {
       data.append('file', payload.file);
     }

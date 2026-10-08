@@ -17,8 +17,13 @@ export interface AssetVersion {
   /** Translations/tafsirs: the version number ("major.minor"), issued by the server and
    *  never editable. Other kinds: a free-text version name. */
   name: string;
-  /** Translations/tafsirs: the human-readable version name. */
-  label?: string;
+  /** Translations/tafsirs: the human-readable version name, per language. */
+  label_en?: string;
+  label_ar?: string;
+  /** Translations/tafsirs: the summary, per language. */
+  summary_en?: string;
+  summary_ar?: string;
+  /** Other kinds: the single summary. */
   summary?: string;
   /** Commit author (version creator) display name. */
   created_by?: string | null;
@@ -52,13 +57,17 @@ export interface AssetVersionFormPayload {
   asset_id: number;
   /** Free-text version name (mushafs, fonts, programs). */
   name?: string;
-  /** Translations/tafsirs: version name. */
-  label?: string;
+  /** Translations/tafsirs: version name and summary, per language. */
+  label_en?: string;
+  label_ar?: string;
+  summary_en?: string;
+  summary_ar?: string;
   /** Translations/tafsirs, create only: starts the language's number sequence. */
   version_number?: string;
   /** Translations/tafsirs, create only: how the next number is derived. */
   bump?: VersionBump;
-  summary: string;
+  /** Other kinds: the single summary. */
+  summary?: string;
   file?: File | null;
   /** Language this uploaded version belongs to (translations/tafsirs). */
   language?: string | null;

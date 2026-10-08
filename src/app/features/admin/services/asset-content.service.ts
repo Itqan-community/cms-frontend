@@ -13,6 +13,7 @@ import type {
   ContentEntryPatch,
 } from '../models/asset-content.models';
 import type { VersionBump } from '../models/asset-versions.models';
+import type { VersionText } from '../utils/version-text.util';
 
 /**
  * Per-unit content editing for translations & tafsirs. The unit granularity
@@ -36,7 +37,7 @@ export class AssetContentService {
     slug: string,
     language: string,
     file?: File | null,
-    version?: { label: string; number: string }
+    version?: { label_en: string; label_ar: string; number: string }
   ): Observable<AssetLanguage> {
     const data = new FormData();
     data.append('language', language);
@@ -44,7 +45,8 @@ export class AssetContentService {
       data.append('file', file);
       // The file becomes the language's first version, which starts its numbering.
       if (version) {
-        data.append('version_label', version.label);
+        data.append('version_label_en', version.label_en);
+        data.append('version_label_ar', version.label_ar);
         data.append('version_number', version.number);
       }
     }
@@ -113,12 +115,13 @@ export class AssetContentService {
     kind: AssetVersionParentKind,
     slug: string,
     versionId: number,
-    message: string,
-    numbering: { label: string; version_number?: string; bump: VersionBump }
+    text: VersionText,
+    numbering: { version_number?: string; bump: VersionBump }
   ): Observable<ContentDraftVersion> {
+    // The summary is the commit message (at least one language); the name, if any.
     return this.http.post<ContentDraftVersion>(
       `${this.versionBase(kind, slug, versionId)}publish/`,
-      { message, ...numbering }
+      { ...text, ...numbering }
     );
   }
 

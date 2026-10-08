@@ -90,9 +90,11 @@ export class TafsirFormComponent implements OnInit {
     restricted_for_tenant: [false],
     template: [null as AssetTemplate | null, [Validators.required]],
     mushaf_layout_id: [null as number | null],
-    version_name: [''],
+    version_name_en: [''],
+    version_name_ar: [''],
     version_number: ['', [versionNumberValidator]],
-    version_summary: [''],
+    version_summary_en: [''],
+    version_summary_ar: [''],
   });
 
   /** A first version's number is required once a file is attached to the create form. */
@@ -131,8 +133,13 @@ export class TafsirFormComponent implements OnInit {
       this.form.controls.template.disable();
       this.form.controls.mushaf_layout_id.disable();
     } else {
-      this.form.controls.version_name.setValidators([Validators.maxLength(255)]);
-      this.form.controls.version_name.updateValueAndValidity();
+      for (const control of [
+        this.form.controls.version_name_en,
+        this.form.controls.version_name_ar,
+      ]) {
+        control.setValidators([Validators.maxLength(255)]);
+        control.updateValueAndValidity();
+      }
       this.bindTenantPublisher();
     }
   }
@@ -246,10 +253,15 @@ export class TafsirFormComponent implements OnInit {
       body.template = v.template ?? undefined;
       body.mushaf_layout_id = v.mushaf_layout_id ?? null;
 
-      const versionName = v.version_name?.trim();
-      const versionSummary = v.version_summary?.trim();
-      if (versionName) body.version_name = versionName;
-      if (versionSummary) body.version_summary = versionSummary;
+      for (const key of [
+        'version_name_en',
+        'version_name_ar',
+        'version_summary_en',
+        'version_summary_ar',
+      ] as const) {
+        const value = v[key]?.trim();
+        if (value) body[key] = value;
+      }
       if (this.versionFile()) {
         body.file = this.versionFile()!;
         body.version_number = (v.version_number ?? '').trim();

@@ -68,6 +68,12 @@ import {
 } from './content-text-cell-editor.component';
 import { surahLabel } from '../../models/quran-metadata';
 import { SurahFloatingFilterComponent } from './surah-floating-filter.component';
+import {
+  EMPTY_VERSION_TEXT,
+  hasVersionSummary,
+  trimVersionText,
+  type VersionText,
+} from '../../utils/version-text.util';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
@@ -258,7 +264,8 @@ export class AssetContentGridComponent implements OnInit {
   private newLanguageFile: File | null = null;
   readonly newLanguageFileName = signal<string | null>(null);
   /** The seed file becomes the language's first version: its name and starting number. */
-  readonly newLanguageLabel = signal('');
+  /** The new language's first version name, per language. */
+  readonly newLanguageLabels = signal({ label_en: '', label_ar: '' });
   readonly newLanguageStart = signal('');
   readonly addLanguageBlocked = computed(
     () =>
@@ -279,9 +286,10 @@ export class AssetContentGridComponent implements OnInit {
 
   /** Commit dialog state (required message + change review). */
   readonly commitDialogVisible = signal(false);
-  readonly commitMessage = signal('');
-  /** The commit's version name (prefilled from the draft) and number choice. */
-  readonly commitLabel = signal('');
+  /** The commit's message (its summary, at least one language) and version name
+   *  (prefilled from the draft), per language. */
+  readonly commitText = signal<VersionText>(EMPTY_VERSION_TEXT);
+  readonly commitHasMessage = computed(() => hasVersionSummary(this.commitText()));
   /** The language's latest version number; null when this commit is its first. */
   readonly commitLatest = signal<string | null>(null);
   readonly commitLatestLoading = signal(false);
@@ -298,7 +306,8 @@ export class AssetContentGridComponent implements OnInit {
       (this.commitLatest() === null && !isVersionNumber(this.commitStart()))
   );
   /** The open draft's version name, carried over from the version it was seeded from. */
-  private draftLabel = '';
+  /** The draft's version name per language, to prefill the commit. */
+  private draftLabels = { label_en: '', label_ar: '' };
   readonly committing = signal(false);
   readonly pendingLoading = signal(false);
   readonly pendingError = signal(false);
@@ -659,7 +668,7 @@ export class AssetContentGridComponent implements OnInit {
         next: (draft) => {
           if (generation !== this.loadGeneration) return;
           this.draftId.set(draft.id);
-          this.draftLabel = draft.label ?? '';
+          this.draftLabels = { label_en: draft.label_en ?? '', label_ar: draft.label_ar ?? '' };
           this.refreshPendingCount();
           this.loadTemplate(generation);
         },
@@ -690,7 +699,7 @@ export class AssetContentGridComponent implements OnInit {
   /** Open the "add language" modal. */
   openAddLanguage(): void {
     this.newLanguage.set(null);
-    this.newLanguageLabel.set('');
+    this.newLanguageLabels.set({ label_en: '', label_ar: '' });
     this.newLanguageStart.set('');
     this.clearNewLanguageFile();
     this.addLanguageVisible.set(true);
@@ -717,7 +726,8 @@ export class AssetContentGridComponent implements OnInit {
     this.addLanguageBusy.set(true);
     this.contentService
       .addLanguage(this.kind, this.slug, language, this.newLanguageFile, {
-        label: this.newLanguageLabel().trim(),
+        label_en: this.newLanguageLabels().label_en.trim(),
+        label_ar: this.newLanguageLabels().label_ar.trim(),
         number: this.newLanguageStart().trim(),
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -882,8 +892,7 @@ export class AssetContentGridComponent implements OnInit {
     void this.flushPending().then((ok) => {
       this.publishing.set(false);
       if (!ok) return;
-      this.commitMessage.set('');
-      this.commitLabel.set(this.draftLabel);
+      this.commitText.set({ ...EMPTY_VERSION_TEXT, ...this.draftLabels });
       this.commitStart.set('');
       this.commitBump.set('minor');
       this.loadCommitLatest();
@@ -933,12 +942,20 @@ export class AssetContentGridComponent implements OnInit {
       });
   }
 
+  setCommitText(key: keyof VersionText, value: string): void {
+    this.commitText.update((text) => ({ ...text, [key]: value }));
+  }
+
+  setNewLanguageLabel(key: 'label_en' | 'label_ar', value: string): void {
+    this.newLanguageLabels.update((labels) => ({ ...labels, [key]: value }));
+  }
+
   /** Confirm the commit: publish the draft with the (required) message. */
   confirmCommit(): void {
     const versionId = this.draftId();
     if (
       versionId === null ||
-      !this.commitMessage().trim() ||
+      !this.commitHasMessage() ||
       this.pendingLoading() ||
       this.pendingError() ||
       this.commitNumberIncomplete()
@@ -947,8 +964,7 @@ export class AssetContentGridComponent implements OnInit {
     }
     this.committing.set(true);
     this.contentService
-      .commit(this.kind, this.slug, versionId, this.commitMessage().trim(), {
-        label: this.commitLabel().trim(),
+      .commit(this.kind, this.slug, versionId, trimVersionText(this.commitText()), {
         // The number is issued by the server: only how to derive it is sent.
         ...(this.commitLatest() === null ? { version_number: this.commitStart().trim() } : {}),
         bump: this.commitBump(),

@@ -1127,6 +1127,16 @@
         "NAME_LABEL": "Version name",
         "NAME_PLACEHOLDER": "e.g. Revised edition",
         "LOAD_ERROR": "Couldn't load the latest version number. Close this dialog and try again."
+      },
+      "VERSION_TEXT": {
+        "NAME_AR": "Version name (Arabic)",
+        "NAME_EN": "Version name (English)",
+        "SUMMARY_AR": "Summary (Arabic)",
+        "SUMMARY_EN": "Summary (English)",
+        "MESSAGE_AR": "Commit message (Arabic)",
+        "MESSAGE_EN": "Commit message (English)",
+        "SUMMARY_REQUIRED": "Write a summary in at least one language.",
+        "MESSAGE_REQUIRED": "Write a commit message in at least one language."
       }
     },
     "TENANT": {

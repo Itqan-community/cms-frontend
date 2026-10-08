@@ -135,6 +135,24 @@
     margin: 16px 0;
   }
 
+  // Arabic and English side by side; stacked on narrow screens.
+  &__text-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+
+    @media (max-width: 600px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  &__commit-hint {
+    margin: 0 0 8px;
+    font-size: 0.875rem;
+    color: var(--admin-text-500);
+  }
+
   &__commit-review {
     margin-top: 16px;
   }
