@@ -107,11 +107,13 @@ export interface TranslationFormValue {
   template?: AssetTemplate;
   /** Create-only: required iff template === 'page'. */
   mushaf_layout_id?: number | null;
-  /** Create-only: first version metadata + content file. */
-  version_name?: string;
+  /** Create-only: first version metadata (name and summary per language) + content file. */
+  version_name_en?: string;
+  version_name_ar?: string;
   /** Required with `file`: the first version's number ("major.minor"). */
   version_number?: string;
-  version_summary?: string;
+  version_summary_en?: string;
+  version_summary_ar?: string;
   file?: File;
 }
 

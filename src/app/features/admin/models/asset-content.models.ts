@@ -1,3 +1,4 @@
+import type { VersionText } from '../utils/version-text.util';
 import type { AssetVersionParentKind } from './asset-versions.models';
 
 /** One language an asset provides content in (source + translations). */
@@ -9,17 +10,15 @@ export interface AssetLanguage {
   is_available: boolean;
 }
 
-/** A per-ayah content draft version (state === 'draft'). */
-export interface ContentDraftVersion {
+/** A per-ayah content draft version (state === 'draft'). Carries its version
+ *  name and summary per language (see VersionText). */
+export interface ContentDraftVersion extends VersionText {
   id: number;
   asset_id: number;
   /** Language code this draft belongs to. */
   language: string;
   /** Version number ("major.minor"); empty while a draft. */
   name: string;
-  /** Version name. */
-  label: string;
-  summary: string;
   state: 'draft' | 'published';
   entries_count: number;
   created_at: string;

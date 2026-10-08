@@ -135,7 +135,7 @@ describe('AssetVersionsManagerComponent', () => {
       fixture.detectChanges();
 
       component.openCreateModal();
-      component.form.setValue({ name: '', label: 'v1', summary: 'first upload' });
+      component.form.patchValue({ label_en: 'v1', summary_en: 'first upload' });
       component.onPickFile({
         target: { files: [new File(['x'], 'v1.csv')], value: '' },
       } as unknown as Event);
@@ -151,7 +151,7 @@ describe('AssetVersionsManagerComponent', () => {
       fixture.detectChanges();
 
       component.openCreateModal();
-      component.form.setValue({ name: '', label: 'v1', summary: 'first upload' });
+      component.form.patchValue({ label_en: 'v1', summary_en: 'first upload' });
       component.onPickFile({
         target: { files: [new File(['x'], 'v1.csv')], value: '' },
       } as unknown as Event);
@@ -167,7 +167,7 @@ describe('AssetVersionsManagerComponent', () => {
       versionsService.create.and.returnValue(of(page('ar').results[0]));
       fixture.detectChanges();
       component.openCreateModal();
-      component.form.setValue({ name: '', label: 'v1', summary: 'first upload' });
+      component.form.patchValue({ label_en: 'v1', summary_en: 'first upload' });
       component.onPickFile({
         target: { files: [new File(['x'], 'v1.csv')], value: '' },
       } as unknown as Event);
@@ -205,6 +205,81 @@ describe('AssetVersionsManagerComponent', () => {
       component.openCreateModal();
 
       expect(component.preApproved()).toBeFalse();
+    });
+  });
+
+  describe('bilingual name and summary', () => {
+    it('needs a summary in at least one language', () => {
+      fixture.detectChanges();
+      component.openCreateModal();
+
+      component.form.patchValue({ summary_en: '', summary_ar: '' });
+      expect(component.form.hasError('summaryRequired')).toBeTrue();
+
+      component.form.patchValue({ summary_ar: 'ملخص' });
+      expect(component.form.hasError('summaryRequired')).toBeFalse();
+    });
+
+    it('uploads the name and summary in both languages, without the single summary', () => {
+      versionsService.create.and.returnValue(of(page('ar').results[0]));
+      fixture.detectChanges();
+      component.openCreateModal();
+      component.form.patchValue({
+        label_en: ' First ',
+        label_ar: 'الأولى',
+        summary_en: '',
+        summary_ar: 'ملخص',
+      });
+      component.onPickFile({
+        target: { files: [new File(['x'], 'v1.csv')], value: '' },
+      } as unknown as Event);
+
+      component.submit();
+
+      const payload = versionsService.create.calls.mostRecent().args[2];
+      expect(payload).toEqual(
+        jasmine.objectContaining({
+          label_en: 'First',
+          label_ar: 'الأولى',
+          summary_en: '',
+          summary_ar: 'ملخص',
+        })
+      );
+      expect(payload.summary).toBeUndefined();
+    });
+
+    it('prefills both languages when editing', () => {
+      fixture.detectChanges();
+
+      component.openEditModal({
+        ...page('ar').results[0],
+        label_en: 'First',
+        label_ar: 'الأولى',
+        summary_en: 'notes',
+        summary_ar: 'ملاحظات',
+      });
+
+      expect(component.form.getRawValue()).toEqual(
+        jasmine.objectContaining({
+          label_en: 'First',
+          label_ar: 'الأولى',
+          summary_en: 'notes',
+          summary_ar: 'ملاحظات',
+        })
+      );
+    });
+
+    it('lists each version in the UI language, falling back to the other', () => {
+      fixture.detectChanges();
+      const version = {
+        ...page('ar').results[0],
+        label_en: '',
+        label_ar: 'الأولى',
+        summary_en: 'notes',
+      };
+
+      expect(component.versionText(version, 'label')).toBe('الأولى');
+      expect(component.versionText(version, 'summary')).toBe('notes');
     });
   });
 
@@ -450,7 +525,7 @@ describe('AssetVersionsManagerComponent', () => {
       fixture.detectChanges();
 
       component.openCreateModal();
-      component.form.setValue({ name: '', label: 'First edition', summary: 'first' });
+      component.form.patchValue({ label_en: 'First edition', summary_en: 'first' });
       pickFile();
       component.submit();
 
@@ -463,7 +538,11 @@ describe('AssetVersionsManagerComponent', () => {
       expect(versionsService.create).toHaveBeenCalledWith(
         'translation',
         'sahih-intl',
-        jasmine.objectContaining({ label: 'First edition', version_number: '7.0', bump: 'minor' })
+        jasmine.objectContaining({
+          label_en: 'First edition',
+          version_number: '7.0',
+          bump: 'minor',
+        })
       );
     });
 
@@ -472,7 +551,7 @@ describe('AssetVersionsManagerComponent', () => {
       fixture.detectChanges();
 
       component.openCreateModal();
-      component.form.setValue({ name: '', label: '', summary: 'next' });
+      component.form.patchValue({ label_en: '', summary_en: 'next' });
       component.versionBump.set('major');
       pickFile();
       component.submit();
@@ -487,13 +566,13 @@ describe('AssetVersionsManagerComponent', () => {
       versionsService.update.and.returnValue(of(page('ar').results[0]));
       fixture.detectChanges();
 
-      component.openEditModal({ ...page('ar').results[0], name: '7.1', label: 'Old' });
+      component.openEditModal({ ...page('ar').results[0], name: '7.1', label_en: 'Old' });
       expect(component.editingNumber()).toBe('7.1');
-      component.form.patchValue({ label: 'Renamed', summary: 'notes' });
+      component.form.patchValue({ label_ar: 'معدل', summary_en: 'notes' });
       component.submit();
 
       const payload = versionsService.update.calls.mostRecent().args[3];
-      expect(payload.label).toBe('Renamed');
+      expect([payload.label_en, payload.label_ar]).toEqual(['Old', 'معدل']);
       expect(payload.name).toBeUndefined();
       expect(payload.bump).toBeUndefined();
     });
@@ -503,7 +582,7 @@ describe('AssetVersionsManagerComponent', () => {
       fixture.detectChanges();
 
       component.openCreateModal();
-      component.form.setValue({ name: '', label: '', summary: 'next' });
+      component.form.patchValue({ label_en: '', summary_en: 'next' });
       // A failed lookup must not read as "first version" and invite a starting number.
       component.versionStart.set('7.0');
       pickFile();
@@ -574,7 +653,7 @@ describe('AssetVersionsManagerComponent', () => {
       fixture.detectChanges();
 
       component.openCreateModal();
-      component.form.setValue({ name: '', label: 'v2', summary: 'upload' });
+      component.form.patchValue({ label_en: 'v2', summary_en: 'upload' });
       component.onPickFile({
         target: { files: [new File(['x'], 'v2.pdf')], value: '' },
       } as unknown as Event);

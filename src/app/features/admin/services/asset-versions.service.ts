@@ -153,8 +153,10 @@ export class AssetVersionsService {
     if (payload.name !== undefined) {
       data.append('name', payload.name);
     }
-    if (payload.label !== undefined) {
-      data.append('label', payload.label);
+    for (const key of ['label_en', 'label_ar', 'summary_en', 'summary_ar'] as const) {
+      if (payload[key] !== undefined) {
+        data.append(key, payload[key]);
+      }
     }
     if (payload.version_number) {
       data.append('version_number', payload.version_number);
@@ -162,7 +164,9 @@ export class AssetVersionsService {
     if (payload.bump) {
       data.append('bump', payload.bump);
     }
-    data.append('summary', payload.summary);
+    if (payload.summary !== undefined) {
+      data.append('summary', payload.summary);
+    }
     if (payload.file) {
       data.append('file', payload.file);
     }

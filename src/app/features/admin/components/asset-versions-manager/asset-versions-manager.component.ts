@@ -12,13 +12,22 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  type AbstractControl,
+  FormBuilder,
+  FormsModule,
+  ReactiveFormsModule,
+  type ValidationErrors,
+  type ValidatorFn,
+  Validators,
+} from '@angular/forms';
 import { NgIcon } from '@ng-icons/core';
 import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzCheckboxModule } from 'ng-zorro-antd/checkbox';
 import { NzFormModule } from 'ng-zorro-antd/form';
+import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
@@ -49,10 +58,19 @@ import { ContentChangesComponent } from '../content-changes/content-changes.comp
 import { CsvTemplateDownloadComponent } from '../csv-template-download/csv-template-download.component';
 import { UniversalAssetPreviewerComponent } from '../universal-asset-previewer/universal-asset-previewer.component';
 import { VersionNumberFieldComponent } from '../version-number-field/version-number-field.component';
+import {
+  hasVersionSummary,
+  localizedVersionText,
+  trimVersionText,
+} from '../../utils/version-text.util';
 
 const DEFAULT_PAGE_SIZE = 10;
 /** Diff rows per request — the API's maximum, so large diffs need few round trips. */
 const DIFF_PAGE_SIZE = 1000;
+
+/** Translations/tafsirs: the summary is required in at least one language. */
+const summaryInEitherLanguage: ValidatorFn = (group: AbstractControl): ValidationErrors | null =>
+  hasVersionSummary(group.value) ? null : { summaryRequired: true };
 
 /** Upload/replace rejections that have a more helpful message than the generic save error. */
 const SAVE_ERROR_KEYS: Record<string, string> = {
@@ -105,6 +123,7 @@ const VERSION_PERMISSIONS: Record<
     NzButtonModule,
     NzCheckboxModule,
     NzFormModule,
+    NzGridModule,
     NzInputModule,
     NzModalModule,
     NzSelectModule,
@@ -251,7 +270,12 @@ export class AssetVersionsManagerComponent implements OnInit {
 
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required]],
-    label: [''],
+    // Translations/tafsirs: name and summary per language (summary in at least one).
+    label_en: [''],
+    label_ar: [''],
+    summary_en: [''],
+    summary_ar: [''],
+    // Other kinds: a single summary.
     summary: ['', [Validators.required]],
   });
 
@@ -275,6 +299,10 @@ export class AssetVersionsManagerComponent implements OnInit {
     if (this.numbered()) {
       this.form.controls.name.clearValidators();
       this.form.controls.name.updateValueAndValidity();
+      this.form.controls.summary.clearValidators();
+      this.form.controls.summary.updateValueAndValidity();
+      this.form.addValidators(summaryInEitherLanguage);
+      this.form.updateValueAndValidity();
     }
     this.search$
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
@@ -393,7 +421,14 @@ export class AssetVersionsManagerComponent implements OnInit {
     }
     this.modalMode.set('create');
     this.editingId.set(null);
-    this.form.reset({ name: '', label: '', summary: '' });
+    this.form.reset({
+      name: '',
+      label_en: '',
+      label_ar: '',
+      summary: '',
+      summary_en: '',
+      summary_ar: '',
+    });
     this.clearFile();
     this.preApproved.set(false);
     // Default the upload to the language currently being viewed, else the source.
@@ -411,8 +446,11 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.editingId.set(row.id);
     this.form.patchValue({
       name: row.name,
-      label: row.label ?? '',
+      label_en: row.label_en ?? '',
+      label_ar: row.label_ar ?? '',
       summary: row.summary ?? '',
+      summary_en: row.summary_en ?? '',
+      summary_ar: row.summary_ar ?? '',
     });
     this.editingNumber.set(row.name);
     this.clearFile();
@@ -475,7 +513,14 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.editingId.set(null);
     this.editingNumber.set(null);
     this.cancelLatestLookup();
-    this.form.reset({ name: '', label: '', summary: '' });
+    this.form.reset({
+      name: '',
+      label_en: '',
+      label_ar: '',
+      summary: '',
+      summary_en: '',
+      summary_ar: '',
+    });
     this.clearFile();
     this.preApproved.set(false);
   }
@@ -519,20 +564,19 @@ export class AssetVersionsManagerComponent implements OnInit {
       return;
     }
 
-    const { name, label, summary } = this.form.getRawValue();
+    const { name, label_en, label_ar, summary, summary_en, summary_ar } = this.form.getRawValue();
     const payload = {
       asset_id: this.assetId,
       ...(this.numbered()
         ? {
-            label: label.trim(),
+            ...trimVersionText({ label_en, label_ar, summary_en, summary_ar }),
             // The number is issued by the server: only how to derive it is sent.
             ...(creating && this.latestNumber() === null
               ? { version_number: this.versionStart().trim() }
               : {}),
             ...(creating ? { bump: this.versionBump() } : {}),
           }
-        : { name }),
-      summary,
+        : { name, summary }),
       file: this.selectedFile ?? undefined,
       // Language only applies when creating a new (uploaded) version.
       language:
@@ -957,6 +1001,12 @@ export class AssetVersionsManagerComponent implements OnInit {
     anchor.download = filename;
     anchor.rel = 'noopener';
     anchor.click();
+  }
+
+  /** A version's name or summary in the UI language (translations/tafsirs), else its single summary. */
+  versionText(ver: AssetVersion, field: 'label' | 'summary'): string {
+    if (!this.numbered()) return field === 'summary' ? (ver.summary ?? '') : '';
+    return localizedVersionText(ver, field, this.translate.currentLang);
   }
 
   truncate(text: string | null | undefined, max = 80): string {
