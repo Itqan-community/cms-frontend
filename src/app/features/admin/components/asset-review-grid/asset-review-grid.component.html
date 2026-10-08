@@ -52,6 +52,29 @@
           </nz-select>
         }
       </div>
+      @if (hasLanguages()) {
+        <div class="asset-review-grid__bulk">
+          <button
+            nz-button
+            nzType="default"
+            type="button"
+            [disabled]="!selectedIds().size || bulkApproving()"
+            (click)="approveSelected()"
+          >
+            {{ 'ADMIN.REVIEW.BULK.APPROVE_SELECTED' | translate: { count: selectedIds().size } }}
+          </button>
+          <button
+            nz-button
+            nzType="primary"
+            type="button"
+            [nzLoading]="bulkApproving()"
+            [disabled]="!canApproveAll() || loading()"
+            (click)="approveAll()"
+          >
+            {{ 'ADMIN.REVIEW.BULK.APPROVE_ALL' | translate: { count: total() } }}
+          </button>
+        </div>
+      }
     </div>
 
     @if (selectedVersionName(); as name) {
@@ -82,6 +105,14 @@
         >
           <thead>
             <tr>
+              <th
+                nzWidth="48px"
+                [nzChecked]="allSelected()"
+                [nzIndeterminate]="someSelected()"
+                [nzDisabled]="!selectableRows().length || bulkApproving()"
+                [attr.aria-label]="'ADMIN.REVIEW.BULK.SELECT_ALL' | translate"
+                (nzCheckedChange)="toggleAll($event)"
+              ></th>
               <th nzWidth="90px">{{ 'ADMIN.REVIEW.COLUMN.UNIT' | translate }}</th>
               <th nzWidth="80px">{{ 'ADMIN.REVIEW.COLUMN.TYPE' | translate }}</th>
               <th>{{ 'ADMIN.REVIEW.COLUMN.CHANGE' | translate }}</th>
@@ -94,6 +125,14 @@
           <tbody>
             @for (row of reviewTable.data; track row.id) {
               <tr>
+                <td
+                  [nzChecked]="selectedIds().has(row.id)"
+                  [nzDisabled]="row.review_state === 'approved' || bulkApproving()"
+                  [attr.aria-label]="
+                    'ADMIN.REVIEW.BULK.SELECT_ROW' | translate: { label: row.label }
+                  "
+                  (nzCheckedChange)="toggleRow(row.id, $event)"
+                ></td>
                 <td>{{ row.label }}</td>
                 <td>{{ typeKey(row.change_type) | translate }}</td>
                 <td class="asset-review-grid__change">
