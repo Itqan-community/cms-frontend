@@ -245,6 +245,9 @@ export class AssetReviewGridComponent implements OnInit {
     }
     this.cancelInFlightChanges$.next();
     this.loading.set(true);
+    // The ticked rows belong to the old listing: drop them now, so "Approve
+    // selected" can't send them along with the new language or filters.
+    this.selectedIds.set(new Set());
     const filter = this.stateFilter();
     this.reviewService
       .listChanges(
@@ -260,7 +263,6 @@ export class AssetReviewGridComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.changes.set(res.results);
-          this.selectedIds.set(new Set());
           this.total.set(res.count);
           this.loading.set(false);
         },

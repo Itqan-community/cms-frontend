@@ -511,6 +511,19 @@ describe('AssetReviewGridComponent', () => {
       expect(reviewServiceSpy.bulkApprove).not.toHaveBeenCalled();
     });
 
+    it('drops the selection as soon as another listing is requested', () => {
+      fixture.detectChanges();
+      component.toggleRow(1, true);
+      const pending = new Subject<ReviewChangesResponse>();
+      reviewServiceSpy.listChanges.and.returnValue(pending);
+
+      component.onLanguageChange('fr');
+      component.approveSelected();
+
+      expect(component.selectedIds().size).toBe(0);
+      expect(reviewServiceSpy.bulkApprove).not.toHaveBeenCalled();
+    });
+
     it('keeps the selection when the bulk approve fails', () => {
       reviewServiceSpy.bulkApprove.and.returnValue(
         throwError(() => ({ error: { error_name: 'change_not_found' } }))
