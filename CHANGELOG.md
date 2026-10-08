@@ -505,6 +505,19 @@ Release 1.11.0.
 
 ---
 
+## [1.12.0] - 2026-10-08
+
+Release 1.12.0.
+
+## Changes
+
+- fix(admin): drop the review selection when a new listing is requested
+- feat(admin): bilingual version name and summary
+- feat(admin): pre-approved checkbox when uploading a version
+- feat(admin): bulk-approve changes on the review page
+
+---
+
 ## [Unreleased]
 
 ### Added
