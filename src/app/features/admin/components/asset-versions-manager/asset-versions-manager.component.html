@@ -147,17 +147,76 @@
               (bumpChange)="versionBump.set($event)"
             />
           }
-          <nz-form-item>
-            <nz-form-label>{{ t('FORM_NAME') | translate }}</nz-form-label>
-            <nz-form-control>
-              <input
-                nz-input
-                formControlName="label"
-                maxlength="255"
-                [placeholder]="t('PLACEHOLDER_LABEL') | translate"
-              />
-            </nz-form-control>
-          </nz-form-item>
+          <div nz-row [nzGutter]="16">
+            <div nz-col [nzXs]="24" [nzSm]="12">
+              <nz-form-item>
+                <nz-form-label>{{ 'ADMIN.COMMON.VERSION_TEXT.NAME_AR' | translate }}</nz-form-label>
+                <nz-form-control>
+                  <input
+                    nz-input
+                    formControlName="label_ar"
+                    maxlength="255"
+                    [placeholder]="t('PLACEHOLDER_LABEL') | translate"
+                  />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzXs]="24" [nzSm]="12">
+              <nz-form-item>
+                <nz-form-label>{{ 'ADMIN.COMMON.VERSION_TEXT.NAME_EN' | translate }}</nz-form-label>
+                <nz-form-control>
+                  <input
+                    nz-input
+                    formControlName="label_en"
+                    maxlength="255"
+                    dir="ltr"
+                    [placeholder]="t('PLACEHOLDER_LABEL') | translate"
+                  />
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+          <div nz-row [nzGutter]="16">
+            <div nz-col [nzXs]="24" [nzSm]="12">
+              <nz-form-item>
+                <nz-form-label>{{
+                  'ADMIN.COMMON.VERSION_TEXT.SUMMARY_AR' | translate
+                }}</nz-form-label>
+                <nz-form-control>
+                  <textarea
+                    nz-input
+                    formControlName="summary_ar"
+                    [placeholder]="t('PLACEHOLDER_SUMMARY') | translate"
+                    [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+                  ></textarea>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+            <div nz-col [nzXs]="24" [nzSm]="12">
+              <nz-form-item>
+                <nz-form-label>{{
+                  'ADMIN.COMMON.VERSION_TEXT.SUMMARY_EN' | translate
+                }}</nz-form-label>
+                <nz-form-control>
+                  <textarea
+                    nz-input
+                    formControlName="summary_en"
+                    dir="ltr"
+                    [placeholder]="t('PLACEHOLDER_SUMMARY') | translate"
+                    [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+                  ></textarea>
+                </nz-form-control>
+              </nz-form-item>
+            </div>
+          </div>
+          @if (
+            form.hasError('summaryRequired') &&
+            (form.controls.summary_ar.touched || form.controls.summary_en.touched)
+          ) {
+            <p class="asset-versions-manager__hint asset-versions-manager__summary-hint">
+              {{ 'ADMIN.COMMON.VERSION_TEXT.SUMMARY_REQUIRED' | translate }}
+            </p>
+          }
         } @else {
           <nz-form-item>
             <nz-form-label nzRequired>{{ t('FORM_NAME') | translate }}</nz-form-label>
@@ -169,18 +228,18 @@
               />
             </nz-form-control>
           </nz-form-item>
+          <nz-form-item>
+            <nz-form-label nzRequired>{{ t('FORM_SUMMARY') | translate }}</nz-form-label>
+            <nz-form-control [nzErrorTip]="t('ERR_SUMMARY') | translate">
+              <textarea
+                nz-input
+                formControlName="summary"
+                [placeholder]="t('PLACEHOLDER_SUMMARY') | translate"
+                [nzAutosize]="{ minRows: 3, maxRows: 6 }"
+              ></textarea>
+            </nz-form-control>
+          </nz-form-item>
         }
-        <nz-form-item>
-          <nz-form-label nzRequired>{{ t('FORM_SUMMARY') | translate }}</nz-form-label>
-          <nz-form-control [nzErrorTip]="t('ERR_SUMMARY') | translate">
-            <textarea
-              nz-input
-              formControlName="summary"
-              [placeholder]="t('PLACEHOLDER_SUMMARY') | translate"
-              [nzAutosize]="{ minRows: 3, maxRows: 6 }"
-            ></textarea>
-          </nz-form-control>
-        </nz-form-item>
         <!-- Replacing the file changes the text, so it needs the content permission. -->
         @if (canEditContent()) {
           <div class="asset-versions-manager__upload">
@@ -282,8 +341,8 @@
               <td>
                 @if (numbered()) {
                   <span class="admin-mono" dir="ltr">{{ ver.name }}</span>
-                  @if (ver.label) {
-                    <span class="asset-versions-manager__label">{{ ver.label }}</span>
+                  @if (versionText(ver, 'label'); as label) {
+                    <span class="asset-versions-manager__label" dir="auto">{{ label }}</span>
                   }
                 } @else {
                   {{ ver.name }}
@@ -349,7 +408,7 @@
                 }
               </td>
               <td class="asset-versions-manager__summary-cell">
-                {{ truncate(ver.summary) }}
+                <span dir="auto">{{ truncate(versionText(ver, 'summary')) }}</span>
                 @if (ver.review_comments_count) {
                   <span
                     class="asset-versions-manager__comments"
