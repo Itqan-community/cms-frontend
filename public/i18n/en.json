@@ -1005,6 +1005,16 @@
         "COMMENT": "Comment",
         "UNREVIEW": "Unreview"
       },
+      "BULK": {
+        "APPROVE_SELECTED": "Approve selected ({{count}})",
+        "APPROVE_ALL": "Approve all ({{count}})",
+        "SELECT_ALL": "Select all changes on this page",
+        "SELECT_ROW": "Select change {{label}}",
+        "CONFIRM_TITLE": "Approve all these changes?",
+        "CONFIRM_BODY": "All {{count}} changes that match the current filters will be approved, including those on other pages. Changes that are already approved stay as they are.",
+        "CONFIRM_OK": "Approve all",
+        "SUCCESS": "{{count}} changes approved."
+      },
       "COLUMN": {
         "UNIT": "Reference",
         "TYPE": "Type",
@@ -1032,6 +1042,8 @@
       "ERRORS": {
         "REVIEW_COMMENT_REQUIRED": "A comment is required when requesting changes.",
         "LANGUAGE_NOT_ASSIGNED": "You are not assigned to review this language.",
+        "CHANGE_NOT_FOUND": "Some of the selected changes no longer exist. Reload and try again.",
+        "VERSION_NOT_FOUND": "That version no longer exists. Reload and try again.",
         "GENERIC": "Something went wrong. Please try again."
       }
     },

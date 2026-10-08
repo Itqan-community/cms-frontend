@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { type ModalOptions, NzModalService } from 'ng-zorro-antd/modal';
 import { Subject, of, throwError } from 'rxjs';
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
 import type { ReviewChange, ReviewChangesResponse } from '../../models/asset-review.models';
@@ -17,6 +18,7 @@ describe('AssetReviewGridComponent', () => {
   let adminAuthSpy: jasmine.SpyObj<AdminAuthService>;
   let lastLanguageSpy: jasmine.SpyObj<LastActiveLanguageService>;
   let messageSpy: jasmine.SpyObj<NzMessageService>;
+  let modalConfirm: jasmine.Spy;
 
   const mockChange: ReviewChange = {
     id: 1,
@@ -47,6 +49,7 @@ describe('AssetReviewGridComponent', () => {
       'listChanges',
       'listVersions',
       'setState',
+      'bulkApprove',
     ]);
     adminAuthSpy = jasmine.createSpyObj('AdminAuthService', ['hasPermission']);
     lastLanguageSpy = jasmine.createSpyObj('LastActiveLanguageService', ['get', 'set']);
@@ -81,6 +84,14 @@ describe('AssetReviewGridComponent', () => {
     component = fixture.componentInstance;
     component.kind = 'translation';
     component.slug = 'en-sahih';
+    // The component's own NzModalService (NzModalModule provides one, shadowing any
+    // root stub); the template's <nz-modal>s need the real one, so only confirm is
+    // spied: it confirms immediately, as if the user clicked OK.
+    modalConfirm = spyOn(fixture.debugElement.injector.get(NzModalService), 'confirm');
+    modalConfirm.and.callFake((options?: ModalOptions) => {
+      (options?.nzOnOk as (() => void) | undefined)?.();
+      return {};
+    });
   });
 
   it('should create and load languages on init when user has permission', () => {
@@ -273,8 +284,9 @@ describe('AssetReviewGridComponent', () => {
 
     fixture.detectChanges();
 
-    const firstCell: HTMLElement = fixture.nativeElement.querySelector('tbody tr td');
-    expect(firstCell.textContent?.trim()).toBe('2:255:4');
+    // The first cell is the row's selection checkbox; the reference follows it.
+    const referenceCell: HTMLElement = fixture.nativeElement.querySelector('tbody tr td + td');
+    expect(referenceCell.textContent?.trim()).toBe('2:255:4');
   });
 
   describe('version filter', () => {
@@ -425,6 +437,92 @@ describe('AssetReviewGridComponent', () => {
 
       const cell: HTMLElement = fixture.nativeElement.querySelector('.asset-review-grid__editor');
       expect(cell.textContent?.trim()).toBe('COMMON.EM_DASH');
+    });
+  });
+
+  describe('bulk approve', () => {
+    const second: ReviewChange = { ...mockChange, id: 2, label: '1:2' };
+    const approved: ReviewChange = { ...mockChange, id: 3, label: '1:3', review_state: 'approved' };
+
+    beforeEach(() => {
+      reviewServiceSpy.listChanges.and.returnValue(
+        of({ count: 3, results: [mockChange, second, approved] })
+      );
+      reviewServiceSpy.bulkApprove.and.returnValue(of({ approved: 2 }));
+    });
+
+    it('selects only the rows that still need approval', () => {
+      fixture.detectChanges();
+
+      component.toggleAll(true);
+
+      expect([...component.selectedIds()]).toEqual([1, 2]);
+      expect(component.allSelected()).toBeTrue();
+    });
+
+    it('approves the selected rows, then reloads with the selection cleared', () => {
+      fixture.detectChanges();
+      component.toggleRow(2, true);
+      reviewServiceSpy.listChanges.calls.reset();
+
+      component.approveSelected();
+
+      expect(reviewServiceSpy.bulkApprove).toHaveBeenCalledWith('translation', 'en-sahih', {
+        language: 'en',
+        change_ids: [2],
+      });
+      expect(messageSpy.success).toHaveBeenCalled();
+      expect(reviewServiceSpy.listChanges).toHaveBeenCalled();
+      expect(component.selectedIds().size).toBe(0);
+    });
+
+    it('approves everything the filters match after confirming', () => {
+      fixture.detectChanges();
+      component.onVersionChange(10);
+
+      component.approveAll();
+
+      expect(modalConfirm).toHaveBeenCalled();
+      expect(reviewServiceSpy.bulkApprove).toHaveBeenCalledWith('translation', 'en-sahih', {
+        language: 'en',
+        state: 'unreviewed',
+        version: 10,
+      });
+    });
+
+    it('sends no state filter when every state is listed', () => {
+      fixture.detectChanges();
+      component.onFilterChange('all');
+
+      component.approveAll();
+
+      expect(reviewServiceSpy.bulkApprove).toHaveBeenCalledWith('translation', 'en-sahih', {
+        language: 'en',
+      });
+    });
+
+    it('offers no approve-all while only approved changes are listed', () => {
+      fixture.detectChanges();
+      component.onFilterChange('approved');
+
+      component.approveAll();
+
+      expect(component.canApproveAll()).toBeFalse();
+      expect(reviewServiceSpy.bulkApprove).not.toHaveBeenCalled();
+    });
+
+    it('keeps the selection when the bulk approve fails', () => {
+      reviewServiceSpy.bulkApprove.and.returnValue(
+        throwError(() => ({ error: { error_name: 'change_not_found' } }))
+      );
+      fixture.detectChanges();
+      component.toggleRow(1, true);
+
+      component.approveSelected();
+
+      expect(messageSpy.error).toHaveBeenCalled();
+      expect(component.bulkApproving()).toBeFalse();
+      expect([...component.selectedIds()]).toEqual([1]);
     });
   });
 });
