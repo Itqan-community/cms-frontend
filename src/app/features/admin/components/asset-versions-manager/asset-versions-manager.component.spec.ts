@@ -162,6 +162,52 @@ describe('AssetVersionsManagerComponent', () => {
     });
   });
 
+  describe('pre-approved upload', () => {
+    function uploadWith(preApproved: boolean): void {
+      versionsService.create.and.returnValue(of(page('ar').results[0]));
+      fixture.detectChanges();
+      component.openCreateModal();
+      component.form.setValue({ name: '', label: 'v1', summary: 'first upload' });
+      component.onPickFile({
+        target: { files: [new File(['x'], 'v1.csv')], value: '' },
+      } as unknown as Event);
+      component.preApproved.set(preApproved);
+      component.submit();
+    }
+
+    it('asks the server to approve the upload when a reviewer ticks it', () => {
+      uploadWith(true);
+
+      expect(versionsService.create.calls.mostRecent().args[2].pre_approved).toBeTrue();
+    });
+
+    it('leaves the upload for review when it is not ticked', () => {
+      uploadWith(false);
+
+      expect(versionsService.create.calls.mostRecent().args[2].pre_approved).toBeUndefined();
+    });
+
+    it('never sends it for a user who cannot review', () => {
+      granted = new Set([PORTAL_PERMISSIONS.PORTAL_EDIT_TRANSLATION_CONTENT]);
+
+      uploadWith(true);
+
+      expect(component.canReview()).toBeFalse();
+      expect(versionsService.create.calls.mostRecent().args[2].pre_approved).toBeUndefined();
+    });
+
+    it('starts unticked each time the upload form opens', () => {
+      fixture.detectChanges();
+      component.openCreateModal();
+      component.preApproved.set(true);
+      component.closeVersionModal();
+
+      component.openCreateModal();
+
+      expect(component.preApproved()).toBeFalse();
+    });
+  });
+
   describe('default language', () => {
     it('defaults to the source language even when a translation is listed first', () => {
       // LANGUAGES has the source first, so a `langs[0]` fallback passes by luck; reverse it.

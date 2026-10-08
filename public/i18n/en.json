@@ -783,7 +783,9 @@
       "PUBLISH_ERROR": "Could not publish the version.",
       "NOT_APPROVED_ERROR": "This version has changes that are not approved yet.",
       "FILE_UNPARSEABLE_ERROR": "The file could not be read as content rows. Use the CSV template for this asset.",
-      "VERSION_IS_PUBLISHED_ERROR": "This version is published. Publish another version before changing its file."
+      "VERSION_IS_PUBLISHED_ERROR": "This version is published. Publish another version before changing its file.",
+      "PRE_APPROVED": "Pre-approved",
+      "PRE_APPROVED_HINT": "The uploaded changes are approved now under your name, so the version can be published without a separate review."
     },
     "VERSION_VIEWER": {
       "OPEN": "View this version",
