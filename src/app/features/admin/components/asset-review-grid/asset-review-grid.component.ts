@@ -17,14 +17,19 @@ import { Subject, takeUntil } from 'rxjs';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzModalModule } from 'ng-zorro-antd/modal';
+import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 
 import { AdminTablePaginationComponent } from '../admin-table-pagination/admin-table-pagination.component';
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
-import type { ReviewChange, ReviewState, ReviewVersion } from '../../models/asset-review.models';
+import type {
+  BulkApproveRequest,
+  ReviewChange,
+  ReviewState,
+  ReviewVersion,
+} from '../../models/asset-review.models';
 import type { AssetVersionParentKind } from '../../models/asset-versions.models';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { AssetReviewService } from '../../services/asset-review.service';
@@ -75,6 +80,7 @@ export class AssetReviewGridComponent implements OnInit {
   private readonly adminAuth = inject(AdminAuthService);
   private readonly lastLanguage = inject(LastActiveLanguageService);
   private readonly message = inject(NzMessageService);
+  private readonly modal = inject(NzModalService);
   readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
   /** Emits to abort the in-flight changes request. Row actions stay available
@@ -112,6 +118,22 @@ export class AssetReviewGridComponent implements OnInit {
     () => this.versions().find((v) => v.id === this.selectedVersion())?.name ?? null
   );
   readonly savingAction = signal<{ id: number; action: ReviewActionType } | null>(null);
+
+  /** Rows ticked for "Approve selected" — on the current page only. */
+  readonly selectedIds = signal<ReadonlySet<number>>(new Set());
+  /** Rows that can be ticked: approved ones have nothing left to approve. */
+  readonly selectableRows = computed(() =>
+    this.changes().filter((r) => r.review_state !== 'approved')
+  );
+  readonly allSelected = computed(() => {
+    const rows = this.selectableRows();
+    return rows.length > 0 && rows.every((r) => this.selectedIds().has(r.id));
+  });
+  readonly someSelected = computed(() => this.selectedIds().size > 0 && !this.allSelected());
+  /** A bulk approve is in flight. */
+  readonly bulkApproving = signal(false);
+  /** "Approve all" has nothing to do when only approved changes are listed. */
+  readonly canApproveAll = computed(() => this.stateFilter() !== 'approved' && this.total() > 0);
 
   /** Comment dialog state. */
   readonly commentOpen = signal(false);
@@ -238,6 +260,7 @@ export class AssetReviewGridComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.changes.set(res.results);
+          this.selectedIds.set(new Set());
           this.total.set(res.count);
           this.loading.set(false);
         },
@@ -311,6 +334,72 @@ export class AssetReviewGridComponent implements OnInit {
     );
   }
 
+  toggleRow(id: number, checked: boolean): void {
+    const next = new Set(this.selectedIds());
+    if (checked) {
+      next.add(id);
+    } else {
+      next.delete(id);
+    }
+    this.selectedIds.set(next);
+  }
+
+  toggleAll(checked: boolean): void {
+    this.selectedIds.set(new Set(checked ? this.selectableRows().map((r) => r.id) : []));
+  }
+
+  approveSelected(): void {
+    const language = this.selectedLanguage();
+    const ids = [...this.selectedIds()];
+    if (!language || !ids.length || this.bulkApproving()) {
+      return;
+    }
+    this.runBulkApprove({ language, change_ids: ids });
+  }
+
+  /** Approve every change the current filters match, across all pages — after confirming. */
+  approveAll(): void {
+    const language = this.selectedLanguage();
+    if (!language || !this.canApproveAll() || this.bulkApproving()) {
+      return;
+    }
+    const filter = this.stateFilter();
+    const version = this.selectedVersion();
+    const body: BulkApproveRequest = {
+      language,
+      ...(filter === 'unreviewed' || filter === 'commented' ? { state: filter } : {}),
+      ...(version !== null ? { version } : {}),
+    };
+    this.modal.confirm({
+      nzTitle: this.translate.instant('ADMIN.REVIEW.BULK.CONFIRM_TITLE'),
+      nzContent: this.translate.instant('ADMIN.REVIEW.BULK.CONFIRM_BODY', { count: this.total() }),
+      nzOkText: this.translate.instant('ADMIN.REVIEW.BULK.CONFIRM_OK'),
+      nzCancelText: this.translate.instant('ADMIN.REVIEW.COMMENT_DIALOG.CANCEL'),
+      nzDirection: this.translate.currentLang === 'ar' ? 'rtl' : 'ltr',
+      nzOnOk: () => this.runBulkApprove(body),
+    });
+  }
+
+  private runBulkApprove(body: BulkApproveRequest): void {
+    this.bulkApproving.set(true);
+    this.reviewService
+      .bulkApprove(this.kind, this.slug, body)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ approved }) => {
+          this.bulkApproving.set(false);
+          this.message.success(
+            this.translate.instant('ADMIN.REVIEW.BULK.SUCCESS', { count: approved })
+          );
+          this.loadChanges();
+        },
+        error: (err: HttpErrorResponse) => {
+          this.bulkApproving.set(false);
+          this.showError(err);
+        },
+      });
+  }
+
   closeComment(): void {
     this.commentOpen.set(false);
     this.commentChangeId = null;
@@ -339,6 +428,9 @@ export class AssetReviewGridComponent implements OnInit {
             this.loadChanges();
           } else {
             this.changes.update((rows) => rows.map((r) => (r.id === updated.id ? updated : r)));
+            if (updated.review_state === 'approved') {
+              this.toggleRow(updated.id, false);
+            }
           }
         },
         error: (err: HttpErrorResponse) => {

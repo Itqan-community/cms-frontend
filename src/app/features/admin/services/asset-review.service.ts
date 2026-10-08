@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import type { AssetVersionParentKind } from '../models/asset-versions.models';
 import type {
+  BulkApproveRequest,
+  BulkApproveResponse,
   ReviewChange,
   ReviewChangesResponse,
   ReviewState,
@@ -80,5 +82,17 @@ export class AssetReviewService {
       state,
       comment: comment ?? '',
     });
+  }
+
+  /** Approve many changes at once (selected ids, or everything the filter matches). */
+  bulkApprove(
+    kind: AssetVersionParentKind,
+    slug: string,
+    body: BulkApproveRequest
+  ): Observable<BulkApproveResponse> {
+    return this.http.post<BulkApproveResponse>(
+      `${this.reviewBase(kind, slug)}changes/bulk-approve/`,
+      body
+    );
   }
 }

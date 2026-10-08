@@ -36,3 +36,17 @@ export interface ReviewVersion {
   name: string;
   created_at: string;
 }
+
+/** Bulk approve: the given changes, or — without `change_ids` — every change
+ *  matching the state/version filter across all pages. */
+export interface BulkApproveRequest {
+  language: string;
+  change_ids?: number[];
+  state?: Exclude<ReviewState, 'approved'>;
+  version?: number;
+}
+
+export interface BulkApproveResponse {
+  /** How many changes were approved (already-approved ones are skipped). */
+  approved: number;
+}

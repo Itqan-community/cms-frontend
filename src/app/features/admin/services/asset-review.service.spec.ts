@@ -167,4 +167,22 @@ describe('AssetReviewService', () => {
       req.flush({ id: 99, review_state: 'approved' });
     });
   });
+
+  describe('bulkApprove', () => {
+    it('posts the selection to the bulk-approve endpoint', (done) => {
+      service
+        .bulkApprove('tafsir', 'muyassar', { language: 'ar', change_ids: [1, 2] })
+        .subscribe((res) => {
+          expect(res.approved).toBe(2);
+          done();
+        });
+
+      const req = httpMock.expectOne(
+        `${base}/content/tafsirs/muyassar/review/changes/bulk-approve/`
+      );
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({ language: 'ar', change_ids: [1, 2] });
+      req.flush({ approved: 2 });
+    });
+  });
 });
