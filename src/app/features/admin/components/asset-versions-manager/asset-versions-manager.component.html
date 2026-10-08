@@ -218,6 +218,19 @@
             } @else {
               <p class="asset-versions-manager__hint">{{ t('FILE_REQUIRED_HINT') | translate }}</p>
             }
+            @if (modalMode() === 'create' && canReview()) {
+              <span
+                nz-checkbox
+                class="asset-versions-manager__pre-approved"
+                [nzChecked]="preApproved()"
+                (nzCheckedChange)="preApproved.set($event)"
+              >
+                {{ 'ADMIN.VERSION_PUBLISHING.PRE_APPROVED' | translate }}
+              </span>
+              <p class="asset-versions-manager__hint">
+                {{ 'ADMIN.VERSION_PUBLISHING.PRE_APPROVED_HINT' | translate }}
+              </p>
+            }
           </div>
         }
       </form>
