@@ -359,7 +359,7 @@ describe('AssetContentGridComponent column definitions', () => {
     // Arrange
     const translate = TestBed.inject(TranslateService);
     translate.setTranslation('ar', {
-      COMMON: { LOADING: 'جارٍ التحميل...' },
+      COMMON: { LOADING: 'التحميل جارٍ...' },
       ADMIN: { CONTENT_EDITOR: { GRID: { equals: 'يساوي', greaterThan: 'أكبر من' } } },
     });
     translate.use('ar');
@@ -369,7 +369,7 @@ describe('AssetContentGridComponent column definitions', () => {
 
     // Assert
     expect(localeText).toEqual({
-      loadingOoo: 'جارٍ التحميل...',
+      loadingOoo: 'التحميل جارٍ...',
       equals: 'يساوي',
       greaterThan: 'أكبر من',
     });
