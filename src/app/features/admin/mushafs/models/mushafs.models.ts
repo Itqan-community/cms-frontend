@@ -100,7 +100,11 @@ export interface MushafFormValue {
   external_url?: string | null;
   thumbnail?: File;
   /** Create-only: first version metadata + content file. */
-  version_name?: string;
-  version_summary?: string;
+  version_name_en?: string;
+  version_name_ar?: string;
+  /** Starting version number ("major.minor") — required with a file. */
+  version_number?: string;
+  version_summary_en?: string;
+  version_summary_ar?: string;
   file?: File;
 }
