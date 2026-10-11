@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -19,6 +19,7 @@ import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-re
 import { isRestrictedForTenantConflictError } from '../../../../../shared/utils/error.utils';
 import { AssetInitialVersionFieldsComponent } from '../../../components/asset-initial-version-fields/asset-initial-version-fields.component';
 import { AdminTenantService } from '../../../services/admin-tenant.service';
+import { versionNumberValidator } from '../../../utils/version-number.util';
 import {
   createDisplayLocalizationLabels,
   localizeLanguageCode,
@@ -83,8 +84,20 @@ export class MushafFormComponent implements OnInit {
     external_url: [''],
     is_open_access: [false],
     restricted_for_tenant: [false],
-    version_name: [''],
-    version_summary: [''],
+    version_name_en: [''],
+    version_name_ar: [''],
+    version_number: ['', [versionNumberValidator]],
+    version_summary_en: [''],
+    version_summary_ar: [''],
+  });
+
+  /** A first version's number is required once a file is attached to the create form. */
+  private readonly versionNumberRequired = effect(() => {
+    const control = this.form.controls.version_number;
+    control.setValidators(
+      this.versionFile() ? [Validators.required, versionNumberValidator] : [versionNumberValidator]
+    );
+    control.updateValueAndValidity();
   });
 
   private editSlug: string | null = null;
@@ -96,8 +109,13 @@ export class MushafFormComponent implements OnInit {
       this.editSlug = slugParam;
       this.loadForEdit();
     } else {
-      this.form.controls.version_name.setValidators([Validators.maxLength(255)]);
-      this.form.controls.version_name.updateValueAndValidity();
+      for (const control of [
+        this.form.controls.version_name_en,
+        this.form.controls.version_name_ar,
+      ]) {
+        control.setValidators([Validators.maxLength(255)]);
+        control.updateValueAndValidity();
+      }
       this.bindTenantPublisher();
     }
   }
@@ -190,11 +208,19 @@ export class MushafFormComponent implements OnInit {
     };
 
     if (!this.isEditMode()) {
-      const versionName = v.version_name?.trim();
-      const versionSummary = v.version_summary?.trim();
-      if (versionName) body.version_name = versionName;
-      if (versionSummary) body.version_summary = versionSummary;
-      if (this.versionFile()) body.file = this.versionFile()!;
+      for (const key of [
+        'version_name_en',
+        'version_name_ar',
+        'version_summary_en',
+        'version_summary_ar',
+      ] as const) {
+        const value = v[key]?.trim();
+        if (value) body[key] = value;
+      }
+      if (this.versionFile()) {
+        body.file = this.versionFile()!;
+        body.version_number = (v.version_number ?? '').trim();
+      }
     }
 
     return body;

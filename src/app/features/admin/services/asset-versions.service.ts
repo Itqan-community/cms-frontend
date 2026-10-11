@@ -83,13 +83,14 @@ export class AssetVersionsService {
       );
   }
 
-  /** The language's latest version number (translations/tafsirs); null when it has none. */
+  /** The latest version number of the language's sequence (`null` language: the asset's
+   *  only sequence, e.g. a mushaf or font); null when it has none. */
   latestNumber(
     kind: AssetVersionParentKind,
     slug: string,
-    language: string
+    language: string | null
   ): Observable<string | null> {
-    return this.list(kind, slug, { page: 1, page_size: 1, language }).pipe(
+    return this.list(kind, slug, { page: 1, page_size: 1, language: language ?? undefined }).pipe(
       map((res) => res.results[0]?.name ?? null)
     );
   }

@@ -289,10 +289,11 @@ export class AssetVersionsManagerComponent implements OnInit {
     return this.kind === 'translation' || this.kind === 'tafsir';
   }
 
-  /** Translations/tafsirs: `name` is a server-issued version number and `label` the
-   *  version name. Other kinds keep a free-text, editable `name`. */
+  /** Translations, tafsirs, mushafs and fonts: `name` is a server-issued version number
+   *  and `label` the version name (the package registry only installs numbered versions).
+   *  Other kinds keep a free-text, editable `name`. */
   numbered(): boolean {
-    return this.supportsLanguages();
+    return this.supportsLanguages() || this.kind === 'mushaf' || this.kind === 'font';
   }
 
   ngOnInit(): void {
@@ -458,13 +459,14 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.versionModalOpen.set(true);
   }
 
-  /** Choose the upload's language and look up the number its next version follows. */
+  /** Choose the upload's language and look up the number its next version follows
+   *  (single-language kinds pass null: their one sequence). */
   onVersionLanguageChange(language: string | null): void {
     this.versionLanguage.set(language);
     this.versionStart.set('');
     this.versionBump.set('minor');
     this.cancelLatestLookup();
-    if (!this.numbered() || !language) return;
+    if (!this.numbered() || (this.supportsLanguages() && !language)) return;
     this.latestNumberLoading.set(true);
     this.assetVersionsService
       .latestNumber(this.kind, this.slug, language)

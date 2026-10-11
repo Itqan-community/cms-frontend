@@ -81,8 +81,11 @@ export class FontsService {
     if (payload.thumbnail) {
       data.append('thumbnail', payload.thumbnail);
     }
-    append('version_name', payload.version_name);
-    append('version_summary', payload.version_summary);
+    append('version_label_en', payload.version_name_en);
+    append('version_label_ar', payload.version_name_ar);
+    append('version_number', payload.version_number);
+    append('version_summary_en', payload.version_summary_en);
+    append('version_summary_ar', payload.version_summary_ar);
     if (payload.file) {
       data.append('file', payload.file);
     }
