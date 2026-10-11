@@ -639,6 +639,77 @@ describe('AssetVersionsManagerComponent', () => {
     });
   });
 
+  describe('mushaf and font numbering', () => {
+    function asKind(kind: 'mushaf' | 'font'): void {
+      component.kind = kind;
+      component.slug = 'uthmanic-hafs';
+      component.i18nPrefix = `ADMIN.${kind.toUpperCase()}S.DETAIL.VERSIONS`;
+      fixture.detectChanges();
+    }
+
+    function pickFile(): void {
+      component.onPickFile({
+        target: { files: [new File(['x'], 'font.zip')], value: '' },
+      } as unknown as Event);
+    }
+
+    it('numbers mushaf and font versions without a language picker', () => {
+      asKind('font');
+
+      expect(component.numbered()).toBeTrue();
+      expect(component.supportsLanguages()).toBeFalse();
+      expect(contentService.listLanguages).not.toHaveBeenCalled();
+    });
+
+    it('asks for a starting number for the first upload and sends no name or language', () => {
+      versionsService.latestNumber.and.returnValue(of(null));
+      versionsService.create.and.returnValue(of(page('ar').results[0]));
+      asKind('mushaf');
+
+      component.openCreateModal();
+      component.form.patchValue({ label_ar: 'الطبعة الأولى', summary_ar: 'أول إصدار' });
+      pickFile();
+      component.submit();
+
+      expect(versionsService.latestNumber).toHaveBeenCalledWith('mushaf', 'uthmanic-hafs', null);
+      expect(component.versionNumberIncomplete()).toBeTrue();
+      expect(versionsService.create).not.toHaveBeenCalled();
+
+      component.versionStart.set('1.0');
+      component.submit();
+
+      const payload = versionsService.create.calls.mostRecent().args[2];
+      expect(payload).toEqual(
+        jasmine.objectContaining({
+          label_ar: 'الطبعة الأولى',
+          summary_ar: 'أول إصدار',
+          version_number: '1.0',
+          bump: 'minor',
+        })
+      );
+      expect(payload.name).toBeUndefined();
+      expect(payload.language).toBeUndefined();
+      expect(payload.pre_approved).toBeUndefined();
+    });
+
+    it('sends the chosen bump once the font has versions', () => {
+      versionsService.latestNumber.and.returnValue(of('1.0'));
+      versionsService.create.and.returnValue(of(page('ar').results[0]));
+      asKind('font');
+
+      component.openCreateModal();
+      component.form.patchValue({ summary_en: 'hinting fixes' });
+      component.versionBump.set('major');
+      pickFile();
+      component.submit();
+
+      const payload = versionsService.create.calls.mostRecent().args[2];
+      expect(payload.bump).toBe('major');
+      expect(payload.version_number).toBeUndefined();
+      expect(payload.name).toBeUndefined();
+    });
+  });
+
   describe('upload rejections', () => {
     it('explains an upload whose file cannot be read as content rows', () => {
       versionsService.create.and.returnValue(
