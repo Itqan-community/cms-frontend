@@ -518,6 +518,17 @@ Release 1.12.0.
 
 ---
 
+## [1.13.0] - 2026-10-12
+
+Release 1.13.0.
+
+## Changes
+
+- fix(i18n): say "التحميل جارٍ" instead of "جاري التحميل" in Arabic
+- feat(admin): number mushaf and font versions like tafsirs
+
+---
+
 ## [Unreleased]
 
 ### Added
