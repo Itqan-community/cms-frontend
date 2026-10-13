@@ -785,7 +785,34 @@
       "FILE_UNPARSEABLE_ERROR": "The file could not be read as content rows. Use the CSV template for this asset.",
       "VERSION_IS_PUBLISHED_ERROR": "This version is published. Publish another version before changing its file.",
       "PRE_APPROVED": "Pre-approved",
-      "PRE_APPROVED_HINT": "The uploaded changes are approved now under your name, so the version can be published without a separate review."
+      "PRE_APPROVED_HINT": "The uploaded changes are approved now under your name, so the version can be published without a separate review.",
+      "ROLLBACK_TITLE": "Go back to this version?",
+      "ROLLBACK_BODY": "Consumers will get this earlier version again. Projects locked to a newer version keep installing it, and the itqan CLI shows them your reason.",
+      "ROLLBACK_REASON_REQUIRED": "Enter a reason for going back to this version."
+    },
+    "PACKAGE_AVAILABILITY": {
+      "STATUS": {
+        "RELEASED": "CLI",
+        "WITHDRAWN": "CLI: withdrawn",
+        "REMOVED": "CLI: removed",
+        "NOT_RELEASED": "Not in CLI"
+      },
+      "HINT": {
+        "RELEASED": "Developers can install this version with the itqan CLI.",
+        "WITHDRAWN": "The publisher went back to an earlier version. Projects that already locked this one still install it, with a warning.",
+        "REMOVED": "Removed by Itqan: it can't be installed or downloaded any more.",
+        "NOT_RELEASED": "Not published yet, so the itqan CLI does not offer it."
+      },
+      "TOOLTIP_REMOVE": "Remove version (Itqan admins)",
+      "REMOVE_TITLE": "Remove {{name}}?",
+      "REMOVE_BODY": "The version will never be installed or downloaded again. Projects that locked it will fail to install until they move to another version. Use this only for cases such as a revoked licence or wrong content.",
+      "REMOVE_OK": "Remove",
+      "REMOVE_SUCCESS": "{{name}} was removed.",
+      "REMOVE_REASON_REQUIRED": "Enter a reason for removing this version.",
+      "REASON_REQUIRED_LABEL": "Reason (required, shown to developers)",
+      "REASON_PLACEHOLDER": "For example: errors in Surah 2",
+      "VERSION_IS_SERVED_ERROR": "Consumers are served this version. Publish another version before removing it.",
+      "ACTION_ERROR": "Could not update the version's itqan CLI availability."
     },
     "VERSION_VIEWER": {
       "OPEN": "View this version",

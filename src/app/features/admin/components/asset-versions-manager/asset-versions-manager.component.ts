@@ -80,6 +80,18 @@ const SAVE_ERROR_KEYS: Record<string, string> = {
   version_number_invalid: 'ADMIN.COMMON.VERSION_NUMBER.START_INVALID',
 };
 
+/** Publish rejections with a more helpful message than the generic error. */
+const PUBLISH_ERROR_KEYS: Record<string, string> = {
+  version_not_approved: 'ADMIN.VERSION_PUBLISHING.NOT_APPROVED_ERROR',
+  // The list said this was not a rollback, but another version was published meanwhile.
+  rollback_reason_required: 'ADMIN.VERSION_PUBLISHING.ROLLBACK_REASON_REQUIRED',
+};
+
+/** Package-availability rejections with a more helpful message than the generic error. */
+const PACKAGE_ERROR_KEYS: Record<string, string> = {
+  version_is_served: 'ADMIN.PACKAGE_AVAILABILITY.VERSION_IS_SERVED_ERROR',
+};
+
 /**
  * Version management is gated per asset type: the backend `PermissionChoice` set has no
  * catalogue-wide code, so each kind maps to its own update/delete permission.
@@ -220,6 +232,13 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly downloadingId = signal<number | null>(null);
   readonly restoringId = signal<number | null>(null);
   readonly publishingId = signal<number | null>(null);
+  /** Version a remove request is in flight for. */
+  readonly removingId = signal<number | null>(null);
+  /** Reason typed in the rollback / remove dialog. */
+  readonly packageReason = signal('');
+  /** Which action the reason dialog is for: its hint explains that action's effect. */
+  readonly packageDialog = signal<'rollback' | 'remove'>('rollback');
+  @ViewChild('packageReasonTpl', { static: true }) packageReasonTpl!: TemplateRef<unknown>;
   readonly searchTerm = signal('');
   readonly selectedFileName = signal<string | null>(null);
   private selectedFile: File | null = null;
@@ -911,19 +930,35 @@ export class AssetVersionsManagerComponent implements OnInit {
     if (!this.canPublish() || !row.is_approved || this.publishingId() !== null) {
       return;
     }
+    // Going back to an earlier version needs a reason: the itqan CLI shows it to projects
+    // still locked to a version this rolls back past.
+    const rollsBack = row.publishing_rolls_back === true;
+    this.packageReason.set('');
+    this.packageDialog.set('rollback');
     this.modal.confirm({
-      nzTitle: this.translate.instant('ADMIN.VERSION_PUBLISHING.CONFIRM_TITLE'),
-      nzContent: this.translate.instant('ADMIN.VERSION_PUBLISHING.CONFIRM_BODY', {
-        name: row.name,
-      }),
+      nzTitle: this.translate.instant(
+        rollsBack
+          ? 'ADMIN.VERSION_PUBLISHING.ROLLBACK_TITLE'
+          : 'ADMIN.VERSION_PUBLISHING.CONFIRM_TITLE'
+      ),
+      nzContent: rollsBack
+        ? this.packageReasonTpl
+        : this.translate.instant('ADMIN.VERSION_PUBLISHING.CONFIRM_BODY', { name: row.name }),
       nzOkText: this.translate.instant('ADMIN.VERSION_PUBLISHING.CONFIRM_OK'),
       nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
       nzDirection: this.modalDirection(),
-      nzOnOk: () =>
-        new Promise<void>((resolve, reject) => {
+      nzOnOk: () => {
+        const reason = this.packageReason().trim();
+        if (rollsBack && !reason) {
+          this.message.warning(
+            this.translate.instant('ADMIN.VERSION_PUBLISHING.ROLLBACK_REASON_REQUIRED')
+          );
+          return Promise.reject();
+        }
+        return new Promise<void>((resolve, reject) => {
           this.publishingId.set(row.id);
           this.assetContentService
-            .setPublishedVersion(this.kind, this.slug, row.id)
+            .setPublishedVersion(this.kind, this.slug, row.id, rollsBack ? reason : '')
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe({
               next: () => {
@@ -939,16 +974,69 @@ export class AssetVersionsManagerComponent implements OnInit {
               error: (err: HttpErrorResponse) => {
                 this.publishingId.set(null);
                 const key =
-                  err.error?.error_name === 'version_not_approved'
-                    ? 'ADMIN.VERSION_PUBLISHING.NOT_APPROVED_ERROR'
-                    : 'ADMIN.VERSION_PUBLISHING.PUBLISH_ERROR';
+                  PUBLISH_ERROR_KEYS[err.error?.error_name] ??
+                  'ADMIN.VERSION_PUBLISHING.PUBLISH_ERROR';
                 this.message.error(this.translate.instant(key));
                 // The list may be stale (e.g. a review was withdrawn meanwhile).
                 this.loadList();
                 reject();
               },
             });
-        }),
+        });
+      },
+    });
+  }
+
+  /** Itqan admins: remove a version for good. A reason is required. */
+  removeVersion(row: AssetVersion): void {
+    if (!this.canRemove(row) || this.removingId() !== null) return;
+    this.packageReason.set('');
+    this.packageDialog.set('remove');
+    this.modal.confirm({
+      nzTitle: this.translate.instant('ADMIN.PACKAGE_AVAILABILITY.REMOVE_TITLE', {
+        name: row.name,
+      }),
+      nzContent: this.packageReasonTpl,
+      nzOkText: this.translate.instant('ADMIN.PACKAGE_AVAILABILITY.REMOVE_OK'),
+      nzOkDanger: true,
+      nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
+      nzDirection: this.modalDirection(),
+      nzOnOk: () => {
+        const reason = this.packageReason().trim();
+        if (!reason) {
+          this.message.warning(
+            this.translate.instant('ADMIN.PACKAGE_AVAILABILITY.REMOVE_REASON_REQUIRED')
+          );
+          return Promise.reject();
+        }
+        this.removingId.set(row.id);
+        return new Promise<void>((resolve, reject) => {
+          this.assetVersionsService
+            .removePackageVersion(row.id, reason)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: () => {
+                this.removingId.set(null);
+                this.message.success(
+                  this.translate.instant('ADMIN.PACKAGE_AVAILABILITY.REMOVE_SUCCESS', {
+                    name: row.name,
+                  })
+                );
+                this.loadList();
+                resolve();
+              },
+              error: (err: HttpErrorResponse) => {
+                this.removingId.set(null);
+                const key =
+                  PACKAGE_ERROR_KEYS[err.error?.error_name] ??
+                  'ADMIN.PACKAGE_AVAILABILITY.ACTION_ERROR';
+                this.message.error(this.translate.instant(key));
+                this.loadList();
+                reject();
+              },
+            });
+        });
+      },
     });
   }
 
@@ -1050,6 +1138,25 @@ export class AssetVersionsManagerComponent implements OnInit {
     return (
       this.supportsLanguages() &&
       this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT)
+    );
+  }
+
+  /** Tooltip for a version's CLI badge: what the status means, plus the reason given. */
+  packageHint(ver: AssetVersion): string {
+    const status = ver.package_status;
+    if (!status) return '';
+    const hint = this.translate.instant(`ADMIN.PACKAGE_AVAILABILITY.HINT.${status.toUpperCase()}`);
+    const reason = status === 'removed' ? ver.removal_reason : ver.withdrawal_reason;
+    return reason ? `${hint} ${reason}` : hint;
+  }
+
+  /** Itqan admins remove any version except the one consumers are served. */
+  canRemove(ver: AssetVersion): boolean {
+    return (
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_REMOVE_PACKAGE_VERSION) &&
+      ver.package_status !== undefined &&
+      ver.package_status !== 'removed' &&
+      !ver.is_published
     );
   }
 
