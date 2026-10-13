@@ -138,6 +138,11 @@ export class AssetVersionsService {
     }
   }
 
+  /** Itqan admins: remove a version for good, with a reason. */
+  removePackageVersion(versionId: number, reason: string): Observable<unknown> {
+    return this.http.post(`${this.base}/packages/versions/${versionId}/remove/`, { reason });
+  }
+
   private listUrl(kind: AssetVersionParentKind, slug: string): string {
     const segment = this.segmentForKind(kind);
     return `${this.base}/${segment}/${encodeURIComponent(slug)}/versions/`;
