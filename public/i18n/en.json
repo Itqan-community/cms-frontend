@@ -788,7 +788,10 @@
       "PRE_APPROVED_HINT": "The uploaded changes are approved now under your name, so the version can be published without a separate review.",
       "ROLLBACK_TITLE": "Go back to this version?",
       "ROLLBACK_BODY": "Consumers will get this earlier version again. Projects locked to a newer version keep installing it, and the itqan CLI shows them your reason.",
-      "ROLLBACK_REASON_REQUIRED": "Enter a reason for going back to this version."
+      "ROLLBACK_REASON_REQUIRED": "Enter a reason for going back to this version.",
+      "TOOLTIP_NO_PERMISSION": "You need the \"Publish Content\" permission to publish versions. Ask your publisher admin.",
+      "PUBLISH_NOW": "Publish now",
+      "PUBLISH_NOW_HINT": "Consumers get this version as soon as it is uploaded. Untick to upload it first and publish it later."
     },
     "PACKAGE_AVAILABILITY": {
       "STATUS": {

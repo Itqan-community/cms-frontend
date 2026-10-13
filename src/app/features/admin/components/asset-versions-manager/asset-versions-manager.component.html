@@ -289,6 +289,28 @@
                 {{ 'ADMIN.VERSION_PUBLISHING.PRE_APPROVED_HINT' | translate }}
               </p>
             }
+            @if (modalMode() === 'create' && stagesUploads()) {
+              <!-- On a wrapper: a disabled checkbox shows no tooltip itself. -->
+              <span
+                nz-tooltip
+                [nzTooltipTitle]="
+                  canPublish() ? '' : ('ADMIN.VERSION_PUBLISHING.TOOLTIP_NO_PERMISSION' | translate)
+                "
+              >
+                <span
+                  nz-checkbox
+                  class="asset-versions-manager__pre-approved"
+                  [nzDisabled]="!canPublish()"
+                  [nzChecked]="canPublish() && publishNow()"
+                  (nzCheckedChange)="publishNow.set($event)"
+                >
+                  {{ 'ADMIN.VERSION_PUBLISHING.PUBLISH_NOW' | translate }}
+                </span>
+              </span>
+              <p class="asset-versions-manager__hint">
+                {{ 'ADMIN.VERSION_PUBLISHING.PUBLISH_NOW_HINT' | translate }}
+              </p>
+            }
           </div>
         }
       </form>
@@ -346,17 +368,17 @@
                 } @else {
                   {{ ver.name }}
                 }
+                @if (supportsPublishing() && ver.is_published) {
+                  <span
+                    class="asset-versions-manager__badge asset-versions-manager__badge--published"
+                    nz-tooltip
+                    [nzTooltipTitle]="'ADMIN.VERSION_PUBLISHING.PUBLISHED_HINT' | translate"
+                  >
+                    <ng-icon name="lucideGlobe" aria-hidden="true" />
+                    {{ 'ADMIN.VERSION_PUBLISHING.PUBLISHED_BADGE' | translate }}
+                  </span>
+                }
                 @if (supportsLanguages()) {
-                  @if (ver.is_published) {
-                    <span
-                      class="asset-versions-manager__badge asset-versions-manager__badge--published"
-                      nz-tooltip
-                      [nzTooltipTitle]="'ADMIN.VERSION_PUBLISHING.PUBLISHED_HINT' | translate"
-                    >
-                      <ng-icon name="lucideGlobe" aria-hidden="true" />
-                      {{ 'ADMIN.VERSION_PUBLISHING.PUBLISHED_BADGE' | translate }}
-                    </span>
-                  }
                   @if (ver.is_active) {
                     <span
                       class="asset-versions-manager__badge asset-versions-manager__badge--latest"
@@ -523,7 +545,7 @@
                     </button>
                   </div>
                   @if (
-                    canPublish() ||
+                    supportsPublishing() ||
                     canEditContent() ||
                     canMutateVersions() ||
                     canDeleteVersions() ||
@@ -532,7 +554,7 @@
                   ) {
                     <span class="asset-versions-manager__divider" aria-hidden="true"></span>
                     <div class="asset-versions-manager__action-group">
-                      @if (canPublish() && !ver.is_published) {
+                      @if (supportsPublishing() && !ver.is_published) {
                         <!-- On a wrapper: a disabled button shows no tooltip itself. -->
                         <span
                           class="asset-versions-manager__publish-wrap"
@@ -548,7 +570,9 @@
                               'ADMIN.VERSION_PUBLISHING.TOOLTIP_PUBLISH' | translate
                             "
                             [nzLoading]="publishingId() === ver.id"
-                            [disabled]="!ver.is_approved || publishingId() !== null"
+                            [disabled]="
+                              !canPublish() || !publishable(ver) || publishingId() !== null
+                            "
                             (click)="publishVersion(ver)"
                           >
                             <ng-icon name="lucideGlobe" aria-hidden="true" />
