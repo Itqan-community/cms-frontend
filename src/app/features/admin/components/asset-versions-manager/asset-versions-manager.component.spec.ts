@@ -64,6 +64,7 @@ describe('AssetVersionsManagerComponent', () => {
       'delete',
       'removePackageVersion',
       'reinstatePackageVersion',
+      'setPublishedVersion',
     ]);
     contentService = jasmine.createSpyObj<AssetContentService>('AssetContentService', [
       'listLanguages',
@@ -456,11 +457,46 @@ describe('AssetVersionsManagerComponent', () => {
       expect(component.canPublish()).toBeFalse();
     });
 
-    it('does not offer publishing for assets without reviewed content', () => {
+    it('does not offer publishing for programs, which serve their newest version', () => {
+      component.kind = 'program';
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT);
+
+      expect(component.supportsPublishing()).toBeFalse();
+      expect(component.canPublish()).toBeFalse();
+    });
+
+    it('offers publishing mushafs and fonts without a review step', () => {
       component.kind = 'mushaf';
       withPermissions(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT);
 
+      expect(component.canPublish()).toBeTrue();
+      expect(component.publishable(version({ is_approved: undefined }))).toBeTrue();
+    });
+
+    it('shows the publish button disabled, explaining the permission, to users who cannot publish', () => {
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION);
+
+      expect(component.supportsPublishing()).toBeTrue();
       expect(component.canPublish()).toBeFalse();
+      expect(component.publishTooltip(version({ is_approved: true }))).toBe(
+        'ADMIN.VERSION_PUBLISHING.TOOLTIP_NO_PERMISSION'
+      );
+    });
+
+    it('publishes a mushaf version through the mushaf versions API', () => {
+      component.kind = 'mushaf';
+      versionsService.setPublishedVersion.and.returnValue(of(page('ar').results[0]));
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT);
+
+      component.publishVersion(version({ id: 3 }));
+
+      expect(versionsService.setPublishedVersion).toHaveBeenCalledWith(
+        'mushaf',
+        'sahih-intl',
+        3,
+        ''
+      );
+      expect(contentService.setPublishedVersion).not.toHaveBeenCalled();
     });
 
     it('publishes an approved version and reloads the list', () => {
@@ -907,6 +943,61 @@ describe('AssetVersionsManagerComponent', () => {
       expect(message.error).toHaveBeenCalledWith(
         'ADMIN.PACKAGE_AVAILABILITY.VERSION_NOT_REMOVED_ERROR'
       );
+    });
+  });
+
+  describe('publish now on upload (mushafs, fonts)', () => {
+    function upload(): void {
+      component.openCreateModal();
+      component.form.patchValue({ label_en: 'v2', summary_en: 'second' });
+      component.onPickFile({
+        target: { files: [new File(['x'], 'v2.pdf')], value: '' },
+      } as unknown as Event);
+      component.submit();
+    }
+
+    beforeEach(() => {
+      component.kind = 'mushaf';
+      versionsService.create.and.returnValue(of(page('ar').results[0]));
+    });
+
+    it('publishes the upload by default for users who can publish', () => {
+      granted = new Set([
+        PORTAL_PERMISSIONS.PORTAL_UPDATE_MUSHAF,
+        PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT,
+      ]);
+      fixture.detectChanges();
+
+      upload();
+
+      expect(versionsService.create.calls.mostRecent().args[2].publish).toBeTrue();
+    });
+
+    it('stages the upload when the publisher unticks publish now', () => {
+      granted = new Set([
+        PORTAL_PERMISSIONS.PORTAL_UPDATE_MUSHAF,
+        PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT,
+      ]);
+      fixture.detectChanges();
+
+      component.openCreateModal();
+      component.publishNow.set(false);
+      component.form.patchValue({ label_en: 'v2', summary_en: 'second' });
+      component.onPickFile({
+        target: { files: [new File(['x'], 'v2.pdf')], value: '' },
+      } as unknown as Event);
+      component.submit();
+
+      expect(versionsService.create.calls.mostRecent().args[2].publish).toBeFalse();
+    });
+
+    it('stages the upload for users without the publish permission', () => {
+      granted = new Set([PORTAL_PERMISSIONS.PORTAL_UPDATE_MUSHAF]);
+      fixture.detectChanges();
+
+      upload();
+
+      expect(versionsService.create.calls.mostRecent().args[2].publish).toBeFalse();
     });
   });
 });

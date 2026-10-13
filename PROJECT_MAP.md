@@ -350,7 +350,11 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   (`publishing_rolls_back`) requires a reason, sent to `set-published/` and shown by the itqan CLI.
   Remove (`PORTAL_REMOVE_PACKAGE_VERSION`, reason required) via `packages/versions/{id}/remove/`;
   the same admins undo it on removed rows via `packages/versions/{id}/reinstate/` (reason required,
-  up to 100 characters, kept in the audit log).
+  up to 100 characters, kept in the audit log). Publishing applies to tafsirs, translations, mushafs
+  and fonts (`supportsPublishing()`): mushafs/fonts publish via
+  `{mushafs|fonts}/{slug}/versions/{id}/set-published/` with no review step, and their upload modal
+  has a "Publish now" checkbox (default on, sends `publish`). Without `portal_publish_content` the
+  Publish button and checkbox are shown disabled with a permission tooltip.
 - `asset-content-editor/` + `asset-content-grid/` — Per-unit draft editor (surah/ayah/word/page
   content templates); flush before publish; leave blocked if PATCH fails. Column set is driven by
   `effectiveTemplate()` (the `template` input, falling back to a one-row probe's `unit_type`). Every
