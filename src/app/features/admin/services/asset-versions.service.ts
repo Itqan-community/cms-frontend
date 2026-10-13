@@ -143,6 +143,11 @@ export class AssetVersionsService {
     return this.http.post(`${this.base}/packages/versions/${versionId}/remove/`, { reason });
   }
 
+  /** Itqan admins: undo a removal, with a reason kept in the audit log. */
+  reinstatePackageVersion(versionId: number, reason: string): Observable<unknown> {
+    return this.http.post(`${this.base}/packages/versions/${versionId}/reinstate/`, { reason });
+  }
+
   private listUrl(kind: AssetVersionParentKind, slug: string): string {
     const segment = this.segmentForKind(kind);
     return `${this.base}/${segment}/${encodeURIComponent(slug)}/versions/`;

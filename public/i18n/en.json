@@ -812,6 +812,14 @@
       "REASON_REQUIRED_LABEL": "Reason (required, shown to developers)",
       "REASON_PLACEHOLDER": "For example: errors in Surah 2",
       "VERSION_IS_SERVED_ERROR": "Consumers are served this version. Publish another version before removing it.",
+      "TOOLTIP_REINSTATE": "Undo removal (Itqan admins)",
+      "REINSTATE_TITLE": "Undo the removal of {{name}}?",
+      "REINSTATE_BODY": "The version gets back the CLI status it would have had without the removal, so projects that locked it can install it again.",
+      "REINSTATE_OK": "Undo removal",
+      "REINSTATE_SUCCESS": "The removal of {{name}} was undone.",
+      "REINSTATE_REASON_REQUIRED": "Enter a reason for undoing the removal.",
+      "REINSTATE_REASON_LABEL": "Reason (required, kept in the audit log)",
+      "VERSION_NOT_REMOVED_ERROR": "This version is not removed any more. The list was refreshed.",
       "ACTION_ERROR": "Could not update the version's itqan CLI availability."
     },
     "VERSION_VIEWER": {

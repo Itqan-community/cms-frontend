@@ -348,7 +348,9 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   Each row's CLI availability (`package_status`: released / withdrawn / removed / not released, with
   `withdrawal_reason` / `removal_reason`) shows as a badge. Publishing an older version
   (`publishing_rolls_back`) requires a reason, sent to `set-published/` and shown by the itqan CLI.
-  Remove (`PORTAL_REMOVE_PACKAGE_VERSION`, reason required) via `packages/versions/{id}/remove/`
+  Remove (`PORTAL_REMOVE_PACKAGE_VERSION`, reason required) via `packages/versions/{id}/remove/`;
+  the same admins undo it on removed rows via `packages/versions/{id}/reinstate/` (reason required,
+  up to 100 characters, kept in the audit log).
 - `asset-content-editor/` + `asset-content-grid/` — Per-unit draft editor (surah/ayah/word/page
   content templates); flush before publish; leave blocked if PATCH fails. Column set is driven by
   `effectiveTemplate()` (the `template` input, falling back to a one-row probe's `unit_type`). Every

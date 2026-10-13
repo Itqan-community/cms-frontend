@@ -527,7 +527,8 @@
                     canEditContent() ||
                     canMutateVersions() ||
                     canDeleteVersions() ||
-                    canRemove(ver)
+                    canRemove(ver) ||
+                    canReinstate(ver)
                   ) {
                     <span class="asset-versions-manager__divider" aria-hidden="true"></span>
                     <div class="asset-versions-manager__action-group">
@@ -600,6 +601,26 @@
                           (click)="removeVersion(ver)"
                         >
                           <ng-icon name="lucideCircleX" aria-hidden="true" />
+                        </button>
+                      }
+                      @if (canReinstate(ver)) {
+                        <button
+                          type="button"
+                          nz-button
+                          nzType="text"
+                          class="action-icon asset-versions-manager__act asset-versions-manager__act--reinstate"
+                          nz-tooltip
+                          [nzTooltipTitle]="
+                            'ADMIN.PACKAGE_AVAILABILITY.TOOLTIP_REINSTATE' | translate
+                          "
+                          [attr.aria-label]="
+                            'ADMIN.PACKAGE_AVAILABILITY.TOOLTIP_REINSTATE' | translate
+                          "
+                          [nzLoading]="reinstatingId() === ver.id"
+                          [disabled]="reinstatingId() !== null"
+                          (click)="reinstateVersion(ver)"
+                        >
+                          <ng-icon name="lucideUndo2" aria-hidden="true" />
                         </button>
                       }
                       @if (canDeleteVersions() && !ver.is_published) {
@@ -709,21 +730,21 @@
 
   <ng-template #packageReasonTpl>
     <p class="asset-versions-manager__package-hint">
-      {{
-        (packageDialog() === 'remove'
-          ? 'ADMIN.PACKAGE_AVAILABILITY.REMOVE_BODY'
-          : 'ADMIN.VERSION_PUBLISHING.ROLLBACK_BODY'
-        ) | translate
-      }}
+      {{ packageDialogBody[packageDialog()] | translate }}
     </p>
     <label class="asset-versions-manager__package-reason-label" for="package-reason">
-      {{ 'ADMIN.PACKAGE_AVAILABILITY.REASON_REQUIRED_LABEL' | translate }}
+      {{
+        (packageDialog() === 'reinstate'
+          ? 'ADMIN.PACKAGE_AVAILABILITY.REINSTATE_REASON_LABEL'
+          : 'ADMIN.PACKAGE_AVAILABILITY.REASON_REQUIRED_LABEL'
+        ) | translate
+      }}
     </label>
     <textarea
       nz-input
       id="package-reason"
       rows="3"
-      maxlength="500"
+      [maxlength]="packageDialog() === 'reinstate' ? 100 : 500"
       dir="auto"
       [placeholder]="'ADMIN.PACKAGE_AVAILABILITY.REASON_PLACEHOLDER' | translate"
       [ngModel]="packageReason()"

@@ -812,6 +812,14 @@
       "REASON_REQUIRED_LABEL": "السبب (مطلوب، يظهر للمطورين)",
       "REASON_PLACEHOLDER": "مثلًا: أخطاء في سورة البقرة",
       "VERSION_IS_SERVED_ERROR": "هذا هو الإصدار المقدَّم للمستخدمين. انشر إصدارًا آخر قبل إزالته.",
+      "TOOLTIP_REINSTATE": "التراجع عن الإزالة (لمسؤولي إتقان)",
+      "REINSTATE_TITLE": "التراجع عن إزالة {{name}}؟",
+      "REINSTATE_BODY": "يستعيد الإصدار حالته في أداة itqan كما لو لم يُزَل، فتتمكن المشاريع التي ثبّتته في ملف القفل من تثبيته مجددًا.",
+      "REINSTATE_OK": "التراجع عن الإزالة",
+      "REINSTATE_SUCCESS": "تم التراجع عن إزالة {{name}}.",
+      "REINSTATE_REASON_REQUIRED": "أدخل سبب التراجع عن الإزالة.",
+      "REINSTATE_REASON_LABEL": "السبب (مطلوب، يُحفظ في سجل التدقيق)",
+      "VERSION_NOT_REMOVED_ERROR": "لم يعد هذا الإصدار مُزالًا. حُدِّثت القائمة.",
       "ACTION_ERROR": "تعذّر تحديث إتاحة الإصدار في أداة itqan."
     },
     "VERSION_VIEWER": {

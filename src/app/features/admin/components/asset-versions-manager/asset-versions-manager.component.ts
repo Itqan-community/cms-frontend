@@ -90,6 +90,7 @@ const PUBLISH_ERROR_KEYS: Record<string, string> = {
 /** Package-availability rejections with a more helpful message than the generic error. */
 const PACKAGE_ERROR_KEYS: Record<string, string> = {
   version_is_served: 'ADMIN.PACKAGE_AVAILABILITY.VERSION_IS_SERVED_ERROR',
+  version_not_removed: 'ADMIN.PACKAGE_AVAILABILITY.VERSION_NOT_REMOVED_ERROR',
 };
 
 /**
@@ -234,10 +235,17 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly publishingId = signal<number | null>(null);
   /** Version a remove request is in flight for. */
   readonly removingId = signal<number | null>(null);
-  /** Reason typed in the rollback / remove dialog. */
+  /** Version an undo-removal request is in flight for. */
+  readonly reinstatingId = signal<number | null>(null);
+  /** Reason typed in the rollback / remove / undo-removal dialog. */
   readonly packageReason = signal('');
   /** Which action the reason dialog is for: its hint explains that action's effect. */
-  readonly packageDialog = signal<'rollback' | 'remove'>('rollback');
+  readonly packageDialog = signal<'rollback' | 'remove' | 'reinstate'>('rollback');
+  readonly packageDialogBody = {
+    rollback: 'ADMIN.VERSION_PUBLISHING.ROLLBACK_BODY',
+    remove: 'ADMIN.PACKAGE_AVAILABILITY.REMOVE_BODY',
+    reinstate: 'ADMIN.PACKAGE_AVAILABILITY.REINSTATE_BODY',
+  } as const;
   @ViewChild('packageReasonTpl', { static: true }) packageReasonTpl!: TemplateRef<unknown>;
   readonly searchTerm = signal('');
   readonly selectedFileName = signal<string | null>(null);
@@ -1040,6 +1048,58 @@ export class AssetVersionsManagerComponent implements OnInit {
     });
   }
 
+  /** Itqan admins: undo a removal. A reason is required; it is kept in the audit log. */
+  reinstateVersion(row: AssetVersion): void {
+    if (!this.canReinstate(row) || this.reinstatingId() !== null) return;
+    this.packageReason.set('');
+    this.packageDialog.set('reinstate');
+    this.modal.confirm({
+      nzTitle: this.translate.instant('ADMIN.PACKAGE_AVAILABILITY.REINSTATE_TITLE', {
+        name: row.name,
+      }),
+      nzContent: this.packageReasonTpl,
+      nzOkText: this.translate.instant('ADMIN.PACKAGE_AVAILABILITY.REINSTATE_OK'),
+      nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
+      nzDirection: this.modalDirection(),
+      nzOnOk: () => {
+        const reason = this.packageReason().trim();
+        if (!reason) {
+          this.message.warning(
+            this.translate.instant('ADMIN.PACKAGE_AVAILABILITY.REINSTATE_REASON_REQUIRED')
+          );
+          return Promise.reject();
+        }
+        this.reinstatingId.set(row.id);
+        return new Promise<void>((resolve, reject) => {
+          this.assetVersionsService
+            .reinstatePackageVersion(row.id, reason)
+            .pipe(takeUntilDestroyed(this.destroyRef))
+            .subscribe({
+              next: () => {
+                this.reinstatingId.set(null);
+                this.message.success(
+                  this.translate.instant('ADMIN.PACKAGE_AVAILABILITY.REINSTATE_SUCCESS', {
+                    name: row.name,
+                  })
+                );
+                this.loadList();
+                resolve();
+              },
+              error: (err: HttpErrorResponse) => {
+                this.reinstatingId.set(null);
+                const key =
+                  PACKAGE_ERROR_KEYS[err.error?.error_name] ??
+                  'ADMIN.PACKAGE_AVAILABILITY.ACTION_ERROR';
+                this.message.error(this.translate.instant(key));
+                this.loadList();
+                reject();
+              },
+            });
+        });
+      },
+    });
+  }
+
   /** Download a version's content (CSV of its per-ayah entries, or its file). */
   downloadVersion(row: AssetVersion): void {
     if (this.downloadingId() !== null) {
@@ -1157,6 +1217,14 @@ export class AssetVersionsManagerComponent implements OnInit {
       ver.package_status !== undefined &&
       ver.package_status !== 'removed' &&
       !ver.is_published
+    );
+  }
+
+  /** Itqan admins can undo a removal. */
+  canReinstate(ver: AssetVersion): boolean {
+    return (
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_REMOVE_PACKAGE_VERSION) &&
+      ver.package_status === 'removed'
     );
   }
 
