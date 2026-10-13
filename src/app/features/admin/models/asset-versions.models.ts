@@ -81,6 +81,8 @@ export interface AssetVersionFormPayload {
   language?: string | null;
   /** Translations/tafsirs, create only: approve the uploaded changes now (reviewers only). */
   pre_approved?: boolean;
+  /** Mushafs/fonts, create only: publish the upload right away (needs the publish permission). */
+  publish?: boolean;
 }
 
 export type AssetVersionParentKind = 'tafsir' | 'translation' | 'mushaf' | 'font' | 'program';

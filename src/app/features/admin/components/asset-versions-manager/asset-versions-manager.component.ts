@@ -35,7 +35,15 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import { Subject, debounceTime, distinctUntilChanged, finalize, forkJoin, takeUntil } from 'rxjs';
+import {
+  type Observable,
+  Subject,
+  debounceTime,
+  distinctUntilChanged,
+  finalize,
+  forkJoin,
+  takeUntil,
+} from 'rxjs';
 import {
   PORTAL_PERMISSIONS,
   type PortalPermissionCode,
@@ -276,6 +284,8 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly versionBump = signal<VersionBump>('minor');
   /** Reviewers uploading a version can approve its changes on upload. */
   readonly preApproved = signal(false);
+  /** Mushafs/fonts: publish the upload right away (users who can publish). */
+  readonly publishNow = signal(true);
   /** The edited version's number — shown, never editable. */
   readonly editingNumber = signal<string | null>(null);
   /** Upload can't be numbered yet: still looking up the latest number, or a first
@@ -459,6 +469,7 @@ export class AssetVersionsManagerComponent implements OnInit {
     });
     this.clearFile();
     this.preApproved.set(false);
+    this.publishNow.set(true);
     // Default the upload to the language currently being viewed, else the source.
     const source = this.languages().find((l) => l.is_source) ?? this.languages()[0];
     this.onVersionLanguageChange(this.selectedLanguage() ?? source?.language ?? null);
@@ -611,6 +622,9 @@ export class AssetVersionsManagerComponent implements OnInit {
       language:
         creating && this.supportsLanguages() ? (this.versionLanguage() ?? undefined) : undefined,
       ...(creating && this.canReview() && this.preApproved() ? { pre_approved: true } : {}),
+      ...(creating && this.stagesUploads()
+        ? { publish: this.canPublish() && this.publishNow() }
+        : {}),
     };
 
     // Abort any previous in-flight save (e.g. double submit).
@@ -935,7 +949,7 @@ export class AssetVersionsManagerComponent implements OnInit {
 
   /** Make a fully approved version the one consumers see for its language. */
   publishVersion(row: AssetVersion): void {
-    if (!this.canPublish() || !row.is_approved || this.publishingId() !== null) {
+    if (!this.canPublish() || !this.publishable(row) || this.publishingId() !== null) {
       return;
     }
     // Going back to an earlier version needs a reason: the itqan CLI shows it to projects
@@ -965,31 +979,41 @@ export class AssetVersionsManagerComponent implements OnInit {
         }
         return new Promise<void>((resolve, reject) => {
           this.publishingId.set(row.id);
-          this.assetContentService
-            .setPublishedVersion(this.kind, this.slug, row.id, rollsBack ? reason : '')
-            .pipe(takeUntilDestroyed(this.destroyRef))
-            .subscribe({
-              next: () => {
-                this.publishingId.set(null);
-                this.message.success(
-                  this.translate.instant('ADMIN.VERSION_PUBLISHING.PUBLISH_SUCCESS', {
-                    name: row.name,
-                  })
-                );
-                this.loadList();
-                resolve();
-              },
-              error: (err: HttpErrorResponse) => {
-                this.publishingId.set(null);
-                const key =
-                  PUBLISH_ERROR_KEYS[err.error?.error_name] ??
-                  'ADMIN.VERSION_PUBLISHING.PUBLISH_ERROR';
-                this.message.error(this.translate.instant(key));
-                // The list may be stale (e.g. a review was withdrawn meanwhile).
-                this.loadList();
-                reject();
-              },
-            });
+          const request$: Observable<unknown> = this.supportsLanguages()
+            ? this.assetContentService.setPublishedVersion(
+                this.kind,
+                this.slug,
+                row.id,
+                rollsBack ? reason : ''
+              )
+            : this.assetVersionsService.setPublishedVersion(
+                this.kind,
+                this.slug,
+                row.id,
+                rollsBack ? reason : ''
+              );
+          request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+            next: () => {
+              this.publishingId.set(null);
+              this.message.success(
+                this.translate.instant('ADMIN.VERSION_PUBLISHING.PUBLISH_SUCCESS', {
+                  name: row.name,
+                })
+              );
+              this.loadList();
+              resolve();
+            },
+            error: (err: HttpErrorResponse) => {
+              this.publishingId.set(null);
+              const key =
+                PUBLISH_ERROR_KEYS[err.error?.error_name] ??
+                'ADMIN.VERSION_PUBLISHING.PUBLISH_ERROR';
+              this.message.error(this.translate.instant(key));
+              // The list may be stale (e.g. a review was withdrawn meanwhile).
+              this.loadList();
+              reject();
+            },
+          });
         });
       },
     });
@@ -1180,9 +1204,25 @@ export class AssetVersionsManagerComponent implements OnInit {
 
   /** Why the publish action is (un)available for a version. */
   publishTooltip(ver: AssetVersion): string {
-    return ver.is_approved
+    if (!this.canPublish()) return 'ADMIN.VERSION_PUBLISHING.TOOLTIP_NO_PERMISSION';
+    return this.publishable(ver)
       ? 'ADMIN.VERSION_PUBLISHING.TOOLTIP_PUBLISH'
       : 'ADMIN.VERSION_PUBLISHING.TOOLTIP_NOT_APPROVED';
+  }
+
+  /** Translations/tafsirs publish only fully approved versions; mushafs/fonts have no review. */
+  publishable(ver: AssetVersion): boolean {
+    return !this.supportsLanguages() || ver.is_approved === true;
+  }
+
+  /** Kinds whose consumers get an explicitly published version. */
+  supportsPublishing(): boolean {
+    return this.supportsLanguages() || this.stagesUploads();
+  }
+
+  /** Mushafs/fonts: an upload is staged unless published right away. */
+  stagesUploads(): boolean {
+    return this.kind === 'mushaf' || this.kind === 'font';
   }
 
   /** Reviewers can jump from a version's pending count to its changes. */
@@ -1193,10 +1233,10 @@ export class AssetVersionsManagerComponent implements OnInit {
     );
   }
 
-  /** Choosing the consumer-visible version applies to translations/tafsirs only. */
+  /** Choosing the consumer-visible version (translations, tafsirs, mushafs, fonts). */
   canPublish(): boolean {
     return (
-      this.supportsLanguages() &&
+      this.supportsPublishing() &&
       this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT)
     );
   }
