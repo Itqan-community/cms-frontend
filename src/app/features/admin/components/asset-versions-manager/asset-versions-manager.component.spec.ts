@@ -63,6 +63,7 @@ describe('AssetVersionsManagerComponent', () => {
       'update',
       'delete',
       'removePackageVersion',
+      'reinstatePackageVersion',
     ]);
     contentService = jasmine.createSpyObj<AssetContentService>('AssetContentService', [
       'listLanguages',
@@ -856,6 +857,55 @@ describe('AssetVersionsManagerComponent', () => {
 
       expect(message.error).toHaveBeenCalledWith(
         'ADMIN.PACKAGE_AVAILABILITY.VERSION_IS_SERVED_ERROR'
+      );
+    });
+
+    it('offers undoing a removal only on removed versions, to holders of the remove permission', () => {
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT);
+      expect(component.canReinstate(version({ package_status: 'removed' }))).toBeFalse();
+
+      granted = new Set([PORTAL_PERMISSIONS.PORTAL_REMOVE_PACKAGE_VERSION]);
+      expect(component.canReinstate(version({ package_status: 'removed' }))).toBeTrue();
+      expect(component.canReinstate(version({ package_status: 'released' }))).toBeFalse();
+    });
+
+    it('refuses to undo a removal without a reason', () => {
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_REMOVE_PACKAGE_VERSION);
+      confirmTyping('   ');
+
+      component.reinstateVersion(version({ package_status: 'removed' }));
+
+      expect(versionsService.reinstatePackageVersion).not.toHaveBeenCalled();
+      expect(message.warning).toHaveBeenCalledWith(
+        'ADMIN.PACKAGE_AVAILABILITY.REINSTATE_REASON_REQUIRED'
+      );
+    });
+
+    it('undoes a removal with the reason given, then reloads the list', () => {
+      versionsService.reinstatePackageVersion.and.returnValue(of({}));
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_REMOVE_PACKAGE_VERSION);
+      versionsService.list.calls.reset();
+      confirmTyping(' Licence confirmed ');
+
+      component.reinstateVersion(version({ package_status: 'removed' }));
+
+      expect(versionsService.reinstatePackageVersion).toHaveBeenCalledWith(1, 'Licence confirmed');
+      expect(versionsService.list).toHaveBeenCalled();
+    });
+
+    it('explains when the version was already brought back', () => {
+      versionsService.reinstatePackageVersion.and.returnValue(
+        throwError(
+          () => new HttpErrorResponse({ status: 400, error: { error_name: 'version_not_removed' } })
+        )
+      );
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_REMOVE_PACKAGE_VERSION);
+      confirmTyping('Licence confirmed');
+
+      component.reinstateVersion(version({ package_status: 'removed' }));
+
+      expect(message.error).toHaveBeenCalledWith(
+        'ADMIN.PACKAGE_AVAILABILITY.VERSION_NOT_REMOVED_ERROR'
       );
     });
   });
