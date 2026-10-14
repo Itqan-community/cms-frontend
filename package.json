@@ -61,7 +61,7 @@
     "@angular/common": "^20.3.7",
     "@angular/compiler": "^20.3.7",
     "@angular/core": "^20.3.7",
-    "@angular/forms": "^20.3.7",
+    "@angular/forms": "^22.2.1",
     "@angular/platform-browser": "^20.3.7",
     "@angular/router": "^20.3.7",
     "@ng-icons/core": "^32.5.0",
