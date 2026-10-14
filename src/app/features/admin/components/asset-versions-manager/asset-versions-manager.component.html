@@ -78,7 +78,6 @@
       </ng-template>
     </div>
   </div>
-
   <nz-modal
     [nzVisible]="versionModalOpen()"
     (nzVisibleChange)="onVersionModalVisibleChange($event)"
@@ -290,6 +289,28 @@
                 {{ 'ADMIN.VERSION_PUBLISHING.PRE_APPROVED_HINT' | translate }}
               </p>
             }
+            @if (modalMode() === 'create' && stagesUploads()) {
+              <!-- On a wrapper: a disabled checkbox shows no tooltip itself. -->
+              <span
+                nz-tooltip
+                [nzTooltipTitle]="
+                  canPublish() ? '' : ('ADMIN.VERSION_PUBLISHING.TOOLTIP_NO_PERMISSION' | translate)
+                "
+              >
+                <span
+                  nz-checkbox
+                  class="asset-versions-manager__pre-approved"
+                  [nzDisabled]="!canPublish()"
+                  [nzChecked]="canPublish() && publishNow()"
+                  (nzCheckedChange)="publishNow.set($event)"
+                >
+                  {{ 'ADMIN.VERSION_PUBLISHING.PUBLISH_NOW' | translate }}
+                </span>
+              </span>
+              <p class="asset-versions-manager__hint">
+                {{ 'ADMIN.VERSION_PUBLISHING.PUBLISH_NOW_HINT' | translate }}
+              </p>
+            }
           </div>
         }
       </form>
@@ -347,17 +368,17 @@
                 } @else {
                   {{ ver.name }}
                 }
+                @if (supportsPublishing() && ver.is_published) {
+                  <span
+                    class="asset-versions-manager__badge asset-versions-manager__badge--published"
+                    nz-tooltip
+                    [nzTooltipTitle]="'ADMIN.VERSION_PUBLISHING.PUBLISHED_HINT' | translate"
+                  >
+                    <ng-icon name="lucideGlobe" aria-hidden="true" />
+                    {{ 'ADMIN.VERSION_PUBLISHING.PUBLISHED_BADGE' | translate }}
+                  </span>
+                }
                 @if (supportsLanguages()) {
-                  @if (ver.is_published) {
-                    <span
-                      class="asset-versions-manager__badge asset-versions-manager__badge--published"
-                      nz-tooltip
-                      [nzTooltipTitle]="'ADMIN.VERSION_PUBLISHING.PUBLISHED_HINT' | translate"
-                    >
-                      <ng-icon name="lucideGlobe" aria-hidden="true" />
-                      {{ 'ADMIN.VERSION_PUBLISHING.PUBLISHED_BADGE' | translate }}
-                    </span>
-                  }
                   @if (ver.is_active) {
                     <span
                       class="asset-versions-manager__badge asset-versions-manager__badge--latest"
@@ -402,6 +423,17 @@
                       }}
                     </span>
                   }
+                }
+                @if (ver.package_status; as status) {
+                  <span
+                    class="asset-versions-manager__badge asset-versions-manager__badge--cli"
+                    [class]="'asset-versions-manager__badge--cli-' + status"
+                    nz-tooltip
+                    [nzTooltipTitle]="packageHint(ver)"
+                  >
+                    <ng-icon name="lucideDownloadCloud" aria-hidden="true" />
+                    {{ 'ADMIN.PACKAGE_AVAILABILITY.STATUS.' + status.toUpperCase() | translate }}
+                  </span>
                 }
                 @if (ver.created_by) {
                   <span class="asset-versions-manager__author">{{ ver.created_by }}</span>
@@ -513,11 +545,16 @@
                     </button>
                   </div>
                   @if (
-                    canPublish() || canEditContent() || canMutateVersions() || canDeleteVersions()
+                    supportsPublishing() ||
+                    canEditContent() ||
+                    canMutateVersions() ||
+                    canDeleteVersions() ||
+                    canRemove(ver) ||
+                    canReinstate(ver)
                   ) {
                     <span class="asset-versions-manager__divider" aria-hidden="true"></span>
                     <div class="asset-versions-manager__action-group">
-                      @if (canPublish() && !ver.is_published) {
+                      @if (supportsPublishing() && !ver.is_published) {
                         <!-- On a wrapper: a disabled button shows no tooltip itself. -->
                         <span
                           class="asset-versions-manager__publish-wrap"
@@ -533,7 +570,9 @@
                               'ADMIN.VERSION_PUBLISHING.TOOLTIP_PUBLISH' | translate
                             "
                             [nzLoading]="publishingId() === ver.id"
-                            [disabled]="!ver.is_approved || publishingId() !== null"
+                            [disabled]="
+                              !canPublish() || !publishable(ver) || publishingId() !== null
+                            "
                             (click)="publishVersion(ver)"
                           >
                             <ng-icon name="lucideGlobe" aria-hidden="true" />
@@ -568,6 +607,44 @@
                           (click)="openEditModal(ver)"
                         >
                           <ng-icon name="lucideSquarePen" aria-hidden="true" />
+                        </button>
+                      }
+                      @if (canRemove(ver)) {
+                        <button
+                          type="button"
+                          nz-button
+                          nzType="text"
+                          class="action-icon action-icon--delete asset-versions-manager__act asset-versions-manager__act--remove"
+                          nz-tooltip
+                          [nzTooltipTitle]="'ADMIN.PACKAGE_AVAILABILITY.TOOLTIP_REMOVE' | translate"
+                          [attr.aria-label]="
+                            'ADMIN.PACKAGE_AVAILABILITY.TOOLTIP_REMOVE' | translate
+                          "
+                          [nzLoading]="removingId() === ver.id"
+                          [disabled]="removingId() !== null"
+                          (click)="removeVersion(ver)"
+                        >
+                          <ng-icon name="lucideCircleX" aria-hidden="true" />
+                        </button>
+                      }
+                      @if (canReinstate(ver)) {
+                        <button
+                          type="button"
+                          nz-button
+                          nzType="text"
+                          class="action-icon asset-versions-manager__act asset-versions-manager__act--reinstate"
+                          nz-tooltip
+                          [nzTooltipTitle]="
+                            'ADMIN.PACKAGE_AVAILABILITY.TOOLTIP_REINSTATE' | translate
+                          "
+                          [attr.aria-label]="
+                            'ADMIN.PACKAGE_AVAILABILITY.TOOLTIP_REINSTATE' | translate
+                          "
+                          [nzLoading]="reinstatingId() === ver.id"
+                          [disabled]="reinstatingId() !== null"
+                          (click)="reinstateVersion(ver)"
+                        >
+                          <ng-icon name="lucideUndo2" aria-hidden="true" />
                         </button>
                       }
                       @if (canDeleteVersions() && !ver.is_published) {
@@ -674,6 +751,30 @@
       </ng-container>
     </nz-modal>
   }
+
+  <ng-template #packageReasonTpl>
+    <p class="asset-versions-manager__package-hint">
+      {{ packageDialogBody[packageDialog()] | translate }}
+    </p>
+    <label class="asset-versions-manager__package-reason-label" for="package-reason">
+      {{
+        (packageDialog() === 'reinstate'
+          ? 'ADMIN.PACKAGE_AVAILABILITY.REINSTATE_REASON_LABEL'
+          : 'ADMIN.PACKAGE_AVAILABILITY.REASON_REQUIRED_LABEL'
+        ) | translate
+      }}
+    </label>
+    <textarea
+      nz-input
+      id="package-reason"
+      rows="3"
+      [maxlength]="packageDialog() === 'reinstate' ? 100 : 500"
+      dir="auto"
+      [placeholder]="'ADMIN.PACKAGE_AVAILABILITY.REASON_PLACEHOLDER' | translate"
+      [ngModel]="packageReason()"
+      (ngModelChange)="packageReason.set($event)"
+    ></textarea>
+  </ng-template>
 
   <ng-template #restoreContentTpl>
     <p [innerHTML]="t('RESTORE_CONFIRM_BODY') | translate: { name: restoreRow()?.name ?? '' }"></p>

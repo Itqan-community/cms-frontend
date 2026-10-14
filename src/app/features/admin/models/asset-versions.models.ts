@@ -8,6 +8,14 @@ export interface AssetVersion {
   is_active?: boolean;
   /** True when this is the version consumers are served for its language (translations/tafsirs). */
   is_published?: boolean;
+  /** Translations/tafsirs: publishing it goes back to an earlier version, which needs a reason. */
+  publishing_rolls_back?: boolean;
+  /** Availability in the itqan CLI (tafsirs, translations, mushafs, fonts). */
+  package_status?: PackageVersionStatus;
+  /** Why the publisher rolled back past this version (shown by the CLI). */
+  withdrawal_reason?: string;
+  /** Why an Itqan admin removed this version. */
+  removal_reason?: string;
   /** True when every change in this version is approved, so it can be published. */
   is_approved?: boolean;
   /** Unapproved changes still listed on the review page (unreviewed or needing changes). */
@@ -73,6 +81,17 @@ export interface AssetVersionFormPayload {
   language?: string | null;
   /** Translations/tafsirs, create only: approve the uploaded changes now (reviewers only). */
   pre_approved?: boolean;
+  /** Mushafs/fonts, create only: publish the upload right away (needs the publish permission). */
+  publish?: boolean;
 }
 
 export type AssetVersionParentKind = 'tafsir' | 'translation' | 'mushaf' | 'font' | 'program';
+
+/**
+ * A version's availability in the package manager (itqan CLI).
+ * - released: new installs may get it.
+ * - withdrawn: the publisher rolled back past it; only projects that locked it still install it.
+ * - removed: removed by an Itqan admin; never installed or served again.
+ * - not_released: never published.
+ */
+export type PackageVersionStatus = 'released' | 'withdrawn' | 'removed' | 'not_released';

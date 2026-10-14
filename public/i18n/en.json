@@ -584,7 +584,14 @@
       "FORBIDDEN": "You do not have permission to submit this report",
       "LOGIN_REQUIRED": "Please log in to report an issue"
     },
-    "DOWNLOAD_LANGUAGE": "Download language"
+    "DOWNLOAD_LANGUAGE": "Download language",
+    "ITQAN_CLI": {
+      "TITLE": "Install with the itqan CLI",
+      "HINT": "Add it to your project with one command:",
+      "COPY": "Copy command",
+      "COPIED": "Command copied",
+      "GET_CLI": "Don't have the itqan CLI? Get it"
+    }
   },
   "UI": {
     "FILTERS": "Filters",
@@ -785,7 +792,45 @@
       "FILE_UNPARSEABLE_ERROR": "The file could not be read as content rows. Use the CSV template for this asset.",
       "VERSION_IS_PUBLISHED_ERROR": "This version is published. Publish another version before changing its file.",
       "PRE_APPROVED": "Pre-approved",
-      "PRE_APPROVED_HINT": "The uploaded changes are approved now under your name, so the version can be published without a separate review."
+      "PRE_APPROVED_HINT": "The uploaded changes are approved now under your name, so the version can be published without a separate review.",
+      "ROLLBACK_TITLE": "Go back to this version?",
+      "ROLLBACK_BODY": "Consumers will get this earlier version again. Projects locked to a newer version keep installing it, and the itqan CLI shows them your reason.",
+      "ROLLBACK_REASON_REQUIRED": "Enter a reason for going back to this version.",
+      "TOOLTIP_NO_PERMISSION": "You need the \"Publish Content\" permission to publish versions. Ask your publisher admin.",
+      "PUBLISH_NOW": "Publish now",
+      "PUBLISH_NOW_HINT": "Consumers get this version as soon as it is uploaded. Untick to upload it first and publish it later."
+    },
+    "PACKAGE_AVAILABILITY": {
+      "STATUS": {
+        "RELEASED": "CLI",
+        "WITHDRAWN": "CLI: withdrawn",
+        "REMOVED": "CLI: removed",
+        "NOT_RELEASED": "Not in CLI"
+      },
+      "HINT": {
+        "RELEASED": "Developers can install this version with the itqan CLI.",
+        "WITHDRAWN": "The publisher went back to an earlier version. Projects that already locked this one still install it, with a warning.",
+        "REMOVED": "Removed by Itqan: it can't be installed or downloaded any more.",
+        "NOT_RELEASED": "Not published yet, so the itqan CLI does not offer it."
+      },
+      "TOOLTIP_REMOVE": "Remove version (Itqan admins)",
+      "REMOVE_TITLE": "Remove {{name}}?",
+      "REMOVE_BODY": "The version will never be installed or downloaded again. Projects that locked it will fail to install until they move to another version. Use this only for cases such as a revoked licence or wrong content.",
+      "REMOVE_OK": "Remove",
+      "REMOVE_SUCCESS": "{{name}} was removed.",
+      "REMOVE_REASON_REQUIRED": "Enter a reason for removing this version.",
+      "REASON_REQUIRED_LABEL": "Reason (required, shown to developers)",
+      "REASON_PLACEHOLDER": "For example: errors in Surah 2",
+      "VERSION_IS_SERVED_ERROR": "Consumers are served this version. Publish another version before removing it.",
+      "TOOLTIP_REINSTATE": "Undo removal (Itqan admins)",
+      "REINSTATE_TITLE": "Undo the removal of {{name}}?",
+      "REINSTATE_BODY": "The version gets back the CLI status it would have had without the removal, so projects that locked it can install it again.",
+      "REINSTATE_OK": "Undo removal",
+      "REINSTATE_SUCCESS": "The removal of {{name}} was undone.",
+      "REINSTATE_REASON_REQUIRED": "Enter a reason for undoing the removal.",
+      "REINSTATE_REASON_LABEL": "Reason (required, kept in the audit log)",
+      "VERSION_NOT_REMOVED_ERROR": "This version is not removed any more. The list was refreshed.",
+      "ACTION_ERROR": "Could not update the version's itqan CLI availability."
     },
     "VERSION_VIEWER": {
       "OPEN": "View this version",
