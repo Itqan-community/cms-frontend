@@ -584,7 +584,14 @@
       "FORBIDDEN": "You do not have permission to submit this report",
       "LOGIN_REQUIRED": "Please log in to report an issue"
     },
-    "DOWNLOAD_LANGUAGE": "Download language"
+    "DOWNLOAD_LANGUAGE": "Download language",
+    "ITQAN_CLI": {
+      "TITLE": "Install with the itqan CLI",
+      "HINT": "Add it to your project with one command:",
+      "COPY": "Copy command",
+      "COPIED": "Command copied",
+      "GET_CLI": "Don't have the itqan CLI? Get it"
+    }
   },
   "UI": {
     "FILTERS": "Filters",

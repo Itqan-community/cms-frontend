@@ -37,6 +37,7 @@ import {
 import { IssuesService } from '../../../admin/issues/services/issues.service';
 import { localizedLanguageName } from '../../../admin/utils/iso-639.util';
 import { AssetDetails } from '../../models/assets.model';
+import { ItqanAddCommandComponent } from '../../components/itqan-add-command/itqan-add-command.component';
 import { AssetLicenseAcceptanceService } from '../../services/asset-license-acceptance.service';
 import { AssetsService } from '../../services/assets.service';
 
@@ -60,6 +61,7 @@ import { AssetsService } from '../../services/assets.service';
     NzSelectModule,
     ReactiveFormsModule,
     FormsModule,
+    ItqanAddCommandComponent,
   ],
   templateUrl: './asset-details.page.html',
   styleUrl: './asset-details.page.less',
