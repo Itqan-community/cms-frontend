@@ -260,14 +260,15 @@ Trust, Profile, CompleteProfile
 
 **Purpose:** Browse, search, filter, and download Quranic assets.
 
-| File                                                    | Type       | Purpose                                                        |
-| ------------------------------------------------------- | ---------- | -------------------------------------------------------------- |
-| `models/assets.model.ts`                                | Interfaces | `ApiAssets`, `Asset`, `AssetDetails`                           |
-| `services/assets.service.ts`                            | Service    | `getAssets(filters)`, `getAssetDetails(id)`                    |
-| `pages/gallery/gallery.page.ts`                         | Page       | Wrapper title + `<app-assets-listing/>`                        |
-| `pages/asset-details/asset-details.page.ts`             | Page       | Full detail + access request modal + license modal + download  |
-| `components/assets-listing/assets-listing.component.ts` | Component  | Filter state + grid + skeleton + empty state                   |
-| `components/asset-card/asset-card.component.ts`         | Component  | Single asset card (icon, license, name, desc, publisher, link) |
+| File                                                          | Type       | Purpose                                                                                                |
+| ------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------ |
+| `models/assets.model.ts`                                      | Interfaces | `ApiAssets`, `Asset`, `AssetDetails`                                                                   |
+| `services/assets.service.ts`                                  | Service    | `getAssets(filters)`, `getAssetDetails(id)`                                                            |
+| `pages/gallery/gallery.page.ts`                               | Page       | Wrapper title + `<app-assets-listing/>`                                                                |
+| `pages/asset-details/asset-details.page.ts`                   | Page       | Full detail + access request modal + license modal + download + itqan CLI card (when `package` is set) |
+| `components/assets-listing/assets-listing.component.ts`       | Component  | Filter state + grid + skeleton + empty state                                                           |
+| `components/asset-card/asset-card.component.ts`               | Component  | Single asset card (icon, license, name, desc, publisher, link)                                         |
+| `components/itqan-add-command/itqan-add-command.component.ts` | Component  | `itqan add <slug> [--language]` + copy + "get the CLI" link (GitHub)                                   |
 
 **States:** loading (skeleton), empty (no results with/without filters), error, not-found (404),
 success.

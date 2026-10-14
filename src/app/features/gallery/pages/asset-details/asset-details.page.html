@@ -130,6 +130,20 @@
           </div>
         </div>
 
+        @if (asset()!.package; as pkg) {
+          <!-- itqan CLI Card -->
+          <div class="card itqan-cli-card">
+            <div class="card-header">
+              <ng-icon name="lucideTerminal" />
+              <h3 class="card-title">{{ 'GALLERY.ITQAN_CLI.TITLE' | translate }}</h3>
+            </div>
+
+            <div class="card-content">
+              <app-itqan-add-command [package]="pkg" [language]="selectedLanguage()" />
+            </div>
+          </div>
+        }
+
         <!-- Publisher Card -->
         <div class="card publisher-card">
           <div class="card-header">

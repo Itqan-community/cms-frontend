@@ -1,0 +1,46 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.add-hint {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--color-neutral-400);
+}
+
+.command {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-block: 0.25rem;
+  padding-inline: 0.75rem 0.25rem;
+  background-color: var(--color-neutral-50);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 6px;
+
+  code {
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.8125rem;
+    color: var(--color-neutral-600);
+  }
+}
+
+.copy-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.get-cli-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+}

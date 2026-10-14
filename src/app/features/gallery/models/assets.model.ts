@@ -47,6 +47,14 @@ export interface AssetDetails {
   available_languages?: string[];
   template: AssetTemplate | null;
   mushaf_layout: { id: number; name: string; page_count: number } | null;
+  /** How the itqan CLI installs the asset; null when it can't. */
+  package?: AssetPackage | null;
+}
+
+export interface AssetPackage {
+  slug: string;
+  /** Installable languages, source first. */
+  languages: { language: string; is_source: boolean }[];
 }
 
 interface AssetSnapshot {

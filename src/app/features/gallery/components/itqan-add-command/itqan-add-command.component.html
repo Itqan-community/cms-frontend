@@ -1,0 +1,20 @@
+<p class="add-hint">{{ 'GALLERY.ITQAN_CLI.HINT' | translate }}</p>
+<div class="command">
+  <code dir="ltr">{{ command() }}</code>
+  <button
+    nz-button
+    nzType="text"
+    nzSize="small"
+    class="copy-button"
+    type="button"
+    [attr.aria-label]="'GALLERY.ITQAN_CLI.COPY' | translate"
+    [title]="'GALLERY.ITQAN_CLI.COPY' | translate"
+    (click)="copy()"
+  >
+    <ng-icon [name]="copied() ? 'lucideCheck' : 'lucideCopy'" />
+  </button>
+</div>
+<a class="get-cli-link" [href]="cliUrl" target="_blank" rel="noopener noreferrer">
+  {{ 'GALLERY.ITQAN_CLI.GET_CLI' | translate }}
+  <ng-icon name="lucideExternalLink" />
+</a>
