@@ -62,6 +62,9 @@ describe('AssetVersionsManagerComponent', () => {
       'create',
       'update',
       'delete',
+      'removePackageVersion',
+      'reinstatePackageVersion',
+      'setPublishedVersion',
     ]);
     contentService = jasmine.createSpyObj<AssetContentService>('AssetContentService', [
       'listLanguages',
@@ -454,11 +457,46 @@ describe('AssetVersionsManagerComponent', () => {
       expect(component.canPublish()).toBeFalse();
     });
 
-    it('does not offer publishing for assets without reviewed content', () => {
+    it('does not offer publishing for programs, which serve their newest version', () => {
+      component.kind = 'program';
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT);
+
+      expect(component.supportsPublishing()).toBeFalse();
+      expect(component.canPublish()).toBeFalse();
+    });
+
+    it('offers publishing mushafs and fonts without a review step', () => {
       component.kind = 'mushaf';
       withPermissions(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT);
 
+      expect(component.canPublish()).toBeTrue();
+      expect(component.publishable(version({ is_approved: undefined }))).toBeTrue();
+    });
+
+    it('shows the publish button disabled, explaining the permission, to users who cannot publish', () => {
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION);
+
+      expect(component.supportsPublishing()).toBeTrue();
       expect(component.canPublish()).toBeFalse();
+      expect(component.publishTooltip(version({ is_approved: true }))).toBe(
+        'ADMIN.VERSION_PUBLISHING.TOOLTIP_NO_PERMISSION'
+      );
+    });
+
+    it('publishes a mushaf version through the mushaf versions API', () => {
+      component.kind = 'mushaf';
+      versionsService.setPublishedVersion.and.returnValue(of(page('ar').results[0]));
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT);
+
+      component.publishVersion(version({ id: 3 }));
+
+      expect(versionsService.setPublishedVersion).toHaveBeenCalledWith(
+        'mushaf',
+        'sahih-intl',
+        3,
+        ''
+      );
+      expect(contentService.setPublishedVersion).not.toHaveBeenCalled();
     });
 
     it('publishes an approved version and reloads the list', () => {
@@ -471,7 +509,8 @@ describe('AssetVersionsManagerComponent', () => {
       expect(contentService.setPublishedVersion).toHaveBeenCalledWith(
         'translation',
         'sahih-intl',
-        3
+        3,
+        ''
       );
       expect(message.success).toHaveBeenCalled();
       expect(versionsService.list).toHaveBeenCalled();
@@ -731,6 +770,234 @@ describe('AssetVersionsManagerComponent', () => {
       component.submit();
 
       expect(message.error).toHaveBeenCalledWith('ADMIN.VERSION_PUBLISHING.FILE_UNPARSEABLE_ERROR');
+    });
+  });
+
+  describe('package availability (itqan CLI)', () => {
+    function version(overrides: Partial<AssetVersion> = {}): AssetVersion {
+      return { ...page('ar').results[0], package_status: 'released', ...overrides };
+    }
+
+    function withPermissions(...perms: string[]): void {
+      granted = new Set(perms);
+      fixture.detectChanges();
+    }
+
+    /** Confirm the dialog after typing `reason` into it, as a user would. */
+    function confirmTyping(reason: string): void {
+      modal.confirm.and.callFake(((options?: ModalOptions) => {
+        component.packageReason.set(reason);
+        const onOk = options?.nzOnOk as (() => Promise<void>) | undefined;
+        onOk?.().catch(() => undefined);
+        return {};
+      }) as unknown as NzModalService['confirm']);
+    }
+
+    it("explains a withdrawn version with the publisher's rollback reason", () => {
+      fixture.detectChanges();
+
+      const hint = component.packageHint(
+        version({ package_status: 'withdrawn', withdrawal_reason: 'Errors in Surah 2' })
+      );
+
+      expect(hint).toContain('ADMIN.PACKAGE_AVAILABILITY.HINT.WITHDRAWN');
+      expect(hint).toContain('Errors in Surah 2');
+    });
+
+    it('asks for a reason when publishing goes back, and sends it', () => {
+      contentService.setPublishedVersion.and.returnValue(of({} as ContentDraftVersion));
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT);
+      confirmTyping('  Errors in Surah 2 ');
+
+      component.publishVersion(version({ is_approved: true, publishing_rolls_back: true }));
+
+      expect(contentService.setPublishedVersion).toHaveBeenCalledWith(
+        'translation',
+        'sahih-intl',
+        1,
+        'Errors in Surah 2'
+      );
+    });
+
+    it('refuses to go back to an earlier version without a reason', () => {
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT);
+      confirmTyping('   ');
+
+      component.publishVersion(version({ is_approved: true, publishing_rolls_back: true }));
+
+      expect(contentService.setPublishedVersion).not.toHaveBeenCalled();
+      expect(message.warning).toHaveBeenCalledWith(
+        'ADMIN.VERSION_PUBLISHING.ROLLBACK_REASON_REQUIRED'
+      );
+    });
+
+    it('does not ask for a reason when publishing a newer version', () => {
+      contentService.setPublishedVersion.and.returnValue(of({} as ContentDraftVersion));
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT);
+      confirmTyping('');
+
+      component.publishVersion(version({ is_approved: true, publishing_rolls_back: false }));
+
+      expect(contentService.setPublishedVersion).toHaveBeenCalledWith(
+        'translation',
+        'sahih-intl',
+        1,
+        ''
+      );
+    });
+
+    it('offers removal only to holders of the remove permission', () => {
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT);
+      expect(component.canRemove(version())).toBeFalse();
+
+      granted = new Set([PORTAL_PERMISSIONS.PORTAL_REMOVE_PACKAGE_VERSION]);
+      expect(component.canRemove(version())).toBeTrue();
+      expect(component.canRemove(version({ is_published: true }))).toBeFalse();
+      expect(component.canRemove(version({ package_status: 'removed' }))).toBeFalse();
+    });
+
+    it('refuses to remove a version without a reason', () => {
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_REMOVE_PACKAGE_VERSION);
+      confirmTyping('   ');
+
+      component.removeVersion(version());
+
+      expect(versionsService.removePackageVersion).not.toHaveBeenCalled();
+      expect(message.warning).toHaveBeenCalledWith(
+        'ADMIN.PACKAGE_AVAILABILITY.REMOVE_REASON_REQUIRED'
+      );
+    });
+
+    it('removes a version with the reason given, then reloads the list', () => {
+      versionsService.removePackageVersion.and.returnValue(of({}));
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_REMOVE_PACKAGE_VERSION);
+      versionsService.list.calls.reset();
+      confirmTyping('Licence revoked');
+
+      component.removeVersion(version());
+
+      expect(versionsService.removePackageVersion).toHaveBeenCalledWith(1, 'Licence revoked');
+      expect(versionsService.list).toHaveBeenCalled();
+    });
+
+    it('explains why the version consumers are served cannot be removed', () => {
+      versionsService.removePackageVersion.and.returnValue(
+        throwError(
+          () => new HttpErrorResponse({ status: 400, error: { error_name: 'version_is_served' } })
+        )
+      );
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_REMOVE_PACKAGE_VERSION);
+      confirmTyping('Licence revoked');
+
+      component.removeVersion(version());
+
+      expect(message.error).toHaveBeenCalledWith(
+        'ADMIN.PACKAGE_AVAILABILITY.VERSION_IS_SERVED_ERROR'
+      );
+    });
+
+    it('offers undoing a removal only on removed versions, to holders of the remove permission', () => {
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT);
+      expect(component.canReinstate(version({ package_status: 'removed' }))).toBeFalse();
+
+      granted = new Set([PORTAL_PERMISSIONS.PORTAL_REMOVE_PACKAGE_VERSION]);
+      expect(component.canReinstate(version({ package_status: 'removed' }))).toBeTrue();
+      expect(component.canReinstate(version({ package_status: 'released' }))).toBeFalse();
+    });
+
+    it('refuses to undo a removal without a reason', () => {
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_REMOVE_PACKAGE_VERSION);
+      confirmTyping('   ');
+
+      component.reinstateVersion(version({ package_status: 'removed' }));
+
+      expect(versionsService.reinstatePackageVersion).not.toHaveBeenCalled();
+      expect(message.warning).toHaveBeenCalledWith(
+        'ADMIN.PACKAGE_AVAILABILITY.REINSTATE_REASON_REQUIRED'
+      );
+    });
+
+    it('undoes a removal with the reason given, then reloads the list', () => {
+      versionsService.reinstatePackageVersion.and.returnValue(of({}));
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_REMOVE_PACKAGE_VERSION);
+      versionsService.list.calls.reset();
+      confirmTyping(' Licence confirmed ');
+
+      component.reinstateVersion(version({ package_status: 'removed' }));
+
+      expect(versionsService.reinstatePackageVersion).toHaveBeenCalledWith(1, 'Licence confirmed');
+      expect(versionsService.list).toHaveBeenCalled();
+    });
+
+    it('explains when the version was already brought back', () => {
+      versionsService.reinstatePackageVersion.and.returnValue(
+        throwError(
+          () => new HttpErrorResponse({ status: 400, error: { error_name: 'version_not_removed' } })
+        )
+      );
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_REMOVE_PACKAGE_VERSION);
+      confirmTyping('Licence confirmed');
+
+      component.reinstateVersion(version({ package_status: 'removed' }));
+
+      expect(message.error).toHaveBeenCalledWith(
+        'ADMIN.PACKAGE_AVAILABILITY.VERSION_NOT_REMOVED_ERROR'
+      );
+    });
+  });
+
+  describe('publish now on upload (mushafs, fonts)', () => {
+    function upload(): void {
+      component.openCreateModal();
+      component.form.patchValue({ label_en: 'v2', summary_en: 'second' });
+      component.onPickFile({
+        target: { files: [new File(['x'], 'v2.pdf')], value: '' },
+      } as unknown as Event);
+      component.submit();
+    }
+
+    beforeEach(() => {
+      component.kind = 'mushaf';
+      versionsService.create.and.returnValue(of(page('ar').results[0]));
+    });
+
+    it('publishes the upload by default for users who can publish', () => {
+      granted = new Set([
+        PORTAL_PERMISSIONS.PORTAL_UPDATE_MUSHAF,
+        PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT,
+      ]);
+      fixture.detectChanges();
+
+      upload();
+
+      expect(versionsService.create.calls.mostRecent().args[2].publish).toBeTrue();
+    });
+
+    it('stages the upload when the publisher unticks publish now', () => {
+      granted = new Set([
+        PORTAL_PERMISSIONS.PORTAL_UPDATE_MUSHAF,
+        PORTAL_PERMISSIONS.PORTAL_PUBLISH_CONTENT,
+      ]);
+      fixture.detectChanges();
+
+      component.openCreateModal();
+      component.publishNow.set(false);
+      component.form.patchValue({ label_en: 'v2', summary_en: 'second' });
+      component.onPickFile({
+        target: { files: [new File(['x'], 'v2.pdf')], value: '' },
+      } as unknown as Event);
+      component.submit();
+
+      expect(versionsService.create.calls.mostRecent().args[2].publish).toBeFalse();
+    });
+
+    it('stages the upload for users without the publish permission', () => {
+      granted = new Set([PORTAL_PERMISSIONS.PORTAL_UPDATE_MUSHAF]);
+      fixture.detectChanges();
+
+      upload();
+
+      expect(versionsService.create.calls.mostRecent().args[2].publish).toBeFalse();
     });
   });
 });

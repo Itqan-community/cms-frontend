@@ -183,15 +183,17 @@ export class AssetContentService {
     );
   }
 
-  /** Make a fully approved version the one consumers see for its language. */
+  /** Make a fully approved version the one consumers see for its language. Going back to
+   *  an earlier version needs a reason, which the itqan CLI shows to projects still on a newer one. */
   setPublishedVersion(
     kind: AssetVersionParentKind,
     slug: string,
-    versionId: number
+    versionId: number,
+    reason = ''
   ): Observable<ContentDraftVersion> {
     return this.http.post<ContentDraftVersion>(
       `${this.versionBase(kind, slug, versionId)}set-published/`,
-      {}
+      { reason }
     );
   }
 

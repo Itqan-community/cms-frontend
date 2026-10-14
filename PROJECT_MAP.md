@@ -260,14 +260,15 @@ Trust, Profile, CompleteProfile
 
 **Purpose:** Browse, search, filter, and download Quranic assets.
 
-| File                                                    | Type       | Purpose                                                        |
-| ------------------------------------------------------- | ---------- | -------------------------------------------------------------- |
-| `models/assets.model.ts`                                | Interfaces | `ApiAssets`, `Asset`, `AssetDetails`                           |
-| `services/assets.service.ts`                            | Service    | `getAssets(filters)`, `getAssetDetails(id)`                    |
-| `pages/gallery/gallery.page.ts`                         | Page       | Wrapper title + `<app-assets-listing/>`                        |
-| `pages/asset-details/asset-details.page.ts`             | Page       | Full detail + access request modal + license modal + download  |
-| `components/assets-listing/assets-listing.component.ts` | Component  | Filter state + grid + skeleton + empty state                   |
-| `components/asset-card/asset-card.component.ts`         | Component  | Single asset card (icon, license, name, desc, publisher, link) |
+| File                                                          | Type       | Purpose                                                                                                |
+| ------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------ |
+| `models/assets.model.ts`                                      | Interfaces | `ApiAssets`, `Asset`, `AssetDetails`                                                                   |
+| `services/assets.service.ts`                                  | Service    | `getAssets(filters)`, `getAssetDetails(id)`                                                            |
+| `pages/gallery/gallery.page.ts`                               | Page       | Wrapper title + `<app-assets-listing/>`                                                                |
+| `pages/asset-details/asset-details.page.ts`                   | Page       | Full detail + access request modal + license modal + download + itqan CLI card (when `package` is set) |
+| `components/assets-listing/assets-listing.component.ts`       | Component  | Filter state + grid + skeleton + empty state                                                           |
+| `components/asset-card/asset-card.component.ts`               | Component  | Single asset card (icon, license, name, desc, publisher, link)                                         |
+| `components/itqan-add-command/itqan-add-command.component.ts` | Component  | `itqan add <slug> [--language]` + copy + "get the CLI" link (GitHub)                                   |
 
 **States:** loading (skeleton), empty (no results with/without filters), error, not-found (404),
 success.
@@ -344,7 +345,17 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
 - `asset-versions-manager/` — Version CRUD (tafsir/translation/mushaf/font; program when
   re-enabled); CSV `export/` then `file_url` fallback. Tafsir/translation/mushaf/font
   (`numbered()`): `name` is the locked version number and `label` the editable version name — the
-  package registry (`itqan` CLI) only installs numbered versions; program keeps a free-text `name`
+  package registry (`itqan` CLI) only installs numbered versions; program keeps a free-text `name`.
+  Each row's CLI availability (`package_status`: released / withdrawn / removed / not released, with
+  `withdrawal_reason` / `removal_reason`) shows as a badge. Publishing an older version
+  (`publishing_rolls_back`) requires a reason, sent to `set-published/` and shown by the itqan CLI.
+  Remove (`PORTAL_REMOVE_PACKAGE_VERSION`, reason required) via `packages/versions/{id}/remove/`;
+  the same admins undo it on removed rows via `packages/versions/{id}/reinstate/` (reason required,
+  up to 100 characters, kept in the audit log). Publishing applies to tafsirs, translations, mushafs
+  and fonts (`supportsPublishing()`): mushafs/fonts publish via
+  `{mushafs|fonts}/{slug}/versions/{id}/set-published/` with no review step, and their upload modal
+  has a "Publish now" checkbox (default on, sends `publish`). Without `portal_publish_content` the
+  Publish button and checkbox are shown disabled with a permission tooltip.
 - `asset-content-editor/` + `asset-content-grid/` — Per-unit draft editor (surah/ayah/word/page
   content templates); flush before publish; leave blocked if PATCH fails. Column set is driven by
   `effectiveTemplate()` (the `template` input, falling back to a one-row probe's `unit_type`). Every

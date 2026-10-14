@@ -138,6 +138,31 @@ export class AssetVersionsService {
     }
   }
 
+  /** Mushafs/fonts: make a version the one consumers get. Going back to an earlier
+   *  version needs a reason, which the itqan CLI shows. (Translations/tafsirs publish
+   *  through AssetContentService.) */
+  setPublishedVersion(
+    kind: AssetVersionParentKind,
+    slug: string,
+    versionId: number,
+    reason = ''
+  ): Observable<AssetVersion> {
+    return this.http.post<AssetVersion>(
+      `${this.versionItemUrl(kind, slug, versionId)}set-published/`,
+      { reason }
+    );
+  }
+
+  /** Itqan admins: remove a version for good, with a reason. */
+  removePackageVersion(versionId: number, reason: string): Observable<unknown> {
+    return this.http.post(`${this.base}/packages/versions/${versionId}/remove/`, { reason });
+  }
+
+  /** Itqan admins: undo a removal, with a reason kept in the audit log. */
+  reinstatePackageVersion(versionId: number, reason: string): Observable<unknown> {
+    return this.http.post(`${this.base}/packages/versions/${versionId}/reinstate/`, { reason });
+  }
+
   private listUrl(kind: AssetVersionParentKind, slug: string): string {
     const segment = this.segmentForKind(kind);
     return `${this.base}/${segment}/${encodeURIComponent(slug)}/versions/`;
@@ -176,6 +201,9 @@ export class AssetVersionsService {
     }
     if (payload.pre_approved) {
       data.append('pre_approved', 'true');
+    }
+    if (payload.publish !== undefined) {
+      data.append('publish', String(payload.publish));
     }
     return data;
   }
