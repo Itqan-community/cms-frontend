@@ -49,14 +49,78 @@ describe('ApiKeysPage', () => {
     expect(page.keys().length).toBe(1);
   });
 
-  it('onCreate exposes raw key once in revealedRawKey signal', async () => {
-    listApiKeys.and.returnValue(of([]));
+  it('onCreate keeps the full key from the create response on its row', async () => {
+    listApiKeys.and.returnValue(of([{ id: '1', name: 'K', maskedKey: 'm', isRevoked: false }]));
     await fixture.whenStable();
     page.openCreateForm();
     page.createForm.patchValue({ name: 'Unit' });
     await page.onCreate();
-    expect(page.revealedRawKey()?.raw).toBe('raw');
+    expect(page.fullKeyFor(page.keys()[0]!)).toBe('raw');
     expect(page.showCreateForm()).toBe(false);
+  });
+
+  it('shows a full key returned by the list with a copy button', async () => {
+    listApiKeys.and.returnValue(
+      of([{ id: 'a', name: 'App', maskedKey: '••••', fullKey: 'abc.def', isRevoked: false }])
+    );
+    await page.reload();
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.textContent).toContain('abc.def');
+    expect(el.textContent).not.toContain('AUTH.API_KEYS.FULL_KEY_UNAVAILABLE');
+    expect(copyButtons(el).length).toBe(1);
+  });
+
+  it('shows the masked preview without a copy button when the full key is unavailable', async () => {
+    listApiKeys.and.returnValue(
+      of([{ id: 'a', name: 'Old', maskedKey: '••••', isRevoked: false }])
+    );
+    await page.reload();
+    fixture.detectChanges();
+
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.textContent).toContain('AUTH.API_KEYS.FULL_KEY_UNAVAILABLE');
+    expect(copyButtons(el).length).toBe(0);
+  });
+
+  it('never copies a masked preview', async () => {
+    const writeText = spyOn(navigator.clipboard, 'writeText').and.resolveTo();
+
+    await page.copyKey({ id: 'a', name: 'Old', maskedKey: '••••', isRevoked: false });
+
+    expect(writeText).not.toHaveBeenCalled();
+  });
+
+  it('copies the full key and confirms', async () => {
+    const writeText = spyOn(navigator.clipboard, 'writeText').and.resolveTo();
+
+    await page.copyKey({
+      id: 'a',
+      name: 'App',
+      maskedKey: '••••',
+      fullKey: 'abc.def',
+      isRevoked: false,
+    });
+
+    expect(writeText).toHaveBeenCalledWith('abc.def');
+    expect(page.successMsg()).toBe('AUTH.API_KEYS.COPY_OK');
+  });
+
+  it('reports when the clipboard is unavailable', async () => {
+    spyOn(navigator.clipboard, 'writeText').and.rejectWith(new Error('denied'));
+
+    await page.copySnippet();
+
+    expect(page.pageError()).toBe('AUTH.API_KEYS.COPY_ERROR');
+  });
+
+  it('shows the header snippet with X-API-Key and X-External-User-Id', () => {
+    fixture.detectChanges();
+
+    const snippet = (fixture.nativeElement as HTMLElement).querySelector('.api-keys__snippet');
+    expect(snippet?.textContent).toContain('X-API-Key: <YOUR_PUBLIC_KEY>');
+    expect(snippet?.textContent).toContain('X-External-User-Id:');
   });
 
   it('create form is hidden initially and toggles with actions', () => {
@@ -66,4 +130,10 @@ describe('ApiKeysPage', () => {
     page.cancelCreateForm();
     expect(page.showCreateForm()).toBe(false);
   });
+
+  function copyButtons(el: HTMLElement): HTMLButtonElement[] {
+    return Array.from(el.querySelectorAll<HTMLButtonElement>('.account-manage__li button')).filter(
+      (b) => b.textContent?.trim() === 'AUTH.API_KEYS.COPY'
+    );
+  }
 });

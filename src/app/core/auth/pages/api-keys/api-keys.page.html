@@ -19,37 +19,9 @@
         <div class="account-manage__ok">{{ successMsg() }}</div>
       }
 
-      @if (revealedRawKey(); as reveal) {
-        <div class="api-keys__reveal" role="status">
-          <p class="account-manage__hint" style="margin-bottom: 8px; font-weight: 600">
-            {{ 'AUTH.API_KEYS.REVEAL_TITLE' | translate }}
-          </p>
-          <p class="account-manage__hint">{{ 'AUTH.API_KEYS.REVEAL_HINT' | translate }}</p>
-          @if (reveal.raw) {
-            <div class="account-manage__mono">{{ reveal.raw }}</div>
-          } @else {
-            <p class="account-manage__hint">{{ 'AUTH.API_KEYS.REVEAL_EMPTY' | translate }}</p>
-          }
-          <div class="api-keys__reveal-actions">
-            <button
-              type="button"
-              class="account-manage__btn account-manage__btn--secondary"
-              [disabled]="!reveal.raw || isLoading()"
-              (click)="copyRawKey(reveal.raw)"
-            >
-              {{ 'AUTH.API_KEYS.COPY' | translate }}
-            </button>
-            <button
-              type="button"
-              class="account-manage__btn account-manage__btn--secondary"
-              [disabled]="isLoading()"
-              (click)="dismissReveal()"
-            >
-              {{ 'AUTH.API_KEYS.DONE' | translate }}
-            </button>
-          </div>
-        </div>
-      }
+      <div class="api-keys__notice" role="note">
+        {{ 'AUTH.API_KEYS.PUBLIC_ID_NOTE' | translate }}
+      </div>
 
       @if (isLoading()) {
         <p class="account-manage__hint">{{ 'COMMON.LOADING' | translate }}</p>
@@ -117,6 +89,29 @@
         }
       </section>
 
+      <section class="account-manage__section">
+        <h2 class="account-manage__h2">{{ 'AUTH.API_KEYS.USAGE_SECTION' | translate }}</h2>
+        <p class="account-manage__hint">{{ 'AUTH.API_KEYS.USAGE_HINT' | translate }}</p>
+        <p class="account-manage__hint">{{ 'AUTH.API_KEYS.USAGE_USER_ID_HINT' | translate }}</p>
+        <pre class="api-keys__snippet" dir="ltr"><code>{{ usageSnippet }}</code></pre>
+        <div class="account-manage__row">
+          <button
+            type="button"
+            class="account-manage__btn account-manage__btn--secondary"
+            (click)="copySnippet()"
+          >
+            {{ 'AUTH.API_KEYS.COPY_SNIPPET' | translate }}
+          </button>
+          <a
+            class="api-keys__docs-link"
+            [href]="authDocsUrl"
+            target="_blank"
+            rel="noopener noreferrer"
+            >{{ 'AUTH.API_KEYS.DOCS_LINK' | translate }}</a
+          >
+        </div>
+      </section>
+
       <section class="account-manage__section" style="border-bottom: none; margin-bottom: 0">
         <h2 class="account-manage__h2">{{ 'AUTH.API_KEYS.LIST_SECTION' | translate }}</h2>
         <ul class="account-manage__list">
@@ -143,7 +138,14 @@
                 } @else {
                   <div style="font-weight: 600; margin-top: 4px">{{ k.name }}</div>
                 }
-                <div class="account-manage__mono">{{ k.maskedKey }}</div>
+                @if (fullKeyFor(k); as fullKey) {
+                  <div class="account-manage__mono" dir="ltr">{{ fullKey }}</div>
+                } @else {
+                  <div class="account-manage__mono" dir="ltr">{{ k.maskedKey }}</div>
+                  <p class="account-manage__hint">
+                    {{ 'AUTH.API_KEYS.FULL_KEY_UNAVAILABLE' | translate }}
+                  </p>
+                }
                 <p class="account-manage__hint">
                   @if (k.createdAt) {
                     {{ 'AUTH.API_KEYS.CREATED' | translate }}: {{ k.createdAt }}
@@ -175,6 +177,16 @@
                     {{ 'COMMON.CANCEL' | translate }}
                   </button>
                 } @else {
+                  @if (fullKeyFor(k)) {
+                    <button
+                      type="button"
+                      class="account-manage__btn account-manage__btn--secondary"
+                      [disabled]="isLoading() || k.isRevoked"
+                      (click)="copyKey(k)"
+                    >
+                      {{ 'AUTH.API_KEYS.COPY' | translate }}
+                    </button>
+                  }
                   <button
                     type="button"
                     class="account-manage__btn account-manage__btn--secondary"
