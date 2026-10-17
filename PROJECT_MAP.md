@@ -197,7 +197,8 @@ user toast still via `error.interceptor` (`ERRORS.NETWORK_ERROR`).
   reject all, or per-service switches (off by default). `/privacy` can reopen it.
 - An `effect()` in `App` calls `GoogleAnalyticsService.init()`/`disable()` (opt-out flag + `_ga`
   cookie cleanup) and `startSentry()`/`stopSentry()` whenever the choice changes.
-- `WebVitalsService` only logs to the console in dev mode, so it is not consent-gated.
+- `WebVitalsService` only logs to the console in dev mode, so it is not consent-gated; `/privacy`
+  says so.
 
 ### Auth Architecture (django-allauth headless SPA)
 

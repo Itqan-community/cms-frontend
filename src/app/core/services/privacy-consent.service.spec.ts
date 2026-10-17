@@ -116,6 +116,28 @@ describe('PrivacyConsentService', () => {
     expect(service.consent()?.analytics).toBeFalse();
   });
 
+  it('picks up a choice made in another tab', () => {
+    const service = TestBed.inject(PrivacyConsentService);
+    service.acceptAll();
+
+    storeRaw({ version: PRIVACY_CONSENT_VERSION, analytics: false, errorReporting: false });
+    window.dispatchEvent(new StorageEvent('storage', { key: PRIVACY_CONSENT_STORAGE_KEY }));
+
+    expect(service.consent()).toEqual(
+      jasmine.objectContaining({ analytics: false, errorReporting: false })
+    );
+  });
+
+  it('ignores storage events for other keys', () => {
+    const service = TestBed.inject(PrivacyConsentService);
+    service.acceptAll();
+
+    storeRaw({ version: PRIVACY_CONSENT_VERSION, analytics: false, errorReporting: false });
+    window.dispatchEvent(new StorageEvent('storage', { key: 'lang' }));
+
+    expect(service.consent()?.analytics).toBeTrue();
+  });
+
   it('still honours the choice for the session when storage is blocked', () => {
     const service = TestBed.inject(PrivacyConsentService);
     spyOn(Storage.prototype, 'setItem').and.throwError('QuotaExceededError');

@@ -17,6 +17,7 @@ export class PrivacyPage {
 
   readonly consent = this.consentService.consent;
 
+  /** Reopens the consent banner so the visitor can change or withdraw consent. */
   changeSettings(): void {
     this.consentService.reopen();
   }

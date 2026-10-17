@@ -804,6 +804,10 @@
       "SESSION": "Your sign-in session, if you log in.",
       "CHOICES": "Your privacy choices."
     },
+    "NOT_SENT": {
+      "TITLE": "Measured but never sent",
+      "WEB_VITALS": "Page performance measurements (Core Web Vitals) are only printed to the browser console while the site is being developed. They are never sent anywhere and are not collected on the live site."
+    },
     "CHOICES": {
       "TITLE": "Your choices",
       "ALLOWED": "Allowed",

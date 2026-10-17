@@ -65,6 +65,7 @@ export class GoogleAnalyticsService {
     this.deleteGaCookies();
   }
 
+  /** Sets or clears Google's `ga-disable-<ID>` flag, which makes gtag drop every hit. */
   private setOptOut(optOut: boolean): void {
     const trackingId = (environment as { gaTrackingId?: string }).gaTrackingId;
     const win = this.document.defaultView as (Window & Record<string, unknown>) | null;

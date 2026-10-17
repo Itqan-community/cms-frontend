@@ -29,6 +29,9 @@ export function startSentry(): void {
 
 /** Stops sending events after the visitor withdraws consent. */
 export function stopSentry(): void {
-  if (!Sentry.getClient()) return;
+  const client = Sentry.getClient();
+  if (!client) return;
+  // close() only disables the client after flushing; stop capturing right away.
+  client.getOptions().enabled = false;
   void Sentry.close();
 }

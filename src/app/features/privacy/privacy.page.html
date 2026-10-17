@@ -27,6 +27,11 @@
   </section>
 
   <section class="privacy-page__section">
+    <h2 class="privacy-page__section-title">{{ 'PRIVACY_PAGE.NOT_SENT.TITLE' | translate }}</h2>
+    <p>{{ 'PRIVACY_PAGE.NOT_SENT.WEB_VITALS' | translate }}</p>
+  </section>
+
+  <section class="privacy-page__section">
     <h2 class="privacy-page__section-title">{{ 'PRIVACY_PAGE.CHOICES.TITLE' | translate }}</h2>
     @if (consent(); as current) {
       <ul class="privacy-page__list">

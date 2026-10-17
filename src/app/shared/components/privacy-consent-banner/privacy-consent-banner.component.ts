@@ -33,20 +33,24 @@ export class PrivacyConsentBannerComponent {
     () => this.consentService.consent()?.errorReporting ?? false
   );
 
+  /** Shows the per-service switches. */
   customize(): void {
     this.customizing.set(true);
   }
 
+  /** Allows every service and closes the banner. */
   acceptAll(): void {
     this.consentService.acceptAll();
     this.customizing.set(false);
   }
 
+  /** Refuses every service and closes the banner. */
   rejectAll(): void {
     this.consentService.rejectAll();
     this.customizing.set(false);
   }
 
+  /** Saves the switch positions and closes the banner. */
   saveChoices(): void {
     this.consentService.save({
       analytics: this.analytics(),

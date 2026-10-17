@@ -1,4 +1,4 @@
-import { Injectable, signal } from '@angular/core';
+import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 
 /** localStorage key holding the visitor's privacy choices. */
 export const PRIVACY_CONSENT_STORAGE_KEY = 'cms.privacyConsent';
@@ -61,14 +61,28 @@ export class PrivacyConsentService {
   /** True when the visitor asked to review their choices again (e.g. from the privacy page). */
   readonly reopened = this.reopenedState.asReadonly();
 
+  constructor() {
+    // A choice made in another tab applies here too, so withdrawn consent stops tracking everywhere.
+    const onStorage = (event: StorageEvent): void => {
+      if (event.key === PRIVACY_CONSENT_STORAGE_KEY || event.key === null) {
+        this.consentState.set(readStoredPrivacyConsent());
+      }
+    };
+    window.addEventListener('storage', onStorage);
+    inject(DestroyRef).onDestroy(() => window.removeEventListener('storage', onStorage));
+  }
+
+  /** Allows analytics and error reporting. */
   acceptAll(): void {
     this.save({ analytics: true, errorReporting: true });
   }
 
+  /** Refuses analytics and error reporting. */
   rejectAll(): void {
     this.save({ analytics: false, errorReporting: false });
   }
 
+  /** Records the visitor's choice, persists it, and closes a reopened banner. */
   save(choices: PrivacyConsentChoices): void {
     const consent: PrivacyConsent = {
       version: PRIVACY_CONSENT_VERSION,
