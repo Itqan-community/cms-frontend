@@ -1,17 +1,20 @@
 import { Location } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRouteSnapshot, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ar_EG, en_US, NzI18nService } from 'ng-zorro-antd/i18n';
 import { filter, firstValueFrom } from 'rxjs';
+import { startSentry, stopSentry } from './core/sentry/sentry-init';
 import { GoogleAnalyticsService } from './core/services/google-analytics.service';
+import { PrivacyConsentService } from './core/services/privacy-consent.service';
 import { WebVitalsService } from './core/services/web-vitals.service';
 import { HeaderComponent } from './shared/components/header/header.component';
+import { PrivacyConsentBannerComponent } from './shared/components/privacy-consent-banner/privacy-consent-banner.component';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, HeaderComponent],
+  imports: [RouterOutlet, HeaderComponent, PrivacyConsentBannerComponent],
   templateUrl: './app.html',
   styleUrl: './app.less',
 })
@@ -23,6 +26,7 @@ export class App {
   protected router = inject(Router);
   private readonly webVitalsService = inject(WebVitalsService);
   private readonly googleAnalyticsService = inject(GoogleAnalyticsService);
+  private readonly privacyConsent = inject(PrivacyConsentService);
 
   protected readonly title = signal('ITQAN | إتقان');
   protected hideHeader = signal(false);
@@ -30,7 +34,23 @@ export class App {
 
   constructor() {
     void this.webVitalsService;
-    this.googleAnalyticsService.init();
+    // Analytics and error reporting run only with consent, and stop when it is withdrawn.
+    effect(() => {
+      const consent = this.privacyConsent.consent();
+      if (!consent) return;
+
+      if (consent.analytics) {
+        this.googleAnalyticsService.init();
+      } else {
+        this.googleAnalyticsService.disable();
+      }
+
+      if (consent.errorReporting) {
+        startSentry();
+      } else {
+        stopSentry();
+      }
+    });
 
     const syncShellFromRoute = (): void => {
       let merged: Record<string, unknown> = {};

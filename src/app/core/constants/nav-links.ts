@@ -54,6 +54,10 @@ export const NAV_LINKS = [
     hidden: isPublisher, // Hide API docs for publisher hosts
   },
   {
+    label: 'NAV.PRIVACY',
+    link: '/privacy',
+  },
+  {
     label: 'NAV.PUBLISHER_DASHBOARD',
     link: `/dashboard`,
     hidden: !publisher,
