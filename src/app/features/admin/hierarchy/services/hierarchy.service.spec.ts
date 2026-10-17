@@ -261,7 +261,12 @@ describe('HierarchyService', () => {
       service.getLetters('2:255:3').subscribe();
 
       // Assert
-      const paths = ['surahs/', 'surahs/2/ayahs/', 'ayahs/2:255/words/', 'words/2:255:3/letters/'];
+      const paths = [
+        'surahs/',
+        'surahs/2/ayahs/',
+        'ayahs/2%3A255/words/',
+        'words/2%3A255%3A3/letters/',
+      ];
       paths.forEach((path) => {
         const req = httpMock.expectOne(`${base}${path}`);
         expect(req.request.method).toBe('GET');

@@ -41,14 +41,18 @@ export class HierarchyService {
     if (environment.useHierarchyMockApi) {
       return this.mockStore.getWords(ayahKey);
     }
-    return this.http.get<HierarchyList<HierarchyWord>>(`${this.apiUrl}ayahs/${ayahKey}/words/`);
+    return this.http.get<HierarchyList<HierarchyWord>>(
+      `${this.apiUrl}ayahs/${encodeURIComponent(ayahKey)}/words/`
+    );
   }
 
   getLetters(wordKey: string): Observable<HierarchyList<HierarchyLetter>> {
     if (environment.useHierarchyMockApi) {
       return this.mockStore.getLetters(wordKey);
     }
-    return this.http.get<HierarchyList<HierarchyLetter>>(`${this.apiUrl}words/${wordKey}/letters/`);
+    return this.http.get<HierarchyList<HierarchyLetter>>(
+      `${this.apiUrl}words/${encodeURIComponent(wordKey)}/letters/`
+    );
   }
 
   search(query: string): Observable<HierarchyList<HierarchySearchResult>> {
