@@ -6,6 +6,7 @@ import { portalAccessGuard } from './features/admin/guards/portal-access.guard';
 import { permissionGuard } from './features/admin/guards/permission.guard';
 import { tenantReadyGuard } from './features/admin/guards/tenant-ready.guard';
 import { PORTAL_PERMISSIONS } from './features/admin/constants/portal-permission.constants';
+import { environment } from '../environments/environment';
 
 export const routes: Routes = [
   {
@@ -80,6 +81,13 @@ export const routes: Routes = [
         path: 'reciters',
         loadChildren: () =>
           import('./features/admin/reciters/reciters.routes').then((m) => m.reciterRoutes),
+      },
+      {
+        // Off where the hierarchy API is not available; the URL then falls through to coming soon.
+        path: 'hierarchy',
+        canMatch: [() => environment.hierarchyManager],
+        loadChildren: () =>
+          import('./features/admin/hierarchy/hierarchy.routes').then((m) => m.hierarchyRoutes),
       },
       {
         path: 'usage',

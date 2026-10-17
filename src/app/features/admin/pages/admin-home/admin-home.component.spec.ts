@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
+import { environment } from '../../../../../environments/environment';
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { AdminHomeComponent } from './admin-home.component';
@@ -55,8 +56,24 @@ describe('AdminHomeComponent', () => {
 
     expect(sections.map((section) => section.route)).toEqual([
       '/admin/recitations',
+      '/admin/hierarchy',
       '/admin/issues',
       '/admin/usage',
     ]);
+  });
+
+  it('hides the hierarchy module where the hierarchy manager is switched off', () => {
+    const enabled = environment.hierarchyManager;
+    environment.hierarchyManager = false;
+    hasPermission.and.callFake((code: string) => code === PORTAL_PERMISSIONS.PORTAL_ACCESS);
+
+    try {
+      const fixture = TestBed.createComponent(AdminHomeComponent);
+      const routes = fixture.componentInstance.sections().map((section) => section.route);
+
+      expect(routes).toEqual(['/admin/issues', '/admin/usage']);
+    } finally {
+      environment.hierarchyManager = enabled;
+    }
   });
 });
