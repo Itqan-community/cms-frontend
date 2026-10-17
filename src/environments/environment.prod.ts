@@ -9,6 +9,9 @@ export const environment = {
     'https://1a5c2f7445e8a4e690c9c3c86cfb4e4a@o4510669335232512.ingest.de.sentry.io/4511143600586832',
   webauthnReplaceRpIdWithHostname: false,
   useProgramsMockApi: false,
+  /** Hidden until the portal hierarchy API is live (no mock data outside dev and staging). */
+  hierarchyManager: false,
+  useHierarchyMockApi: false,
   /** Off until the portal API exposes `is_visible` on recitation folders. */
   recitationFolderVisibility: true,
 };
