@@ -202,6 +202,10 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'privacy',
+    loadComponent: () => import('./features/privacy/privacy.page').then((m) => m.PrivacyPage),
+  },
+  {
     path: 'license/:id',
     loadComponent: () =>
       import('./features/license/pages/license-details/license-details.page').then(

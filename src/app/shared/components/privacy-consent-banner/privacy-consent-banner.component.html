@@ -1,0 +1,67 @@
+@if (visible()) {
+  <section
+    class="privacy-banner"
+    role="region"
+    aria-labelledby="privacy-banner-title"
+    aria-describedby="privacy-banner-description"
+  >
+    <div class="privacy-banner__inner">
+      <div class="privacy-banner__text">
+        <h2 id="privacy-banner-title" class="privacy-banner__title">
+          {{ 'PRIVACY_CONSENT.TITLE' | translate }}
+        </h2>
+        <p id="privacy-banner-description" class="privacy-banner__description">
+          {{ 'PRIVACY_CONSENT.DESCRIPTION' | translate }}
+          <a routerLink="/privacy" class="privacy-banner__link">
+            {{ 'PRIVACY_CONSENT.LEARN_MORE' | translate }}
+          </a>
+        </p>
+      </div>
+
+      @if (showOptions()) {
+        <div class="privacy-banner__options">
+          <label class="privacy-banner__option">
+            <nz-switch
+              [ngModel]="analytics()"
+              (ngModelChange)="analytics.set($event)"
+              data-testid="privacy-analytics-switch"
+            />
+            <span class="privacy-banner__option-text">
+              <strong>{{ 'PRIVACY_CONSENT.ANALYTICS' | translate }}</strong>
+              <span>{{ 'PRIVACY_CONSENT.ANALYTICS_DESC' | translate }}</span>
+            </span>
+          </label>
+          <label class="privacy-banner__option">
+            <nz-switch
+              [ngModel]="errorReporting()"
+              (ngModelChange)="errorReporting.set($event)"
+              data-testid="privacy-error-reporting-switch"
+            />
+            <span class="privacy-banner__option-text">
+              <strong>{{ 'PRIVACY_CONSENT.ERROR_REPORTING' | translate }}</strong>
+              <span>{{ 'PRIVACY_CONSENT.ERROR_REPORTING_DESC' | translate }}</span>
+            </span>
+          </label>
+        </div>
+      }
+
+      <div class="privacy-banner__actions">
+        @if (showOptions()) {
+          <button nz-button nzType="default" type="button" (click)="saveChoices()">
+            {{ 'PRIVACY_CONSENT.SAVE_CHOICES' | translate }}
+          </button>
+        } @else {
+          <button nz-button nzType="default" type="button" (click)="customize()">
+            {{ 'PRIVACY_CONSENT.CUSTOMIZE' | translate }}
+          </button>
+        }
+        <button nz-button nzType="primary" type="button" (click)="rejectAll()">
+          {{ 'PRIVACY_CONSENT.REJECT_ALL' | translate }}
+        </button>
+        <button nz-button nzType="primary" type="button" (click)="acceptAll()">
+          {{ 'PRIVACY_CONSENT.ACCEPT_ALL' | translate }}
+        </button>
+      </div>
+    </div>
+  </section>
+}

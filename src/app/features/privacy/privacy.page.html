@@ -1,0 +1,65 @@
+<div class="privacy-page">
+  <app-breadcrumb />
+
+  <header class="privacy-page__header">
+    <h1 class="privacy-page__title">{{ 'PRIVACY_PAGE.TITLE' | translate }}</h1>
+    <p class="privacy-page__intro">{{ 'PRIVACY_PAGE.INTRO' | translate }}</p>
+    <p class="privacy-page__meta">{{ 'PRIVACY_PAGE.LAST_UPDATED' | translate }}</p>
+  </header>
+
+  <section class="privacy-page__section">
+    <h2 class="privacy-page__section-title">{{ 'PRIVACY_PAGE.OPTIONAL.TITLE' | translate }}</h2>
+    <p>{{ 'PRIVACY_PAGE.OPTIONAL.DESCRIPTION' | translate }}</p>
+    <h3 class="privacy-page__item-title">{{ 'PRIVACY_CONSENT.ANALYTICS' | translate }}</h3>
+    <p>{{ 'PRIVACY_PAGE.OPTIONAL.ANALYTICS' | translate }}</p>
+    <h3 class="privacy-page__item-title">{{ 'PRIVACY_CONSENT.ERROR_REPORTING' | translate }}</h3>
+    <p>{{ 'PRIVACY_PAGE.OPTIONAL.ERROR_REPORTING' | translate }}</p>
+  </section>
+
+  <section class="privacy-page__section">
+    <h2 class="privacy-page__section-title">{{ 'PRIVACY_PAGE.ESSENTIAL.TITLE' | translate }}</h2>
+    <p>{{ 'PRIVACY_PAGE.ESSENTIAL.DESCRIPTION' | translate }}</p>
+    <ul class="privacy-page__list">
+      <li>{{ 'PRIVACY_PAGE.ESSENTIAL.LANGUAGE' | translate }}</li>
+      <li>{{ 'PRIVACY_PAGE.ESSENTIAL.SESSION' | translate }}</li>
+      <li>{{ 'PRIVACY_PAGE.ESSENTIAL.CHOICES' | translate }}</li>
+    </ul>
+  </section>
+
+  <section class="privacy-page__section">
+    <h2 class="privacy-page__section-title">{{ 'PRIVACY_PAGE.CHOICES.TITLE' | translate }}</h2>
+    @if (consent(); as current) {
+      <ul class="privacy-page__list">
+        <li>
+          {{ 'PRIVACY_CONSENT.ANALYTICS' | translate }}:
+          <strong>{{
+            (current.analytics
+              ? 'PRIVACY_PAGE.CHOICES.ALLOWED'
+              : 'PRIVACY_PAGE.CHOICES.NOT_ALLOWED'
+            ) | translate
+          }}</strong>
+        </li>
+        <li>
+          {{ 'PRIVACY_CONSENT.ERROR_REPORTING' | translate }}:
+          <strong>{{
+            (current.errorReporting
+              ? 'PRIVACY_PAGE.CHOICES.ALLOWED'
+              : 'PRIVACY_PAGE.CHOICES.NOT_ALLOWED'
+            ) | translate
+          }}</strong>
+        </li>
+      </ul>
+      @if (current.updatedAt) {
+        <p class="privacy-page__meta">
+          {{ 'PRIVACY_PAGE.CHOICES.SAVED_ON' | translate }} {{ current.updatedAt | date: 'medium' }}
+        </p>
+      }
+    } @else {
+      <p>{{ 'PRIVACY_PAGE.CHOICES.NONE' | translate }}</p>
+    }
+    <p>{{ 'PRIVACY_PAGE.CHOICES.WITHDRAW' | translate }}</p>
+    <button nz-button nzType="primary" type="button" (click)="changeSettings()">
+      {{ 'PRIVACY_PAGE.CHOICES.CHANGE' | translate }}
+    </button>
+  </section>
+</div>

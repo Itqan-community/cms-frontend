@@ -111,6 +111,8 @@ export class BreadcrumbComponent implements OnInit {
         return 'NAV.GALLERY';
       case 'content-standards':
         return 'NAV.CONTENT_STANDARDS';
+      case 'privacy':
+        return 'NAV.PRIVACY';
       case 'publishers':
         return 'NAVIGATION.PUBLISHERS';
       case 'reciters':

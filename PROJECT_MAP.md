@@ -48,8 +48,8 @@ User Browser
     |       |-- Admin Portal Layer
     |               GET/POST /portal/* -> Django admin API
     |
-    |-- Sentry (error monitoring)
-    |-- Google Analytics (usage tracking)
+    |-- Sentry (error monitoring, only with consent)
+    |-- Google Analytics (usage tracking, only with consent)
     |-- Cloudflare Pages (hosting, CD; staging API proxy via `functions/`)
 ```
 
@@ -130,7 +130,7 @@ cms-frontend/
 │   └── i18n/                        # en.json, ar.json (~1370 keys each)
 ├── src/
 │   ├── index.html                   # Root HTML (Arabic RTL default, Inter font)
-│   ├── main.ts                      # Angular bootstrap + Sentry init
+│   ├── main.ts                      # Angular bootstrap + Sentry init (if consent stored)
 │   ├── styles.less                  # Global utilities (sr-only, card, flex)
 │   ├── theme.less                   # CSS vars + NG-ZORRO component overrides
 │   ├── environments/                # 5 env configs (default/prod/staging/local/publisher)
@@ -160,8 +160,8 @@ cms-frontend/
 | `enums/`         | `Categories` (tafsir/translation/recitation), `Licenses` (CC0-CC-BY-NC-ND + colors)                                            | Content categorization and licensing                              |
 | `guards/`        | `publisherHostGuard`                                                                                                           | Blocks publisher subdomain visitors from CMS routes               |
 | `interceptors/`  | 6 interceptors (credentials, CSRF response, app-session-token, headers/global, auth-error, error)                              | HTTP pipeline: session token, CSRF, error handling, Sentry        |
-| `sentry/`        | chunk-load recovery, `beforeSend` noise filter, app ErrorHandler wrapper                                                       | Benign network/chunk failures: one-time reload + drop from Sentry |
-| `services/`      | `GoogleAnalyticsService`, `WebVitalsService`, `ViewportService`                                                                | Analytics, Core Web Vitals, responsive viewport detection         |
+| `sentry/`        | `startSentry`/`stopSentry`, chunk-load recovery, `beforeSend` noise filter, app ErrorHandler wrapper                           | Benign network/chunk failures: one-time reload + drop from Sentry |
+| `services/`      | `GoogleAnalyticsService`, `WebVitalsService`, `ViewportService`, `PrivacyConsentService`                                       | Analytics, Core Web Vitals, responsive viewport detection         |
 | `utils/`         | `csrf.util.ts`                                                                                                                 | Django CSRF (same-origin cookies + cross-origin override)         |
 
 ### Interceptor Pipeline (order matters)
@@ -181,11 +181,23 @@ user toast still via `error.interceptor` (`ERRORS.NETWORK_ERROR`).
 
 ### Sentry (noise + recovery)
 
-- Init: `main.ts` — `beforeSend` drops chunk/module-import failures and status-0 HTTP noise
-  (`core/sentry/sentry-before-send.util.ts`).
+- Init: `startSentry()` (`core/sentry/sentry-init.ts`), called from `main.ts` when consent is
+  already stored and from `App` when it is granted later. `beforeSend` drops chunk/module-import
+  failures and status-0 HTTP noise (`core/sentry/sentry-before-send.util.ts`).
 - ErrorHandler: `createAppSentryErrorHandler()` — one-time `location.reload()` on lazy chunk /
   module-import failure (`sessionStorage` flag), then delegates to Sentry.
 - Successful bootstrap clears the chunk-recovery flag so a later deploy mismatch can recover once.
+
+### Privacy Consent (GA + Sentry)
+
+- `PrivacyConsentService` keeps `{ version, analytics, errorReporting, updatedAt }` in
+  `localStorage['cms.privacyConsent']`. A stored `version` lower than `PRIVACY_CONSENT_VERSION` is
+  ignored, so bumping it shows the banner again.
+- `PrivacyConsentBannerComponent` (in `app.html`) shows until the visitor decides: accept all,
+  reject all, or per-service switches (off by default). `/privacy` can reopen it.
+- An `effect()` in `App` calls `GoogleAnalyticsService.init()`/`disable()` (opt-out flag + `_ga`
+  cookie cleanup) and `startSentry()`/`stopSentry()` whenever the choice changes.
+- `WebVitalsService` only logs to the console in dev mode, so it is not consent-gated.
 
 ### Auth Architecture (django-allauth headless SPA)
 
@@ -236,6 +248,7 @@ Trust, Profile, CompleteProfile
 | `/mushaf/:suraId`             | `SuraViewPage`         | `authGuard`, `publisherHostGuard` | **Temporarily hidden** (same as `/mushaf`)                                                                                                 |
 | `/mushaf/:suraId/:ayahNumber` | `AyahFocusPage`        | `authGuard`, `publisherHostGuard` | **Temporarily hidden** (same as `/mushaf`)                                                                                                 |
 | `/content-standards`          | `UsageStandardsPage`   | `publisherHostGuard`              | Content guidelines                                                                                                                         |
+| `/privacy`                    | `PrivacyPage`          | none                              | Data collection notice + reopen consent banner                                                                                             |
 | `/unauthorized`               | `UnauthorizedPage`     | —                                 | Card UX; CTA + 5s countdown auto-redirect to `/gallery`; `hideHeader`; dir name typo `unautorized/`                                        |
 | `/complete-profile`           | `CompleteProfilePage`  | `authGuard`                       | Profile completion                                                                                                                         |
 | `/account/*`                  | (22 auth pages)        | guestGuard/authGuard              | Auth & account management                                                                                                                  |
@@ -403,6 +416,15 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
 | `content-standards.page.ts`   | Page     | Documentation content     |
 | `content-standards.page.html` | Template | (view file for content)   |
 | `content-standards.page.less` | Styles   | RTL documentation styling |
+
+### 4b. Privacy (`src/app/features/privacy/`)
+
+**Purpose:** Privacy notice listing what GA and Sentry collect, the current consent choice, and a
+button that reopens the consent banner to change or withdraw consent.
+
+| File              | Type | Purpose                          |
+| ----------------- | ---- | -------------------------------- |
+| `privacy.page.ts` | Page | Notice + current consent choices |
 
 ### 5. License (`src/app/features/license/`)
 
