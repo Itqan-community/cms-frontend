@@ -5,11 +5,16 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
+import { environment } from '../../../../../environments/environment';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
 import type { ManagedApiKey } from '../../models/api-keys.model';
 import { AuthService } from '../../services/auth.service';
+
+/** Request headers developers send with every API call (see the API docs authentication guide). */
+export const API_KEY_USAGE_SNIPPET = `X-API-Key: <YOUR_PUBLIC_KEY>
+X-External-User-Id: <OPTIONAL_ANONYMOUS_USER_ID>`;
 
 @Component({
   standalone: true,
@@ -30,8 +35,14 @@ export class ApiKeysPage implements OnInit {
   readonly successMsg = signal('');
   readonly showCreateForm = signal(false);
 
-  /** One-time plaintext after create; cleared when user dismisses. */
-  readonly revealedRawKey = signal<{ keyLabel: string; raw: string } | null>(null);
+  readonly usageSnippet = API_KEY_USAGE_SNIPPET;
+  readonly authDocsUrl = `${environment.API_DOCS_URL}/docs/getting-started/authentication/`;
+
+  /**
+   * Full keys returned by create in this visit, by key id. The list endpoint does not return
+   * full keys yet; when it does, `ManagedApiKey.fullKey` takes over. Kept in memory only.
+   */
+  private readonly createdKeys = signal<Record<string, string>>({});
 
   readonly editingId = signal<string | null>(null);
   readonly renameDraft = signal<Record<string, string>>({});
@@ -90,10 +101,9 @@ export class ApiKeysPage implements OnInit {
     this.isLoading.set(true);
     try {
       const result = await firstValueFrom(this.auth.createApiKey({ name }));
-      this.revealedRawKey.set({
-        keyLabel: result.key.name || name,
-        raw: result.rawKey,
-      });
+      if (result.key.id && result.rawKey.trim()) {
+        this.createdKeys.update((keys) => ({ ...keys, [result.key.id]: result.rawKey.trim() }));
+      }
       this.successMsg.set(this.translate.instant('AUTH.API_KEYS.CREATE_SUCCESS'));
       this.createForm.reset({ name: '' });
       this.showCreateForm.set(false);
@@ -142,16 +152,32 @@ export class ApiKeysPage implements OnInit {
     }
   }
 
-  dismissReveal(): void {
-    this.revealedRawKey.set(null);
+  /** Full key for a row, or '' when only a masked preview is available. */
+  fullKeyFor(k: ManagedApiKey): string {
+    return k.fullKey || this.createdKeys()[k.id] || '';
   }
 
-  async copyRawKey(text: string): Promise<void> {
+  /** Copies a full key; masked previews are never copied. */
+  async copyKey(k: ManagedApiKey): Promise<void> {
+    const key = this.fullKeyFor(k);
+    if (!key) {
+      return;
+    }
+    await this.copyText(key);
+  }
+
+  async copySnippet(): Promise<void> {
+    await this.copyText(this.usageSnippet);
+  }
+
+  private async copyText(text: string): Promise<void> {
+    this.pageError.set('');
+    this.successMsg.set('');
     try {
       await navigator.clipboard.writeText(text);
       this.successMsg.set(this.translate.instant('AUTH.API_KEYS.COPY_OK'));
     } catch {
-      /* ignore — clipboard unavailable */
+      this.pageError.set(this.translate.instant('AUTH.API_KEYS.COPY_ERROR'));
     }
   }
 
