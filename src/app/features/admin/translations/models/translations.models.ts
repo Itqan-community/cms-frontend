@@ -114,6 +114,8 @@ export interface TranslationFormValue {
   version_number?: string;
   version_summary_en?: string;
   version_summary_ar?: string;
+  /** Create-only: package slug suggested by `POST /portal/ai/slug/`. */
+  slug?: string;
   file?: File;
 }
 

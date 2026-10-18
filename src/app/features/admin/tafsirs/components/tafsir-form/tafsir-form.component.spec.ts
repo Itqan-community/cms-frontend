@@ -166,6 +166,7 @@ describe('TafsirFormComponent template controls', () => {
       license: Licenses.CC0,
       language: 'ar',
       publisher_id: 1,
+      slug: 'tafsir-sample',
       template: 'page',
       mushaf_layout_id: 1,
     });
@@ -191,6 +192,7 @@ describe('TafsirFormComponent template controls', () => {
       license: Licenses.CC0,
       language: 'ar',
       publisher_id: 1,
+      slug: 'tafsir-sample',
       template: 'ayah',
     });
 

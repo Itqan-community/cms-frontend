@@ -115,6 +115,14 @@ Base class: AdminListBase (src/app/features/admin/utils/admin-list-base.ts)
 Create forms for font/mushaf/tafsir/translation include shared
 `asset-initial-version-fields` (optional on create). Additional versions on detail via
 `asset-versions-manager`.
+Create forms (font/mushaf/tafsir/translation/recitation/reciter) also show
+`ai-translate-actions`: POST /portal/ai/translate/ (Gemini free tier, backend-side key)
+-> fills only the empty *_en controls from the *_ar ones; "web" mode also writes the
+description/bio fields from Wikipedia (backend-side) and lists the source links.
+The same request (one Gemini call per click) sends `slug_for` and returns the package `slug`
+(not for reciters): it is shown read-only and stored in the form's required `slug` control
+(`utils/asset-slug.util.ts`), so Save is blocked until Translate is clicked; when generation
+fails the admin types it. Create never calls AI.
 ```
 
 ---
@@ -329,6 +337,16 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
 **Shared admin components:**
 
 - `admin-column-picker/` — Column visibility toggles for tables
+- `ai-translate-actions/` — "Translate from Arabic" / "Write from the web" buttons on create forms
+  (font/mushaf/tafsir/translation/recitation/reciter; placed under the English name field so it is
+  discoverable; hidden on edit). Fills only empty `<key>_en` controls from `<key>_ar` (`name`,
+  `description`, `long_description`, `bio`, `version_name`, `version_summary`; missing pairs
+  skipped); recitation passes the selected reciter/riwayah as `context`. Uses
+  `services/ai-translate.service.ts`; 429 with `error_name: ai_rate_limited` → wait-a-minute
+  message, any other 429 → daily free-limit message. Also sends `slug_for` and writes the returned
+  identifier (slug) to the form's `slug` control (editable input only when generation fails;
+  validated per asset type by `utils/asset-slug.util.ts`). A recitation's identifier is cleared when
+  its reciter or riwayah changes, and a response for inputs changed mid-request is ignored
 - `asset-initial-version-fields/` — Optional first version (starting number, bilingual name/summary,
   file) on asset create forms (font/mushaf/tafsir/translation); the number is required once a file
   is attached. Tafsir/translation also pass `contentKind`/`contentTemplate`/`mushafLayoutId` to
@@ -556,8 +574,9 @@ reciters, issue reports (`/portal/issue-reports/`), publisher members (`/portal/
 (`GET /portal/groups/` for member invite/edit options), asset access requests
 (`/portal/access-requests/` — list, detail, accept, reject;
 `/portal/publishers/{id}/access-requests-settings/` — auto-acceptance), mushafs (`/portal/mushafs/`
-— CRUD + versions), fonts (`/portal/fonts/` — CRUD + versions), usage analytics. Programs portal
-module is dormant (route/nav hidden) until BE ships `/portal/programs/`.
+— CRUD + versions), fonts (`/portal/fonts/` — CRUD + versions), usage analytics, AI translate for
+create forms (`POST /portal/ai/translate/`). Programs portal module is dormant (route/nav hidden)
+until BE ships `/portal/programs/`.
 
 Asset create/edit forms (tafsir, translation, mushaf, font, program, recitation): publisher field is
 view-only — create binds `AdminTenantService.selectedPublisherId()`; edit shows the asset publisher.
@@ -585,25 +604,26 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
 
 ## [ORPHANS & PENDING]
 
-| Item                                    | Status            | Notes                                                                                                                                             |
-| --------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `features/error/pages/unautorized/`     | Partial           | `UnauthorizedPage`: full UX + countdown redirect (directory spelling still misses `h`). `not-found` page unchanged.                               |
-| `features/publishers/pages/publishers/` | Stub              | Publishers directory listing page is empty.                                                                                                       |
-| `features/dashify/`                     | Unknown           | Minimal implementation, purpose unclear.                                                                                                          |
-| `features/admin/` guards                | Implemented       | `portal-access`, `permission`, `itqan-admin` guards active on admin routes.                                                                       |
-| `shared/directives/`                    | Empty             | Directory exists with no files.                                                                                                                   |
-| `features/admin/mushafs/`               | Implemented       | Portal mushaf CRUD wired to live `/portal/mushafs/` + `permissionGuard` (`portal_*_mushaf`).                                                      |
-| `features/admin/fonts/`                 | Implemented       | Portal font CRUD wired to live `/portal/fonts/` + `permissionGuard` (`portal_*_font`).                                                            |
-| `features/admin/programs/`              | Hidden (dormant)  | Module kept; `/admin/programs` route, sidebar tab, and redirect candidate removed until BE API is ready.                                          |
-| `features/mushaf/` (reader)             | Hidden (dormant)  | Module kept; `/mushaf` route + `NAV.MUSHAF` commented out. Mobile menu now respects `hidden`. Admin small-MQ toggle exclusivity fixed.            |
-| `features/admin/audio/`                 | Partial           | Routes defined but implementation details need verification.                                                                                      |
-| `features/admin/software/`              | Partial           | Routes defined but implementation details need verification.                                                                                      |
-| Recitation folder visibility            | Implemented       | `is_visible` PATCH + hide/show in folder tab menu; requires backend Phase A on the API environment.                                               |
-| Recitation folder set-default           | Implemented       | `PATCH { is_default: true }` from folder tab menu; slugs stay fixed; hidden folders cannot be promoted.                                           |
-| Recitation folder variant taxonomy      | Frontend-owned    | Quality×effects vocabulary lives in `recitation-folder.util.ts` and is carried in folder names; no server-side uniqueness enforcement.            |
-| Recitation folder variant relabelling   | Constrained       | Non-default classified folders with tracks cannot change variant (slug is public `?folder=`); default folder always editable (`?folder=default`). |
-| Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                                                       |
-| WebAuthn RP ID                          | Development mode  | `webauthnReplaceRpIdWithHostname` env flag allows RP ID patching in dev.                                                                          |
+| Item                                    | Status            | Notes                                                                                                                                                            |
+| --------------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `features/error/pages/unautorized/`     | Partial           | `UnauthorizedPage`: full UX + countdown redirect (directory spelling still misses `h`). `not-found` page unchanged.                                              |
+| `features/publishers/pages/publishers/` | Stub              | Publishers directory listing page is empty.                                                                                                                      |
+| `features/dashify/`                     | Unknown           | Minimal implementation, purpose unclear.                                                                                                                         |
+| `features/admin/` guards                | Implemented       | `portal-access`, `permission`, `itqan-admin` guards active on admin routes.                                                                                      |
+| `shared/directives/`                    | Empty             | Directory exists with no files.                                                                                                                                  |
+| `features/admin/mushafs/`               | Implemented       | Portal mushaf CRUD wired to live `/portal/mushafs/` + `permissionGuard` (`portal_*_mushaf`).                                                                     |
+| `features/admin/fonts/`                 | Implemented       | Portal font CRUD wired to live `/portal/fonts/` + `permissionGuard` (`portal_*_font`).                                                                           |
+| `features/admin/programs/`              | Hidden (dormant)  | Module kept; `/admin/programs` route, sidebar tab, and redirect candidate removed until BE API is ready.                                                         |
+| `features/mushaf/` (reader)             | Hidden (dormant)  | Module kept; `/mushaf` route + `NAV.MUSHAF` commented out. Mobile menu now respects `hidden`. Admin small-MQ toggle exclusivity fixed.                           |
+| `features/admin/audio/`                 | Partial           | Routes defined but implementation details need verification.                                                                                                     |
+| `features/admin/software/`              | Partial           | Routes defined but implementation details need verification.                                                                                                     |
+| AI translate / asset identifier         | Pending backend   | Create forms need `POST /portal/ai/translate/` (cms-backend#553) deployed; until then Translate fails and admins must type the identifier. Remove once deployed. |
+| Recitation folder visibility            | Implemented       | `is_visible` PATCH + hide/show in folder tab menu; requires backend Phase A on the API environment.                                                              |
+| Recitation folder set-default           | Implemented       | `PATCH { is_default: true }` from folder tab menu; slugs stay fixed; hidden folders cannot be promoted.                                                          |
+| Recitation folder variant taxonomy      | Frontend-owned    | Quality×effects vocabulary lives in `recitation-folder.util.ts` and is carried in folder names; no server-side uniqueness enforcement.                           |
+| Recitation folder variant relabelling   | Constrained       | Non-default classified folders with tracks cannot change variant (slug is public `?folder=`); default folder always editable (`?folder=default`).                |
+| Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                                                                      |
+| WebAuthn RP ID                          | Development mode  | `webauthnReplaceRpIdWithHostname` env flag allows RP ID patching in dev.                                                                                         |
 
 ---
 

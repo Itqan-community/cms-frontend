@@ -642,7 +642,11 @@
     "translation": "Translation",
     "recitation": "Recitation",
     "font": "Font",
-    "program": "Program"
+    "program": "Program",
+    "mushaf": "Mushaf",
+    "linguistic": "Linguistic",
+    "search": "Search",
+    "tajweed": "Tajweed"
   },
   "LICENSES": {
     "CC0": "CC0",
@@ -2740,6 +2744,24 @@
       "DOWNLOAD": "Download CSV template",
       "HINT": "An empty sheet with one row per unit. Fill in the text column and upload it here.",
       "PICK_TEMPLATE_FIRST": "Choose the content template (and the mushaf layout for pages) to download its CSV template."
+    },
+    "AI_TRANSLATE": {
+      "TRANSLATE": "Translate from Arabic",
+      "WEB": "Write from the web",
+      "HINT": "Fills empty English fields only. Review before saving.",
+      "DONE": "English fields filled. Please review them.",
+      "NOTHING_TO_FILL": "All English fields are filled. Clear a field to regenerate it.",
+      "NEED_ARABIC": "Enter the Arabic details first.",
+      "QUOTA": "Today's free AI limit is reached. Try again tomorrow.",
+      "RATE_LIMITED": "Too many AI requests right now. Wait a minute and try again.",
+      "FAILED": "Translation failed. Try again later.",
+      "SOURCES": "Sources:",
+      "IDENTIFIER": "Identifier:",
+      "IDENTIFIER_TOOLTIP": "Used by the itqan add command and in file names; it can't be changed after saving.",
+      "SLUG_REQUIRED": "Click \"Translate from Arabic\" to generate the identifier before saving.",
+      "SLUG_MANUAL": "The identifier could not be generated. Type it in lowercase words joined by hyphens, starting with the asset type (e.g. tafsir-ibn-kathir).",
+      "SLUG_FORMAT": "Use lowercase letters, digits and single hyphens, starting with the asset type (e.g. tafsir-ibn-kathir); max 50 characters.",
+      "SLUG_PLACEHOLDER": "e.g. tafsir-ibn-kathir"
     }
   },
   "USAGE": {
