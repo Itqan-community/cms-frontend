@@ -642,7 +642,11 @@
     "translation": "Translation",
     "recitation": "Recitation",
     "font": "Font",
-    "program": "Program"
+    "program": "Program",
+    "mushaf": "Mushaf",
+    "linguistic": "Linguistic",
+    "search": "Search",
+    "tajweed": "Tajweed"
   },
   "LICENSES": {
     "CC0": "CC0",

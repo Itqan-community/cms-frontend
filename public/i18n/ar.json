@@ -642,7 +642,11 @@
     "translation": "الترجمات",
     "recitation": "التلاوات",
     "font": "الخطوط",
-    "program": "البرامج"
+    "program": "البرامج",
+    "mushaf": "المصاحف",
+    "linguistic": "اللغويات",
+    "search": "البحث",
+    "tajweed": "التجويد"
   },
   "LICENSES": {
     "CC0": "CC0",
