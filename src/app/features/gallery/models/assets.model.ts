@@ -22,6 +22,8 @@ export interface Asset {
   is_open_access?: boolean;
   template: AssetTemplate | null;
   mushaf_layout: { id: number; name: string; page_count: number } | null;
+  /** True when a recitation has per-ayah timings in a visible folder. */
+  has_ayah_timings: boolean;
 }
 
 export interface AssetDetails {
