@@ -186,6 +186,56 @@ describe('AiTranslateActionsComponent', () => {
     );
   });
 
+  describe('recitation identity', () => {
+    beforeEach(() => {
+      form.addControl('reciter_id', new FormControl<number | null>(7));
+      form.addControl('riwayah_id', new FormControl<number | null>(3));
+      fixture.componentRef.setInput('category', 'recitation');
+      fixture.detectChanges();
+    });
+
+    it('should clear the generated identifier when the reciter changes', () => {
+      api.translate.and.returnValue(ok({ slug: 'recitation-saad-hafs' }));
+      component.run('translate');
+
+      form.patchValue({ reciter_id: 8 });
+
+      expect(form.value.slug).toBe('');
+      expect(form.controls['slug'].dirty).toBeFalse();
+    });
+
+    it('should clear the generated identifier when the riwayah changes', () => {
+      api.translate.and.returnValue(ok({ slug: 'recitation-saad-hafs' }));
+      component.run('translate');
+
+      form.patchValue({ riwayah_id: 4 });
+
+      expect(form.value.slug).toBe('');
+    });
+
+    it('should keep the identifier when an unrelated field changes', () => {
+      api.translate.and.returnValue(ok({ slug: 'recitation-saad-hafs' }));
+      component.run('translate');
+
+      form.patchValue({ description_en: 'Edited' });
+
+      expect(form.value.slug).toBe('recitation-saad-hafs');
+    });
+
+    it('should ignore an identifier for selections changed while the request ran', () => {
+      const response = new Subject<AiTranslateResponse>();
+      api.translate.and.returnValue(response.asObservable());
+
+      component.run('translate');
+      form.patchValue({ reciter_id: 8 });
+      response.next({ fields: {}, sources: [], slug: 'recitation-saad-hafs' });
+      response.complete();
+
+      expect(form.value.slug).toBe('');
+      expect(component.slugEditable()).toBeFalse();
+    });
+  });
+
   it('should not send slug inputs for a reciter', () => {
     fixture.componentRef.setInput('category', 'reciter');
     api.translate.and.returnValue(ok({}));

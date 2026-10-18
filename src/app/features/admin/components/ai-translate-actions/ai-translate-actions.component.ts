@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, input, signal } from '@angular/core';
+import { Component, effect, inject, input, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -63,6 +63,27 @@ export class AiTranslateActionsComponent {
   /** True once generation failed: the admin then types the package slug. */
   readonly slugEditable = signal(false);
 
+  /**
+   * A recitation's identifier is built from its reciter and riwayah: when either changes, a
+   * generated identifier no longer matches and must be generated again.
+   */
+  private readonly clearStaleIdentifier = effect((onCleanup) => {
+    const form = this.form();
+    if (this.category() !== 'recitation') return;
+    let identity = this.recitationIdentity();
+    const subscription = form.valueChanges.subscribe(() => {
+      const next = this.recitationIdentity();
+      if (next === identity) return;
+      identity = next;
+      const control = this.slugControl();
+      if (control?.value && !this.slugEditable()) {
+        control.setValue('');
+        control.markAsPristine();
+      }
+    });
+    onCleanup(() => subscription.unsubscribe());
+  });
+
   /** The form's package slug control (asset create forms only). */
   slugControl(): FormControl | null {
     const control = this.category() === 'reciter' ? null : this.form().get('slug');
@@ -121,10 +142,14 @@ export class AiTranslateActionsComponent {
       context: this.context(),
     };
     if (slugFor) request.slug_for = slugFor;
+    // The identifier is only valid for the inputs it was generated from.
+    const slugInputsSent = JSON.stringify(slugFor);
     this.loading.set(mode);
     this.sources.set([]);
     this.api.translate(request).subscribe({
       next: (res) => {
+        // Checked before filling English fields, which are themselves slug inputs.
+        const inputsUnchanged = JSON.stringify(this.slugInputs()) === slugInputsSent;
         for (const [key, value] of Object.entries(res.fields)) {
           const en = form.get(`${key}_en`);
           if (en && value && !String(en.value ?? '').trim()) {
@@ -132,7 +157,7 @@ export class AiTranslateActionsComponent {
             en.markAsDirty();
           }
         }
-        if (slugFor) this.applySlug(res.slug);
+        if (slugFor && inputsUnchanged) this.applySlug(res.slug);
         this.sources.set(res.sources ?? []);
         this.loading.set(null);
         this.message.success(this.translate.instant('ADMIN.AI_TRANSLATE.DONE'));
@@ -159,6 +184,11 @@ export class AiTranslateActionsComponent {
         );
       },
     });
+  }
+
+  private recitationIdentity(): string {
+    const form = this.form();
+    return `${form.get('reciter_id')?.value ?? ''}|${form.get('riwayah_id')?.value ?? ''}`;
   }
 
   /** Slug inputs for the request, or null when the form has no slug or no name to build it from. */
