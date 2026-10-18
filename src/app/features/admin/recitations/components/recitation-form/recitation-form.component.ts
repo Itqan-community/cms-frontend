@@ -154,7 +154,7 @@ export class RecitationFormComponent implements OnInit {
       this.editSlug = slugParam;
       this.loadForEdit();
     } else {
-      this.form.controls.slug.setValidators(assetSlugValidators);
+      this.form.controls.slug.setValidators(assetSlugValidators('recitation'));
       this.form.controls.slug.updateValueAndValidity();
       this.bindTenantPublisher();
       this.form.valueChanges

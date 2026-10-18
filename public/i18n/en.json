@@ -2756,7 +2756,7 @@
       "IDENTIFIER_TOOLTIP": "Used by the itqan add command and in file names; it can't be changed after saving.",
       "SLUG_REQUIRED": "Click \"Translate from Arabic\" to generate the identifier before saving.",
       "SLUG_MANUAL": "The identifier could not be generated. Type it in lowercase words joined by hyphens, starting with the asset type (e.g. tafsir-ibn-kathir).",
-      "SLUG_FORMAT": "Use lowercase letters, digits and single hyphens only (max 50 characters).",
+      "SLUG_FORMAT": "Use lowercase letters, digits and single hyphens, starting with the asset type (e.g. tafsir-ibn-kathir); max 50 characters.",
       "SLUG_PLACEHOLDER": "e.g. tafsir-ibn-kathir"
     }
   },

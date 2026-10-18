@@ -145,7 +145,7 @@ export class TafsirFormComponent implements OnInit {
         control.setValidators([Validators.maxLength(255)]);
         control.updateValueAndValidity();
       }
-      this.form.controls.slug.setValidators(assetSlugValidators);
+      this.form.controls.slug.setValidators(assetSlugValidators('tafsir'));
       this.form.controls.slug.updateValueAndValidity();
       this.bindTenantPublisher();
     }

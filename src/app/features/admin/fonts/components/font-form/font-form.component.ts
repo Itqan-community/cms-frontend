@@ -121,7 +121,7 @@ export class FontFormComponent implements OnInit {
         control.setValidators([Validators.maxLength(255)]);
         control.updateValueAndValidity();
       }
-      this.form.controls.slug.setValidators(assetSlugValidators);
+      this.form.controls.slug.setValidators(assetSlugValidators('font'));
       this.form.controls.slug.updateValueAndValidity();
       this.bindTenantPublisher();
     }
