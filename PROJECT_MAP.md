@@ -115,6 +115,14 @@ Base class: AdminListBase (src/app/features/admin/utils/admin-list-base.ts)
 Create forms for font/mushaf/tafsir/translation include shared
 `asset-initial-version-fields` (optional on create). Additional versions on detail via
 `asset-versions-manager`.
+Create forms (font/mushaf/tafsir/translation/recitation/reciter) also show
+`ai-translate-actions`: POST /portal/ai/translate/ (Gemini free tier, backend-side key)
+-> fills only the empty *_en controls from the *_ar ones; "web" mode also writes the
+description/bio fields from Wikipedia (backend-side) and lists the source links.
+The same request (one Gemini call per click) sends `slug_for` and returns the package `slug`
+(not for reciters): it is shown read-only and stored in the form's required `slug` control
+(`utils/asset-slug.util.ts`), so Save is blocked until Translate is clicked; when generation
+fails the admin types it. Create never calls AI.
 ```
 
 ---
@@ -329,6 +337,14 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
 **Shared admin components:**
 
 - `admin-column-picker/` — Column visibility toggles for tables
+- `ai-translate-actions/` — "Translate from Arabic" / "Write from the web" buttons on create forms
+  (font/mushaf/tafsir/translation/recitation/reciter; placed under the English name field so it is
+  discoverable; hidden on edit). Fills only empty `<key>_en` controls from `<key>_ar` (`name`,
+  `description`, `long_description`, `bio`, `version_name`, `version_summary`; missing pairs
+  skipped); recitation passes the selected reciter/riwayah as `context`. Uses
+  `services/ai-translate.service.ts`; 429 → daily free-limit message. Also sends `slug_for` and
+  writes the returned package slug to the form's `slug` control (editable input only when generation
+  fails)
 - `asset-initial-version-fields/` — Optional first version (starting number, bilingual name/summary,
   file) on asset create forms (font/mushaf/tafsir/translation); the number is required once a file
   is attached. Tafsir/translation also pass `contentKind`/`contentTemplate`/`mushafLayoutId` to
@@ -556,8 +572,9 @@ reciters, issue reports (`/portal/issue-reports/`), publisher members (`/portal/
 (`GET /portal/groups/` for member invite/edit options), asset access requests
 (`/portal/access-requests/` — list, detail, accept, reject;
 `/portal/publishers/{id}/access-requests-settings/` — auto-acceptance), mushafs (`/portal/mushafs/`
-— CRUD + versions), fonts (`/portal/fonts/` — CRUD + versions), usage analytics. Programs portal
-module is dormant (route/nav hidden) until BE ships `/portal/programs/`.
+— CRUD + versions), fonts (`/portal/fonts/` — CRUD + versions), usage analytics, AI translate for
+create forms (`POST /portal/ai/translate/`). Programs portal module is dormant (route/nav hidden)
+until BE ships `/portal/programs/`.
 
 Asset create/edit forms (tafsir, translation, mushaf, font, program, recitation): publisher field is
 view-only — create binds `AdminTenantService.selectedPublisherId()`; edit shows the asset publisher.

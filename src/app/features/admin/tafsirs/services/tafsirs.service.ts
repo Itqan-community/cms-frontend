@@ -94,6 +94,7 @@ export class TafsirsService {
     append('version_number', payload.version_number);
     append('version_summary_en', payload.version_summary_en);
     append('version_summary_ar', payload.version_summary_ar);
+    append('slug', payload.slug);
     if (payload.file) {
       data.append('file', payload.file);
     }

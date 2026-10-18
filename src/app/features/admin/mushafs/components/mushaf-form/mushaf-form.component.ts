@@ -26,6 +26,8 @@ import {
 } from '../../../utils/display-localization.util';
 import { MushafFormValue } from '../../models/mushafs.models';
 import { MushafsService } from '../../services/mushafs.service';
+import { AiTranslateActionsComponent } from '../../../components/ai-translate-actions/ai-translate-actions.component';
+import { assetSlugValidators } from '../../../utils/asset-slug.util';
 
 @Component({
   selector: 'app-mushaf-form',
@@ -44,6 +46,7 @@ import { MushafsService } from '../../services/mushafs.service';
     NzUploadModule,
     NzToolTipModule,
     TranslateModule,
+    AiTranslateActionsComponent,
     AssetInitialVersionFieldsComponent,
   ],
   templateUrl: './mushaf-form.component.html',
@@ -89,6 +92,8 @@ export class MushafFormComponent implements OnInit {
     version_number: ['', [versionNumberValidator]],
     version_summary_en: [''],
     version_summary_ar: [''],
+    /** Filled by the AI translate actions; sent on create only. */
+    slug: [''],
   });
 
   /** A first version's number is required once a file is attached to the create form. */
@@ -116,6 +121,8 @@ export class MushafFormComponent implements OnInit {
         control.setValidators([Validators.maxLength(255)]);
         control.updateValueAndValidity();
       }
+      this.form.controls.slug.setValidators(assetSlugValidators);
+      this.form.controls.slug.updateValueAndValidity();
       this.bindTenantPublisher();
     }
   }
@@ -208,6 +215,8 @@ export class MushafFormComponent implements OnInit {
     };
 
     if (!this.isEditMode()) {
+      const slug = v.slug?.trim();
+      if (slug) body.slug = slug;
       for (const key of [
         'version_name_en',
         'version_name_ar',

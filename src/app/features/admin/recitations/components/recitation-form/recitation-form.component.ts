@@ -25,10 +25,18 @@ import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { ReciterListItem } from '../../../reciters/models/reciters.models';
 import { RecitersAdminService } from '../../../reciters/services/reciters.service';
 import { AdminTenantService } from '../../../services/admin-tenant.service';
-import { MaddLevel, MeemBehavior, NamedId } from '../../models/recitations.models';
+import {
+  MaddLevel,
+  MeemBehavior,
+  NamedId,
+  RecitationFormValue,
+} from '../../models/recitations.models';
 import { RecitationsService } from '../../services/recitations.service';
 import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
 import { isRestrictedForTenantConflictError } from '../../../../../shared/utils/error.utils';
+import { AiTranslateActionsComponent } from '../../../components/ai-translate-actions/ai-translate-actions.component';
+import { AiTranslateContext } from '../../../services/ai-translate.service';
+import { assetSlugValidators } from '../../../utils/asset-slug.util';
 
 /** Hijri year optional: empty is valid; if set, must be within range */
 function optionalHijriYearRange(minY: number, maxY: number) {
@@ -59,6 +67,7 @@ function optionalHijriYearRange(minY: number, maxY: number) {
     NzSkeletonModule,
     NzSwitchModule,
     TranslateModule,
+    AiTranslateActionsComponent,
   ],
   templateUrl: './recitation-form.component.html',
   styleUrl: './recitation-form.component.less',
@@ -84,6 +93,8 @@ export class RecitationFormComponent implements OnInit {
   readonly qiraahOptions = signal<NamedId[]>([]);
   readonly riwayahOptions = signal<NamedId[]>([]);
   readonly riwayahsLoading = signal(false);
+  /** Selected reciter / riwayah names, sent to the AI translate buttons as context. */
+  readonly aiContext = signal<AiTranslateContext>({});
   readonly selectedHijriDate = signal<Date | null>(null);
   readonly hijriDefaultPickerDate = new Date(1446, 0, 1);
   private readonly minHijriYear = 1300;
@@ -114,6 +125,8 @@ export class RecitationFormComponent implements OnInit {
     license: ['', [Validators.required]],
     is_open_access: [false],
     restricted_for_tenant: [false],
+    /** Filled by the AI translate actions; sent on create only. */
+    slug: [''],
   });
 
   private editSlug: string | null = null;
@@ -141,7 +154,22 @@ export class RecitationFormComponent implements OnInit {
       this.editSlug = slugParam;
       this.loadForEdit();
     } else {
+      this.form.controls.slug.setValidators(assetSlugValidators);
+      this.form.controls.slug.updateValueAndValidity();
       this.bindTenantPublisher();
+      this.form.valueChanges
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe(() => this.syncAiContext());
+    }
+  }
+
+  private syncAiContext(): void {
+    const { reciter_id, riwayah_id } = this.form.getRawValue();
+    const reciter = this.reciterOptions().find((r) => r.id === reciter_id)?.name;
+    const riwayah = this.riwayahOptions().find((r) => r.id === riwayah_id)?.name;
+    const current = this.aiContext();
+    if (current.reciter !== reciter || current.riwayah !== riwayah) {
+      this.aiContext.set({ reciter, riwayah });
     }
   }
 
@@ -155,7 +183,7 @@ export class RecitationFormComponent implements OnInit {
     }
 
     const v = this.form.getRawValue();
-    const body = {
+    const body: RecitationFormValue = {
       name_ar: v.name_ar ?? '',
       name_en: v.name_en ?? '',
       description_ar: v.description_ar ?? '',
@@ -171,6 +199,8 @@ export class RecitationFormComponent implements OnInit {
       is_open_access: v.is_open_access ?? false,
       restricted_for_tenant: v.restricted_for_tenant ?? false,
     };
+    const slug = v.slug?.trim();
+    if (!this.isEditMode() && slug) body.slug = slug;
 
     this.submitting.set(true);
     const request$ =

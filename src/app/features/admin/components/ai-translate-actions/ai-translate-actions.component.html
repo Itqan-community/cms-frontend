@@ -1,0 +1,84 @@
+<div class="ai-translate-actions">
+  <div class="ai-translate-actions__buttons">
+    <button
+      nz-button
+      type="button"
+      [nzLoading]="loading() === 'translate'"
+      [disabled]="loading() !== null"
+      (click)="run('translate')"
+    >
+      <ng-icon name="lucideLanguages" />
+      {{ 'ADMIN.AI_TRANSLATE.TRANSLATE' | translate }}
+    </button>
+    <button
+      nz-button
+      type="button"
+      [nzLoading]="loading() === 'web'"
+      [disabled]="loading() !== null"
+      (click)="run('web')"
+    >
+      <ng-icon name="lucideGlobe" />
+      {{ 'ADMIN.AI_TRANSLATE.WEB' | translate }}
+    </button>
+    <span class="ai-translate-actions__hint">{{ 'ADMIN.AI_TRANSLATE.HINT' | translate }}</span>
+  </div>
+  @if (slugControl(); as slug) {
+    @if (slug.value || slugEditable()) {
+      <div class="ai-translate-actions__slug">
+        <span>{{ 'ADMIN.AI_TRANSLATE.IDENTIFIER' | translate }}</span>
+        @if (slugEditable()) {
+          <input
+            nz-input
+            dir="ltr"
+            class="ai-translate-actions__slug-input"
+            [formControl]="slug"
+            [placeholder]="'ADMIN.AI_TRANSLATE.SLUG_PLACEHOLDER' | translate"
+          />
+        } @else {
+          <code dir="ltr">{{ slug.value }}</code>
+        }
+        <ng-icon
+          name="lucideInfo"
+          class="ai-translate-actions__slug-info"
+          nz-tooltip
+          [nzTooltipTitle]="'ADMIN.AI_TRANSLATE.IDENTIFIER_TOOLTIP' | translate"
+        />
+      </div>
+    }
+    @if (slugEditable()) {
+      <div
+        class="ai-translate-actions__slug-hint"
+        [class.ai-translate-actions__slug-hint--error]="!!slug.value && slug.invalid"
+      >
+        {{
+          (slug.value && slug.invalid
+            ? 'ADMIN.AI_TRANSLATE.SLUG_FORMAT'
+            : 'ADMIN.AI_TRANSLATE.SLUG_MANUAL'
+          ) | translate
+        }}
+      </div>
+    } @else if (!slug.value && (hasArabicName() || slug.dirty || slug.touched)) {
+      <!-- A prompt once there is a name to work from; an error only after a save attempt. -->
+      <div
+        class="ai-translate-actions__slug-hint"
+        [class.ai-translate-actions__slug-hint--error]="slug.dirty || slug.touched"
+      >
+        {{ 'ADMIN.AI_TRANSLATE.SLUG_REQUIRED' | translate }}
+      </div>
+    }
+  }
+  @if (sources().length) {
+    <div class="ai-translate-actions__sources">
+      <span>{{ 'ADMIN.AI_TRANSLATE.SOURCES' | translate }}</span>
+      <ul>
+        @for (url of sources(); track url) {
+          <li>
+            <a [href]="url" target="_blank" rel="noopener noreferrer" dir="ltr">{{
+              displayUrl(url)
+            }}</a>
+          </li>
+        }
+      </ul>
+    </div>
+  }
+</div>
