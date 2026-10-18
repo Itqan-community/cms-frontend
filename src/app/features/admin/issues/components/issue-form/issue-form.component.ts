@@ -193,6 +193,7 @@ export class IssueFormComponent implements OnInit {
               // badge renders nothing rather than guessing a template.
               template: null,
               mushaf_layout: null,
+              has_ayah_timings: false,
             },
           ]);
           this.loadingDetail.set(false);

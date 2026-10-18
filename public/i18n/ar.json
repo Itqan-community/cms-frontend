@@ -556,6 +556,7 @@
     "VIEW_DETAILS": "عرض التفاصيل",
     "VIEW_LICENSE": "عرض الترخيص",
     "OPEN_ACCESS_BADGE": "وصول مفتوح",
+    "AYAH_TIMED_BADGE": "مزمنة",
     "OPEN_ACCESS_HINT": "لا يلزم طلب وصول لهذا المورد.",
     "REQUEST_ACCESS_BUTTON": "طلب الوصول",
     "ACCESS_PENDING_HINT": "طلب الوصول الخاص بك قيد المراجعة. ستتمكن من التنزيل بعد الموافقة عليه.",

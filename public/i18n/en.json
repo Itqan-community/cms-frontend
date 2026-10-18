@@ -556,6 +556,7 @@
     "VIEW_DETAILS": "View Details",
     "VIEW_LICENSE": "View License",
     "OPEN_ACCESS_BADGE": "Open access",
+    "AYAH_TIMED_BADGE": "Ayah-timed",
     "OPEN_ACCESS_HINT": "No access request required for this resource.",
     "REQUEST_ACCESS_BUTTON": "Request Access",
     "ACCESS_PENDING_HINT": "Your access request is being reviewed. You will be able to download once it is approved.",

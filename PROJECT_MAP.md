@@ -75,6 +75,7 @@ User Browser
 
 ```
 1. Gallery page: GET /cms-api/assets/?category=&search=&license_code=
+   - cards tag open-access assets and recitations with `has_ayah_timings` ("مزمنة" / "Ayah-timed")
 2. Asset detail: GET /cms-api/assets/{id}/  (includes is_open_access, access_status)
 3. Download click (logged in):
    - access_status null -> open access path (license then download)
