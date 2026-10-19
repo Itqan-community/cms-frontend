@@ -19,11 +19,13 @@ import {
 import { FontDetails } from '../../models/fonts.models';
 import { FontsService } from '../../services/fonts.service';
 import { canDeleteFont, canUpdateFont } from '../../utils/font-permissions.util';
+import { AssetUsageSectionComponent } from '../../../../usage/components/asset-usage-section/asset-usage-section.component';
 
 @Component({
   selector: 'app-font-detail',
   standalone: true,
   imports: [
+    AssetUsageSectionComponent,
     DatePipe,
     RouterLink,
     NzModalModule,

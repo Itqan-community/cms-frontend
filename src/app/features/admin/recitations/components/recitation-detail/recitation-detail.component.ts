@@ -65,6 +65,7 @@ import {
   buildTimingUploadSuccessDescription,
 } from '../../utils/timing-upload-result.format';
 import { FolderSwitcherComponent } from '../folder-switcher/folder-switcher.component';
+import { AssetUsageSectionComponent } from '../../../../usage/components/asset-usage-section/asset-usage-section.component';
 
 const TRACKS_PAGE_SIZE = 10;
 const MAX_MP3_FILES = 114;
@@ -73,6 +74,7 @@ const MAX_MP3_FILES = 114;
   selector: 'app-recitation-detail',
   standalone: true,
   imports: [
+    AssetUsageSectionComponent,
     DatePipe,
     RouterLink,
     NzModalModule,

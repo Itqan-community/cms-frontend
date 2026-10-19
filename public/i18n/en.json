@@ -2899,7 +2899,8 @@
       "EDGE_REQUESTS": "Edge requests",
       "UNSEEN": "Unseen reads",
       "PER_DAY": "Reads per day"
-    }
+    },
+    "ASSET_SECTION_TITLE": "Usage"
   },
   "MUSHAF": {
     "TITLE": "The Noble Quran",
