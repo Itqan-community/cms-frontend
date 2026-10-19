@@ -45,6 +45,7 @@
             }
           </div>
           <p class="asset-description">{{ asset()!.description }}</p>
+          <app-asset-usage-counts [assetId]="asset()!.id" />
         </div>
 
         <!-- Content Preview Card -->

@@ -40,10 +40,12 @@ import { AssetDetails } from '../../models/assets.model';
 import { ItqanAddCommandComponent } from '../../components/itqan-add-command/itqan-add-command.component';
 import { AssetLicenseAcceptanceService } from '../../services/asset-license-acceptance.service';
 import { AssetsService } from '../../services/assets.service';
+import { AssetUsageCountsComponent } from '../../../usage/components/asset-usage-counts/asset-usage-counts.component';
 
 @Component({
   selector: 'app-asset-details-page',
   imports: [
+    AssetUsageCountsComponent,
     RouterModule,
     ImageCarouselComponent,
     BreadcrumbComponent,

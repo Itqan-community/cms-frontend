@@ -142,6 +142,14 @@ describe('api-error-resolver.util', () => {
       expect(shouldSuppressGlobalErrorToast(err)).toBe(true);
     });
 
+    it('suppresses usage_counts_disabled (gallery counts turned off)', () => {
+      const err = new HttpErrorResponse({
+        status: 404,
+        error: { error_name: 'usage_counts_disabled', message: 'x' },
+      });
+      expect(shouldSuppressGlobalErrorToast(err)).toBe(true);
+    });
+
     it('suppresses invalid_status', () => {
       const err = new HttpErrorResponse({
         status: 409,

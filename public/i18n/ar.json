@@ -2900,7 +2900,12 @@
       "UNSEEN": "قراءات غير مرئية",
       "PER_DAY": "القراءات يوميًا"
     },
-    "ASSET_SECTION_TITLE": "الاستخدام"
+    "ASSET_SECTION_TITLE": "الاستخدام",
+    "PUBLIC": {
+      "PLAYS": "تشغيل",
+      "DOWNLOADS": "تنزيل",
+      "APPS": "تطبيقات"
+    }
   },
   "MUSHAF": {
     "TITLE": "القرآن الكريم",

@@ -221,7 +221,9 @@ export function shouldSuppressGlobalErrorToast(error: unknown): boolean {
     errorName === 'invalid_status' ||
     errorName === 'tenant_required' ||
     // Handled locally by the content editor grid with a friendly popup.
-    errorName === 'no_changes_to_publish'
+    errorName === 'no_changes_to_publish' ||
+    // Gallery usage counts are turned off on the backend; the line simply stays hidden.
+    errorName === 'usage_counts_disabled'
   ) {
     return true;
   }

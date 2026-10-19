@@ -2900,7 +2900,12 @@
       "UNSEEN": "Unseen reads",
       "PER_DAY": "Reads per day"
     },
-    "ASSET_SECTION_TITLE": "Usage"
+    "ASSET_SECTION_TITLE": "Usage",
+    "PUBLIC": {
+      "PLAYS": "plays",
+      "DOWNLOADS": "downloads",
+      "APPS": "apps"
+    }
   },
   "MUSHAF": {
     "TITLE": "The Noble Quran",
