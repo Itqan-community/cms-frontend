@@ -133,6 +133,32 @@ describe('UsageDashboardComponent', () => {
     expect(api.summary.calls.count()).toBe(2);
   });
 
+  it('keeps every app in the developer app filter after one is selected', () => {
+    const item = (key: string, label: string) => ({ key, label, value: 5, previous: null });
+    api.breakdown.and.callFake((_scope, filters, params) =>
+      of({
+        ...BREAKDOWN,
+        by: params.by,
+        items:
+          params.by !== 'app'
+            ? []
+            : filters.app
+              ? [item(String(filters.app), `App ${filters.app}`)]
+              : [item('1', 'App 1'), item('2', 'App 2')],
+      })
+    );
+    fixture.componentRef.setInput('scope', 'developer');
+    fixture.componentRef.setInput('syncUrl', false);
+    fixture.detectChanges();
+
+    fixture.componentInstance.setFilter('app', 1);
+
+    expect(fixture.componentInstance.appOptions().map((app) => app.name)).toEqual([
+      'App 1',
+      'App 2',
+    ]);
+  });
+
   it('exports the CSV for the current filters', () => {
     fixture.detectChanges();
     spyOn(URL, 'createObjectURL').and.returnValue('blob:x');

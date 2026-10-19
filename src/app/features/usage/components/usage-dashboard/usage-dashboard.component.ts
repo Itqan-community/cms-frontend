@@ -252,7 +252,7 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
             : panel.chart === 'heatmap'
               ? buildHourOfWeekOptions(state.data.items, {
                   rtl: this.rtl(),
-                  dayLabels: DAY_KEYS.map((day) => this.t(`USAGE.DAYS.${day}`)),
+                            dayLabels: DAY_KEYS.map((day) => this.t(`USAGE.DAYS.${day}`)),
                 })
               : buildBarOptions(items, { rtl: this.rtl() });
       }
@@ -268,9 +268,10 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
     })
   );
 
-  /** Developer app filter: apps with traffic in the range (from the "by app" panel). */
+  /** Developer app filter: apps with traffic in the range, fetched without the app filter. */
+  private readonly appChoices = signal<UsageBreakdown | null>(null);
   readonly appOptions = computed(() =>
-    (this.panelStates()['app']?.data?.items ?? [])
+    (this.appChoices()?.items ?? [])
       .filter((item) => item.key !== '')
       .map((item) => ({ id: Number(item.key), name: item.label ?? item.key }))
   );
@@ -376,6 +377,18 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
       }),
       (value) => this.trend.set(value)
     );
+    if (this.profile().showAppFilter) {
+      // Keep the previous choices until the new list arrives, so the select never empties.
+      this.track(
+        'apps',
+        this.api.breakdown(scope, { ...filters, app: undefined }, { metric, by: 'app', limit: 50 }),
+        (value) => {
+          if (value.data) {
+            this.appChoices.set(value.data);
+          }
+        }
+      );
+    }
     const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
     for (const panel of this.profile().panels) {
       this.track(
