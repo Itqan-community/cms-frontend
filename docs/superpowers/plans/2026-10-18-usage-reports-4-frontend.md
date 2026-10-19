@@ -2,7 +2,7 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development
 > (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use
-> checkbox (`- [ ]`) syntax for tracking.
+> checkbox (`- [x]`) syntax for tracking.
 
 **Goal:** Usage dashboards on the four surfaces of the usage-reports spec: the publisher portal
 (with Itqan-admin extras), a usage section on each asset's admin page, the public gallery counts
@@ -39,8 +39,8 @@ plan-3 API (§9 + §20) as the contract (backend PR Itqan-community/cms-backend#
    section below the versions manager keeps the pages unchanged otherwise.
 2. **No world map yet.** A map needs a world GeoJSON bundle (hundreds of KB) and the map chart.
    Countries are shown as a ranked bar chart + table; the map goes to the backlog.
-3. **No dark theme.** The app has no dark mode; the chart palette comes from the CSS variables at
-   render time.
+3. **No dark theme.** The app has no dark mode; the chart palette is a fixed list built from the
+   theme's primary/secondary tokens (ECharts draws on canvas and cannot read CSS variables).
 4. **Admin page tabs:** Dashboard for everyone with `portal_read_usage`; Itqan admins also get a
    publisher picker, _Leaderboard_ and _Unseen traffic_; the Mixpanel iframe becomes _Legacy board_
    until cutover.
@@ -94,63 +94,63 @@ formatCompact(value, lang) / formatChange(change)
 
 ### Task 1: Dependencies and ECharts setup
 
-- [ ] `npm install echarts@6.1.0 ngx-echarts@20.0.2`; `features/usage/echarts-setup.ts` registers
+- [x] `npm install echarts@6.1.0 ngx-echarts@20.0.2`; `features/usage/echarts-setup.ts` registers
       LineChart, BarChart, PieChart, HeatmapChart, grid/tooltip/legend/visualMap/dataZoom components
       and the canvas renderer; provided with `provideEchartsCore({ echarts: () => import(...) })`.
-- [ ] Commit `build(usage): add echarts and ngx-echarts`.
+- [x] Commit `build(usage): add echarts and ngx-echarts`.
 
 ### Task 2: Models, API service and filter helpers
 
-- [ ] Failing specs: `usage-api.service.spec.ts` (URLs per scope, query params, 404 → `null` for
+- [x] Failing specs: `usage-api.service.spec.ts` (URLs per scope, query params, 404 → `null` for
       public counts, CSV as blob), `usage-filters.util.spec.ts` (presets, URL round trip, compact
       numbers in `ar`/`en`, change formatting).
-- [ ] Implement; specs pass. Commit
+- [x] Implement; specs pass. Commit
       `feat(usage): add the usage reports API service and filter helpers`.
 
 ### Task 3: Chart option builders and the chart wrapper
 
-- [ ] Failing specs: trend (zero series, RTL inverse axis + right y-axis, `__other__` label), donut,
+- [x] Failing specs: trend (zero series, RTL inverse axis + right y-axis, `__other__` label), donut,
       bar (`"<3"` rendered as 0-height with the text label), hour-of-week (168 cells, day labels);
       chart wrapper shows loading, empty, error and table modes.
-- [ ] Implement; commit `feat(usage): add chart option builders and the usage chart component`.
+- [x] Implement; commit `feat(usage): add chart option builders and the usage chart component`.
 
 ### Task 4: Usage dashboard component
 
-- [ ] Failing specs: loads summary/timeseries/breakdowns for the scope; headline cards with %
+- [x] Failing specs: loads summary/timeseries/breakdowns for the scope; headline cards with %
       change; metric switcher reloads the trend; URL query params drive filters; Export CSV calls
       the export endpoint; footer shows `data_updated_at` and the disclaimers; error state.
-- [ ] Implement; commit `feat(usage): add the usage dashboard`.
+- [x] Implement; commit `feat(usage): add the usage dashboard`.
 
 ### Task 5: Admin usage page (publisher + Itqan admin)
 
-- [ ] Failing specs: publisher sees only Dashboard; Itqan admin sees publisher picker, Leaderboard,
+- [x] Failing specs: publisher sees only Dashboard; Itqan admin sees publisher picker, Leaderboard,
       Unseen traffic and Legacy board tabs.
-- [ ] Route guard `portal_read_usage`; commit
+- [x] Route guard `portal_read_usage`; commit
       `feat(usage): replace the admin usage page with usage dashboards`.
 
 ### Task 6: Asset usage sections
 
-- [ ] Failing spec: section picks metrics per category (recitation: plays/listeners, surahs, hour of
+- [x] Failing spec: section picks metrics per category (recitation: plays/listeners, surahs, hour of
       week; text categories: downloads + installs, versions, languages; others: downloads +
       installs, platforms).
-- [ ] Add to font, mushaf, tafsir, translation and recitation detail pages; commit
+- [x] Add to font, mushaf, tafsir, translation and recitation detail pages; commit
       `feat(usage): show usage on asset admin pages`.
 
 ### Task 7: Gallery counts line
 
-- [ ] Failing spec: renders "plays · downloads · apps" on 200, nothing on 404.
-- [ ] Commit `feat(gallery): show public usage counts on asset pages`.
+- [x] Failing spec: renders "plays · downloads · apps" on 200, nothing on 404.
+- [x] Commit `feat(gallery): show public usage counts on asset pages`.
 
 ### Task 8: Developer usage page and app slug on API keys
 
-- [ ] Failing specs: `/account/usage` loads the developer scope; API keys list shows the slug and
+- [x] Failing specs: `/account/usage` loads the developer scope; API keys list shows the slug and
       saves an edited slug (`PATCH app_slug`), showing `invalid_app_slug` / `app_slug_taken`.
-- [ ] Commits `feat(account): add the developer usage page` and
+- [x] Commits `feat(account): add the developer usage page` and
       `feat(account): show and edit the app slug of API keys`.
 
 ### Task 9: i18n, PROJECT_MAP, verification
 
-- [ ] `npm run check:i18n`, `npx tsc --noEmit -p tsconfig.app.json`, `npm run lint`,
+- [x] `npm run check:i18n`, `npx tsc --noEmit -p tsconfig.app.json`, `npm run lint`,
       `npx prettier --check .`, `ng test --watch=false`, `npm run build:staging` (check the echarts
       chunk is lazy). `PROJECT_MAP.md` updated. Commit
       `docs(usage): map the usage     reports frontend`.
