@@ -36,6 +36,7 @@ import {
   buildDonutOptions,
   buildHourOfWeekOptions,
   buildTrendOptions,
+  formatPeriod,
 } from '../../utils/usage-chart-options';
 import {
   UsageHeadline,
@@ -211,6 +212,7 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
       })),
       {
         rtl: this.rtl(),
+        lang: this.lang(),
         labels: {
           other: this.t('USAGE.OTHER'),
           unknown: this.t('USAGE.UNKNOWN'),
@@ -224,7 +226,7 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
   readonly trendRows = computed<UsageTableRow[]>(() => {
     const series = this.trend().data?.series ?? [];
     return (series[0]?.points ?? []).map((point, index) => ({
-      label: point.t,
+      label: formatPeriod(point.t, this.lang()),
       value: series
         .map((item) => formatCompact(item.points[index]?.value ?? null, this.lang()))
         .join(' · '),
@@ -248,13 +250,14 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
       if (state.data) {
         options =
           panel.chart === 'donut'
-            ? buildDonutOptions(items, { rtl: this.rtl() })
+            ? buildDonutOptions(items, { rtl: this.rtl(), lang: this.lang() })
             : panel.chart === 'heatmap'
               ? buildHourOfWeekOptions(state.data.items, {
                   rtl: this.rtl(),
-                            dayLabels: DAY_KEYS.map((day) => this.t(`USAGE.DAYS.${day}`)),
+                  lang: this.lang(),
+                  dayLabels: DAY_KEYS.map((day) => this.t(`USAGE.DAYS.${day}`)),
                 })
-              : buildBarOptions(items, { rtl: this.rtl() });
+              : buildBarOptions(items, { rtl: this.rtl(), lang: this.lang() });
       }
       return {
         panel,

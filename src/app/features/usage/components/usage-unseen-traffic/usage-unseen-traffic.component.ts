@@ -8,7 +8,7 @@ import {
   UsageReconciliation,
 } from '../../models/usage.models';
 import { UsageApiService } from '../../services/usage-api.service';
-import { buildTrendOptions } from '../../utils/usage-chart-options';
+import { buildTrendOptions, formatPeriod } from '../../utils/usage-chart-options';
 import { formatCompact } from '../../utils/usage-filters.util';
 import { UsageChartComponent } from '../usage-chart/usage-chart.component';
 import { usageLang } from '../../utils/usage-lang';
@@ -50,6 +50,7 @@ export class UsageUnseenTrafficComponent implements OnChanges {
       })),
       {
         rtl: this.lang() === 'ar',
+        lang: this.lang(),
         labels: { other: '', unknown: '', previous: '' },
       }
     );
@@ -57,7 +58,7 @@ export class UsageUnseenTrafficComponent implements OnChanges {
 
   readonly chartRows = computed(() =>
     (this.data()?.days ?? []).map((day) => ({
-      label: day.t,
+      label: formatPeriod(day.t, this.lang()),
       value: MEASURES.map((measure) => formatCompact(day[measure], this.lang())).join(' · '),
     }))
   );

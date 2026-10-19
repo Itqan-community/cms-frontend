@@ -45,6 +45,61 @@ function seriesName(
   return series.label || series.key || labels.unknown;
 }
 
+function locale(lang: string | undefined): string {
+  return lang === 'ar' ? 'ar' : 'en';
+}
+
+function formatNumber(value: unknown, lang: string | undefined): string {
+  return typeof value === 'number'
+    ? new Intl.NumberFormat(locale(lang)).format(value)
+    : String(value ?? '—');
+}
+
+/** A period key from the API (`2026-10`, `2026-10-01` or an ISO hour) as a localized label. */
+export function formatPeriod(value: string, lang: string | undefined): string {
+  const format = (date: Date, options: Intl.DateTimeFormatOptions) =>
+    new Intl.DateTimeFormat(locale(lang), options).format(date);
+  if (/^\d{4}-\d{2}$/.test(value)) {
+    return format(new Date(`${value}-01T00:00:00Z`), {
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    });
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return format(new Date(`${value}T00:00:00Z`), {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    });
+  }
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? value
+    : format(date, { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+}
+
+function formatHour(hour: number, lang: string | undefined): string {
+  return new Intl.DateTimeFormat(locale(lang), { hour: 'numeric', timeZone: 'UTC' }).format(
+    new Date(Date.UTC(2026, 0, 1, hour))
+  );
+}
+
+/** Tooltip shared by every chart: localized numbers, right-to-left layout in Arabic. */
+function tooltip(
+  rtl: boolean,
+  lang: string | undefined,
+  extra: Record<string, unknown>
+): Record<string, unknown> {
+  return {
+    confine: true,
+    valueFormatter: (value: unknown) => formatNumber(value, lang),
+    extraCssText: rtl ? 'direction: rtl; text-align: right;' : '',
+    ...extra,
+  };
+}
+
 function legend(rtl: boolean): Record<string, unknown> {
   return rtl ? { type: 'scroll', top: 0, right: 0 } : { type: 'scroll', top: 0, left: 0 };
 }
@@ -53,12 +108,13 @@ export function buildTrendOptions(
   series: UsageSeries[],
   options: {
     rtl: boolean;
+    lang?: string;
     labels: { other: string; unknown: string; previous: string };
     previous?: UsagePoint[] | null;
   }
 ): EChartsCoreOption {
-  const { rtl, labels, previous } = options;
-  const times = series[0]?.points.map((point) => point.t) ?? [];
+  const { rtl, lang, labels, previous } = options;
+  const times = series[0]?.points.map((point) => formatPeriod(point.t, lang)) ?? [];
   const lines: Record<string, unknown>[] = series.map((item) => ({
     name: seriesName(item, labels),
     type: 'line',
@@ -78,7 +134,7 @@ export function buildTrendOptions(
   }
   return {
     color: PALETTE,
-    tooltip: { trigger: 'axis', confine: true },
+    tooltip: tooltip(rtl, lang, { trigger: 'axis' }),
     legend: legend(rtl),
     grid: { top: 40, bottom: 30, left: 16, right: 16, containLabel: true },
     xAxis: { type: 'category', data: times, inverse: rtl, boundaryGap: false },
@@ -89,11 +145,11 @@ export function buildTrendOptions(
 
 export function buildDonutOptions(
   items: ChartItem[],
-  options: { rtl: boolean }
+  options: { rtl: boolean; lang?: string }
 ): EChartsCoreOption {
   return {
     color: PALETTE,
-    tooltip: { trigger: 'item', confine: true },
+    tooltip: tooltip(options.rtl, options.lang, { trigger: 'item' }),
     legend: { ...legend(options.rtl), orient: 'horizontal', bottom: 0, top: undefined },
     series: [
       {
@@ -110,10 +166,16 @@ export function buildDonutOptions(
 }
 
 /** Horizontal ranked bars (countries, assets, apps). */
-export function buildBarOptions(items: ChartItem[], options: { rtl: boolean }): EChartsCoreOption {
+export function buildBarOptions(
+  items: ChartItem[],
+  options: { rtl: boolean; lang?: string }
+): EChartsCoreOption {
   return {
     color: PALETTE,
-    tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' }, confine: true },
+    tooltip: tooltip(options.rtl, options.lang, {
+      trigger: 'axis',
+      axisPointer: { type: 'shadow' },
+    }),
     grid: { top: 8, bottom: 8, left: 8, right: 24, containLabel: true },
     xAxis: { type: 'value', inverse: options.rtl, minInterval: 1 },
     yAxis: {
@@ -140,7 +202,7 @@ export function buildBarOptions(items: ChartItem[], options: { rtl: boolean }): 
 /** 7 × 24 heatmap; keys are `<ISO weekday>-<hour>` in the viewer's time zone. */
 export function buildHourOfWeekOptions(
   items: UsageBreakdownItem[],
-  options: { rtl: boolean; dayLabels: string[] }
+  options: { rtl: boolean; lang?: string; dayLabels: string[] }
 ): EChartsCoreOption {
   const values = new Map(items.map((item) => [item.key, chartValue(item.value)]));
   const data: [number, number, number][] = [];
@@ -151,7 +213,11 @@ export function buildHourOfWeekOptions(
   }
   const max = Math.max(1, ...data.map((cell) => cell[2]));
   return {
-    tooltip: { position: 'top', confine: true },
+    tooltip: tooltip(options.rtl, options.lang, {
+      position: 'top',
+      formatter: ({ value }: { value: [number, number, number] }) =>
+        `${options.dayLabels[value[1]]} · ${formatHour(value[0], options.lang)} — ${formatNumber(value[2], options.lang)}`,
+    }),
     grid: { top: 8, bottom: 60, left: 8, right: 8, containLabel: true },
     xAxis: {
       type: 'category',
