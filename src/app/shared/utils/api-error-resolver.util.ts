@@ -210,6 +210,8 @@ export function resolveApiErrorMessage(
   return translate.instant(fallbackKey);
 }
 
+const USAGE_COUNTS_URL = /\/assets\/\d+\/usage-counts\/?(\?|$)/;
+
 /** Errors handled locally by feature components — skip global interceptor toast. */
 export function shouldSuppressGlobalErrorToast(error: unknown): boolean {
   if (!(error instanceof HttpErrorResponse)) {
@@ -229,6 +231,11 @@ export function shouldSuppressGlobalErrorToast(error: unknown): boolean {
   }
 
   if (isRestrictedForTenantConflictError(error)) {
+    return true;
+  }
+
+  // The gallery usage-counts line is optional; any 404 (turned off, unknown asset) just hides it.
+  if (error.status === 404 && USAGE_COUNTS_URL.test(error.url ?? '')) {
     return true;
   }
 
