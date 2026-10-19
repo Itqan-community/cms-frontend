@@ -41,7 +41,7 @@
       echarts
       class="usage-chart__canvas"
       [style.height.px]="height()"
-      [options]="options()"
+      [options]="options() ?? {}"
       [autoResize]="true"
     ></div>
   }
