@@ -11,6 +11,7 @@ import { UsageApiService } from '../../services/usage-api.service';
 import { buildTrendOptions } from '../../utils/usage-chart-options';
 import { formatCompact } from '../../utils/usage-filters.util';
 import { UsageChartComponent } from '../usage-chart/usage-chart.component';
+import { usageLang } from '../../utils/usage-lang';
 
 const MEASURES: (keyof ReconciliationNumbers)[] = ['reads', 'edge_requests', 'unseen'];
 
@@ -34,7 +35,7 @@ export class UsageUnseenTrafficComponent implements OnChanges {
   readonly error = signal(false);
   readonly data = signal<UsageReconciliation | null>(null);
 
-  readonly lang = computed(() => this.translate.currentLang || 'ar');
+  readonly lang = usageLang();
 
   readonly chartOptions = computed<EChartsCoreOption | null>(() => {
     const days = this.data()?.days;
@@ -47,7 +48,10 @@ export class UsageUnseenTrafficComponent implements OnChanges {
         label: this.translate.instant(`USAGE.UNSEEN.${measure.toUpperCase()}`) as string,
         points: days.map((day) => ({ t: day.t, value: day[measure] })),
       })),
-      { rtl: this.lang() === 'ar', labels: { other: '', unknown: '', previous: '' } }
+      {
+        rtl: this.lang() === 'ar',
+        labels: { other: '', unknown: '', previous: '' },
+      }
     );
   });
 

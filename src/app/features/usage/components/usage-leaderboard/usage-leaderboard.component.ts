@@ -9,6 +9,7 @@ import { UsageBreakdown, UsageFilters, UsageMetric } from '../../models/usage.mo
 import { UsageApiService } from '../../services/usage-api.service';
 import { itemLabel } from '../../utils/usage-dashboard.profile';
 import { USAGE_METRICS, formatChange, formatCompact } from '../../utils/usage-filters.util';
+import { usageLang } from '../../utils/usage-lang';
 
 /** Itqan admin: top publishers or assets with their previous-period values. */
 @Component({
@@ -23,6 +24,7 @@ export class UsageLeaderboardComponent implements OnChanges {
 
   private readonly api = inject(UsageApiService);
   private readonly translate = inject(TranslateService);
+  private readonly lang = usageLang();
   private request?: Subscription;
 
   readonly metrics = USAGE_METRICS;
@@ -32,13 +34,16 @@ export class UsageLeaderboardComponent implements OnChanges {
   readonly error = signal(false);
   readonly data = signal<UsageBreakdown | null>(null);
 
-  readonly byOptions = computed(() => [
-    { label: this.translate.instant('USAGE.SPLIT_BY.publisher') as string, value: 'publisher' },
-    { label: this.translate.instant('USAGE.SPLIT_BY.asset') as string, value: 'asset' },
-  ]);
+  readonly byOptions = computed(() => {
+    this.lang(); // re-translate when the language changes
+    return [
+      { label: this.translate.instant('USAGE.SPLIT_BY.publisher') as string, value: 'publisher' },
+      { label: this.translate.instant('USAGE.SPLIT_BY.asset') as string, value: 'asset' },
+    ];
+  });
 
   readonly rows = computed(() => {
-    const lang = this.translate.currentLang || 'ar';
+    const lang = this.lang();
     const t = (key: string, params?: Record<string, unknown>) =>
       this.translate.instant(key, params) as string;
     return (this.data()?.items ?? []).map((item, index) => {

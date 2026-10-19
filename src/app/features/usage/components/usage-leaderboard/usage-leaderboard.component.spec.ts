@@ -3,6 +3,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { UsageApiService } from '../../services/usage-api.service';
+import { formatCompact } from '../../utils/usage-filters.util';
 import { UsageLeaderboardComponent } from './usage-leaderboard.component';
 
 describe('UsageLeaderboardComponent', () => {
@@ -45,6 +46,20 @@ describe('UsageLeaderboardComponent', () => {
     expect(rows.length).toBe(2);
     expect(rows[0].textContent).toContain('Pub B');
     expect(rows[0].textContent).toContain('+200%');
+  });
+
+  it('relabels the options and rows when the language changes', () => {
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('en', { USAGE: { SPLIT_BY: { publisher: 'Publisher' } } });
+    translate.setTranslation('ar', { USAGE: { SPLIT_BY: { publisher: 'الناشر' } } });
+    fixture.detectChanges();
+    expect(fixture.componentInstance.byOptions()[0].label).toBe('Publisher');
+
+    translate.use('ar');
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.byOptions()[0].label).toBe('الناشر');
+    expect(fixture.componentInstance.rows()[0].value).toBe(formatCompact(900, 'ar'));
   });
 
   it('reloads when switching to assets', () => {
