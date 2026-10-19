@@ -77,6 +77,10 @@ export function usageStateFromParams(
       filters[name] = params[name];
     }
   }
+  const app = Number(params['app']);
+  if (Number.isInteger(app) && app > 0) {
+    filters.app = app;
+  }
   const metric = USAGE_METRICS.includes(params['metric'] as UsageMetric)
     ? (params['metric'] as UsageMetric)
     : 'plays';
@@ -94,6 +98,9 @@ export function usageStateToParams(state: UsageViewState): Record<string, string
     if (value) {
       params[name] = value;
     }
+  }
+  if (state.filters.app) {
+    params['app'] = String(state.filters.app);
   }
   params['metric'] = state.metric;
   if (state.split) {

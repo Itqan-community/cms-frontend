@@ -30,6 +30,7 @@ describe('usage-filters.util', () => {
       end: '2026-01-31',
       category: 'tafsir',
       channel: 'cli',
+      app: '4',
       metric: 'downloads',
       split: 'country',
     };
@@ -39,6 +40,7 @@ describe('usage-filters.util', () => {
       end_date: '2026-01-31',
       category: 'tafsir',
       channel: 'cli',
+      app: 4,
     });
     expect(usageStateToParams(state)).toEqual(params);
   });
