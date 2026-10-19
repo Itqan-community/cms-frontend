@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { UsageApiService } from '../../../../usage/services/usage-api.service';
 import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
 import { AdminAuthService } from '../../../services/admin-auth.service';
@@ -67,5 +67,25 @@ describe('UsagePageComponent', () => {
     ]);
     expect(fixture.componentInstance.scope()).toBe('admin');
     expect(fixture.componentInstance.publishers().length).toBe(1);
+  });
+  it('a late board response for a previous publisher does not replace the current board', () => {
+    const responses = [
+      new Subject<{ board_url: string | null }>(),
+      new Subject<{ board_url: string | null }>(),
+    ];
+    const getBoardUrl = jasmine.createSpy('getBoardUrl').and.returnValues(...responses);
+    TestBed.overrideProvider(UsageService, { useValue: { getBoardUrl } });
+    isItqanAdmin.set(true);
+    fixture = TestBed.createComponent(UsagePageComponent);
+    fixture.detectChanges();
+    const page = fixture.componentInstance;
+
+    page.onTabChange(3, 3);
+    page.onPublisherChange(5);
+    responses[1].next({ board_url: 'https://board/5' });
+    responses[0].next({ board_url: 'https://board/all' });
+
+    const url = page.boardUrl() as unknown as { changingThisBreaksApplicationSecurity: string };
+    expect(url.changingThisBreaksApplicationSecurity).toBe('https://board/5');
   });
 });

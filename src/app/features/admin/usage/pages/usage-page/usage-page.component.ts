@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { Subscription } from 'rxjs';
 import { NzAlertModule } from 'ng-zorro-antd/alert';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzSelectModule } from 'ng-zorro-antd/select';
@@ -71,6 +72,7 @@ export class UsagePageComponent implements OnInit {
   readonly boardError = signal(false);
   readonly boardUrl = signal<SafeResourceUrl | null>(null);
   private boardRequested = false;
+  private boardRequest?: Subscription;
 
   ngOnInit(): void {
     if (this.isItqanAdmin()) {
@@ -96,10 +98,12 @@ export class UsagePageComponent implements OnInit {
   }
 
   private loadBoardUrl(): void {
+    // Drop the previous publisher's request so a late answer cannot replace the current board.
+    this.boardRequest?.unsubscribe();
     this.boardLoading.set(true);
     this.boardError.set(false);
     this.boardUrl.set(null);
-    this.usageService
+    this.boardRequest = this.usageService
       .getBoardUrl(this.selectedPublisherId())
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
