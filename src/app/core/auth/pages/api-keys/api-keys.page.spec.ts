@@ -59,6 +59,30 @@ describe('ApiKeysPage', () => {
     expect(page.showCreateForm()).toBe(false);
   });
 
+  it('saveRename sends the app slug only when it changed', async () => {
+    const auth = TestBed.inject(AuthService) as unknown as { updateApiKey: jasmine.Spy };
+    const key = { id: 'a', name: 'n', maskedKey: 'mk', isRevoked: false, appSlug: 'old-slug' };
+    page.startRename(key);
+    page.updateSlugDraft('a', 'new-slug');
+    await page.saveRename('a');
+    expect(auth.updateApiKey).toHaveBeenCalledWith('a', { name: 'n', app_slug: 'new-slug' });
+
+    auth.updateApiKey.calls.reset();
+    page.startRename({ ...key, appSlug: 'new-slug' });
+    page.updateSlugDraft('a', 'new-slug');
+    await page.saveRename('a');
+    expect(auth.updateApiKey).toHaveBeenCalledWith('a', { name: 'n' });
+  });
+
+  it('lists the app slug of each key', async () => {
+    listApiKeys.and.returnValue(
+      of([{ id: 'a', name: 'n', maskedKey: 'mk', isRevoked: false, appSlug: 'my-app' }])
+    );
+    await page.reload();
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('my-app');
+  });
+
   it('create form is hidden initially and toggles with actions', () => {
     expect(page.showCreateForm()).toBe(false);
     page.openCreateForm();

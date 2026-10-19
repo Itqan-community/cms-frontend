@@ -19,6 +19,11 @@ describe('api-keys.util', () => {
     expect(list[0]?.createdAt).toBe('2026-05-01T00:00:00Z');
   });
 
+  it('parseApiKeysList keeps the public app slug', () => {
+    const list = parseApiKeysList([{ id: '1', name: 'Prod', app_slug: 'quran-companion' }]);
+    expect(list[0]?.appSlug).toBe('quran-companion');
+  });
+
   it('parseApiKeysList unwraps pagination-style envelope', () => {
     const list = parseApiKeysList({ results: [{ id: '9', name: 'Q', masked_key: 'ab' }] });
     expect(list[0]?.id).toBe('9');

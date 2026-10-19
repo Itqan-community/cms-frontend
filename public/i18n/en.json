@@ -317,7 +317,9 @@
       "REVOKE_SUCCESS": "API key revoked.",
       "DELETE": "Delete",
       "DELETE_CONFIRM": "Permanently delete this API key? This cannot be undone.",
-      "DELETE_SUCCESS": "API key deleted."
+      "DELETE_SUCCESS": "API key deleted.",
+      "APP_SLUG": "App ID",
+      "APP_SLUG_HINT": "Public and safe to share: added to file links as ?c=… so plays and downloads count for this app. 3–40 lowercase letters, digits or hyphens."
     },
     "PROVIDERS": {
       "TITLE": "Connected accounts",
