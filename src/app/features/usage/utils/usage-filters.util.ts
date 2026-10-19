@@ -63,7 +63,7 @@ export function usageStateFromParams(
   ) {
     range = { start_date: start, end_date: end };
   } else {
-    if (!(preset in PRESET_DAYS)) {
+    if (!Object.hasOwn(PRESET_DAYS, preset)) {
       preset = '30d';
     }
     if (preset === 'custom') {

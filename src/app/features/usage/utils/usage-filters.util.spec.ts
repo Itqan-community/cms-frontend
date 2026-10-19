@@ -54,6 +54,12 @@ describe('usage-filters.util', () => {
     expect(state.metric).toBe('plays');
   });
 
+  it('usageStateFromParams falls back to 30 days for inherited object keys', () => {
+    const state = usageStateFromParams({ range: 'toString' }, today);
+    expect(state.preset).toBe('30d');
+    expect(state.filters).toEqual({ start_date: '2026-09-19', end_date: '2026-10-18' });
+  });
+
   it('formatCompact formats numbers per language and passes "<3" through', () => {
     expect(formatCompact(1234, 'en')).toBe('1.2K');
     expect(formatCompact('<3', 'en')).toBe('<3');
