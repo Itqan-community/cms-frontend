@@ -2766,7 +2766,7 @@
     }
   },
   "USAGE": {
-    "TITLE": "API Usage",
+    "TITLE": "Usage",
     "SUBTITLE": "API request analytics for your publisher account",
     "ALL_PUBLISHERS": "All publishers",
     "REQUESTS_OVER_TIME": "Requests over time",
@@ -2862,7 +2862,8 @@
       "kind": "By type",
       "version": "By version",
       "language": "By language",
-      "endpoint": "By endpoint"
+      "endpoint": "By endpoint",
+      "publisher": "Publisher"
     },
     "PANELS": {
       "channel": "Channels",
@@ -2884,6 +2885,20 @@
       "FRI": "Fri",
       "SAT": "Sat",
       "SUN": "Sun"
+    },
+    "CHANGE": "Change",
+    "TABS": {
+      "DASHBOARD": "Dashboard",
+      "LEADERBOARD": "Leaderboard",
+      "UNSEEN": "Unseen traffic",
+      "LEGACY": "Legacy board"
+    },
+    "UNSEEN": {
+      "INTRO": "Reads from storage that never passed through the CDN edge, so the other reports cannot see them (for example direct bucket access).",
+      "READS": "Storage reads",
+      "EDGE_REQUESTS": "Edge requests",
+      "UNSEEN": "Unseen reads",
+      "PER_DAY": "Reads per day"
     }
   },
   "MUSHAF": {

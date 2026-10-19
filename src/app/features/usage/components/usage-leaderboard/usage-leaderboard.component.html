@@ -1,0 +1,53 @@
+<div class="usage-leaderboard">
+  <div class="usage-leaderboard__controls">
+    <nz-segmented
+      nzSize="small"
+      [nzOptions]="byOptions()"
+      [ngModel]="by()"
+      (ngModelChange)="setBy($event)"
+    ></nz-segmented>
+    <nz-select
+      class="usage-leaderboard__select"
+      nzSize="small"
+      [ngModel]="metric()"
+      (ngModelChange)="setMetric($event)"
+    >
+      @for (item of metrics; track item) {
+        <nz-option [nzValue]="item" [nzLabel]="'USAGE.METRICS.' + item | translate" />
+      }
+    </nz-select>
+  </div>
+
+  @if (loading()) {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 6 }" />
+  } @else if (error()) {
+    <p class="usage-leaderboard__error" role="alert">{{ 'USAGE.LOAD_ERROR' | translate }}</p>
+  } @else if (!rows().length) {
+    <p class="usage-leaderboard__empty">{{ 'USAGE.NO_DATA' | translate }}</p>
+  } @else {
+    <table class="usage-leaderboard__table">
+      <thead>
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">{{ 'USAGE.SPLIT_BY.' + by() | translate }}</th>
+          <th scope="col">{{ 'USAGE.METRICS.' + metric() | translate }}</th>
+          <th scope="col">{{ 'USAGE.PREVIOUS_PERIOD' | translate }}</th>
+          <th scope="col">{{ 'USAGE.CHANGE' | translate }}</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of rows(); track row.rank) {
+          <tr>
+            <td>{{ row.rank }}</td>
+            <td>{{ row.label }}</td>
+            <td>{{ row.value }}</td>
+            <td>{{ row.previous }}</td>
+            <td [class]="'usage-leaderboard__change--' + (row.change?.direction ?? 'flat')">
+              {{ row.change?.text ?? '—' }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>

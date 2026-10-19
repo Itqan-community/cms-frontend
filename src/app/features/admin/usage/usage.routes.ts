@@ -5,7 +5,7 @@ import { permissionGuard } from '../guards/permission.guard';
 export const usageRoutes: Routes = [
   {
     path: '',
-    canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_ACCESS] })],
+    canActivate: [permissionGuard({ permissions: [PORTAL_PERMISSIONS.PORTAL_READ_USAGE] })],
     loadComponent: () =>
       import('./pages/usage-page/usage-page.component').then((m) => m.UsagePageComponent),
   },
