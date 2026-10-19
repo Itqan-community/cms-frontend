@@ -311,6 +311,7 @@
       "LAST_USED": "Last used",
       "RENAME": "Rename",
       "RENAME_REQUIRED": "Enter a name for this key.",
+      "SLUG_REQUIRED": "Enter an app slug; it can be changed but not removed.",
       "RENAME_SUCCESS": "API key updated.",
       "REVOKE": "Revoke",
       "REVOKE_CONFIRM": "Revoke this API key? Requests using this key will stop working.",

@@ -195,12 +195,17 @@ export class ApiKeysPage implements OnInit {
       this.pageError.set(this.translate.instant('AUTH.API_KEYS.RENAME_REQUIRED'));
       return;
     }
+    const slug = (this.slugDraft()[id] ?? '').trim();
+    // The API cannot clear a slug; say so instead of saving the name and keeping the old one.
+    if (!slug && this.savedSlugs.get(id)) {
+      this.pageError.set(this.translate.instant('AUTH.API_KEYS.SLUG_REQUIRED'));
+      return;
+    }
 
     this.pageError.set('');
     this.successMsg.set('');
     this.isLoading.set(true);
     try {
-      const slug = (this.slugDraft()[id] ?? '').trim();
       const patch: ApiKeyPatchIn = { name };
       if (slug && slug !== this.savedSlugs.get(id)) {
         patch.app_slug = slug;

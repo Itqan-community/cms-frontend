@@ -74,6 +74,21 @@ describe('ApiKeysPage', () => {
     expect(auth.updateApiKey).toHaveBeenCalledWith('a', { name: 'n' });
   });
 
+  it('saveRename rejects a cleared app slug instead of silently keeping it', async () => {
+    const auth = TestBed.inject(AuthService) as unknown as { updateApiKey: jasmine.Spy };
+    page.startRename({
+      id: 'a',
+      name: 'n',
+      maskedKey: 'mk',
+      isRevoked: false,
+      appSlug: 'old-slug',
+    });
+    page.updateSlugDraft('a', '  ');
+    await page.saveRename('a');
+    expect(auth.updateApiKey).not.toHaveBeenCalled();
+    expect(page.pageError()).toBe('AUTH.API_KEYS.SLUG_REQUIRED');
+  });
+
   it('lists the app slug of each key', async () => {
     listApiKeys.and.returnValue(
       of([{ id: 'a', name: 'n', maskedKey: 'mk', isRevoked: false, appSlug: 'my-app' }])
