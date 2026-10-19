@@ -11,6 +11,9 @@
     <div class="account-manage__card">
       <h1 class="account-manage__title">{{ 'AUTH.API_KEYS.TITLE' | translate }}</h1>
       <p class="account-manage__subtitle">{{ 'AUTH.API_KEYS.SUBTITLE' | translate }}</p>
+      <p class="account-manage__hint">
+        <a routerLink="/account/usage">{{ 'USAGE.DEVELOPER.VIEW_USAGE' | translate }}</a>
+      </p>
 
       @if (pageError()) {
         <div class="account-manage__alert">{{ pageError() }}</div>

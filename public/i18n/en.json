@@ -2905,6 +2905,12 @@
       "PLAYS": "plays",
       "DOWNLOADS": "downloads",
       "APPS": "apps"
+    },
+    "DEVELOPER": {
+      "TITLE": "API usage",
+      "SUBTITLE": "How your apps use Itqan: API calls, plays and downloads attributed to your API keys.",
+      "BACK_TO_KEYS": "Back to API keys",
+      "VIEW_USAGE": "View the usage of your apps"
     }
   },
   "MUSHAF": {
