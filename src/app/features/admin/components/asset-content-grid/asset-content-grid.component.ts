@@ -382,6 +382,7 @@ export class AssetContentGridComponent implements OnInit {
     }
     this.pendingRows.set(row.unit_id, {
       unit_id: row.unit_id,
+      column: '',
       text: row.text ?? '',
     });
     this.dirty.set(true);
@@ -441,7 +442,7 @@ export class AssetContentGridComponent implements OnInit {
     if (node?.data) {
       node.setDataValue('text', edit[value], HISTORY_SOURCE); // -> onCellValueChanged
     } else {
-      this.pendingRows.set(edit.unitId, { unit_id: edit.unitId, text: edit[value] });
+      this.pendingRows.set(edit.unitId, { unit_id: edit.unitId, column: '', text: edit[value] });
       this.dirty.set(true);
       this.autosave$.next();
       this.refreshUndoState();

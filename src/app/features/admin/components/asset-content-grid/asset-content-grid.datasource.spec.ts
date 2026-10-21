@@ -33,6 +33,8 @@ function flushDraft(httpMock: HttpTestingController, slug: string, id: number): 
     state: 'draft',
     entries_count: 0,
     created_at: '2026-01-01T00:00:00Z',
+    column_keys: ['text'],
+    requires_major: false,
   };
   httpMock.expectOne((r) => r.url.includes('draft/') && r.url.includes(slug)).flush(draft);
   // The editor counts the draft's real changes to know whether Commit applies.

@@ -3,6 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import type {
+  AssetColumn,
   AssetLanguage,
   AssetTemplate,
   AssetVersionParentKind,
@@ -64,6 +65,44 @@ export class AssetContentService {
       `${this.draftBase(kind, slug)}languages/${encodeURIComponent(language)}/availability/`,
       { available }
     );
+  }
+
+  /** The asset's text columns, in file order. */
+  listColumns(kind: AssetVersionParentKind, slug: string): Observable<AssetColumn[]> {
+    return this.http.get<AssetColumn[]>(`${this.draftBase(kind, slug)}columns/`);
+  }
+
+  /** Add a text column at the end (needs the manage-columns permission). */
+  createColumn(
+    kind: AssetVersionParentKind,
+    slug: string,
+    body: { key: string; label_en: string; label_ar: string }
+  ): Observable<AssetColumn> {
+    return this.http.post<AssetColumn>(`${this.draftBase(kind, slug)}columns/`, body);
+  }
+
+  /** Change a column's labels, or its key while no committed version has it. */
+  updateColumn(
+    kind: AssetVersionParentKind,
+    slug: string,
+    key: string,
+    body: Partial<{ key: string; label_en: string; label_ar: string }>
+  ): Observable<AssetColumn> {
+    return this.http.patch<AssetColumn>(`${this.columnUrl(kind, slug, key)}`, body);
+  }
+
+  /** Set the column order (every key, once). */
+  reorderColumns(
+    kind: AssetVersionParentKind,
+    slug: string,
+    keys: string[]
+  ): Observable<AssetColumn[]> {
+    return this.http.put<AssetColumn[]>(`${this.draftBase(kind, slug)}columns/order/`, { keys });
+  }
+
+  /** Delete a column no committed version contains. */
+  deleteColumn(kind: AssetVersionParentKind, slug: string, key: string): Observable<void> {
+    return this.http.delete<void>(this.columnUrl(kind, slug, key));
   }
 
   /** Get-or-create the shared draft for one language, seeded from its latest published. */
@@ -232,6 +271,10 @@ export class AssetContentService {
 
   private draftBase(kind: AssetVersionParentKind, slug: string): string {
     return `${this.base}/content/${this.segment(kind)}/${encodeURIComponent(slug)}/`;
+  }
+
+  private columnUrl(kind: AssetVersionParentKind, slug: string, key: string): string {
+    return `${this.draftBase(kind, slug)}columns/${encodeURIComponent(key)}/`;
   }
 
   private versionBase(kind: AssetVersionParentKind, slug: string, versionId: number): string {

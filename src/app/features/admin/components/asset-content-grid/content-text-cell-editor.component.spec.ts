@@ -16,6 +16,7 @@ describe('ContentTextCellEditorComponent', () => {
     reference_text: 'ٱللَّهُ لَآ إِلَٰهَ إِلَّا هُوَ',
     sura: 2,
     aya: 255,
+    cells: { text: 'existing tafsir' },
     text: 'existing tafsir',
     order: 262,
   };

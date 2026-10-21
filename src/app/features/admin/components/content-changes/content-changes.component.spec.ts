@@ -15,6 +15,7 @@ function change(
     unit_type: 'ayah',
     unit_id: unitId,
     label: `1:${unitId}`,
+    column: 'text',
     change_type: changeType,
     old_text: oldText,
     new_text: newText,

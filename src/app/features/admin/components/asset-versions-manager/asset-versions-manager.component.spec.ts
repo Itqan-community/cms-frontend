@@ -341,6 +341,7 @@ describe('AssetVersionsManagerComponent', () => {
         unit_type: 'ayah',
         unit_id: id,
         label: `1:${id}`,
+        column: 'text',
         change_type: 'added',
         old_text: '',
         new_text: `text ${id}`,
