@@ -38,6 +38,7 @@ import { localizedLanguageName } from '../../utils/iso-639.util';
 import { isPreviewCut } from '../../utils/text-preview.util';
 import { diffWords, type WordDiff } from '../../utils/word-diff.util';
 import { ChangeCompareComponent } from '../change-compare/change-compare.component';
+import { columnLabel } from '../../utils/column-label.util';
 
 export type ReviewActionType = 'approve' | 'comment' | 'unreview';
 
@@ -104,6 +105,10 @@ export class AssetReviewGridComponent implements OnInit {
   readonly languages = signal<string[]>([]);
   readonly selectedLanguage = signal<string | null>(null);
   readonly changes = signal<ReviewChange[]>([]);
+  /** Several text columns: each row names the column its change belongs to. */
+  readonly multiColumn = computed(() =>
+    this.changes().some((c) => !!c.column && c.column !== 'text')
+  );
   readonly total = signal(0);
   readonly page = signal(1);
   readonly pageSize = signal(DEFAULT_PAGE_SIZE);
@@ -181,6 +186,14 @@ export class AssetReviewGridComponent implements OnInit {
   }
 
   /** i18n key for a change type (e.g. "added" → ADMIN.REVIEW.TYPE.ADDED). */
+  /** A row's column, labelled in the interface language (its key when unlabelled). */
+  columnName(change: ReviewChange): string {
+    return columnLabel(
+      { key: change.column, label_en: change.column_label_en, label_ar: change.column_label_ar },
+      this.translate.currentLang
+    );
+  }
+
   typeKey(type: ReviewChange['change_type']): string {
     return `ADMIN.REVIEW.TYPE.${type.toUpperCase()}`;
   }

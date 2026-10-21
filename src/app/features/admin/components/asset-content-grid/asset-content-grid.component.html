@@ -397,7 +397,7 @@
             {{ 'ADMIN.CONTENT_EDITOR.COMMIT.REVIEW' | translate }}
           </h4>
           <div class="content-grid__commit-changes">
-            <app-content-changes [changes]="pendingChanges()" />
+            <app-content-changes [changes]="pendingChanges()" [columns]="columns()" />
           </div>
         }
       </div>

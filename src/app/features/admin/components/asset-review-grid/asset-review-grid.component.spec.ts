@@ -541,4 +541,31 @@ describe('AssetReviewGridComponent', () => {
       expect([...component.selectedIds()]).toEqual([1]);
     });
   });
+
+  it('names the column of each change by its label when the asset has several columns', () => {
+    // Arrange
+    component.changes.set([
+      {
+        ...mockChange,
+        id: 1,
+        column: 'question',
+        column_label_en: 'Question',
+        column_label_ar: 'السؤال',
+      },
+      { ...mockChange, id: 2, column: 'answer', column_label_en: '', column_label_ar: '' },
+    ]);
+
+    // Act / Assert
+    expect(component.multiColumn()).toBeTrue();
+    expect(component.columnName(component.changes()[0])).toBe('Question');
+    expect(component.columnName(component.changes()[1])).toBe('answer');
+  });
+
+  it('shows no column for a single-column asset', () => {
+    // Arrange
+    component.changes.set([mockChange]);
+
+    // Act / Assert
+    expect(component.multiColumn()).toBeFalse();
+  });
 });
