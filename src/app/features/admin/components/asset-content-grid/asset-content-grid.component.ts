@@ -65,6 +65,8 @@ import { ISO_639_LANGUAGES, localizedLanguageName } from '../../utils/iso-639.ut
 import { isVersionNumber } from '../../utils/version-number.util';
 import { ContentChangesComponent } from '../content-changes/content-changes.component';
 import { VersionNumberFieldComponent } from '../version-number-field/version-number-field.component';
+import { ManageColumnsModalComponent } from '../manage-columns-modal/manage-columns-modal.component';
+import { ContentColumnHeaderComponent } from './content-column-header.component';
 import {
   ContentTextCellEditorComponent,
   type ContentTextEditorParams,
@@ -150,6 +152,7 @@ const NUMBER_FILTER_PARAMS: INumberFilterParams = {
     NzSpinModule,
     NzSwitchModule,
     NzToolTipModule,
+    ManageColumnsModalComponent,
     VersionNumberFieldComponent,
   ],
   templateUrl: './asset-content-grid.component.html',
@@ -239,6 +242,15 @@ export class AssetContentGridComponent implements OnInit {
   readonly columnKeys = signal<string[]>(DEFAULT_COLUMN_KEYS);
   /** Translating: show each source column beside its translation. */
   readonly showSource = signal(false);
+  /** Adding, labelling, reordering and deleting columns: few users may, and only
+   *  with access to every language (a column applies to all of them). */
+  readonly canManageColumns = computed(
+    () =>
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_MANAGE_ASSET_COLUMNS) &&
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS_ALL_LANGUAGES)
+  );
+  readonly manageColumnsVisible = signal(false);
+  readonly manageColumnsFocus = signal<string | null>(null);
 
   /** Undo/redo history. AG Grid's built-in undo only covers the client-side
    *  row model, so text edits are tracked here instead. */
@@ -399,6 +411,35 @@ export class AssetContentGridComponent implements OnInit {
         },
         error: (err: HttpErrorResponse) => this.showError(err),
       });
+  }
+
+  /** Open the columns dialog, optionally on one column (its header gear). */
+  openManageColumns(focusKey: string | null = null): void {
+    this.manageColumnsFocus.set(focusKey);
+    this.manageColumnsVisible.set(true);
+  }
+
+  /** The columns changed: reload them, then the draft (its keys) and its rows,
+   *  which now carry the new cells. */
+  onColumnsChanged(): void {
+    this.loadColumns();
+    void this.flushPending().then((ok) => {
+      if (!ok || this.readOnly()) return;
+      const language = this.selectedLanguage();
+      if (!language) return;
+      this.contentService
+        .createDraft(this.kind, this.slug, language)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (draft) => {
+            this.columnKeys.set(
+              draft.column_keys?.length ? draft.column_keys : DEFAULT_COLUMN_KEYS
+            );
+            this.gridApi?.refreshInfiniteCache();
+          },
+          error: (err: HttpErrorResponse) => this.showError(err),
+        });
+    });
   }
 
   /** Show or hide the source columns while translating (remembered per asset). */
@@ -1256,6 +1297,12 @@ export class AssetContentGridComponent implements OnInit {
         colId: CELL_PREFIX + key,
         headerName: title,
         headerTooltip: key,
+        headerComponent: ContentColumnHeaderComponent,
+        headerComponentParams: {
+          columnKey: key,
+          canManage: this.canManageColumns() && !this.readOnly(),
+          openManage: (columnKey: string) => this.openManageColumns(columnKey),
+        },
         valueGetter: ({ data }) =>
           data?.cells?.[key] ?? (key === this.columnKeys()[0] ? (data?.text ?? '') : ''),
         valueSetter: ({ data, newValue }) => {

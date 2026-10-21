@@ -1024,6 +1024,27 @@
         "ariaFilterFromValue": "Filter from value",
         "ariaFilterToValue": "Filter to value",
         "ariaFilterMenuOpen": "Open filter menu"
+      },
+      "COLUMNS_MANAGE": {
+        "TITLE": "Columns",
+        "ADD_COLUMN": "Add column",
+        "REORDER_NOTE": "Some columns are already in a committed version. Their keys can't change, and reordering them makes the next version major.",
+        "KEY": "Key (file header)",
+        "LABEL_EN": "English label",
+        "LABEL_AR": "Arabic label",
+        "KEY_PLACEHOLDER": "e.g. answer",
+        "ADD": "Add",
+        "DELETE_CONFIRM": "Delete this column and its draft text?",
+        "CLOSE": "Close",
+        "ERRORS": {
+          "GENERIC": "Something went wrong. Try again.",
+          "COLUMN_KEY_INVALID": "A key starts with a lowercase letter and uses only lowercase letters, digits and underscores (at most 64). Unit names such as sura or ayah can't be used.",
+          "COLUMN_KEY_TAKEN": "This asset already has a column with this key.",
+          "COLUMN_COMMITTED": "This column is in a committed version, so its key can't change and it can't be deleted.",
+          "COLUMN_LAST": "An asset needs at least one column.",
+          "COLUMN_ORDER_MISMATCH": "The columns changed meanwhile. Close the dialog and try again.",
+          "COLUMN_NOT_FOUND": "This column no longer exists."
+        }
       }
     },
     "REVIEW": {

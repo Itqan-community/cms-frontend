@@ -1,0 +1,36 @@
+.manage-columns__table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0 6px;
+
+  th {
+    text-align: start;
+    font-weight: 600;
+    padding-inline-end: 8px;
+  }
+
+  td {
+    padding-inline-end: 8px;
+    vertical-align: middle;
+  }
+}
+
+.manage-columns__actions {
+  display: flex;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.manage-columns__row--focus input {
+  border-color: var(--ant-primary-color, #1677ff);
+}
+
+.manage-columns__note {
+  opacity: 0.75;
+  margin-bottom: 8px;
+}
+
+.manage-columns__error {
+  color: #cf1322;
+  margin-top: 8px;
+}

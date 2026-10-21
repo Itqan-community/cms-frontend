@@ -37,15 +37,28 @@
           </button>
         }
       }
+      @if (canManageColumns() && !readOnly()) {
+        <button
+          nz-button
+          nzType="default"
+          class="content-grid__add-column"
+          (click)="openManageColumns()"
+          [disabled]="loading() || saving() || publishing() || savingDraft()"
+        >
+          <ng-icon name="lucidePlus" />
+          {{ 'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.ADD_COLUMN' | translate }}
+        </button>
+      }
       @if (!isEditingSource()) {
-        <label class="content-grid__show-source">
+        <span class="content-grid__show-source">
           <nz-switch
+            [attr.aria-label]="'ADMIN.CONTENT_EDITOR.SHOW_SOURCE' | translate"
             nzSize="small"
             [ngModel]="showSource()"
             (ngModelChange)="setShowSource($event)"
           ></nz-switch>
           {{ 'ADMIN.CONTENT_EDITOR.SHOW_SOURCE' | translate }}
-        </label>
+        </span>
       }
     </div>
 
@@ -385,3 +398,15 @@
     </ng-container>
   </nz-modal>
 </div>
+
+@if (canManageColumns()) {
+  <app-manage-columns-modal
+    [kind]="kind"
+    [slug]="slug"
+    [columns]="columns()"
+    [visible]="manageColumnsVisible()"
+    [focusKey]="manageColumnsFocus()"
+    (closed)="manageColumnsVisible.set(false)"
+    (changed)="onColumnsChanged()"
+  />
+}

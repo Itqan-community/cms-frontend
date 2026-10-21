@@ -216,3 +216,62 @@ describe('AssetContentGridComponent text columns', () => {
     ]);
   });
 });
+
+describe('AssetContentGridComponent column management access', () => {
+  function gridWith(granted: string[]): AssetContentGridComponent {
+    TestBed.configureTestingModule({
+      imports: [AssetContentGridComponent, TranslateModule.forRoot()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideNoopAnimations(),
+        {
+          provide: NzMessageService,
+          useValue: { success: () => void 0, error: () => void 0, info: () => void 0 },
+        },
+        { provide: NzModalService, useValue: { confirm: () => void 0, info: () => void 0 } },
+        {
+          provide: AdminAuthService,
+          useValue: { hasPermission: (code: string) => granted.includes(code) },
+        },
+        { provide: LastActiveLanguageService, useValue: { get: () => null, set: () => void 0 } },
+        { provide: Router, useValue: { navigate: () => Promise.resolve(true) } },
+      ],
+    });
+    const fixture = TestBed.createComponent(AssetContentGridComponent);
+    fixture.componentRef.setInput('template', 'ayah');
+    fixture.detectChanges();
+    return fixture.componentInstance;
+  }
+
+  function headerParams(component: AssetContentGridComponent): { canManage: boolean } {
+    const column = component.buildColumnDefs().find((col) => col.colId === 'cell__text')!;
+    return column.headerComponentParams as { canManage: boolean };
+  }
+
+  it('lets users with both permissions manage columns', () => {
+    // Arrange / Act
+    const component = gridWith(['portal_manage_asset_columns', 'portal_access_all_languages']);
+
+    // Assert
+    expect(component.canManageColumns()).toBeTrue();
+    expect(headerParams(component).canManage).toBeTrue();
+  });
+
+  it('hides column management without access to every language', () => {
+    // Arrange / Act
+    const component = gridWith(['portal_manage_asset_columns']);
+
+    // Assert
+    expect(component.canManageColumns()).toBeFalse();
+    expect(headerParams(component).canManage).toBeFalse();
+  });
+
+  it('hides column management without the manage permission', () => {
+    // Arrange / Act
+    const component = gridWith(['portal_access_all_languages']);
+
+    // Assert
+    expect(component.canManageColumns()).toBeFalse();
+  });
+});
