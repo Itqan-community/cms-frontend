@@ -56,7 +56,7 @@ import { AssetContentService } from '../../services/asset-content.service';
 import { AssetVersionsService } from '../../services/asset-versions.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import {
-  normalizeClipboardForTextPaste,
+  mapClipboardToColumns,
   parseClipboardTable,
   serializeCsv,
 } from '../../utils/clipboard-table.util';
@@ -411,7 +411,10 @@ export class AssetContentGridComponent implements OnInit {
             );
           }
         },
-        error: (err: HttpErrorResponse) => this.showError(err),
+        // A backend without columns (404) keeps the single text column, silently.
+        error: (err: HttpErrorResponse) => {
+          if (err?.status !== 404) this.showError(err);
+        },
       });
   }
 
@@ -663,25 +666,29 @@ export class AssetContentGridComponent implements OnInit {
     const text = event.clipboardData?.getData('text/plain') ?? '';
     const parsed = parseClipboardTable(text);
     if (parsed.length === 0) return;
-    // Exported CSV includes surah/ayah columns; strip those so paste into Text
-    // only writes the text values (avoids autosaving identifiers as ayah text).
-    const table = normalizeClipboardForTextPaste(parsed);
-    if (table.length === 0) return;
+    // A content CSV (the grid's own copy or a file export) is written by header into
+    // the matching text columns, so identifiers and Quran text never land in a cell.
+    const { keys, rows } = mapClipboardToColumns(parsed, this.columnKeys());
+    if (rows.length === 0) return;
     event.preventDefault();
 
-    const displayedCols = api.getAllDisplayedColumns();
-    const startColIdx = displayedCols.findIndex((c) => c.getColId() === focused.column.getColId());
+    // Anything else fills text columns rightward from the focused one, skipping the
+    // read-only columns (unit, reference, shown source columns) in between.
+    const cellCols = api
+      .getAllDisplayedColumns()
+      .map((c) => c.getColId())
+      .filter(isCellColumn);
+    const startColIdx = cellCols.indexOf(focused.column.getColId());
     if (startColIdx < 0) return;
 
     let changed = 0;
-    table.forEach((values, r) => {
+    rows.forEach((values, r) => {
       const node = api.getDisplayedRowAtIndex(focused.rowIndex + r);
       // Rows past the loaded blocks have no data yet; paste stops there.
       if (!node?.data) return;
       values.forEach((value, c) => {
-        const col = displayedCols[startColIdx + c];
-        const colId = col?.getColId();
-        if (!isCellColumn(colId)) return; // skip read-only columns
+        const colId = keys ? CELL_PREFIX + keys[c] : cellCols[startColIdx + c];
+        if (!colId) return;
         node.setDataValue(colId, value); // fires onCellValueChanged -> autosave
         changed++;
       });
@@ -709,7 +716,12 @@ export class AssetContentGridComponent implements OnInit {
     const sorted = [...rows].sort((a, b) => a.order - b.order || a.unit_id - b.unit_id);
     return [
       ['label', 'reference_text', ...keys],
-      ...sorted.map((r) => [r.label, r.reference_text, ...keys.map((key) => r.cells?.[key] ?? '')]),
+      ...sorted.map((r) => [
+        r.label,
+        r.reference_text,
+        // A row from a backend without columns carries only `text` (the first column).
+        ...keys.map((key, i) => r.cells?.[key] ?? (i === 0 ? (r.text ?? '') : '')),
+      ]),
     ];
   }
 
@@ -960,6 +972,12 @@ export class AssetContentGridComponent implements OnInit {
             error: (err: HttpErrorResponse) => {
               this.activePatchesCount--;
               this.activePatchError = true;
+              if (err?.error?.error_name === 'unknown_column') {
+                // A column was deleted or renamed elsewhere: keep only the edits of
+                // columns that still exist, so they don't block every later save.
+                void this.dropEditsOfMissingColumns(batch).then(resolve);
+                return;
+              }
               // Re-queue the failed batch so nothing is silently lost.
               for (const patch of batch) {
                 const key = `${patch.unit_id}:${patch.column}`;
@@ -985,6 +1003,52 @@ export class AssetContentGridComponent implements OnInit {
       return false;
     }
     return true;
+  }
+
+  /** Reload the columns, re-queue ``batch``'s edits of columns that still exist and
+   *  drop (with a warning) those of columns that are gone, undo history included. */
+  private dropEditsOfMissingColumns(batch: ContentEntryPatch[]): Promise<void> {
+    return new Promise((resolve) => {
+      this.contentService
+        .listColumns(this.kind, this.slug)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (columns) => {
+            this.columns.set(columns);
+            const keys = new Set(columns.map((c) => c.key));
+            this.columnKeys.update((current) => current.filter((key) => keys.has(key)));
+            let dropped = 0;
+            for (const patch of batch) {
+              const id = `${patch.unit_id}:${patch.column}`;
+              if (!keys.has(patch.column)) {
+                dropped++;
+              } else if (!this.pendingRows.has(id)) {
+                this.pendingRows.set(id, patch);
+              }
+            }
+            for (const [id, patch] of this.pendingRows) {
+              if (!keys.has(patch.column)) this.pendingRows.delete(id);
+            }
+            const keep = (edit: CellEdit) => keys.has(edit.column);
+            this.undoStack.splice(0, this.undoStack.length, ...this.undoStack.filter(keep));
+            this.redoStack.splice(0, this.redoStack.length, ...this.redoStack.filter(keep));
+            this.refreshUndoState();
+            if (dropped > 0) {
+              this.message.warning(
+                this.translate.instant('ADMIN.CONTENT_EDITOR.MESSAGES.COLUMN_EDITS_DROPPED', {
+                  count: dropped,
+                })
+              );
+            }
+            this.activePatchError = false;
+            resolve();
+          },
+          error: (err: HttpErrorResponse) => {
+            this.showError(err);
+            resolve();
+          },
+        });
+    });
   }
 
   /** Save the current edits to the draft and return to the detail page, keeping
@@ -1333,6 +1397,7 @@ export class AssetContentGridComponent implements OnInit {
         cellEditorParams: {
           sourceTitle: this.sourceColHeader(),
           readOnly: this.readOnly(),
+          columnKey: key,
         } satisfies ContentTextEditorParams,
         // Yellow when the draft differs from the published version.
         cellClassRules: { 'content-grid__cell--changed': (p) => !!p.data?.changed },

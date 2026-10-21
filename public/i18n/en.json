@@ -966,7 +966,8 @@
       },
       "MESSAGES": {
         "PUBLISHED": "Changes committed. Publish the version once its changes are approved.",
-        "DRAFT_SAVED": "Draft saved"
+        "DRAFT_SAVED": "Draft saved",
+        "COLUMN_EDITS_DROPPED": "{{count}} edit(s) of a column that was deleted or renamed elsewhere could not be saved and were discarded."
       },
       "PASTE": {
         "SELECT_EDITABLE": "Select a Text cell first, then paste.",

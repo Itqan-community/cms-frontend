@@ -211,6 +211,21 @@ export function resolveApiErrorMessage(
 }
 
 const USAGE_COUNTS_URL = /\/assets\/\d+\/usage-counts\/?(\?|$)/;
+const FILE_STRUCTURE_URL = /\/assets\/\d+\/file-structure\/?(\?|$)/;
+const ASSET_COLUMNS_URL = /\/content\/[^/]+\/[^/]+\/columns\/?(\?|$)/;
+
+/** Text-column errors the content editor and its columns dialog show themselves. */
+const CONTENT_COLUMN_ERRORS = new Set([
+  'major_bump_required',
+  'unknown_filter_column',
+  'unknown_column',
+  'column_key_invalid',
+  'column_key_taken',
+  'column_committed',
+  'column_last',
+  'column_order_mismatch',
+  'column_not_found',
+]);
 
 /** Errors handled locally by feature components — skip global interceptor toast. */
 export function shouldSuppressGlobalErrorToast(error: unknown): boolean {
@@ -225,7 +240,8 @@ export function shouldSuppressGlobalErrorToast(error: unknown): boolean {
     // Handled locally by the content editor grid with a friendly popup.
     errorName === 'no_changes_to_publish' ||
     // Gallery usage counts are turned off on the backend; the line simply stays hidden.
-    errorName === 'usage_counts_disabled'
+    errorName === 'usage_counts_disabled' ||
+    (errorName !== undefined && errorName !== null && CONTENT_COLUMN_ERRORS.has(errorName))
   ) {
     return true;
   }
@@ -236,6 +252,15 @@ export function shouldSuppressGlobalErrorToast(error: unknown): boolean {
 
   // The gallery usage-counts line is optional; any 404 (turned off, unknown asset) just hides it.
   if (error.status === 404 && USAGE_COUNTS_URL.test(error.url ?? '')) {
+    return true;
+  }
+
+  // The gallery file-structure preview hides itself when a language has none; the
+  // editor falls back to one text column on a backend that predates columns.
+  if (
+    error.status === 404 &&
+    (FILE_STRUCTURE_URL.test(error.url ?? '') || ASSET_COLUMNS_URL.test(error.url ?? ''))
+  ) {
     return true;
   }
 

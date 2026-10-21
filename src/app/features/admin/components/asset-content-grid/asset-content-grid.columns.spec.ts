@@ -343,3 +343,203 @@ describe('AssetContentGridComponent commit after a column reorder', () => {
     expect(message.error).not.toHaveBeenCalled();
   });
 });
+
+describe('AssetContentGridComponent review fixes', () => {
+  let message: {
+    success: jasmine.Spy;
+    error: jasmine.Spy;
+    info: jasmine.Spy;
+    warning: jasmine.Spy;
+  };
+
+  beforeEach(async () => {
+    message = {
+      success: jasmine.createSpy('success'),
+      error: jasmine.createSpy('error'),
+      info: jasmine.createSpy('info'),
+      warning: jasmine.createSpy('warning'),
+    };
+    await TestBed.configureTestingModule({
+      imports: [AssetContentGridComponent, TranslateModule.forRoot()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideNoopAnimations(),
+        { provide: NzMessageService, useValue: message },
+        { provide: NzModalService, useValue: { confirm: () => void 0, info: () => void 0 } },
+        { provide: AdminAuthService, useValue: { hasPermission: () => true } },
+        { provide: LastActiveLanguageService, useValue: { get: () => null, set: () => void 0 } },
+        { provide: Router, useValue: { navigate: () => Promise.resolve(true) } },
+      ],
+    }).compileComponents();
+  });
+
+  function qaGrid(): AssetContentGridComponent {
+    const fixture = TestBed.createComponent(AssetContentGridComponent);
+    fixture.componentRef.setInput('template', 'ayah');
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+    component.columns.set(QA);
+    component.columnKeys.set(['question', 'answer']);
+    return component;
+  }
+
+  /** A grid API stub over the given displayed column ids and loaded rows. */
+  function pasteApi(colIds: string[], focusedColId: string, rows: object[]) {
+    const writes: { row: number; colId: string; value: string }[] = [];
+    const columns = colIds.map((id) => ({ getColId: () => id }));
+    return {
+      writes,
+      api: {
+        getEditingCells: () => [],
+        getFocusedCell: () => ({ rowIndex: 0, column: { getColId: () => focusedColId } }),
+        getAllDisplayedColumns: () => columns,
+        getDisplayedRowAtIndex: (index: number) =>
+          rows[index]
+            ? {
+                data: rows[index],
+                setDataValue: (colId: string, value: string) =>
+                  writes.push({ row: index, colId, value }),
+              }
+            : undefined,
+      },
+    };
+  }
+
+  function pasteEvent(text: string): ClipboardEvent {
+    return {
+      clipboardData: { getData: () => text },
+      preventDefault: () => void 0,
+    } as unknown as ClipboardEvent;
+  }
+
+  it("pastes the grid's own copy back into the matching columns, never into identifiers", () => {
+    // Arrange
+    const component = qaGrid();
+    const copied = component.copyTable([
+      {
+        unit_id: 1,
+        order: 1,
+        label: '1:1',
+        reference_text: 'r',
+        cells: { question: 'Q', answer: 'A' },
+      } as never,
+    ]);
+    const { api, writes } = pasteApi(
+      ['label', 'reference_text', 'cell__question', 'cell__answer'],
+      'cell__question',
+      [{ unit_id: 2 }]
+    );
+    component.onGridReady({ api } as never);
+
+    // Act
+    component.onPaste(pasteEvent(copied.map((row) => row.join(',')).join('\n')));
+
+    // Assert
+    expect(writes).toEqual([
+      { row: 0, colId: 'cell__question', value: 'Q' },
+      { row: 0, colId: 'cell__answer', value: 'A' },
+    ]);
+  });
+
+  it('pastes spreadsheet columns onto text columns only, skipping the shown source columns', () => {
+    // Arrange
+    const component = qaGrid();
+    const { api, writes } = pasteApi(
+      ['label', 'source__question', 'cell__question', 'source__answer', 'cell__answer'],
+      'cell__question',
+      [{ unit_id: 2 }]
+    );
+    component.onGridReady({ api } as never);
+
+    // Act
+    component.onPaste(pasteEvent('Q\tA'));
+
+    // Assert
+    expect(writes).toEqual([
+      { row: 0, colId: 'cell__question', value: 'Q' },
+      { row: 0, colId: 'cell__answer', value: 'A' },
+    ]);
+  });
+
+  it('opens each column with its own source text in the editor', () => {
+    // Arrange
+    const component = qaGrid();
+
+    // Act
+    const answer = component.buildColumnDefs().find((col) => col.colId === 'cell__answer')!;
+
+    // Assert
+    expect(answer.cellEditorParams.columnKey).toBe('answer');
+  });
+
+  it('drops edits of a column that no longer exists so later edits still save', async () => {
+    // Arrange
+    const component = qaGrid();
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.match((r) => r.url.endsWith('/columns/')).forEach((req) => req.flush(QA));
+    component.draftId.set(7);
+    const row = { unit_id: 5, cells: { question: 'Q2', answer: 'A2' }, text: 'Q2' };
+    component.onCellValueChanged({
+      data: row,
+      oldValue: 'Q',
+      newValue: 'Q2',
+      colDef: { colId: 'cell__question' },
+      source: 'edit',
+    } as never);
+    component.onCellValueChanged({
+      data: row,
+      oldValue: 'A',
+      newValue: 'A2',
+      colDef: { colId: 'cell__answer' },
+      source: 'edit',
+    } as never);
+
+    // Act — `answer` was deleted in another tab
+    const first = component.keepDraftOnLeave();
+    httpMock
+      .expectOne((r) => r.method === 'PATCH')
+      .flush({ error_name: 'unknown_column' }, { status: 400, statusText: 'Bad Request' });
+    httpMock.expectOne((r) => r.url.endsWith('/columns/')).flush([QA[0]]);
+    await first;
+    await new Promise((resolve) => setTimeout(resolve));
+    const second = component.keepDraftOnLeave();
+    const retry = httpMock.expectOne((r) => r.method === 'PATCH');
+    const rows = retry.request.body.rows;
+    retry.flush([]);
+    await second;
+
+    // Assert
+    expect(rows).toEqual([{ unit_id: 5, column: 'question', text: 'Q2' }]);
+    expect(message.warning).toHaveBeenCalled();
+  });
+
+  it('keeps the single text column quietly when the backend has no columns endpoint yet', () => {
+    // Arrange
+    const component = qaGrid();
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    // Act
+    httpMock
+      .match((r) => r.url.endsWith('/columns/'))
+      .forEach((req) => req.flush({}, { status: 404, statusText: 'Not Found' }));
+    component.columnKeys.set(['text']);
+
+    // Assert
+    expect(message.error).not.toHaveBeenCalled();
+  });
+
+  it('copies the first column from `text` when a row has no cells (older backend)', () => {
+    // Arrange
+    const component = qaGrid();
+    component.columnKeys.set(['text']);
+
+    // Act
+    const table = component.copyTable([
+      { unit_id: 1, order: 1, label: '1:1', reference_text: 'r', text: 'T' } as never,
+    ]);
+
+    // Assert
+    expect(table[1]).toEqual(['1:1', 'r', 'T']);
+  });
+});

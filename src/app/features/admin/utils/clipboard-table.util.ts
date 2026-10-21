@@ -80,23 +80,33 @@ export function serializeCsv(rows: string[][]): string {
 }
 
 const CSV_ID_HEADERS = new Set(['surah', 'sura', 'ayah', 'aya', 'label', 'word_id', 'page']);
-const CSV_TEXT_HEADERS = new Set(['text']);
+
+/** Clipboard cells to write: by column key when the table has a recognised header,
+ *  else positional (`keys` null) from the focused cell. */
+export interface ClipboardCells {
+  keys: string[] | null;
+  rows: string[][];
+}
 
 /**
- * When clipboard data is a content CSV export (the grid's `label,reference_text,text`
- * copy, or a per-template download such as `surah,ayah,text`, `sura,text`,
- * `word_id,sura,aya,word,text` or `page,text`), return only the text column (no
- * header) so positional paste into a Text cell cannot overwrite unit text with
- * identifiers.
- * Raw single-column / spreadsheet pastes are returned unchanged.
+ * When clipboard data is a content CSV (the grid's `label,reference_text,<keys…>`
+ * copy, or a file export such as `surah,ayah,<keys…>`, `sura,text`,
+ * `word_id,sura,aya,word,text` or `page,text`), keep only the columns named after
+ * one of ``columnKeys`` (no header), so a paste can't write identifiers or Quran
+ * text into content cells. Anything else (a raw spreadsheet selection) is left for
+ * positional paste.
  */
-export function normalizeClipboardForTextPaste(table: string[][]): string[][] {
-  if (table.length === 0) return table;
+export function mapClipboardToColumns(table: string[][], columnKeys: string[]): ClipboardCells {
+  if (table.length === 0) return { keys: null, rows: table };
   const header = table[0].map((c) => c.trim().toLowerCase());
-  const textIdx = header.findIndex((h) => CSV_TEXT_HEADERS.has(h));
+  const known = new Set(columnKeys);
+  const indexes = header.map((h, i) => (known.has(h) ? i : -1)).filter((i) => i >= 0);
   const hasId = header.some((h) => CSV_ID_HEADERS.has(h));
-  if (textIdx < 0 || !hasId) {
-    return table;
+  if (indexes.length === 0 || !hasId) {
+    return { keys: null, rows: table };
   }
-  return table.slice(1).map((row) => [row[textIdx] ?? '']);
+  return {
+    keys: indexes.map((i) => header[i]),
+    rows: table.slice(1).map((row) => indexes.map((i) => row[i] ?? '')),
+  };
 }

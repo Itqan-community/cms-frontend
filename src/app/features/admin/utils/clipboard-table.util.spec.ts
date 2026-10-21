@@ -1,8 +1,4 @@
-import {
-  normalizeClipboardForTextPaste,
-  parseClipboardTable,
-  serializeCsv,
-} from './clipboard-table.util';
+import { mapClipboardToColumns, parseClipboardTable, serializeCsv } from './clipboard-table.util';
 
 describe('parseClipboardTable', () => {
   it('parses TSV (spreadsheet) rows and columns', () => {
@@ -82,14 +78,19 @@ describe('serializeCsv', () => {
   });
 });
 
-describe('normalizeClipboardForTextPaste', () => {
+describe('mapClipboardToColumns', () => {
+  const TEXT = ['text'];
+
   it('extracts the text column from a surah/ayah CSV export', () => {
     const table = [
       ['surah', 'ayah', 'text'],
       ['1', '1', 'In the name'],
       ['1', '2', 'Praise be'],
     ];
-    expect(normalizeClipboardForTextPaste(table)).toEqual([['In the name'], ['Praise be']]);
+    expect(mapClipboardToColumns(table, TEXT)).toEqual({
+      keys: ['text'],
+      rows: [['In the name'], ['Praise be']],
+    });
   });
 
   it("extracts the text column from the grid's label/reference_text copy", () => {
@@ -97,22 +98,31 @@ describe('normalizeClipboardForTextPaste', () => {
       ['label', 'reference_text', 'text'],
       ['2:255', 'ٱللَّهُ لَآ إِلَٰهَ', 'Allah - there is no deity'],
     ];
-    expect(normalizeClipboardForTextPaste(table)).toEqual([['Allah - there is no deity']]);
+    expect(mapClipboardToColumns(table, TEXT)).toEqual({
+      keys: ['text'],
+      rows: [['Allah - there is no deity']],
+    });
   });
 
   it('extracts the text column from word and page template exports', () => {
     expect(
-      normalizeClipboardForTextPaste([
-        ['word_id', 'sura', 'aya', 'word', 'text'],
-        ['1', '1', '1', '1', 'In the name'],
-      ])
-    ).toEqual([['In the name']]);
+      mapClipboardToColumns(
+        [
+          ['word_id', 'sura', 'aya', 'word', 'text'],
+          ['1', '1', '1', '1', 'In the name'],
+        ],
+        TEXT
+      )
+    ).toEqual({ keys: ['text'], rows: [['In the name']] });
     expect(
-      normalizeClipboardForTextPaste([
-        ['page', 'text'],
-        ['42', 'Page note'],
-      ])
-    ).toEqual([['Page note']]);
+      mapClipboardToColumns(
+        [
+          ['page', 'text'],
+          ['42', 'Page note'],
+        ],
+        TEXT
+      )
+    ).toEqual({ keys: ['text'], rows: [['Page note']] });
   });
 
   it('accepts legacy sura/aya headers', () => {
@@ -120,19 +130,44 @@ describe('normalizeClipboardForTextPaste', () => {
       ['sura', 'aya', 'text'],
       ['2', '1', 'Alif Lam'],
     ];
-    expect(normalizeClipboardForTextPaste(table)).toEqual([['Alif Lam']]);
+    expect(mapClipboardToColumns(table, TEXT)).toEqual({ keys: ['text'], rows: [['Alif Lam']] });
   });
 
-  it('leaves raw spreadsheet pastes unchanged', () => {
+  it("maps the grid's own multi-column copy onto its columns, dropping identifiers", () => {
+    const table = [
+      ['label', 'reference_text', 'question', 'answer'],
+      ['1:1', 'بسم الله', 'Q', 'A'],
+    ];
+    expect(mapClipboardToColumns(table, ['question', 'answer'])).toEqual({
+      keys: ['question', 'answer'],
+      rows: [['Q', 'A']],
+    });
+  });
+
+  it('maps a multi-column file export by header, keeping only known columns', () => {
+    const table = [
+      ['surah', 'ayah', 'answer', 'question', 'notes'],
+      ['1', '1', 'A', 'Q', 'n'],
+    ];
+    expect(mapClipboardToColumns(table, ['question', 'answer'])).toEqual({
+      keys: ['answer', 'question'],
+      rows: [['A', 'Q']],
+    });
+  });
+
+  it('leaves raw spreadsheet pastes for positional paste', () => {
     const table = [['line one'], ['line two']];
-    expect(normalizeClipboardForTextPaste(table)).toEqual(table);
+    expect(mapClipboardToColumns(table, TEXT)).toEqual({ keys: null, rows: table });
   });
 
-  it('leaves multi-column pastes without id headers unchanged', () => {
+  it('leaves multi-column pastes without id headers for positional paste', () => {
     const table = [
       ['hello', 'world'],
       ['foo', 'bar'],
     ];
-    expect(normalizeClipboardForTextPaste(table)).toEqual(table);
+    expect(mapClipboardToColumns(table, ['question', 'answer'])).toEqual({
+      keys: null,
+      rows: table,
+    });
   });
 });
