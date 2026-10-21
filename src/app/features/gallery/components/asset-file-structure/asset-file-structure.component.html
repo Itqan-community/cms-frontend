@@ -29,7 +29,9 @@
           @for (row of file.rows; track $index) {
             <tr>
               @for (cell of row; track $index) {
-                <td dir="auto">{{ cell }}</td>
+                <td>
+                  <bdi>{{ cell }}</bdi>
+                </td>
               }
             </tr>
           }
