@@ -142,6 +142,29 @@ describe('api-error-resolver.util', () => {
       expect(shouldSuppressGlobalErrorToast(err)).toBe(true);
     });
 
+    it('suppresses usage_counts_disabled (gallery counts turned off)', () => {
+      const err = new HttpErrorResponse({
+        status: 404,
+        error: { error_name: 'usage_counts_disabled', message: 'x' },
+      });
+      expect(shouldSuppressGlobalErrorToast(err)).toBe(true);
+    });
+
+    it('suppresses any 404 from the optional gallery usage counts, but not other 404s', () => {
+      const counts = new HttpErrorResponse({
+        status: 404,
+        url: 'https://api.example.com/cms-api/assets/9/usage-counts/',
+        error: { error_name: 'asset_not_found' },
+      });
+      const other = new HttpErrorResponse({
+        status: 404,
+        url: 'https://api.example.com/cms-api/assets/9/',
+        error: { error_name: 'asset_not_found' },
+      });
+      expect(shouldSuppressGlobalErrorToast(counts)).toBe(true);
+      expect(shouldSuppressGlobalErrorToast(other)).toBe(false);
+    });
+
     it('suppresses invalid_status', () => {
       const err = new HttpErrorResponse({
         status: 409,

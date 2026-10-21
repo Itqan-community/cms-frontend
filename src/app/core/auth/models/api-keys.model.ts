@@ -10,6 +10,8 @@ export interface ManagedApiKey {
   isRevoked: boolean;
   createdAt?: string;
   lastUsedAt?: string;
+  /** Public slug appended to file URLs (`?c=`) so usage is attributed to this key's app. */
+  appSlug?: string;
 }
 
 export interface ApiKeyCreateIn {
@@ -20,6 +22,7 @@ export interface ApiKeyPatchIn {
   name?: string;
   /** When true, server revokes the key (irreversible — confirm in UI). */
   revoked?: boolean;
+  app_slug?: string;
 }
 
 export interface ApiKeyCreateResult {

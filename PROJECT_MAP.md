@@ -7,25 +7,26 @@
 
 ## [TECH_STACK]
 
-| Layer        | Technology                                                 | Version  |
-| ------------ | ---------------------------------------------------------- | -------- |
-| Framework    | Angular (standalone components)                            | ^20.3.7  |
-| Language     | TypeScript                                                 | ~5.9.2   |
-| UI Library   | NG-ZORRO (Ant Design for Angular)                          | ^20.3.1  |
-| Icons        | @ng-icons/lucide                                           | ^32.5.0  |
-| i18n         | @ngx-translate/core                                        | ^17.0.0  |
-| Styling      | LESS                                                       | ^4.2.0   |
-| Auth Backend | django-allauth (headless SPA mode)                         | —        |
-| Monitoring   | Sentry                                                     | ^10.47.0 |
-| Analytics    | Google Analytics (gtag)                                    | —        |
-| Web Vitals   | web-vitals                                                 | ^5.1.0   |
-| QR Codes     | qrcode                                                     | ^1.5.4   |
-| State Mgmt   | RxJS + Angular Signals                                     | ~7.8.0   |
-| Testing      | Karma + Jasmine                                            | —        |
-| Linting      | ESLint (flat config) + Prettier                            | —        |
-| Commit       | Commitlint (conventional commits) + Husky + lint-staged    | —        |
-| Package Mgr  | npm / pnpm                                                 | —        |
-| Deployment   | Cloudflare Pages (+ Pages Functions for staging API proxy) | —        |
+| Layer        | Technology                                                  | Version          |
+| ------------ | ----------------------------------------------------------- | ---------------- |
+| Framework    | Angular (standalone components)                             | ^20.3.7          |
+| Language     | TypeScript                                                  | ~5.9.2           |
+| UI Library   | NG-ZORRO (Ant Design for Angular)                           | ^20.3.1          |
+| Icons        | @ng-icons/lucide                                            | ^32.5.0          |
+| i18n         | @ngx-translate/core                                         | ^17.0.0          |
+| Styling      | LESS                                                        | ^4.2.0           |
+| Auth Backend | django-allauth (headless SPA mode)                          | —                |
+| Monitoring   | Sentry                                                      | ^10.47.0         |
+| Analytics    | Google Analytics (gtag)                                     | —                |
+| Web Vitals   | web-vitals                                                  | ^5.1.0           |
+| QR Codes     | qrcode                                                      | ^1.5.4           |
+| Charts       | echarts (tree-shaken, lazy) + ngx-echarts (Angular 20 line) | ^6.1.0 / ^20.0.2 |
+| State Mgmt   | RxJS + Angular Signals                                      | ~7.8.0           |
+| Testing      | Karma + Jasmine                                             | —                |
+| Linting      | ESLint (flat config) + Prettier                             | —                |
+| Commit       | Commitlint (conventional commits) + Husky + lint-staged     | —                |
+| Package Mgr  | npm / pnpm                                                  | —                |
+| Deployment   | Cloudflare Pages (+ Pages Functions for staging API proxy)  | —                |
 
 ---
 
@@ -258,7 +259,7 @@ Trust, Profile, CompleteProfile
 | `/admin/issues`               | (lazy routes)          | _(permission guards commented)_   | Issue reports (list/detail/create/edit/delete); TODO enable `portal_*_issue_report` guards                                                 |
 | `/admin/members`              | (lazy routes)          | `membersAccessGuard`              | Publisher member list/invite/edit/remove/resend via `/portal/members/` (modal UX on single list)                                           |
 | `/admin/access-requests`      | (lazy routes)          | `accessRequestsAccessGuard`       | Asset access requests list/accept/reject + settings via `/portal/access-requests/` and `/portal/publishers/{id}/access-requests-settings/` |
-| `/admin/usage`                | (lazy routes)          | `portal_access`                   | API usage analytics                                                                                                                        |
+| `/admin/usage`                | (lazy routes)          | `portal_read_usage`               | Usage dashboards (+ admin tabs)                                                                                                            |
 | `**`                          | redirect -> /gallery   | —                                 | Wildcard                                                                                                                                   |
 
 ---
@@ -460,6 +461,34 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 (KFQC)/douri/shubah. **States:** loading (skeleton), error (retry), not-found (404). **i18n:**
 `MUSHAF.*` + `NAV.MUSHAF` (en/ar). **Attribution:** quranpedia quran-svg under each page.
 
+### Usage reports (`src/app/features/usage/`)
+
+**Purpose:** Usage dashboards on four surfaces, on the backend reports API (cms-backend spec
+`2026-10-18-usage-reports-design.md` §9/§20; plan
+`docs/superpowers/plans/2026-10-18-usage-reports-4-frontend.md`).
+
+| File                               | Type      | Purpose                                                                                                                                                                            |
+| ---------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `models/usage.models.ts`           | Types     | API contract (summary, timeseries, breakdown, reconciliation, public counts); `USAGE_OTHER_KEY`                                                                                    |
+| `services/usage-api.service.ts`    | Service   | One method per report with a `scope` (`publisher` → `/portal/usage/`, `admin` → `/portal/admin/usage/`, `developer` → `/cms-api/developers/usage/`); public counts → `null` on 404 |
+| `usage-echarts.ts`                 | Setup     | Tree-shaken ECharts (line, bar, pie, heatmap); loaded lazily by the chart component (own chunk)                                                                                    |
+| `utils/usage-chart-options.ts`     | Util      | Pure option builders (trend, donut, bar, hour-of-week heatmap); RTL mirrors axes and legends; `"<3"` as 0 + label                                                                  |
+| `utils/usage-filters.util.ts`      | Util      | Presets, URL query-param state, compact numbers / % change per language, granularity by range                                                                                      |
+| `utils/usage-dashboard.profile.ts` | Util      | Headline cards, metrics and panels per scope / asset category (spec §8); `itemLabel` (countries/languages via `Intl.DisplayNames`)                                                 |
+| `components/usage-chart/`          | Component | Titled chart card: loading / empty / error (retry) / view-as-table                                                                                                                 |
+| `components/usage-dashboard/`      | Component | Filter bar (URL state on pages, local on asset sections), headline cards, trend + split, panels, CSV export, last-updated + API disclaimers                                        |
+| `components/usage-leaderboard/`    | Component | Admin: top publishers / assets with previous-period change                                                                                                                         |
+| `components/usage-unseen-traffic/` | Component | Admin: R2 reads vs edge requests (unseen traffic)                                                                                                                                  |
+| `components/asset-usage-section/`  | Component | "Usage" section on font/mushaf/tafsir/translation/recitation admin detail pages (`portal_read_usage`)                                                                              |
+| `components/asset-usage-counts/`   | Component | Gallery asset page "plays · downloads · apps"; hidden unless the backend returns 200                                                                                               |
+| `pages/developer-usage/`           | Page      | `/account/usage` (developer scope), linked from `/account/api-keys`                                                                                                                |
+
+`/admin/usage` (`features/admin/usage/`): Dashboard tab for everyone with `portal_read_usage`; Itqan
+admins also get a publisher picker, Leaderboard and Unseen traffic; the Mixpanel iframe is the
+"Legacy board" tab (loaded when opened) until the usage-reports cutover. `/account/api-keys` shows
+and edits each key's public app slug (`app_slug`). The global error toast skips
+`usage_counts_disabled`.
+
 ### 6. Error (`src/app/features/error/`)
 
 **Purpose:** Error/status pages.
@@ -567,6 +596,8 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 - `GET /assets/{id}/download/` — Get download URL
 - `GET /resources/{id}/download/` — Download resource directly
 - `GET /publishers/{id}/` — Publisher detail
+- `GET /assets/{id}/usage-counts/` — Public usage counts (404 while turned off)
+- `GET /developers/usage/{summary,timeseries,breakdown}/` — Developer usage reports
 
 ### Admin Portal (`/portal/`)
 
@@ -576,8 +607,9 @@ reciters, issue reports (`/portal/issue-reports/`), publisher members (`/portal/
 (`/portal/access-requests/` — list, detail, accept, reject;
 `/portal/publishers/{id}/access-requests-settings/` — auto-acceptance), mushafs (`/portal/mushafs/`
 — CRUD + versions), fonts (`/portal/fonts/` — CRUD + versions), usage analytics, AI translate for
-create forms (`POST /portal/ai/translate/`). Programs portal module is dormant (route/nav hidden)
-until BE ships `/portal/programs/`.
+create forms (`POST /portal/ai/translate/`), usage reports (`/portal/usage/*`,
+`/portal/admin/usage/*`). Programs portal module is dormant (route/nav hidden) until BE ships
+`/portal/programs/`.
 
 Asset create/edit forms (tafsir, translation, mushaf, font, program, recitation): publisher field is
 view-only — create binds `AdminTenantService.selectedPublisherId()`; edit shows the asset publisher.
@@ -624,6 +656,8 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
 | Recitation folder variant taxonomy      | Frontend-owned    | Quality×effects vocabulary lives in `recitation-folder.util.ts` and is carried in folder names; no server-side uniqueness enforcement.                           |
 | Recitation folder variant relabelling   | Constrained       | Non-default classified folders with tracks cannot change variant (slug is public `?folder=`); default folder always editable (`?folder=default`).                |
 | Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                                                                      |
+| Usage reports API                       | Pending backend   | Needs cms-backend#557 deployed; until then the dashboards show their error state.                                                                                |
+| Usage world map                         | Deferred          | Countries show as a ranked bar + table; a world map needs a GeoJSON bundle (spec §10).                                                                           |
 | WebAuthn RP ID                          | Development mode  | `webauthnReplaceRpIdWithHostname` env flag allows RP ID patching in dev.                                                                                         |
 
 ---

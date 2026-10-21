@@ -1,0 +1,50 @@
+.usage-unseen {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &__intro {
+    margin: 0;
+    color: var(--color-neutral-400);
+  }
+
+  &__totals {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  &__total {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 12px 16px;
+    background: #fff;
+    border: 1px solid var(--color-neutral-50);
+    border-radius: var(--radius-xl);
+  }
+
+  &__label {
+    font-size: 13px;
+    color: var(--color-neutral-400);
+  }
+
+  &__value {
+    font-size: 22px;
+    font-weight: 600;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #fff;
+
+    th,
+    td {
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--color-neutral-50);
+      text-align: start;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}

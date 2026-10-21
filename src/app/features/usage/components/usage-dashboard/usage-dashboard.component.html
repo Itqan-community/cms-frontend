@@ -1,0 +1,181 @@
+<div class="usage-dashboard">
+  <div class="usage-dashboard__filters">
+    <nz-segmented
+      nzSize="small"
+      [nzOptions]="presetOptions()"
+      [ngModel]="state().preset"
+      (ngModelChange)="setPreset($event)"
+    ></nz-segmented>
+
+    @if (state().preset === 'custom') {
+      <nz-range-picker
+        nzSize="small"
+        [ngModel]="customRange()"
+        (ngModelChange)="setCustomRange($event)"
+        [nzAllowClear]="false"
+      ></nz-range-picker>
+    }
+
+    @if (profile().showCategoryFilter) {
+      <nz-select
+        class="usage-dashboard__select"
+        nzSize="small"
+        nzAllowClear
+        [nzPlaceHolder]="'USAGE.ALL_CATEGORIES' | translate"
+        [ngModel]="state().filters.category ?? null"
+        (ngModelChange)="setFilter('category', $event)"
+      >
+        @for (category of categories; track category) {
+          <nz-option [nzValue]="category" [nzLabel]="'USAGE.CATEGORIES.' + category | translate" />
+        }
+      </nz-select>
+    }
+
+    @if (profile().showAppFilter) {
+      <nz-select
+        class="usage-dashboard__select"
+        nzSize="small"
+        nzAllowClear
+        [nzPlaceHolder]="'USAGE.ALL_APPS' | translate"
+        [ngModel]="state().filters.app ?? null"
+        (ngModelChange)="setFilter('app', $event)"
+      >
+        @for (app of appOptions(); track app.id) {
+          <nz-option [nzValue]="app.id" [nzLabel]="app.name" />
+        }
+      </nz-select>
+    }
+
+    <nz-select
+      class="usage-dashboard__select"
+      nzSize="small"
+      nzAllowClear
+      [nzPlaceHolder]="'USAGE.ALL_CHANNELS' | translate"
+      [ngModel]="state().filters.channel ?? null"
+      (ngModelChange)="setFilter('channel', $event)"
+    >
+      @for (channel of channels; track channel) {
+        <nz-option [nzValue]="channel" [nzLabel]="'USAGE.CHANNELS.' + channel | translate" />
+      }
+    </nz-select>
+
+    <nz-select
+      class="usage-dashboard__select"
+      nzSize="small"
+      nzAllowClear
+      [nzPlaceHolder]="'USAGE.ALL_PLATFORMS' | translate"
+      [ngModel]="state().filters.platform ?? null"
+      (ngModelChange)="setFilter('platform', $event)"
+    >
+      @for (platform of platforms; track platform) {
+        <nz-option [nzValue]="platform" [nzLabel]="'USAGE.PLATFORMS.' + platform | translate" />
+      }
+    </nz-select>
+
+    @if (profile().showExport) {
+      <button nz-button nzSize="small" class="usage-dashboard__export" (click)="exportCsv()">
+        {{ 'USAGE.EXPORT_CSV' | translate }}
+      </button>
+    }
+  </div>
+
+  @if (summary().error) {
+    <div class="usage-dashboard__error" role="alert">
+      <p>{{ 'USAGE.LOAD_ERROR' | translate }}</p>
+      <button nz-button nzSize="small" (click)="load()">{{ 'USAGE.RETRY' | translate }}</button>
+    </div>
+  } @else {
+    <div class="usage-dashboard__cards">
+      @for (card of headlineCards(); track card.key) {
+        <div
+          class="usage-card"
+          [class.usage-card--loading]="summary().loading"
+          nz-tooltip
+          [nzTooltipTitle]="card.hint || null"
+        >
+          <span class="usage-card__label">{{ 'USAGE.METRICS.' + card.key | translate }}</span>
+          <span class="usage-card__value">{{ summary().loading ? '…' : card.value }}</span>
+          @if (card.change) {
+            <span class="usage-card__change usage-card__change--{{ card.change.direction }}">
+              {{ card.change.text }}
+              <span class="usage-card__vs">{{ 'USAGE.VS_PREVIOUS' | translate }}</span>
+            </span>
+          }
+        </div>
+      }
+    </div>
+  }
+
+  <div class="usage-dashboard__trend-controls">
+    <nz-select
+      class="usage-dashboard__select"
+      nzSize="small"
+      [ngModel]="state().metric"
+      (ngModelChange)="setMetric($event)"
+    >
+      @for (metric of profile().metrics; track metric) {
+        <nz-option [nzValue]="metric" [nzLabel]="'USAGE.METRICS.' + metric | translate" />
+      }
+    </nz-select>
+    <nz-select
+      class="usage-dashboard__select"
+      nzSize="small"
+      nzAllowClear
+      [nzPlaceHolder]="'USAGE.NO_SPLIT' | translate"
+      [ngModel]="state().split"
+      (ngModelChange)="setSplit($event)"
+    >
+      @for (split of profile().splits; track split) {
+        <nz-option [nzValue]="split" [nzLabel]="'USAGE.SPLIT_BY.' + split | translate" />
+      }
+    </nz-select>
+  </div>
+
+  <app-usage-chart
+    [title]="'USAGE.TREND' | translate: { metric: ('USAGE.METRICS.' + state().metric | translate) }"
+    [options]="trendOptions()"
+    [rows]="trendRows()"
+    [loading]="trend().loading"
+    [error]="trend().error"
+    [empty]="!trend().loading && !trend().error && trendEmpty()"
+    [height]="320"
+    (retry)="load()"
+  />
+
+  <div class="usage-dashboard__panels">
+    @for (view of panels(); track view.panel.by) {
+      <app-usage-chart
+        [class.usage-dashboard__panel--wide]="view.panel.chart === 'heatmap'"
+        [title]="'USAGE.PANELS.' + view.panel.by | translate"
+        [options]="view.options"
+        [rows]="view.rows"
+        [loading]="view.state.loading"
+        [error]="view.state.error"
+        [empty]="!view.state.loading && !view.state.error && !view.state.data?.items?.length"
+        [height]="view.panel.by === 'surah' ? 900 : 280"
+        (retry)="load()"
+      />
+    }
+  </div>
+
+  <footer class="usage-dashboard__footer">
+    @if (updatedAt(); as updated) {
+      <p class="usage-dashboard__updated">
+        {{ 'USAGE.LAST_UPDATED' | translate: { time: updated } }}
+      </p>
+    }
+    @if (summary().data?.unidentified_apps) {
+      <p>{{ 'USAGE.UNIDENTIFIED_APPS_NOTE' | translate }}</p>
+    }
+    @if (summary().data?.uniques_basis === 'monthly') {
+      <p>{{ 'USAGE.UNIQUES_MONTHLY' | translate }}</p>
+    } @else if (summary().data?.uniques_basis === 'unavailable') {
+      <p>{{ 'USAGE.UNIQUES_UNAVAILABLE' | translate }}</p>
+    }
+    <ul class="usage-dashboard__disclaimers">
+      @for (disclaimer of summary().data?.disclaimers ?? []; track disclaimer.code) {
+        <li>{{ disclaimer.text }}</li>
+      }
+    </ul>
+  </footer>
+</div>
