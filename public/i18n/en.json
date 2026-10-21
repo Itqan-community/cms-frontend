@@ -914,7 +914,8 @@
         "REVIEW_LOADING": "Reviewing changes…",
         "REVIEW_ERROR": "Could not load the change review. Close this dialog and try again.",
         "CONFIRM": "Commit",
-        "CANCEL": "Cancel"
+        "CANCEL": "Cancel",
+        "MAJOR_REQUIRED_HINT": "The columns were reordered since the last version. That changes the file layout, so this must be a major version."
       },
       "SAVING": "Saving…",
       "UNSAVED": "Unsaved changes",

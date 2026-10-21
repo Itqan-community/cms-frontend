@@ -311,7 +311,13 @@
           (startChange)="commitStart.set($event)"
           [bump]="commitBump()"
           (bumpChange)="commitBump.set($event)"
+          [minorDisabled]="commitRequiresMajor()"
         />
+        @if (commitRequiresMajor()) {
+          <p class="content-grid__major-hint" role="note">
+            {{ 'ADMIN.CONTENT_EDITOR.COMMIT.MAJOR_REQUIRED_HINT' | translate }}
+          </p>
+        }
         <div class="content-grid__text-pair">
           <div>
             <label class="content-grid__commit-label" for="content-grid-commit-label-ar">

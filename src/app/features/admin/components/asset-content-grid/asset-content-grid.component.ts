@@ -333,6 +333,8 @@ export class AssetContentGridComponent implements OnInit {
   private readonly cancelCommitLatest$ = new Subject<void>();
   readonly commitStart = signal('');
   readonly commitBump = signal<VersionBump>('minor');
+  /** The draft's columns were reordered since the last version: only major is allowed. */
+  readonly commitRequiresMajor = signal(false);
   readonly commitNumberIncomplete = computed(
     () =>
       this.commitLatestLoading() ||
@@ -435,6 +437,7 @@ export class AssetContentGridComponent implements OnInit {
             this.columnKeys.set(
               draft.column_keys?.length ? draft.column_keys : DEFAULT_COLUMN_KEYS
             );
+            this.commitRequiresMajor.set(!!draft.requires_major);
             this.gridApi?.refreshInfiniteCache();
           },
           error: (err: HttpErrorResponse) => this.showError(err),
@@ -802,6 +805,7 @@ export class AssetContentGridComponent implements OnInit {
           if (generation !== this.loadGeneration) return;
           this.draftId.set(draft.id);
           this.columnKeys.set(draft.column_keys?.length ? draft.column_keys : DEFAULT_COLUMN_KEYS);
+          this.commitRequiresMajor.set(!!draft.requires_major);
           this.draftLabels = { label_en: draft.label_en ?? '', label_ar: draft.label_ar ?? '' };
           this.refreshPendingCount();
           this.loadTemplate(generation);
@@ -1033,7 +1037,7 @@ export class AssetContentGridComponent implements OnInit {
       if (!ok) return;
       this.commitText.set({ ...EMPTY_VERSION_TEXT, ...this.draftLabels });
       this.commitStart.set('');
-      this.commitBump.set('minor');
+      this.commitBump.set(this.commitRequiresMajor() ? 'major' : 'minor');
       this.loadCommitLatest();
       this.pendingChanges.set([]);
       this.pendingError.set(false);
@@ -1121,9 +1125,20 @@ export class AssetContentGridComponent implements OnInit {
         },
         error: (err: HttpErrorResponse) => {
           this.committing.set(false);
-          this.showError(err);
+          this.handleCommitError(err);
         },
       });
+  }
+
+  /** A commit failed. When the server requires a major version (columns were
+   *  reordered meanwhile), switch the dialog to major and explain why there. */
+  handleCommitError(err: HttpErrorResponse): void {
+    if (err?.error?.error_name === 'major_bump_required') {
+      this.commitRequiresMajor.set(true);
+      this.commitBump.set('major');
+      return;
+    }
+    this.showError(err);
   }
 
   /** Confirm, then discard the draft and leave. */

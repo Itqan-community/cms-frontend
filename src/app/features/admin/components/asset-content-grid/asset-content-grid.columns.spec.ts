@@ -275,3 +275,71 @@ describe('AssetContentGridComponent column management access', () => {
     expect(component.canManageColumns()).toBeFalse();
   });
 });
+
+describe('AssetContentGridComponent commit after a column reorder', () => {
+  let message: { success: jasmine.Spy; error: jasmine.Spy; info: jasmine.Spy };
+
+  beforeEach(async () => {
+    message = {
+      success: jasmine.createSpy('success'),
+      error: jasmine.createSpy('error'),
+      info: jasmine.createSpy('info'),
+    };
+    await TestBed.configureTestingModule({
+      imports: [AssetContentGridComponent, TranslateModule.forRoot()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideNoopAnimations(),
+        { provide: NzMessageService, useValue: message },
+        { provide: NzModalService, useValue: { confirm: () => void 0, info: () => void 0 } },
+        { provide: AdminAuthService, useValue: { hasPermission: () => true } },
+        { provide: LastActiveLanguageService, useValue: { get: () => null, set: () => void 0 } },
+        { provide: Router, useValue: { navigate: () => Promise.resolve(true) } },
+      ],
+    }).compileComponents();
+  });
+
+  function grid(): AssetContentGridComponent {
+    const fixture = TestBed.createComponent(AssetContentGridComponent);
+    fixture.componentRef.setInput('template', 'ayah');
+    fixture.detectChanges();
+    return fixture.componentInstance;
+  }
+
+  it('opens the commit dialog on a major version with minor unavailable', async () => {
+    // Arrange
+    const component = grid();
+    component.draftId.set(7);
+    component.commitRequiresMajor.set(true);
+
+    // Act
+    component.openCommit();
+    await Promise.resolve();
+    await Promise.resolve();
+
+    // Assert
+    expect(component.commitBump()).toBe('major');
+  });
+
+  it('switches to major and explains why when the server requires it', () => {
+    // Arrange
+    const component = grid();
+    component.commitDialogVisible.set(true);
+    component.commitBump.set('minor');
+
+    // Act
+    component.handleCommitError(
+      new HttpErrorResponse({
+        status: 400,
+        error: { error_name: 'major_bump_required', message: 'x' },
+      })
+    );
+
+    // Assert
+    expect(component.commitDialogVisible()).toBeTrue();
+    expect(component.commitBump()).toBe('major');
+    expect(component.commitRequiresMajor()).toBeTrue();
+    expect(message.error).not.toHaveBeenCalled();
+  });
+});
