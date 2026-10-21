@@ -894,6 +894,7 @@
       "SUBTITLE": "Manage platform content and settings"
     },
     "CONTENT_EDITOR": {
+      "SHOW_SOURCE": "Show source",
       "TITLE": "Edit content",
       "HINT": "Edit the text unit by unit. Changes autosave to a draft; publish to create a new version. Tip: select a Text cell and paste (Ctrl+V) CSV/spreadsheet rows to fill cells downward.",
       "BACK": "Back to details",

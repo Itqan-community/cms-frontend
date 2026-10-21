@@ -36,9 +36,11 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
+import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { Subject, debounceTime, takeUntil } from 'rxjs';
 import type {
+  AssetColumn,
   AssetLanguage,
   AssetTemplate,
   AssetVersionParentKind,
@@ -58,6 +60,7 @@ import {
   parseClipboardTable,
   serializeCsv,
 } from '../../utils/clipboard-table.util';
+import { columnLabel } from '../../utils/column-label.util';
 import { ISO_639_LANGUAGES, localizedLanguageName } from '../../utils/iso-639.util';
 import { isVersionNumber } from '../../utils/version-number.util';
 import { ContentChangesComponent } from '../content-changes/content-changes.component';
@@ -86,7 +89,16 @@ export function suppressClearKeys(params: SuppressKeyboardEventParams<ContentEnt
 }
 
 /** Columns the positional paste is allowed to write into. */
-const EDITABLE_FIELDS = new Set<string>(['text']);
+/** Column ids of a text column's own cells and of its source-language reference. */
+const CELL_PREFIX = 'cell__';
+const SOURCE_PREFIX = 'source__';
+/** Before the asset's columns load, a grid shows the single default column. */
+const DEFAULT_COLUMN_KEYS = ['text'];
+
+/** Whether a grid column holds editable cells (a text column of the edited version). */
+function isCellColumn(colId: string | undefined): colId is string {
+  return !!colId && colId.startsWith(CELL_PREFIX);
+}
 
 /** Language codes that should render with RTL direction in the source column. */
 const RTL_LANGUAGE_CODES = new Set(['ar', 'fa', 'ur', 'ps', 'ku', 'he', 'yi', 'sd', 'ug']);
@@ -107,6 +119,8 @@ const HISTORY_SOURCE = 'history';
 /** A text-cell edit, replayable by undo/redo. */
 interface CellEdit {
   unitId: number;
+  /** Text column key. */
+  column: string;
   oldValue: string;
   newValue: string;
 }
@@ -134,6 +148,7 @@ const NUMBER_FILTER_PARAMS: INumberFilterParams = {
     NzModalModule,
     NzSelectModule,
     NzSpinModule,
+    NzSwitchModule,
     NzToolTipModule,
     VersionNumberFieldComponent,
   ],
@@ -216,7 +231,14 @@ export class AssetContentGridComponent implements OnInit {
   private pendingCountRequest = 0;
 
   /** Unit ids with unsaved edits pending the next autosave flush. */
-  private readonly pendingRows = new Map<number, ContentEntryPatch>();
+  /** Unsaved cells keyed `${unit_id}:${column}`. */
+  private readonly pendingRows = new Map<string, ContentEntryPatch>();
+  /** The asset's text columns (keys, labels), for headers. */
+  readonly columns = signal<AssetColumn[]>([]);
+  /** The shown version's text column keys, in file order. */
+  readonly columnKeys = signal<string[]>(DEFAULT_COLUMN_KEYS);
+  /** Translating: show each source column beside its translation. */
+  readonly showSource = signal(false);
 
   /** Undo/redo history. AG Grid's built-in undo only covers the client-side
    *  row model, so text edits are tracked here instead. */
@@ -356,7 +378,49 @@ export class AssetContentGridComponent implements OnInit {
     this.autosave$
       .pipe(debounceTime(AUTOSAVE_DEBOUNCE_MS), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => void this.flushPending());
+    this.showSource.set(this.readShowSource());
+    this.loadColumns();
     this.loadLanguages();
+  }
+
+  /** Load the asset's text columns (labels for headers; reloaded after edits to them). */
+  loadColumns(): void {
+    this.contentService
+      .listColumns(this.kind, this.slug)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (columns) => {
+          this.columns.set(columns);
+          if (this.draftId() === null || !this.readOnly()) {
+            this.columnKeys.set(
+              columns.length > 0 ? columns.map((c) => c.key) : DEFAULT_COLUMN_KEYS
+            );
+          }
+        },
+        error: (err: HttpErrorResponse) => this.showError(err),
+      });
+  }
+
+  /** Show or hide the source columns while translating (remembered per asset). */
+  setShowSource(show: boolean): void {
+    this.showSource.set(show);
+    try {
+      localStorage.setItem(this.showSourceKey(), show ? '1' : '0');
+    } catch {
+      // Storage unavailable (private mode): the choice lasts for this page only.
+    }
+  }
+
+  private readShowSource(): boolean {
+    try {
+      return localStorage.getItem(this.showSourceKey()) === '1';
+    } catch {
+      return false;
+    }
+  }
+
+  private showSourceKey(): string {
+    return `content-grid:show-source:${this.slug}`;
   }
 
   /** True while there are edits not yet persisted to the draft. */
@@ -373,25 +437,30 @@ export class AssetContentGridComponent implements OnInit {
     // A committed version is never edited here (the grid also sets readOnlyEdit).
     if (this.readOnly()) return;
     const row = event.data;
+    const colId = event.colDef?.colId;
+    const column = isCellColumn(colId) ? colId.slice(CELL_PREFIX.length) : this.columnKeys()[0];
+    const text =
+      (event.newValue as string | null | undefined) ?? row.cells?.[column] ?? row.text ?? '';
     // Assume the edit differs from the published text until the autosave
     // response says otherwise (see `applySavedRows`).
     row.changed = true;
     // `force`: the grid has already drawn the new value, so a plain refresh skips it.
     if (event.node) {
-      this.gridApi?.refreshCells({ rowNodes: [event.node], columns: ['text'], force: true });
+      this.gridApi?.refreshCells({
+        rowNodes: [event.node],
+        columns: [CELL_PREFIX + column],
+        force: true,
+      });
     }
-    this.pendingRows.set(row.unit_id, {
-      unit_id: row.unit_id,
-      column: '',
-      text: row.text ?? '',
-    });
+    this.pendingRows.set(`${row.unit_id}:${column}`, { unit_id: row.unit_id, column, text });
     this.dirty.set(true);
     this.autosave$.next();
     if (event.source !== HISTORY_SOURCE) {
       this.undoStack.push({
         unitId: row.unit_id,
+        column,
         oldValue: (event.oldValue as string | null) ?? '',
-        newValue: row.text ?? '',
+        newValue: text,
       });
       if (this.undoStack.length > UNDO_LIMIT) this.undoStack.shift();
       this.redoStack.length = 0;
@@ -440,9 +509,13 @@ export class AssetContentGridComponent implements OnInit {
     to.push(edit);
     const node = this.gridApi?.getRowNode(String(edit.unitId));
     if (node?.data) {
-      node.setDataValue('text', edit[value], HISTORY_SOURCE); // -> onCellValueChanged
+      node.setDataValue(CELL_PREFIX + edit.column, edit[value], HISTORY_SOURCE); // -> onCellValueChanged
     } else {
-      this.pendingRows.set(edit.unitId, { unit_id: edit.unitId, column: '', text: edit[value] });
+      this.pendingRows.set(`${edit.unitId}:${edit.column}`, {
+        unit_id: edit.unitId,
+        column: edit.column,
+        text: edit[value],
+      });
       this.dirty.set(true);
       this.autosave$.next();
       this.refreshUndoState();
@@ -498,12 +571,23 @@ export class AssetContentGridComponent implements OnInit {
               error: (err: HttpErrorResponse) => {
                 done();
                 params.failCallback();
-                this.showError(err);
+                this.handleEntriesError(err);
               },
             });
         });
       },
     };
+  }
+
+  /** An entries request failed. A filter on a column that no longer exists (deleted
+   *  elsewhere) is dropped and the columns reloaded, rather than failing forever. */
+  handleEntriesError(err: HttpErrorResponse): void {
+    if (err?.error?.error_name === 'unknown_filter_column') {
+      this.gridApi?.setFilterModel(null);
+      this.loadColumns();
+      return;
+    }
+    this.showError(err);
   }
 
   /** Rebuilt whenever the draft changes (e.g. switching language), so AG Grid
@@ -527,8 +611,7 @@ export class AssetContentGridComponent implements OnInit {
     const focused = api.getFocusedCell();
     if (!focused) return;
 
-    const startField = focused.column.getColDef().field;
-    if (!startField || !EDITABLE_FIELDS.has(startField)) {
+    if (!isCellColumn(focused.column.getColId())) {
       this.message.info(this.translate.instant('ADMIN.CONTENT_EDITOR.PASTE.SELECT_EDITABLE'));
       return;
     }
@@ -553,9 +636,9 @@ export class AssetContentGridComponent implements OnInit {
       if (!node?.data) return;
       values.forEach((value, c) => {
         const col = displayedCols[startColIdx + c];
-        const field = col?.getColDef().field;
-        if (!field || !EDITABLE_FIELDS.has(field)) return; // skip read-only columns
-        node.setDataValue(field, value); // fires onCellValueChanged -> autosave
+        const colId = col?.getColId();
+        if (!isCellColumn(colId)) return; // skip read-only columns
+        node.setDataValue(colId, value); // fires onCellValueChanged -> autosave
         changed++;
       });
     });
@@ -576,6 +659,16 @@ export class AssetContentGridComponent implements OnInit {
    * with a header). Pasting back into a Text cell is header-aware and writes
    * only the text column.
    */
+  /** The copied table: unit label, reference text, then every text column, in unit order. */
+  copyTable(rows: ContentEntry[]): string[][] {
+    const keys = this.columnKeys();
+    const sorted = [...rows].sort((a, b) => a.order - b.order || a.unit_id - b.unit_id);
+    return [
+      ['label', 'reference_text', ...keys],
+      ...sorted.map((r) => [r.label, r.reference_text, ...keys.map((key) => r.cells?.[key] ?? '')]),
+    ];
+  }
+
   copySelectedToCsv(): void {
     const api = this.gridApi;
     if (!api) return;
@@ -584,12 +677,7 @@ export class AssetContentGridComponent implements OnInit {
       this.message.info(this.translate.instant('ADMIN.CONTENT_EDITOR.COPY.NONE_SELECTED'));
       return;
     }
-    selected.sort((a, b) => a.order - b.order || a.unit_id - b.unit_id);
-    const table: string[][] = [
-      ['label', 'reference_text', 'text'],
-      ...selected.map((r) => [r.label, r.reference_text, r.text ?? '']),
-    ];
-    const csv = serializeCsv(table);
+    const csv = serializeCsv(this.copyTable(selected));
     navigator.clipboard.writeText(csv).then(
       () =>
         this.message.success(
@@ -641,6 +729,9 @@ export class AssetContentGridComponent implements OnInit {
         next: (version) => {
           if (generation !== this.loadGeneration) return;
           this.viewedVersion.set(version);
+          this.columnKeys.set(
+            version.column_keys?.length ? version.column_keys : DEFAULT_COLUMN_KEYS
+          );
           this.selectedLanguage.set(version.language);
           this.draftId.set(version.id);
           this.loadTemplate(generation);
@@ -669,6 +760,7 @@ export class AssetContentGridComponent implements OnInit {
         next: (draft) => {
           if (generation !== this.loadGeneration) return;
           this.draftId.set(draft.id);
+          this.columnKeys.set(draft.column_keys?.length ? draft.column_keys : DEFAULT_COLUMN_KEYS);
           this.draftLabels = { label_en: draft.label_en ?? '', label_ar: draft.label_ar ?? '' };
           this.refreshPendingCount();
           this.loadTemplate(generation);
@@ -780,14 +872,18 @@ export class AssetContentGridComponent implements OnInit {
     const api = this.gridApi;
     if (!api) return;
     const nodes = [];
+    const pendingUnits = new Set(Array.from(this.pendingRows.values(), (patch) => patch.unit_id));
     for (const row of saved) {
-      if (this.pendingRows.has(row.unit_id)) continue;
+      if (pendingUnits.has(row.unit_id)) continue;
       const node = api.getRowNode(String(row.unit_id));
       if (!node?.data) continue;
       node.data.changed = row.changed ?? false;
       nodes.push(node);
     }
-    if (nodes.length > 0) api.refreshCells({ rowNodes: nodes, columns: ['text'], force: true });
+    if (nodes.length > 0) {
+      const columns = this.columnKeys().map((key) => CELL_PREFIX + key);
+      api.refreshCells({ rowNodes: nodes, columns, force: true });
+    }
   }
 
   /** Persist any pending edits to the draft. `true` on success/nothing to save. */
@@ -821,8 +917,9 @@ export class AssetContentGridComponent implements OnInit {
               this.activePatchError = true;
               // Re-queue the failed batch so nothing is silently lost.
               for (const patch of batch) {
-                if (!this.pendingRows.has(patch.unit_id)) {
-                  this.pendingRows.set(patch.unit_id, patch);
+                const key = `${patch.unit_id}:${patch.column}`;
+                if (!this.pendingRows.has(key)) {
+                  this.pendingRows.set(key, patch);
                 }
               }
               this.showError(err);
@@ -1131,43 +1228,67 @@ export class AssetContentGridComponent implements OnInit {
       });
     }
 
-    // When editing a translation, show the source language read-only alongside.
-    if (!this.isEditingSource()) {
+    // One editable column per text column. When translating with "show source" on,
+    // each source column sits read-only right before its translation.
+    const showSource = !this.isEditingSource() && this.showSource();
+    for (const key of this.columnKeys()) {
+      const title = this.columnTitle(key);
+      if (showSource) {
+        columns.push({
+          colId: SOURCE_PREFIX + key,
+          headerName: `${this.colHeader('SOURCE')} · ${title}`,
+          headerTooltip: key,
+          valueGetter: ({ data }) => data?.source_cells?.[key] ?? '',
+          flex: 2,
+          // "Editable" only so a cell opens the text popup in read-only mode:
+          // rows are one line tall, and this is the only way to read it all.
+          editable: true,
+          cellEditor: ContentTextCellEditorComponent,
+          cellEditorPopup: true,
+          cellEditorParams: { readOnly: true } satisfies ContentTextEditorParams,
+          // Being "editable", AG Grid would clear it on Delete/Backspace without the popup.
+          suppressKeyboardEvent: suppressClearKeys,
+          cellStyle: { direction: this.sourceTextDirection() },
+          ...textFilter,
+        });
+      }
       columns.push({
-        field: 'source_text',
-        headerName: this.sourceColHeader(),
+        colId: CELL_PREFIX + key,
+        headerName: title,
+        headerTooltip: key,
+        valueGetter: ({ data }) =>
+          data?.cells?.[key] ?? (key === this.columnKeys()[0] ? (data?.text ?? '') : ''),
+        valueSetter: ({ data, newValue }) => {
+          data.cells = { ...(data.cells ?? {}), [key]: (newValue as string | null) ?? '' };
+          if (key === this.columnKeys()[0]) data.text = data.cells[key];
+          return true;
+        },
         flex: 2,
-        // "Editable" only so a cell opens the text popup in read-only mode:
-        // rows are one line tall, and this is the only way to read it all.
         editable: true,
         cellEditor: ContentTextCellEditorComponent,
         cellEditorPopup: true,
-        cellEditorParams: { readOnly: true } satisfies ContentTextEditorParams,
-        // Being "editable", AG Grid would clear it on Delete/Backspace without the popup.
-        suppressKeyboardEvent: suppressClearKeys,
-        cellStyle: { direction: this.sourceTextDirection() },
+        // Read-only mode still opens the popup, to read long text in full.
+        cellEditorParams: {
+          sourceTitle: this.sourceColHeader(),
+          readOnly: this.readOnly(),
+        } satisfies ContentTextEditorParams,
+        // Yellow when the draft differs from the published version.
+        cellClassRules: { 'content-grid__cell--changed': (p) => !!p.data?.changed },
         ...textFilter,
       });
     }
 
-    columns.push({
-      field: 'text',
-      headerName: this.colHeader('TEXT'),
-      flex: 2,
-      editable: true,
-      cellEditor: ContentTextCellEditorComponent,
-      cellEditorPopup: true,
-      // Read-only mode still opens the popup, to read long text in full.
-      cellEditorParams: {
-        sourceTitle: this.sourceColHeader(),
-        readOnly: this.readOnly(),
-      } satisfies ContentTextEditorParams,
-      // Yellow when the draft differs from the published version.
-      cellClassRules: { 'content-grid__cell--changed': (p) => !!p.data?.changed },
-      ...textFilter,
-    });
-
     return columns;
+  }
+
+  /** A text column's header: its label in the interface language, else its key. The
+   *  single default `text` column keeps the editor's own "Text" heading. */
+  private columnTitle(key: string): string {
+    const column = this.columns().find((c) => c.key === key);
+    if (column && (column.label_en || column.label_ar)) {
+      return columnLabel(column, this.translate.currentLang);
+    }
+    return key === 'text' && this.columnKeys().length === 1 ? this.colHeader('TEXT') : key;
   }
 
   /** Header for the read-only source-reference column (shows the source language). */

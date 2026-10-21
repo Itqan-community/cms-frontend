@@ -37,6 +37,16 @@
           </button>
         }
       }
+      @if (!isEditingSource()) {
+        <label class="content-grid__show-source">
+          <nz-switch
+            nzSize="small"
+            [ngModel]="showSource()"
+            (ngModelChange)="setShowSource($event)"
+          ></nz-switch>
+          {{ 'ADMIN.CONTENT_EDITOR.SHOW_SOURCE' | translate }}
+        </label>
+      }
     </div>
 
     @if (!readOnly()) {
