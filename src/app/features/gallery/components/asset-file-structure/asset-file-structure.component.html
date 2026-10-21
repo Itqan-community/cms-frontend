@@ -1,0 +1,40 @@
+@if (structure(); as file) {
+  <section class="file-structure">
+    <div class="file-structure__header">
+      <ng-icon name="lucideFileText" />
+      <h3 class="file-structure__title">{{ 'GALLERY.FILE_STRUCTURE.TITLE' | translate }}</h3>
+    </div>
+    <p class="file-structure__format">
+      {{
+        'GALLERY.FILE_STRUCTURE.FORMAT'
+          | translate
+            : { unit: ('GALLERY.FILE_STRUCTURE.UNITS.' + file.template.toUpperCase() | translate) }
+      }}
+    </p>
+    <div class="file-structure__scroll">
+      <table class="file-structure__table">
+        <thead>
+          <tr>
+            @for (name of file.header; track name) {
+              <th>
+                <code dir="ltr">{{ name }}</code>
+                @if (labelOf(file, name); as label) {
+                  <span class="file-structure__label" dir="auto">{{ label }}</span>
+                }
+              </th>
+            }
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of file.rows; track $index) {
+            <tr>
+              @for (cell of row; track $index) {
+                <td dir="auto">{{ cell }}</td>
+              }
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </section>
+}

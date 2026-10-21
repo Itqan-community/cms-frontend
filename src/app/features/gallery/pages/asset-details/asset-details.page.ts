@@ -37,6 +37,7 @@ import {
 import { IssuesService } from '../../../admin/issues/services/issues.service';
 import { localizedLanguageName } from '../../../admin/utils/iso-639.util';
 import { AssetDetails } from '../../models/assets.model';
+import { AssetFileStructureComponent } from '../../components/asset-file-structure/asset-file-structure.component';
 import { ItqanAddCommandComponent } from '../../components/itqan-add-command/itqan-add-command.component';
 import { AssetLicenseAcceptanceService } from '../../services/asset-license-acceptance.service';
 import { AssetsService } from '../../services/assets.service';
@@ -45,6 +46,7 @@ import { AssetUsageCountsComponent } from '../../../usage/components/asset-usage
 @Component({
   selector: 'app-asset-details-page',
   imports: [
+    AssetFileStructureComponent,
     AssetUsageCountsComponent,
     RouterModule,
     ImageCarouselComponent,

@@ -595,6 +595,16 @@
       "COPY": "نسخ الأمر",
       "COPIED": "تم نسخ الأمر",
       "GET_CLI": "ليست لديك أداة itqan؟ احصل عليها"
+    },
+    "FILE_STRUCTURE": {
+      "TITLE": "بنية الملف",
+      "FORMAT": "CSV · صف لكل {{unit}}",
+      "UNITS": {
+        "SURAH": "سورة",
+        "AYAH": "آية",
+        "WORD": "كلمة",
+        "PAGE": "صفحة"
+      }
     }
   },
   "UI": {

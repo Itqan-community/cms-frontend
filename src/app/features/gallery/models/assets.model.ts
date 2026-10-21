@@ -64,3 +64,16 @@ interface AssetSnapshot {
   title: string;
   description: string;
 }
+
+/** What a translation / tafsir download looks like: its CSV layout and a few rows. */
+export interface AssetFileStructure {
+  format: 'csv';
+  /** What one row is: surah, ayah, word or page. */
+  template: AssetTemplate;
+  /** The CSV header: unit columns, then one per text column. */
+  header: string[];
+  /** The text columns, with their display labels. */
+  columns: { key: string; label_en: string; label_ar: string }[];
+  /** Up to three sample rows, as in the file. */
+  rows: string[][];
+}

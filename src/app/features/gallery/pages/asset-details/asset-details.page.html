@@ -58,6 +58,12 @@
             <app-image-carousel [images]="images()" />
           </div>
         </div>
+
+        <app-asset-file-structure
+          [assetId]="asset()!.id"
+          [category]="asset()!.category"
+          [language]="selectedLanguage()"
+        />
       </div>
 
       <!-- Sidebar -->

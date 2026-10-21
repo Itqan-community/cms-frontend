@@ -595,6 +595,16 @@
       "COPY": "Copy command",
       "COPIED": "Command copied",
       "GET_CLI": "Don't have the itqan CLI? Get it"
+    },
+    "FILE_STRUCTURE": {
+      "TITLE": "File structure",
+      "FORMAT": "CSV · one row per {{unit}}",
+      "UNITS": {
+        "SURAH": "surah",
+        "AYAH": "ayah",
+        "WORD": "word",
+        "PAGE": "page"
+      }
     }
   },
   "UI": {
