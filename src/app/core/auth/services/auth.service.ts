@@ -203,7 +203,9 @@ export class AuthService {
             }
             return of(void 0);
           }
-          this.provisionalSession.set(false);
+          // The provisional flag is cleared once the profile is in (below): clearing it
+          // now would make `authReady` false for that round trip and hold every
+          // route guard evaluated meanwhile until the profile lands.
           return this.getProfile().pipe(
             tap((p) => {
               this.applyProfileFromApi(p);
@@ -215,6 +217,7 @@ export class AuthService {
           );
         }),
         tap(() => {
+          this.provisionalSession.set(false);
           this.bootstrapDone.set(true);
           this.redirectPrimed = true;
         }),
