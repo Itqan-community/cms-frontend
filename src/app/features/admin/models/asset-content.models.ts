@@ -37,6 +37,8 @@ export interface ContentDraftVersion extends VersionText {
   column_keys: string[];
   /** Columns were reordered since the last version: committing must be major. */
   requires_major: boolean;
+  /** The asset's unit template; absent from older backends. */
+  template?: AssetTemplate | null;
 }
 
 /** Content granularity of a text asset. Fixed when the asset is created. */

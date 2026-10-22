@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { firstValueFrom, of, throwError } from 'rxjs';
+import { Subject, firstValueFrom, of, throwError } from 'rxjs';
 import type { AuthenticatedResponse, ConfigurationResponse } from '../headless/headless-api.types';
 import {
   ALLAUTH_SESSION_TOKEN_STORAGE_KEY,
@@ -275,6 +275,90 @@ describe('AuthService (app / headless)', () => {
     await svc.bootstrapOnce();
     expect(svc.getCurrentUser()?.permissions).toEqual(['portal_access']);
     expect(svc.bootstrapDone()).toBe(true);
+  });
+
+  /** An AuthService restored from a cached login of `cachedId`, whose profile request
+   *  stays in flight until the returned subject settles. */
+  function serviceWithCachedUser(cachedId: string): {
+    svc: AuthService;
+    profile: Subject<unknown>;
+  } {
+    localStorage.setItem('sessionToken', 'tok');
+    localStorage.setItem(
+      'user',
+      JSON.stringify({
+        id: cachedId,
+        name: 'Cached',
+        email: 'c@example.com',
+        phone: '',
+        is_active: true,
+        is_profile_completed: true,
+        permissions: ['portal_access'],
+        is_admin: true,
+      })
+    );
+    TestBed.resetTestingModule();
+    const profile = new Subject<unknown>();
+    httpClientMock.get.and.returnValue(profile);
+    headless.getAuth.and.returnValue(of(authedResponse()));
+    TestBed.configureTestingModule({
+      providers: [
+        AuthService,
+        { provide: HttpClient, useValue: httpClientMock },
+        { provide: Router, useValue: routerMock },
+        { provide: HeadlessAuthApiService, useValue: headless },
+        {
+          provide: TranslateService,
+          useValue: {
+            instant: (key: string) => key,
+            getCurrentLang: () => 'en',
+            onLangChange: of({ lang: 'en' }),
+          },
+        },
+        {
+          provide: NzMessageService,
+          useValue: jasmine.createSpyObj<NzMessageService>('NzMessageService', [
+            'warning',
+            'error',
+            'success',
+            'info',
+          ]),
+        },
+      ],
+    });
+    return { svc: TestBed.inject(AuthService), profile };
+  }
+
+  it('bootstrapOnce keeps protected routes ready while the profile loads', async () => {
+    // Arrange — a cached login; the session confirms it, the profile is still in flight
+    const { svc, profile } = serviceWithCachedUser(String(mockUser.id));
+
+    // Act
+    const done = svc.bootstrapOnce();
+
+    // Assert — guards evaluated now don't wait a round trip for the profile
+    expect(svc.bootstrapDone()).toBe(false);
+    expect(svc.authReady()).toBe(true);
+    profile.error(new HttpErrorResponse({ status: 500 }));
+    await done;
+    expect(svc.bootstrapDone()).toBe(true);
+    expect(svc.hasProvisionalSession()).toBe(false);
+  });
+
+  it("bootstrapOnce doesn't lend the cached user's access to a different session user", async () => {
+    // Arrange — the browser cached user 2, but the session token now belongs to user 1
+    const { svc, profile } = serviceWithCachedUser('2');
+
+    // Act
+    const done = svc.bootstrapOnce();
+
+    // Assert — guards wait for user 1's own profile; nothing of user 2's is kept
+    expect(svc.authReady()).toBe(false);
+    expect(svc.getCurrentUser()?.permissions ?? []).toEqual([]);
+    expect(svc.getCurrentUser()?.is_admin).not.toBe(true);
+    profile.error(new HttpErrorResponse({ status: 500 }));
+    await done;
+    expect(svc.authReady()).toBe(true);
   });
 
   it('bootstrapOnce authenticates when session token exists in localStorage (new tab)', async () => {

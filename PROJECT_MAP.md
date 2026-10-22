@@ -62,7 +62,8 @@ User Browser
    so admin guards can allow access without unauthorized flash (authReady = provisional OR bootstrapDone).
 3. Background validate: GET app `/auth/session` (token if present); if not established, GET browser
    `/auth/session` (credentials). Parallel GET `/config`. On success merge GET `/auth/profile/`
-   permissions; on profile failure keep cached permissions. Invalid session with provisional cache
+   permissions; on profile failure keep cached permissions. The provisional flag stays set until the
+   profile is applied, so guards never wait on it. Invalid session with provisional cache
    → clear + login + SESSION_EXPIRED when applicable. `storage` event syncs login/logout across tabs.
 4. Public routes never wait; authGuard / portalAccessGuard / permissionGuard wait on authReady.
 5. Login: POST /auth/login -> session_token (+ optional JWTs). Interceptor attaches X-Session-Token
@@ -388,18 +389,22 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   edit only reloads the headers). Changed cells are highlighted per column (`changed_columns`).
   After a reorder the commit dialog allows only a major version (`requires_major`, or a
   `major_bump_required` answer). Diffs and review rows name each change's column when the asset has
-  several. Column set is driven by `effectiveTemplate()` (the `template` input, falling back to a
-  one-row probe's `unit_type`). Every template uses AG Grid's infinite row model via
-  `buildDatasource()` (paginated `entries/`, `cacheBlockSize` pinned to the page size, sorting off,
-  one-line rows with truncated text). Column filters run server-side: the grid's `filterModel` is
-  sent as the JSON `filters` param — text filters on `text`/`reference_text`/`source_text`, number
-  filters on `sura`/`aya`, and a surah-name dropdown (`SurahFloatingFilterComponent`) on the unit
-  column (`colId: 'surah'`). Undo/redo is a custom stack (AG Grid's only covers the client-side
-  model), replayed via `getRowId`. The text column edits in `ContentTextCellEditorComponent`: a
-  near-fullscreen popup showing the unit label and `reference_text` (plus `source_text` when editing
-  a translation); an outside click commits it (`stopEditingWhenCellsLoseFocus`), and the page behind
-  is `visibility: hidden` so find-in-page only searches the popup. The read-only `source_text`
-  column opens the same popup with `readOnly: true` (always cancels) so its full text is readable
+  several. Column set is driven by `effectiveTemplate()` (the `template` input, else the draft's
+  `template`, else a one-row probe's `unit_type` for older backends). The draft is opened alongside
+  `languages/` (remembered language, else the server's default source), falling back to the picked
+  language when that early open fails or differs. Only the AG Grid modules the grid uses are
+  registered (`ValidationModule` in dev builds names a missing one). Every template uses AG Grid's
+  infinite row model via `buildDatasource()` (paginated `entries/`, `cacheBlockSize` pinned to the
+  page size, sorting off, one-line rows with truncated text). Column filters run server-side: the
+  grid's `filterModel` is sent as the JSON `filters` param — text filters on
+  `text`/`reference_text`/`source_text`, number filters on `sura`/`aya`, and a surah-name dropdown
+  (`SurahFloatingFilterComponent`) on the unit column (`colId: 'surah'`). Undo/redo is a custom
+  stack (AG Grid's only covers the client-side model), replayed via `getRowId`. The text column
+  edits in `ContentTextCellEditorComponent`: a near-fullscreen popup showing the unit label and
+  `reference_text` (plus `source_text` when editing a translation); an outside click commits it
+  (`stopEditingWhenCellsLoseFocus`), and the page behind is `visibility: hidden` so find-in-page
+  only searches the popup. The read-only `source_text` column opens the same popup with
+  `readOnly: true` (always cancels) so its full text is readable
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`
 - `search-panel/` — Search UI

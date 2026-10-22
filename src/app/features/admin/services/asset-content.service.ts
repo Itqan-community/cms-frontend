@@ -105,13 +105,17 @@ export class AssetContentService {
     return this.http.delete<void>(this.columnUrl(kind, slug, key));
   }
 
-  /** Get-or-create the shared draft for one language, seeded from its latest published. */
+  /** Get-or-create the shared draft for one language, seeded from its latest published.
+   *  Without a language the server opens the source language's draft. */
   createDraft(
     kind: AssetVersionParentKind,
     slug: string,
-    language: string
+    language?: string | null
   ): Observable<ContentDraftVersion> {
-    return this.http.post<ContentDraftVersion>(`${this.draftBase(kind, slug)}draft/`, { language });
+    return this.http.post<ContentDraftVersion>(
+      `${this.draftBase(kind, slug)}draft/`,
+      language ? { language } : {}
+    );
   }
 
   /** Load a page of per-unit entries for a version, optionally filtered to one surah. */
