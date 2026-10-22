@@ -277,13 +277,17 @@ describe('AuthService (app / headless)', () => {
     expect(svc.bootstrapDone()).toBe(true);
   });
 
-  it('bootstrapOnce keeps protected routes ready while the profile loads', async () => {
-    // Arrange — a cached login; the session confirms it, the profile is still in flight
+  /** An AuthService restored from a cached login of `cachedId`, whose profile request
+   *  stays in flight until the returned subject settles. */
+  function serviceWithCachedUser(cachedId: string): {
+    svc: AuthService;
+    profile: Subject<unknown>;
+  } {
     localStorage.setItem('sessionToken', 'tok');
     localStorage.setItem(
       'user',
       JSON.stringify({
-        id: '1',
+        id: cachedId,
         name: 'Cached',
         email: 'c@example.com',
         phone: '',
@@ -322,7 +326,12 @@ describe('AuthService (app / headless)', () => {
         },
       ],
     });
-    const svc = TestBed.inject(AuthService);
+    return { svc: TestBed.inject(AuthService), profile };
+  }
+
+  it('bootstrapOnce keeps protected routes ready while the profile loads', async () => {
+    // Arrange — a cached login; the session confirms it, the profile is still in flight
+    const { svc, profile } = serviceWithCachedUser(String(mockUser.id));
 
     // Act
     const done = svc.bootstrapOnce();
@@ -334,6 +343,22 @@ describe('AuthService (app / headless)', () => {
     await done;
     expect(svc.bootstrapDone()).toBe(true);
     expect(svc.hasProvisionalSession()).toBe(false);
+  });
+
+  it("bootstrapOnce doesn't lend the cached user's access to a different session user", async () => {
+    // Arrange — the browser cached user 2, but the session token now belongs to user 1
+    const { svc, profile } = serviceWithCachedUser('2');
+
+    // Act
+    const done = svc.bootstrapOnce();
+
+    // Assert — guards wait for user 1's own profile; nothing of user 2's is kept
+    expect(svc.authReady()).toBe(false);
+    expect(svc.getCurrentUser()?.permissions ?? []).toEqual([]);
+    expect(svc.getCurrentUser()?.is_admin).not.toBe(true);
+    profile.error(new HttpErrorResponse({ status: 500 }));
+    await done;
+    expect(svc.authReady()).toBe(true);
   });
 
   it('bootstrapOnce authenticates when session token exists in localStorage (new tab)', async () => {
