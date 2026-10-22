@@ -10,6 +10,10 @@ export interface ReviewChange {
   unit_id: number;
   /** Display reference, e.g. "2. Al-Baqara", "2:255", "2:255:4", "Page 42". */
   label: string;
+  /** The text column of the changed cell, with its display labels. */
+  column: string;
+  column_label_en: string;
+  column_label_ar: string;
   change_type: 'added' | 'modified' | 'removed';
   old_text: string;
   new_text: string;

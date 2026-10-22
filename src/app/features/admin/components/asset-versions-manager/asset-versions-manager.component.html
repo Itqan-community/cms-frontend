@@ -783,7 +783,13 @@
         [latest]="restoreLatest()"
         [bump]="restoreBump()"
         (bumpChange)="restoreBump.set($event)"
+        [minorDisabled]="restoreRequiresMajor()"
       />
+      @if (restoreRequiresMajor()) {
+        <p class="versions-manager__major-hint" role="note">
+          {{ 'ADMIN.CONTENT_EDITOR.COMMIT.MAJOR_REQUIRED_HINT' | translate }}
+        </p>
+      }
     }
   </ng-template>
 </section>

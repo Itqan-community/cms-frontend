@@ -1,0 +1,152 @@
+<nz-modal
+  [nzVisible]="visible()"
+  [nzTitle]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.TITLE' | translate"
+  [nzFooter]="footer"
+  nzWidth="min(760px, calc(100vw - 32px))"
+  (nzOnCancel)="close()"
+>
+  <ng-container *nzModalContent>
+    <p class="manage-columns__note">
+      {{ 'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.LABELS_HINT' | translate }}
+    </p>
+    @if (anyCommitted()) {
+      <p class="manage-columns__note">
+        {{ 'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.REORDER_NOTE' | translate }}
+      </p>
+    }
+    <table class="manage-columns__table">
+      <thead>
+        <tr>
+          <th>{{ 'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.KEY' | translate }}</th>
+          <th>{{ 'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.LABEL_EN' | translate }}</th>
+          <th>{{ 'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.LABEL_AR' | translate }}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (column of rows(); track column.key; let i = $index; let last = $last) {
+          <tr [class.manage-columns__row--focus]="column.key === focusKey()">
+            <td>
+              @if (canEditKey(column)) {
+                <input
+                  nz-input
+                  dir="ltr"
+                  [ngModel]="column.key"
+                  (blur)="save(column, 'key', $any($event.target).value)"
+                  (keydown.enter)="$any($event.target).blur()"
+                  [disabled]="busy()"
+                />
+              } @else {
+                <code dir="ltr">{{ column.key }}</code>
+              }
+            </td>
+            <td>
+              <input
+                nz-input
+                dir="ltr"
+                [placeholder]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.LABEL_OPTIONAL' | translate"
+                [ngModel]="column.label_en"
+                (blur)="save(column, 'label_en', $any($event.target).value)"
+                (keydown.enter)="$any($event.target).blur()"
+                [disabled]="busy()"
+              />
+            </td>
+            <td>
+              <input
+                nz-input
+                dir="rtl"
+                [placeholder]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.LABEL_OPTIONAL' | translate"
+                [ngModel]="column.label_ar"
+                (blur)="save(column, 'label_ar', $any($event.target).value)"
+                (keydown.enter)="$any($event.target).blur()"
+                [disabled]="busy()"
+              />
+            </td>
+            <td class="manage-columns__actions">
+              <button
+                nz-button
+                nzSize="small"
+                [attr.aria-label]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.MOVE_UP' | translate"
+                [disabled]="busy() || i === 0"
+                (click)="move(i, -1)"
+              >
+                <ng-icon name="lucideChevronUp" />
+              </button>
+              <button
+                nz-button
+                nzSize="small"
+                [attr.aria-label]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.MOVE_DOWN' | translate"
+                [disabled]="busy() || last"
+                (click)="move(i, 1)"
+              >
+                <ng-icon name="lucideChevronDown" />
+              </button>
+              @if (canDelete(column)) {
+                <button
+                  nz-button
+                  nzSize="small"
+                  nzDanger
+                  [attr.aria-label]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.DELETE' | translate"
+                  nz-popconfirm
+                  [nzPopconfirmTitle]="
+                    'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.DELETE_CONFIRM' | translate
+                  "
+                  (nzOnConfirm)="remove(column)"
+                  [disabled]="busy()"
+                >
+                  <ng-icon name="lucideTrash2" />
+                </button>
+              }
+            </td>
+          </tr>
+        }
+        <tr class="manage-columns__add">
+          <td>
+            <input
+              nz-input
+              dir="ltr"
+              [placeholder]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.KEY_PLACEHOLDER' | translate"
+              [ngModel]="newKey()"
+              (ngModelChange)="newKey.set($event)"
+              [disabled]="busy()"
+            />
+          </td>
+          <td>
+            <input
+              nz-input
+              dir="ltr"
+              [placeholder]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.LABEL_OPTIONAL' | translate"
+              [ngModel]="newLabelEn()"
+              (ngModelChange)="newLabelEn.set($event)"
+              [disabled]="busy()"
+            />
+          </td>
+          <td>
+            <input
+              nz-input
+              dir="rtl"
+              [placeholder]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.LABEL_OPTIONAL' | translate"
+              [ngModel]="newLabelAr()"
+              (ngModelChange)="newLabelAr.set($event)"
+              [disabled]="busy()"
+            />
+          </td>
+          <td>
+            <button nz-button nzType="primary" nzSize="small" [nzLoading]="busy()" (click)="add()">
+              <ng-icon name="lucidePlus" />
+              {{ 'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.ADD' | translate }}
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    @if (error(); as message) {
+      <p class="manage-columns__error" role="alert">{{ message }}</p>
+    }
+  </ng-container>
+  <ng-template #footer>
+    <button nz-button (click)="close()">
+      {{ 'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.CLOSE' | translate }}
+    </button>
+  </ng-template>
+</nz-modal>

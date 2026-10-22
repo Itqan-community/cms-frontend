@@ -32,7 +32,7 @@
       >
         <!-- nz-radio renders its own input inside this label, which associates them implicitly. -->
         <!-- eslint-disable-next-line @angular-eslint/template/label-has-associated-control -->
-        <label nz-radio nzValue="minor">
+        <label nz-radio nzValue="minor" [nzDisabled]="minorDisabled()">
           {{ i18n + '.MINOR' | translate: { from: latest(), to: nextMinor() } }}
         </label>
         <!-- nz-radio renders its own input inside this label, which associates them implicitly. -->

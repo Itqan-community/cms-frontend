@@ -270,15 +270,15 @@ Trust, Profile, CompleteProfile
 
 **Purpose:** Browse, search, filter, and download Quranic assets.
 
-| File                                                          | Type       | Purpose                                                                                                |
-| ------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------ |
-| `models/assets.model.ts`                                      | Interfaces | `ApiAssets`, `Asset`, `AssetDetails`                                                                   |
-| `services/assets.service.ts`                                  | Service    | `getAssets(filters)`, `getAssetDetails(id)`                                                            |
-| `pages/gallery/gallery.page.ts`                               | Page       | Wrapper title + `<app-assets-listing/>`                                                                |
-| `pages/asset-details/asset-details.page.ts`                   | Page       | Full detail + access request modal + license modal + download + itqan CLI card (when `package` is set) |
-| `components/assets-listing/assets-listing.component.ts`       | Component  | Filter state + grid + skeleton + empty state                                                           |
-| `components/asset-card/asset-card.component.ts`               | Component  | Single asset card (icon, license, name, desc, publisher, link)                                         |
-| `components/itqan-add-command/itqan-add-command.component.ts` | Component  | `itqan add <slug> [--language]` + copy + "get the CLI" link (GitHub)                                   |
+| File                                                          | Type       | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `models/assets.model.ts`                                      | Interfaces | `ApiAssets`, `Asset`, `AssetDetails`                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `services/assets.service.ts`                                  | Service    | `getAssets(filters)`, `getAssetDetails(id)`                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `pages/gallery/gallery.page.ts`                               | Page       | Wrapper title + `<app-assets-listing/>`                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `pages/asset-details/asset-details.page.ts`                   | Page       | Full detail + access request modal + license modal + download + itqan CLI card (when `package` is set) + "File structure" (`components/asset-file-structure/`, translations/tafsirs: CSV header, column labels, 3 sample rows, and a language switch above them shared with the download language; the language starts at the UI language when offered — `utils/preferred-language.util.ts` — and follows UI changes until the user picks one) |
+| `components/assets-listing/assets-listing.component.ts`       | Component  | Filter state + grid + skeleton + empty state                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `components/asset-card/asset-card.component.ts`               | Component  | Single asset card (icon, license, name, desc, publisher, link)                                                                                                                                                                                                                                                                                                                                                                                 |
+| `components/itqan-add-command/itqan-add-command.component.ts` | Component  | `itqan add <slug> [--language]` + copy + "get the CLI" link (GitHub)                                                                                                                                                                                                                                                                                                                                                                           |
 
 **States:** loading (skeleton), empty (no results with/without filters), error, not-found (404),
 success.
@@ -377,19 +377,29 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   has a "Publish now" checkbox (default on, sends `publish`). Without `portal_publish_content` the
   Publish button and checkbox are shown disabled with a permission tooltip.
 - `asset-content-editor/` + `asset-content-grid/` — Per-unit draft editor (surah/ayah/word/page
-  content templates); flush before publish; leave blocked if PATCH fails. Column set is driven by
-  `effectiveTemplate()` (the `template` input, falling back to a one-row probe's `unit_type`). Every
-  template uses AG Grid's infinite row model via `buildDatasource()` (paginated `entries/`,
-  `cacheBlockSize` pinned to the page size, sorting off, one-line rows with truncated text). Column
-  filters run server-side: the grid's `filterModel` is sent as the JSON `filters` param — text
-  filters on `text`/`reference_text`/`source_text`, number filters on `sura`/`aya`, and a surah-name
-  dropdown (`SurahFloatingFilterComponent`) on the unit column (`colId: 'surah'`). Undo/redo is a
-  custom stack (AG Grid's only covers the client-side model), replayed via `getRowId`. The text
-  column edits in `ContentTextCellEditorComponent`: a near-fullscreen popup showing the unit label
-  and `reference_text` (plus `source_text` when editing a translation); an outside click commits it
-  (`stopEditingWhenCellsLoseFocus`), and the page behind is `visibility: hidden` so find-in-page
-  only searches the popup. The read-only `source_text` column opens the same popup with
-  `readOnly: true` (always cancels) so its full text is readable
+  content templates); flush before publish; leave blocked if PATCH fails. **Text columns:** one
+  editable grid column per key of the draft's `column_keys` (colId `cell__<key>`, reading/writing
+  `row.cells[key]`; filters keyed `cell__<key>` / `source__<key>`); unsaved cells are keyed
+  `unit:column` and PATCHed as `{unit_id, column, text}`. Translating, a remembered "Show source"
+  switch inserts each read-only `source__<key>` column before its translation. Users with
+  `portal_manage_asset_columns` + `portal_access_all_languages` get "+ Add column" and a ⚙ in each
+  text column header (`content-column-header.component.ts`, which also marks a filtered column)
+  opening `manage-columns-modal/` (add, optional labels en/ar, reorder, delete uncommitted; a label
+  edit only reloads the headers). Changed cells are highlighted per column (`changed_columns`).
+  After a reorder the commit dialog allows only a major version (`requires_major`, or a
+  `major_bump_required` answer). Diffs and review rows name each change's column when the asset has
+  several. Column set is driven by `effectiveTemplate()` (the `template` input, falling back to a
+  one-row probe's `unit_type`). Every template uses AG Grid's infinite row model via
+  `buildDatasource()` (paginated `entries/`, `cacheBlockSize` pinned to the page size, sorting off,
+  one-line rows with truncated text). Column filters run server-side: the grid's `filterModel` is
+  sent as the JSON `filters` param — text filters on `text`/`reference_text`/`source_text`, number
+  filters on `sura`/`aya`, and a surah-name dropdown (`SurahFloatingFilterComponent`) on the unit
+  column (`colId: 'surah'`). Undo/redo is a custom stack (AG Grid's only covers the client-side
+  model), replayed via `getRowId`. The text column edits in `ContentTextCellEditorComponent`: a
+  near-fullscreen popup showing the unit label and `reference_text` (plus `source_text` when editing
+  a translation); an outside click commits it (`stopEditingWhenCellsLoseFocus`), and the page behind
+  is `visibility: hidden` so find-in-page only searches the popup. The read-only `source_text`
+  column opens the same popup with `readOnly: true` (always cancels) so its full text is readable
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`
 - `search-panel/` — Search UI
@@ -597,6 +607,8 @@ and edits each key's public app slug (`app_slug`). The global error toast skips
 - `GET /resources/{id}/download/` — Download resource directly
 - `GET /publishers/{id}/` — Publisher detail
 - `GET /assets/{id}/usage-counts/` — Public usage counts (404 while turned off)
+- `GET /assets/{id}/file-structure/?language=` — A translation's / tafsir's CSV layout + sample rows
+  (404 when unavailable)
 - `GET /developers/usage/{summary,timeseries,breakdown}/` — Developer usage reports
 
 ### Admin Portal (`/portal/`)
@@ -657,6 +669,7 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
 | Recitation folder variant relabelling   | Constrained       | Non-default classified folders with tracks cannot change variant (slug is public `?folder=`); default folder always editable (`?folder=default`).                |
 | Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                                                                      |
 | Usage reports API                       | Pending backend   | Needs cms-backend#557 deployed; until then the dashboards show their error state.                                                                                |
+| Multi-column text assets                | Pending backend   | Editor columns, column management, file structure need the cms-backend multi-column release (`feat/multi-column-text-assets`); remove once deployed.             |
 | Usage world map                         | Deferred          | Countries show as a ranked bar + table; a world map needs a GeoJSON bundle (spec §10).                                                                           |
 | WebAuthn RP ID                          | Development mode  | `webauthnReplaceRpIdWithHostname` env flag allows RP ID patching in dev.                                                                                         |
 

@@ -29,6 +29,8 @@ export class VersionNumberFieldComponent {
   readonly error = input(false);
   readonly start = model('');
   readonly bump = model<VersionBump>('minor');
+  /** Only a major version is allowed (e.g. the columns were reordered). */
+  readonly minorDisabled = input(false);
 
   readonly i18n = 'ADMIN.COMMON.VERSION_NUMBER';
   readonly startInvalid = computed(

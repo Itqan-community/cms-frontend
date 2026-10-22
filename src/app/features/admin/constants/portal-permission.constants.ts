@@ -72,6 +72,7 @@ export const PORTAL_PERMISSIONS = {
   PORTAL_EDIT_TAFSIR_CONTENT: 'portal_edit_tafsir_content',
 
   PORTAL_ACCESS_ALL_LANGUAGES: 'portal_access_all_languages',
+  PORTAL_MANAGE_ASSET_COLUMNS: 'portal_manage_asset_columns',
   PORTAL_ADD_ASSET_LANGUAGE: 'portal_add_asset_language',
 } as const;
 

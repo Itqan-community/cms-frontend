@@ -134,6 +134,40 @@ describe('api-error-resolver.util', () => {
   });
 
   describe('shouldSuppressGlobalErrorToast', () => {
+    it('suppresses the errors the content editor and its columns dialog handle themselves', () => {
+      for (const name of [
+        'major_bump_required',
+        'unknown_filter_column',
+        'unknown_column',
+        'column_key_invalid',
+        'column_key_taken',
+        'column_committed',
+        'column_last',
+        'column_order_mismatch',
+        'column_not_found',
+      ]) {
+        const err = new HttpErrorResponse({ status: 400, error: { error_name: name } });
+        expect(shouldSuppressGlobalErrorToast(err)).withContext(name).toBe(true);
+      }
+    });
+
+    it('suppresses a 404 from the gallery file-structure preview', () => {
+      const err = new HttpErrorResponse({
+        status: 404,
+        url: 'https://api.example/cms-api/assets/9/file-structure/?language=fr',
+        error: { error_name: 'file_structure_unavailable' },
+      });
+      expect(shouldSuppressGlobalErrorToast(err)).toBe(true);
+    });
+
+    it('suppresses a 404 for the columns of an asset on a backend without columns', () => {
+      const err = new HttpErrorResponse({
+        status: 404,
+        url: 'https://api.example/portal/content/tafsirs/qa/columns/',
+      });
+      expect(shouldSuppressGlobalErrorToast(err)).toBe(true);
+    });
+
     it('suppresses restricted_for_tenant_conflict', () => {
       const err = new HttpErrorResponse({
         status: 409,

@@ -18,6 +18,10 @@ import type { ContentDraftVersion } from '../../models/asset-content.models';
  * on `expectOne`.
  */
 function flushDraft(httpMock: HttpTestingController, slug: string, id: number): void {
+  // The grid loads the asset's text columns for its headers.
+  httpMock
+    .expectOne((r) => r.url.includes(slug) && r.url.endsWith('/columns/'))
+    .flush([{ key: 'text', label_en: '', label_ar: '', order: 0, committed: false }]);
   httpMock
     .expectOne((r) => r.url.includes(slug) && r.url.includes('languages/'))
     .flush([{ language: 'ar', is_source: true, is_available: true }]);
@@ -33,6 +37,8 @@ function flushDraft(httpMock: HttpTestingController, slug: string, id: number): 
     state: 'draft',
     entries_count: 0,
     created_at: '2026-01-01T00:00:00Z',
+    column_keys: ['text'],
+    requires_major: false,
   };
   httpMock.expectOne((r) => r.url.includes('draft/') && r.url.includes(slug)).flush(draft);
   // The editor counts the draft's real changes to know whether Commit applies.
