@@ -139,6 +139,13 @@ const NUMBER_FILTER_PARAMS: INumberFilterParams = {
   allowedCharPattern: '\\d',
 };
 
+/** Whether `row`'s cell in column `key` differs from the published version:
+ *  per column when the backend names them, else the whole row's flag. */
+function cellChanged(row: ContentEntry | undefined, key: string): boolean {
+  if (!row?.changed) return false;
+  return row.changed_columns ? row.changed_columns.includes(key) : true;
+}
+
 @Component({
   selector: 'app-asset-content-grid',
   standalone: true,
@@ -496,6 +503,9 @@ export class AssetContentGridComponent implements OnInit {
     // Assume the edit differs from the published text until the autosave
     // response says otherwise (see `applySavedRows`).
     row.changed = true;
+    if (row.changed_columns && !row.changed_columns.includes(column)) {
+      row.changed_columns = [...row.changed_columns, column];
+    }
     // `force`: the grid has already drawn the new value, so a plain refresh skips it.
     if (event.node) {
       this.gridApi?.refreshCells({
@@ -940,6 +950,7 @@ export class AssetContentGridComponent implements OnInit {
       const node = api.getRowNode(String(row.unit_id));
       if (!node?.data) continue;
       node.data.changed = row.changed ?? false;
+      node.data.changed_columns = row.changed_columns;
       nodes.push(node);
     }
     if (nodes.length > 0) {
@@ -1405,7 +1416,7 @@ export class AssetContentGridComponent implements OnInit {
           columnKey: key,
         } satisfies ContentTextEditorParams,
         // Yellow when the draft differs from the published version.
-        cellClassRules: { 'content-grid__cell--changed': (p) => !!p.data?.changed },
+        cellClassRules: { 'content-grid__cell--changed': (p) => cellChanged(p.data, key) },
         ...textFilter,
       });
     }

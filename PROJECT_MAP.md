@@ -385,21 +385,21 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   `portal_manage_asset_columns` + `portal_access_all_languages` get "+ Add column" and a ⚙ in each
   text column header (`content-column-header.component.ts`, which also marks a filtered column)
   opening `manage-columns-modal/` (add, optional labels en/ar, reorder, delete uncommitted; a label
-  edit only reloads the headers). After a reorder the commit dialog allows only a major version
-  (`requires_major`, or a `major_bump_required` answer). Diffs and review rows name each change's
-  column when the asset has several. Column set is driven by `effectiveTemplate()` (the `template`
-  input, falling back to a one-row probe's `unit_type`). Every template uses AG Grid's infinite row
-  model via `buildDatasource()` (paginated `entries/`, `cacheBlockSize` pinned to the page size,
-  sorting off, one-line rows with truncated text). Column filters run server-side: the grid's
-  `filterModel` is sent as the JSON `filters` param — text filters on
-  `text`/`reference_text`/`source_text`, number filters on `sura`/`aya`, and a surah-name dropdown
-  (`SurahFloatingFilterComponent`) on the unit column (`colId: 'surah'`). Undo/redo is a custom
-  stack (AG Grid's only covers the client-side model), replayed via `getRowId`. The text column
-  edits in `ContentTextCellEditorComponent`: a near-fullscreen popup showing the unit label and
-  `reference_text` (plus `source_text` when editing a translation); an outside click commits it
-  (`stopEditingWhenCellsLoseFocus`), and the page behind is `visibility: hidden` so find-in-page
-  only searches the popup. The read-only `source_text` column opens the same popup with
-  `readOnly: true` (always cancels) so its full text is readable
+  edit only reloads the headers). Changed cells are highlighted per column (`changed_columns`).
+  After a reorder the commit dialog allows only a major version (`requires_major`, or a
+  `major_bump_required` answer). Diffs and review rows name each change's column when the asset has
+  several. Column set is driven by `effectiveTemplate()` (the `template` input, falling back to a
+  one-row probe's `unit_type`). Every template uses AG Grid's infinite row model via
+  `buildDatasource()` (paginated `entries/`, `cacheBlockSize` pinned to the page size, sorting off,
+  one-line rows with truncated text). Column filters run server-side: the grid's `filterModel` is
+  sent as the JSON `filters` param — text filters on `text`/`reference_text`/`source_text`, number
+  filters on `sura`/`aya`, and a surah-name dropdown (`SurahFloatingFilterComponent`) on the unit
+  column (`colId: 'surah'`). Undo/redo is a custom stack (AG Grid's only covers the client-side
+  model), replayed via `getRowId`. The text column edits in `ContentTextCellEditorComponent`: a
+  near-fullscreen popup showing the unit label and `reference_text` (plus `source_text` when editing
+  a translation); an outside click commits it (`stopEditingWhenCellsLoseFocus`), and the page behind
+  is `visibility: hidden` so find-in-page only searches the popup. The read-only `source_text`
+  column opens the same popup with `readOnly: true` (always cancels) so its full text is readable
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`
 - `search-panel/` — Search UI

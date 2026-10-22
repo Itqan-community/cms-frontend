@@ -71,6 +71,8 @@ export interface ContentEntry {
   order: number;
   /** Draft text differs from the latest published version (drafts only). */
   changed?: boolean;
+  /** The columns whose cells differ (absent from older backends: then the whole row). */
+  changed_columns?: string[];
 }
 
 /** Paginated entries response (Django Ninja pagination shape). */

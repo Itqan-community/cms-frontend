@@ -211,6 +211,33 @@ describe('AssetContentGridComponent text columns', () => {
     expect(service.createDraft).not.toHaveBeenCalled();
   });
 
+  it('highlights only the cells whose column changed', () => {
+    // Arrange
+    const defs = grid().buildColumnDefs();
+    const isChanged = (colId: string, data: object) =>
+      (
+        defs.find((col) => col.colId === colId)!.cellClassRules!['content-grid__cell--changed'] as (
+          p: unknown
+        ) => boolean
+      )({ data });
+    const row = { unit_id: 1, changed: true, changed_columns: ['answer'] };
+
+    // Act / Assert
+    expect(isChanged('cell__answer', row)).toBeTrue();
+    expect(isChanged('cell__question', row)).toBeFalse();
+  });
+
+  it('highlights the whole row when the backend sends only the row flag', () => {
+    // Arrange
+    const defs = grid().buildColumnDefs();
+    const rule = defs.find((col) => col.colId === 'cell__question')!.cellClassRules![
+      'content-grid__cell--changed'
+    ] as (p: unknown) => boolean;
+
+    // Act / Assert
+    expect(rule({ data: { unit_id: 1, changed: true } })).toBeTrue();
+  });
+
   it('copies every text column', () => {
     // Arrange
     const component = grid();
