@@ -32,6 +32,7 @@ import type {
 } from '../../models/asset-review.models';
 import type { AssetVersionParentKind } from '../../models/asset-versions.models';
 import { AdminAuthService } from '../../services/admin-auth.service';
+import { AssetContentService } from '../../services/asset-content.service';
 import { AssetReviewService } from '../../services/asset-review.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { localizedLanguageName } from '../../utils/iso-639.util';
@@ -78,6 +79,7 @@ interface RowCompare {
 })
 export class AssetReviewGridComponent implements OnInit {
   private readonly reviewService = inject(AssetReviewService);
+  private readonly contentService = inject(AssetContentService);
   private readonly adminAuth = inject(AdminAuthService);
   private readonly lastLanguage = inject(LastActiveLanguageService);
   private readonly message = inject(NzMessageService);
@@ -105,10 +107,15 @@ export class AssetReviewGridComponent implements OnInit {
   readonly languages = signal<string[]>([]);
   readonly selectedLanguage = signal<string | null>(null);
   readonly changes = signal<ReviewChange[]>([]);
-  /** Several text columns: each row names the column its change belongs to. */
-  readonly multiColumn = computed(() =>
-    this.changes().some((c) => !!c.column && c.column !== 'text')
-  );
+  /** The asset's number of text columns (null until loaded, or when unavailable). */
+  private readonly columnCount = signal<number | null>(null);
+  /** Several text columns: each row names the column its change belongs to. Until
+   *  the asset's columns load, guessed from the changes on this page. */
+  readonly multiColumn = computed(() => {
+    const count = this.columnCount();
+    if (count !== null) return count > 1;
+    return this.changes().some((c) => !!c.column && c.column !== 'text');
+  });
   readonly total = signal(0);
   readonly page = signal(1);
   readonly pageSize = signal(DEFAULT_PAGE_SIZE);
@@ -185,7 +192,6 @@ export class AssetReviewGridComponent implements OnInit {
     return `ADMIN.REVIEW.STATE.${state.toUpperCase()}`;
   }
 
-  /** i18n key for a change type (e.g. "added" → ADMIN.REVIEW.TYPE.ADDED). */
   /** A row's column, labelled in the interface language (its key when unlabelled). */
   columnName(change: ReviewChange): string {
     return columnLabel(
@@ -194,6 +200,7 @@ export class AssetReviewGridComponent implements OnInit {
     );
   }
 
+  /** i18n key for a change type (e.g. "added" → ADMIN.REVIEW.TYPE.ADDED). */
   typeKey(type: ReviewChange['change_type']): string {
     return `ADMIN.REVIEW.TYPE.${type.toUpperCase()}`;
   }
@@ -203,6 +210,18 @@ export class AssetReviewGridComponent implements OnInit {
       return;
     }
     this.loadLanguages();
+    this.loadColumnCount();
+  }
+
+  /** How many text columns the asset has; failures keep the page-based guess. */
+  private loadColumnCount(): void {
+    this.contentService
+      .listColumns(this.kind, this.slug)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (columns) => this.columnCount.set(columns.length || null),
+        error: () => this.columnCount.set(null),
+      });
   }
 
   loadLanguages(): void {

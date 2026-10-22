@@ -7,6 +7,7 @@ import { Subject, of, throwError } from 'rxjs';
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
 import type { ReviewChange, ReviewChangesResponse } from '../../models/asset-review.models';
 import { AdminAuthService } from '../../services/admin-auth.service';
+import { AssetContentService } from '../../services/asset-content.service';
 import { AssetReviewService } from '../../services/asset-review.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { AssetReviewGridComponent } from './asset-review-grid.component';
@@ -15,6 +16,7 @@ describe('AssetReviewGridComponent', () => {
   let component: AssetReviewGridComponent;
   let fixture: ComponentFixture<AssetReviewGridComponent>;
   let reviewServiceSpy: jasmine.SpyObj<AssetReviewService>;
+  let contentServiceSpy: jasmine.SpyObj<AssetContentService>;
   let adminAuthSpy: jasmine.SpyObj<AdminAuthService>;
   let lastLanguageSpy: jasmine.SpyObj<LastActiveLanguageService>;
   let messageSpy: jasmine.SpyObj<NzMessageService>;
@@ -54,6 +56,8 @@ describe('AssetReviewGridComponent', () => {
       'setState',
       'bulkApprove',
     ]);
+    contentServiceSpy = jasmine.createSpyObj('AssetContentService', ['listColumns']);
+    contentServiceSpy.listColumns.and.returnValue(of([]));
     adminAuthSpy = jasmine.createSpyObj('AdminAuthService', ['hasPermission']);
     lastLanguageSpy = jasmine.createSpyObj('LastActiveLanguageService', ['get', 'set']);
     messageSpy = jasmine.createSpyObj('NzMessageService', ['success', 'error', 'warning', 'info']);
@@ -77,6 +81,7 @@ describe('AssetReviewGridComponent', () => {
       providers: [
         provideNoopAnimations(),
         { provide: AssetReviewService, useValue: reviewServiceSpy },
+        { provide: AssetContentService, useValue: contentServiceSpy },
         { provide: AdminAuthService, useValue: adminAuthSpy },
         { provide: LastActiveLanguageService, useValue: lastLanguageSpy },
         { provide: NzMessageService, useValue: messageSpy },
@@ -559,6 +564,38 @@ describe('AssetReviewGridComponent', () => {
     expect(component.multiColumn()).toBeTrue();
     expect(component.columnName(component.changes()[0])).toBe('Question');
     expect(component.columnName(component.changes()[1])).toBe('answer');
+  });
+
+  it("names columns whenever the asset has several, even if this page's changes are all in one", () => {
+    // Arrange
+    contentServiceSpy.listColumns.and.returnValue(
+      of([
+        { key: 'text', label_en: '', label_ar: '', order: 0, committed: true },
+        { key: 'answer', label_en: '', label_ar: '', order: 1, committed: false },
+      ])
+    );
+
+    // Act
+    fixture.detectChanges();
+    component.changes.set([{ ...mockChange, column: 'text' }]);
+
+    // Assert
+    expect(contentServiceSpy.listColumns).toHaveBeenCalledWith('translation', 'en-sahih');
+    expect(component.multiColumn()).toBeTrue();
+  });
+
+  it('names no column for a single-column asset whatever its key', () => {
+    // Arrange
+    contentServiceSpy.listColumns.and.returnValue(
+      of([{ key: 'body', label_en: '', label_ar: '', order: 0, committed: true }])
+    );
+
+    // Act
+    fixture.detectChanges();
+    component.changes.set([{ ...mockChange, column: 'body' }]);
+
+    // Assert
+    expect(component.multiColumn()).toBeFalse();
   });
 
   it('shows no column for a single-column asset', () => {
