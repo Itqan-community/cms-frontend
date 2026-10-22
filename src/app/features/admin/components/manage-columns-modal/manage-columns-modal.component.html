@@ -2,10 +2,13 @@
   [nzVisible]="visible()"
   [nzTitle]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.TITLE' | translate"
   [nzFooter]="footer"
-  nzWidth="760px"
+  nzWidth="min(760px, calc(100vw - 32px))"
   (nzOnCancel)="close()"
 >
   <ng-container *nzModalContent>
+    <p class="manage-columns__note">
+      {{ 'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.LABELS_HINT' | translate }}
+    </p>
     @if (anyCommitted()) {
       <p class="manage-columns__note">
         {{ 'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.REORDER_NOTE' | translate }}
@@ -21,7 +24,7 @@
         </tr>
       </thead>
       <tbody>
-        @for (column of columns(); track column.key; let i = $index; let last = $last) {
+        @for (column of rows(); track column.key; let i = $index; let last = $last) {
           <tr [class.manage-columns__row--focus]="column.key === focusKey()">
             <td>
               @if (canEditKey(column)) {
@@ -30,6 +33,7 @@
                   dir="ltr"
                   [ngModel]="column.key"
                   (blur)="save(column, 'key', $any($event.target).value)"
+                  (keydown.enter)="$any($event.target).blur()"
                   [disabled]="busy()"
                 />
               } @else {
@@ -40,8 +44,10 @@
               <input
                 nz-input
                 dir="ltr"
+                [placeholder]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.LABEL_OPTIONAL' | translate"
                 [ngModel]="column.label_en"
                 (blur)="save(column, 'label_en', $any($event.target).value)"
+                (keydown.enter)="$any($event.target).blur()"
                 [disabled]="busy()"
               />
             </td>
@@ -49,16 +55,30 @@
               <input
                 nz-input
                 dir="rtl"
+                [placeholder]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.LABEL_OPTIONAL' | translate"
                 [ngModel]="column.label_ar"
                 (blur)="save(column, 'label_ar', $any($event.target).value)"
+                (keydown.enter)="$any($event.target).blur()"
                 [disabled]="busy()"
               />
             </td>
             <td class="manage-columns__actions">
-              <button nz-button nzSize="small" [disabled]="busy() || i === 0" (click)="move(i, -1)">
+              <button
+                nz-button
+                nzSize="small"
+                [attr.aria-label]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.MOVE_UP' | translate"
+                [disabled]="busy() || i === 0"
+                (click)="move(i, -1)"
+              >
                 <ng-icon name="lucideChevronUp" />
               </button>
-              <button nz-button nzSize="small" [disabled]="busy() || last" (click)="move(i, 1)">
+              <button
+                nz-button
+                nzSize="small"
+                [attr.aria-label]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.MOVE_DOWN' | translate"
+                [disabled]="busy() || last"
+                (click)="move(i, 1)"
+              >
                 <ng-icon name="lucideChevronDown" />
               </button>
               @if (canDelete(column)) {
@@ -66,6 +86,7 @@
                   nz-button
                   nzSize="small"
                   nzDanger
+                  [attr.aria-label]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.DELETE' | translate"
                   nz-popconfirm
                   [nzPopconfirmTitle]="
                     'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.DELETE_CONFIRM' | translate
@@ -94,6 +115,7 @@
             <input
               nz-input
               dir="ltr"
+              [placeholder]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.LABEL_OPTIONAL' | translate"
               [ngModel]="newLabelEn()"
               (ngModelChange)="newLabelEn.set($event)"
               [disabled]="busy()"
@@ -103,6 +125,7 @@
             <input
               nz-input
               dir="rtl"
+              [placeholder]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.LABEL_OPTIONAL' | translate"
               [ngModel]="newLabelAr()"
               (ngModelChange)="newLabelAr.set($event)"
               [disabled]="busy()"

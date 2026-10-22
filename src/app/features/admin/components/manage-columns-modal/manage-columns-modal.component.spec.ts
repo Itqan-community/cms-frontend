@@ -138,6 +138,66 @@ describe('ManageColumnsModalComponent', () => {
     ]);
   });
 
+  it('builds a second quick move on the first one, before the parent reloads', () => {
+    // Arrange
+    const extra: AssetColumn = { ...ANSWER, key: 'extra', order: 2 };
+    const modal = create([TEXT, ANSWER, extra]);
+    service.reorderColumns.and.returnValue(of([]));
+
+    // Act — the parent has not passed the new columns in between
+    modal.move(0, 1);
+    modal.move(1, 1);
+
+    // Assert
+    expect(service.reorderColumns.calls.mostRecent().args[2]).toEqual([
+      'answer',
+      'extra',
+      'question',
+    ]);
+  });
+
+  it('restores the server order when a move fails', () => {
+    // Arrange
+    const modal = create();
+    service.reorderColumns.and.returnValue(
+      throwError(() => new HttpErrorResponse({ status: 400, error: {} }))
+    );
+
+    // Act
+    modal.move(0, 1);
+
+    // Assert
+    expect(modal.rows().map((column) => column.key)).toEqual(['question', 'answer']);
+  });
+
+  it('reports a label edit as a labels-only change', () => {
+    // Arrange
+    const modal = create();
+    service.updateColumn.and.returnValue(of({ ...ANSWER, label_en: 'Answer' }));
+    const changed = jasmine.createSpy('changed');
+    modal.changed.subscribe(changed);
+
+    // Act
+    modal.save(ANSWER, 'label_en', 'Answer');
+
+    // Assert
+    expect(changed).toHaveBeenCalledWith('labels');
+  });
+
+  it('reports a key rename as a structure change', () => {
+    // Arrange
+    const modal = create();
+    service.updateColumn.and.returnValue(of({ ...ANSWER, key: 'reply' }));
+    const changed = jasmine.createSpy('changed');
+    modal.changed.subscribe(changed);
+
+    // Act
+    modal.save(ANSWER, 'key', 'reply');
+
+    // Assert
+    expect(changed).toHaveBeenCalledWith('structure');
+  });
+
   it('notes that reordering makes the next version major once a column is committed', () => {
     // Arrange / Act
     const committed = create();

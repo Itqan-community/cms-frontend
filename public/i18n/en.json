@@ -1057,8 +1057,16 @@
           "COLUMN_LAST": "An asset needs at least one column.",
           "COLUMN_ORDER_MISMATCH": "The columns changed meanwhile. Close the dialog and try again.",
           "COLUMN_NOT_FOUND": "This column no longer exists."
-        }
-      }
+        },
+        "MOVE_UP": "Move up",
+        "MOVE_DOWN": "Move down",
+        "DELETE": "Delete column",
+        "OPEN": "Manage columns",
+        "LABEL_OPTIONAL": "Optional",
+        "LABELS_HINT": "Labels are optional display names for the editor and the gallery; without one, the key is shown."
+      },
+      "COLUMN_MENU": "Column menu",
+      "FILTER_ACTIVE": "Filtered"
     },
     "REVIEW": {
       "TITLE": "Review changes",

@@ -65,7 +65,10 @@ import { ISO_639_LANGUAGES, localizedLanguageName } from '../../utils/iso-639.ut
 import { isVersionNumber } from '../../utils/version-number.util';
 import { ContentChangesComponent } from '../content-changes/content-changes.component';
 import { VersionNumberFieldComponent } from '../version-number-field/version-number-field.component';
-import { ManageColumnsModalComponent } from '../manage-columns-modal/manage-columns-modal.component';
+import {
+  ManageColumnsModalComponent,
+  type ColumnsChange,
+} from '../manage-columns-modal/manage-columns-modal.component';
 import { ContentColumnHeaderComponent } from './content-column-header.component';
 import {
   ContentTextCellEditorComponent,
@@ -424,10 +427,12 @@ export class AssetContentGridComponent implements OnInit {
     this.manageColumnsVisible.set(true);
   }
 
-  /** The columns changed: reload them, then the draft (its keys) and its rows,
-   *  which now carry the new cells. */
-  onColumnsChanged(): void {
+  /** The columns changed: reload them (their labels head the grid). A structural
+   *  change also reloads the draft (its keys) and its rows, which now carry the
+   *  new cells; a label edit needs neither. */
+  onColumnsChanged(change: ColumnsChange = 'structure'): void {
     this.loadColumns();
+    if (change === 'labels') return;
     void this.flushPending().then((ok) => {
       if (!ok || this.readOnly()) return;
       const language = this.selectedLanguage();

@@ -7,7 +7,9 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
+import { of } from 'rxjs';
 import { AdminAuthService } from '../../services/admin-auth.service';
+import { AssetContentService } from '../../services/asset-content.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import type { AssetColumn } from '../../models/asset-content.models';
 import { AssetContentGridComponent } from './asset-content-grid.component';
@@ -192,6 +194,21 @@ describe('AssetContentGridComponent text columns', () => {
     // Assert
     expect(setFilterModel).toHaveBeenCalledWith(null);
     httpMock.expectOne((r) => r.method === 'GET' && r.url.endsWith('/columns/')).flush(QA);
+  });
+
+  it('only reloads the column labels after a label edit', () => {
+    // Arrange
+    const component = grid();
+    const service = TestBed.inject(AssetContentService);
+    spyOn(service, 'listColumns').and.returnValue(of(QA));
+    spyOn(service, 'createDraft').and.callThrough();
+
+    // Act
+    component.onColumnsChanged('labels');
+
+    // Assert
+    expect(service.listColumns).toHaveBeenCalled();
+    expect(service.createDraft).not.toHaveBeenCalled();
   });
 
   it('copies every text column', () => {
