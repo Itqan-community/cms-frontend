@@ -392,17 +392,19 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   several. Column set is driven by `effectiveTemplate()` (the `template` input, else the draft's
   `template`, else a one-row probe's `unit_type` for older backends). The draft is opened alongside
   `languages/` (remembered language, else the server's default source), falling back to the picked
-  language when that early open fails or differs. Every template uses AG Grid's infinite row model
-  via `buildDatasource()` (paginated `entries/`, `cacheBlockSize` pinned to the page size, sorting
-  off, one-line rows with truncated text). Column filters run server-side: the grid's `filterModel`
-  is sent as the JSON `filters` param — text filters on `text`/`reference_text`/`source_text`,
-  number filters on `sura`/`aya`, and a surah-name dropdown (`SurahFloatingFilterComponent`) on the
-  unit column (`colId: 'surah'`). Undo/redo is a custom stack (AG Grid's only covers the client-side
-  model), replayed via `getRowId`. The text column edits in `ContentTextCellEditorComponent`: a
-  near-fullscreen popup showing the unit label and `reference_text` (plus `source_text` when editing
-  a translation); an outside click commits it (`stopEditingWhenCellsLoseFocus`), and the page behind
-  is `visibility: hidden` so find-in-page only searches the popup. The read-only `source_text`
-  column opens the same popup with `readOnly: true` (always cancels) so its full text is readable
+  language when that early open fails or differs. Only the AG Grid modules the grid uses are
+  registered (`ValidationModule` in dev builds names a missing one). Every template uses AG Grid's
+  infinite row model via `buildDatasource()` (paginated `entries/`, `cacheBlockSize` pinned to the
+  page size, sorting off, one-line rows with truncated text). Column filters run server-side: the
+  grid's `filterModel` is sent as the JSON `filters` param — text filters on
+  `text`/`reference_text`/`source_text`, number filters on `sura`/`aya`, and a surah-name dropdown
+  (`SurahFloatingFilterComponent`) on the unit column (`colId: 'surah'`). Undo/redo is a custom
+  stack (AG Grid's only covers the client-side model), replayed via `getRowId`. The text column
+  edits in `ContentTextCellEditorComponent`: a near-fullscreen popup showing the unit label and
+  `reference_text` (plus `source_text` when editing a translation); an outside click commits it
+  (`stopEditingWhenCellsLoseFocus`), and the page behind is `visibility: hidden` so find-in-page
+  only searches the popup. The read-only `source_text` column opens the same popup with
+  `readOnly: true` (always cancels) so its full text is readable
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`
 - `search-panel/` — Search UI

@@ -7,6 +7,7 @@ import {
   computed,
   inject,
   input,
+  isDevMode,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -28,7 +29,23 @@ import type {
   RowSelectionOptions,
   SuppressKeyboardEventParams,
 } from 'ag-grid-community';
-import { AllCommunityModule, ModuleRegistry, themeQuartz } from 'ag-grid-community';
+import {
+  CellStyleModule,
+  ColumnApiModule,
+  CustomEditorModule,
+  CustomFilterModule,
+  InfiniteRowModelModule,
+  LocaleModule,
+  ModuleRegistry,
+  NumberFilterModule,
+  RenderApiModule,
+  RowApiModule,
+  RowSelectionModule,
+  TextFilterModule,
+  TooltipModule,
+  ValidationModule,
+  themeQuartz,
+} from 'ag-grid-community';
 import { AgGridAngular } from 'ag-grid-angular';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
@@ -83,7 +100,24 @@ import {
   type VersionText,
 } from '../../utils/version-text.util';
 
-ModuleRegistry.registerModules([AllCommunityModule]);
+// Only the features this grid uses, not `AllCommunityModule`: it keeps the editor's
+// download smaller. Dev builds add `ValidationModule`, which names any module a
+// new grid option or API call needs (AG Grid error #200) instead of failing quietly.
+ModuleRegistry.registerModules([
+  InfiniteRowModelModule,
+  TextFilterModule,
+  NumberFilterModule,
+  CustomFilterModule,
+  CustomEditorModule,
+  RowSelectionModule,
+  CellStyleModule,
+  TooltipModule,
+  LocaleModule,
+  RowApiModule,
+  RenderApiModule,
+  ColumnApiModule,
+  ...(isDevMode() ? [ValidationModule] : []),
+]);
 
 /**
  * Stops AG Grid clearing a focused cell on Delete/Backspace for a column that is
@@ -386,7 +420,8 @@ export class AssetContentGridComponent implements OnInit {
   readonly rowSelection: RowSelectionOptions = {
     mode: 'multiRow',
     checkboxes: true,
-    headerCheckbox: true,
+    // The infinite row model has no select-all box (AG Grid warning #129).
+    headerCheckbox: false,
   };
 
   readonly defaultColDef: ColDef<ContentEntry> = {
