@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { environment } from '../../../../../environments/environment';
 import type { AssetFileStructure } from '../../models/assets.model';
 import { AssetFileStructureComponent } from './asset-file-structure.component';
@@ -111,6 +111,24 @@ describe('AssetFileStructureComponent', () => {
     expect(options.length).toBe(2);
     expect(picked).toEqual(['en']);
     httpMock.expectOne((r) => r.params.get('language') === 'en').flush(QA);
+  });
+
+  it('renames the languages when the interface language changes', () => {
+    // Arrange
+    const translate = TestBed.inject(TranslateService);
+    translate.use('en');
+    const fixture = render('tafsir', 'ar');
+    fixture.componentRef.setInput('languages', ['ar', 'en']);
+    httpMock.expectOne((r) => r.params.get('language') === 'ar').flush(QA);
+    fixture.detectChanges();
+    const before = fixture.componentInstance.languageOptions()[0].label;
+
+    // Act
+    translate.use('ar');
+    fixture.detectChanges();
+
+    // Assert
+    expect(fixture.componentInstance.languageOptions()[0].label).not.toBe(before);
   });
 
   it('shows no language switch for a single-language asset', () => {

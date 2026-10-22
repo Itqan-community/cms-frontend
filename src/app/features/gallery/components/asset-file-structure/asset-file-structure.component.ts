@@ -41,6 +41,10 @@ export class AssetFileStructureComponent {
 
   private readonly assetsService = inject(AssetsService);
   private readonly translate = inject(TranslateService);
+  /** The interface language, as a signal so the language names follow it. */
+  private readonly uiLang = toSignal(this.translate.onLangChange.pipe(map((event) => event.lang)), {
+    initialValue: this.translate.currentLang,
+  });
 
   private readonly request = computed(() => ({
     id: this.assetId(),
@@ -72,7 +76,7 @@ export class AssetFileStructureComponent {
   readonly languageOptions = computed<NzSegmentedOption[]>(() =>
     this.languages().map((code) => ({
       value: code,
-      label: localizedLanguageName(code, this.translate.currentLang || 'en'),
+      label: localizedLanguageName(code, this.uiLang() || 'en'),
     }))
   );
 
@@ -80,7 +84,7 @@ export class AssetFileStructureComponent {
   labelOf(structure: AssetFileStructure, header: string): string | null {
     const column = structure.columns.find((c) => c.key === header);
     if (!column) return null;
-    const label = columnLabel(column, this.translate.currentLang);
+    const label = columnLabel(column, this.uiLang());
     return label === column.key ? null : label;
   }
 }
