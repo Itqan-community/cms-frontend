@@ -164,13 +164,13 @@ export class ManageColumnsModalComponent {
     });
   }
 
+  /** The translated message for ``name``, else the server's ``fallback``, else the generic one. */
   private errorMessage(name: string | undefined, fallback?: string): string {
-    if (!name)
-      return (
-        fallback ?? this.translate.instant('ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.ERRORS.GENERIC')
-      );
+    const generic = () =>
+      fallback ?? this.translate.instant('ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.ERRORS.GENERIC');
+    if (!name) return generic();
     const key = `ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.ERRORS.${name.toUpperCase()}`;
     const translated = this.translate.instant(key);
-    return translated === key && fallback ? fallback : translated;
+    return translated === key ? generic() : translated;
   }
 }

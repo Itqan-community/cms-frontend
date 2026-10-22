@@ -89,9 +89,18 @@ describe('ManageColumnsModalComponent', () => {
     expect(modal.newKey()).toBe('');
   });
 
+  function useErrors(errors: Record<string, string>): void {
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('en', {
+      ADMIN: { CONTENT_EDITOR: { COLUMNS_MANAGE: { ERRORS: errors } } },
+    });
+    translate.use('en');
+  }
+
   it('refuses a malformed key before asking the server', () => {
     // Arrange
     const modal = create();
+    useErrors({ COLUMN_KEY_INVALID: 'Bad key', GENERIC: 'Something went wrong' });
     modal.newKey.set('Bad Key');
 
     // Act
@@ -99,7 +108,25 @@ describe('ManageColumnsModalComponent', () => {
 
     // Assert
     expect(service.createColumn).not.toHaveBeenCalled();
-    expect(modal.error()).toBe('ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.ERRORS.COLUMN_KEY_INVALID');
+    expect(modal.error()).toBe('Bad key');
+  });
+
+  it('shows the generic message for a server error it has no text for', () => {
+    // Arrange
+    const modal = create();
+    useErrors({ GENERIC: 'Something went wrong' });
+    service.createColumn.and.returnValue(
+      throwError(
+        () => new HttpErrorResponse({ status: 400, error: { error_name: 'brand_new_error' } })
+      )
+    );
+    modal.newKey.set('answer');
+
+    // Act
+    modal.add();
+
+    // Assert
+    expect(modal.error()).toBe('Something went wrong');
   });
 
   it('shows the translated message of a server error', () => {
