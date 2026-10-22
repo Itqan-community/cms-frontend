@@ -558,6 +558,41 @@ describe('AssetContentGridComponent review fixes', () => {
     expect(message.warning).toHaveBeenCalled();
   });
 
+  it('keeps the edits for a retry when the columns can not be reloaded', async () => {
+    // Arrange
+    const component = qaGrid();
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.match((r) => r.url.endsWith('/columns/')).forEach((req) => req.flush(QA));
+    component.draftId.set(7);
+    const row = { unit_id: 5, cells: { question: 'Q2', answer: 'A' }, text: 'Q2' };
+    component.onCellValueChanged({
+      data: row,
+      oldValue: 'Q',
+      newValue: 'Q2',
+      colDef: { colId: 'cell__question' },
+      source: 'edit',
+    } as never);
+
+    // Act — the save says a column is gone, then reloading the columns fails too
+    const first = component.keepDraftOnLeave();
+    httpMock
+      .expectOne((r) => r.method === 'PATCH')
+      .flush({ error_name: 'unknown_column' }, { status: 400, statusText: 'Bad Request' });
+    httpMock
+      .expectOne((r) => r.url.endsWith('/columns/'))
+      .flush({}, { status: 500, statusText: 'Server Error' });
+    await first;
+    await new Promise((resolve) => setTimeout(resolve));
+    const second = component.keepDraftOnLeave();
+    const retry = httpMock.expectOne((r) => r.method === 'PATCH');
+    const rows = retry.request.body.rows;
+    retry.flush([]);
+    await second;
+
+    // Assert
+    expect(rows).toEqual([{ unit_id: 5, column: 'question', text: 'Q2' }]);
+  });
+
   it('keeps the single text column quietly when the backend has no columns endpoint yet', () => {
     // Arrange
     const component = qaGrid();

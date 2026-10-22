@@ -995,12 +995,7 @@ export class AssetContentGridComponent implements OnInit {
                 return;
               }
               // Re-queue the failed batch so nothing is silently lost.
-              for (const patch of batch) {
-                const key = `${patch.unit_id}:${patch.column}`;
-                if (!this.pendingRows.has(key)) {
-                  this.pendingRows.set(key, patch);
-                }
-              }
+              this.requeue(batch);
               this.showError(err);
               resolve();
             },
@@ -1060,11 +1055,23 @@ export class AssetContentGridComponent implements OnInit {
             resolve();
           },
           error: (err: HttpErrorResponse) => {
+            // Which columns are gone is unknown: keep every edit for the next save.
+            this.requeue(batch);
             this.showError(err);
             resolve();
           },
         });
     });
+  }
+
+  /** Put a failed batch back in the queue, behind any newer edit of the same cell. */
+  private requeue(batch: ContentEntryPatch[]): void {
+    for (const patch of batch) {
+      const key = `${patch.unit_id}:${patch.column}`;
+      if (!this.pendingRows.has(key)) {
+        this.pendingRows.set(key, patch);
+      }
+    }
   }
 
   /** Save the current edits to the draft and return to the detail page, keeping
