@@ -604,7 +604,8 @@
         "AYAH": "ayah",
         "WORD": "word",
         "PAGE": "page"
-      }
+      },
+      "LANGUAGE": "Preview language"
     }
   },
   "UI": {

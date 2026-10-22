@@ -62,7 +62,9 @@
         <app-asset-file-structure
           [assetId]="asset()!.id"
           [category]="asset()!.category"
+          [languages]="asset()!.available_languages ?? []"
           [language]="selectedLanguage()"
+          (languageChange)="pickLanguage($event)"
         />
       </div>
 
@@ -102,7 +104,7 @@
                   class="download-language-select"
                   nzBlock
                   [ngModel]="selectedLanguage()"
-                  (ngModelChange)="selectedLanguage.set($event)"
+                  (ngModelChange)="pickLanguage($event)"
                   [nzDisabled]="isDownloading()"
                 >
                   @for (lang of asset()!.available_languages; track lang) {

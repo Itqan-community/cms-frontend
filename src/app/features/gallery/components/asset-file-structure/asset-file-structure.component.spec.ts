@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { environment } from '../../../../../environments/environment';
 import type { AssetFileStructure } from '../../models/assets.model';
@@ -33,7 +34,7 @@ describe('AssetFileStructureComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [AssetFileStructureComponent, TranslateModule.forRoot()],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideNoopAnimations()],
     }).compileComponents();
     httpMock = TestBed.inject(HttpTestingController);
   });
@@ -88,6 +89,62 @@ describe('AssetFileStructureComponent', () => {
 
     // Assert
     expect((fixture.nativeElement as HTMLElement).querySelector('.file-structure')).toBeNull();
+  });
+
+  it('offers the asset languages above the table and reports the pick', () => {
+    // Arrange
+    const fixture = render('tafsir', 'ar');
+    fixture.componentRef.setInput('languages', ['ar', 'en']);
+    httpMock.expectOne((r) => r.params.get('language') === 'ar').flush(QA);
+    fixture.detectChanges();
+    const picked: (string | null)[] = [];
+    fixture.componentInstance.language.subscribe((value) => picked.push(value));
+
+    // Act
+    const options = (fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
+      '.file-structure__languages .ant-segmented-item'
+    );
+    options[1].click();
+    fixture.detectChanges();
+
+    // Assert
+    expect(options.length).toBe(2);
+    expect(picked).toEqual(['en']);
+    httpMock.expectOne((r) => r.params.get('language') === 'en').flush(QA);
+  });
+
+  it('shows no language switch for a single-language asset', () => {
+    // Arrange
+    const fixture = render('tafsir', 'ar');
+    fixture.componentRef.setInput('languages', ['ar']);
+
+    // Act
+    httpMock.expectOne((r) => r.params.get('language') === 'ar').flush(QA);
+    fixture.detectChanges();
+
+    // Assert
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('.file-structure__languages')
+    ).toBeNull();
+  });
+
+  it('keeps the previous table, marked busy, while the next language loads', () => {
+    // Arrange
+    const fixture = render('tafsir', 'ar');
+    httpMock.expectOne((r) => r.params.get('language') === 'ar').flush(QA);
+    fixture.detectChanges();
+
+    // Act
+    fixture.componentRef.setInput('language', 'en');
+    fixture.detectChanges();
+
+    // Assert
+    const table = (fixture.nativeElement as HTMLElement).querySelector('.file-structure__table');
+    expect(table).not.toBeNull();
+    expect(table?.getAttribute('aria-busy')).toBe('true');
+    httpMock.expectOne((r) => r.params.get('language') === 'en').flush(QA);
+    fixture.detectChanges();
+    expect(table?.getAttribute('aria-busy')).toBe('false');
   });
 
   it('asks nothing for categories without text columns', () => {
