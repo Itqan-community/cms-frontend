@@ -131,6 +131,22 @@ describe('AssetFileStructureComponent', () => {
     expect(fixture.componentInstance.languageOptions()[0].label).not.toBe(before);
   });
 
+  it('lets a long sample cell be read in full', () => {
+    // Arrange
+    const long = 'a long answer '.repeat(40).trim();
+    const fixture = render('tafsir', 'ar');
+
+    // Act
+    httpMock
+      .expectOne((r) => r.params.get('language') === 'ar')
+      .flush({ ...QA, rows: [['1', '1', 'Q', long]] });
+    fixture.detectChanges();
+
+    // Assert
+    const cells = (fixture.nativeElement as HTMLElement).querySelectorAll('tbody td');
+    expect(cells[3].getAttribute('title')).toBe(long);
+  });
+
   it('shows no language switch for a single-language asset', () => {
     // Arrange
     const fixture = render('tafsir', 'ar');

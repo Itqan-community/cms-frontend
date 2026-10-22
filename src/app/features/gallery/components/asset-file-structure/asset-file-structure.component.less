@@ -42,13 +42,24 @@
     text-align: start;
     vertical-align: top;
     max-width: 320px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   th {
     font-weight: 600;
+    white-space: nowrap;
+  }
+
+  // Long samples wrap to a few lines; the cell's title holds the full text.
+  td {
+    overflow-wrap: anywhere;
+
+    bdi {
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 4;
+      line-clamp: 4;
+      overflow: hidden;
+    }
   }
 }
 

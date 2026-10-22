@@ -43,7 +43,7 @@
           @for (row of file.rows; track $index) {
             <tr>
               @for (cell of row; track $index) {
-                <td>
+                <td [attr.title]="cell">
                   <bdi>{{ cell }}</bdi>
                 </td>
               }
