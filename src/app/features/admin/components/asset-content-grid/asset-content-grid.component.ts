@@ -38,7 +38,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import { Subject, debounceTime, takeUntil } from 'rxjs';
+import { Subject, catchError, debounceTime, forkJoin, of, takeUntil } from 'rxjs';
 import type {
   AssetColumn,
   AssetLanguage,
@@ -761,25 +761,42 @@ export class AssetContentGridComponent implements OnInit {
   }
 
   /** Load the asset's languages, restoring the last-active one (else the source),
-   *  then open its draft. */
+   *  and open its draft.
+   *
+   *  The draft is opened alongside the languages rather than after them, for the
+   *  remembered language or else the source (the server's default), saving a
+   *  round trip. An early open that fails (the language was removed) or is for
+   *  another language than the list settles on falls back to opening that one. */
   private loadLanguages(): void {
     this.loading.set(true);
-    this.contentService
-      .listLanguages(this.kind, this.slug)
+    const viewId = this.viewVersionId();
+    const remembered = this.lastLanguage.get(this.kind, this.slug);
+    const earlyDraft$ =
+      viewId === null
+        ? this.contentService
+            .createDraft(this.kind, this.slug, remembered)
+            .pipe(catchError(() => of(null)))
+        : of(null);
+    forkJoin({
+      langs: this.contentService.listLanguages(this.kind, this.slug),
+      draft: earlyDraft$,
+    })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (langs) => {
+        next: ({ langs, draft }) => {
           this.languages.set(langs);
-          const viewId = this.viewVersionId();
           if (viewId !== null) {
             this.loadViewedVersion(viewId);
             return;
           }
           const source = langs.find((l) => l.is_source) ?? langs[0];
-          const remembered = this.lastLanguage.get(this.kind, this.slug);
           const initial = langs.find((l) => l.language === remembered) ?? source;
           this.selectedLanguage.set(initial?.language ?? null);
-          this.loadForLanguage();
+          if (draft && draft.language === initial?.language) {
+            this.openDraft(draft, ++this.loadGeneration);
+          } else {
+            this.loadForLanguage();
+          }
         },
         error: (err: HttpErrorResponse) => {
           this.loading.set(false);
@@ -805,7 +822,7 @@ export class AssetContentGridComponent implements OnInit {
           );
           this.selectedLanguage.set(version.language);
           this.draftId.set(version.id);
-          this.loadTemplate(generation);
+          this.applyTemplate(version.template, generation);
         },
         error: (err: HttpErrorResponse) => {
           if (generation !== this.loadGeneration) return;
@@ -830,12 +847,7 @@ export class AssetContentGridComponent implements OnInit {
       .subscribe({
         next: (draft) => {
           if (generation !== this.loadGeneration) return;
-          this.draftId.set(draft.id);
-          this.columnKeys.set(draft.column_keys?.length ? draft.column_keys : DEFAULT_COLUMN_KEYS);
-          this.commitRequiresMajor.set(!!draft.requires_major);
-          this.draftLabels = { label_en: draft.label_en ?? '', label_ar: draft.label_ar ?? '' };
-          this.refreshPendingCount();
-          this.loadTemplate(generation);
+          this.openDraft(draft, generation);
         },
         error: (err: HttpErrorResponse) => {
           if (generation !== this.loadGeneration) return;
@@ -843,6 +855,27 @@ export class AssetContentGridComponent implements OnInit {
           this.showError(err);
         },
       });
+  }
+
+  /** Show an opened draft: its columns, change count and rows. */
+  private openDraft(draft: ContentDraftVersion, generation: number): void {
+    this.draftId.set(draft.id);
+    this.columnKeys.set(draft.column_keys?.length ? draft.column_keys : DEFAULT_COLUMN_KEYS);
+    this.commitRequiresMajor.set(!!draft.requires_major);
+    this.draftLabels = { label_en: draft.label_en ?? '', label_ar: draft.label_ar ?? '' };
+    this.refreshPendingCount();
+    this.applyTemplate(draft.template, generation);
+  }
+
+  /** Create the grid from the version's template, or learn it from a one-row
+   *  probe when the backend doesn't send it. */
+  private applyTemplate(template: AssetTemplate | null | undefined, generation: number): void {
+    if (!template) {
+      this.loadTemplate(generation);
+      return;
+    }
+    this.derivedTemplate.set(template);
+    this.loading.set(false);
   }
 
   /** Switch the edited language: flush pending edits, then reload for the new one. */

@@ -389,13 +389,15 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   edit only reloads the headers). Changed cells are highlighted per column (`changed_columns`).
   After a reorder the commit dialog allows only a major version (`requires_major`, or a
   `major_bump_required` answer). Diffs and review rows name each change's column when the asset has
-  several. Column set is driven by `effectiveTemplate()` (the `template` input, falling back to a
-  one-row probe's `unit_type`). Every template uses AG Grid's infinite row model via
-  `buildDatasource()` (paginated `entries/`, `cacheBlockSize` pinned to the page size, sorting off,
-  one-line rows with truncated text). Column filters run server-side: the grid's `filterModel` is
-  sent as the JSON `filters` param — text filters on `text`/`reference_text`/`source_text`, number
-  filters on `sura`/`aya`, and a surah-name dropdown (`SurahFloatingFilterComponent`) on the unit
-  column (`colId: 'surah'`). Undo/redo is a custom stack (AG Grid's only covers the client-side
+  several. Column set is driven by `effectiveTemplate()` (the `template` input, else the draft's
+  `template`, else a one-row probe's `unit_type` for older backends). The draft is opened alongside
+  `languages/` (remembered language, else the server's default source), falling back to the picked
+  language when that early open fails or differs. Every template uses AG Grid's infinite row model
+  via `buildDatasource()` (paginated `entries/`, `cacheBlockSize` pinned to the page size, sorting
+  off, one-line rows with truncated text). Column filters run server-side: the grid's `filterModel`
+  is sent as the JSON `filters` param — text filters on `text`/`reference_text`/`source_text`,
+  number filters on `sura`/`aya`, and a surah-name dropdown (`SurahFloatingFilterComponent`) on the
+  unit column (`colId: 'surah'`). Undo/redo is a custom stack (AG Grid's only covers the client-side
   model), replayed via `getRowId`. The text column edits in `ContentTextCellEditorComponent`: a
   near-fullscreen popup showing the unit label and `reference_text` (plus `source_text` when editing
   a translation); an outside click commits it (`stopEditingWhenCellsLoseFocus`), and the page behind

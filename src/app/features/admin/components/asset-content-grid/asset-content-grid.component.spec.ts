@@ -322,6 +322,7 @@ describe('AssetContentGridComponent column definitions', () => {
       .flush({
         id: 1,
         asset_id: 1,
+        language: 'ar',
         name: 'draft',
         summary: '',
         state: 'draft',
