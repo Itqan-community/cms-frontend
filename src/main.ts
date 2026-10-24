@@ -1,26 +1,14 @@
 import { bootstrapApplication } from '@angular/platform-browser';
 import { appConfig } from './app/app.config';
 import { App } from './app/app';
-import * as Sentry from '@sentry/angular';
-import { environment } from './environments/environment';
 import { CHUNK_LOAD_RECOVERY_FLAG } from './app/core/sentry/chunk-load-error.util';
-import { filterBenignNetworkSentryEvent } from './app/core/sentry/sentry-before-send.util';
+import { startSentry } from './app/core/sentry/sentry-init';
+import { readStoredPrivacyConsent } from './app/core/services/privacy-consent.service';
 
-if (environment.sentryDsn) {
-  Sentry.init({
-    dsn: environment.sentryDsn,
-    environment: environment.production ? 'production' : 'staging',
-    integrations: [Sentry.browserTracingIntegration()],
-    tracesSampleRate: environment.production ? 0.2 : 1.0,
-    tracePropagationTargets: [
-      'localhost',
-      /^https:\/\/.*\.api\.cms\.itqan\.dev/,
-      /^https:\/\/api\.cms\.itqan\.dev/,
-    ],
-    beforeSend(event, hint) {
-      return filterBenignNetworkSentryEvent(event, hint);
-    },
-  });
+// Error reporting starts before bootstrap only for visitors who already consented;
+// first-time visitors are handled by PrivacyConsentService once they decide.
+if (readStoredPrivacyConsent()?.errorReporting) {
+  startSentry();
 }
 
 bootstrapApplication(App, appConfig)

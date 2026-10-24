@@ -11,9 +11,10 @@ export class GoogleAnalyticsService {
   private initialized = false;
 
   init(): void {
-    if (this.initialized) return;
     if (!environment.production) return;
     if (!isPlatformBrowser(this.platformId)) return;
+    this.setOptOut(false);
+    if (this.initialized) return;
     this.initialized = true;
 
     const scheduleIdle = (this.document.defaultView as Window)?.requestIdleCallback
@@ -51,6 +52,43 @@ export class GoogleAnalyticsService {
     }
 
     this.document.head.appendChild(inlineScript);
+  }
+
+  /**
+   * Stops tracking after the visitor withdraws consent: sets Google's documented
+   * `ga-disable-<ID>` opt-out flag and removes the `_ga` cookies already written.
+   */
+  disable(): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    if (!(environment as { gaTrackingId?: string }).gaTrackingId) return;
+    this.setOptOut(true);
+    this.deleteGaCookies();
+  }
+
+  /** Sets or clears Google's `ga-disable-<ID>` flag, which makes gtag drop every hit. */
+  private setOptOut(optOut: boolean): void {
+    const trackingId = (environment as { gaTrackingId?: string }).gaTrackingId;
+    const win = this.document.defaultView as (Window & Record<string, unknown>) | null;
+    if (!trackingId || !win) return;
+    win[`ga-disable-${trackingId}`] = optOut;
+  }
+
+  /** GA writes its cookies on the widest domain it can, so expire them on every parent domain. */
+  private deleteGaCookies(): void {
+    const names = this.document.cookie
+      .split(';')
+      .map((c) => c.split('=')[0]?.trim() ?? '')
+      .filter((name) => name === '_ga' || name.startsWith('_ga_'));
+    if (!names.length) return;
+
+    const labels = (this.document.location?.hostname ?? '').split('.');
+    const domains = labels.map((_, i) => labels.slice(i).join('.')).filter((d) => d.includes('.'));
+    for (const name of names) {
+      this.document.cookie = `${name}=; Max-Age=0; path=/`;
+      for (const domain of domains) {
+        this.document.cookie = `${name}=; Max-Age=0; path=/; domain=.${domain}`;
+      }
+    }
   }
 
   trackEvent(name: string, params?: Record<string, unknown>): void {

@@ -517,7 +517,8 @@
     "ASSET_REQUEST_FORM": "Add Quranic Content to ITQAN",
     "ADMIN_PORTAL": "Admin Portal",
     "MUSHAF": "Quran",
-    "RECITERS": "Reciters"
+    "RECITERS": "Reciters",
+    "PRIVACY": "Privacy"
   },
   "HOME": {
     "WELCOME": "Welcome to Itqan CMS",
@@ -790,6 +791,50 @@
       "SPECIFICATIONS": "Format Specifications",
       "SCHEMA_DOCS": "Schema Documentation",
       "EXAMPLE_FILE": "Example File"
+    }
+  },
+  "PRIVACY_CONSENT": {
+    "TITLE": "Your privacy",
+    "DESCRIPTION": "With your permission, we use Google Analytics to understand how the site is used and Sentry to receive reports when something breaks. Neither runs until you choose.",
+    "LEARN_MORE": "Privacy details",
+    "ANALYTICS": "Usage analytics",
+    "ANALYTICS_DESC": "Pages visited and device and browser type, through Google Analytics cookies.",
+    "ERROR_REPORTING": "Error reports",
+    "ERROR_REPORTING_DESC": "Technical details of errors you run into, sent to Sentry so we can fix them.",
+    "CUSTOMIZE": "Customize",
+    "SAVE_CHOICES": "Save choices",
+    "REJECT_ALL": "Reject all",
+    "ACCEPT_ALL": "Accept all"
+  },
+  "PRIVACY_PAGE": {
+    "TITLE": "Privacy and data collection",
+    "INTRO": "This page explains what data the Itqan CMS website collects from your browser, why, and how to change your choices at any time.",
+    "LAST_UPDATED": "Last updated: 17 October 2026",
+    "OPTIONAL": {
+      "TITLE": "Collected only with your consent",
+      "DESCRIPTION": "These services stay off until you allow them in the privacy banner. Turning one off later stops it from collecting anything new.",
+      "ANALYTICS": "Google Analytics records which pages you visit, your approximate location, and your device and browser type, so we can see which parts of the site are useful. It stores cookies whose names start with _ga. It runs on the production site only.",
+      "ERROR_REPORTING": "Sentry receives a report when the site hits an error: the error message, the page, the steps that led to it, and your browser and device type. Some page loads are also timed to find slow areas."
+    },
+    "ESSENTIAL": {
+      "TITLE": "Always stored because the site needs it",
+      "DESCRIPTION": "These are kept in your own browser and are not used for tracking:",
+      "LANGUAGE": "Your language choice.",
+      "SESSION": "Your sign-in session, if you log in.",
+      "CHOICES": "Your privacy choices."
+    },
+    "NOT_SENT": {
+      "TITLE": "Measured but never sent",
+      "WEB_VITALS": "Page performance measurements (Core Web Vitals) are only printed to the browser console while the site is being developed. They are never sent anywhere and are not collected on the live site."
+    },
+    "CHOICES": {
+      "TITLE": "Your choices",
+      "ALLOWED": "Allowed",
+      "NOT_ALLOWED": "Not allowed",
+      "SAVED_ON": "Saved on",
+      "NONE": "You have not made a choice yet, so no optional service is running.",
+      "WITHDRAW": "You can change or withdraw your consent at any time. Your choice is saved in this browser only.",
+      "CHANGE": "Change privacy settings"
     }
   },
   "ADMIN": {
