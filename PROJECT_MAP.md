@@ -226,8 +226,9 @@ Pages   Guards    Interceptors   Utils
 ChangePassword, ChangeEmail, Logout, LoginByCode (2-step), MFA (TOTP/WebAuthn/RecoveryCodes),
 Reauthenticate (3 modes), VerifyEmail, ProviderSignup, Passkey (3 modes), OAuthCallback,
 ManageProviders, SecuritySettings (TOTP / recovery codes: GET may omit plaintext; one-time POST
-merge + redacted UX), Sessions, ApiKeys (`/account/api-keys`: list/create/rename/revoke/delete),
-Trust, Profile, CompleteProfile
+merge + redacted UX), Sessions, ApiKeys (`/account/api-keys`: list/create/rename/revoke/delete; keys
+are public app identifiers, full key shown and copied when the API returns it, `X-API-Key` /
+`X-External-User-Id` usage snippet), Trust, Profile, CompleteProfile
 
 **Auth guards:** `authGuard` (requires auth), `guestGuard` (blocks authenticated users),
 `profileCompletedGuard` (requires completed profile)
