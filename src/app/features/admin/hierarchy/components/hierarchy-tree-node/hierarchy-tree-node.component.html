@@ -1,0 +1,84 @@
+<span class="hierarchy-tree-node__toggle" aria-hidden="true">
+  @if (row().expandable) {
+    @if (row().expanded) {
+      <ng-icon name="lucideChevronDown" />
+    } @else {
+      <ng-icon name="lucideChevronRight" class="rtl-flip" />
+    }
+  }
+</span>
+
+@if (surah(); as surah) {
+  <span class="hierarchy-tree-node__index">{{ surah.surah_number }}</span>
+  <span class="hierarchy-tree-node__main">
+    <span class="hierarchy-tree-node__label" lang="ar" dir="rtl">{{ surah.name_ar }}</span>
+    <span class="hierarchy-tree-node__secondary" lang="en" dir="ltr">{{ surah.name_en }}</span>
+  </span>
+  <span class="hierarchy-tree-node__meta">
+    <nz-tag [nzColor]="surah.revelation_type === 'meccan' ? 'gold' : 'cyan'">
+      {{
+        (surah.revelation_type === 'meccan' ? 'ADMIN.HIERARCHY.MECCAN' : 'ADMIN.HIERARCHY.MEDINAN')
+          | translate
+      }}
+    </nz-tag>
+    <span class="hierarchy-tree-node__count">{{
+      'ADMIN.HIERARCHY.AYAHS_COUNT' | translate: { count: surah.ayahs_count }
+    }}</span>
+  </span>
+}
+
+@if (ayah(); as ayah) {
+  <span class="hierarchy-tree-node__index">{{ ayah.ayah_number }}</span>
+  <span class="hierarchy-tree-node__main">
+    <span
+      class="hierarchy-tree-node__label hierarchy-tree-node__label--text"
+      lang="ar"
+      dir="rtl"
+      [title]="ayah.text"
+      >{{ ayah.text }}</span
+    >
+  </span>
+  <span class="hierarchy-tree-node__meta">
+    <span class="hierarchy-tree-node__key" dir="ltr">{{ ayah.ayah_key }}</span>
+    <span class="hierarchy-tree-node__count">{{
+      'ADMIN.HIERARCHY.WORDS_COUNT' | translate: { count: ayah.words_count }
+    }}</span>
+  </span>
+}
+
+@if (word(); as word) {
+  <span class="hierarchy-tree-node__index">{{ word.position }}</span>
+  <span class="hierarchy-tree-node__main">
+    <span class="hierarchy-tree-node__label hierarchy-tree-node__label--word" lang="ar" dir="rtl">{{
+      word.text
+    }}</span>
+  </span>
+  <span class="hierarchy-tree-node__meta">
+    @if (timing(); as timing) {
+      <span class="hierarchy-tree-node__timing" dir="ltr">
+        <ng-icon name="lucideClock" aria-hidden="true" />
+        {{ 'ADMIN.HIERARCHY.TIMING' | translate: timing }}
+      </span>
+    } @else {
+      <span class="hierarchy-tree-node__muted">{{ 'ADMIN.HIERARCHY.NO_TIMING' | translate }}</span>
+    }
+    <span class="hierarchy-tree-node__count">{{
+      'ADMIN.HIERARCHY.LETTERS_COUNT' | translate: { count: word.letters_count }
+    }}</span>
+  </span>
+}
+
+@if (letter(); as letter) {
+  <span class="hierarchy-tree-node__index">{{ letter.position }}</span>
+  <span class="hierarchy-tree-node__main">
+    <span
+      class="hierarchy-tree-node__label hierarchy-tree-node__label--letter"
+      lang="ar"
+      dir="rtl"
+      >{{ letter.text }}</span
+    >
+  </span>
+  <span class="hierarchy-tree-node__meta">
+    <span class="hierarchy-tree-node__key" dir="ltr">{{ codePoints() }}</span>
+  </span>
+}

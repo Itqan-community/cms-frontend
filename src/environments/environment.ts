@@ -12,6 +12,10 @@ export const environment = {
   webauthnReplaceRpIdWithHostname: false,
   /** In-memory programs CRUD until portal programs API is live. */
   useProgramsMockApi: true,
+  /** Surah > Ayah > Word > Letter hierarchy manager (`/admin/hierarchy`) and its sidebar tab. */
+  hierarchyManager: true,
+  /** Typed in-memory `/portal/hierarchy/` until the portal hierarchy API is live. */
+  useHierarchyMockApi: true,
   /**
    * Recitation folder public visibility toggle. Off until the portal API exposes
    * `is_visible` on folders — a toggle that cannot actually hide a folder would tell

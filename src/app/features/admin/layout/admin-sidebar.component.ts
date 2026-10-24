@@ -4,6 +4,7 @@ import { NgIcon } from '@ng-icons/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzLayoutModule } from 'ng-zorro-antd/layout';
 import { NzMenuModule } from 'ng-zorro-antd/menu';
+import { environment } from '../../../../environments/environment';
 import { PORTAL_PERMISSIONS } from '../constants/portal-permission.constants';
 import { AdminAuthService } from '../services/admin-auth.service';
 import { AdminTenantService } from '../services/admin-tenant.service';
@@ -76,6 +77,13 @@ export const TAB_RECITERS: CmsTab = {
   description: 'ADMIN.MENU.RECITERS_DESC',
   icon: 'lucideMic',
 };
+export const TAB_HIERARCHY: CmsTab = {
+  id: 'hierarchy',
+  path: 'hierarchy',
+  label: 'ADMIN.MENU.HIERARCHY',
+  description: 'ADMIN.MENU.HIERARCHY_DESC',
+  icon: 'lucideListTree',
+};
 export const TAB_ISSUES: CmsTab = {
   id: 'issues',
   path: 'issues',
@@ -133,6 +141,9 @@ export function buildAuthorizedAdminTabs(
   }
   if (adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_RECITER)) {
     tabs.push(TAB_RECITERS);
+  }
+  if (environment.hierarchyManager && adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS)) {
+    tabs.push(TAB_HIERARCHY);
   }
   // TODO(backend-permissions): gate with PORTAL_PERMISSIONS.PORTAL_READ_ISSUE_REPORT once seeded
   tabs.push(TAB_ISSUES);

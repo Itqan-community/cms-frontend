@@ -1,6 +1,6 @@
 # PROJECT_MAP — Itqan CMS Frontend
 
-> Last updated: 2026-08-30 Generated for AI-assisted development. Provide this doc to any LLM to
+> Last updated: 2026-10-17 Generated for AI-assisted development. Provide this doc to any LLM to
 > give full project context.
 
 ---
@@ -257,6 +257,7 @@ Trust, Profile, CompleteProfile
 | `/admin/translations`         | (lazy routes)          | per-route `permissionGuard`       | Translation CRUD                                                                                                                           |
 | `/admin/recitations`          | (lazy routes)          | per-route `permissionGuard`       | Recitation CRUD                                                                                                                            |
 | `/admin/reciters`             | (lazy routes)          | per-route `permissionGuard`       | Reciter CRUD                                                                                                                               |
+| `/admin/hierarchy`            | (lazy routes)          | `portal_access`                   | Quran Surah > Ayah > Word > Letter tree (mocked API); `canMatch` on `environment.hierarchyManager`, else coming soon                       |
 | `/admin/issues`               | (lazy routes)          | _(permission guards commented)_   | Issue reports (list/detail/create/edit/delete); TODO enable `portal_*_issue_report` guards                                                 |
 | `/admin/members`              | (lazy routes)          | `membersAccessGuard`              | Publisher member list/invite/edit/remove/resend via `/portal/members/` (modal UX on single list)                                           |
 | `/admin/access-requests`      | (lazy routes)          | `accessRequestsAccessGuard`       | Asset access requests list/accept/reject + settings via `/portal/access-requests/` and `/portal/publishers/{id}/access-requests-settings/` |
@@ -311,6 +312,7 @@ cards as the sidebar.
 | `translations/`    | Translation           | `Translation`, `TranslationVersion` | CRUD; create always multipart FormData with optional initial version; update/patch remain JSON; version management on detail                                                                                                                                                                                                                 |
 | `recitations/`     | Recitation (audio)    | `Recitation`, `RecitationFolderOut` | CRUD + ng-zorro folder tabs (`FolderSwitcherComponent`; per-tab settings dropdown) + folder variants chosen from a fixed quality×effects taxonomy + folder-scoped tracks upload with progress + timings; full bulk upload success redirects to `/gallery/asset/{id}`; partial failure clears validate banner and keeps failed rows for retry |
 | `reciters/`        | Reciter               | `Reciter`                           | CRUD + image upload + death info                                                                                                                                                                                                                                                                                                             |
+| `hierarchy/`       | Quran hierarchy       | `HierarchySurah`/`Ayah`/`Word`      | Read-only lazy tree (virtual scroll, debounced search, breadcrumb, Arrow/Enter/Escape keys) over `/portal/hierarchy/` (surahs, ayahs, words with optional `start_ms`/`end_ms`, letters, search); typed mock in `hierarchy.mock-store.ts` behind `useHierarchyMockApi`                                                                        |
 | `issues/`          | Issue reports         | `IssueReportOut`                    | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions                                                                                                                                                                                                                                            |
 | `members/`         | Publisher members     | `MemberOut`, `GroupListOut`         | List/invite/update/remove/resend via `/portal/members/`; list shows `group_name`; invite/edit submit `group_id` from `GET /portal/groups/`; scoped by `AdminTenantService.selectedPublisherId()`                                                                                                                                             |
 | `access-requests/` | Asset access requests | `AccessRequestOut`                  | List/accept/reject + publisher settings (`/portal/publishers/{id}/access-requests-settings/`); detail drawer; permission-gated actions                                                                                                                                                                                                       |
@@ -628,6 +630,10 @@ create forms (`POST /portal/ai/translate/`), usage reports (`/portal/usage/*`,
 `/portal/admin/usage/*`). Programs portal module is dormant (route/nav hidden) until BE ships
 `/portal/programs/`.
 
+Quran hierarchy (`/portal/hierarchy/surahs/`, `surahs/{n}/ayahs/`, `ayahs/{key}/words/`,
+`words/{key}/letters/`, `search/?q=`) is not live yet: served by `HierarchyMockStore` while
+`useHierarchyMockApi` is on; `hierarchyManager` hides the page where neither exists (production).
+
 Asset create/edit forms (tafsir, translation, mushaf, font, program, recitation): publisher field is
 view-only — create binds `AdminTenantService.selectedPublisherId()`; edit shows the asset publisher.
 
@@ -664,6 +670,7 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
 | `features/admin/mushafs/`               | Implemented       | Portal mushaf CRUD wired to live `/portal/mushafs/` + `permissionGuard` (`portal_*_mushaf`).                                                                     |
 | `features/admin/fonts/`                 | Implemented       | Portal font CRUD wired to live `/portal/fonts/` + `permissionGuard` (`portal_*_font`).                                                                           |
 | `features/admin/programs/`              | Hidden (dormant)  | Module kept; `/admin/programs` route, sidebar tab, and redirect candidate removed until BE API is ready.                                                         |
+| `features/admin/hierarchy/`             | Mocked            | Typed mock of `/portal/hierarchy/` behind `useHierarchyMockApi`; hidden in prod (`hierarchyManager`). Drop the mock when BE ships.                               |
 | `features/mushaf/` (reader)             | Hidden (dormant)  | Module kept; `/mushaf` route + `NAV.MUSHAF` commented out. Mobile menu now respects `hidden`. Admin small-MQ toggle exclusivity fixed.                           |
 | `features/admin/audio/`                 | Partial           | Routes defined but implementation details need verification.                                                                                                     |
 | `features/admin/software/`              | Partial           | Routes defined but implementation details need verification.                                                                                                     |
