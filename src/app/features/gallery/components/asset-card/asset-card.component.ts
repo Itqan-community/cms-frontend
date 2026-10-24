@@ -53,9 +53,16 @@ import { Asset } from '../../models/assets.model';
             </div>
           </div>
           <div class="button-container">
-            @if (asset().is_open_access) {
+            @if (asset().is_open_access || asset().has_ayah_timings) {
               <div class="asset-card__access-row">
-                <nz-tag nzColor="green">{{ 'GALLERY.OPEN_ACCESS_BADGE' | translate }}</nz-tag>
+                @if (asset().is_open_access) {
+                  <nz-tag nzColor="green">{{ 'GALLERY.OPEN_ACCESS_BADGE' | translate }}</nz-tag>
+                }
+                @if (asset().has_ayah_timings) {
+                  <nz-tag nzColor="blue" class="asset-card__timed">{{
+                    'GALLERY.AYAH_TIMED_BADGE' | translate
+                  }}</nz-tag>
+                }
               </div>
             }
             <a nz-button nzSize="large" routerLink="/gallery/asset/{{ asset().id }}" class="w-full">

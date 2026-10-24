@@ -88,6 +88,8 @@ export interface RecitationFormValue {
   license: string;
   is_open_access: boolean;
   restricted_for_tenant: boolean;
+  /** Create-only: package slug suggested by `POST /portal/ai/slug/`. */
+  slug?: string;
 }
 
 export interface RecitationsListResponse {

@@ -43,18 +43,18 @@ describe('AssetContentGridComponent column definitions', () => {
     // Arrange / Act
     const fields = componentFor('page')
       .buildColumnDefs()
-      .map((col: { field?: string }) => col.field)
+      .map((col: { field?: string; colId?: string }) => col.colId ?? col.field)
       .filter(Boolean);
 
     // Assert
-    expect(fields).toEqual(['label', 'text']);
+    expect(fields).toEqual(['label', 'cell__text']);
   });
 
   it('shows the reference text column for the ayah template', () => {
     // Arrange / Act
     const fields = componentFor('ayah')
       .buildColumnDefs()
-      .map((col: { field?: string }) => col.field)
+      .map((col: { field?: string; colId?: string }) => col.colId ?? col.field)
       .filter(Boolean);
 
     // Assert
@@ -104,7 +104,8 @@ describe('AssetContentGridComponent column definitions', () => {
       { language: 'fr', is_source: false, is_available: true },
     ]);
     grid.selectedLanguage.set('fr');
-    const source = grid.buildColumnDefs().find((col) => col.field === 'source_text')!;
+    grid.showSource.set(true);
+    const source = grid.buildColumnDefs().find((col) => col.colId === 'source__text')!;
     const press = (key: string, editing = false) =>
       suppressClearKeys({ editing, event: new KeyboardEvent('keydown', { key }) } as never);
 
@@ -166,7 +167,7 @@ describe('AssetContentGridComponent column definitions', () => {
     // Arrange / Act
     const textColumns = componentFor('ayah')
       .buildColumnDefs()
-      .filter((col) => col.field === 'reference_text' || col.field === 'text');
+      .filter((col) => col.field === 'reference_text' || col.colId === 'cell__text');
 
     // Assert — long text is cut off in the cell rather than growing the row
     expect(textColumns.length).toBe(2);
@@ -185,11 +186,12 @@ describe('AssetContentGridComponent column definitions', () => {
       { language: 'ar', is_source: false, is_available: true },
     ] as never);
     grid.selectedLanguage.set('ar');
+    grid.showSource.set(true);
 
     // Act
     const columns = grid.buildColumnDefs();
-    const source = columns.find((col) => col.field === 'source_text');
-    const text = columns.find((col) => col.field === 'text');
+    const source = columns.find((col) => col.colId === 'source__text');
+    const text = columns.find((col) => col.colId === 'cell__text');
 
     // Assert — the source cell opens read-only; the text editor gets its heading
     expect(source?.editable).toBeTrue();
@@ -202,7 +204,7 @@ describe('AssetContentGridComponent column definitions', () => {
     // Arrange
     const text = componentFor('ayah')
       .buildColumnDefs()
-      .find((col) => col.field === 'text');
+      .find((col) => col.colId === 'cell__text');
     const rule = text?.cellClassRules?.['content-grid__cell--changed'] as (p: unknown) => boolean;
 
     // Act / Assert
@@ -273,7 +275,7 @@ describe('AssetContentGridComponent column definitions', () => {
     const fields = (template: string) =>
       componentFor(template)
         .buildColumnDefs()
-        .map((col: { field?: string }) => col.field);
+        .map((col: { field?: string; colId?: string }) => col.colId ?? col.field);
 
     // Assert
     expect(fields('surah')).not.toContain('aya');
@@ -310,6 +312,9 @@ describe('AssetContentGridComponent column definitions', () => {
     fixture.detectChanges();
     const httpMock = TestBed.inject(HttpTestingController);
     httpMock
+      .expectOne((req) => req.url.endsWith('/columns/'))
+      .flush([{ key: 'text', label_en: '', label_ar: '', order: 0, committed: false }]);
+    httpMock
       .expectOne((req) => req.url.includes('languages/'))
       .flush([{ language: 'ar', is_source: true, is_available: true }]);
     httpMock
@@ -317,6 +322,7 @@ describe('AssetContentGridComponent column definitions', () => {
       .flush({
         id: 1,
         asset_id: 1,
+        language: 'ar',
         name: 'draft',
         summary: '',
         state: 'draft',
@@ -344,13 +350,13 @@ describe('AssetContentGridComponent column definitions', () => {
 
     const fields = fixture.componentInstance
       .buildColumnDefs()
-      .map((col: { field?: string }) => col.field)
+      .map((col: { field?: string; colId?: string }) => col.colId ?? col.field)
       .filter(Boolean);
 
     // Assert: page columns (no reference_text) even though `template` was
     // never set — proves buildColumnDefs reads the derived template, not the
     // raw (unset) input.
-    expect(fields).toEqual(['label', 'text']);
+    expect(fields).toEqual(['label', 'cell__text']);
 
     httpMock.verify();
   });
@@ -431,7 +437,7 @@ describe('AssetContentGridComponent column definitions', () => {
       const grid = fixture.componentInstance;
 
       // Act
-      const text = grid.buildColumnDefs().find((col) => col.field === 'text')!;
+      const text = grid.buildColumnDefs().find((col) => col.colId === 'cell__text')!;
 
       // Assert
       expect(grid.readOnly()).toBeTrue();

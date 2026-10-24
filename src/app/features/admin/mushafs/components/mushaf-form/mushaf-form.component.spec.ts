@@ -93,6 +93,7 @@ describe('MushafFormComponent first version', () => {
       version_number: '1.0',
       version_name_ar: 'الطبعة الأولى',
       version_summary_en: 'First printing',
+      slug: 'mushaf-madinah',
     });
     component.onSubmit();
 
@@ -101,5 +102,32 @@ describe('MushafFormComponent first version', () => {
     expect(body.version_name_ar).toBe('الطبعة الأولى');
     expect(body.version_summary_en).toBe('First printing');
     expect(body.file?.name).toBe('mushaf.zip');
+  });
+
+  it('blocks create until a package slug is filled', () => {
+    const component = create();
+
+    component.form.patchValue({ version_number: '1.0', slug: '' });
+    component.onSubmit();
+
+    expect(mushafsServiceMock.create).not.toHaveBeenCalled();
+  });
+
+  it('rejects a typed slug that is not lowercase-hyphenated', () => {
+    const component = create();
+
+    component.form.patchValue({ version_number: '1.0', slug: 'Mushaf Madinah' });
+    component.onSubmit();
+
+    expect(mushafsServiceMock.create).not.toHaveBeenCalled();
+  });
+
+  it('sends the suggested slug on create', () => {
+    const component = create();
+
+    component.form.patchValue({ version_number: '1.0', slug: 'mushaf-madinah-hafs' });
+    component.onSubmit();
+
+    expect(mushafsServiceMock.create.calls.mostRecent().args[0].slug).toBe('mushaf-madinah-hafs');
   });
 });

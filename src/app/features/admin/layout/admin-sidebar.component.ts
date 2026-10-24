@@ -159,7 +159,7 @@ export function buildAuthorizedAdminTabs(
   ) {
     tabs.push(TAB_ACCESS_REQUESTS);
   }
-  if (adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS)) {
+  if (adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_USAGE)) {
     tabs.push(TAB_USAGE);
   }
   return tabs;

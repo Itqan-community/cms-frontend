@@ -1,35 +1,57 @@
 <div class="usage-page">
-  @if (isStaff()) {
-    <div class="usage-page__toolbar">
+  <header class="usage-page__header">
+    <h1 class="usage-page__title">{{ 'USAGE.TITLE' | translate }}</h1>
+    @if (isItqanAdmin()) {
       <nz-select
         class="usage-page__publisher-select"
         [ngModel]="selectedPublisherId()"
         (ngModelChange)="onPublisherChange($event)"
-        nzPlaceHolder="{{ 'USAGE.ALL_PUBLISHERS' | translate }}"
+        [nzPlaceHolder]="'USAGE.ALL_PUBLISHERS' | translate"
         nzAllowClear
       >
         @for (pub of publishers(); track pub.id) {
           <nz-option [nzValue]="pub.id" [nzLabel]="pub.name"></nz-option>
         }
       </nz-select>
-    </div>
-  }
-  <nz-spin [nzSpinning]="loading()">
-    @if (hasError()) {
-      <nz-alert
-        nzType="warning"
-        [nzMessage]="'USAGE.ERROR_UNAVAILABLE' | translate"
-        nzShowIcon
-      ></nz-alert>
-    } @else if (!boardUrl() && !loading()) {
-      <nz-empty [nzNotFoundContent]="'USAGE.NO_DATA' | translate"></nz-empty>
-    } @else if (boardUrl()) {
-      <iframe
-        class="usage-page__board"
-        [src]="boardUrl()!"
-        frameborder="0"
-        allowfullscreen
-      ></iframe>
     }
-  </nz-spin>
+  </header>
+
+  <nz-tabset (nzSelectedIndexChange)="onTabChange($event, isItqanAdmin() ? 3 : 1)">
+    <nz-tab [nzTitle]="'USAGE.TABS.DASHBOARD' | translate">
+      <app-usage-dashboard [scope]="scope()" [publisherId]="selectedPublisherId()" />
+    </nz-tab>
+    @if (isItqanAdmin()) {
+      <nz-tab [nzTitle]="'USAGE.TABS.LEADERBOARD' | translate">
+        <ng-template nz-tab>
+          <app-usage-leaderboard [filters]="filters()" />
+        </ng-template>
+      </nz-tab>
+      <nz-tab [nzTitle]="'USAGE.TABS.UNSEEN' | translate">
+        <ng-template nz-tab>
+          <app-usage-unseen-traffic [filters]="filters()" />
+        </ng-template>
+      </nz-tab>
+    }
+    <nz-tab [nzTitle]="'USAGE.TABS.LEGACY' | translate">
+      <nz-spin [nzSpinning]="boardLoading()">
+        @if (boardError()) {
+          <nz-alert
+            nzType="warning"
+            [nzMessage]="'USAGE.ERROR_UNAVAILABLE' | translate"
+            nzShowIcon
+          ></nz-alert>
+        } @else if (boardUrl()) {
+          <iframe
+            class="usage-page__board"
+            title="Mixpanel"
+            [src]="boardUrl()!"
+            frameborder="0"
+            allowfullscreen
+          ></iframe>
+        } @else if (!boardLoading()) {
+          <nz-empty [nzNotFoundContent]="'USAGE.NO_DATA' | translate"></nz-empty>
+        }
+      </nz-spin>
+    </nz-tab>
+  </nz-tabset>
 </div>

@@ -8,7 +8,7 @@ import { firstValueFrom } from 'rxjs';
 import { LangSwitchComponent } from '../../../../shared/components/lang-switch/lang-switch.component';
 import { resolveAuthErrorMessage } from '../../../../shared/utils/auth-error-resolver.util';
 import { tryNavigateForAuth401 } from '../../headless/headless-auth-flow.util';
-import type { ManagedApiKey } from '../../models/api-keys.model';
+import type { ApiKeyPatchIn, ManagedApiKey } from '../../models/api-keys.model';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -35,6 +35,8 @@ export class ApiKeysPage implements OnInit {
 
   readonly editingId = signal<string | null>(null);
   readonly renameDraft = signal<Record<string, string>>({});
+  readonly slugDraft = signal<Record<string, string>>({});
+  private readonly savedSlugs = new Map<string, string>();
 
   readonly createForm = this.fb.nonNullable.group({
     name: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(120)]],
@@ -161,6 +163,16 @@ export class ApiKeysPage implements OnInit {
     const next = { ...this.renameDraft() };
     next[k.id] = k.name;
     this.renameDraft.set(next);
+    this.savedSlugs.set(k.id, k.appSlug ?? '');
+    this.slugDraft.set({ ...this.slugDraft(), [k.id]: k.appSlug ?? '' });
+  }
+
+  draftSlug(id: string): string {
+    return this.slugDraft()[id] ?? '';
+  }
+
+  updateSlugDraft(id: string, value: string): void {
+    this.slugDraft.set({ ...this.slugDraft(), [id]: value });
   }
 
   cancelRename(): void {
@@ -183,12 +195,22 @@ export class ApiKeysPage implements OnInit {
       this.pageError.set(this.translate.instant('AUTH.API_KEYS.RENAME_REQUIRED'));
       return;
     }
+    const slug = (this.slugDraft()[id] ?? '').trim();
+    // The API cannot clear a slug; say so instead of saving the name and keeping the old one.
+    if (!slug && this.savedSlugs.get(id)) {
+      this.pageError.set(this.translate.instant('AUTH.API_KEYS.SLUG_REQUIRED'));
+      return;
+    }
 
     this.pageError.set('');
     this.successMsg.set('');
     this.isLoading.set(true);
     try {
-      await firstValueFrom(this.auth.updateApiKey(id, { name }));
+      const patch: ApiKeyPatchIn = { name };
+      if (slug && slug !== this.savedSlugs.get(id)) {
+        patch.app_slug = slug;
+      }
+      await firstValueFrom(this.auth.updateApiKey(id, patch));
       this.editingId.set(null);
       this.successMsg.set(this.translate.instant('AUTH.API_KEYS.RENAME_SUCCESS'));
       await this.reloadQuiet();

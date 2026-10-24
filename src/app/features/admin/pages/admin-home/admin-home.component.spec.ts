@@ -48,7 +48,7 @@ describe('AdminHomeComponent', () => {
     hasPermission.and.callFake(
       (code: string) =>
         code === PORTAL_PERMISSIONS.PORTAL_READ_RECITATION ||
-        code === PORTAL_PERMISSIONS.PORTAL_ACCESS
+        code === PORTAL_PERMISSIONS.PORTAL_READ_USAGE
     );
 
     const fixture = TestBed.createComponent(AdminHomeComponent);

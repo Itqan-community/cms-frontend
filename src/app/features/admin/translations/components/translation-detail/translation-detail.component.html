@@ -142,6 +142,8 @@
       sectionTitleKey="ADMIN.TRANSLATIONS.DETAIL.VERSIONS_TITLE"
     />
 
+    <app-asset-usage-section [assetId]="translation()!.id" category="translation" />
+
     <div class="admin-back">
       <a routerLink="/admin/translations">
         <button nz-button nzType="default">

@@ -20,11 +20,13 @@ import {
 } from '../../../utils/display-localization.util';
 import { TranslationDetails } from '../../models/translations.models';
 import { TranslationsService } from '../../services/translations.service';
+import { AssetUsageSectionComponent } from '../../../../usage/components/asset-usage-section/asset-usage-section.component';
 
 @Component({
   selector: 'app-translation-detail',
   standalone: true,
   imports: [
+    AssetUsageSectionComponent,
     DatePipe,
     RouterLink,
     NzModalModule,

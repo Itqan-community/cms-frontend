@@ -210,6 +210,23 @@ export function resolveApiErrorMessage(
   return translate.instant(fallbackKey);
 }
 
+const USAGE_COUNTS_URL = /\/assets\/\d+\/usage-counts\/?(\?|$)/;
+const FILE_STRUCTURE_URL = /\/assets\/\d+\/file-structure\/?(\?|$)/;
+const ASSET_COLUMNS_URL = /\/content\/[^/]+\/[^/]+\/columns\/?(\?|$)/;
+
+/** Text-column errors the content editor and its columns dialog show themselves. */
+const CONTENT_COLUMN_ERRORS = new Set([
+  'major_bump_required',
+  'unknown_filter_column',
+  'unknown_column',
+  'column_key_invalid',
+  'column_key_taken',
+  'column_committed',
+  'column_last',
+  'column_order_mismatch',
+  'column_not_found',
+]);
+
 /** Errors handled locally by feature components — skip global interceptor toast. */
 export function shouldSuppressGlobalErrorToast(error: unknown): boolean {
   if (!(error instanceof HttpErrorResponse)) {
@@ -221,12 +238,29 @@ export function shouldSuppressGlobalErrorToast(error: unknown): boolean {
     errorName === 'invalid_status' ||
     errorName === 'tenant_required' ||
     // Handled locally by the content editor grid with a friendly popup.
-    errorName === 'no_changes_to_publish'
+    errorName === 'no_changes_to_publish' ||
+    // Gallery usage counts are turned off on the backend; the line simply stays hidden.
+    errorName === 'usage_counts_disabled' ||
+    (errorName !== undefined && errorName !== null && CONTENT_COLUMN_ERRORS.has(errorName))
   ) {
     return true;
   }
 
   if (isRestrictedForTenantConflictError(error)) {
+    return true;
+  }
+
+  // The gallery usage-counts line is optional; any 404 (turned off, unknown asset) just hides it.
+  if (error.status === 404 && USAGE_COUNTS_URL.test(error.url ?? '')) {
+    return true;
+  }
+
+  // The gallery file-structure preview hides itself when a language has none; the
+  // editor falls back to one text column on a backend that predates columns.
+  if (
+    error.status === 404 &&
+    (FILE_STRUCTURE_URL.test(error.url ?? '') || ASSET_COLUMNS_URL.test(error.url ?? ''))
+  ) {
     return true;
   }
 

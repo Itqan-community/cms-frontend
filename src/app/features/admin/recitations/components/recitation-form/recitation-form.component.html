@@ -61,6 +61,13 @@
                 />
               </nz-form-control>
             </nz-form-item>
+            @if (!isEditMode()) {
+              <app-ai-translate-actions
+                [form]="form"
+                [category]="'recitation'"
+                [context]="aiContext()"
+              />
+            }
           </div>
         </div>
       </div>

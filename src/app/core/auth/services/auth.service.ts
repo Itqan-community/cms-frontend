@@ -203,7 +203,9 @@ export class AuthService {
             }
             return of(void 0);
           }
-          this.provisionalSession.set(false);
+          // The provisional flag is cleared once the profile is in (below): clearing it
+          // now would make `authReady` false for that round trip and hold every
+          // route guard evaluated meanwhile until the profile lands.
           return this.getProfile().pipe(
             tap((p) => {
               this.applyProfileFromApi(p);
@@ -215,6 +217,7 @@ export class AuthService {
           );
         }),
         tap(() => {
+          this.provisionalSession.set(false);
           this.bootstrapDone.set(true);
           this.redirectPrimed = true;
         }),
@@ -325,7 +328,14 @@ export class AuthService {
     const info = authInfo(msg);
     if (info.isAuthenticated && info.user) {
       const mapped = this.mapHeadlessToUser(info.user);
-      const prev = this.currentUser();
+      // Only this same user's cache may stand in for the profile. Another user's
+      // session (e.g. a login in another tab) gets none of the cached access fields,
+      // and guards wait for its own profile instead of the provisional cache.
+      const cached = this.currentUser();
+      const prev = cached && String(cached.id) === mapped.id ? cached : null;
+      if (cached && !prev) {
+        this.provisionalSession.set(false);
+      }
       // Headless user has no portal permissions — preserve cache until profile merge.
       const merged: User = {
         ...mapped,

@@ -19,6 +19,7 @@ describe('AssetCardComponent', () => {
     license: Licenses.CC0,
     template: 'word',
     mushaf_layout: null,
+    has_ayah_timings: false,
   };
 
   beforeEach(async () => {
@@ -37,5 +38,30 @@ describe('AssetCardComponent', () => {
     const badge = el.querySelector('.text-content app-asset-template-badge');
     expect(badge?.textContent).toContain('ADMIN.ASSET_TEMPLATE.WORD');
     expect(el.querySelector('.asset-card__header-license app-asset-template-badge')).toBeNull();
+  });
+
+  it('marks a recitation that has ayah timings as timed', () => {
+    const fixture = TestBed.createComponent(AssetCardComponent);
+    fixture.componentRef.setInput('asset', {
+      ...asset,
+      category: Categories.RECITATION,
+      template: null,
+      has_ayah_timings: true,
+    });
+    fixture.detectChanges();
+    const el: HTMLElement = fixture.nativeElement;
+
+    expect(el.querySelector('.asset-card__timed')?.textContent).toContain(
+      'GALLERY.AYAH_TIMED_BADGE'
+    );
+  });
+
+  it('does not mark an asset without ayah timings as timed', () => {
+    const fixture = TestBed.createComponent(AssetCardComponent);
+    fixture.componentRef.setInput('asset', asset);
+    fixture.detectChanges();
+    const el: HTMLElement = fixture.nativeElement;
+
+    expect(el.querySelector('.asset-card__timed')).toBeNull();
   });
 });

@@ -1,0 +1,68 @@
+// Sits right under the English name field: pull it up into the form item's bottom margin.
+:host {
+  display: block;
+  margin-top: -12px;
+}
+
+.ai-translate-actions {
+  margin-bottom: 16px;
+
+  &__buttons {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__hint {
+    color: var(--admin-text-500);
+    font-size: 12px;
+  }
+
+  &__slug {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    color: var(--admin-text-500);
+    font-size: 12px;
+
+    code {
+      color: var(--admin-text-900);
+    }
+  }
+
+  &__slug-info {
+    cursor: help;
+    color: var(--admin-text-500);
+  }
+
+  &__slug-input {
+    max-width: 320px;
+  }
+
+  &__slug-hint {
+    color: var(--admin-text-500);
+    font-size: 12px;
+
+    &--error {
+      color: var(--admin-danger, #cf1322);
+    }
+  }
+
+  &__sources {
+    margin-top: 8px;
+    color: var(--admin-text-500);
+    font-size: 12px;
+
+    ul {
+      margin: 4px 0 0;
+      padding-inline-start: 16px;
+    }
+
+    a {
+      word-break: break-all;
+    }
+  }
+}

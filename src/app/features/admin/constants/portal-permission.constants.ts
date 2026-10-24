@@ -1,6 +1,7 @@
 /** Backend `PermissionChoice` values (django) — use for guards and UI gates. */
 export const PORTAL_PERMISSIONS = {
   PORTAL_ACCESS: 'portal_access',
+  PORTAL_READ_USAGE: 'portal_read_usage',
 
   PORTAL_READ_RECITER: 'portal_read_reciter',
   PORTAL_CREATE_RECITER: 'portal_create_reciter',
@@ -71,6 +72,7 @@ export const PORTAL_PERMISSIONS = {
   PORTAL_EDIT_TAFSIR_CONTENT: 'portal_edit_tafsir_content',
 
   PORTAL_ACCESS_ALL_LANGUAGES: 'portal_access_all_languages',
+  PORTAL_MANAGE_ASSET_COLUMNS: 'portal_manage_asset_columns',
   PORTAL_ADD_ASSET_LANGUAGE: 'portal_add_asset_language',
 } as const;
 

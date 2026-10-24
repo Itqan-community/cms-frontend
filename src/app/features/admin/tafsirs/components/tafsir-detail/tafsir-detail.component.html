@@ -128,6 +128,8 @@
       sectionTitleKey="ADMIN.TAFSIRS.DETAIL.VERSIONS_TITLE"
     />
 
+    <app-asset-usage-section [assetId]="tafsir()!.id" category="tafsir" />
+
     <div class="admin-back">
       <a routerLink="/admin/tafsirs">
         <button nz-button nzType="default">

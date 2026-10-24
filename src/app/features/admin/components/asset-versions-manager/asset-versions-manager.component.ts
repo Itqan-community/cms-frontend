@@ -304,6 +304,8 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly restoreRow = signal<AssetVersion | null>(null);
   readonly restoreLatest = signal<string | null>(null);
   readonly restoreBump = signal<VersionBump>('minor');
+  /** The asset's columns were reordered since that language's last version: major only. */
+  readonly restoreRequiresMajor = signal(false);
 
   readonly form = this.fb.nonNullable.group({
     name: ['', [Validators.required]],
@@ -910,6 +912,7 @@ export class AssetVersionsManagerComponent implements OnInit {
           this.restoreRow.set(row);
           this.restoreLatest.set(latest);
           this.restoreBump.set('minor');
+          this.restoreRequiresMajor.set(false);
           this.confirmRestore(row);
         },
         error: () => this.message.error(this.translate.instant(this.t('MESSAGES.RESTORE_ERROR'))),
@@ -937,8 +940,15 @@ export class AssetVersionsManagerComponent implements OnInit {
                 this.loadList();
                 resolve();
               },
-              error: () => {
+              error: (err: HttpErrorResponse) => {
                 this.restoringId.set(null);
+                if (err?.error?.error_name === 'major_bump_required') {
+                  // Keep the dialog open on a major version and say why.
+                  this.restoreRequiresMajor.set(true);
+                  this.restoreBump.set('major');
+                  reject();
+                  return;
+                }
                 this.message.error(this.translate.instant(this.t('MESSAGES.RESTORE_ERROR')));
                 reject();
               },

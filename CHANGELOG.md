@@ -391,6 +391,144 @@ Release 1.9.0.
 
 ---
 
+## [1.10.0] - 2026-09-28
+
+Release 1.10.0.
+
+## Changes
+
+- fix(ci): fix prettier formatting and eslint rules for lint-and-test workflow
+- fix(admin): address PR #246 code review feedback
+- feat(admin): fold long unchanged text in content changes by default
+- feat(admin): say language assignment covers tafsirs and translations only
+- feat(admin): bring back surah and ayah number columns in the editor
+- fix(admin): label the surah template's reference column 'Surah name'
+- feat(admin): show review comments in the version list
+- feat(admin): gate content editing behind its own permission
+- fix(gallery): save downloads under the name the backend gives
+- feat(gallery): show each asset's content template
+- feat(admin): clarify the version list actions and changes panel
+- feat(admin): show content changes in a readable before/after layout
+- fix(admin): show the unit count for word assets in the editor title
+- fix(admin): make long descriptions optional on asset forms
+- fix(admin): create the content grid once its row model is known
+- style: apply prettier to asset-templates files
+- feat: render review changes by template unit label
+- fix(admin): render commit diffs by template unit label
+- feat: add template and layout selectors to asset create forms
+- feat: show the content template badge on gallery asset cards
+- feat: show the content template badge on translation and tafsir assets
+- feat: add asset template badge component
+- fix: gate cacheBlockSize on the infinite row model
+- feat: add infinite row model for word based content editing
+- fix: derive content grid template from loaded rows when unbound
+- feat: drive content grid columns from the asset template
+- feat: add template-shaped content models and mushaf layouts service
+- style: apply prettier to files merged from staging
+- fix(admin): normalize asset version page size
+- fix(admin): address final previewer review comments
+- style: apply prettier to members-list component
+- fix(admin): address review feedback on the review grid PR
+- feat(admin): add language support for asset versions (#240)
+- feat(admin): add language assignment for members with permission checks
+- fix(admin): enhance review grid UX, language persistence, and tests
+- feat(admin): show last-approved to current diff in review grid
+- feat(admin): move translation review to a dedicated full-screen page
+- feat(admin): surface review grid on asset detail with i18n
+- feat(admin): translation review grid component
+- feat(admin): review models, service, and permission constant
+- fix(admin): clamp asset version page size
+- fix(admin): address universal asset previewer review feedback
+- fix(admin): remove unrelated save error reload
+- fix(admin): address asset previewer review feedback
+- feat(admin): add commit functionality with change review support
+- fix(auth): reject protocol-relative redirect targets in readNextQueryParam
+- fix(admin): address asset previewer review feedback
+- feat(admin): add universal asset previewer
+- chore: restore environment configuration
+- fix(auth): preserve redirect after login
+- feat(admin): add file upload for seeding new languages and version restoration
+- feat(admin): add language support for asset versions
+- fix(admin): harden multilingual content editor against data loss
+- fix(admin): standardize CSV column headers in asset grid (surah/ayah)
+- feat(admin): add language management to content editor
+- feat(content-editor): remove footnotes from editable fields and update related hints
+- feat(admin): handle "no_changes_to_publish" error with friendly popup
+
+---
+
+## [1.11.0] - 2026-10-07
+
+Release 1.11.0.
+
+## Changes
+
+- fix(admin): don't treat a failed or stale latest-number lookup as a first version
+- feat(admin): version numbers and names for tafsir and translation versions
+- fix(admin): keep Delete and Backspace from clearing the read-only source column
+- fix(admin): keep the read-only version view from clearing cells
+- fix(admin): ignore an older change count that answers after a newer one
+- test(audio): look up a folder the timestamp editor's recitation has
+- style(admin): shade before and after differently in change comparisons
+- feat(admin): filter the review page by version and link to it from versions
+- feat(admin): cut long changes short wherever diffs are shown
+- feat(admin): disable Commit while the draft has no changes
+- feat(admin): open a version change's full text in a popup
+- feat(admin): colour version actions by what they do
+- feat(admin): let the source language be shown or hidden
+- feat(admin): view any version read-only in the editor's table
+- feat(admin): show surah names beside numbers in the content editor
+- fix(admin): show a first version's changes without waiting for every page
+- feat(admin): show a change's review status as a chip on its header line
+- feat(admin): open review full text in a popup and show each change's editor
+- feat(admin): show review changes as before above after with highlighted words
+- feat(admin): publish approved versions from the version list
+- chore(audio): add an ayah timing fixture generator
+- fix(audio): correct the timing file contract and load timings that exist
+- fix(admin): default version language to the source, not the first listed
+- feat(admin): add compact mode to content changes and highlight draft edits
+- feat(admin): add read-only source column and refine saved-state logic
+- feat(admin): fullscreen content editor with ayah context, narrower grid columns (#252)
+- feat(admin): localize content grid filter UI and reduce cache block size
+- feat(admin): rename the tafsirs sidebar item to "التفاسير وعلوم القرآن"
+- feat(admin): narrow the position, surah and ayah columns in content grid
+- feat(admin): near-fullscreen text editor with ayah context in content grid
+- feat(admin): localize the content grid's loading overlay
+- feat(admin): show a loading overlay while the content grid refetches
+- feat(admin): infinite scrolling and server-side filters in content editor
+- feat(admin): add CSV template download for translations and tafsirs
+- fix(errors): stop reporting 4xx responses as server errors
+- Update src/app/features/admin/audio/components/timestamp-editor/timestamp-editor.component.ts
+- feat(audio): wire timestamp editor to the real timing contract
+- feat: enhance timestamp editor and waveform renderer functionality
+- feat: add waveform geometry utilities and tests
+
+---
+
+## [1.12.0] - 2026-10-08
+
+Release 1.12.0.
+
+## Changes
+
+- fix(admin): drop the review selection when a new listing is requested
+- feat(admin): bilingual version name and summary
+- feat(admin): pre-approved checkbox when uploading a version
+- feat(admin): bulk-approve changes on the review page
+
+---
+
+## [1.13.0] - 2026-10-12
+
+Release 1.13.0.
+
+## Changes
+
+- fix(i18n): say "التحميل جارٍ" instead of "جاري التحميل" in Arabic
+- feat(admin): number mushaf and font versions like tafsirs
+
+---
+
 ## [Unreleased]
 
 ### Added

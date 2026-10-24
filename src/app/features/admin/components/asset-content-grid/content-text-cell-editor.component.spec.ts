@@ -16,6 +16,7 @@ describe('ContentTextCellEditorComponent', () => {
     reference_text: 'ٱللَّهُ لَآ إِلَٰهَ إِلَّا هُوَ',
     sura: 2,
     aya: 255,
+    cells: { text: 'existing tafsir' },
     text: 'existing tafsir',
     order: 262,
   };
@@ -209,5 +210,20 @@ describe('ContentTextCellEditorComponent', () => {
       // Assert
       expect(el.querySelector('.text-editor__source')).toBeNull();
     });
+  });
+
+  it('shows the source text of the column being edited', () => {
+    // Arrange / Act
+    const { editor } = create({
+      data: {
+        ...row,
+        source_text: 'source question',
+        source_cells: { text: 'source question', answer: 'source answer' },
+      },
+      columnKey: 'answer',
+    });
+
+    // Assert
+    expect(editor.source).toBe('source answer');
   });
 });
