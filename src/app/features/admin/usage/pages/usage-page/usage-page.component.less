@@ -1,18 +1,21 @@
 .usage-page {
-  height: 100%;
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  padding: 16px;
 
-  ::ng-deep .ant-spin-container {
-    height: 100%;
+  &__header {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
   }
 
-  &__toolbar {
-    padding: 12px 16px;
-    border-bottom: 1px solid #f0f0f0;
-    flex-shrink: 0;
+  &__title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
   }
 
   &__publisher-select {
@@ -21,8 +24,7 @@
 
   &__board {
     width: 100%;
-    flex: 1;
-    min-height: calc(100vh - 64px);
+    min-height: calc(100vh - 160px);
     border: none;
   }
 }

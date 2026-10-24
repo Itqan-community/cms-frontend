@@ -133,7 +133,12 @@
                   "
                   (nzCheckedChange)="toggleRow(row.id, $event)"
                 ></td>
-                <td>{{ row.label }}</td>
+                <td>
+                  {{ row.label }}
+                  @if (multiColumn()) {
+                    <span class="asset-review-grid__column" dir="auto">{{ columnName(row) }}</span>
+                  }
+                </td>
                 <td>{{ typeKey(row.change_type) | translate }}</td>
                 <td class="asset-review-grid__change">
                   @if (compare().get(row.id); as cmp) {

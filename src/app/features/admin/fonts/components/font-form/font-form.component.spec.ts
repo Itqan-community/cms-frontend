@@ -93,10 +93,12 @@ describe('FontFormComponent first version', () => {
       version_number: '1.0',
       version_name_ar: 'الطبعة الأولى',
       version_summary_en: 'First printing',
+      slug: 'font-uthmanic-hafs',
     });
     component.onSubmit();
 
     const body = fontsServiceMock.create.calls.mostRecent().args[0];
+    expect(body.slug).toBe('font-uthmanic-hafs');
     expect(body.version_number).toBe('1.0');
     expect(body.version_name_ar).toBe('الطبعة الأولى');
     expect(body.version_summary_en).toBe('First printing');

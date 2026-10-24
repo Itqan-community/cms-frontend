@@ -80,6 +80,7 @@ export function normalizeApiKeyRow(raw: unknown): ManagedApiKey | null {
   const createdAt = pickStr(o, ['created_at', 'created']) || undefined;
   const lastUsedAt = pickStr(o, ['last_used_at', 'last_used', 'last_seen_at']) || undefined;
   const fullKey = pickFullKey(o) || undefined;
+  const appSlug = pickStr(o, ['app_slug']) || undefined;
 
   return {
     id,
@@ -89,6 +90,7 @@ export function normalizeApiKeyRow(raw: unknown): ManagedApiKey | null {
     ...(fullKey ? { fullKey } : {}),
     ...(createdAt ? { createdAt } : {}),
     ...(lastUsedAt ? { lastUsedAt } : {}),
+    ...(appSlug ? { appSlug } : {}),
   };
 }
 

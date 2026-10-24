@@ -23,13 +23,16 @@
     </div>
 
     <ul class="content-changes__list">
-      @for (item of visible(); track item.change.unit_id) {
+      @for (item of visible(); track item.change.unit_id + ':' + item.change.column) {
         <li class="content-changes__item content-changes__item--{{ item.change.change_type }}">
           <div class="content-changes__head">
             <span class="content-changes__badge">{{
               typeLabel(item.change.change_type) | translate
             }}</span>
             <span class="content-changes__label" dir="auto">{{ item.change.label }}</span>
+            @if (multiColumn()) {
+              <span class="content-changes__column" dir="auto">{{ columnName(item.change) }}</span>
+            }
             @if (showsReview(item.change); as state) {
               <span class="content-changes__review content-changes__review--{{ state }}">
                 <span class="content-changes__review-chip">

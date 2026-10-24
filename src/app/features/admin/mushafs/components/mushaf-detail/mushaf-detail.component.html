@@ -111,6 +111,8 @@
       sectionTitleKey="ADMIN.MUSHAFS.DETAIL.VERSIONS_TITLE"
     />
 
+    <app-asset-usage-section [assetId]="mushaf()!.id" category="mushaf" />
+
     <div class="admin-back">
       <a routerLink="/admin/mushafs">
         <button nz-button nzType="default">

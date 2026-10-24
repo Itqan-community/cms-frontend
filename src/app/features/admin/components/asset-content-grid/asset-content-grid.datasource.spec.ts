@@ -6,6 +6,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import type { GridApi, IGetRowsParams } from 'ag-grid-community';
 
 import { AssetContentGridComponent } from './asset-content-grid.component';
+import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import type { ContentDraftVersion } from '../../models/asset-content.models';
 
 /**
@@ -18,6 +19,10 @@ import type { ContentDraftVersion } from '../../models/asset-content.models';
  * on `expectOne`.
  */
 function flushDraft(httpMock: HttpTestingController, slug: string, id: number): void {
+  // The grid loads the asset's text columns for its headers.
+  httpMock
+    .expectOne((r) => r.url.includes(slug) && r.url.endsWith('/columns/'))
+    .flush([{ key: 'text', label_en: '', label_ar: '', order: 0, committed: false }]);
   httpMock
     .expectOne((r) => r.url.includes(slug) && r.url.includes('languages/'))
     .flush([{ language: 'ar', is_source: true, is_available: true }]);
@@ -33,6 +38,8 @@ function flushDraft(httpMock: HttpTestingController, slug: string, id: number): 
     state: 'draft',
     entries_count: 0,
     created_at: '2026-01-01T00:00:00Z',
+    column_keys: ['text'],
+    requires_major: false,
   };
   httpMock.expectOne((r) => r.url.includes('draft/') && r.url.includes(slug)).flush(draft);
   // The editor counts the draft's real changes to know whether Commit applies.
@@ -342,6 +349,133 @@ describe('AssetContentGridComponent word datasource', () => {
       });
 
     expect(fixture.componentInstance.entriesTotal()).toBe(77432);
+    fixture.destroy();
+  });
+});
+
+describe('AssetContentGridComponent opening', () => {
+  let httpMock: HttpTestingController;
+  let remembered: string | null;
+
+  const draftFor = (language: string, template?: 'ayah'): ContentDraftVersion => ({
+    id: 9,
+    asset_id: 1,
+    language,
+    name: '',
+    label_en: '',
+    label_ar: '',
+    summary_en: '',
+    summary_ar: '',
+    state: 'draft',
+    entries_count: 0,
+    created_at: '2026-01-01T00:00:00Z',
+    column_keys: ['text'],
+    requires_major: false,
+    template,
+  });
+  const languages = [
+    { language: 'ar', is_source: true, is_available: true },
+    { language: 'en', is_source: false, is_available: true },
+  ];
+
+  beforeEach(async () => {
+    remembered = null;
+    await TestBed.configureTestingModule({
+      imports: [AssetContentGridComponent, TranslateModule.forRoot()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideNoopAnimations(),
+        {
+          provide: LastActiveLanguageService,
+          useValue: { get: () => remembered, set: () => void 0 },
+        },
+      ],
+    }).compileComponents();
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  afterEach(() => httpMock.verify());
+
+  function open(slug: string) {
+    const fixture = TestBed.createComponent(AssetContentGridComponent);
+    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('slug', slug);
+    fixture.detectChanges();
+    httpMock
+      .expectOne((r) => r.url.includes(slug) && r.url.endsWith('/columns/'))
+      .flush([{ key: 'text', label_en: '', label_ar: '', order: 0, committed: false }]);
+    return fixture;
+  }
+
+  it('opens the draft while the languages are still loading', () => {
+    // Arrange / Act
+    open('early-tafsir');
+
+    // Assert — both requests are in flight at once; the source is the server's default
+    const draft = httpMock.expectOne((r) => r.url.includes('draft/'));
+    expect(draft.request.body).toEqual({});
+    httpMock.expectOne((r) => r.url.includes('languages/')).flush(languages);
+    draft.flush(draftFor('ar', 'ayah'));
+    httpMock.expectOne((r) => r.url.includes('pending-diff/')).flush({ results: [], count: 0 });
+  });
+
+  it('opens the remembered language early', () => {
+    // Arrange
+    remembered = 'en';
+
+    // Act
+    open('remembered-tafsir');
+
+    // Assert
+    const draft = httpMock.expectOne((r) => r.url.includes('draft/'));
+    expect(draft.request.body).toEqual({ language: 'en' });
+    httpMock.expectOne((r) => r.url.includes('languages/')).flush(languages);
+    draft.flush(draftFor('en', 'ayah'));
+    httpMock.expectOne((r) => r.url.includes('pending-diff/')).flush({ results: [], count: 0 });
+  });
+
+  it('opens the source draft when the remembered language is gone', () => {
+    // Arrange — "fr" was removed since it was last edited
+    remembered = 'fr';
+    const fixture = open('gone-tafsir');
+
+    // Act
+    httpMock.expectOne((r) => r.url.includes('languages/')).flush(languages);
+    httpMock
+      .expectOne((r) => r.url.includes('draft/'))
+      .flush(
+        { error_name: 'language_not_available', message: 'x' },
+        { status: 404, statusText: 'Not Found' }
+      );
+
+    // Assert — the editor falls back to the source language, quietly
+    const retry = httpMock.expectOne((r) => r.url.includes('draft/'));
+    expect(retry.request.body).toEqual({ language: 'ar' });
+    retry.flush(draftFor('ar', 'ayah'));
+    httpMock.expectOne((r) => r.url.includes('pending-diff/')).flush({ results: [], count: 0 });
+    expect(fixture.componentInstance.selectedLanguage()).toBe('ar');
+  });
+
+  it('skips the one-row probe when the draft names its template', async () => {
+    // Arrange
+    const fixture = open('templated-tafsir');
+    httpMock.expectOne((r) => r.url.includes('languages/')).flush(languages);
+    httpMock.expectOne((r) => r.url.includes('draft/')).flush(draftFor('ar', 'ayah'));
+    httpMock.expectOne((r) => r.url.includes('pending-diff/')).flush({ results: [], count: 0 });
+
+    // Act
+    fixture.detectChanges();
+    await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // Assert — the only entries request is the grid's first block
+    const block = httpMock.expectOne((r) => r.url.includes('entries/'));
+    expect(block.request.params.get('page_size')).toBe(
+      String(fixture.componentInstance.cacheBlockSize)
+    );
+    block.flush({ results: [], count: 6236 });
+    expect(fixture.componentInstance.effectiveTemplate()).toBe('ayah');
     fixture.destroy();
   });
 });

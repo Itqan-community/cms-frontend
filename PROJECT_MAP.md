@@ -7,25 +7,26 @@
 
 ## [TECH_STACK]
 
-| Layer        | Technology                                                 | Version  |
-| ------------ | ---------------------------------------------------------- | -------- |
-| Framework    | Angular (standalone components)                            | ^20.3.7  |
-| Language     | TypeScript                                                 | ~5.9.2   |
-| UI Library   | NG-ZORRO (Ant Design for Angular)                          | ^20.3.1  |
-| Icons        | @ng-icons/lucide                                           | ^32.5.0  |
-| i18n         | @ngx-translate/core                                        | ^17.0.0  |
-| Styling      | LESS                                                       | ^4.2.0   |
-| Auth Backend | django-allauth (headless SPA mode)                         | —        |
-| Monitoring   | Sentry                                                     | ^10.47.0 |
-| Analytics    | Google Analytics (gtag)                                    | —        |
-| Web Vitals   | web-vitals                                                 | ^5.1.0   |
-| QR Codes     | qrcode                                                     | ^1.5.4   |
-| State Mgmt   | RxJS + Angular Signals                                     | ~7.8.0   |
-| Testing      | Karma + Jasmine                                            | —        |
-| Linting      | ESLint (flat config) + Prettier                            | —        |
-| Commit       | Commitlint (conventional commits) + Husky + lint-staged    | —        |
-| Package Mgr  | npm / pnpm                                                 | —        |
-| Deployment   | Cloudflare Pages (+ Pages Functions for staging API proxy) | —        |
+| Layer        | Technology                                                  | Version          |
+| ------------ | ----------------------------------------------------------- | ---------------- |
+| Framework    | Angular (standalone components)                             | ^20.3.7          |
+| Language     | TypeScript                                                  | ~5.9.2           |
+| UI Library   | NG-ZORRO (Ant Design for Angular)                           | ^20.3.1          |
+| Icons        | @ng-icons/lucide                                            | ^32.5.0          |
+| i18n         | @ngx-translate/core                                         | ^17.0.0          |
+| Styling      | LESS                                                        | ^4.2.0           |
+| Auth Backend | django-allauth (headless SPA mode)                          | —                |
+| Monitoring   | Sentry                                                      | ^10.47.0         |
+| Analytics    | Google Analytics (gtag)                                     | —                |
+| Web Vitals   | web-vitals                                                  | ^5.1.0           |
+| QR Codes     | qrcode                                                      | ^1.5.4           |
+| Charts       | echarts (tree-shaken, lazy) + ngx-echarts (Angular 20 line) | ^6.1.0 / ^20.0.2 |
+| State Mgmt   | RxJS + Angular Signals                                      | ~7.8.0           |
+| Testing      | Karma + Jasmine                                             | —                |
+| Linting      | ESLint (flat config) + Prettier                             | —                |
+| Commit       | Commitlint (conventional commits) + Husky + lint-staged     | —                |
+| Package Mgr  | npm / pnpm                                                  | —                |
+| Deployment   | Cloudflare Pages (+ Pages Functions for staging API proxy)  | —                |
 
 ---
 
@@ -61,7 +62,8 @@ User Browser
    so admin guards can allow access without unauthorized flash (authReady = provisional OR bootstrapDone).
 3. Background validate: GET app `/auth/session` (token if present); if not established, GET browser
    `/auth/session` (credentials). Parallel GET `/config`. On success merge GET `/auth/profile/`
-   permissions; on profile failure keep cached permissions. Invalid session with provisional cache
+   permissions; on profile failure keep cached permissions. The provisional flag stays set until the
+   profile is applied, so guards never wait on it. Invalid session with provisional cache
    → clear + login + SESSION_EXPIRED when applicable. `storage` event syncs login/logout across tabs.
 4. Public routes never wait; authGuard / portalAccessGuard / permissionGuard wait on authReady.
 5. Login: POST /auth/login -> session_token (+ optional JWTs). Interceptor attaches X-Session-Token
@@ -75,6 +77,7 @@ User Browser
 
 ```
 1. Gallery page: GET /cms-api/assets/?category=&search=&license_code=
+   - cards tag open-access assets and recitations with `has_ayah_timings` ("مزمنة" / "Ayah-timed")
 2. Asset detail: GET /cms-api/assets/{id}/  (includes is_open_access, access_status)
 3. Download click (logged in):
    - access_status null -> open access path (license then download)
@@ -115,6 +118,14 @@ Base class: AdminListBase (src/app/features/admin/utils/admin-list-base.ts)
 Create forms for font/mushaf/tafsir/translation include shared
 `asset-initial-version-fields` (optional on create). Additional versions on detail via
 `asset-versions-manager`.
+Create forms (font/mushaf/tafsir/translation/recitation/reciter) also show
+`ai-translate-actions`: POST /portal/ai/translate/ (Gemini free tier, backend-side key)
+-> fills only the empty *_en controls from the *_ar ones; "web" mode also writes the
+description/bio fields from Wikipedia (backend-side) and lists the source links.
+The same request (one Gemini call per click) sends `slug_for` and returns the package `slug`
+(not for reciters): it is shown read-only and stored in the form's required `slug` control
+(`utils/asset-slug.util.ts`), so Save is blocked until Translate is clicked; when generation
+fails the admin types it. Create never calls AI.
 ```
 
 ---
@@ -250,7 +261,7 @@ are public app identifiers, full key shown and copied when the API returns it, `
 | `/admin/issues`               | (lazy routes)          | _(permission guards commented)_   | Issue reports (list/detail/create/edit/delete); TODO enable `portal_*_issue_report` guards                                                 |
 | `/admin/members`              | (lazy routes)          | `membersAccessGuard`              | Publisher member list/invite/edit/remove/resend via `/portal/members/` (modal UX on single list)                                           |
 | `/admin/access-requests`      | (lazy routes)          | `accessRequestsAccessGuard`       | Asset access requests list/accept/reject + settings via `/portal/access-requests/` and `/portal/publishers/{id}/access-requests-settings/` |
-| `/admin/usage`                | (lazy routes)          | `portal_access`                   | API usage analytics                                                                                                                        |
+| `/admin/usage`                | (lazy routes)          | `portal_read_usage`               | Usage dashboards (+ admin tabs)                                                                                                            |
 | `**`                          | redirect -> /gallery   | —                                 | Wildcard                                                                                                                                   |
 
 ---
@@ -261,15 +272,15 @@ are public app identifiers, full key shown and copied when the API returns it, `
 
 **Purpose:** Browse, search, filter, and download Quranic assets.
 
-| File                                                          | Type       | Purpose                                                                                                |
-| ------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------ |
-| `models/assets.model.ts`                                      | Interfaces | `ApiAssets`, `Asset`, `AssetDetails`                                                                   |
-| `services/assets.service.ts`                                  | Service    | `getAssets(filters)`, `getAssetDetails(id)`                                                            |
-| `pages/gallery/gallery.page.ts`                               | Page       | Wrapper title + `<app-assets-listing/>`                                                                |
-| `pages/asset-details/asset-details.page.ts`                   | Page       | Full detail + access request modal + license modal + download + itqan CLI card (when `package` is set) |
-| `components/assets-listing/assets-listing.component.ts`       | Component  | Filter state + grid + skeleton + empty state                                                           |
-| `components/asset-card/asset-card.component.ts`               | Component  | Single asset card (icon, license, name, desc, publisher, link)                                         |
-| `components/itqan-add-command/itqan-add-command.component.ts` | Component  | `itqan add <slug> [--language]` + copy + "get the CLI" link (GitHub)                                   |
+| File                                                          | Type       | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `models/assets.model.ts`                                      | Interfaces | `ApiAssets`, `Asset`, `AssetDetails`                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `services/assets.service.ts`                                  | Service    | `getAssets(filters)`, `getAssetDetails(id)`                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `pages/gallery/gallery.page.ts`                               | Page       | Wrapper title + `<app-assets-listing/>`                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `pages/asset-details/asset-details.page.ts`                   | Page       | Full detail + access request modal + license modal + download + itqan CLI card (when `package` is set) + "File structure" (`components/asset-file-structure/`, translations/tafsirs: CSV header, column labels, 3 sample rows, and a language switch above them shared with the download language; the language starts at the UI language when offered — `utils/preferred-language.util.ts` — and follows UI changes until the user picks one) |
+| `components/assets-listing/assets-listing.component.ts`       | Component  | Filter state + grid + skeleton + empty state                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `components/asset-card/asset-card.component.ts`               | Component  | Single asset card (icon, license, name, desc, publisher, link)                                                                                                                                                                                                                                                                                                                                                                                 |
+| `components/itqan-add-command/itqan-add-command.component.ts` | Component  | `itqan add <slug> [--language]` + copy + "get the CLI" link (GitHub)                                                                                                                                                                                                                                                                                                                                                                           |
 
 **States:** loading (skeleton), empty (no results with/without filters), error, not-found (404),
 success.
@@ -330,6 +341,16 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
 **Shared admin components:**
 
 - `admin-column-picker/` — Column visibility toggles for tables
+- `ai-translate-actions/` — "Translate from Arabic" / "Write from the web" buttons on create forms
+  (font/mushaf/tafsir/translation/recitation/reciter; placed under the English name field so it is
+  discoverable; hidden on edit). Fills only empty `<key>_en` controls from `<key>_ar` (`name`,
+  `description`, `long_description`, `bio`, `version_name`, `version_summary`; missing pairs
+  skipped); recitation passes the selected reciter/riwayah as `context`. Uses
+  `services/ai-translate.service.ts`; 429 with `error_name: ai_rate_limited` → wait-a-minute
+  message, any other 429 → daily free-limit message. Also sends `slug_for` and writes the returned
+  identifier (slug) to the form's `slug` control (editable input only when generation fails;
+  validated per asset type by `utils/asset-slug.util.ts`). A recitation's identifier is cleared when
+  its reciter or riwayah changes, and a response for inputs changed mid-request is ignored
 - `asset-initial-version-fields/` — Optional first version (starting number, bilingual name/summary,
   file) on asset create forms (font/mushaf/tafsir/translation); the number is required once a file
   is attached. Tafsir/translation also pass `contentKind`/`contentTemplate`/`mushafLayoutId` to
@@ -358,16 +379,30 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   has a "Publish now" checkbox (default on, sends `publish`). Without `portal_publish_content` the
   Publish button and checkbox are shown disabled with a permission tooltip.
 - `asset-content-editor/` + `asset-content-grid/` — Per-unit draft editor (surah/ayah/word/page
-  content templates); flush before publish; leave blocked if PATCH fails. Column set is driven by
-  `effectiveTemplate()` (the `template` input, falling back to a one-row probe's `unit_type`). Every
-  template uses AG Grid's infinite row model via `buildDatasource()` (paginated `entries/`,
-  `cacheBlockSize` pinned to the page size, sorting off, one-line rows with truncated text). Column
-  filters run server-side: the grid's `filterModel` is sent as the JSON `filters` param — text
-  filters on `text`/`reference_text`/`source_text`, number filters on `sura`/`aya`, and a surah-name
-  dropdown (`SurahFloatingFilterComponent`) on the unit column (`colId: 'surah'`). Undo/redo is a
-  custom stack (AG Grid's only covers the client-side model), replayed via `getRowId`. The text
-  column edits in `ContentTextCellEditorComponent`: a near-fullscreen popup showing the unit label
-  and `reference_text` (plus `source_text` when editing a translation); an outside click commits it
+  content templates); flush before publish; leave blocked if PATCH fails. **Text columns:** one
+  editable grid column per key of the draft's `column_keys` (colId `cell__<key>`, reading/writing
+  `row.cells[key]`; filters keyed `cell__<key>` / `source__<key>`); unsaved cells are keyed
+  `unit:column` and PATCHed as `{unit_id, column, text}`. Translating, a remembered "Show source"
+  switch inserts each read-only `source__<key>` column before its translation. Users with
+  `portal_manage_asset_columns` + `portal_access_all_languages` get "+ Add column" and a ⚙ in each
+  text column header (`content-column-header.component.ts`, which also marks a filtered column)
+  opening `manage-columns-modal/` (add, optional labels en/ar, reorder, delete uncommitted; a label
+  edit only reloads the headers). Changed cells are highlighted per column (`changed_columns`).
+  After a reorder the commit dialog allows only a major version (`requires_major`, or a
+  `major_bump_required` answer). Diffs and review rows name each change's column when the asset has
+  several. Column set is driven by `effectiveTemplate()` (the `template` input, else the draft's
+  `template`, else a one-row probe's `unit_type` for older backends). The draft is opened alongside
+  `languages/` (remembered language, else the server's default source), falling back to the picked
+  language when that early open fails or differs. Only the AG Grid modules the grid uses are
+  registered (`ValidationModule` in dev builds names a missing one). Every template uses AG Grid's
+  infinite row model via `buildDatasource()` (paginated `entries/`, `cacheBlockSize` pinned to the
+  page size, sorting off, one-line rows with truncated text). Column filters run server-side: the
+  grid's `filterModel` is sent as the JSON `filters` param — text filters on
+  `text`/`reference_text`/`source_text`, number filters on `sura`/`aya`, and a surah-name dropdown
+  (`SurahFloatingFilterComponent`) on the unit column (`colId: 'surah'`). Undo/redo is a custom
+  stack (AG Grid's only covers the client-side model), replayed via `getRowId`. The text column
+  edits in `ContentTextCellEditorComponent`: a near-fullscreen popup showing the unit label and
+  `reference_text` (plus `source_text` when editing a translation); an outside click commits it
   (`stopEditingWhenCellsLoseFocus`), and the page behind is `visibility: hidden` so find-in-page
   only searches the popup. The read-only `source_text` column opens the same popup with
   `readOnly: true` (always cancels) so its full text is readable
@@ -441,6 +476,34 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 **Data source:** jsDelivr CDN (quranpedia/quran-svg @ pinned SHA). **Editions:** hafs/warsh/qalon
 (KFQC)/douri/shubah. **States:** loading (skeleton), error (retry), not-found (404). **i18n:**
 `MUSHAF.*` + `NAV.MUSHAF` (en/ar). **Attribution:** quranpedia quran-svg under each page.
+
+### Usage reports (`src/app/features/usage/`)
+
+**Purpose:** Usage dashboards on four surfaces, on the backend reports API (cms-backend spec
+`2026-10-18-usage-reports-design.md` §9/§20; plan
+`docs/superpowers/plans/2026-10-18-usage-reports-4-frontend.md`).
+
+| File                               | Type      | Purpose                                                                                                                                                                            |
+| ---------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `models/usage.models.ts`           | Types     | API contract (summary, timeseries, breakdown, reconciliation, public counts); `USAGE_OTHER_KEY`                                                                                    |
+| `services/usage-api.service.ts`    | Service   | One method per report with a `scope` (`publisher` → `/portal/usage/`, `admin` → `/portal/admin/usage/`, `developer` → `/cms-api/developers/usage/`); public counts → `null` on 404 |
+| `usage-echarts.ts`                 | Setup     | Tree-shaken ECharts (line, bar, pie, heatmap); loaded lazily by the chart component (own chunk)                                                                                    |
+| `utils/usage-chart-options.ts`     | Util      | Pure option builders (trend, donut, bar, hour-of-week heatmap); RTL mirrors axes and legends; `"<3"` as 0 + label                                                                  |
+| `utils/usage-filters.util.ts`      | Util      | Presets, URL query-param state, compact numbers / % change per language, granularity by range                                                                                      |
+| `utils/usage-dashboard.profile.ts` | Util      | Headline cards, metrics and panels per scope / asset category (spec §8); `itemLabel` (countries/languages via `Intl.DisplayNames`)                                                 |
+| `components/usage-chart/`          | Component | Titled chart card: loading / empty / error (retry) / view-as-table                                                                                                                 |
+| `components/usage-dashboard/`      | Component | Filter bar (URL state on pages, local on asset sections), headline cards, trend + split, panels, CSV export, last-updated + API disclaimers                                        |
+| `components/usage-leaderboard/`    | Component | Admin: top publishers / assets with previous-period change                                                                                                                         |
+| `components/usage-unseen-traffic/` | Component | Admin: R2 reads vs edge requests (unseen traffic)                                                                                                                                  |
+| `components/asset-usage-section/`  | Component | "Usage" section on font/mushaf/tafsir/translation/recitation admin detail pages (`portal_read_usage`)                                                                              |
+| `components/asset-usage-counts/`   | Component | Gallery asset page "plays · downloads · apps"; hidden unless the backend returns 200                                                                                               |
+| `pages/developer-usage/`           | Page      | `/account/usage` (developer scope), linked from `/account/api-keys`                                                                                                                |
+
+`/admin/usage` (`features/admin/usage/`): Dashboard tab for everyone with `portal_read_usage`; Itqan
+admins also get a publisher picker, Leaderboard and Unseen traffic; the Mixpanel iframe is the
+"Legacy board" tab (loaded when opened) until the usage-reports cutover. `/account/api-keys` shows
+and edits each key's public app slug (`app_slug`). The global error toast skips
+`usage_counts_disabled`.
 
 ### 6. Error (`src/app/features/error/`)
 
@@ -549,6 +612,10 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 - `GET /assets/{id}/download/` — Get download URL
 - `GET /resources/{id}/download/` — Download resource directly
 - `GET /publishers/{id}/` — Publisher detail
+- `GET /assets/{id}/usage-counts/` — Public usage counts (404 while turned off)
+- `GET /assets/{id}/file-structure/?language=` — A translation's / tafsir's CSV layout + sample rows
+  (404 when unavailable)
+- `GET /developers/usage/{summary,timeseries,breakdown}/` — Developer usage reports
 
 ### Admin Portal (`/portal/`)
 
@@ -557,8 +624,10 @@ reciters, issue reports (`/portal/issue-reports/`), publisher members (`/portal/
 (`GET /portal/groups/` for member invite/edit options), asset access requests
 (`/portal/access-requests/` — list, detail, accept, reject;
 `/portal/publishers/{id}/access-requests-settings/` — auto-acceptance), mushafs (`/portal/mushafs/`
-— CRUD + versions), fonts (`/portal/fonts/` — CRUD + versions), usage analytics. Programs portal
-module is dormant (route/nav hidden) until BE ships `/portal/programs/`.
+— CRUD + versions), fonts (`/portal/fonts/` — CRUD + versions), usage analytics, AI translate for
+create forms (`POST /portal/ai/translate/`), usage reports (`/portal/usage/*`,
+`/portal/admin/usage/*`). Programs portal module is dormant (route/nav hidden) until BE ships
+`/portal/programs/`.
 
 Asset create/edit forms (tafsir, translation, mushaf, font, program, recitation): publisher field is
 view-only — create binds `AdminTenantService.selectedPublisherId()`; edit shows the asset publisher.
@@ -586,25 +655,29 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
 
 ## [ORPHANS & PENDING]
 
-| Item                                    | Status            | Notes                                                                                                                                             |
-| --------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `features/error/pages/unautorized/`     | Partial           | `UnauthorizedPage`: full UX + countdown redirect (directory spelling still misses `h`). `not-found` page unchanged.                               |
-| `features/publishers/pages/publishers/` | Stub              | Publishers directory listing page is empty.                                                                                                       |
-| `features/dashify/`                     | Unknown           | Minimal implementation, purpose unclear.                                                                                                          |
-| `features/admin/` guards                | Implemented       | `portal-access`, `permission`, `itqan-admin` guards active on admin routes.                                                                       |
-| `shared/directives/`                    | Empty             | Directory exists with no files.                                                                                                                   |
-| `features/admin/mushafs/`               | Implemented       | Portal mushaf CRUD wired to live `/portal/mushafs/` + `permissionGuard` (`portal_*_mushaf`).                                                      |
-| `features/admin/fonts/`                 | Implemented       | Portal font CRUD wired to live `/portal/fonts/` + `permissionGuard` (`portal_*_font`).                                                            |
-| `features/admin/programs/`              | Hidden (dormant)  | Module kept; `/admin/programs` route, sidebar tab, and redirect candidate removed until BE API is ready.                                          |
-| `features/mushaf/` (reader)             | Hidden (dormant)  | Module kept; `/mushaf` route + `NAV.MUSHAF` commented out. Mobile menu now respects `hidden`. Admin small-MQ toggle exclusivity fixed.            |
-| `features/admin/audio/`                 | Partial           | Routes defined but implementation details need verification.                                                                                      |
-| `features/admin/software/`              | Partial           | Routes defined but implementation details need verification.                                                                                      |
-| Recitation folder visibility            | Implemented       | `is_visible` PATCH + hide/show in folder tab menu; requires backend Phase A on the API environment.                                               |
-| Recitation folder set-default           | Implemented       | `PATCH { is_default: true }` from folder tab menu; slugs stay fixed; hidden folders cannot be promoted.                                           |
-| Recitation folder variant taxonomy      | Frontend-owned    | Quality×effects vocabulary lives in `recitation-folder.util.ts` and is carried in folder names; no server-side uniqueness enforcement.            |
-| Recitation folder variant relabelling   | Constrained       | Non-default classified folders with tracks cannot change variant (slug is public `?folder=`); default folder always editable (`?folder=default`). |
-| Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                                                       |
-| WebAuthn RP ID                          | Development mode  | `webauthnReplaceRpIdWithHostname` env flag allows RP ID patching in dev.                                                                          |
+| Item                                    | Status            | Notes                                                                                                                                                            |
+| --------------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `features/error/pages/unautorized/`     | Partial           | `UnauthorizedPage`: full UX + countdown redirect (directory spelling still misses `h`). `not-found` page unchanged.                                              |
+| `features/publishers/pages/publishers/` | Stub              | Publishers directory listing page is empty.                                                                                                                      |
+| `features/dashify/`                     | Unknown           | Minimal implementation, purpose unclear.                                                                                                                         |
+| `features/admin/` guards                | Implemented       | `portal-access`, `permission`, `itqan-admin` guards active on admin routes.                                                                                      |
+| `shared/directives/`                    | Empty             | Directory exists with no files.                                                                                                                                  |
+| `features/admin/mushafs/`               | Implemented       | Portal mushaf CRUD wired to live `/portal/mushafs/` + `permissionGuard` (`portal_*_mushaf`).                                                                     |
+| `features/admin/fonts/`                 | Implemented       | Portal font CRUD wired to live `/portal/fonts/` + `permissionGuard` (`portal_*_font`).                                                                           |
+| `features/admin/programs/`              | Hidden (dormant)  | Module kept; `/admin/programs` route, sidebar tab, and redirect candidate removed until BE API is ready.                                                         |
+| `features/mushaf/` (reader)             | Hidden (dormant)  | Module kept; `/mushaf` route + `NAV.MUSHAF` commented out. Mobile menu now respects `hidden`. Admin small-MQ toggle exclusivity fixed.                           |
+| `features/admin/audio/`                 | Partial           | Routes defined but implementation details need verification.                                                                                                     |
+| `features/admin/software/`              | Partial           | Routes defined but implementation details need verification.                                                                                                     |
+| AI translate / asset identifier         | Pending backend   | Create forms need `POST /portal/ai/translate/` (cms-backend#553) deployed; until then Translate fails and admins must type the identifier. Remove once deployed. |
+| Recitation folder visibility            | Implemented       | `is_visible` PATCH + hide/show in folder tab menu; requires backend Phase A on the API environment.                                                              |
+| Recitation folder set-default           | Implemented       | `PATCH { is_default: true }` from folder tab menu; slugs stay fixed; hidden folders cannot be promoted.                                                          |
+| Recitation folder variant taxonomy      | Frontend-owned    | Quality×effects vocabulary lives in `recitation-folder.util.ts` and is carried in folder names; no server-side uniqueness enforcement.                           |
+| Recitation folder variant relabelling   | Constrained       | Non-default classified folders with tracks cannot change variant (slug is public `?folder=`); default folder always editable (`?folder=default`).                |
+| Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                                                                      |
+| Usage reports API                       | Pending backend   | Needs cms-backend#557 deployed; until then the dashboards show their error state.                                                                                |
+| Multi-column text assets                | Pending backend   | Editor columns, column management, file structure need the cms-backend multi-column release (`feat/multi-column-text-assets`); remove once deployed.             |
+| Usage world map                         | Deferred          | Countries show as a ranked bar + table; a world map needs a GeoJSON bundle (spec §10).                                                                           |
+| WebAuthn RP ID                          | Development mode  | `webauthnReplaceRpIdWithHostname` env flag allows RP ID patching in dev.                                                                                         |
 
 ---
 

@@ -15,6 +15,7 @@ function change(
     unit_type: 'ayah',
     unit_id: unitId,
     label: `1:${unitId}`,
+    column: 'text',
     change_type: changeType,
     old_text: oldText,
     new_text: newText,
@@ -218,5 +219,38 @@ describe('ContentChangesComponent', () => {
     const el: HTMLElement = render([pending]).nativeElement;
 
     expect(el.querySelector('.content-changes__review')).toBeNull();
+  });
+
+  it('names the column of each change when the asset has several columns', () => {
+    // Arrange
+    const fixture = TestBed.createComponent(ContentChangesComponent);
+    fixture.componentRef.setInput('changes', [
+      { ...change(1, 'added', '', 'Q'), column: 'question' },
+      { ...change(1, 'added', '', 'A'), column: 'answer' },
+    ]);
+    fixture.componentRef.setInput('columns', [
+      { key: 'question', label_en: 'Question', label_ar: '', order: 0, committed: false },
+      { key: 'answer', label_en: 'Answer', label_ar: '', order: 1, committed: false },
+    ]);
+
+    // Act
+    fixture.detectChanges();
+
+    // Assert — both changes of the same unit are listed, each naming its column
+    const chips = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll('.content-changes__column'),
+      (el) => el.textContent?.trim()
+    );
+    expect(chips).toEqual(['Question', 'Answer']);
+  });
+
+  it('shows no column name for a single-column asset', () => {
+    // Arrange / Act
+    const fixture = render([change(1, 'added', '', 'new')]);
+
+    // Assert
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('.content-changes__column')
+    ).toBeNull();
   });
 });

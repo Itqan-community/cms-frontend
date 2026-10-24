@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
-import { ApiAssets, AssetDetails } from '../models/assets.model';
+import { ApiAssets, AssetDetails, AssetFileStructure } from '../models/assets.model';
 
 @Injectable({
   providedIn: 'root',
@@ -60,5 +60,14 @@ export class AssetsService {
    */
   getAssetDetails(id: string) {
     return this.http.get<AssetDetails>(`${this.BASE_URL}/assets/${id}/`);
+  }
+
+  /** A translation's / tafsir's download layout and sample rows for one language
+   *  (the source when ``language`` is null). */
+  getFileStructure(id: number | string, language: string | null) {
+    const params = language ? new HttpParams().set('language', language) : undefined;
+    return this.http.get<AssetFileStructure>(`${this.BASE_URL}/assets/${id}/file-structure/`, {
+      params,
+    });
   }
 }

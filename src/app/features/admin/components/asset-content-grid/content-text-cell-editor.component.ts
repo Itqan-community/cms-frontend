@@ -11,6 +11,8 @@ export interface ContentTextEditorParams {
   readOnly?: boolean;
   /** Heading over the unit's source-language text, shown while editing a translation. */
   sourceTitle?: string;
+  /** The text column being edited: its source cell is the one shown. */
+  columnKey?: string;
 }
 
 type Params = ICellEditorParams<ContentEntry, string> & ContentTextEditorParams;
@@ -181,7 +183,9 @@ export class ContentTextCellEditorComponent implements ICellEditorAngularComp {
       this.cancelled = true;
       return;
     }
-    this.source = params.data?.source_text ?? '';
+    const key = params.columnKey;
+    this.source =
+      (key ? params.data?.source_cells?.[key] : undefined) ?? params.data?.source_text ?? '';
     this.sourceTitle = params.sourceTitle ?? '';
     // Same start value as agLargeTextCellEditor: Backspace/Delete clears,
     // a printable key replaces the text, anything else keeps the cell value.

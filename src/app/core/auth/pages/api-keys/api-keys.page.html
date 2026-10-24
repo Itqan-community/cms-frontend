@@ -11,6 +11,9 @@
     <div class="account-manage__card">
       <h1 class="account-manage__title">{{ 'AUTH.API_KEYS.TITLE' | translate }}</h1>
       <p class="account-manage__subtitle">{{ 'AUTH.API_KEYS.SUBTITLE' | translate }}</p>
+      <p class="account-manage__hint">
+        <a routerLink="/account/usage">{{ 'USAGE.DEVELOPER.VIEW_USAGE' | translate }}</a>
+      </p>
 
       @if (pageError()) {
         <div class="account-manage__alert">{{ pageError() }}</div>
@@ -135,6 +138,20 @@
                     [value]="draftName(k.id)"
                     (input)="updateDraft(k.id, $any($event.target).value)"
                   />
+                  <label class="account-manage__hint" style="display: block; margin-top: 8px">
+                    {{ 'AUTH.API_KEYS.APP_SLUG' | translate }}
+                    <input
+                      type="text"
+                      class="account-manage__input account-manage__mono"
+                      style="margin-top: 4px; max-width: 100%"
+                      dir="ltr"
+                      [value]="draftSlug(k.id)"
+                      (input)="updateSlugDraft(k.id, $any($event.target).value)"
+                    />
+                  </label>
+                  <p class="account-manage__hint">
+                    {{ 'AUTH.API_KEYS.APP_SLUG_HINT' | translate }}
+                  </p>
                 } @else {
                   <div style="font-weight: 600; margin-top: 4px">{{ k.name }}</div>
                 }
@@ -144,6 +161,12 @@
                   <div class="account-manage__mono" dir="ltr">{{ k.maskedKey }}</div>
                   <p class="account-manage__hint">
                     {{ 'AUTH.API_KEYS.FULL_KEY_UNAVAILABLE' | translate }}
+                  </p>
+                }
+                @if (k.appSlug && editingId() !== k.id) {
+                  <p class="account-manage__hint">
+                    {{ 'AUTH.API_KEYS.APP_SLUG' | translate }}:
+                    <span class="account-manage__mono" dir="ltr">{{ k.appSlug }}</span>
                   </p>
                 }
                 <p class="account-manage__hint">
