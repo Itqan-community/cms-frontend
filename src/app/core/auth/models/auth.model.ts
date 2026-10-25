@@ -21,11 +21,15 @@ export function normalizeProfilePermissionCodes(
   return [...set];
 }
 
+/** Language the backend sends the user's emails in. */
+export type PreferredLanguage = 'en' | 'ar';
+
 export interface User {
   id: string;
   name: string;
   email: string;
   phone: string;
+  preferred_language?: PreferredLanguage;
   is_active: boolean;
   is_profile_completed: boolean;
   is_admin?: boolean;
@@ -70,6 +74,7 @@ export interface AppRefreshTokenData {
 }
 
 export interface UpdateProfileRequest {
+  preferred_language?: PreferredLanguage;
   bio?: string;
   project_summary?: string;
   project_url?: string;
@@ -80,6 +85,7 @@ export interface UpdateProfileResponse {
   email: string;
   name: string;
   phone: string;
+  preferred_language?: PreferredLanguage;
   is_active: boolean;
   is_profile_completed: boolean;
   bio: string;
