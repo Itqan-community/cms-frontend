@@ -693,7 +693,7 @@ export class AssetVersionsManagerComponent implements OnInit {
       nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
       nzDirection: dir,
       nzOnOk: () =>
-        new Promise<void>((resolve, reject) => {
+        new Promise<false | void>((resolve) => {
           this.assetVersionsService.delete(this.kind, this.slug, row.id).subscribe({
             next: () => {
               this.message.success(
@@ -709,7 +709,7 @@ export class AssetVersionsManagerComponent implements OnInit {
               this.message.error(
                 this.translate.instant(`${this.i18nPrefix}.MESSAGES.DELETE_ERROR`)
               );
-              reject();
+              resolve(false);
             },
           });
         }),
@@ -927,7 +927,7 @@ export class AssetVersionsManagerComponent implements OnInit {
       nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
       nzDirection: this.modalDirection(),
       nzOnOk: () =>
-        new Promise<void>((resolve, reject) => {
+        new Promise<false | void>((resolve) => {
           this.restoringId.set(row.id);
           this.assetContentService
             .restoreVersion(this.kind, this.slug, row.id, this.restoreBump())
@@ -946,11 +946,11 @@ export class AssetVersionsManagerComponent implements OnInit {
                   // Keep the dialog open on a major version and say why.
                   this.restoreRequiresMajor.set(true);
                   this.restoreBump.set('major');
-                  reject();
+                  resolve(false);
                   return;
                 }
                 this.message.error(this.translate.instant(this.t('MESSAGES.RESTORE_ERROR')));
-                reject();
+                resolve(false);
               },
             });
         }),
@@ -985,9 +985,9 @@ export class AssetVersionsManagerComponent implements OnInit {
           this.message.warning(
             this.translate.instant('ADMIN.VERSION_PUBLISHING.ROLLBACK_REASON_REQUIRED')
           );
-          return Promise.reject();
+          return Promise.resolve(false);
         }
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<false | void>((resolve) => {
           this.publishingId.set(row.id);
           const request$: Observable<unknown> = this.supportsLanguages()
             ? this.assetContentService.setPublishedVersion(
@@ -1021,7 +1021,7 @@ export class AssetVersionsManagerComponent implements OnInit {
               this.message.error(this.translate.instant(key));
               // The list may be stale (e.g. a review was withdrawn meanwhile).
               this.loadList();
-              reject();
+              resolve(false);
             },
           });
         });
@@ -1049,10 +1049,10 @@ export class AssetVersionsManagerComponent implements OnInit {
           this.message.warning(
             this.translate.instant('ADMIN.PACKAGE_AVAILABILITY.REMOVE_REASON_REQUIRED')
           );
-          return Promise.reject();
+          return Promise.resolve(false);
         }
         this.removingId.set(row.id);
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<false | void>((resolve) => {
           this.assetVersionsService
             .removePackageVersion(row.id, reason)
             .pipe(takeUntilDestroyed(this.destroyRef))
@@ -1074,7 +1074,7 @@ export class AssetVersionsManagerComponent implements OnInit {
                   'ADMIN.PACKAGE_AVAILABILITY.ACTION_ERROR';
                 this.message.error(this.translate.instant(key));
                 this.loadList();
-                reject();
+                resolve(false);
               },
             });
         });
@@ -1101,10 +1101,10 @@ export class AssetVersionsManagerComponent implements OnInit {
           this.message.warning(
             this.translate.instant('ADMIN.PACKAGE_AVAILABILITY.REINSTATE_REASON_REQUIRED')
           );
-          return Promise.reject();
+          return Promise.resolve(false);
         }
         this.reinstatingId.set(row.id);
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<false | void>((resolve) => {
           this.assetVersionsService
             .reinstatePackageVersion(row.id, reason)
             .pipe(takeUntilDestroyed(this.destroyRef))
@@ -1126,7 +1126,7 @@ export class AssetVersionsManagerComponent implements OnInit {
                   'ADMIN.PACKAGE_AVAILABILITY.ACTION_ERROR';
                 this.message.error(this.translate.instant(key));
                 this.loadList();
-                reject();
+                resolve(false);
               },
             });
         });

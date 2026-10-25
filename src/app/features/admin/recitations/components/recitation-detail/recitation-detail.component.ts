@@ -688,7 +688,7 @@ export class RecitationDetailComponent implements OnInit {
                 this.translate
               )
             );
-            return Promise.reject(err);
+            return false;
           }),
     });
   }
@@ -740,7 +740,7 @@ export class RecitationDetailComponent implements OnInit {
                 this.translate
               )
             );
-            return Promise.reject(err);
+            return false;
           }),
     });
   }
@@ -1185,7 +1185,7 @@ export class RecitationDetailComponent implements OnInit {
       nzCancelText: this.translate.instant('ADMIN.RECITATIONS.TRACKS.DELETE.CANCEL'),
       nzDirection: this.translate.currentLang === 'ar' ? 'rtl' : 'ltr',
       nzOnOk: () =>
-        new Promise<void>((resolve, reject) => {
+        new Promise<false | void>((resolve) => {
           this.recitationsService
             .recitationTracksDelete({ asset_id: rec.id, track_ids: [track.id] })
             .subscribe({
@@ -1201,7 +1201,7 @@ export class RecitationDetailComponent implements OnInit {
                 this.message.error(
                   this.translate.instant('ADMIN.RECITATIONS.TRACKS.MESSAGES.DELETE_ERROR')
                 );
-                reject();
+                resolve(false);
               },
             });
         }),
