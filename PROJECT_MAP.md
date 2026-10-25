@@ -631,6 +631,11 @@ create forms (`POST /portal/ai/translate/`), usage reports (`/portal/usage/*`,
 Asset create/edit forms (tafsir, translation, mushaf, font, program, recitation): publisher field is
 view-only — create binds `AdminTenantService.selectedPublisherId()`; edit shows the asset publisher.
 
+Header publisher switch (`resolveUrlAfterTenantChange`): publisher detail/edit/index → the new
+publisher's detail; any other record route (`/admin/<section>/<slug|id>/…`) → `/admin/<section>`,
+since the record belongs to the previous publisher and would 404. `create`, list routes and
+`/admin/software/*` tabs reload unchanged.
+
 ---
 
 ## [DEPLOYMENT]
