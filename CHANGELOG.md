@@ -549,6 +549,64 @@ Release 1.14.0.
 
 ---
 
+## [1.15.0] - 2026-10-25
+
+Release 1.15.0.
+
+## Changes
+
+- fix(auth): don't lend a cached user's access to a different session user
+- perf(editor): register only the AG Grid modules the grid uses
+- perf(editor): open the draft alongside the languages and take its template
+- fix(auth): keep the provisional session until the profile is applied
+- fix(gallery): wrap long sample cells and show their full text on hover
+- fix(gallery): rename the preview's languages when the interface language changes
+- fix(content): show the generic message for column errors without a translation
+- fix(content): keep unsaved edits when the columns can't be reloaded
+- fix(content): call committed versions محفوظ, not معتمد, in the Arabic column messages
+- fix(content): say column keys use a-z, 0-9 and underscores
+- fix(review): name change columns whenever the asset has several
+- feat(content): highlight only the changed cells of a row
+- fix(content): steadier, clearer column management
+- feat(gallery): show the file structure in the user's language, with a language switch
+- fix(gallery): align file-structure cells under their headers in both directions
+- fix(content): safe multi-column paste, quiet handled errors, per-column source
+- docs: project map for multi-column text assets
+- feat(gallery): file structure preview for text assets
+- feat(review): show which column a change belongs to
+- feat(content): require a major version after reordering columns
+- feat(content): manage asset columns
+- feat(content): edit every text column in the grid
+- feat(content): column models and API client
+- feat(usage): localize chart tooltips, dates and numbers
+- fix(usage): never toast a 404 from the optional gallery counts
+- fix(usage): ignore inherited object keys in the range preset
+- fix(usage): relabel the leaderboard and unseen traffic on language change
+- fix(usage): list every developer app in the app filter
+- fix(usage): drop the previous board request when the publisher changes
+- fix(api-keys): reject a cleared app slug instead of silently keeping it
+- docs(usage): record the chart palette ruling and mark the plan done
+- docs(usage): map the usage reports frontend
+- fix(usage): pass an empty chart option while a chart has no data
+- feat(account): show and edit the app slug of API keys
+- feat(account): add the developer usage page
+- feat(gallery): show public usage counts on asset pages
+- feat(usage): show usage on asset admin pages
+- feat(usage): replace the admin usage page with usage dashboards
+- feat(usage): add the usage dashboard
+- feat(usage): add chart option builders and the usage chart component
+- feat(usage): add the usage reports API service and filter helpers
+- build(usage): add echarts and ngx-echarts
+- docs(usage): add the usage reports frontend plan
+- feat(gallery): mark recitations with ayah timings as timed
+- fix(gallery): label mushaf, linguistic, search and tajweed categories
+- docs: update project map for AI translate rate limits and backend dependency
+- fix(admin): require the asset type prefix on a typed identifier
+- fix(admin): clear a recitation identifier when its reciter or riwayah changes
+- feat(admin): translate create forms from Arabic and generate the asset identifier
+
+---
+
 ## [Unreleased]
 
 ### Added
