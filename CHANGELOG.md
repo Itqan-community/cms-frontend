@@ -529,6 +529,26 @@ Release 1.13.0.
 
 ---
 
+## [1.14.0] - 2026-10-14
+
+Release 1.14.0.
+
+## Changes
+
+- feat(gallery): show the itqan add command on installable assets
+- feat(admin): publish mushaf and font versions
+- feat(admin): let Itqan admins undo a version removal
+- fix(i18n): clarify the Arabic rollback confirmation text
+- feat(admin): show itqan CLI availability and ask for a rollback reason
+- feat(admin): number mushaf and font versions like tafsirs
+- fix(i18n): say "التحميل جارٍ" instead of "جاري التحميل" in Arabic
+- fix(admin): drop the review selection when a new listing is requested
+- feat(admin): bilingual version name and summary
+- feat(admin): pre-approved checkbox when uploading a version
+- feat(admin): bulk-approve changes on the review page
+
+---
+
 ## [Unreleased]
 
 ### Added
