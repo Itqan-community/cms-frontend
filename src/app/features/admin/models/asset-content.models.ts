@@ -10,6 +10,17 @@ export interface AssetLanguage {
   is_available: boolean;
 }
 
+/** One text column of a translation / tafsir. `key` is the CSV header and is the
+ *  same in every language; the labels are display names only. */
+export interface AssetColumn {
+  key: string;
+  label_en: string;
+  label_ar: string;
+  order: number;
+  /** A committed version contains it: its key is frozen and it can't be deleted. */
+  committed: boolean;
+}
+
 /** A per-ayah content draft version (state === 'draft'). Carries its version
  *  name and summary per language (see VersionText). */
 export interface ContentDraftVersion extends VersionText {
@@ -22,6 +33,12 @@ export interface ContentDraftVersion extends VersionText {
   state: 'draft' | 'published';
   entries_count: number;
   created_at: string;
+  /** Text column keys in file order (a draft follows the asset's current columns). */
+  column_keys: string[];
+  /** Columns were reordered since the last version: committing must be major. */
+  requires_major: boolean;
+  /** The asset's unit template; absent from older backends. */
+  template?: AssetTemplate | null;
 }
 
 /** Content granularity of a text asset. Fixed when the asset is created. */
@@ -45,12 +62,19 @@ export interface ContentEntry {
   reference_text: string;
   sura: number | null;
   aya: number | null;
+  /** Every text column's cell, keyed by column key. */
+  cells: Record<string, string>;
+  /** The first column (older single-column shape). */
   text: string;
-  /** Source-language text for the same unit (translations only; read-only). */
+  /** Source-language cells for the same unit (translations only; read-only). */
+  source_cells?: Record<string, string> | null;
+  /** Source-language first column (translations only; read-only). */
   source_text?: string | null;
   order: number;
   /** Draft text differs from the latest published version (drafts only). */
   changed?: boolean;
+  /** The columns whose cells differ (absent from older backends: then the whole row). */
+  changed_columns?: string[];
 }
 
 /** Paginated entries response (Django Ninja pagination shape). */
@@ -62,6 +86,8 @@ export interface ContentEntriesResponse {
 /** A single dirty row sent to the PATCH entries endpoint. */
 export interface ContentEntryPatch {
   unit_id: number;
+  /** The text column the cell belongs to. */
+  column: string;
   text: string;
 }
 
@@ -70,6 +96,8 @@ export interface ContentChange {
   unit_type: AssetTemplate;
   unit_id: number;
   label: string;
+  /** The text column of the changed cell. */
+  column: string;
   change_type: 'added' | 'modified' | 'removed';
   old_text: string;
   new_text: string;

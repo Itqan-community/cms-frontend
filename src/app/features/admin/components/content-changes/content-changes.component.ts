@@ -1,11 +1,12 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, input, linkedSignal, signal } from '@angular/core';
+import { Component, computed, inject, input, linkedSignal, signal } from '@angular/core';
 import { NgIcon } from '@ng-icons/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 
-import type { ContentChange } from '../../models/asset-content.models';
+import type { AssetColumn, ContentChange } from '../../models/asset-content.models';
+import { columnLabel } from '../../utils/column-label.util';
 import { clipText, isPreviewCut } from '../../utils/text-preview.util';
 import { diffWords, type WordDiff } from '../../utils/word-diff.util';
 import { ChangeCompareComponent } from '../change-compare/change-compare.component';
@@ -53,6 +54,24 @@ const COMPACT_CONTEXT_WORDS = 2;
 export class ContentChangesComponent {
   readonly changes = input.required<ContentChange[]>();
   readonly compact = input(false);
+  /** The asset's text columns, to name each change's column by its label. */
+  readonly columns = input<AssetColumn[]>([]);
+
+  private readonly translate = inject(TranslateService);
+
+  /** Several columns: each change names its column (one unit may change in two). */
+  readonly multiColumn = computed(
+    () => this.columns().length > 1 || this.changes().some((c) => !!c.column && c.column !== 'text')
+  );
+
+  /** A change's column, labelled in the interface language (its key when unlabelled). */
+  columnName(change: ContentChange): string {
+    const column = this.columns().find((c) => c.key === change.column);
+    return columnLabel(
+      column ?? { key: change.column, label_en: '', label_ar: '' },
+      this.translate.currentLang
+    );
+  }
 
   readonly filters: { key: ChangeFilter; label: string }[] = [
     { key: 'all', label: 'ADMIN.CONTENT_CHANGES.ALL' },

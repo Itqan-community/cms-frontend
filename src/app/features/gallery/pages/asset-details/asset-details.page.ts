@@ -37,13 +37,18 @@ import {
 import { IssuesService } from '../../../admin/issues/services/issues.service';
 import { localizedLanguageName } from '../../../admin/utils/iso-639.util';
 import { AssetDetails } from '../../models/assets.model';
+import { AssetFileStructureComponent } from '../../components/asset-file-structure/asset-file-structure.component';
 import { ItqanAddCommandComponent } from '../../components/itqan-add-command/itqan-add-command.component';
 import { AssetLicenseAcceptanceService } from '../../services/asset-license-acceptance.service';
+import { preferredLanguage } from '../../utils/preferred-language.util';
 import { AssetsService } from '../../services/assets.service';
+import { AssetUsageCountsComponent } from '../../../usage/components/asset-usage-counts/asset-usage-counts.component';
 
 @Component({
   selector: 'app-asset-details-page',
   imports: [
+    AssetFileStructureComponent,
+    AssetUsageCountsComponent,
     RouterModule,
     ImageCarouselComponent,
     BreadcrumbComponent,
@@ -92,8 +97,11 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
   canConfirmLicense = signal<boolean>(false);
   isSubmittingRequest = signal<boolean>(false);
   isDownloading = signal<boolean>(false);
-  /** Language chosen for download on a multi-language asset (null = source/default). */
+  /** Language chosen for download and the file-structure preview (null = source/default).
+   *  Starts at the UI language when the asset offers it and follows UI language
+   *  changes until the user picks one. */
   selectedLanguage = signal<string | null>(null);
+  private languagePicked = false;
   isReportIssueModalVisible = signal<boolean>(false);
   isSubmittingReportIssue = signal<boolean>(false);
 
@@ -114,6 +122,18 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.getAssetDetails(this.id);
+    this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({ lang }) => {
+      const asset = this.asset();
+      if (asset && !this.languagePicked) {
+        this.selectedLanguage.set(preferredLanguage(asset.available_languages ?? [], lang));
+      }
+    });
+  }
+
+  /** The user chose a language (download select or preview switch): keep it. */
+  pickLanguage(language: string | null): void {
+    this.languagePicked = true;
+    this.selectedLanguage.set(language);
   }
 
   getAssetDetails(id: string) {
@@ -127,7 +147,9 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
         next: (asset) => {
           this.asset.set(asset);
           this.images.set(asset.snapshots.map((snapshot) => snapshot.image_url));
-          this.selectedLanguage.set(asset.available_languages?.[0] ?? null);
+          this.selectedLanguage.set(
+            preferredLanguage(asset.available_languages ?? [], this.translate.currentLang)
+          );
           this.loading.set(false);
           this.setSeoFromAsset(asset);
           this.maybeOpenReportIssueModal();

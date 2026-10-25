@@ -20,11 +20,13 @@ import {
 import { AssetVersionsManagerComponent } from '../../../components/asset-versions-manager/asset-versions-manager.component';
 import { TafsirDetails } from '../../models/tafsirs.models';
 import { TafsirsService } from '../../services/tafsirs.service';
+import { AssetUsageSectionComponent } from '../../../../usage/components/asset-usage-section/asset-usage-section.component';
 
 @Component({
   selector: 'app-tafsir-detail',
   standalone: true,
   imports: [
+    AssetUsageSectionComponent,
     DatePipe,
     RouterLink,
     NzModalModule,

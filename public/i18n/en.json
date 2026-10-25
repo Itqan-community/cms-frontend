@@ -311,13 +311,16 @@
       "LAST_USED": "Last used",
       "RENAME": "Rename",
       "RENAME_REQUIRED": "Enter a name for this key.",
+      "SLUG_REQUIRED": "Enter an app slug; it can be changed but not removed.",
       "RENAME_SUCCESS": "API key updated.",
       "REVOKE": "Revoke",
       "REVOKE_CONFIRM": "Revoke this API key? Requests using this key will stop working.",
       "REVOKE_SUCCESS": "API key revoked.",
       "DELETE": "Delete",
       "DELETE_CONFIRM": "Permanently delete this API key? This cannot be undone.",
-      "DELETE_SUCCESS": "API key deleted."
+      "DELETE_SUCCESS": "API key deleted.",
+      "APP_SLUG": "App ID",
+      "APP_SLUG_HINT": "Public and safe to share: added to file links as ?c=… so plays and downloads count for this app. 3–40 lowercase letters, digits or hyphens."
     },
     "PROVIDERS": {
       "TITLE": "Connected accounts",
@@ -556,6 +559,7 @@
     "VIEW_DETAILS": "View Details",
     "VIEW_LICENSE": "View License",
     "OPEN_ACCESS_BADGE": "Open access",
+    "AYAH_TIMED_BADGE": "Ayah-timed",
     "OPEN_ACCESS_HINT": "No access request required for this resource.",
     "REQUEST_ACCESS_BUTTON": "Request Access",
     "ACCESS_PENDING_HINT": "Your access request is being reviewed. You will be able to download once it is approved.",
@@ -591,6 +595,17 @@
       "COPY": "Copy command",
       "COPIED": "Command copied",
       "GET_CLI": "Don't have the itqan CLI? Get it"
+    },
+    "FILE_STRUCTURE": {
+      "TITLE": "File structure",
+      "FORMAT": "CSV · one row per {{unit}}",
+      "UNITS": {
+        "SURAH": "surah",
+        "AYAH": "ayah",
+        "WORD": "word",
+        "PAGE": "page"
+      },
+      "LANGUAGE": "Preview language"
     }
   },
   "UI": {
@@ -642,7 +657,11 @@
     "translation": "Translation",
     "recitation": "Recitation",
     "font": "Font",
-    "program": "Program"
+    "program": "Program",
+    "mushaf": "Mushaf",
+    "linguistic": "Linguistic",
+    "search": "Search",
+    "tajweed": "Tajweed"
   },
   "LICENSES": {
     "CC0": "CC0",
@@ -886,6 +905,7 @@
       "SUBTITLE": "Manage platform content and settings"
     },
     "CONTENT_EDITOR": {
+      "SHOW_SOURCE": "Show source",
       "TITLE": "Edit content",
       "HINT": "Edit the text unit by unit. Changes autosave to a draft; publish to create a new version. Tip: select a Text cell and paste (Ctrl+V) CSV/spreadsheet rows to fill cells downward.",
       "BACK": "Back to details",
@@ -905,7 +925,8 @@
         "REVIEW_LOADING": "Reviewing changes…",
         "REVIEW_ERROR": "Could not load the change review. Close this dialog and try again.",
         "CONFIRM": "Commit",
-        "CANCEL": "Cancel"
+        "CANCEL": "Cancel",
+        "MAJOR_REQUIRED_HINT": "The columns were reordered since the last version. That changes the file layout, so this must be a major version."
       },
       "SAVING": "Saving…",
       "UNSAVED": "Unsaved changes",
@@ -946,7 +967,8 @@
       },
       "MESSAGES": {
         "PUBLISHED": "Changes committed. Publish the version once its changes are approved.",
-        "DRAFT_SAVED": "Draft saved"
+        "DRAFT_SAVED": "Draft saved",
+        "COLUMN_EDITS_DROPPED": "{{count}} edit(s) of a column that was deleted or renamed elsewhere could not be saved and were discarded."
       },
       "PASTE": {
         "SELECT_EDITABLE": "Select a Text cell first, then paste.",
@@ -1015,7 +1037,36 @@
         "ariaFilterFromValue": "Filter from value",
         "ariaFilterToValue": "Filter to value",
         "ariaFilterMenuOpen": "Open filter menu"
-      }
+      },
+      "COLUMNS_MANAGE": {
+        "TITLE": "Columns",
+        "ADD_COLUMN": "Add column",
+        "REORDER_NOTE": "Some columns are already in a committed version. Their keys can't change, and reordering them makes the next version major.",
+        "KEY": "Key (file header)",
+        "LABEL_EN": "English label",
+        "LABEL_AR": "Arabic label",
+        "KEY_PLACEHOLDER": "e.g. answer",
+        "ADD": "Add",
+        "DELETE_CONFIRM": "Delete this column and its draft text?",
+        "CLOSE": "Close",
+        "ERRORS": {
+          "GENERIC": "Something went wrong. Try again.",
+          "COLUMN_KEY_INVALID": "A key starts with a lowercase English letter (a-z) and uses only a-z, 0-9 and underscores (at most 64). Unit names such as sura or ayah can't be used.",
+          "COLUMN_KEY_TAKEN": "This asset already has a column with this key.",
+          "COLUMN_COMMITTED": "This column is in a committed version, so its key can't change and it can't be deleted.",
+          "COLUMN_LAST": "An asset needs at least one column.",
+          "COLUMN_ORDER_MISMATCH": "The columns changed meanwhile. Close the dialog and try again.",
+          "COLUMN_NOT_FOUND": "This column no longer exists."
+        },
+        "MOVE_UP": "Move up",
+        "MOVE_DOWN": "Move down",
+        "DELETE": "Delete column",
+        "OPEN": "Manage columns",
+        "LABEL_OPTIONAL": "Optional",
+        "LABELS_HINT": "Labels are optional display names for the editor and the gallery; without one, the key is shown."
+      },
+      "COLUMN_MENU": "Column menu",
+      "FILTER_ACTIVE": "Filtered"
     },
     "REVIEW": {
       "TITLE": "Review changes",
@@ -2740,17 +2791,173 @@
       "DOWNLOAD": "Download CSV template",
       "HINT": "An empty sheet with one row per unit. Fill in the text column and upload it here.",
       "PICK_TEMPLATE_FIRST": "Choose the content template (and the mushaf layout for pages) to download its CSV template."
+    },
+    "AI_TRANSLATE": {
+      "TRANSLATE": "Translate from Arabic",
+      "WEB": "Write from the web",
+      "HINT": "Fills empty English fields only. Review before saving.",
+      "DONE": "English fields filled. Please review them.",
+      "NOTHING_TO_FILL": "All English fields are filled. Clear a field to regenerate it.",
+      "NEED_ARABIC": "Enter the Arabic details first.",
+      "QUOTA": "Today's free AI limit is reached. Try again tomorrow.",
+      "RATE_LIMITED": "Too many AI requests right now. Wait a minute and try again.",
+      "FAILED": "Translation failed. Try again later.",
+      "SOURCES": "Sources:",
+      "IDENTIFIER": "Identifier:",
+      "IDENTIFIER_TOOLTIP": "Used by the itqan add command and in file names; it can't be changed after saving.",
+      "SLUG_REQUIRED": "Click \"Translate from Arabic\" to generate the identifier before saving.",
+      "SLUG_MANUAL": "The identifier could not be generated. Type it in lowercase words joined by hyphens, starting with the asset type (e.g. tafsir-ibn-kathir).",
+      "SLUG_FORMAT": "Use lowercase letters, digits and single hyphens, starting with the asset type (e.g. tafsir-ibn-kathir); max 50 characters.",
+      "SLUG_PLACEHOLDER": "e.g. tafsir-ibn-kathir"
     }
   },
   "USAGE": {
-    "TITLE": "API Usage",
+    "TITLE": "Usage",
     "SUBTITLE": "API request analytics for your publisher account",
     "ALL_PUBLISHERS": "All publishers",
     "REQUESTS_OVER_TIME": "Requests over time",
     "TOP_ENDPOINTS": "Top endpoints",
     "TOP_ENTITIES": "Top entities",
     "NO_DATA": "No data for the selected period",
-    "ERROR_UNAVAILABLE": "Usage stats are temporarily unavailable. Please try again later."
+    "ERROR_UNAVAILABLE": "Usage stats are temporarily unavailable. Please try again later.",
+    "LOAD_ERROR": "Could not load this report.",
+    "RETRY": "Retry",
+    "VIEW_AS_TABLE": "View as table",
+    "VIEW_AS_CHART": "View as chart",
+    "EXPORT_CSV": "Export CSV",
+    "ALL_CATEGORIES": "All categories",
+    "ALL_CHANNELS": "All channels",
+    "ALL_PLATFORMS": "All platforms",
+    "ALL_APPS": "All apps",
+    "NO_SPLIT": "No split",
+    "TREND": "{{metric}} over time",
+    "OTHER": "Other",
+    "UNKNOWN": "Unknown",
+    "NO_APP": "No identified app",
+    "PREVIOUS_PERIOD": "Previous period",
+    "VS_PREVIOUS": "vs previous period",
+    "LAST_UPDATED": "Last updated {{time}}",
+    "UNIDENTIFIED_APPS_NOTE": "Some traffic came from apps that do not send an API key, so it cannot be attributed to an app.",
+    "UNIQUES_MONTHLY": "This range reaches past raw-event retention: unique counts are monthly totals added together.",
+    "UNIQUES_UNAVAILABLE": "Unique counts are not available for this range with these filters.",
+    "SURAH_N": "Surah {{n}}",
+    "PRESETS": {
+      "7d": "7 days",
+      "30d": "30 days",
+      "90d": "90 days",
+      "12m": "12 months",
+      "custom": "Custom"
+    },
+    "METRICS": {
+      "plays": "Plays",
+      "downloads": "Downloads",
+      "installs": "CLI installs",
+      "api_calls": "API calls",
+      "views": "Page views",
+      "requests": "Requests",
+      "bytes": "Bytes delivered",
+      "unique_listeners": "Unique listeners",
+      "unique_downloaders": "Unique downloaders",
+      "unique_end_users": "Unique end users",
+      "integrating_apps": "Integrating apps",
+      "latest_version_share": "On the latest version"
+    },
+    "CATEGORIES": {
+      "recitation": "Recitations",
+      "mushaf": "Mushafs",
+      "tafsir": "Tafsirs",
+      "translation": "Translations",
+      "linguistic": "Linguistic",
+      "tajweed": "Tajweed",
+      "font": "Fonts",
+      "search": "Search",
+      "program": "Programs"
+    },
+    "CHANNELS": {
+      "gallery": "Gallery",
+      "cli": "itqan CLI",
+      "app_identified": "Identified apps",
+      "web": "Web browsers",
+      "app_unidentified": "Unidentified apps",
+      "script": "Scripts",
+      "other": "Other"
+    },
+    "PLATFORMS": {
+      "android": "Android",
+      "ios": "iOS",
+      "web": "Web",
+      "desktop": "Desktop",
+      "server": "Server",
+      "unknown": "Unknown"
+    },
+    "KINDS": {
+      "audio_surah": "Surah audio",
+      "audio_ayah": "Ayah audio",
+      "version_file": "Version files",
+      "gallery_download": "Gallery downloads",
+      "api_call": "API calls",
+      "cli_install": "CLI installs",
+      "view": "Page views"
+    },
+    "SPLIT_BY": {
+      "channel": "By channel",
+      "platform": "By platform",
+      "country": "By country",
+      "asset": "By asset",
+      "app": "By app",
+      "kind": "By type",
+      "version": "By version",
+      "language": "By language",
+      "endpoint": "By endpoint",
+      "publisher": "Publisher"
+    },
+    "PANELS": {
+      "channel": "Channels",
+      "platform": "Platforms",
+      "country": "Countries",
+      "asset": "Top assets",
+      "app": "Integrating apps",
+      "surah": "Surahs",
+      "hour_of_week": "Hour of the week (your time zone)",
+      "version": "Versions",
+      "language": "Languages",
+      "endpoint": "Endpoints"
+    },
+    "DAYS": {
+      "MON": "Mon",
+      "TUE": "Tue",
+      "WED": "Wed",
+      "THU": "Thu",
+      "FRI": "Fri",
+      "SAT": "Sat",
+      "SUN": "Sun"
+    },
+    "CHANGE": "Change",
+    "TABS": {
+      "DASHBOARD": "Dashboard",
+      "LEADERBOARD": "Leaderboard",
+      "UNSEEN": "Unseen traffic",
+      "LEGACY": "Legacy board"
+    },
+    "UNSEEN": {
+      "INTRO": "Reads from storage that never passed through the CDN edge, so the other reports cannot see them (for example direct bucket access).",
+      "READS": "Storage reads",
+      "EDGE_REQUESTS": "Edge requests",
+      "UNSEEN": "Unseen reads",
+      "PER_DAY": "Reads per day"
+    },
+    "ASSET_SECTION_TITLE": "Usage",
+    "PUBLIC": {
+      "PLAYS": "plays",
+      "DOWNLOADS": "downloads",
+      "APPS": "apps"
+    },
+    "DEVELOPER": {
+      "TITLE": "API usage",
+      "SUBTITLE": "How your apps use Itqan: API calls, plays and downloads attributed to your API keys.",
+      "BACK_TO_KEYS": "Back to API keys",
+      "VIEW_USAGE": "View the usage of your apps"
+    }
   },
   "MUSHAF": {
     "TITLE": "The Noble Quran",

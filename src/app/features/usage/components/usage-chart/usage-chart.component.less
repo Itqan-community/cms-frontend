@@ -1,0 +1,57 @@
+.usage-chart {
+  background: #fff;
+  border: 1px solid var(--color-neutral-50);
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  min-width: 0;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-neutral-800);
+  }
+
+  &__state {
+    min-height: 160px;
+  }
+
+  &__error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--color-red-600);
+  }
+
+  &__canvas {
+    width: 100%;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+
+    th,
+    td {
+      padding: 6px 8px;
+      border-bottom: 1px solid var(--color-neutral-50);
+      text-align: start;
+      font-weight: normal;
+    }
+
+    td {
+      text-align: end;
+      font-variant-numeric: tabular-nums;
+    }
+  }
+}

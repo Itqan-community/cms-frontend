@@ -1,0 +1,48 @@
+<section class="usage-chart">
+  <header class="usage-chart__header">
+    <h3 class="usage-chart__title">{{ title() }}</h3>
+    @if (!loading() && !error() && !empty()) {
+      <button
+        nz-button
+        nzType="link"
+        nzSize="small"
+        class="usage-chart__toggle"
+        (click)="toggleTable()"
+      >
+        {{ (showTable() ? 'USAGE.VIEW_AS_CHART' : 'USAGE.VIEW_AS_TABLE') | translate }}
+      </button>
+    }
+  </header>
+
+  @if (loading()) {
+    <nz-skeleton class="usage-chart__state" [nzActive]="true" [nzParagraph]="{ rows: 5 }" />
+  } @else if (error()) {
+    <div class="usage-chart__state usage-chart__error" role="alert">
+      <p>{{ 'USAGE.LOAD_ERROR' | translate }}</p>
+      <button nz-button nzSize="small" (click)="retry.emit()">
+        {{ 'USAGE.RETRY' | translate }}
+      </button>
+    </div>
+  } @else if (empty()) {
+    <nz-empty class="usage-chart__state" [nzNotFoundContent]="'USAGE.NO_DATA' | translate" />
+  } @else if (showTable()) {
+    <table class="usage-chart__table">
+      <tbody>
+        @for (row of rows(); track $index) {
+          <tr>
+            <th scope="row">{{ row.label }}</th>
+            <td>{{ row.value }}</td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <div
+      echarts
+      class="usage-chart__canvas"
+      [style.height.px]="height()"
+      [options]="options() ?? {}"
+      [autoResize]="true"
+    ></div>
+  }
+</section>

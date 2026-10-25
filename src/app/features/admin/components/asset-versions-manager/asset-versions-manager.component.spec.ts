@@ -341,6 +341,7 @@ describe('AssetVersionsManagerComponent', () => {
         unit_type: 'ayah',
         unit_id: id,
         label: `1:${id}`,
+        column: 'text',
         change_type: 'added',
         old_text: '',
         new_text: `text ${id}`,
@@ -675,6 +676,26 @@ describe('AssetVersionsManagerComponent', () => {
         1,
         'major'
       );
+    });
+
+    it('switches the restore to major instead of failing when columns were reordered', async () => {
+      contentService.restoreVersion.and.returnValue(
+        throwError(
+          () => new HttpErrorResponse({ status: 400, error: { error_name: 'major_bump_required' } })
+        )
+      );
+      fixture.detectChanges();
+      let ok: Promise<void> | undefined;
+      modal.confirm.and.callFake(((options?: ModalOptions) => {
+        ok = (options?.nzOnOk as () => Promise<void>)();
+        return {};
+      }) as unknown as NzModalService['confirm']);
+
+      component.restoreVersion(page('ar').results[0]);
+      await ok?.catch(() => undefined);
+
+      expect(component.restoreBump()).toBe('major');
+      expect(component.restoreRequiresMajor()).toBeTrue();
     });
   });
 

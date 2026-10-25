@@ -59,6 +59,9 @@
                 />
               </nz-form-control>
             </nz-form-item>
+            @if (!isEditMode()) {
+              <app-ai-translate-actions [form]="form" [category]="'reciter'" />
+            }
           </div>
         </div>
       </div>

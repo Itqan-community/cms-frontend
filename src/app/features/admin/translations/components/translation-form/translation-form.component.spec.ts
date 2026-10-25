@@ -166,6 +166,7 @@ describe('TranslationFormComponent template controls', () => {
       license: Licenses.CC0,
       language: 'ar',
       publisher_id: 1,
+      slug: 'translation-sample',
       template: 'page',
       mushaf_layout_id: 1,
     });
@@ -191,6 +192,7 @@ describe('TranslationFormComponent template controls', () => {
       license: Licenses.CC0,
       language: 'ar',
       publisher_id: 1,
+      slug: 'translation-sample',
       template: 'ayah',
     });
 

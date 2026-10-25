@@ -28,6 +28,8 @@ import { versionNumberValidator } from '../../../utils/version-number.util';
 import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
 import { isRestrictedForTenantConflictError } from '../../../../../shared/utils/error.utils';
 import { AssetInitialVersionFieldsComponent } from '../../../components/asset-initial-version-fields/asset-initial-version-fields.component';
+import { AiTranslateActionsComponent } from '../../../components/ai-translate-actions/ai-translate-actions.component';
+import { assetSlugValidators } from '../../../utils/asset-slug.util';
 
 @Component({
   selector: 'app-translation-form',
@@ -46,6 +48,7 @@ import { AssetInitialVersionFieldsComponent } from '../../../components/asset-in
     NzToolTipModule,
     NzUploadModule,
     TranslateModule,
+    AiTranslateActionsComponent,
     AssetInitialVersionFieldsComponent,
   ],
   templateUrl: './translation-form.component.html',
@@ -95,6 +98,8 @@ export class TranslationFormComponent implements OnInit {
     version_number: ['', [versionNumberValidator]],
     version_summary_en: [''],
     version_summary_ar: [''],
+    /** Filled by the AI translate actions; sent on create only. */
+    slug: [''],
   });
 
   /** A first version's number is required once a file is attached to the create form. */
@@ -140,6 +145,8 @@ export class TranslationFormComponent implements OnInit {
         control.setValidators([Validators.maxLength(255)]);
         control.updateValueAndValidity();
       }
+      this.form.controls.slug.setValidators(assetSlugValidators('translation'));
+      this.form.controls.slug.updateValueAndValidity();
       this.bindTenantPublisher();
     }
   }
@@ -249,6 +256,8 @@ export class TranslationFormComponent implements OnInit {
     };
 
     if (!this.isEditMode()) {
+      const slug = v.slug?.trim();
+      if (slug) body.slug = slug;
       body.template = v.template ?? undefined;
       body.mushaf_layout_id = v.mushaf_layout_id ?? null;
 

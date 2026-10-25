@@ -25,6 +25,7 @@ import {
   createDisplayLocalizationLabels,
   localizeCountryCodeOrName,
 } from '../../../utils/display-localization.util';
+import { AiTranslateActionsComponent } from '../../../components/ai-translate-actions/ai-translate-actions.component';
 
 @Component({
   selector: 'app-reciter-form',
@@ -42,6 +43,7 @@ import {
     NzSkeletonModule,
     NzUploadModule,
     TranslateModule,
+    AiTranslateActionsComponent,
   ],
   templateUrl: './reciter-form.component.html',
   styleUrl: './reciter-form.component.less',

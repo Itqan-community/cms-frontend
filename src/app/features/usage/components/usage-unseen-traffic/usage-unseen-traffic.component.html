@@ -1,0 +1,49 @@
+<div class="usage-unseen">
+  <p class="usage-unseen__intro">{{ 'USAGE.UNSEEN.INTRO' | translate }}</p>
+
+  @if (data(); as report) {
+    <div class="usage-unseen__totals">
+      @for (measure of measures; track measure) {
+        <div class="usage-unseen__total">
+          <span class="usage-unseen__label">{{
+            'USAGE.UNSEEN.' + measure.toUpperCase() | translate
+          }}</span>
+          <span class="usage-unseen__value">{{ format(report.total[measure]) }}</span>
+        </div>
+      }
+    </div>
+  }
+
+  <app-usage-chart
+    [title]="'USAGE.UNSEEN.PER_DAY' | translate"
+    [options]="chartOptions()"
+    [rows]="chartRows()"
+    [loading]="loading()"
+    [error]="error()"
+    [empty]="!loading() && !error() && !data()?.total?.reads"
+    (retry)="load()"
+  />
+
+  @if (data()?.assets?.length) {
+    <table class="usage-unseen__table">
+      <thead>
+        <tr>
+          <th scope="col">{{ 'USAGE.SPLIT_BY.asset' | translate }}</th>
+          @for (measure of measures; track measure) {
+            <th scope="col">{{ 'USAGE.UNSEEN.' + measure.toUpperCase() | translate }}</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (asset of data()!.assets; track asset.key) {
+          <tr>
+            <td>{{ asset.label || asset.key || ('USAGE.UNKNOWN' | translate) }}</td>
+            @for (measure of measures; track measure) {
+              <td>{{ format(asset[measure]) }}</td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+</div>
