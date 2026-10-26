@@ -49,7 +49,7 @@ type PreviewResult = { response: QuranRangeResponse | null } | { error: string }
 /**
  * Pick a group's range — from/to ayah, or from/to word for a word group — and
  * see the mushaf text it covers while picking. In add mode it also takes the
- * group's first text: a group exists only once it has text.
+ * group's first text, optional: a group left blank is dropped when committed.
  */
 @Component({
   selector: 'app-group-range-modal',
@@ -110,14 +110,12 @@ export class GroupRangeModalComponent {
     return text;
   });
 
-  readonly hasText = computed(() => Object.values(this.texts()).some((text) => text.trim()));
   readonly canConfirm = computed(
     () =>
       this.preview() !== null &&
       !this.previewLoading() &&
       this.previewError() === null &&
-      !this.busy() &&
-      (this.mode() === 'move' || this.hasText())
+      !this.busy()
   );
 
   /** A range to preview; null when it is incomplete (a word still being typed). */

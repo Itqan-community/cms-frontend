@@ -1090,14 +1090,17 @@
         "PREVIEW": "Mushaf text of this range",
         "PREVIEW_TRUNCATED": "Showing the start of a long range.",
         "PREVIEW_LOADING": "Loading the mushaf text…",
-        "TEXT_REQUIRED": "Write the group's text in at least one column.",
         "ORPHANED": "Not in source",
         "ORPHANED_HINT": "The source language no longer has this range. Move this text to the new range, then delete this row.",
         "ADD_TITLE": "Add a group",
         "MOVE_TITLE": "Change the group's range",
         "ACTIONS": "Actions",
         "CONFIRM": "Save",
-        "CANCEL": "Cancel"
+        "CANCEL": "Cancel",
+        "ADD_NEXT": "Add next group",
+        "GROW": "Extend the range by one",
+        "SHRINK": "Shorten the range by one",
+        "POSITION_INVALID": "Write a position as surah:ayah (or surah:ayah:word for word groups), e.g. 2:255."
       }
     },
     "REVIEW": {

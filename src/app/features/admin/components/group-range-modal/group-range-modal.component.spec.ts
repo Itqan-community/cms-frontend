@@ -121,19 +121,22 @@ describe('GroupRangeModalComponent', () => {
     expect(modal.canConfirm()).toBeFalse();
   }));
 
-  it('disables confirm in add mode while every text is blank', fakeAsync(() => {
+  it('allows adding a group without text, sending no cells', fakeAsync(() => {
     // Arrange
     const { modal } = create();
     tick(300);
+    const emitted: unknown[] = [];
+    modal.confirmed.subscribe((value) => emitted.push(value));
 
     // Act
     modal.setText('text', '   ');
+    modal.confirm();
 
     // Assert
-    expect(modal.preview()).not.toBeNull();
-    expect(modal.canConfirm()).toBeFalse();
-    modal.setText('text', 'commentary');
     expect(modal.canConfirm()).toBeTrue();
+    expect(emitted).toEqual([
+      { start: { surah: 1, ayah: 1 }, end: { surah: 1, ayah: 1 }, cells: {} },
+    ]);
   }));
 
   it('emits start, end and empty cells when confirmed in move mode', fakeAsync(() => {

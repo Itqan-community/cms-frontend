@@ -384,13 +384,16 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   content templates, and the tafsir-only `ayah_group` / `word_group` templates); flush before
   publish; leave blocked if PATCH fails. **Group templates:** each row is a publisher-chosen range
   (label `2:1 → 2:5`, `group_from` / `group_to`, opaque `unit_id`); no `sura`/`aya` columns. On the
-  source language "Add group" and a per-row actions column (`group-actions-cell.component.ts`:
-  change range, delete) open `group-range-modal/` — from/to surah + ayah (+ word) pickers with a
-  debounced, cancelling live preview of the mushaf text (`GET content/quran-range/`), plus the first
-  text per column (add needs one non-blank) — then `POST/PUT/DELETE …/groups/` and refresh the
-  infinite cache. A translated language lists its source's ranges; only an `orphaned` row (a range
-  the source dropped) can be deleted, its text opens read-only, and a commit refused with
-  `orphaned_groups` lists the groups. **Text columns:** one editable grid column per key of the
+  source language the range is edited in place (`group-range-cell.component.ts`: typed start / end
+  saved on Enter or blur via `PUT …/groups/{id}/`, and −/+ shrinking or growing the end one ayah /
+  word via `POST …/groups/{id}/extend/`); "Add next group" under the grid (`POST …/groups/next/`)
+  adds a blank group after the furthest one, then scrolls to it and focuses its text. "Add group"
+  and the per-row change-range action (`group-actions-cell.component.ts`) open `group-range-modal/`
+  — from/to pickers with a debounced, cancelling live preview of the mushaf text
+  (`GET content/quran-range/`), optional first text per column — and delete removes a group. A
+  translated language lists its source's ranges; only an `orphaned` row (a range the source dropped)
+  can be deleted, its text opens read-only and can't be cleared or pasted over, and a commit refused
+  with `orphaned_groups` lists the groups. **Text columns:** one editable grid column per key of the
   draft's `column_keys` (colId `cell__<key>`, reading/writing `row.cells[key]`; filters keyed
   `cell__<key>` / `source__<key>`); unsaved cells are keyed `unit:column` and PATCHed as
   `{unit_id, column, text}`. Translating, a remembered "Show source" switch inserts each read-only

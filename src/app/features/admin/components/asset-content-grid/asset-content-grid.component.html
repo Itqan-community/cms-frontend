@@ -196,6 +196,21 @@
         (cellValueChanged)="onCellValueChanged($event)"
         (selectionChanged)="onSelectionChanged()"
       ></ag-grid-angular>
+      @if (canEditGroups()) {
+        <button
+          nz-button
+          nzType="dashed"
+          nzBlock
+          type="button"
+          class="content-grid__add-next"
+          [nzLoading]="groupBusy()"
+          [disabled]="loading() || saving() || publishing() || savingDraft() || draftId() === null"
+          (click)="appendGroup()"
+        >
+          <ng-icon name="lucidePlus" />
+          {{ 'ADMIN.CONTENT_EDITOR.GROUPS.ADD_NEXT' | translate }}
+        </button>
+      }
     }
   </nz-spin>
 

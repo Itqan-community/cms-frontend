@@ -18,6 +18,7 @@ import { AdminAuthService } from '../../services/admin-auth.service';
 import { AssetContentService } from '../../services/asset-content.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { AssetContentGridComponent, GRID_MODULES } from './asset-content-grid.component';
+import { GroupRangeCellComponent, type GroupRangeCellParams } from './group-range-cell.component';
 
 const SOURCE: AssetLanguage = { language: 'ar', is_source: true, is_available: true };
 const ENGLISH: AssetLanguage = { language: 'en', is_source: false, is_available: true };
@@ -75,6 +76,8 @@ describe('AssetContentGridComponent groups', () => {
       'addGroup',
       'moveGroup',
       'deleteGroup',
+      'appendGroup',
+      'extendGroup',
       'commit',
     ]);
     service.listColumns.and.returnValue(of([]));
@@ -93,6 +96,8 @@ describe('AssetContentGridComponent groups', () => {
       'refreshInfiniteCache',
       'getRowNode',
       'refreshCells',
+      'ensureIndexVisible',
+      'setFocusedCell',
     ]);
     TestBed.configureTestingModule({
       imports: [AssetContentGridComponent, TranslateModule.forRoot()],
@@ -406,5 +411,96 @@ describe('AssetContentGridComponent groups', () => {
     expect(unit.cellStyle).toEqual(
       jasmine.objectContaining({ direction: 'ltr', unicodeBidi: 'isolate' })
     );
+  });
+
+  it('edits the range in its cell: editable on the source, read-only on a translation', () => {
+    // Arrange
+    const component = grid();
+    const unit = component.buildColumnDefs().find((col) => col.colId === 'surah')!;
+    const params = unit.cellRendererParams as GroupRangeCellParams;
+
+    // Act / Assert
+    expect(unit.cellRenderer).toBe(GroupRangeCellComponent);
+    expect(params.editable(row())).toBeTrue();
+    component.selectedLanguage.set('en');
+    expect(params.editable(row())).toBeFalse();
+  });
+
+  it('lets keys typed in the range boxes reach them instead of the grid', () => {
+    // Arrange
+    const unit = grid()
+      .buildColumnDefs()
+      .find((col) => col.colId === 'surah')!;
+    const input = document.createElement('input');
+
+    // Act / Assert
+    expect(
+      unit.suppressKeyboardEvent!({
+        event: { target: input },
+      } as unknown as SuppressKeyboardEventParams<ContentEntry>)
+    ).toBeTrue();
+  });
+
+  it('grows a group by one step from its cell', async () => {
+    // Arrange
+    service.extendGroup.and.returnValue(of([row({ unit_id: 1000004 })]));
+    const component = grid();
+
+    // Act
+    await component.extendGroupBy(row(), 1);
+
+    // Assert
+    expect(service.extendGroup).toHaveBeenCalledWith('tafsir', 'grouped', 7, 1000003, 1);
+    expect(gridApi.refreshInfiniteCache).toHaveBeenCalled();
+  });
+
+  it('saves a range typed in its cell', async () => {
+    // Arrange
+    service.moveGroup.and.returnValue(of([row({ unit_id: 2000003 })]));
+    const component = grid();
+
+    // Act
+    await component.changeGroupRange(row(), { surah: 1, ayah: 2 }, { surah: 1, ayah: 3 });
+
+    // Assert
+    expect(service.moveGroup).toHaveBeenCalledWith(
+      'tafsir',
+      'grouped',
+      7,
+      1000003,
+      { surah: 1, ayah: 2 },
+      { surah: 1, ayah: 3 }
+    );
+  });
+
+  it('adds the next group, then scrolls to it and focuses its text', async () => {
+    // Arrange
+    service.appendGroup.and.returnValue(of([row({ unit_id: 4000004 })]));
+    service.getEntries.and.returnValue(of({ results: [], count: 120 }));
+    const component = grid();
+    const datasource = component.buildDatasource();
+    const blockParams = (startRow: number) => ({
+      startRow,
+      endRow: startRow + 50,
+      filterModel: {},
+      sortModel: [],
+      successCallback: () => void 0,
+      failCallback: () => void 0,
+      context: undefined,
+    });
+
+    // Act
+    await component.appendGroup();
+    datasource.getRows(blockParams(0) as never);
+    await Promise.resolve();
+    await Promise.resolve();
+    datasource.getRows(blockParams(100) as never);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    // Assert
+    expect(service.appendGroup).toHaveBeenCalledWith('tafsir', 'grouped', 7);
+    expect(gridApi.ensureIndexVisible).toHaveBeenCalledWith(119, 'bottom');
+    expect(gridApi.setFocusedCell).toHaveBeenCalledWith(119, 'cell__text');
   });
 });

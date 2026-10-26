@@ -111,6 +111,21 @@ describe('AssetContentService groups', () => {
     req.flush([]);
   });
 
+  it('appends the next group', () => {
+    service.appendGroup('tafsir', 'grouped', 7).subscribe();
+    const req = httpMock.expectOne(`${versionBase}groups/next/`);
+    expect(req.request.method).toBe('POST');
+    req.flush([]);
+  });
+
+  it('grows or shrinks a group by one step', () => {
+    service.extendGroup('tafsir', 'grouped', 7, 2000005, -1).subscribe();
+    const req = httpMock.expectOne(`${versionBase}groups/2000005/extend/`);
+    expect(req.request.method).toBe('POST');
+    expect(req.request.body).toEqual({ by: -1 });
+    req.flush([]);
+  });
+
   it('deletes a group by its unit id', () => {
     service.deleteGroup('tafsir', 'grouped', 7, 2000005).subscribe();
     const req = httpMock.expectOne(`${versionBase}groups/2000005/`);

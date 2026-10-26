@@ -186,6 +186,33 @@ export class AssetContentService {
     );
   }
 
+  /** Add a blank one-ayah (or one-word) group right after the furthest unit the
+   *  draft's groups reach — "add next group" under the grid. */
+  appendGroup(
+    kind: AssetVersionParentKind,
+    slug: string,
+    versionId: number
+  ): Observable<ContentEntry[]> {
+    return this.http.post<ContentEntry[]>(
+      `${this.versionBase(kind, slug, versionId)}groups/next/`,
+      {}
+    );
+  }
+
+  /** Grow (1) or shrink (-1) a draft group's end by one ayah / word. */
+  extendGroup(
+    kind: AssetVersionParentKind,
+    slug: string,
+    versionId: number,
+    unitId: number,
+    by: 1 | -1
+  ): Observable<ContentEntry[]> {
+    return this.http.post<ContentEntry[]>(
+      `${this.versionBase(kind, slug, versionId)}groups/${unitId}/extend/`,
+      { by }
+    );
+  }
+
   /** Delete a draft's group (every column). */
   deleteGroup(
     kind: AssetVersionParentKind,

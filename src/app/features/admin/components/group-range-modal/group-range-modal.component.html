@@ -87,11 +87,6 @@
           ></textarea>
         </label>
       }
-      @if (!hasText()) {
-        <span class="group-range__hint">
-          {{ 'ADMIN.CONTENT_EDITOR.GROUPS.TEXT_REQUIRED' | translate }}
-        </span>
-      }
     }
 
     @if (serverError()) {

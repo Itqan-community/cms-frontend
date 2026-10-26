@@ -56,7 +56,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import { Subject, catchError, debounceTime, forkJoin, of, takeUntil } from 'rxjs';
+import { Subject, catchError, debounceTime, forkJoin, of, takeUntil, type Observable } from 'rxjs';
 import type {
   AssetColumn,
   AssetLanguage,
@@ -94,6 +94,7 @@ import {
   type GroupRangeResult,
 } from '../group-range-modal/group-range-modal.component';
 import { ContentColumnHeaderComponent } from './content-column-header.component';
+import { GroupRangeCellComponent, type GroupRangeCellParams } from './group-range-cell.component';
 import {
   GroupActionsCellComponent,
   type GroupActions,
@@ -362,6 +363,8 @@ export class AssetContentGridComponent implements OnInit {
     end: QuranPosition | null;
   } | null>(null);
   readonly groupBusy = signal(false);
+  /** "Add next group" ran: scroll to and focus the last row once it loads. */
+  private focusLastRow = false;
   readonly groupError = signal<string | null>(null);
   /** Text column titles for the add dialog's text boxes. */
   readonly groupColumnTitles = computed(() =>
@@ -706,6 +709,7 @@ export class AssetContentGridComponent implements OnInit {
                 done();
                 this.entriesTotal.set(response.count);
                 params.successCallback(response.results, response.count);
+                this.revealAppendedGroup(params, response.count);
               },
               error: (err: HttpErrorResponse) => {
                 done();
@@ -1463,6 +1467,77 @@ export class AssetContentGridComponent implements OnInit {
     });
   }
 
+  /** Grow (1) or shrink (-1) a group's end by one ayah / word, from its range cell. */
+  async extendGroupBy(row: ContentEntry, by: 1 | -1): Promise<void> {
+    const versionId = this.draftId();
+    if (versionId === null) return;
+    await this.runGroupChange(
+      this.contentService.extendGroup(this.kind, this.slug, versionId, row.unit_id, by)
+    );
+  }
+
+  /** Save a start / end typed in a group's range cell. */
+  async changeGroupRange(
+    row: ContentEntry,
+    start: QuranPosition,
+    end: QuranPosition
+  ): Promise<void> {
+    const versionId = this.draftId();
+    if (versionId === null) return;
+    await this.runGroupChange(
+      this.contentService.moveGroup(this.kind, this.slug, versionId, row.unit_id, start, end)
+    );
+  }
+
+  /** "Add next group": a blank group right after the furthest one, which the grid
+   *  then scrolls to (it sorts last) with its text cell focused for typing. */
+  async appendGroup(): Promise<void> {
+    const versionId = this.draftId();
+    if (versionId === null) return;
+    const ok = await this.runGroupChange(
+      this.contentService.appendGroup(this.kind, this.slug, versionId)
+    );
+    if (ok) this.focusLastRow = true;
+  }
+
+  /** Save pending edits, run one group change, then refresh; errors show as a
+   *  toast and refresh the rows too (a cell may still show what was typed). */
+  private async runGroupChange(request$: Observable<ContentEntry[]>): Promise<boolean> {
+    if (this.groupBusy()) return false;
+    this.groupBusy.set(true);
+    if (!(await this.flushPending())) {
+      this.groupBusy.set(false);
+      return false;
+    }
+    return new Promise<boolean>((resolve) => {
+      request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: () => {
+          this.groupBusy.set(false);
+          this.afterGroupChange();
+          resolve(true);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.groupBusy.set(false);
+          this.showError(err);
+          this.gridApi?.refreshInfiniteCache();
+          resolve(false);
+        },
+      });
+    });
+  }
+
+  /** After "add next group": bring the last row into view, then focus its first text cell. */
+  private revealAppendedGroup(params: IGetRowsParams, total: number): void {
+    if (!this.focusLastRow || total === 0) return;
+    const last = total - 1;
+    if (last < params.startRow || last >= params.endRow) {
+      this.gridApi?.ensureIndexVisible(last, 'bottom');
+      return;
+    }
+    this.focusLastRow = false;
+    this.gridApi?.setFocusedCell(last, CELL_PREFIX + this.columnKeys()[0]);
+  }
+
   /** Rows were re-keyed or removed: refetch them, recount the changes, and drop
    *  undo history that still names the old row ids. */
   private afterGroupChange(): void {
@@ -1580,9 +1655,10 @@ export class AssetContentGridComponent implements OnInit {
       {
         field: 'label',
         headerName: this.colHeader('UNIT'),
-        width: this.isGroup() ? 170 : 120,
+        width: this.isGroup() ? (this.canEditGroups() ? 290 : 170) : 120,
         editable: false,
-        // A range label reads start → end only left-to-right, also in Arabic.
+        // A range label reads start → end only left-to-right, also in Arabic. The
+        // source's draft edits it in place: typed start / end and grow / shrink.
         ...(this.isGroup()
           ? {
               cellStyle: {
@@ -1590,6 +1666,22 @@ export class AssetContentGridComponent implements OnInit {
                 unicodeBidi: 'isolate',
                 textAlign: this.rtl() ? 'right' : 'left',
               },
+              cellRenderer: GroupRangeCellComponent,
+              cellRendererParams: {
+                words: this.effectiveTemplate() === 'word_group',
+                editable: () => this.canEditGroups(),
+                orphanLabel: this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.ORPHANED'),
+                onRangeChange: (entry: ContentEntry, start: QuranPosition, end: QuranPosition) =>
+                  void this.changeGroupRange(entry, start, end),
+                onExtend: (entry: ContentEntry, by: 1 | -1) => void this.extendGroupBy(entry, by),
+                onInvalid: () =>
+                  this.message.error(
+                    this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.POSITION_INVALID')
+                  ),
+              } satisfies Partial<GroupRangeCellParams>,
+              // Keys typed in the range boxes belong to them, not to grid navigation.
+              suppressKeyboardEvent: (params: SuppressKeyboardEventParams<ContentEntry>) =>
+                (params.event.target as HTMLElement | null)?.tagName === 'INPUT',
             }
           : {}),
         // A translation's text for a range its source dropped: marked, with the reason.
