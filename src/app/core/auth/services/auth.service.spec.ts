@@ -645,6 +645,29 @@ describe('AuthService (app / headless)', () => {
     expect(delUrl).toContain('abc%2Fdef');
   });
 
+  describe('preferred language sync', () => {
+    it('saves the UI language when the profile has a different preferred language', () => {
+      service.applyProfileFromApi({ ...profileApiPayload, preferred_language: 'ar' });
+
+      expect(httpClientMock.put).toHaveBeenCalledOnceWith(
+        jasmine.stringMatching(/\/auth\/profile\/$/),
+        { preferred_language: 'en' }
+      );
+    });
+
+    it('does not save when the preferred language already matches the UI language', () => {
+      service.applyProfileFromApi({ ...profileApiPayload, preferred_language: 'en' });
+
+      expect(httpClientMock.put).not.toHaveBeenCalled();
+    });
+
+    it('does not save when the profile has no preferred language', () => {
+      service.applyProfileFromApi(profileApiPayload);
+
+      expect(httpClientMock.put).not.toHaveBeenCalled();
+    });
+  });
+
   describe('readNextQueryParam()', () => {
     const readNext = (svc: AuthService) =>
       (svc as unknown as { readNextQueryParam(): string }).readNextQueryParam();

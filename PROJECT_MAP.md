@@ -63,7 +63,10 @@ User Browser
 3. Background validate: GET app `/auth/session` (token if present); if not established, GET browser
    `/auth/session` (credentials). Parallel GET `/config`. On success merge GET `/auth/profile/`
    permissions; on profile failure keep cached permissions. The provisional flag stays set until the
-   profile is applied, so guards never wait on it. Invalid session with provisional cache
+   profile is applied, so guards never wait on it. Applying the profile also PUTs
+   `preferred_language` (language of the user's emails) when it differs from the UI language;
+   the lang switch reloads the page, so a switch is saved on the next profile load.
+   Invalid session with provisional cache
    → clear + login + SESSION_EXPIRED when applicable. `storage` event syncs login/logout across tabs.
 4. Public routes never wait; authGuard / portalAccessGuard / permissionGuard wait on authReady.
 5. Login: POST /auth/login -> session_token (+ optional JWTs). Interceptor attaches X-Session-Token
