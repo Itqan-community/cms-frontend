@@ -74,8 +74,7 @@ describe('AssetVersionsManagerComponent', () => {
       'restoreVersion',
     ]);
     modal = jasmine.createSpyObj<NzModalService>('NzModalService', ['confirm']);
-    // Confirm immediately, as if the user clicked OK; the rejection a failed action
-    // returns is the modal's to handle.
+    // Confirm immediately, as if the user clicked OK.
     modal.confirm.and.callFake(((options?: ModalOptions) => {
       const onOk = options?.nzOnOk as (() => Promise<void>) | undefined;
       onOk?.().catch(() => undefined);
@@ -767,6 +766,31 @@ describe('AssetVersionsManagerComponent', () => {
       expect(payload.bump).toBe('major');
       expect(payload.version_number).toBeUndefined();
       expect(payload.name).toBeUndefined();
+    });
+  });
+
+  describe('failed confirm actions', () => {
+    // ng-zorro awaits nzOnOk; a rejection escapes as an unhandled error (Sentry
+    // "Handled unknown error"), so a failure resolves false to keep the dialog open.
+    let onOk: (() => Promise<unknown>) | undefined;
+
+    beforeEach(() => {
+      modal.confirm.and.callFake(((options?: ModalOptions) => {
+        onOk = options?.nzOnOk as () => Promise<unknown>;
+        return {};
+      }) as unknown as NzModalService['confirm']);
+      fixture.detectChanges();
+    });
+
+    it('keeps the delete dialog open without rejecting when the delete fails', async () => {
+      versionsService.delete.and.returnValue(
+        throwError(() => new HttpErrorResponse({ status: 400 }))
+      );
+
+      component.deleteRow({ id: 143, name: '1.0' } as AssetVersion);
+
+      await expectAsync(onOk!()).toBeResolvedTo(false);
+      expect(message.error).toHaveBeenCalled();
     });
   });
 
