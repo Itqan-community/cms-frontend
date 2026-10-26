@@ -97,7 +97,6 @@ import { ContentColumnHeaderComponent } from './content-column-header.component'
 import { GroupRangeCellComponent, type GroupRangeCellParams } from './group-range-cell.component';
 import {
   GroupActionsCellComponent,
-  type GroupActions,
   type GroupActionsCellParams,
 } from './group-actions-cell.component';
 import {
@@ -357,13 +356,8 @@ export class AssetContentGridComponent implements OnInit {
   readonly canEditGroups = computed(
     () => this.isGroup() && this.isEditingSource() && !this.readOnly()
   );
-  /** The open add / change-range dialog; `unitId` is the group being moved. */
-  readonly groupModal = signal<{
-    mode: 'add' | 'move';
-    unitId: number | null;
-    start: QuranPosition | null;
-    end: QuranPosition | null;
-  } | null>(null);
+  /** The add-group dialog is open. */
+  readonly addGroupOpen = signal(false);
   readonly groupBusy = signal(false);
   /** "Add next group" ran: scroll to and focus the last row once it loads. */
   private focusLastRow = false;
@@ -1375,77 +1369,50 @@ export class AssetContentGridComponent implements OnInit {
       });
   }
 
-  /** What a group row may do: the source changes ranges; a translation may only
-   *  delete an orphaned row (text for a range its source no longer has). */
-  groupActionsFor(row: ContentEntry): GroupActions {
-    if (!this.isGroup() || this.readOnly()) return { move: false, remove: false };
-    if (this.isEditingSource()) return { move: true, remove: true };
-    return { move: false, remove: !!row.orphaned };
+  /** Whether a group row may be deleted: any row on the source; on a translation
+   *  only an orphaned one (text for a range its source no longer has). */
+  canDeleteGroup(row: ContentEntry): boolean {
+    if (!this.isGroup() || this.readOnly()) return false;
+    return this.isEditingSource() || !!row.orphaned;
   }
 
   openAddGroup(): void {
     this.groupError.set(null);
-    this.groupModal.set({ mode: 'add', unitId: null, start: null, end: null });
-  }
-
-  openMoveGroup(row: ContentEntry): void {
-    this.groupError.set(null);
-    this.groupModal.set({
-      mode: 'move',
-      unitId: row.unit_id,
-      start: row.group_from ?? null,
-      end: row.group_to ?? null,
-    });
+    this.addGroupOpen.set(true);
   }
 
   closeGroupModal(): void {
-    this.groupModal.set(null);
+    this.addGroupOpen.set(false);
     this.groupError.set(null);
   }
 
-  /** Save pending edits, then add or move the group; a failure keeps the dialog open. */
+  /** Save pending edits, then add the group; a failure keeps the dialog open. */
   async confirmGroup(result: GroupRangeResult): Promise<void> {
-    const state = this.groupModal();
     const versionId = this.draftId();
-    if (!state || versionId === null) return;
+    if (!this.addGroupOpen() || versionId === null) return;
     this.groupBusy.set(true);
     this.groupError.set(null);
     if (!(await this.flushPending())) {
       this.groupBusy.set(false);
       return;
     }
-    const request$ =
-      state.mode === 'add'
-        ? this.contentService.addGroup(
-            this.kind,
-            this.slug,
-            versionId,
-            result.start,
-            result.end,
-            result.cells
-          )
-        : this.contentService.moveGroup(
-            this.kind,
-            this.slug,
-            versionId,
-            state.unitId!,
-            result.start,
-            result.end
-          );
     await new Promise<void>((resolve) => {
-      request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-        next: () => {
-          this.groupBusy.set(false);
-          this.groupModal.set(null);
-          this.afterGroupChange();
-          resolve();
-        },
-        error: (err: HttpErrorResponse) => {
-          this.groupBusy.set(false);
-          this.groupError.set(this.errorText(err));
-          resolve();
-        },
-      });
+      this.contentService
+        .addGroup(this.kind, this.slug, versionId, result.start, result.end, result.cells)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.groupBusy.set(false);
+            this.addGroupOpen.set(false);
+            this.afterGroupChange();
+            resolve();
+          },
+          error: (err: HttpErrorResponse) => {
+            this.groupBusy.set(false);
+            this.groupError.set(this.errorText(err));
+            resolve();
+          },
+        });
     });
   }
 
@@ -1842,13 +1809,12 @@ export class AssetContentGridComponent implements OnInit {
       columns.push({
         colId: 'group_actions',
         headerName: this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.ACTIONS'),
-        width: 110,
+        width: 90,
         pinned: this.rtl() ? 'left' : 'right',
         editable: false,
         cellRenderer: GroupActionsCellComponent,
         cellRendererParams: {
-          actionsFor: (entry: ContentEntry) => this.groupActionsFor(entry),
-          onMove: (entry: ContentEntry) => this.openMoveGroup(entry),
+          canDelete: (entry: ContentEntry) => this.canDeleteGroup(entry),
           onDelete: (entry: ContentEntry) => this.confirmDeleteGroup(entry),
         } satisfies Partial<GroupActionsCellParams>,
       });

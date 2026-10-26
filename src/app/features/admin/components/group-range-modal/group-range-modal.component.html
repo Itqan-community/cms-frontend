@@ -1,11 +1,6 @@
 <nz-modal
   [nzVisible]="visible()"
-  [nzTitle]="
-    (mode() === 'add'
-      ? 'ADMIN.CONTENT_EDITOR.GROUPS.ADD_TITLE'
-      : 'ADMIN.CONTENT_EDITOR.GROUPS.MOVE_TITLE'
-    ) | translate
-  "
+  [nzTitle]="'ADMIN.CONTENT_EDITOR.GROUPS.ADD_TITLE' | translate"
   [nzFooter]="footer"
   nzWidth="min(720px, calc(100vw - 32px))"
   (nzOnCancel)="cancel()"
@@ -75,18 +70,16 @@
       }
     </div>
 
-    @if (mode() === 'add') {
-      @for (key of columnKeys(); track key) {
-        <label class="group-range__text">
-          <span>{{ columnTitles()[key] || key }}</span>
-          <textarea
-            nz-input
-            rows="3"
-            [ngModel]="texts()[key] || ''"
-            (ngModelChange)="setText(key, $event)"
-          ></textarea>
-        </label>
-      }
+    @for (key of columnKeys(); track key) {
+      <label class="group-range__text">
+        <span>{{ columnTitles()[key] || key }}</span>
+        <textarea
+          nz-input
+          rows="3"
+          [ngModel]="texts()[key] || ''"
+          (ngModelChange)="setText(key, $event)"
+        ></textarea>
+      </label>
     }
 
     @if (serverError()) {

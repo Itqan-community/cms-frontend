@@ -216,13 +216,9 @@
   </nz-spin>
 
   @if (isGroup()) {
-    @let group = groupModal();
     <app-group-range-modal
-      [visible]="group !== null"
+      [visible]="addGroupOpen()"
       [template]="effectiveTemplate()!"
-      [mode]="group?.mode ?? 'add'"
-      [initialStart]="group?.start ?? null"
-      [initialEnd]="group?.end ?? null"
       [columnKeys]="columnKeys()"
       [columnTitles]="groupColumnTitles()"
       [busy]="groupBusy()"

@@ -7,20 +7,13 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import type { ContentEntry } from '../../models/asset-content.models';
 
-/** What a group row may do: change its range, delete it. */
-export interface GroupActions {
-  move: boolean;
-  remove: boolean;
-}
-
 /** What the grid passes to a group row's actions cell. */
 export interface GroupActionsCellParams extends ICellRendererParams<ContentEntry> {
-  actionsFor: (row: ContentEntry) => GroupActions;
-  onMove: (row: ContentEntry) => void;
+  canDelete: (row: ContentEntry) => boolean;
   onDelete: (row: ContentEntry) => void;
 }
 
-/** Change-range and delete buttons of a group row (group templates only). */
+/** A group row's delete button (group templates only); ranges are edited in their own cell. */
 @Component({
   selector: 'app-group-actions-cell',
   standalone: true,
@@ -29,22 +22,7 @@ export interface GroupActionsCellParams extends ICellRendererParams<ContentEntry
   template: `
     @let p = params();
     @if (p && p.data; as row) {
-      @let actions = p.actionsFor(row);
-      @if (actions.move) {
-        <button
-          nz-button
-          nzType="text"
-          nzSize="small"
-          type="button"
-          nz-tooltip
-          [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.GROUPS.MOVE' | translate"
-          [attr.aria-label]="'ADMIN.CONTENT_EDITOR.GROUPS.MOVE' | translate"
-          (click)="p.onMove(row)"
-        >
-          <ng-icon name="lucideSquarePen" />
-        </button>
-      }
-      @if (actions.remove) {
+      @if (p.canDelete(row)) {
         <button
           nz-button
           nzType="text"
@@ -59,14 +37,6 @@ export interface GroupActionsCellParams extends ICellRendererParams<ContentEntry
           <ng-icon name="lucideTrash2" />
         </button>
       }
-    }
-  `,
-  // Side by side: stacked, the second button falls below the row and is cut off.
-  styles: `
-    :host {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
     }
   `,
 })

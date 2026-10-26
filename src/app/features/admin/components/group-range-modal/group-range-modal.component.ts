@@ -37,7 +37,7 @@ function comparePositions(a: QuranPosition, b: QuranPosition): number {
   return a.surah - b.surah || a.ayah - b.ayah || (a.word ?? 0) - (b.word ?? 0);
 }
 
-/** What a confirmed dialog hands back: the range, and in add mode the first text per column. */
+/** What a confirmed dialog hands back: the range and the first text per column. */
 export interface GroupRangeResult {
   start: QuranPosition;
   end: QuranPosition;
@@ -47,9 +47,9 @@ export interface GroupRangeResult {
 type PreviewResult = { response: QuranRangeResponse | null } | { error: string };
 
 /**
- * Pick a group's range — from/to ayah, or from/to word for a word group — and
- * see the mushaf text it covers while picking. In add mode it also takes the
- * group's first text, optional: a group left blank is dropped when committed.
+ * Pick a new group's range — from/to ayah, or from/to word for a word group —
+ * and see the mushaf text it covers while picking. It also takes the group's
+ * first text, optional: a group left blank is dropped when committed.
  */
 @Component({
   selector: 'app-group-range-modal',
@@ -70,10 +70,7 @@ type PreviewResult = { response: QuranRangeResponse | null } | { error: string }
 export class GroupRangeModalComponent {
   readonly visible = input(false);
   readonly template = input.required<AssetTemplate>();
-  readonly mode = input<'add' | 'move'>('add');
-  readonly initialStart = input<QuranPosition | null>(null);
-  readonly initialEnd = input<QuranPosition | null>(null);
-  /** Add mode: one text box per column key. */
+  /** One text box per column key. */
   readonly columnKeys = input<string[]>([]);
   readonly columnTitles = input<Record<string, string>>({});
   readonly busy = input(false);
@@ -184,10 +181,9 @@ export class GroupRangeModalComponent {
 
   confirm(): void {
     if (!this.canConfirm()) return;
-    const cells =
-      this.mode() === 'add'
-        ? Object.fromEntries(Object.entries(this.texts()).filter(([, text]) => text.trim()))
-        : {};
+    const cells = Object.fromEntries(
+      Object.entries(this.texts()).filter(([, text]) => text.trim())
+    );
     this.confirmed.emit({ start: this.start(), end: this.end(), cells });
   }
 
@@ -196,8 +192,8 @@ export class GroupRangeModalComponent {
   }
 
   private reset(): void {
-    this.start.set(this.normalize(this.initialStart() ?? { surah: 1, ayah: 1 }));
-    this.end.set(this.normalize(this.initialEnd() ?? this.initialStart() ?? { surah: 1, ayah: 1 }));
+    this.start.set(this.normalize({ surah: 1, ayah: 1 }));
+    this.end.set(this.normalize({ surah: 1, ayah: 1 }));
     this.texts.set({});
     this.preview.set(null);
     this.previewError.set(null);

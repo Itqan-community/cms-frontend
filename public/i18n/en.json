@@ -1078,7 +1078,6 @@
       "FILTER_ACTIVE": "Filtered",
       "GROUPS": {
         "ADD": "Add group",
-        "MOVE": "Change range",
         "DELETE": "Delete group",
         "DELETE_CONFIRM_TITLE": "Delete this group?",
         "DELETE_CONFIRM_BODY": "Its text in every column is removed from this draft.",
@@ -1093,7 +1092,6 @@
         "ORPHANED": "Not in source",
         "ORPHANED_HINT": "The source language no longer has this range. Move this text to the new range, then delete this row.",
         "ADD_TITLE": "Add a group",
-        "MOVE_TITLE": "Change the group's range",
         "ACTIONS": "Actions",
         "CONFIRM": "Save",
         "CANCEL": "Cancel",

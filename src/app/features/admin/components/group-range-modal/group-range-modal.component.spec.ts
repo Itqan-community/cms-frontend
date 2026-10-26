@@ -18,13 +18,9 @@ const AYAHS: QuranRangeResponse = {
 describe('GroupRangeModalComponent', () => {
   let service: jasmine.SpyObj<AssetContentService>;
 
-  function create(
-    template: 'ayah_group' | 'word_group' = 'ayah_group',
-    mode: 'add' | 'move' = 'add'
-  ) {
+  function create(template: 'ayah_group' | 'word_group' = 'ayah_group') {
     const fixture = TestBed.createComponent(GroupRangeModalComponent);
     fixture.componentRef.setInput('template', template);
-    fixture.componentRef.setInput('mode', mode);
     fixture.componentRef.setInput('columnKeys', ['text']);
     fixture.componentRef.setInput('visible', true);
     fixture.detectChanges();
@@ -136,28 +132,6 @@ describe('GroupRangeModalComponent', () => {
     expect(modal.canConfirm()).toBeTrue();
     expect(emitted).toEqual([
       { start: { surah: 1, ayah: 1 }, end: { surah: 1, ayah: 1 }, cells: {} },
-    ]);
-  }));
-
-  it('emits start, end and empty cells when confirmed in move mode', fakeAsync(() => {
-    // Arrange
-    const { fixture, modal } = create('ayah_group', 'move');
-    fixture.componentRef.setInput('initialStart', { surah: 1, ayah: 1 });
-    fixture.componentRef.setInput('initialEnd', { surah: 1, ayah: 2 });
-    fixture.componentRef.setInput('visible', false);
-    fixture.detectChanges();
-    fixture.componentRef.setInput('visible', true);
-    fixture.detectChanges();
-    tick(300);
-    const emitted: unknown[] = [];
-    modal.confirmed.subscribe((value) => emitted.push(value));
-
-    // Act
-    modal.confirm();
-
-    // Assert
-    expect(emitted).toEqual([
-      { start: { surah: 1, ayah: 1 }, end: { surah: 1, ayah: 2 }, cells: {} },
     ]);
   }));
 

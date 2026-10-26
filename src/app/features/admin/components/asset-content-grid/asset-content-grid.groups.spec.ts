@@ -175,13 +175,10 @@ describe('AssetContentGridComponent groups', () => {
 
     // Assert
     expect(component.canEditGroups()).toBeFalse();
-    expect(component.groupActionsFor(row())).toEqual({ move: false, remove: false });
-    expect(component.groupActionsFor(row({ orphaned: true }))).toEqual({
-      move: false,
-      remove: true,
-    });
+    expect(component.canDeleteGroup(row())).toBeFalse();
+    expect(component.canDeleteGroup(row({ orphaned: true }))).toBeTrue();
     component.selectedLanguage.set('ar');
-    expect(component.groupActionsFor(row())).toEqual({ move: true, remove: true });
+    expect(component.canDeleteGroup(row())).toBeTrue();
   });
 
   it("opens an orphaned row's text read-only", () => {
@@ -221,7 +218,7 @@ describe('AssetContentGridComponent groups', () => {
       { text: 't' }
     );
     expect(gridApi.refreshInfiniteCache).toHaveBeenCalled();
-    expect(component.groupModal()).toBeNull();
+    expect(component.addGroupOpen()).toBeFalse();
   });
 
   it('keeps the dialog open with the error when the range already exists', async () => {
@@ -242,34 +239,9 @@ describe('AssetContentGridComponent groups', () => {
     });
 
     // Assert
-    expect(component.groupModal()).not.toBeNull();
+    expect(component.addGroupOpen()).toBeTrue();
     expect(component.groupError()).toBe('Range exists');
     expect(gridApi.refreshInfiniteCache).not.toHaveBeenCalled();
-  });
-
-  it("moves the row's group by its unit id", async () => {
-    // Arrange
-    service.moveGroup.and.returnValue(of([row({ unit_id: 2000003 })]));
-    const component = grid();
-    component.openMoveGroup(row());
-
-    // Act
-    await component.confirmGroup({
-      start: { surah: 1, ayah: 2 },
-      end: { surah: 1, ayah: 3 },
-      cells: {},
-    });
-
-    // Assert
-    expect(service.moveGroup).toHaveBeenCalledWith(
-      'tafsir',
-      'grouped',
-      7,
-      1000003,
-      { surah: 1, ayah: 2 },
-      { surah: 1, ayah: 3 }
-    );
-    expect(gridApi.refreshInfiniteCache).toHaveBeenCalled();
   });
 
   it('deletes a group once confirmed', async () => {
