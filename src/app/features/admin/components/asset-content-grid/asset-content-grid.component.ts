@@ -20,6 +20,8 @@ import type {
   ColDef,
   GetRowIdParams,
   GridReadyEvent,
+  IsFullWidthRowParams,
+  BodyScrollEvent,
   GridApi,
   IDatasource,
   IGetRowsParams,
@@ -38,6 +40,7 @@ import {
   LocaleModule,
   ModuleRegistry,
   NumberFilterModule,
+  PinnedRowModule,
   RenderApiModule,
   RowApiModule,
   RowSelectionModule,
@@ -124,6 +127,8 @@ export const GRID_MODULES = [
   RowSelectionModule,
   // `rowClassRules` (orphaned group rows).
   RowStyleModule,
+  // The blank row under a group grid's rows (`addNextSpacer`).
+  PinnedRowModule,
   CellStyleModule,
   TooltipModule,
   LocaleModule,
@@ -160,8 +165,12 @@ const RTL_LANGUAGE_CODES = new Set(['ar', 'fa', 'ur', 'ps', 'ku', 'he', 'yi', 's
 const AUTOSAVE_DEBOUNCE_MS = 800;
 /** Orphaned groups named in a refused commit's message. */
 const ORPHANS_SHOWN = 10;
-/** Rows a fitted group grid always has room for, so its empty-grid message shows. */
-const MIN_FITTED_ROWS = 3;
+/** Diameter of the floating "Add next group" button, in px. */
+const ADD_NEXT_SIZE = 36;
+/** Space between the last row and the floating "Add next group" button, in px. */
+const ADD_NEXT_GAP = 6;
+/** The pinned blank row under a group grid's rows (see `addNextSpacer`). */
+const ADD_NEXT_SPACER = { unit_id: -1 } as ContentEntry;
 /**
  * Rows per infinite-scroll block. Must equal the `cacheBlockSize` bound in
  * the template: AG Grid always requests blocks aligned to that size, so
@@ -439,15 +448,28 @@ export class AssetContentGridComponent implements OnInit {
   readonly entriesTotal = signal(0);
   /** Row and header heights of the grid's theme, known once the grid is ready. */
   private readonly gridSizes = signal<{ rowHeight: number; headerHeight: number } | null>(null);
-  /** A group grid the source edits shrinks to its rows (up to the usual height), so
-   *  "Add next group" sits right under the last row; other grids keep their height. */
-  readonly fittedTableHeight = computed(() => {
+  /** How far the grid's rows are scrolled. */
+  private readonly scrollTop = signal(0);
+  /** A blank row pinned under the rows, so the floating "Add next group" button
+   *  never covers the last row once the grid is full. */
+  readonly addNextSpacer = computed(() => (this.canEditGroups() ? [ADD_NEXT_SPACER] : undefined));
+  readonly isAddNextSpacer = (params: IsFullWidthRowParams<ContentEntry>): boolean =>
+    params.rowNode.rowPinned === 'bottom';
+  readonly blankRow = (): string => '';
+  /** The floating "Add next group" button's top: just under the last row, and
+   *  never below the pinned blank row at the bottom of the grid. */
+  readonly addNextTop = computed(() => {
     const sizes = this.gridSizes();
     if (!sizes || !this.canEditGroups()) return null;
-    // Header + floating filter row, the rows (room for the empty-grid message), borders and a little slack so no scrollbar shows.
-    const px =
-      2 * sizes.headerHeight + Math.max(this.entriesTotal(), MIN_FITTED_ROWS) * sizes.rowHeight + 4;
-    return `min(70vh, ${px}px)`;
+    const inset = (sizes.rowHeight - ADD_NEXT_SIZE) / 2;
+    // Header + floating filter row, then the rows above the scroll position.
+    const underLastRow =
+      2 * sizes.headerHeight +
+      this.entriesTotal() * sizes.rowHeight -
+      this.scrollTop() +
+      ADD_NEXT_GAP;
+    // The pinned row's top, plus the grid's bottom border.
+    return `min(${underLastRow}px, calc(100% - ${sizes.rowHeight + 1 - inset}px))`;
   });
   readonly canUndo = signal(false);
   readonly canRedo = signal(false);
@@ -579,6 +601,10 @@ export class AssetContentGridComponent implements OnInit {
   onGridReady(event: GridReadyEvent<ContentEntry>): void {
     this.gridApi = event.api;
     this.gridSizes.set(event.api.getSizesForCurrentTheme());
+  }
+
+  onBodyScroll(event: BodyScrollEvent<ContentEntry>): void {
+    if (event.direction === 'vertical') this.scrollTop.set(event.top);
   }
 
   onCellValueChanged(event: CellValueChangedEvent<ContentEntry>): void {

@@ -476,32 +476,58 @@ describe('AssetContentGridComponent groups', () => {
     expect(gridApi.setFocusedCell).toHaveBeenCalledWith(119, 'cell__text');
   });
 
-  it('shrinks the source group grid to its rows so Add next group sits under the last one', () => {
-    // Arrange
-    const component = grid();
-    const sizes = { rowHeight: 34, headerHeight: 40 };
-
-    // Act
-    component.onGridReady({ api: { getSizesForCurrentTheme: () => sizes } } as never);
-    component.entriesTotal.set(11);
-
-    // Assert — header + filter row, 11 rows, borders and slack; capped at the usual height
-    expect(component.fittedTableHeight()).toBe('min(70vh, 458px)');
-    component.entriesTotal.set(0);
-    expect(component.fittedTableHeight()).toBe('min(70vh, 186px)');
-  });
-
-  it('keeps the usual grid height where groups are not edited', () => {
-    // Arrange
+  function readyGrid(): AssetContentGridComponent {
     const component = grid();
     component.onGridReady({
-      api: { getSizesForCurrentTheme: () => ({ rowHeight: 34, headerHeight: 40 }) },
+      api: { getSizesForCurrentTheme: () => ({ rowHeight: 40, headerHeight: 40 }) },
     } as never);
+    return component;
+  }
+
+  it('floats Add next group just under the last row, kept above the pinned blank row', () => {
+    // Arrange
+    const component = readyGrid();
+
+    // Act
+    component.entriesTotal.set(11);
+
+    // Assert — header + filter row (80) + 11 rows (440) + gap (6)
+    expect(component.addNextTop()).toBe('min(526px, calc(100% - 39px))');
+    expect(component.addNextSpacer()?.length).toBe(1);
+  });
+
+  it('moves Add next group up with the rows as they scroll', () => {
+    // Arrange
+    const component = readyGrid();
+    component.entriesTotal.set(11);
+
+    // Act
+    component.onBodyScroll({ direction: 'vertical', top: 200 } as never);
+    component.onBodyScroll({ direction: 'horizontal', left: 50, top: 999 } as never);
+
+    // Assert
+    expect(component.addNextTop()).toBe('min(326px, calc(100% - 39px))');
+  });
+
+  it('pins the blank row as a full-width row and only at the bottom', () => {
+    // Arrange
+    const component = readyGrid();
+
+    // Act / Assert
+    expect(component.isAddNextSpacer({ rowNode: { rowPinned: 'bottom' } } as never)).toBeTrue();
+    expect(component.isAddNextSpacer({ rowNode: { rowPinned: null } } as never)).toBeFalse();
+  });
+
+  it('shows no Add next group or blank row where groups are not edited', () => {
+    // Arrange
+    const component = readyGrid();
+    component.entriesTotal.set(11);
 
     // Act
     component.selectedLanguage.set('en');
 
     // Assert
-    expect(component.fittedTableHeight()).toBeNull();
+    expect(component.addNextTop()).toBeNull();
+    expect(component.addNextSpacer()).toBeUndefined();
   });
 });
