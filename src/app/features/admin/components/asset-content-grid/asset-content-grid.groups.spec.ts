@@ -503,4 +503,33 @@ describe('AssetContentGridComponent groups', () => {
     expect(gridApi.ensureIndexVisible).toHaveBeenCalledWith(119, 'bottom');
     expect(gridApi.setFocusedCell).toHaveBeenCalledWith(119, 'cell__text');
   });
+
+  it('shrinks the source group grid to its rows so Add next group sits under the last one', () => {
+    // Arrange
+    const component = grid();
+    const sizes = { rowHeight: 34, headerHeight: 40 };
+
+    // Act
+    component.onGridReady({ api: { getSizesForCurrentTheme: () => sizes } } as never);
+    component.entriesTotal.set(11);
+
+    // Assert — header + filter row, 11 rows, borders and slack; capped at the usual height
+    expect(component.fittedTableHeight()).toBe('min(70vh, 458px)');
+    component.entriesTotal.set(0);
+    expect(component.fittedTableHeight()).toBe('min(70vh, 186px)');
+  });
+
+  it('keeps the usual grid height where groups are not edited', () => {
+    // Arrange
+    const component = grid();
+    component.onGridReady({
+      api: { getSizesForCurrentTheme: () => ({ rowHeight: 34, headerHeight: 40 }) },
+    } as never);
+
+    // Act
+    component.selectedLanguage.set('en');
+
+    // Assert
+    expect(component.fittedTableHeight()).toBeNull();
+  });
 });

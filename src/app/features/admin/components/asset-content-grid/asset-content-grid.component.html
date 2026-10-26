@@ -178,6 +178,8 @@
     @if (canCreateGrid()) {
       <ag-grid-angular
         class="content-grid__table"
+        [class.content-grid__table--fitted]="fittedTableHeight() !== null"
+        [style.height]="fittedTableHeight()"
         [theme]="theme"
         rowModelType="infinite"
         [readOnlyEdit]="readOnly()"
@@ -199,8 +201,7 @@
       @if (canEditGroups()) {
         <button
           nz-button
-          nzType="dashed"
-          nzBlock
+          nzType="primary"
           type="button"
           class="content-grid__add-next"
           [nzLoading]="groupBusy()"

@@ -231,7 +231,11 @@ describe('AssetContentGridComponent column definitions', () => {
     const row = { unit_id: 5, text: 'published', changed: false };
     const refreshCells = jasmine.createSpy('refreshCells');
     grid.onGridReady({
-      api: { getRowNode: (id: string) => (id === '5' ? { data: row } : undefined), refreshCells },
+      api: {
+        getRowNode: (id: string) => (id === '5' ? { data: row } : undefined),
+        refreshCells,
+        getSizesForCurrentTheme: () => ({ rowHeight: 34, headerHeight: 40 }),
+      },
     } as never);
     grid.draftId.set(7);
     grid.onCellValueChanged({ data: row, oldValue: 'edited', source: 'edit' } as never);

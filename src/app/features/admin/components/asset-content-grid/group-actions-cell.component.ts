@@ -61,6 +61,14 @@ export interface GroupActionsCellParams extends ICellRendererParams<ContentEntry
       }
     }
   `,
+  // Side by side: stacked, the second button falls below the row and is cut off.
+  styles: `
+    :host {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+  `,
 })
 export class GroupActionsCellComponent implements ICellRendererAngularComp {
   readonly params = signal<GroupActionsCellParams | null>(null);

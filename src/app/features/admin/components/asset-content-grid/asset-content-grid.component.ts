@@ -161,6 +161,8 @@ const RTL_LANGUAGE_CODES = new Set(['ar', 'fa', 'ur', 'ps', 'ku', 'he', 'yi', 's
 const AUTOSAVE_DEBOUNCE_MS = 800;
 /** Orphaned groups named in a refused commit's message. */
 const ORPHANS_SHOWN = 10;
+/** Rows a fitted group grid always has room for, so its empty-grid message shows. */
+const MIN_FITTED_ROWS = 3;
 /**
  * Rows per infinite-scroll block. Must equal the `cacheBlockSize` bound in
  * the template: AG Grid always requests blocks aligned to that size, so
@@ -441,6 +443,18 @@ export class AssetContentGridComponent implements OnInit {
   private activePatchError = false;
   readonly selectedCount = signal(0);
   readonly entriesTotal = signal(0);
+  /** Row and header heights of the grid's theme, known once the grid is ready. */
+  private readonly gridSizes = signal<{ rowHeight: number; headerHeight: number } | null>(null);
+  /** A group grid the source edits shrinks to its rows (up to the usual height), so
+   *  "Add next group" sits right under the last row; other grids keep their height. */
+  readonly fittedTableHeight = computed(() => {
+    const sizes = this.gridSizes();
+    if (!sizes || !this.canEditGroups()) return null;
+    // Header + floating filter row, the rows (room for the empty-grid message), borders and a little slack so no scrollbar shows.
+    const px =
+      2 * sizes.headerHeight + Math.max(this.entriesTotal(), MIN_FITTED_ROWS) * sizes.rowHeight + 4;
+    return `min(70vh, ${px}px)`;
+  });
   readonly canUndo = signal(false);
   readonly canRedo = signal(false);
 
@@ -570,6 +584,7 @@ export class AssetContentGridComponent implements OnInit {
 
   onGridReady(event: GridReadyEvent<ContentEntry>): void {
     this.gridApi = event.api;
+    this.gridSizes.set(event.api.getSizesForCurrentTheme());
   }
 
   onCellValueChanged(event: CellValueChangedEvent<ContentEntry>): void {
