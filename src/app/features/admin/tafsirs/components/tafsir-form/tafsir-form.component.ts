@@ -113,6 +113,16 @@ export class TafsirFormComponent implements OnInit {
 
   private editSlug: string | null = null;
 
+  /** Templates a tafsir can be created with; the group ones are tafsir only. */
+  readonly templateOptions: AssetTemplate[] = [
+    'surah',
+    'ayah',
+    'word',
+    'page',
+    'ayah_group',
+    'word_group',
+  ];
+
   readonly layoutsLoading = signal(false);
   readonly layoutsError = signal(false);
 

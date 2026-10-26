@@ -381,16 +381,25 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   has a "Publish now" checkbox (default on, sends `publish`). Without `portal_publish_content` the
   Publish button and checkbox are shown disabled with a permission tooltip.
 - `asset-content-editor/` + `asset-content-grid/` — Per-unit draft editor (surah/ayah/word/page
-  content templates); flush before publish; leave blocked if PATCH fails. **Text columns:** one
-  editable grid column per key of the draft's `column_keys` (colId `cell__<key>`, reading/writing
-  `row.cells[key]`; filters keyed `cell__<key>` / `source__<key>`); unsaved cells are keyed
-  `unit:column` and PATCHed as `{unit_id, column, text}`. Translating, a remembered "Show source"
-  switch inserts each read-only `source__<key>` column before its translation. Users with
-  `portal_manage_asset_columns` + `portal_access_all_languages` get "+ Add column" and a ⚙ in each
-  text column header (`content-column-header.component.ts`, which also marks a filtered column)
-  opening `manage-columns-modal/` (add, optional labels en/ar, reorder, delete uncommitted; a label
-  edit only reloads the headers). Changed cells are highlighted per column (`changed_columns`).
-  After a reorder the commit dialog allows only a major version (`requires_major`, or a
+  content templates, and the tafsir-only `ayah_group` / `word_group` templates); flush before
+  publish; leave blocked if PATCH fails. **Group templates:** each row is a publisher-chosen range
+  (label `2:1 → 2:5`, `group_from` / `group_to`, opaque `unit_id`); no `sura`/`aya` columns. On the
+  source language "Add group" and a per-row actions column (`group-actions-cell.component.ts`:
+  change range, delete) open `group-range-modal/` — from/to surah + ayah (+ word) pickers with a
+  debounced, cancelling live preview of the mushaf text (`GET content/quran-range/`), plus the first
+  text per column (add needs one non-blank) — then `POST/PUT/DELETE …/groups/` and refresh the
+  infinite cache. A translated language lists its source's ranges; only an `orphaned` row (a range
+  the source dropped) can be deleted, its text opens read-only, and a commit refused with
+  `orphaned_groups` lists the groups. **Text columns:** one editable grid column per key of the
+  draft's `column_keys` (colId `cell__<key>`, reading/writing `row.cells[key]`; filters keyed
+  `cell__<key>` / `source__<key>`); unsaved cells are keyed `unit:column` and PATCHed as
+  `{unit_id, column, text}`. Translating, a remembered "Show source" switch inserts each read-only
+  `source__<key>` column before its translation. Users with `portal_manage_asset_columns` +
+  `portal_access_all_languages` get "+ Add column" and a ⚙ in each text column header
+  (`content-column-header.component.ts`, which also marks a filtered column) opening
+  `manage-columns-modal/` (add, optional labels en/ar, reorder, delete uncommitted; a label edit
+  only reloads the headers). Changed cells are highlighted per column (`changed_columns`). After a
+  reorder the commit dialog allows only a major version (`requires_major`, or a
   `major_bump_required` answer). Diffs and review rows name each change's column when the asset has
   several. Column set is driven by `effectiveTemplate()` (the `template` input, else the draft's
   `template`, else a one-row probe's `unit_type` for older backends). The draft is opened alongside
@@ -683,6 +692,7 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
 | Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                                                                      |
 | Usage reports API                       | Pending backend   | Needs cms-backend#557 deployed; until then the dashboards show their error state.                                                                                |
 | Multi-column text assets                | Pending backend   | Editor columns, column management, file structure need the cms-backend multi-column release (`feat/multi-column-text-assets`); remove once deployed.             |
+| Group tafsir templates                  | Pending backend   | `ayah_group` / `word_group` editing, `groups/` and `content/quran-range/` need the cms-backend `feat/group-templates` release; remove once deployed.             |
 | Usage world map                         | Deferred          | Countries show as a ranked bar + table; a world map needs a GeoJSON bundle (spec §10).                                                                           |
 | WebAuthn RP ID                          | Development mode  | `webauthnReplaceRpIdWithHostname` env flag allows RP ID patching in dev.                                                                                         |
 

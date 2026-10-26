@@ -104,6 +104,18 @@
           <ng-icon name="lucideRedo2" />
         </button>
       }
+      @if (canEditGroups()) {
+        <button
+          nz-button
+          nzType="default"
+          type="button"
+          [disabled]="loading() || saving() || publishing() || draftId() === null"
+          (click)="openAddGroup()"
+        >
+          <ng-icon name="lucidePlus" />
+          {{ 'ADMIN.CONTENT_EDITOR.GROUPS.ADD' | translate }}
+        </button>
+      }
       <button
         nz-button
         nzType="default"
@@ -179,12 +191,30 @@
         [enableRtl]="rtl()"
         [stopEditingWhenCellsLoseFocus]="true"
         [rowSelection]="rowSelection"
+        [rowClassRules]="rowClassRules"
         (gridReady)="onGridReady($event)"
         (cellValueChanged)="onCellValueChanged($event)"
         (selectionChanged)="onSelectionChanged()"
       ></ag-grid-angular>
     }
   </nz-spin>
+
+  @if (isGroup()) {
+    @let group = groupModal();
+    <app-group-range-modal
+      [visible]="group !== null"
+      [template]="effectiveTemplate()!"
+      [mode]="group?.mode ?? 'add'"
+      [initialStart]="group?.start ?? null"
+      [initialEnd]="group?.end ?? null"
+      [columnKeys]="columnKeys()"
+      [columnTitles]="groupColumnTitles()"
+      [busy]="groupBusy()"
+      [serverError]="groupError()"
+      (confirmed)="confirmGroup($event)"
+      (cancelled)="closeGroupModal()"
+    ></app-group-range-modal>
+  }
 
   <nz-modal
     [nzVisible]="addLanguageVisible()"

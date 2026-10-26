@@ -41,6 +41,7 @@ import {
   RenderApiModule,
   RowApiModule,
   RowSelectionModule,
+  RowStyleModule,
   TextFilterModule,
   TooltipModule,
   ValidationModule,
@@ -65,7 +66,9 @@ import type {
   ContentDraftVersion,
   ContentEntry,
   ContentEntryPatch,
+  QuranPosition,
 } from '../../models/asset-content.models';
+import { isGroupTemplate } from '../../models/asset-content.models';
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import type { VersionBump } from '../../models/asset-versions.models';
@@ -86,7 +89,16 @@ import {
   ManageColumnsModalComponent,
   type ColumnsChange,
 } from '../manage-columns-modal/manage-columns-modal.component';
+import {
+  GroupRangeModalComponent,
+  type GroupRangeResult,
+} from '../group-range-modal/group-range-modal.component';
 import { ContentColumnHeaderComponent } from './content-column-header.component';
+import {
+  GroupActionsCellComponent,
+  type GroupActions,
+  type GroupActionsCellParams,
+} from './group-actions-cell.component';
 import {
   ContentTextCellEditorComponent,
   type ContentTextEditorParams,
@@ -103,13 +115,15 @@ import {
 // Only the features this grid uses, not `AllCommunityModule`: it keeps the editor's
 // download smaller. Dev builds add `ValidationModule`, which names any module a
 // new grid option or API call needs (AG Grid error #200) instead of failing quietly.
-ModuleRegistry.registerModules([
+export const GRID_MODULES = [
   InfiniteRowModelModule,
   TextFilterModule,
   NumberFilterModule,
   CustomFilterModule,
   CustomEditorModule,
   RowSelectionModule,
+  // `rowClassRules` (orphaned group rows).
+  RowStyleModule,
   CellStyleModule,
   TooltipModule,
   LocaleModule,
@@ -117,7 +131,8 @@ ModuleRegistry.registerModules([
   RenderApiModule,
   ColumnApiModule,
   ...(isDevMode() ? [ValidationModule] : []),
-]);
+];
+ModuleRegistry.registerModules(GRID_MODULES);
 
 /**
  * Stops AG Grid clearing a focused cell on Delete/Backspace for a column that is
@@ -143,6 +158,8 @@ function isCellColumn(colId: string | undefined): colId is string {
 const RTL_LANGUAGE_CODES = new Set(['ar', 'fa', 'ur', 'ps', 'ku', 'he', 'yi', 'sd', 'ug']);
 
 const AUTOSAVE_DEBOUNCE_MS = 800;
+/** Orphaned groups named in a refused commit's message. */
+const ORPHANS_SHOWN = 10;
 /**
  * Rows per infinite-scroll block. Must equal the `cacheBlockSize` bound in
  * the template: AG Grid always requests blocks aligned to that size, so
@@ -198,6 +215,7 @@ function cellChanged(row: ContentEntry | undefined, key: string): boolean {
     NzToolTipModule,
     ManageColumnsModalComponent,
     VersionNumberFieldComponent,
+    GroupRangeModalComponent,
   ],
   templateUrl: './asset-content-grid.component.html',
   styleUrl: './asset-content-grid.component.less',
@@ -330,6 +348,30 @@ export class AssetContentGridComponent implements OnInit {
     const sel = this.selectedLanguage();
     return this.languages().find((l) => l.language === sel)?.is_source ?? true;
   });
+  /** The asset's rows are publisher-chosen ranges (ayah_group / word_group). */
+  readonly isGroup = computed(() => isGroupTemplate(this.effectiveTemplate()));
+  /** Groups are added, moved and deleted in the source language's draft only. */
+  readonly canEditGroups = computed(
+    () => this.isGroup() && this.isEditingSource() && !this.readOnly()
+  );
+  /** The open add / change-range dialog; `unitId` is the group being moved. */
+  readonly groupModal = signal<{
+    mode: 'add' | 'move';
+    unitId: number | null;
+    start: QuranPosition | null;
+    end: QuranPosition | null;
+  } | null>(null);
+  readonly groupBusy = signal(false);
+  readonly groupError = signal<string | null>(null);
+  /** Text column titles for the add dialog's text boxes. */
+  readonly groupColumnTitles = computed(() =>
+    Object.fromEntries(this.columnKeys().map((key) => [key, this.columnTitle(key)]))
+  );
+  /** Orphaned rows (a translation's text for a range its source dropped) are marked. */
+  readonly rowClassRules = {
+    'content-grid__row--orphaned': (params: { data?: ContentEntry }) => !!params.data?.orphaned,
+  };
+
   /** Localized language name for the current UI language (e.g. fr → "الفرنسية"). */
   readonly langName = (code: string): string =>
     localizedLanguageName(code, this.translate.currentLang || 'en');
@@ -734,8 +776,9 @@ export class AssetContentGridComponent implements OnInit {
     let changed = 0;
     rows.forEach((values, r) => {
       const node = api.getDisplayedRowAtIndex(focused.rowIndex + r);
-      // Rows past the loaded blocks have no data yet; paste stops there.
-      if (!node?.data) return;
+      // Rows past the loaded blocks have no data yet; paste stops there. An orphaned
+      // group's text is read-only: the server would refuse the whole batch.
+      if (!node?.data || node.data.orphaned) return;
       values.forEach((value, c) => {
         const colId = keys ? CELL_PREFIX + keys[c] : cellCols[startColIdx + c];
         if (!colId) return;
@@ -1062,6 +1105,13 @@ export class AssetContentGridComponent implements OnInit {
                 void this.dropEditsOfMissingColumns(batch).then(resolve);
                 return;
               }
+              if (err?.error?.error_name === 'group_not_in_source') {
+                // A range the source no longer has (an orphan, or one the source moved
+                // meanwhile): drop those edits so they don't block every later save.
+                this.dropEditsOfOrphanedGroups(batch);
+                resolve();
+                return;
+              }
               // Re-queue the failed batch so nothing is silently lost.
               this.requeue(batch);
               this.showError(err);
@@ -1130,6 +1180,27 @@ export class AssetContentGridComponent implements OnInit {
           },
         });
     });
+  }
+
+  /** Re-queue a refused batch's edits of rows still shown as normal groups, drop the
+   *  rest (orphaned, or no longer loaded) with a warning, and refetch the rows so a
+   *  range the source moved meanwhile shows as orphaned. */
+  private dropEditsOfOrphanedGroups(batch: ContentEntryPatch[]): void {
+    const kept = batch.filter((patch) => {
+      const data = this.gridApi?.getRowNode(String(patch.unit_id))?.data;
+      return !!data && !data.orphaned;
+    });
+    this.requeue(kept);
+    const dropped = batch.length - kept.length;
+    if (dropped > 0) {
+      this.message.warning(
+        this.translate.instant('ADMIN.CONTENT_EDITOR.MESSAGES.GROUP_EDITS_DROPPED', {
+          count: dropped,
+        })
+      );
+    }
+    this.activePatchError = false;
+    this.gridApi?.refreshInfiniteCache();
   }
 
   /** Put a failed batch back in the queue, behind any newer edit of the same cell. */
@@ -1285,9 +1356,138 @@ export class AssetContentGridComponent implements OnInit {
       });
   }
 
+  /** What a group row may do: the source changes ranges; a translation may only
+   *  delete an orphaned row (text for a range its source no longer has). */
+  groupActionsFor(row: ContentEntry): GroupActions {
+    if (!this.isGroup() || this.readOnly()) return { move: false, remove: false };
+    if (this.isEditingSource()) return { move: true, remove: true };
+    return { move: false, remove: !!row.orphaned };
+  }
+
+  openAddGroup(): void {
+    this.groupError.set(null);
+    this.groupModal.set({ mode: 'add', unitId: null, start: null, end: null });
+  }
+
+  openMoveGroup(row: ContentEntry): void {
+    this.groupError.set(null);
+    this.groupModal.set({
+      mode: 'move',
+      unitId: row.unit_id,
+      start: row.group_from ?? null,
+      end: row.group_to ?? null,
+    });
+  }
+
+  closeGroupModal(): void {
+    this.groupModal.set(null);
+    this.groupError.set(null);
+  }
+
+  /** Save pending edits, then add or move the group; a failure keeps the dialog open. */
+  async confirmGroup(result: GroupRangeResult): Promise<void> {
+    const state = this.groupModal();
+    const versionId = this.draftId();
+    if (!state || versionId === null) return;
+    this.groupBusy.set(true);
+    this.groupError.set(null);
+    if (!(await this.flushPending())) {
+      this.groupBusy.set(false);
+      return;
+    }
+    const request$ =
+      state.mode === 'add'
+        ? this.contentService.addGroup(
+            this.kind,
+            this.slug,
+            versionId,
+            result.start,
+            result.end,
+            result.cells
+          )
+        : this.contentService.moveGroup(
+            this.kind,
+            this.slug,
+            versionId,
+            state.unitId!,
+            result.start,
+            result.end
+          );
+    await new Promise<void>((resolve) => {
+      request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: () => {
+          this.groupBusy.set(false);
+          this.groupModal.set(null);
+          this.afterGroupChange();
+          resolve();
+        },
+        error: (err: HttpErrorResponse) => {
+          this.groupBusy.set(false);
+          this.groupError.set(this.errorText(err));
+          resolve();
+        },
+      });
+    });
+  }
+
+  /** Confirm, then delete a group's text in every column of the draft. */
+  confirmDeleteGroup(row: ContentEntry): void {
+    this.modal.confirm({
+      nzTitle: this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.DELETE_CONFIRM_TITLE'),
+      nzContent: this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.DELETE_CONFIRM_BODY'),
+      nzOkText: this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.DELETE'),
+      nzOkDanger: true,
+      nzCancelText: this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.CANCEL'),
+      nzDirection: this.rtl() ? 'rtl' : 'ltr',
+      nzOnOk: () => this.deleteGroup(row),
+    });
+  }
+
+  private async deleteGroup(row: ContentEntry): Promise<void> {
+    const versionId = this.draftId();
+    if (versionId === null || !(await this.flushPending())) return;
+    await new Promise<void>((resolve) => {
+      this.contentService
+        .deleteGroup(this.kind, this.slug, versionId, row.unit_id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.afterGroupChange();
+            resolve();
+          },
+          error: (err: HttpErrorResponse) => {
+            this.showError(err);
+            resolve();
+          },
+        });
+    });
+  }
+
+  /** Rows were re-keyed or removed: refetch them, recount the changes, and drop
+   *  undo history that still names the old row ids. */
+  private afterGroupChange(): void {
+    this.savedOnce.set(true);
+    this.clearHistory();
+    this.gridApi?.refreshInfiniteCache();
+    this.refreshPendingCount();
+  }
+
   /** A commit failed. When the server requires a major version (columns were
    *  reordered meanwhile), switch the dialog to major and explain why there. */
   handleCommitError(err: HttpErrorResponse): void {
+    if (err?.error?.error_name === 'orphaned_groups') {
+      // Each label isolated left-to-right ("2:1 → 2:5" reads backwards in Arabic
+      // otherwise); at most ten, and kept on screen until dismissed.
+      const groups: string[] = err.error?.extra?.groups ?? [];
+      const shown = groups.slice(0, ORPHANS_SHOWN).map((label) => `\u2066${label}\u2069`);
+      const list =
+        shown.join(this.rtl() ? '، ' : ', ') + (groups.length > ORPHANS_SHOWN ? ' …' : '');
+      this.message.error(
+        this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.ORPHANED_GROUPS', { groups: list }),
+        { nzDuration: 0 }
+      );
+      return;
+    }
     if (err?.error?.error_name === 'major_bump_required') {
       this.commitRequiresMajor.set(true);
       this.commitBump.set('major');
@@ -1380,8 +1580,27 @@ export class AssetContentGridComponent implements OnInit {
       {
         field: 'label',
         headerName: this.colHeader('UNIT'),
-        width: 120,
+        width: this.isGroup() ? 170 : 120,
         editable: false,
+        // A range label reads start → end only left-to-right, also in Arabic.
+        ...(this.isGroup()
+          ? {
+              cellStyle: {
+                direction: 'ltr',
+                unicodeBidi: 'isolate',
+                textAlign: this.rtl() ? 'right' : 'left',
+              },
+            }
+          : {}),
+        // A translation's text for a range its source dropped: marked, with the reason.
+        valueFormatter: ({ data, value }) =>
+          data?.orphaned
+            ? `${value} · ${this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.ORPHANED')}`
+            : (value ?? ''),
+        tooltipValueGetter: ({ data }) =>
+          data?.orphaned
+            ? this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.ORPHANED_HINT')
+            : undefined,
         pinned: this.rtl() ? 'right' : 'left',
         ...(template !== 'page'
           ? {
@@ -1490,9 +1709,41 @@ export class AssetContentGridComponent implements OnInit {
           readOnly: this.readOnly(),
           columnKey: key,
         } satisfies ContentTextEditorParams,
+        // An orphaned group's text opens read-only too: it can only be read (and moved by
+        // hand), and Delete / Backspace can't clear it.
+        ...(this.isGroup()
+          ? {
+              suppressKeyboardEvent: (params: SuppressKeyboardEventParams<ContentEntry>) =>
+                !!params.data?.orphaned && suppressClearKeys(params),
+              cellEditorSelector: ({ data }: { data?: ContentEntry }) => ({
+                component: ContentTextCellEditorComponent,
+                params: {
+                  sourceTitle: this.sourceColHeader(),
+                  readOnly: this.readOnly() || !!data?.orphaned,
+                  columnKey: key,
+                } satisfies ContentTextEditorParams,
+              }),
+            }
+          : {}),
         // Yellow when the draft differs from the published version.
         cellClassRules: { 'content-grid__cell--changed': (p) => cellChanged(p.data, key) },
         ...textFilter,
+      });
+    }
+
+    if (this.isGroup() && !this.readOnly()) {
+      columns.push({
+        colId: 'group_actions',
+        headerName: this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.ACTIONS'),
+        width: 110,
+        pinned: this.rtl() ? 'left' : 'right',
+        editable: false,
+        cellRenderer: GroupActionsCellComponent,
+        cellRendererParams: {
+          actionsFor: (entry: ContentEntry) => this.groupActionsFor(entry),
+          onMove: (entry: ContentEntry) => this.openMoveGroup(entry),
+          onDelete: (entry: ContentEntry) => this.confirmDeleteGroup(entry),
+        } satisfies Partial<GroupActionsCellParams>,
       });
     }
 
@@ -1540,12 +1791,16 @@ export class AssetContentGridComponent implements OnInit {
       return;
     }
 
+    this.message.error(this.errorText(err));
+  }
+
+  /** An API error's message in the UI language (the generic one for unknown names). */
+  private errorText(err: HttpErrorResponse): string {
+    const name: string | undefined = err?.error?.error_name;
     const key = name ? `ADMIN.CONTENT_EDITOR.ERRORS.${name.toUpperCase()}` : '';
     const translated = key ? this.translate.instant(key) : '';
-    this.message.error(
-      translated && translated !== key
-        ? translated
-        : this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC')
-    );
+    return translated && translated !== key
+      ? translated
+      : this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC');
   }
 }

@@ -151,6 +151,47 @@ describe('TafsirFormComponent template controls', () => {
     expect(Object.prototype.hasOwnProperty.call(body, 'mushaf_layout_id')).toBe(false);
   });
 
+  it('offers the ayah-group and word-group templates', () => {
+    configure({});
+    const fixture = TestBed.createComponent(TafsirFormComponent);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.templateOptions).toEqual([
+      'surah',
+      'ayah',
+      'word',
+      'page',
+      'ayah_group',
+      'word_group',
+    ]);
+  });
+
+  it('creates a word-group tafsir without a mushaf layout', () => {
+    configure({});
+    tafsirsServiceMock.create.and.returnValue(of(detail));
+    const fixture = TestBed.createComponent(TafsirFormComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.form.patchValue({
+      name_ar: 'اسم التفسير',
+      description_ar: 'وصف',
+      description_en: 'Description',
+      license: Licenses.CC0,
+      language: 'ar',
+      publisher_id: 1,
+      slug: 'tafsir-sample',
+      template: 'word_group',
+    });
+
+    expect(fixture.componentInstance.form.controls.mushaf_layout_id.valid).toBeTrue();
+    fixture.componentInstance.onSubmit();
+
+    expect(tafsirsServiceMock.create).toHaveBeenCalled();
+    const body = tafsirsServiceMock.create.calls.mostRecent().args[0];
+    expect(body.template).toBe('word_group');
+    expect(body.mushaf_layout_id).toBeNull();
+  });
+
   it('includes template and mushaf_layout_id in the create payload', () => {
     configure({});
     tafsirsServiceMock.create.and.returnValue(of(detail));

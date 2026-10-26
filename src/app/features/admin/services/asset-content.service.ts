@@ -12,6 +12,8 @@ import type {
   ContentEntriesResponse,
   ContentEntry,
   ContentEntryPatch,
+  QuranPosition,
+  QuranRangeResponse,
 } from '../models/asset-content.models';
 import type { VersionBump } from '../models/asset-versions.models';
 import type { VersionText } from '../utils/version-text.util';
@@ -151,6 +153,60 @@ export class AssetContentService {
     return this.http.patch<ContentEntry[]>(`${this.versionBase(kind, slug, versionId)}entries/`, {
       rows,
     });
+  }
+
+  /** Add a group (a range with its first text) to a source-language draft. */
+  addGroup(
+    kind: AssetVersionParentKind,
+    slug: string,
+    versionId: number,
+    start: QuranPosition,
+    end: QuranPosition,
+    cells: Record<string, string>
+  ): Observable<ContentEntry[]> {
+    return this.http.post<ContentEntry[]>(`${this.versionBase(kind, slug, versionId)}groups/`, {
+      start,
+      end,
+      cells,
+    });
+  }
+
+  /** Give a draft's group a new range, keeping its text. */
+  moveGroup(
+    kind: AssetVersionParentKind,
+    slug: string,
+    versionId: number,
+    unitId: number,
+    start: QuranPosition,
+    end: QuranPosition
+  ): Observable<ContentEntry[]> {
+    return this.http.put<ContentEntry[]>(
+      `${this.versionBase(kind, slug, versionId)}groups/${unitId}/`,
+      { start, end }
+    );
+  }
+
+  /** Delete a draft's group (every column). */
+  deleteGroup(
+    kind: AssetVersionParentKind,
+    slug: string,
+    versionId: number,
+    unitId: number
+  ): Observable<void> {
+    return this.http.delete<void>(`${this.versionBase(kind, slug, versionId)}groups/${unitId}/`);
+  }
+
+  /** The mushaf text of a range: its ayahs, or its words when both ends name a word. */
+  quranRange(start: QuranPosition, end: QuranPosition): Observable<QuranRangeResponse> {
+    let params = new HttpParams()
+      .set('from_surah', start.surah)
+      .set('from_ayah', start.ayah)
+      .set('to_surah', end.surah)
+      .set('to_ayah', end.ayah);
+    if (start.word != null && end.word != null) {
+      params = params.set('from_word', start.word).set('to_word', end.word);
+    }
+    return this.http.get<QuranRangeResponse>(`${this.base}/content/quran-range/`, { params });
   }
 
   /** Commit the draft: publish it as a new version with a required message. */
