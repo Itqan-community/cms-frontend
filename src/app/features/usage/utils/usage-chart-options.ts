@@ -151,14 +151,20 @@ function median(values: number[]): number {
   return sorted.length % 2 ? sorted[middle] : (sorted[middle - 1] + sorted[middle]) / 2;
 }
 
-/** Indexes whose value is at least 3× the median of the 7 points before it. */
+/** Indexes whose value is at least 3× the median of the (non-null) 7 points before it. */
 export function spikeIndexes(values: (number | null)[]): number[] {
   const spikes: number[] = [];
   values.forEach((value, index) => {
     if (index < SPIKE_WINDOW || value === null) {
       return;
     }
-    const before = values.slice(index - SPIKE_WINDOW, index).map((item) => item ?? 0);
+    // Missing buckets are unknown, not zero: leave them out of the baseline.
+    const before = values
+      .slice(index - SPIKE_WINDOW, index)
+      .filter((item): item is number => item !== null);
+    if (!before.length) {
+      return;
+    }
     const base = median(before);
     if (base > 0 && value >= SPIKE_FACTOR * base) {
       spikes.push(index);

@@ -253,6 +253,12 @@ describe('usage-chart-options', () => {
       expect(spikeIndexes([1, 1, 1])).toEqual([]);
     });
 
+    it('spikeIndexes leaves missing buckets out of the baseline', () => {
+      // Median of 10, 10, 100, 100 is 55: 150 is below 3x and must not be flagged.
+      expect(spikeIndexes([null, null, null, 10, 10, 100, 100, 150])).toEqual([]);
+      expect(spikeIndexes([null, null, null, null, null, null, null, 5])).toEqual([]);
+    });
+
     it('buildTrendOptions marks spikes on an unsplit series only', () => {
       const points = [1, 1, 1, 1, 1, 1, 1, 10].map((value, day) => ({
         t: `2026-10-${String(day + 1).padStart(2, '0')}`,
