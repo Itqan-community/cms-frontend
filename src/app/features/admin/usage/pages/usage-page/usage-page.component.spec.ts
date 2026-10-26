@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { of, Subject } from 'rxjs';
 import { UsageApiService } from '../../../../usage/services/usage-api.service';
@@ -45,12 +45,16 @@ describe('UsagePageComponent', () => {
     }).compileComponents();
   });
 
-  it('publishers see the dashboard and the legacy board only', () => {
+  it('publishers see the dashboard, recitations and the legacy board', () => {
     isItqanAdmin.set(false);
     fixture = TestBed.createComponent(UsagePageComponent);
     fixture.detectChanges();
 
-    expect(tabTitles()).toEqual(['USAGE.TABS.DASHBOARD', 'USAGE.TABS.LEGACY']);
+    expect(tabTitles()).toEqual([
+      'USAGE.TABS.DASHBOARD',
+      'USAGE.TABS.RECITATIONS',
+      'USAGE.TABS.LEGACY',
+    ]);
     expect(fixture.componentInstance.scope()).toBe('publisher');
   });
 
@@ -61,6 +65,7 @@ describe('UsagePageComponent', () => {
 
     expect(tabTitles()).toEqual([
       'USAGE.TABS.DASHBOARD',
+      'USAGE.TABS.RECITATIONS',
       'USAGE.TABS.LEADERBOARD',
       'USAGE.TABS.UNSEEN',
       'USAGE.TABS.LEGACY',
@@ -80,12 +85,31 @@ describe('UsagePageComponent', () => {
     fixture.detectChanges();
     const page = fixture.componentInstance;
 
-    page.onTabChange(3, 3);
+    page.onTabChange(4, 4);
     page.onPublisherChange(5);
     responses[1].next({ board_url: 'https://board/5' });
     responses[0].next({ board_url: 'https://board/all' });
 
     const url = page.boardUrl() as unknown as { changingThisBreaksApplicationSecurity: string };
     expect(url.changingThisBreaksApplicationSecurity).toBe('https://board/5');
+  });
+
+  it('writes a range picked on the Recitations tab to the URL, shared with the Dashboard tab', () => {
+    isItqanAdmin.set(false);
+    fixture = TestBed.createComponent(UsagePageComponent);
+    fixture.detectChanges();
+    const navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+
+    fixture.componentInstance.onRangeChange({
+      preset: 'custom',
+      start_date: '2026-09-01',
+      end_date: '2026-09-30',
+    });
+
+    expect(navigate.calls.mostRecent().args[1]?.queryParams).toEqual({
+      range: 'custom',
+      start: '2026-09-01',
+      end: '2026-09-30',
+    });
   });
 });

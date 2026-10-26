@@ -16,9 +16,21 @@
     }
   </header>
 
-  <nz-tabset (nzSelectedIndexChange)="onTabChange($event, isItqanAdmin() ? 3 : 1)">
+  <nz-tabset (nzSelectedIndexChange)="onTabChange($event, isItqanAdmin() ? 4 : 2)">
     <nz-tab [nzTitle]="'USAGE.TABS.DASHBOARD' | translate">
       <app-usage-dashboard [scope]="scope()" [publisherId]="selectedPublisherId()" />
+    </nz-tab>
+    <nz-tab [nzTitle]="'USAGE.TABS.RECITATIONS' | translate">
+      <ng-template nz-tab>
+        <app-usage-dashboard
+          [scope]="scope()"
+          [publisherId]="selectedPublisherId()"
+          category="recitation"
+          [syncUrl]="false"
+          [sharedRange]="range()"
+          (rangeChange)="onRangeChange($event)"
+        />
+      </ng-template>
     </nz-tab>
     @if (isItqanAdmin()) {
       <nz-tab [nzTitle]="'USAGE.TABS.LEADERBOARD' | translate">
