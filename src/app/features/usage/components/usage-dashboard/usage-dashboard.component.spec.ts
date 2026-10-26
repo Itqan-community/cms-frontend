@@ -155,6 +155,17 @@ describe('UsageDashboardComponent', () => {
     expect(api.timeseries.calls.mostRecent().args[2].metric).toBe('downloads');
   });
 
+  it('keeps the same filters object when only the metric changes', () => {
+    fixture.componentRef.setInput('syncUrl', false);
+    fixture.detectChanges();
+    const before = fixture.componentInstance.filters();
+
+    fixture.componentInstance.setMetric('downloads');
+
+    expect(fixture.componentInstance.filters()).toBe(before);
+    expect(api.timeseries.calls.mostRecent().args[2].metric).toBe('downloads');
+  });
+
   it('keeps state locally when not synced to the URL', () => {
     fixture.componentRef.setInput('syncUrl', false);
     fixture.componentRef.setInput('assetId', 7);

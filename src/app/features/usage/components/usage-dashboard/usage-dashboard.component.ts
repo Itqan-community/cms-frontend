@@ -204,12 +204,20 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
   });
   readonly panelStates = signal<Record<string, Loadable<UsageBreakdown>>>({});
 
-  readonly filters = computed<UsageFilters>(() => ({
-    ...this.state().filters,
-    category: this.assetId() != null ? null : this.activeCategory(),
-    asset_id: this.assetId(),
-    publisher_id: this.scope() === 'admin' ? this.publisherId() : null,
-  }));
+  // Compared by value: metric, split and comparison changes keep the same object, so the
+  // recitation reports bound to it don't reload for them.
+  readonly filters = computed<UsageFilters>(
+    () => ({
+      ...this.state().filters,
+      category: this.assetId() != null ? null : this.activeCategory(),
+      asset_id: this.assetId(),
+      publisher_id: this.scope() === 'admin' ? this.publisherId() : null,
+    }),
+    {
+      equal: (a, b) =>
+        (Object.keys({ ...a, ...b }) as (keyof UsageFilters)[]).every((key) => a[key] === b[key]),
+    }
+  );
   readonly granularity = computed(() =>
     granularityFor(this.state().filters.start_date, this.state().filters.end_date)
   );
