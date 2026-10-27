@@ -1,0 +1,20 @@
+@import '../recitation-reports.less';
+
+.recitation-catalog {
+  display: grid;
+  // Two columns: the half-width cards come in pairs; full-width ones span both.
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  @media (max-width: 900px) {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  gap: 16px;
+
+  &__wide {
+    grid-column: 1 / -1;
+  }
+
+  .recitation-card__hint {
+    margin-bottom: 8px;
+  }
+}

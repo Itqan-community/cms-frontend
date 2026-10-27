@@ -16,7 +16,7 @@
       ></nz-range-picker>
     }
 
-    @if (profile().showCategoryFilter) {
+    @if (profile().showCategoryFilter && !category()) {
       <nz-select
         class="usage-dashboard__select"
         nzSize="small"
@@ -27,6 +27,35 @@
       >
         @for (category of categories; track category) {
           <nz-option [nzValue]="category" [nzLabel]="'USAGE.CATEGORIES.' + category | translate" />
+        }
+      </nz-select>
+    }
+
+    @if (profile().showReciterFilters) {
+      <nz-select
+        class="usage-dashboard__select"
+        nzSize="small"
+        nzAllowClear
+        nzShowSearch
+        [nzPlaceHolder]="'USAGE.RECITATION.ALL_RECITERS' | translate"
+        [ngModel]="state().filters.reciter_id ?? null"
+        (ngModelChange)="setFilter('reciter_id', $event)"
+      >
+        @for (reciter of reciterOptions(); track reciter.id) {
+          <nz-option [nzValue]="reciter.id" [nzLabel]="reciter.name" />
+        }
+      </nz-select>
+      <nz-select
+        class="usage-dashboard__select"
+        nzSize="small"
+        nzAllowClear
+        nzShowSearch
+        [nzPlaceHolder]="'USAGE.RECITATION.ALL_RIWAYAHS' | translate"
+        [ngModel]="state().filters.riwayah_id ?? null"
+        (ngModelChange)="setFilter('riwayah_id', $event)"
+      >
+        @for (riwayah of riwayahOptions(); track riwayah.id) {
+          <nz-option [nzValue]="riwayah.id" [nzLabel]="riwayah.name" />
         }
       </nz-select>
     }
@@ -129,6 +158,27 @@
         <nz-option [nzValue]="split" [nzLabel]="'USAGE.SPLIT_BY.' + split | translate" />
       }
     </nz-select>
+    @if (!state().split) {
+      <nz-select
+        class="usage-dashboard__select"
+        nzSize="small"
+        [nzPlaceHolder]="'USAGE.COMPARE.LABEL' | translate"
+        [ngModel]="state().compare"
+        (ngModelChange)="setCompare($event)"
+      >
+        @for (option of compareOptions(); track option.value) {
+          <nz-option [nzValue]="option.value" [nzLabel]="option.label" />
+        }
+      </nz-select>
+    }
+    @if (profile().recitation) {
+      <nz-segmented
+        nzSize="small"
+        [nzOptions]="calendarOptions()"
+        [ngModel]="hijri() ? 'hijri' : 'gregorian'"
+        (ngModelChange)="hijri.set($event === 'hijri')"
+      ></nz-segmented>
+    }
   </div>
 
   <app-usage-chart
@@ -157,6 +207,18 @@
       />
     }
   </div>
+
+  @if (profile().recitation && portalScope(); as portal) {
+    <app-recitation-insights
+      [scope]="portal"
+      [filters]="filters()"
+      [summary]="summary().data"
+      [hijri]="hijri()"
+    />
+    @if (assetId() === null) {
+      <app-recitation-catalog [scope]="portal" [filters]="filters()" />
+    }
+  }
 
   <footer class="usage-dashboard__footer">
     @if (updatedAt(); as updated) {

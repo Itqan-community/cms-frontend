@@ -103,4 +103,36 @@ describe('UsageApiService', () => {
       );
     expect(result).toBeNull();
   });
+
+  it('recitation reports call the scope endpoints with their parameters', () => {
+    const base = `${environment.ADMIN_API_BASE_URL}/usage`;
+    service.listeners('publisher', { ...range, reciter_id: 3 }, 'week').subscribe();
+    service.cohorts('publisher', range).subscribe();
+    service.firstSeen('publisher', range, 'app').subscribe();
+    service.searchTerms('publisher', { ...range }, true).subscribe();
+    service
+      .recitationCoverage('admin', { publisher_id: 2, incomplete_only: true, reciter_id: null })
+      .subscribe();
+
+    const listeners = http.expectOne((r) => r.url === `${base}/listeners/`);
+    expect(listeners.request.params.get('granularity')).toBe('week');
+    expect(listeners.request.params.get('reciter_id')).toBe('3');
+    http.expectOne((r) => r.url === `${base}/cohorts/`).flush({});
+    const firstSeen = http.expectOne((r) => r.url === `${base}/first-seen/`);
+    expect(firstSeen.request.params.get('by')).toBe('app');
+    const searches = http.expectOne((r) => r.url === `${base}/search-terms/`);
+    expect(searches.request.params.get('zero_results')).toBe('true');
+    expect(searches.request.params.keys().sort()).toEqual([
+      'end_date',
+      'limit',
+      'start_date',
+      'zero_results',
+    ]);
+    const coverage = http.expectOne(
+      (r) => r.url === `${environment.ADMIN_API_BASE_URL}/admin/usage/recitation-coverage/`
+    );
+    expect(coverage.request.params.get('publisher_id')).toBe('2');
+    expect(coverage.request.params.has('reciter_id')).toBeFalse();
+    [listeners, firstSeen, searches, coverage].forEach((req) => req.flush({}));
+  });
 });

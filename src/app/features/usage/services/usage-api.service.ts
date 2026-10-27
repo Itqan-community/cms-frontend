@@ -4,16 +4,25 @@ import { Observable, catchError, of, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 import {
   BreakdownOptions,
+  CoverageOptions,
   PublicUsageCounts,
   TimeseriesOptions,
   UsageBreakdown,
+  UsageCohorts,
   UsageFilters,
+  UsageFirstSeen,
   UsageGranularity,
+  UsageListeners,
   UsageReconciliation,
+  UsageRecitationCoverage,
   UsageScope,
+  UsageSearchTerms,
   UsageSummary,
   UsageTimeseries,
 } from '../models/usage.models';
+
+/** Recitation reports exist for the publisher and admin scopes only. */
+type PortalScope = Exclude<UsageScope, 'developer'>;
 
 type ParamValue = string | number | boolean | null | undefined;
 
@@ -94,6 +103,59 @@ export class UsageApiService {
     return this.http.get(`${SCOPE_BASES[scope]()}/export/`, {
       params: toParams({ ...filters }, { granularity }),
       responseType: 'blob',
+    });
+  }
+
+  /** New, returning and cumulative listeners (within event retention). */
+  listeners(
+    scope: PortalScope,
+    filters: UsageFilters,
+    granularity: Exclude<UsageGranularity, 'hour'>
+  ): Observable<UsageListeners> {
+    return this.http.get<UsageListeners>(`${SCOPE_BASES[scope]()}/listeners/`, {
+      params: toParams({ ...filters }, { granularity }),
+    });
+  }
+
+  /** Weekly listener cohorts (ranges up to 182 days). */
+  cohorts(scope: PortalScope, filters: UsageFilters): Observable<UsageCohorts> {
+    return this.http.get<UsageCohorts>(`${SCOPE_BASES[scope]()}/cohorts/`, {
+      params: toParams({ ...filters }),
+    });
+  }
+
+  /** When each country or app first played the content, newest first. */
+  firstSeen(
+    scope: PortalScope,
+    filters: UsageFilters,
+    by: 'country' | 'app',
+    limit = 20
+  ): Observable<UsageFirstSeen> {
+    return this.http.get<UsageFirstSeen>(`${SCOPE_BASES[scope]()}/first-seen/`, {
+      params: toParams({ ...filters }, { by, limit }),
+    });
+  }
+
+  /** Gallery search terms of every visitor (only the dates apply). */
+  searchTerms(
+    scope: PortalScope,
+    filters: Pick<UsageFilters, 'start_date' | 'end_date'>,
+    zeroResults: boolean,
+    limit = 20
+  ): Observable<UsageSearchTerms> {
+    const { start_date, end_date } = filters;
+    return this.http.get<UsageSearchTerms>(`${SCOPE_BASES[scope]()}/search-terms/`, {
+      params: toParams({ start_date, end_date, zero_results: zeroResults, limit }),
+    });
+  }
+
+  /** Recitations missing surahs; admin requests can be limited to one publisher. */
+  recitationCoverage(
+    scope: PortalScope,
+    options: CoverageOptions & { publisher_id?: number | null }
+  ): Observable<UsageRecitationCoverage> {
+    return this.http.get<UsageRecitationCoverage>(`${SCOPE_BASES[scope]()}/recitation-coverage/`, {
+      params: toParams({ ...options }),
     });
   }
 

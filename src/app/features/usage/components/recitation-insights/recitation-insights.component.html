@@ -1,0 +1,145 @@
+<div class="recitation-insights">
+  @if (coverageText(); as coverage) {
+    <div class="recitation-insights__coverage">
+      <span class="recitation-tag">{{ coverage.surahs }}</span>
+      @if (coverage.timed) {
+        <span class="recitation-tag">{{ coverage.timed }}</span>
+      }
+      @if (coverage.missing) {
+        <span class="recitation-card__hint">{{ coverage.missing }}</span>
+      }
+    </div>
+  }
+
+  <app-usage-chart
+    class="recitation-insights__wide"
+    [title]="'USAGE.RECITATION.LISTENERS_TITLE' | translate"
+    [hint]="'USAGE.RECITATION.LISTENERS_HINT' | translate"
+    [options]="listenersOptions()"
+    [rows]="listenersRows()"
+    [loading]="listeners().loading"
+    [error]="listeners().error"
+    [empty]="!listeners().loading && !listeners().error && listenersEmpty()"
+    [height]="300"
+    (retry)="load()"
+  />
+  @if (clampedStart(); as start) {
+    <p class="recitation-card__hint recitation-insights__wide">
+      {{ 'USAGE.RECITATION.CLAMPED' | translate: { date: start } }}
+    </p>
+  }
+
+  <section class="recitation-card recitation-insights__wide">
+    <header class="recitation-card__header">
+      <h3 class="recitation-card__title">{{ 'USAGE.RECITATION.COHORTS_TITLE' | translate }}</h3>
+      <p class="recitation-card__hint">{{ 'USAGE.RECITATION.COHORTS_HINT' | translate }}</p>
+    </header>
+    @if (!cohortsAllowed()) {
+      <p class="recitation-card__empty">{{ 'USAGE.RECITATION.COHORTS_RANGE' | translate }}</p>
+    } @else if (cohorts().loading) {
+      <p class="recitation-card__empty">…</p>
+    } @else if (cohorts().error) {
+      <p class="recitation-card__error" role="alert">{{ 'USAGE.LOAD_ERROR' | translate }}</p>
+    } @else if (!cohortRows().length) {
+      <p class="recitation-card__empty">{{ 'USAGE.NO_DATA' | translate }}</p>
+    } @else {
+      <div class="recitation-insights__scroll">
+        <table class="recitation-table recitation-insights__cohorts">
+          <thead>
+            <tr>
+              <th scope="col">{{ 'USAGE.RECITATION.COHORT_WEEK' | translate }}</th>
+              <th scope="col" class="recitation-table__num">
+                {{ 'USAGE.RECITATION.COHORT_SIZE' | translate }}
+              </th>
+              @for (week of cohortWeeks(); track week) {
+                <th scope="col" class="recitation-table__num">
+                  {{ 'USAGE.RECITATION.WEEK_N' | translate: { n: week } }}
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of cohortRows(); track row.week) {
+              <tr>
+                <th scope="row">{{ row.week }}</th>
+                <td class="recitation-table__num">{{ row.size }}</td>
+                @for (cell of row.cells; track $index) {
+                  <td
+                    class="recitation-table__num recitation-insights__cell"
+                    [class.recitation-insights__cell--dark]="cell.share > 0.5"
+                    [style.background-color]="'rgba(82, 124, 102, ' + cell.share + ')'"
+                  >
+                    {{ cell.text }}
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  @for (list of spread(); track list.title) {
+    <section class="recitation-card">
+      <header class="recitation-card__header">
+        <h3 class="recitation-card__title">{{ list.title | translate }}</h3>
+      </header>
+      @if (list.state.loading) {
+        <p class="recitation-card__empty">…</p>
+      } @else if (list.state.error) {
+        <p class="recitation-card__error" role="alert">{{ 'USAGE.LOAD_ERROR' | translate }}</p>
+      } @else if (!list.rows.length) {
+        <p class="recitation-card__empty">{{ 'USAGE.NO_DATA' | translate }}</p>
+      } @else {
+        <table class="recitation-table">
+          <thead>
+            <tr>
+              <th scope="col"></th>
+              <th scope="col">{{ 'USAGE.RECITATION.FIRST_SEEN' | translate }}</th>
+              <th scope="col" class="recitation-table__num">
+                {{ 'USAGE.METRICS.plays' | translate }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of list.rows; track row.key) {
+              <tr>
+                <th scope="row">
+                  {{ row.label }}
+                  @if (row.isNew) {
+                    <span class="recitation-tag">{{ 'USAGE.RECITATION.NEW_TAG' | translate }}</span>
+                  }
+                </th>
+                <td>{{ row.firstSeen }}</td>
+                <td class="recitation-table__num">{{ row.plays }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+  }
+
+  @if (funnel().length) {
+    <section class="recitation-card recitation-insights__wide">
+      <header class="recitation-card__header">
+        <h3 class="recitation-card__title">{{ 'USAGE.RECITATION.FUNNEL_TITLE' | translate }}</h3>
+        <p class="recitation-card__hint">{{ 'USAGE.RECITATION.FUNNEL_HINT' | translate }}</p>
+      </header>
+      <ol class="recitation-insights__funnel">
+        @for (step of funnel(); track step.step) {
+          <li>
+            <span class="recitation-insights__funnel-label">
+              {{ 'USAGE.METRICS.' + step.step | translate }}
+            </span>
+            <span class="recitation-insights__funnel-bar">
+              <span [style.width.%]="step.width"></span>
+            </span>
+            <span class="recitation-insights__funnel-value">{{ step.value }}</span>
+          </li>
+        }
+      </ol>
+    </section>
+  }
+</div>

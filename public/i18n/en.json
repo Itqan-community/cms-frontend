@@ -2840,7 +2840,6 @@
     "UNIDENTIFIED_APPS_NOTE": "Some traffic came from apps that do not send an API key, so it cannot be attributed to an app.",
     "UNIQUES_MONTHLY": "This range reaches past raw-event retention: unique counts are monthly totals added together.",
     "UNIQUES_UNAVAILABLE": "Unique counts are not available for this range with these filters.",
-    "SURAH_N": "Surah {{n}}",
     "PRESETS": {
       "7d": "7 days",
       "30d": "30 days",
@@ -2860,7 +2859,8 @@
       "unique_downloaders": "Unique downloaders",
       "unique_end_users": "Unique end users",
       "integrating_apps": "Integrating apps",
-      "latest_version_share": "On the latest version"
+      "latest_version_share": "On the latest version",
+      "listening_seconds": "Listening hours"
     },
     "CATEGORIES": {
       "recitation": "Recitations",
@@ -2909,7 +2909,10 @@
       "version": "By version",
       "language": "By language",
       "endpoint": "By endpoint",
-      "publisher": "Publisher"
+      "publisher": "Publisher",
+      "reciter": "By reciter",
+      "riwayah": "By riwayah",
+      "qiraah": "By qira'ah"
     },
     "PANELS": {
       "channel": "Channels",
@@ -2921,7 +2924,10 @@
       "hour_of_week": "Hour of the week (your time zone)",
       "version": "Versions",
       "language": "Languages",
-      "endpoint": "Endpoints"
+      "endpoint": "Endpoints",
+      "reciter": "Top reciters",
+      "riwayah": "Riwayat",
+      "qiraah": "Qira'at"
     },
     "DAYS": {
       "MON": "Mon",
@@ -2937,7 +2943,8 @@
       "DASHBOARD": "Dashboard",
       "LEADERBOARD": "Leaderboard",
       "UNSEEN": "Unseen traffic",
-      "LEGACY": "Legacy board"
+      "LEGACY": "Legacy board",
+      "RECITATIONS": "Recitations"
     },
     "UNSEEN": {
       "INTRO": "Reads from storage that never passed through the CDN edge, so the other reports cannot see them (for example direct bucket access).",
@@ -2957,6 +2964,66 @@
       "SUBTITLE": "How your apps use Itqan: API calls, plays and downloads attributed to your API keys.",
       "BACK_TO_KEYS": "Back to API keys",
       "VIEW_USAGE": "View the usage of your apps"
+    },
+    "RECITATION": {
+      "ALL_RECITERS": "All reciters",
+      "ALL_RIWAYAHS": "All riwayat",
+      "CALENDAR": {
+        "gregorian": "Gregorian",
+        "hijri": "Hijri"
+      },
+      "SPIKE": "Spike",
+      "LISTENERS_TITLE": "Listener growth",
+      "NEW": "New listeners",
+      "RETURNING": "Returning listeners",
+      "CUMULATIVE": "Total listeners (cumulative)",
+      "CLAMPED": "Listener reports start on {{date}}: older events are no longer kept.",
+      "COHORTS_TITLE": "Listener retention by first week",
+      "COHORTS_HINT": "Share of each week's new listeners who kept listening in the following weeks.",
+      "COHORTS_RANGE": "Pick a range of up to 26 weeks to see retention.",
+      "COHORT_WEEK": "First week",
+      "COHORT_SIZE": "Listeners",
+      "WEEK_N": "Week +{{n}}",
+      "SPREAD_COUNTRIES": "Countries reached",
+      "SPREAD_APPS": "Apps reached",
+      "FIRST_SEEN": "First played",
+      "NEW_TAG": "New",
+      "FUNNEL_TITLE": "Gallery funnel",
+      "FUNNEL_HINT": "Asset page views by signed-in visitors, downloads, then plays from every channel.",
+      "COVERAGE": "{{surahs}} / 114 surahs",
+      "TIMED": "Timings: {{share}}",
+      "MISSING_TOP": "Most wanted missing surahs: {{surahs}}",
+      "TOP_WEEK": "This week",
+      "TOP": "Top",
+      "RISING": "Rising",
+      "LAST_WEEK": "Week before",
+      "RECITATION": "Recitation",
+      "SEARCH_TITLE": "Gallery searches",
+      "SEARCH_TOP": "Top searches",
+      "SEARCH_ZERO": "No results",
+      "SEARCH_HINT": "What visitors search for across the whole gallery (terms used by at least 3 people). Searches with no results show demand that nobody serves yet.",
+      "TERM": "Search term",
+      "SEARCHERS": "People",
+      "NO_RESULT_SHARE": "Found nothing",
+      "MATCH_TYPES": {
+        "reciter": "Reciter",
+        "riwayah": "Riwayah",
+        "qiraah": "Qira'ah"
+      },
+      "COVERAGE_TITLE": "Incomplete recitations",
+      "COVERAGE_HINT": "Missing surahs are ordered by how much each surah is played across Itqan (last {{days}} days).",
+      "SURAHS": "Surahs",
+      "MISSING": "Missing (most wanted first)",
+      "TIMINGS": "Ayah timings",
+      "ALL_COMPLETE": "Every recitation has all 114 surahs.",
+      "LISTENERS_HINT": "Bars: listeners active in each period, split into first-timers and returning listeners. Line: everyone who has listened so far, each person counted once.",
+      "ACTIVE": "Active: {{total}} ({{new}} new + {{returning}} returning)"
+    },
+    "COMPARE": {
+      "LABEL": "Compare with",
+      "previous": "Previous period",
+      "year": "Same time last year",
+      "hijri_year": "Same time last Hijri year"
     }
   },
   "MUSHAF": {

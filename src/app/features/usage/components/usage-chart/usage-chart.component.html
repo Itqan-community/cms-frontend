@@ -13,6 +13,9 @@
       </button>
     }
   </header>
+  @if (hint()) {
+    <p class="usage-chart__hint">{{ hint() }}</p>
+  }
 
   @if (loading()) {
     <nz-skeleton class="usage-chart__state" [nzActive]="true" [nzParagraph]="{ rows: 5 }" />
@@ -43,6 +46,7 @@
       [style.height.px]="height()"
       [options]="options() ?? {}"
       [autoResize]="true"
+      (chartInit)="onChartInit($event)"
     ></div>
   }
 </section>

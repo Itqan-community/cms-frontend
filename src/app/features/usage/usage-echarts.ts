@@ -1,11 +1,12 @@
 /**
- * Tree-shaken ECharts build for the usage dashboards (line, bar, pie, heatmap).
+ * Tree-shaken ECharts build for the usage dashboards (line, bar, pie, heatmap, spike markers).
  * Loaded lazily by `provideUsageCharts()`, so only usage screens download it.
  */
 import { BarChart, HeatmapChart, LineChart, PieChart } from 'echarts/charts';
 import {
   GridComponent,
   LegendComponent,
+  MarkPointComponent,
   TooltipComponent,
   VisualMapComponent,
 } from 'echarts/components';
@@ -19,6 +20,7 @@ echarts.use([
   HeatmapChart,
   GridComponent,
   LegendComponent,
+  MarkPointComponent,
   TooltipComponent,
   VisualMapComponent,
   CanvasRenderer,
