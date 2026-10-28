@@ -12,7 +12,13 @@ import { AdminAuthService } from '../../../services/admin-auth.service';
 import { AdminTenantService } from '../../../services/admin-tenant.service';
 import { RolesListComponent } from './roles-list.component';
 
-const EDITORS: GroupListOut = { id: 7, name: 'المحررون', name_en: 'Editors', name_ar: 'المحررون' };
+const EDITORS: GroupListOut = {
+  id: 7,
+  name: 'المحررون',
+  name_en: 'Editors',
+  name_ar: 'المحررون',
+  permissions_count: 3,
+};
 const EDITORS_DETAIL: GroupDetailOut = {
   ...EDITORS,
   permissions: [{ code_name: 'portal_read_reciter', name: 'لوحة التحكم - عرض القراء' }],
@@ -89,29 +95,22 @@ describe('RolesListComponent', () => {
   const el = (selector: string): HTMLElement | null =>
     (fixture.nativeElement as HTMLElement).querySelector(selector);
 
-  it('lists roles by their English and Arabic names only', () => {
+  it('lists each role once, by its name in the UI language', () => {
     setup([PORTAL_PERMISSIONS.PORTAL_READ_GROUP]);
 
-    const headers = [...(fixture.nativeElement as HTMLElement).querySelectorAll('th')].length;
-    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
-    expect(text).toContain('Editors');
-    expect(text).toContain('المحررون');
-    expect(headers).toBe(3);
+    const host = fixture.nativeElement as HTMLElement;
+    const cells = [...host.querySelectorAll('tbody tr td')].map((td) => td.textContent?.trim());
+    expect(host.querySelectorAll('th').length).toBe(3);
+    expect(cells[0]).toBe('المحررون');
+    expect(cells[1]).toBe('3');
+    expect(host.textContent).not.toContain('Editors');
   });
 
-  it('puts the Arabic name before the English name in the table and the form', () => {
+  it('puts the Arabic name field before the English one in the form', () => {
     setup([PORTAL_PERMISSIONS.PORTAL_READ_GROUP, PORTAL_PERMISSIONS.PORTAL_CREATE_GROUP]);
-    TestBed.inject(TranslateService).setTranslation('en', {
-      ADMIN: { ROLES: { COLUMNS: { NAME_AR: 'Arabic name', NAME_EN: 'English name' } } },
-    });
-    TestBed.inject(TranslateService).use('en');
     component.openCreate();
     fixture.detectChanges();
 
-    const headers = [...(fixture.nativeElement as HTMLElement).querySelectorAll('th')].map((th) =>
-      th.textContent?.trim()
-    );
-    expect(headers.slice(0, 2)).toEqual(['Arabic name', 'English name']);
     const inputs = [...document.querySelectorAll('input[formcontrolname]')].map((i) =>
       i.getAttribute('formcontrolname')
     );

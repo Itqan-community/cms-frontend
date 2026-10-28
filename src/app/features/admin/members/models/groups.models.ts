@@ -4,6 +4,8 @@ export interface GroupListOut {
   name: string;
   name_en: string;
   name_ar: string;
+  /** How many permissions the role grants (including implied ones). */
+  permissions_count: number;
 }
 
 /** Groups API ordering value that sorts roles by their name in the UI language. */
