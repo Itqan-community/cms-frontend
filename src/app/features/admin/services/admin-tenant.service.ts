@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
-import { computed, inject, Injectable, signal } from '@angular/core';
-import { catchError, finalize, map, Observable, of, shareReplay } from 'rxjs';
+import { computed, inject, Injectable, Injector, signal } from '@angular/core';
+import { catchError, finalize, map, Observable, of, shareReplay, switchMap } from 'rxjs';
+import { AuthService } from '../../../core/auth/services/auth.service';
 import { environment } from '../../../../environments/environment';
 
 export interface MyPublisherOut {
@@ -8,6 +9,8 @@ export interface MyPublisherOut {
   name: string;
   slug: string;
   icon_url: string | null;
+  /** The caller's effective permissions at this publisher (roles are per publisher). */
+  permissions: string[];
 }
 
 export const ADMIN_TENANT_STORAGE_KEY = 'admin:selectedPublisherId';
@@ -42,10 +45,26 @@ function storeAdminTenantId(value: number | null): void {
 @Injectable({ providedIn: 'root' })
 export class AdminTenantService {
   private readonly http = inject(HttpClient);
+  private readonly injector = inject(Injector);
   private readonly apiUrl = `${environment.ADMIN_API_BASE_URL}/publishers/me/`;
   private loadOnce$?: Observable<boolean>;
+  private loadOnceUserId: string | null = null;
 
-  readonly publishers = signal<MyPublisherOut[]>([]);
+  /** The loaded list and whose it is: sign-out and sign-in do not reload the page. */
+  private readonly loaded = signal<{ userId: string | null; publishers: MyPublisherOut[] }>({
+    userId: null,
+    publishers: [],
+  });
+  // Looked up lazily: AuthService pulls in the whole auth stack, which most callers never need.
+  private readonly currentUserId = computed(
+    () => this.injector.get(AuthService).currentUser()?.id ?? null
+  );
+
+  /** The signed-in user's publishers; empty until loaded for that user. */
+  readonly publishers = computed(() => {
+    const { userId, publishers } = this.loaded();
+    return userId === this.currentUserId() ? publishers : [];
+  });
   readonly selectedPublisherId = signal<number | null>(getStoredAdminTenantId());
   readonly isLoading = signal(false);
   readonly hasValidSelection = computed(
@@ -60,27 +79,38 @@ export class AdminTenantService {
       storeAdminTenantId(this.selectedPublisherId());
       return of(true);
     }
-    if (this.loadOnce$) {
+    const userId = this.currentUserId();
+    if (this.loadOnce$ && this.loadOnceUserId === userId) {
       return this.loadOnce$;
     }
 
     this.isLoading.set(true);
-    const request$ = this.http.get<MyPublisherOut[]>(this.apiUrl).pipe(
-      map((publishers) => this.hydratePublishers(publishers)),
+    // A response for a user who is no longer signed in is dropped, and the current user's
+    // publishers are loaded instead.
+    const isStale = () => userId !== this.currentUserId();
+    const request$: Observable<boolean> = this.http.get<MyPublisherOut[]>(this.apiUrl).pipe(
+      map((publishers) => (isStale() ? null : this.hydratePublishers(userId, publishers))),
       catchError(() => {
-        this.publishers.set([]);
+        if (isStale()) {
+          return of(null);
+        }
+        this.loaded.set({ userId, publishers: [] });
         this.selectedPublisherId.set(null);
         storeAdminTenantId(null);
         return of(false);
       }),
       finalize(() => {
-        this.isLoading.set(false);
-        this.loadOnce$ = undefined;
+        if (this.loadOnce$ === request$) {
+          this.isLoading.set(false);
+          this.loadOnce$ = undefined;
+        }
       }),
+      switchMap((ready) => (ready === null ? this.ensureReady() : of(ready))),
       shareReplay({ bufferSize: 1, refCount: false })
     );
 
     this.loadOnce$ = request$;
+    this.loadOnceUserId = userId;
     return request$;
   }
 
@@ -97,8 +127,8 @@ export class AdminTenantService {
     return this.selectedPublisherId();
   }
 
-  private hydratePublishers(publishers: MyPublisherOut[]): boolean {
-    this.publishers.set(publishers);
+  private hydratePublishers(userId: string | null, publishers: MyPublisherOut[]): boolean {
+    this.loaded.set({ userId, publishers });
     if (!publishers.length) {
       this.selectedPublisherId.set(null);
       storeAdminTenantId(null);

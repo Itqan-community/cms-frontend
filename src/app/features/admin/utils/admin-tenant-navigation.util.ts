@@ -64,3 +64,25 @@ export function resolvePublisherDetailRecoveryId(
   }
   return null;
 }
+
+const TENANT_SWITCH_KEY = 'admin:tenantSwitched';
+
+/** Marks that the next page load follows a publisher switch (see {@link consumeTenantSwitch}). */
+export function rememberTenantSwitch(): void {
+  try {
+    sessionStorage.setItem(TENANT_SWITCH_KEY, '1');
+  } catch {
+    // ignore storage errors
+  }
+}
+
+/** Whether the current page load follows a publisher switch; clears the mark. */
+export function consumeTenantSwitch(): boolean {
+  try {
+    const switched = sessionStorage.getItem(TENANT_SWITCH_KEY) != null;
+    sessionStorage.removeItem(TENANT_SWITCH_KEY);
+    return switched;
+  } catch {
+    return false;
+  }
+}
