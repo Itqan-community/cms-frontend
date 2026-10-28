@@ -118,7 +118,9 @@ export class AdminTenantService {
   refresh(): Observable<boolean> {
     const userId = this.currentUserId();
     return this.http.get<MyPublisherOut[]>(this.apiUrl).pipe(
-      map((publishers) => this.hydratePublishers(userId, publishers)),
+      map((publishers) =>
+        userId === this.currentUserId() ? this.hydratePublishers(userId, publishers) : false
+      ),
       catchError(() => of(this.isReady()))
     );
   }
