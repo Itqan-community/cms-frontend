@@ -65,7 +65,10 @@
                     nzType="default"
                     nzSize="small"
                     type="button"
-                    [attr.aria-label]="'ADMIN.ROLES.ACTIONS.EDIT' | translate"
+                    [attr.aria-label]="
+                      (canUpdate() ? 'ADMIN.ROLES.ACTIONS.EDIT' : 'ADMIN.ROLES.ACTIONS.VIEW')
+                        | translate
+                    "
                     (click)="openEditor(role)"
                   >
                     <ng-icon name="lucideSquarePen" aria-hidden="true" />
