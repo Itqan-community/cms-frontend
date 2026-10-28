@@ -252,12 +252,12 @@ export class RolesListComponent {
       .pipe(
         concatMap(() => this.groups.setPermissions(role.id, requested)),
         // The caller may hold this role, so their own buttons can change.
-        concatMap((saved) => this.tenant.refresh().pipe(concatMap(() => of(saved))))
+        concatMap(() => this.tenant.refresh())
       )
       .subscribe({
-        next: (saved) => {
+        next: () => {
           this.saving.set(false);
-          this.showDetail(saved);
+          this.closeEditor();
           this.load();
           this.message.success(this.translate.instant('ADMIN.ROLES.MESSAGES.SAVED'));
         },
