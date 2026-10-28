@@ -2867,8 +2867,8 @@
       "PERMISSIONS_TITLE": "Permissions",
       "PERMISSIONS_HINT": "Permissions are grouped by what they are used for. Some permissions include others (for example, creating includes viewing): those are ticked and locked automatically. Untick the permission that includes them to remove them.",
       "COLUMNS": {
-        "NAME_EN": "English name",
-        "NAME_AR": "Arabic name",
+        "NAME": "Role",
+        "PERMISSIONS": "Permissions",
         "ACTIONS": "Actions"
       },
       "FIELDS": {

@@ -46,16 +46,17 @@
       >
         <thead>
           <tr>
-            <th>{{ 'ADMIN.ROLES.COLUMNS.NAME_AR' | translate }}</th>
-            <th>{{ 'ADMIN.ROLES.COLUMNS.NAME_EN' | translate }}</th>
+            <th>{{ 'ADMIN.ROLES.COLUMNS.NAME' | translate }}</th>
+            <th nzWidth="140px">{{ 'ADMIN.ROLES.COLUMNS.PERMISSIONS' | translate }}</th>
             <th nzWidth="160px">{{ 'ADMIN.ROLES.COLUMNS.ACTIONS' | translate }}</th>
           </tr>
         </thead>
         <tbody>
           @for (role of rolesTable.data; track role.id) {
             <tr class="admin-list-row">
-              <td class="admin-list-name" dir="rtl">{{ role.name_ar }}</td>
-              <td dir="ltr">{{ role.name_en }}</td>
+              <!-- The API returns the name in the UI language (Accept-Language). -->
+              <td class="admin-list-name">{{ role.name }}</td>
+              <td>{{ role.permissions_count }}</td>
               <td>
                 <div class="roles-list__actions">
                   <button
