@@ -13,7 +13,10 @@ import { LangSwitchComponent } from '../../../shared/components/lang-switch/lang
 import { UserActionsComponent } from '../../../shared/components/user-actions/user-actions.component';
 import { isPublisherHost } from '../../../shared/utils/publisherhost.util';
 import { AdminTenantService } from '../services/admin-tenant.service';
-import { resolveUrlAfterTenantChange } from '../utils/admin-tenant-navigation.util';
+import {
+  consumeTenantSwitch,
+  resolveUrlAfterTenantChange,
+} from '../utils/admin-tenant-navigation.util';
 import { AdminTenantNavigationService } from '../services/admin-tenant-navigation.service';
 import { AdminSidebarComponent } from './admin-sidebar.component';
 
@@ -56,6 +59,8 @@ export class AdminLayoutComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
+    // The page loaded after a publisher switch is allowed; a later /unauthorized is genuine.
+    consumeTenantSwitch();
     this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
       this.layoutDir.set(e.lang === 'ar' ? 'rtl' : 'ltr');
     });

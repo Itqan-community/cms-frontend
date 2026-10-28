@@ -7,6 +7,7 @@ import { of } from 'rxjs';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { AdminLayoutComponent } from './admin-layout.component';
 import { AdminTenantNavigationService } from '../services/admin-tenant-navigation.service';
+import { consumeTenantSwitch, rememberTenantSwitch } from '../utils/admin-tenant-navigation.util';
 import { AdminAuthService } from '../services/admin-auth.service';
 import { AdminTenantService } from '../services/admin-tenant.service';
 
@@ -87,6 +88,14 @@ describe('AdminLayoutComponent', () => {
 
     expect(tenantServiceMock.setSelectedPublisherId).toHaveBeenCalledWith(456);
     expect(tenantNavigationMock.assign).toHaveBeenCalledWith('/admin/publishers/456');
+  });
+
+  it('forgets a publisher switch once the admin layout loaded the page', () => {
+    rememberTenantSwitch();
+
+    TestBed.createComponent(AdminLayoutComponent);
+
+    expect(consumeTenantSwitch()).toBeFalse();
   });
 
   it('does nothing when the selected tenant is unchanged', () => {
