@@ -33,7 +33,6 @@ export interface User {
   is_active: boolean;
   is_profile_completed: boolean;
   is_staff?: boolean;
-  publisher_id?: number | null;
   /** Portal permission codes (`code_name`), normalized from profile API. */
   permissions?: string[];
 }

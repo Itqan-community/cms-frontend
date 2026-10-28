@@ -13,9 +13,10 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { Subject, debounceTime, distinctUntilChanged, finalize, switchMap } from 'rxjs';
 import { Categories } from '../../../../../core/enums/categories.enum';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
-import { AuthService } from '../../../../../core/auth/services/auth.service';
 import { Asset } from '../../../../gallery/models/assets.model';
 import { AssetsService } from '../../../../gallery/services/assets.service';
+import { AdminAuthService } from '../../../services/admin-auth.service';
+import { AdminTenantService } from '../../../services/admin-tenant.service';
 import { IssueReportStatus } from '../../models/issues.models';
 import { IssuesService } from '../../services/issues.service';
 
@@ -42,7 +43,8 @@ export class IssueFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly issuesService = inject(IssuesService);
   private readonly assetsService = inject(AssetsService);
-  private readonly authService = inject(AuthService);
+  private readonly adminAuth = inject(AdminAuthService);
+  private readonly tenant = inject(AdminTenantService);
   private readonly message = inject(NzMessageService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -81,8 +83,6 @@ export class IssueFormComponent implements OnInit {
       this.loadForEdit();
     }
 
-    const publisherId = this.authService.currentUser()?.publisher_id ?? undefined;
-
     this.assetSearch
       .pipe(
         debounceTime(300),
@@ -90,7 +90,7 @@ export class IssueFormComponent implements OnInit {
         switchMap((q) => {
           this.assetsLoading.set(true);
           return this.assetsService
-            .getAssets([], q ?? '', [], publisherId ?? null)
+            .getAssets([], q ?? '', [], this.assetPublisherId())
             .pipe(finalize(() => this.assetsLoading.set(false)));
         }),
         takeUntilDestroyed(this.destroyRef)
@@ -103,6 +103,11 @@ export class IssueFormComponent implements OnInit {
     if (!this.isEditMode()) {
       this.assetSearch.next('');
     }
+  }
+
+  /** Itqan staff pick from every publisher's assets; others from the selected publisher's. */
+  private assetPublisherId(): number | null {
+    return this.adminAuth.isStaff() ? null : this.tenant.selectedPublisherId();
   }
 
   onAssetSearch(query: string): void {

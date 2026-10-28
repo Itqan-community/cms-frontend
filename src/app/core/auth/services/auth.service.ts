@@ -341,10 +341,6 @@ export class AuthService {
         ...mapped,
         permissions: prev?.permissions?.length ? prev.permissions : mapped.permissions,
         is_staff: prev?.is_staff ?? mapped.is_staff,
-        publisher_id:
-          prev?.publisher_id !== undefined && prev?.publisher_id !== null
-            ? prev.publisher_id
-            : mapped.publisher_id,
         is_profile_completed: prev?.is_profile_completed ?? mapped.is_profile_completed,
         phone: prev?.phone || mapped.phone,
       };
