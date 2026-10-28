@@ -38,6 +38,8 @@ import { IssuesService } from '../../../admin/issues/services/issues.service';
 import { localizedLanguageName } from '../../../admin/utils/iso-639.util';
 import { AssetDetails } from '../../models/assets.model';
 import { AssetFileStructureComponent } from '../../components/asset-file-structure/asset-file-structure.component';
+import { AssetFontPreviewComponent } from '../../components/asset-font-preview/asset-font-preview.component';
+import { AssetRecitationPreviewComponent } from '../../components/asset-recitation-preview/asset-recitation-preview.component';
 import { ItqanAddCommandComponent } from '../../components/itqan-add-command/itqan-add-command.component';
 import { AssetLicenseAcceptanceService } from '../../services/asset-license-acceptance.service';
 import { preferredLanguage } from '../../utils/preferred-language.util';
@@ -48,6 +50,8 @@ import { AssetUsageCountsComponent } from '../../../usage/components/asset-usage
   selector: 'app-asset-details-page',
   imports: [
     AssetFileStructureComponent,
+    AssetFontPreviewComponent,
+    AssetRecitationPreviewComponent,
     AssetUsageCountsComponent,
     RouterModule,
     ImageCarouselComponent,

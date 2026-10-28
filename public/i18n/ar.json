@@ -606,6 +606,12 @@
         "PAGE": "صفحة"
       },
       "LANGUAGE": "لغة المعاينة"
+    },
+    "RECITATION_PREVIEW": {
+      "TITLE": "استمع إلى عينة"
+    },
+    "FONT_PREVIEW": {
+      "TITLE": "معاينة الخط"
     }
   },
   "UI": {
