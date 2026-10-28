@@ -12,7 +12,7 @@ import { MushafSelectionService } from '../../services/mushaf-selection.service'
 import { MushafSvgService } from '../../services/mushaf-svg.service';
 
 @Component({
-  selector: 'app-mushaf-sura-view',
+  selector: 'app-mushaf-surah-view',
   standalone: true,
   imports: [
     RouterModule,
@@ -21,10 +21,10 @@ import { MushafSvgService } from '../../services/mushaf-svg.service';
     StateMessageComponent,
     TranslateModule,
   ],
-  templateUrl: './sura-view.page.html',
-  styleUrl: './sura-view.page.less',
+  templateUrl: './surah-view.page.html',
+  styleUrl: './surah-view.page.less',
 })
-export class SuraViewPage implements OnInit {
+export class SurahViewPage implements OnInit {
   private readonly svgService = inject(MushafSvgService);
   private readonly selection = inject(MushafSelectionService);
   private readonly route = inject(ActivatedRoute);
@@ -37,34 +37,34 @@ export class SuraViewPage implements OnInit {
   protected readonly loading = signal(true);
   protected readonly errorState = signal(false);
   protected readonly notFound = signal(false);
-  protected readonly suraId = signal<number>(0);
+  protected readonly surahId = signal<number>(0);
   protected readonly selected = this.selection.selected;
 
   ngOnInit(): void {
     combineLatest([this.route.params, this.route.queryParams])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(([params, query]) => {
-        const suraId = Number(params['suraId']);
+        const surahId = Number(params['surahId']);
         const edition = this.selection.select(query['mushaf']);
-        this.suraId.set(suraId);
-        this.loadSura(edition.slug, suraId);
+        this.surahId.set(surahId);
+        this.loadSurah(edition.slug, surahId);
       });
   }
 
-  protected loadSura(slug: string, suraId: number): void {
+  protected loadSurah(slug: string, surahId: number): void {
     this.loading.set(true);
     this.errorState.set(false);
     this.notFound.set(false);
 
-    if (!Number.isInteger(suraId) || suraId < 1 || suraId > 114) {
+    if (!Number.isInteger(surahId) || surahId < 1 || surahId > 114) {
       this.loading.set(false);
       this.notFound.set(true);
       return;
     }
 
     combineLatest([
-      this.svgService.getSurahMeta(slug, suraId),
-      this.svgService.getSurahPageRange(slug, suraId),
+      this.svgService.getSurahMeta(slug, surahId),
+      this.svgService.getSurahPageRange(slug, surahId),
     ])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -87,7 +87,7 @@ export class SuraViewPage implements OnInit {
   }
 
   protected retry(): void {
-    this.loadSura(this.selected().slug, this.suraId());
+    this.loadSurah(this.selected().slug, this.surahId());
   }
 
   protected onAyahClick(ref: AyahRef): void {

@@ -48,9 +48,9 @@ export class MushafSvgService {
   }
 
   /** Resolve the mushaf page on which a surah starts. */
-  getSurahStartPage(slug: string, suraId: number): Observable<number | null> {
+  getSurahStartPage(slug: string, surahId: number): Observable<number | null> {
     return this.getSurahs(slug).pipe(
-      map((surahs) => surahs.find((s) => s.number === suraId)?.pageNumber ?? null)
+      map((surahs) => surahs.find((s) => s.number === surahId)?.pageNumber ?? null)
     );
   }
 
@@ -71,13 +71,13 @@ export class MushafSvgService {
    * converting to a global ayah index (cumulative ayahCount) and looking it up
    * in markers.json.
    */
-  resolvePage(slug: string, suraId: number, ayahNumber: number): Observable<number | null> {
+  resolvePage(slug: string, surahId: number, ayahNumber: number): Observable<number | null> {
     return combineLatest([this.getSurahs(slug), this.getMarkers(slug)]).pipe(
       map(([surahs, markers]) => {
         const ordered = [...surahs].sort((a, b) => a.number - b.number);
         let globalIndex = 0;
         for (const s of ordered) {
-          if (s.number === suraId) {
+          if (s.number === surahId) {
             if (ayahNumber < 1 || ayahNumber > s.ayahCount) return null;
             globalIndex += ayahNumber;
             break;
@@ -103,12 +103,12 @@ export class MushafSvgService {
    */
   getSurahPageRange(
     slug: string,
-    suraId: number
+    surahId: number
   ): Observable<{ startPage: number; endPage: number } | null> {
     return combineLatest([this.getSurahs(slug), this.getMarkers(slug)]).pipe(
       map(([surahs, markers]) => {
         const ordered = [...surahs].sort((a, b) => a.number - b.number);
-        const idx = ordered.findIndex((s) => s.number === suraId);
+        const idx = ordered.findIndex((s) => s.number === surahId);
         if (idx === -1) return null;
         const startPage = ordered[idx].pageNumber;
         let globalIndex = 0;
@@ -136,8 +136,8 @@ export class MushafSvgService {
   }
 
   /** Convenience: surah metadata for one surah in an edition. */
-  getSurahMeta(slug: string, suraId: number): Observable<MushafSurahMeta | null> {
-    return this.getSurahs(slug).pipe(map((s) => s.find((x) => x.number === suraId) ?? null));
+  getSurahMeta(slug: string, surahId: number): Observable<MushafSurahMeta | null> {
+    return this.getSurahs(slug).pipe(map((s) => s.find((x) => x.number === surahId) ?? null));
   }
 
   /** Drop cached data for an edition (e.g. on hard refresh). */

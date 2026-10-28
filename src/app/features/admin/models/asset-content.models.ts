@@ -82,15 +82,15 @@ export interface MushafLayout {
 /** One editable content row returned by the entries endpoint. */
 export interface ContentEntry {
   unit_type: AssetTemplate;
-  /** Canonical id of the unit: sura id, ayah id, word id, or page number (an opaque
+  /** Canonical id of the unit: surah id, ayah id, word id, or page number (an opaque
    *  key for a group). */
   unit_id: number;
   /** Identifying reference, e.g. "1. Al-Fatiha", "2:255", "2:255:4", "Page 42". */
   label: string;
   /** The Quranic text being annotated; empty for the page template. */
   reference_text: string;
-  sura: number | null;
-  aya: number | null;
+  surah: number | null;
+  ayah: number | null;
   /** Every text column's cell, keyed by column key. */
   cells: Record<string, string>;
   /** The first column (older single-column shape). */

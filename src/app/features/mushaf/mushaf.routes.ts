@@ -6,15 +6,16 @@ export const mushafRoutes: Routes = [
   {
     path: '',
     canActivate: [authGuard, publisherHostGuard],
-    loadComponent: () => import('./pages/sura-index/sura-index.page').then((m) => m.SuraIndexPage),
+    loadComponent: () =>
+      import('./pages/surah-index/surah-index.page').then((m) => m.SurahIndexPage),
   },
   {
-    path: ':suraId',
+    path: ':surahId',
     canActivate: [authGuard, publisherHostGuard],
-    loadComponent: () => import('./pages/sura-view/sura-view.page').then((m) => m.SuraViewPage),
+    loadComponent: () => import('./pages/surah-view/surah-view.page').then((m) => m.SurahViewPage),
   },
   {
-    path: ':suraId/:ayahNumber',
+    path: ':surahId/:ayahNumber',
     canActivate: [authGuard, publisherHostGuard],
     loadComponent: () => import('./pages/ayah-focus/ayah-focus.page').then((m) => m.AyahFocusPage),
   },

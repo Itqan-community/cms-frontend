@@ -1,12 +1,12 @@
-<section class="sura-view">
+<section class="surah-view">
   @if (loading()) {
-    <div class="sura-view__skeleton sura-view__skeleton--header"></div>
-    <div class="sura-view__skeleton sura-view__skeleton--body"></div>
+    <div class="surah-view__skeleton surah-view__skeleton--header"></div>
+    <div class="surah-view__skeleton surah-view__skeleton--body"></div>
   } @else if (notFound()) {
     <app-state-message
       icon="lucideSearch"
       iconVariant="default"
-      [title]="'MUSHAF.SURA_NOT_FOUND' | translate"
+      [title]="'MUSHAF.SURAH_NOT_FOUND' | translate"
       [message]="'ERRORS.NOT_FOUND' | translate"
       [secondaryActionLabel]="'MUSHAF.BACK_TO_INDEX' | translate"
       secondaryRouterLink="/mushaf"
@@ -22,13 +22,13 @@
       (actionClick)="retry()"
     />
   } @else if (surahMeta() && startPage() && endPage()) {
-    <header class="sura-view__header">
-      <a class="sura-view__back" routerLink="/mushaf" [queryParams]="{ mushaf: selected().slug }">
+    <header class="surah-view__header">
+      <a class="surah-view__back" routerLink="/mushaf" [queryParams]="{ mushaf: selected().slug }">
         {{ 'MUSHAF.BACK_TO_INDEX' | translate }}
       </a>
-      <h1 class="sura-view__name">{{ surahMeta()!.nameArabic }}</h1>
-      <p class="sura-view__meta">{{ surahMeta()!.nameEnglish }} · {{ selected().nameAr }}</p>
-      <div class="sura-view__toolbar"><app-mushaf-switcher /></div>
+      <h1 class="surah-view__name">{{ surahMeta()!.nameArabic }}</h1>
+      <p class="surah-view__meta">{{ surahMeta()!.nameEnglish }} · {{ selected().nameAr }}</p>
+      <div class="surah-view__toolbar"><app-mushaf-switcher /></div>
     </header>
 
     <app-mushaf-scroll

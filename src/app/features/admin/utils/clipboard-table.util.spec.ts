@@ -56,10 +56,10 @@ describe('serializeCsv', () => {
   it('joins rows and columns with commas and newlines', () => {
     expect(
       serializeCsv([
-        ['sura', 'aya', 'text'],
+        ['surah', 'ayah', 'text'],
         ['1', '1', 'hello'],
       ])
-    ).toBe('sura,aya,text\n1,1,hello');
+    ).toBe('surah,ayah,text\n1,1,hello');
   });
 
   it('quotes fields containing commas, quotes or newlines', () => {
@@ -70,7 +70,7 @@ describe('serializeCsv', () => {
 
   it('round-trips with parseClipboardTable', () => {
     const table = [
-      ['sura', 'aya', 'text'],
+      ['surah', 'ayah', 'text'],
       ['1', '1', 'with, comma'],
       ['1', '2', 'multi\nline'],
     ];
@@ -108,7 +108,7 @@ describe('mapClipboardToColumns', () => {
     expect(
       mapClipboardToColumns(
         [
-          ['word_id', 'sura', 'aya', 'word', 'text'],
+          ['word_id', 'surah', 'ayah', 'word', 'text'],
           ['1', '1', '1', '1', 'In the name'],
         ],
         TEXT
@@ -125,9 +125,9 @@ describe('mapClipboardToColumns', () => {
     ).toEqual({ keys: ['text'], rows: [['Page note']] });
   });
 
-  it('accepts legacy sura/aya headers', () => {
+  it('accepts legacy surah/ayah headers', () => {
     const table = [
-      ['sura', 'aya', 'text'],
+      ['surah', 'ayah', 'text'],
       ['2', '1', 'Alif Lam'],
     ];
     expect(mapClipboardToColumns(table, TEXT)).toEqual({ keys: ['text'], rows: [['Alif Lam']] });
