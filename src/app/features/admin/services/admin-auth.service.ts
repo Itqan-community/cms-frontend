@@ -28,18 +28,8 @@ export class AdminAuthService {
     return codes;
   });
 
-  // Derive admin roles
-  readonly isAdmin = computed(() => !!this.currentUser()?.is_admin);
-
-  readonly isItqanAdmin = computed(
-    () => this.isAdmin() && this.currentUser()?.publisher_id == null
-  );
-
-  readonly isPublisherAdmin = computed(
-    () => this.isAdmin() && this.currentUser()?.publisher_id != null
-  );
-
-  readonly publisherId = computed(() => this.currentUser()?.publisher_id ?? null);
+  // Itqan staff (the profile's `is_staff`): cross-publisher views such as the admin usage reports.
+  readonly isStaff = computed(() => !!this.currentUser()?.is_staff);
 
   hasPermission(code: string): boolean {
     return this.permissionCodes().has(code);

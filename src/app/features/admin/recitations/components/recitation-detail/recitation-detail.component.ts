@@ -26,6 +26,7 @@ import { AdminTablePaginationComponent } from '../../../components/admin-table-p
 import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
@@ -93,6 +94,7 @@ const MAX_MP3_FILES = 114;
     NzAlertModule,
     NzFormModule,
     NzSelectModule,
+    NzToolTipModule,
     NzRadioModule,
     FormsModule,
     ReactiveFormsModule,

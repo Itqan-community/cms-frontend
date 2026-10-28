@@ -16,7 +16,7 @@ class FakeDashboardComponent {
 describe('AssetUsageSectionComponent', () => {
   let fixture: ComponentFixture<AssetUsageSectionComponent>;
   const permissions = signal<string[]>([]);
-  const isItqanAdmin = signal(false);
+  const isStaff = signal(false);
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -25,7 +25,7 @@ describe('AssetUsageSectionComponent', () => {
         {
           provide: AdminAuthService,
           useValue: {
-            isItqanAdmin,
+            isStaff,
             hasPermission: (code: string) => permissions().includes(code),
           },
         },
@@ -56,7 +56,7 @@ describe('AssetUsageSectionComponent', () => {
 
   it('embeds an asset dashboard that keeps its filters out of the URL', () => {
     permissions.set(['portal_read_usage']);
-    isItqanAdmin.set(false);
+    isStaff.set(false);
     const dashboard = render();
     expect(dashboard?.scope()).toBe('publisher');
     expect(dashboard?.assetId()).toBe(7);
@@ -66,7 +66,7 @@ describe('AssetUsageSectionComponent', () => {
 
   it('uses the admin scope for Itqan admins', () => {
     permissions.set(['portal_read_usage']);
-    isItqanAdmin.set(true);
+    isStaff.set(true);
     expect(render()?.scope()).toBe('admin');
   });
 });

@@ -7,18 +7,18 @@ import { AdminHomeComponent } from './admin-home.component';
 
 describe('AdminHomeComponent', () => {
   let hasPermission: jasmine.Spy;
-  let isItqanAdmin: jasmine.Spy;
+  let isStaff: jasmine.Spy;
 
   beforeEach(() => {
     hasPermission = jasmine.createSpy('hasPermission').and.returnValue(false);
-    isItqanAdmin = jasmine.createSpy('isItqanAdmin').and.returnValue(false);
+    isStaff = jasmine.createSpy('isStaff').and.returnValue(false);
 
     TestBed.configureTestingModule({
       imports: [AdminHomeComponent],
       providers: [
         {
           provide: AdminAuthService,
-          useValue: { hasPermission, isItqanAdmin },
+          useValue: { hasPermission, isStaff },
         },
         {
           provide: TranslateService,

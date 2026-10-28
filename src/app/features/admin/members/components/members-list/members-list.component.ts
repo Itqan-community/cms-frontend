@@ -371,7 +371,7 @@ export class MembersListComponent extends AdminListBase<MemberOut, MemberUiFilte
   }
 
   canManageRow(member: MemberOut): boolean {
-    if (this.adminAuth.isItqanAdmin()) {
+    if (this.adminAuth.isStaff()) {
       return true;
     }
     const currentEmail = this.adminAuth.currentUser()?.email?.toLowerCase();

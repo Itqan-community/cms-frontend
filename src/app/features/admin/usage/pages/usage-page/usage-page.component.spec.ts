@@ -12,7 +12,7 @@ import { UsagePageComponent } from './usage-page.component';
 
 describe('UsagePageComponent', () => {
   let fixture: ComponentFixture<UsagePageComponent>;
-  const isItqanAdmin = signal(false);
+  const isStaff = signal(false);
   const tabTitles = () =>
     Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.ant-tabs-tab')).map(
       (tab) => tab.textContent?.trim()
@@ -35,7 +35,7 @@ describe('UsagePageComponent', () => {
         provideNoopAnimations(),
         provideRouter([]),
         { provide: UsageApiService, useValue: api },
-        { provide: AdminAuthService, useValue: { isItqanAdmin } },
+        { provide: AdminAuthService, useValue: { isStaff } },
         {
           provide: PublishersFilterService,
           useValue: { search: () => of({ results: [{ id: 3, name: 'Pub' }], count: 1 }) },
@@ -46,7 +46,7 @@ describe('UsagePageComponent', () => {
   });
 
   it('publishers see the dashboard, recitations and the legacy board', () => {
-    isItqanAdmin.set(false);
+    isStaff.set(false);
     fixture = TestBed.createComponent(UsagePageComponent);
     fixture.detectChanges();
 
@@ -59,7 +59,7 @@ describe('UsagePageComponent', () => {
   });
 
   it('Itqan admins also get the publisher picker, leaderboard and unseen traffic', () => {
-    isItqanAdmin.set(true);
+    isStaff.set(true);
     fixture = TestBed.createComponent(UsagePageComponent);
     fixture.detectChanges();
 
@@ -80,7 +80,7 @@ describe('UsagePageComponent', () => {
     ];
     const getBoardUrl = jasmine.createSpy('getBoardUrl').and.returnValues(...responses);
     TestBed.overrideProvider(UsageService, { useValue: { getBoardUrl } });
-    isItqanAdmin.set(true);
+    isStaff.set(true);
     fixture = TestBed.createComponent(UsagePageComponent);
     fixture.detectChanges();
     const page = fixture.componentInstance;
@@ -95,7 +95,7 @@ describe('UsagePageComponent', () => {
   });
 
   it('writes a range picked on the Recitations tab to the URL, shared with the Dashboard tab', () => {
-    isItqanAdmin.set(false);
+    isStaff.set(false);
     fixture = TestBed.createComponent(UsagePageComponent);
     fixture.detectChanges();
     const navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);

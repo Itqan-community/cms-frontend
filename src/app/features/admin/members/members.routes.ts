@@ -7,10 +7,7 @@ import { MembersLayoutComponent } from './members-layout.component';
 const membersAccessGuard: CanActivateFn = () => {
   const adminAuth = inject(AdminAuthService);
   const router = inject(Router);
-  if (
-    adminAuth.isItqanAdmin() ||
-    adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_VIEW_PUBLISHER_MEMBERS)
-  ) {
+  if (adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_VIEW_PUBLISHER_MEMBERS)) {
     return true;
   }
   return router.createUrlTree(['/unauthorized']);

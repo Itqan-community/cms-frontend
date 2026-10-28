@@ -7,10 +7,7 @@ import { AccessRequestsLayoutComponent } from './access-requests-layout.componen
 const accessRequestsAccessGuard: CanActivateFn = () => {
   const adminAuth = inject(AdminAuthService);
   const router = inject(Router);
-  if (
-    adminAuth.isItqanAdmin() ||
-    adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_VIEW_ACCESS_REQUESTS)
-  ) {
+  if (adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_VIEW_ACCESS_REQUESTS)) {
     return true;
   }
   return router.createUrlTree(['/unauthorized']);

@@ -255,7 +255,7 @@ Trust, Profile, CompleteProfile
 | `/account/*`                   | (22 auth pages)        | guestGuard/authGuard              | Auth & account management                                                                                                                  |
 | `/admin`                       | `AdminLayoutComponent` | `authGuard`, `portalAccessGuard`  | Permission-based admin shell (`layout/` header + sidebar)                                                                                  |
 | `/admin` (default)             | `AdminHomeComponent`   | —                                 | Landing grid of the same permission-filtered sidebar modules (no portal redirect)                                                          |
-| `/admin/publishers`            | (lazy routes)          | `itqanAdminGuard`                 | Publisher CRUD (staff)                                                                                                                     |
+| `/admin/publishers`            | (lazy routes)          | `permissionGuard`                 | Publisher CRUD (staff)                                                                                                                     |
 | `/admin/tafsirs`               | (lazy routes)          | per-route `permissionGuard`       | Tafsir CRUD                                                                                                                                |
 | `/admin/translations`          | (lazy routes)          | per-route `permissionGuard`       | Translation CRUD                                                                                                                           |
 | `/admin/recitations`           | (lazy routes)          | per-route `permissionGuard`       | Recitation CRUD                                                                                                                            |
@@ -432,12 +432,11 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
 
 **Services:**
 
-- `admin-auth.service.ts` — `AdminAuthService`: exposes `currentUser`, role signals (`isAdmin`,
-  `isItqanAdmin`, `isPublisherAdmin`), and `hasPermission` / `hasAnyPermission` /
-  `hasAllPermissions` based on the selected publisher's `permissions` from
-  `GET /portal/publishers/me/` (roles are per publisher), falling back to the profile's permission
-  codes until a publisher is selected. Constants:
-  `features/admin/constants/portal-permission.constants.ts`.
+- `admin-auth.service.ts` — `AdminAuthService`: exposes `currentUser`, `isStaff` (Itqan staff, from
+  the profile's `is_staff`), and `hasPermission` / `hasAnyPermission` / `hasAllPermissions` based on
+  the selected publisher's `permissions` from `GET /portal/publishers/me/` (roles are per
+  publisher), falling back to the profile's permission codes until a publisher is selected.
+  Constants: `features/admin/constants/portal-permission.constants.ts`.
 - `admin-tenant.service.ts` — `AdminTenantService`: loads `publishers/me` (each entry carries the
   caller's `permissions` there) and holds the selected publisher sent as `X-Tenant`.
 - `admin-table-column-prefs.service.ts` — Persists column visibility per table
@@ -445,9 +444,9 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
 - `asset-versions.service.ts` — Version management API
 - `quran-data.service.ts` — Quran metadata (pages, surahs, ayahs)
 
-**Guards:** `admin.guard.ts` (legacy `is_admin` gate), `itqan-admin.guard.ts`,
-`publisher-admin.guard.ts`, `portal-access.guard.ts` (`portal_access`), `permission.guard.ts`
-(factory for route-level permission checks). Wired on `/admin` and lazy admin feature routes.
+**Guards:** `staff.guard.ts` (`isStaff`), `portal-access.guard.ts` (`portal_access`),
+`permission.guard.ts` (factory for route-level permission checks). Wired on `/admin` and lazy admin
+feature routes.
 
 **Pipes:** `admin-country-label.pipe.ts`, `admin-hijri-year.pipe.ts` **Base class:** `AdminListBase`
 — shared list page logic (loading, data fetching, error handling) **Utility:**
@@ -527,7 +526,7 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 `/admin/usage` (`features/admin/usage/`): Dashboard and Recitations tabs for everyone with
 `portal_read_usage` (Recitations = the dashboard fixed to the recitation category, local state:
 reciter / riwayah filters, listening hours, recitation insights and catalog; picking "Recitations"
-in the Dashboard category filter shows the same profile); Itqan admins also get a publisher picker,
+in the Dashboard category filter shows the same profile); Itqan staff also get a publisher picker,
 Leaderboard and Unseen traffic; the Mixpanel iframe is the "Legacy board" tab (loaded when opened)
 until the usage-reports cutover. `/account/api-keys` shows and edits each key's public app slug
 (`app_slug`). The global error toast skips `usage_counts_disabled`.
