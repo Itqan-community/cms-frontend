@@ -61,6 +61,29 @@ describe('AssetFontPreviewComponent', () => {
     fixture.destroy();
   }));
 
+  it('hides the previous language preview while the new language loads', fakeAsync(() => {
+    // Arrange
+    spyOn(FontFace.prototype, 'load').and.callFake(function (this: FontFace) {
+      return Promise.resolve(this);
+    });
+    const fixture = render('ar');
+    httpMock.expectOne((r) => r.params.get('language') === 'ar').flush(PREVIEW);
+    flushMicrotasks();
+    fixture.detectChanges();
+
+    // Act
+    fixture.componentRef.setInput('language', 'en');
+    fixture.detectChanges();
+
+    // Assert
+    expect((fixture.nativeElement as HTMLElement).querySelector('section')).toBeNull();
+    httpMock.expectOne((r) => r.params.get('language') === 'en').flush(PREVIEW);
+    flushMicrotasks();
+    fixture.detectChanges();
+    expect((fixture.nativeElement as HTMLElement).querySelector('section')).not.toBeNull();
+    fixture.destroy();
+  }));
+
   it('hides itself when the browser cannot load the font', fakeAsync(() => {
     // Arrange
     spyOn(FontFace.prototype, 'load').and.returnValue(Promise.reject(new Error('bad font')));

@@ -3,7 +3,7 @@ import { Component, computed, DestroyRef, inject, input } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule } from '@ngx-translate/core';
-import { catchError, from, map, of, switchMap } from 'rxjs';
+import { catchError, from, map, of, startWith, switchMap } from 'rxjs';
 import type { FontPreview } from '../../models/assets.model';
 import { AssetsService } from '../../services/assets.service';
 
@@ -39,11 +39,13 @@ export class AssetFontPreviewComponent {
 
   readonly loaded = toSignal<LoadedFont | null, LoadedFont | null>(
     toObservable(this.request).pipe(
-      // switchMap: a newer language cancels the previous request.
+      // switchMap: a newer language cancels the previous request. The old
+      // language's preview hides at once instead of showing until the new one loads.
       switchMap(({ id, language }) =>
         this.assetsService.getFontPreview(id, language).pipe(
           switchMap((preview) => this.loadFont(preview)),
-          catchError(() => of(null))
+          catchError(() => of(null)),
+          startWith(null)
         )
       )
     ),
