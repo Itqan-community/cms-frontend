@@ -165,4 +165,19 @@ describe('AdminTenantService', () => {
     });
     httpMock.expectOne(`${adminApi}/publishers/me/`).flush(first);
   });
+
+  it('refresh ignores a response that arrives after the user changed', () => {
+    service.ensureReady().subscribe();
+    httpMock
+      .expectOne(`${adminApi}/publishers/me/`)
+      .flush([{ id: 10, name: 'A', slug: 'a', icon_url: null, permissions: [] }]);
+
+    service.refresh().subscribe();
+    const pending = httpMock.expectOne(`${adminApi}/publishers/me/`);
+    currentUser.set({ id: 'u2' });
+    pending.flush([{ id: 30, name: 'C', slug: 'c', icon_url: null, permissions: ['old'] }]);
+
+    expect(service.publishers()).toEqual([]);
+    expect(service.selectedPublisherId()).toBe(10);
+  });
 });
