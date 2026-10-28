@@ -99,6 +99,25 @@ describe('RolesListComponent', () => {
     expect(headers).toBe(3);
   });
 
+  it('puts the Arabic name before the English name in the table and the form', () => {
+    setup([PORTAL_PERMISSIONS.PORTAL_READ_GROUP, PORTAL_PERMISSIONS.PORTAL_CREATE_GROUP]);
+    TestBed.inject(TranslateService).setTranslation('en', {
+      ADMIN: { ROLES: { COLUMNS: { NAME_AR: 'Arabic name', NAME_EN: 'English name' } } },
+    });
+    TestBed.inject(TranslateService).use('en');
+    component.openCreate();
+    fixture.detectChanges();
+
+    const headers = [...(fixture.nativeElement as HTMLElement).querySelectorAll('th')].map((th) =>
+      th.textContent?.trim()
+    );
+    expect(headers.slice(0, 2)).toEqual(['Arabic name', 'English name']);
+    const inputs = [...document.querySelectorAll('input[formcontrolname]')].map((i) =>
+      i.getAttribute('formcontrolname')
+    );
+    expect(inputs.slice(0, 2)).toEqual(['name_ar', 'name_en']);
+  });
+
   it('groups the permission checklist by usage', () => {
     setup([PORTAL_PERMISSIONS.PORTAL_READ_GROUP]);
     component.openEditor(EDITORS);
