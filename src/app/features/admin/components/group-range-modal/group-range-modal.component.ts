@@ -221,6 +221,8 @@ export class GroupRangeModalComponent {
     const name: string | undefined = err?.error?.error_name;
     const key = name ? `ADMIN.CONTENT_EDITOR.ERRORS.${name.toUpperCase()}` : '';
     const translated = key ? this.translate.instant(key) : '';
-    return translated || this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC');
+    return translated && translated !== key
+      ? translated
+      : this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC');
   }
 }

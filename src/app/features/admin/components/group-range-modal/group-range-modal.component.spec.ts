@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject, of, throwError } from 'rxjs';
 import type { QuranRangeResponse } from '../../models/asset-content.models';
 import { AssetContentService } from '../../services/asset-content.service';
@@ -34,6 +34,15 @@ describe('GroupRangeModalComponent', () => {
       imports: [GroupRangeModalComponent, TranslateModule.forRoot()],
       providers: [provideNoopAnimations(), { provide: AssetContentService, useValue: service }],
     }).compileComponents();
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('en', {
+      ADMIN: {
+        CONTENT_EDITOR: {
+          ERRORS: { GROUP_RANGE_INVALID: 'Invalid range', GENERIC: 'Something went wrong' },
+        },
+      },
+    });
+    translate.use('en');
   });
 
   it('requests the preview once after the debounce', fakeAsync(() => {
@@ -113,8 +122,25 @@ describe('GroupRangeModalComponent', () => {
     tick(300);
 
     // Assert
-    expect(modal.previewError()).toBe('ADMIN.CONTENT_EDITOR.ERRORS.GROUP_RANGE_INVALID');
+    expect(modal.previewError()).toBe('Invalid range');
     expect(modal.canConfirm()).toBeFalse();
+  }));
+
+  it('shows the generic error when the error name has no translation', fakeAsync(() => {
+    // Arrange
+    service.quranRange.and.returnValue(
+      throwError(
+        () => new HttpErrorResponse({ status: 400, error: { error_name: 'validation_error' } })
+      )
+    );
+    const { modal } = create();
+
+    // Act
+    modal.setPosition('start', { ayah: 3 });
+    tick(300);
+
+    // Assert
+    expect(modal.previewError()).toBe('Something went wrong');
   }));
 
   it('allows adding a group without text, sending no cells', fakeAsync(() => {
