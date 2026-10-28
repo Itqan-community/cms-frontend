@@ -1775,6 +1775,8 @@
         "HINT_FILENAMES": "One file per surah, named 001 to 114 with .mp3 extension",
         "HINT_FILENAMES_EXAMPLE": "Example for Surah Al-Fatiha: \"001.mp3\"",
         "OVERALL_PROGRESS": "Overall upload progress",
+        "CONCURRENCY_LABEL": "Files at a time",
+        "CONCURRENCY_HINT": "Use 1 on slow connections; raise it on fast ones",
         "ABORT_ALL": "Abort all uploads",
         "ABORT_ALL_CONFIRM_TITLE": "Abort all uploads?",
         "ABORT_ALL_CONFIRM_CONTENT": "Queued and in-progress uploads will be stopped. Continue?",
