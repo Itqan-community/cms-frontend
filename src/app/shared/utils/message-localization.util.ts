@@ -1,13 +1,21 @@
 const GENERIC_BACKEND_MESSAGES = new Set(
-  ['server error', 'error', 'bad request', 'internal server error'].map((s) => s.toLowerCase())
+  ['server error', 'error', 'bad request', 'internal server error', 'invalid input'].map((s) =>
+    s.toLowerCase()
+  )
 );
 
 const ARABIC_SCRIPT_RE = /[\u0600-\u06FF]/;
 
+/** Whether the backend sent a real explanation rather than a status phrase like "Bad Request". */
+export function isSpecificBackendMessage(message: string): boolean {
+  const trimmed = message.trim();
+  return !!trimmed && !GENERIC_BACKEND_MESSAGES.has(trimmed.toLowerCase());
+}
+
 /** Whether backend text matches the active UI language (Arabic script for `ar`, Latin for `en`). */
 export function isMessageLocalizedForUi(message: string, uiLang: string): boolean {
   const trimmed = message.trim();
-  if (!trimmed || GENERIC_BACKEND_MESSAGES.has(trimmed.toLowerCase())) {
+  if (!isSpecificBackendMessage(trimmed)) {
     return false;
   }
   const hasArabic = ARABIC_SCRIPT_RE.test(trimmed);

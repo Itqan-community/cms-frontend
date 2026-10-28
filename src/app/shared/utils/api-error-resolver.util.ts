@@ -5,7 +5,7 @@ import {
   isAngularHttpFailureMessage,
   isRestrictedForTenantConflictError,
 } from './error.utils';
-import { isMessageLocalizedForUi } from './message-localization.util';
+import { isMessageLocalizedForUi, isSpecificBackendMessage } from './message-localization.util';
 
 export interface ApiErrorTranslator {
   instant(key: string, interpolateParams?: Record<string, unknown>): string;
@@ -152,8 +152,9 @@ export function fallbackKeyForHttpStatus(status: number): string {
  * Resolve a user-facing CMS/portal API error string:
  * 1. Known `error_name` or `errors[].code` → client i18n
  * 2. django-ninja `validation_error` field details
- * 3. Backend `message` when localized for UI language
- * 4. Fallback i18n key
+ * 3. Backend `message`, preferring one in the UI language; one in the other language (a missing
+ *    backend translation) still beats a generic message
+ * 4. Fallback i18n key, only when the backend gave no specific message
  */
 export function resolveApiErrorMessage(
   error: unknown,
@@ -205,6 +206,10 @@ export function resolveApiErrorMessage(
     if (clientMessage && isMessageLocalizedForUi(clientMessage, uiLang)) {
       return clientMessage;
     }
+  }
+
+  if (backendMessage && isSpecificBackendMessage(backendMessage)) {
+    return backendMessage;
   }
 
   return translate.instant(fallbackKey);
