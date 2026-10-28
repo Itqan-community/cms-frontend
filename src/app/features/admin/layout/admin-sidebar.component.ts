@@ -106,7 +106,7 @@ export const TAB_USAGE: CmsTab = {
 };
 
 export function buildAuthorizedAdminTabs(
-  adminAuth: Pick<AdminAuthService, 'hasPermission' | 'isItqanAdmin'>,
+  adminAuth: Pick<AdminAuthService, 'hasPermission'>,
   options: { includeHome?: boolean } = {}
 ): CmsTab[] {
   const tabs: CmsTab[] = [];
@@ -136,16 +136,10 @@ export function buildAuthorizedAdminTabs(
   }
   // TODO(backend-permissions): gate with PORTAL_PERMISSIONS.PORTAL_READ_ISSUE_REPORT once seeded
   tabs.push(TAB_ISSUES);
-  if (
-    adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_VIEW_PUBLISHER_MEMBERS) ||
-    adminAuth.isItqanAdmin()
-  ) {
+  if (adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_VIEW_PUBLISHER_MEMBERS)) {
     tabs.push(TAB_MEMBERS);
   }
-  if (
-    adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_VIEW_ACCESS_REQUESTS) ||
-    adminAuth.isItqanAdmin()
-  ) {
+  if (adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_VIEW_ACCESS_REQUESTS)) {
     tabs.push(TAB_ACCESS_REQUESTS);
   }
   if (adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_USAGE)) {

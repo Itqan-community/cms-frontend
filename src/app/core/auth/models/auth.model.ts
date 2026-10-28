@@ -32,7 +32,7 @@ export interface User {
   preferred_language?: PreferredLanguage;
   is_active: boolean;
   is_profile_completed: boolean;
-  is_admin?: boolean;
+  is_staff?: boolean;
   publisher_id?: number | null;
   /** Portal permission codes (`code_name`), normalized from profile API. */
   permissions?: string[];
@@ -88,6 +88,7 @@ export interface UpdateProfileResponse {
   preferred_language?: PreferredLanguage;
   is_active: boolean;
   is_profile_completed: boolean;
+  is_staff?: boolean;
   bio: string;
   project_summary: string;
   project_url: string;

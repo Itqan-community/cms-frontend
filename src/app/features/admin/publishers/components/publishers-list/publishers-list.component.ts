@@ -51,7 +51,7 @@ export class PublishersListComponent extends AdminListBase<Publisher, PublisherU
   private readonly adminAuth = inject(AdminAuthService);
   private readonly tenantService = inject(AdminTenantService);
 
-  /** Gate create/edit on the granular portal permissions, not the is_admin flag. */
+  /** Gate create/edit on the granular portal permissions, not the is_staff flag. */
   readonly canCreatePublishers = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_CREATE_PUBLISHER)
   );

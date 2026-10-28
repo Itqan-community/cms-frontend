@@ -52,7 +52,7 @@ describe('AdminLayoutComponent', () => {
           provide: AdminAuthService,
           useValue: {
             hasPermission: () => true,
-            isItqanAdmin: () => true,
+            isStaff: () => true,
           },
         },
         {

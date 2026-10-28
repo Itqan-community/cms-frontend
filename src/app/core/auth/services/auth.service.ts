@@ -340,7 +340,7 @@ export class AuthService {
       const merged: User = {
         ...mapped,
         permissions: prev?.permissions?.length ? prev.permissions : mapped.permissions,
-        is_admin: prev?.is_admin ?? mapped.is_admin,
+        is_staff: prev?.is_staff ?? mapped.is_staff,
         publisher_id:
           prev?.publisher_id !== undefined && prev?.publisher_id !== null
             ? prev.publisher_id

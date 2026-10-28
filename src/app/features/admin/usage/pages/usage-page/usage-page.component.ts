@@ -21,7 +21,7 @@ import { PublishersFilterService } from '../../../tafsirs/services/publishers-fi
 import { UsageService } from '../../services/usage.service';
 
 /**
- * Admin → Usage: the usage dashboard for the publisher in the request. Itqan admins also get a
+ * Admin → Usage: the usage dashboard for the publisher in the request. Itqan staff also get a
  * publisher picker, the leaderboard and unseen traffic. The Mixpanel board stays as "Legacy
  * board" until the usage-reports cutover.
  */
@@ -53,8 +53,8 @@ export class UsagePageComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly queryParams = toSignal(this.route.queryParamMap);
 
-  readonly isItqanAdmin = computed(() => this.adminAuth.isItqanAdmin());
-  readonly scope = computed<UsageScope>(() => (this.isItqanAdmin() ? 'admin' : 'publisher'));
+  readonly isStaff = computed(() => this.adminAuth.isStaff());
+  readonly scope = computed<UsageScope>(() => (this.isStaff() ? 'admin' : 'publisher'));
   readonly publishers = signal<PublisherFilterItem[]>([]);
   readonly selectedPublisherId = signal<number | null>(null);
 
@@ -82,7 +82,7 @@ export class UsagePageComponent implements OnInit {
   private boardRequest?: Subscription;
 
   ngOnInit(): void {
-    if (this.isItqanAdmin()) {
+    if (this.isStaff()) {
       this.publishersFilterService
         .search('', 1)
         .pipe(takeUntilDestroyed(this.destroyRef))

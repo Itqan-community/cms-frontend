@@ -186,7 +186,7 @@ describe('AuthService (app / headless)', () => {
         is_active: true,
         is_profile_completed: true,
         permissions: ['portal_access'],
-        is_admin: true,
+        is_staff: true,
       })
     );
     TestBed.resetTestingModule();
@@ -240,7 +240,7 @@ describe('AuthService (app / headless)', () => {
         is_active: true,
         is_profile_completed: true,
         permissions: ['portal_access'],
-        is_admin: true,
+        is_staff: true,
       })
     );
     TestBed.resetTestingModule();
@@ -294,7 +294,7 @@ describe('AuthService (app / headless)', () => {
         is_active: true,
         is_profile_completed: true,
         permissions: ['portal_access'],
-        is_admin: true,
+        is_staff: true,
       })
     );
     TestBed.resetTestingModule();
@@ -355,7 +355,7 @@ describe('AuthService (app / headless)', () => {
     // Assert — guards wait for user 1's own profile; nothing of user 2's is kept
     expect(svc.authReady()).toBe(false);
     expect(svc.getCurrentUser()?.permissions ?? []).toEqual([]);
-    expect(svc.getCurrentUser()?.is_admin).not.toBe(true);
+    expect(svc.getCurrentUser()?.is_staff).not.toBe(true);
     profile.error(new HttpErrorResponse({ status: 500 }));
     await done;
     expect(svc.authReady()).toBe(true);

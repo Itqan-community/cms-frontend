@@ -4,13 +4,13 @@ import { map } from 'rxjs';
 import { waitUntilAuthReady } from '../../../core/auth/guards/wait-until-auth-ready';
 import { AdminAuthService } from '../services/admin-auth.service';
 
-export const itqanAdminGuard: CanActivateFn = () => {
+export const staffGuard: CanActivateFn = () => {
   const adminAuth = inject(AdminAuthService);
   const router = inject(Router);
 
   return waitUntilAuthReady().pipe(
     map(() => {
-      if (adminAuth.isItqanAdmin()) {
+      if (adminAuth.isStaff()) {
         return true;
       }
       return router.createUrlTree(['/unauthorized']);
