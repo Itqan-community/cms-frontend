@@ -15,7 +15,6 @@ import { Categories } from '../../../../../core/enums/categories.enum';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { Asset } from '../../../../gallery/models/assets.model';
 import { AssetsService } from '../../../../gallery/services/assets.service';
-import { AdminAuthService } from '../../../services/admin-auth.service';
 import { AdminTenantService } from '../../../services/admin-tenant.service';
 import { IssueReportStatus } from '../../models/issues.models';
 import { IssuesService } from '../../services/issues.service';
@@ -43,7 +42,6 @@ export class IssueFormComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly issuesService = inject(IssuesService);
   private readonly assetsService = inject(AssetsService);
-  private readonly adminAuth = inject(AdminAuthService);
   private readonly tenant = inject(AdminTenantService);
   private readonly message = inject(NzMessageService);
   private readonly translate = inject(TranslateService);
@@ -105,9 +103,12 @@ export class IssueFormComponent implements OnInit {
     }
   }
 
-  /** Itqan staff pick from every publisher's assets; others from the selected publisher's. */
+  /**
+   * The selected publisher's assets, for staff too: the report's detail page (opened after saving)
+   * is scoped to the selected publisher, so a report on another publisher's asset would not open.
+   */
   private assetPublisherId(): number | null {
-    return this.adminAuth.isStaff() ? null : this.tenant.selectedPublisherId();
+    return this.tenant.selectedPublisherId();
   }
 
   onAssetSearch(query: string): void {

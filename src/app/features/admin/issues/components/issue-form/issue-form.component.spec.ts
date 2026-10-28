@@ -54,14 +54,14 @@ describe('IssueFormComponent', () => {
     expect(getAssets).toHaveBeenCalledWith([], 'mushaf', [], 7);
   }));
 
-  it('searches every publisher’s assets for Itqan staff', fakeAsync(() => {
-    // Arrange
+  it("searches the selected publisher's assets for Itqan staff too", fakeAsync(() => {
+    // Arrange — the saved report opens on a detail page scoped to the selected publisher
     isStaff.set(true);
 
     // Act
     search('mushaf');
 
     // Assert
-    expect(getAssets).toHaveBeenCalledWith([], 'mushaf', [], null);
+    expect(getAssets).toHaveBeenCalledWith([], 'mushaf', [], 7);
   }));
 });
