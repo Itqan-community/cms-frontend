@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -35,7 +35,7 @@ import { buildHeadlessOAuthCallbackUrl, readContinueUrl } from '../../utils/auth
   styleUrls: ['./login.page.less'],
   templateUrl: './login.page.html',
 })
-export class LoginPage implements OnInit {
+export class LoginPage implements OnInit, OnDestroy {
   readonly authService = inject(AuthService);
   private readonly passkeyFlow = inject(PasskeyAuthFlowService);
   private readonly router = inject(Router);
@@ -44,6 +44,7 @@ export class LoginPage implements OnInit {
   private readonly translate = inject(TranslateService);
 
   private autoPasskeyAttempted = false;
+  private passkeyAutofill: AbortController | null = null;
 
   passwordVisible = signal(false);
 
@@ -66,9 +67,15 @@ export class LoginPage implements OnInit {
     if (this.authService.isLoggedIn()) {
       return;
     }
-    if (shouldAttemptPasskeyAutoPrompt()) {
-      void this.onPasskeyLogin({ auto: true });
-    }
+    void shouldAttemptPasskeyAutoPrompt().then((available) => {
+      if (available) {
+        void this.onPasskeyLogin({ auto: true });
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.passkeyAutofill?.abort();
   }
 
   /** Allauth `callback_url` for provider redirect (absolute). */
@@ -97,14 +104,25 @@ export class LoginPage implements OnInit {
     if (isAuto && this.autoPasskeyAttempted) {
       return;
     }
+    // Only one WebAuthn request may be pending: a manual login replaces the autofill request.
+    this.passkeyAutofill?.abort();
+    this.passkeyAutofill = null;
     if (isAuto) {
       this.autoPasskeyAttempted = true;
+      this.passkeyAutofill = new AbortController();
     }
     this.errorMessage.set('');
-    this.passkeyLoading.set(true);
+    // Autofill waits indefinitely for the user, so it must not spin the passkey button.
+    if (!isAuto) {
+      this.passkeyLoading.set(true);
+    }
     try {
       const continueUrl = readContinueUrl(this.activatedRoute.snapshot.queryParamMap);
-      const result = await this.passkeyFlow.loginWithPasskey(continueUrl);
+      const result = this.passkeyAutofill
+        ? await this.passkeyFlow.loginWithPasskey(continueUrl, {
+            signal: this.passkeyAutofill.signal,
+          })
+        : await this.passkeyFlow.loginWithPasskey(continueUrl);
       if (!result.ok) {
         if (!isAuto || !isPasskeyAutoPromptCancellation(result)) {
           this.errorMessage.set(this.translate.instant('AUTH.PASSKEY.CANCELLED'));
@@ -121,7 +139,9 @@ export class LoginPage implements OnInit {
         this.errorMessage.set(resolution.message);
       }
     } finally {
-      this.passkeyLoading.set(false);
+      if (!isAuto) {
+        this.passkeyLoading.set(false);
+      }
     }
   }
 

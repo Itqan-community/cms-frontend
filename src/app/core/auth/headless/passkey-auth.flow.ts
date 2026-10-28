@@ -43,17 +43,24 @@ export class PasskeyAuthFlowService {
   private readonly authService = inject(AuthService);
   private readonly tokenStore = inject(HeadlessAppTokenService);
 
-  /** Drop stale app session; block dead `sessionid` cookie but allow fresh stage token from GET options. */
-  async loginWithPasskey(continueUrl: string): Promise<PasskeyLoginFlowResult> {
+  /**
+   * Drop stale app session; block dead `sessionid` cookie but allow fresh stage token from GET options.
+   * With `autofill`, the request uses conditional mediation: it stays pending until the user picks a
+   * passkey from the browser's autofill UI, and is cancelled through `autofill.signal`.
+   */
+  async loginWithPasskey(
+    continueUrl: string,
+    autofill?: { signal: AbortSignal }
+  ): Promise<PasskeyLoginFlowResult> {
     if (!this.authService.isLoggedIn()) {
       this.tokenStore.blockSessionCookieFallback();
     }
     const res = await firstValueFrom(this.authService.headlessAuth.getWebauthnLoginOptions());
     const data = res.data as WebAuthnCredentialRequestData;
     const publicKey = await getWebAuthnRequestOptions(data);
-    const cred = (await navigator.credentials.get({
-      publicKey,
-    })) as PublicKeyCredential | null;
+    const cred = (await navigator.credentials.get(
+      autofill ? { publicKey, mediation: 'conditional', signal: autofill.signal } : { publicKey }
+    )) as PublicKeyCredential | null;
     if (!cred) {
       return { ok: false, reason: 'cancelled' };
     }
