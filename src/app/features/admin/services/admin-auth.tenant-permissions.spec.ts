@@ -52,7 +52,12 @@ describe('AdminAuthService tenant permissions', () => {
 
     selectedPublisherId.set(1);
     expect(adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_INVITE_PUBLISHER_MEMBERS)).toBe(true);
-    expect(adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS)).toBe(false);
+  });
+
+  it('keeps portal access from the profile when the selected publisher’s role lacks it', () => {
+    selectedPublisherId.set(2);
+
+    expect(adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS)).toBe(true);
   });
 
   it('falls back to profile permissions before a tenant is selected', () => {
