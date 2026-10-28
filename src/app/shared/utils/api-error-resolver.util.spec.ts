@@ -46,7 +46,7 @@ describe('api-error-resolver.util', () => {
       expect(msg).toBe('رسالة خطأ من الخادم.');
     });
 
-    it('falls back when backend message is wrong language', () => {
+    it('shows a specific backend message even when it is not in the UI language', () => {
       const err = new HttpErrorResponse({
         status: 400,
         error: { message: 'English only error.' },
@@ -56,7 +56,30 @@ describe('api-error-resolver.util', () => {
         { fallbackKey: 'ERRORS.SERVER_ERROR' },
         mockTranslate('ar', { 'ERRORS.SERVER_ERROR': 'خطأ في الخادم' })
       );
-      expect(msg).toBe('خطأ في الخادم');
+      expect(msg).toBe('English only error.');
+    });
+
+    it('falls back when the backend message is generic', () => {
+      const err = new HttpErrorResponse({
+        status: 400,
+        error: { error_name: 'validation_error', message: 'Invalid Input', extra: [] },
+      });
+      const msg = resolveApiErrorMessage(
+        err,
+        { fallbackKey: 'ERRORS.SERVER_ERROR' },
+        mockTranslate('en', { 'ERRORS.SERVER_ERROR': 'Server error' })
+      );
+      expect(msg).toBe('Server error');
+    });
+
+    it('falls back when the backend sent no message', () => {
+      const err = new HttpErrorResponse({ status: 500, statusText: 'Server Error', url: '/x' });
+      const msg = resolveApiErrorMessage(
+        err,
+        { fallbackKey: 'ERRORS.SERVER_ERROR' },
+        mockTranslate('en', { 'ERRORS.SERVER_ERROR': 'Server error' })
+      );
+      expect(msg).toBe('Server error');
     });
 
     it('lists pydantic field errors from a ninja validation_error (en)', () => {
