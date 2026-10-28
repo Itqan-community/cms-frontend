@@ -15,6 +15,11 @@ describe('AdminAuthService', () => {
     TestBed.configureTestingModule({
       providers: [
         AdminAuthService,
+        // No publisher selected, so permissions come from the profile.
+        {
+          provide: AdminTenantService,
+          useValue: { publishers: signal([]), selectedPublisherId: signal(null) },
+        },
         {
           provide: AuthService,
           useValue: {

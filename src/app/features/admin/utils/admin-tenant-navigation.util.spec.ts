@@ -2,6 +2,8 @@ import {
   buildSelectedPublisherDetailCommands,
   resolvePublisherDetailRecoveryId,
   resolveUrlAfterTenantChange,
+  consumeTenantSwitch,
+  rememberTenantSwitch,
 } from './admin-tenant-navigation.util';
 
 describe('resolveUrlAfterTenantChange', () => {
@@ -91,5 +93,20 @@ describe('resolvePublisherDetailRecoveryId', () => {
 
   it('returns null when there is no valid recovery target', () => {
     expect(resolvePublisherDetailRecoveryId(999, null, [123, 456])).toBeNull();
+  });
+
+  describe('tenant switch marker', () => {
+    beforeEach(() => sessionStorage.clear());
+
+    it('is consumed once after a switch', () => {
+      rememberTenantSwitch();
+
+      expect(consumeTenantSwitch()).toBeTrue();
+      expect(consumeTenantSwitch()).toBeFalse();
+    });
+
+    it('is absent without a switch', () => {
+      expect(consumeTenantSwitch()).toBeFalse();
+    });
   });
 });

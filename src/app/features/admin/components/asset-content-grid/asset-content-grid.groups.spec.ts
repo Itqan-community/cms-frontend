@@ -48,8 +48,8 @@ function row(overrides: Partial<ContentEntry> = {}): ContentEntry {
     unit_id: 1000003,
     label: '1:1 → 1:3',
     reference_text: 'a1 a2 a3',
-    sura: 1,
-    aya: 1,
+    surah: 1,
+    ayah: 1,
     cells: { text: 't' },
     text: 't',
     order: 1000003,
@@ -151,7 +151,12 @@ describe('AssetContentGridComponent groups', () => {
     // Assert
     expect(component.effectiveTemplate()).toBe('ayah_group');
     expect(component.canEditGroups()).toBeTrue();
-    expect(colIds(component)).toEqual(['surah', 'reference_text', 'cell__text', 'group_actions']);
+    expect(colIds(component)).toEqual([
+      'unit_surah',
+      'reference_text',
+      'cell__text',
+      'group_actions',
+    ]);
   });
 
   it('keeps the previous column ids for an ayah asset', () => {
@@ -162,7 +167,13 @@ describe('AssetContentGridComponent groups', () => {
     const component = grid();
 
     // Assert
-    expect(colIds(component)).toEqual(['surah', 'sura', 'aya', 'reference_text', 'cell__text']);
+    expect(colIds(component)).toEqual([
+      'unit_surah',
+      'surah',
+      'ayah',
+      'reference_text',
+      'cell__text',
+    ]);
     expect(component.canEditGroups()).toBeFalse();
   });
 
@@ -377,7 +388,7 @@ describe('AssetContentGridComponent groups', () => {
     const component = grid();
 
     // Act
-    const unit = component.buildColumnDefs().find((col) => col.colId === 'surah')!;
+    const unit = component.buildColumnDefs().find((col) => col.colId === 'unit_surah')!;
 
     // Assert
     expect(unit.cellStyle).toEqual(
@@ -388,7 +399,7 @@ describe('AssetContentGridComponent groups', () => {
   it('edits the range in its cell: editable on the source, read-only on a translation', () => {
     // Arrange
     const component = grid();
-    const unit = component.buildColumnDefs().find((col) => col.colId === 'surah')!;
+    const unit = component.buildColumnDefs().find((col) => col.colId === 'unit_surah')!;
     const params = unit.cellRendererParams as GroupRangeCellParams;
 
     // Act / Assert
@@ -402,7 +413,7 @@ describe('AssetContentGridComponent groups', () => {
     // Arrange
     const unit = grid()
       .buildColumnDefs()
-      .find((col) => col.colId === 'surah')!;
+      .find((col) => col.colId === 'unit_surah')!;
     const input = document.createElement('input');
 
     // Act / Assert

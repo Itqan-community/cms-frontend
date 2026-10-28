@@ -1,0 +1,26 @@
+@if (preview(); as p) {
+  <section class="recitation-preview">
+    <div class="recitation-preview__header">
+      <ng-icon name="lucideMic" />
+      <h3 class="recitation-preview__title">
+        {{ 'GALLERY.RECITATION_PREVIEW.TITLE' | translate }}
+      </h3>
+    </div>
+    <ul class="recitation-preview__tracks">
+      @for (track of p.tracks; track track.surah_number) {
+        <li class="recitation-preview__track">
+          <span class="recitation-preview__surah">
+            {{ track.surah_number }}. {{ surahName(track) }}
+          </span>
+          <audio
+            controls
+            preload="none"
+            [src]="track.audio_url"
+            [attr.aria-label]="surahName(track)"
+            (play)="onPlay($event)"
+          ></audio>
+        </li>
+      }
+    </ul>
+  </section>
+}

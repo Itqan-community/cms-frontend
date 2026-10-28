@@ -1,7 +1,13 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
-import { ApiAssets, AssetDetails, AssetFileStructure } from '../models/assets.model';
+import {
+  ApiAssets,
+  AssetDetails,
+  AssetFileStructure,
+  FontPreview,
+  RecitationPreview,
+} from '../models/assets.model';
 
 @Injectable({
   providedIn: 'root',
@@ -69,5 +75,14 @@ export class AssetsService {
     return this.http.get<AssetFileStructure>(`${this.BASE_URL}/assets/${id}/file-structure/`, {
       params,
     });
+  }
+
+  getRecitationPreview(id: number | string) {
+    return this.http.get<RecitationPreview>(`${this.BASE_URL}/assets/${id}/recitation-preview/`);
+  }
+
+  getFontPreview(id: number | string, language: string | null) {
+    const params = language ? new HttpParams().set('language', language) : undefined;
+    return this.http.get<FontPreview>(`${this.BASE_URL}/assets/${id}/font-preview/`, { params });
   }
 }

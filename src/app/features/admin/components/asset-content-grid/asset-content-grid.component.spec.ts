@@ -85,14 +85,14 @@ describe('AssetContentGridComponent column definitions', () => {
     for (const template of ['ayah', 'word']) {
       // Arrange / Act
       const columns = componentFor(template).buildColumnDefs();
-      const sura = columns.find((col) => col.field === 'sura');
-      const aya = columns.find((col) => col.field === 'aya');
+      const surah = columns.find((col) => col.field === 'surah');
+      const ayah = columns.find((col) => col.field === 'ayah');
 
       // Assert — plain number filters; the surah-name dropdown sits on the unit column
-      expect(sura?.filter).withContext(template).toBe('agNumberColumnFilter');
-      expect(sura?.floatingFilterComponent).withContext(template).toBeUndefined();
-      expect(aya?.filter).withContext(template).toBe('agNumberColumnFilter');
-      expect(aya?.floatingFilter).withContext(template).toBeTrue();
+      expect(surah?.filter).withContext(template).toBe('agNumberColumnFilter');
+      expect(surah?.floatingFilterComponent).withContext(template).toBeUndefined();
+      expect(ayah?.filter).withContext(template).toBe('agNumberColumnFilter');
+      expect(ayah?.floatingFilter).withContext(template).toBeTrue();
     }
   });
 
@@ -121,10 +121,10 @@ describe('AssetContentGridComponent column definitions', () => {
   it('shows the surah name beside its number while filtering on the number', () => {
     for (const template of ['ayah', 'word']) {
       // Arrange
-      const sura = componentFor(template)
+      const surah = componentFor(template)
         .buildColumnDefs()
-        .find((col) => col.field === 'sura')!;
-      const format = sura.valueFormatter as (params: { value: number | null }) => string;
+        .find((col) => col.field === 'surah')!;
+      const format = surah.valueFormatter as (params: { value: number | null }) => string;
 
       // Act / Assert — the filter stays numeric; only the displayed text changes
       expect(format({ value: 2 }))
@@ -133,17 +133,17 @@ describe('AssetContentGridComponent column definitions', () => {
       expect(format({ value: null }))
         .withContext(template)
         .toBe('');
-      expect(sura.filter).withContext(template).toBe('agNumberColumnFilter');
+      expect(surah.filter).withContext(template).toBe('agNumberColumnFilter');
     }
   });
 
   it('shows the Arabic surah name in the Arabic interface', () => {
     // Arrange
     TestBed.inject(TranslateService).use('ar');
-    const sura = componentFor('ayah')
+    const surah = componentFor('ayah')
       .buildColumnDefs()
-      .find((col) => col.field === 'sura')!;
-    const format = sura.valueFormatter as (params: { value: number }) => string;
+      .find((col) => col.field === 'surah')!;
+    const format = surah.valueFormatter as (params: { value: number }) => string;
 
     // Act / Assert
     expect(format({ value: 2 })).toBe('2. البقرة');
@@ -156,8 +156,8 @@ describe('AssetContentGridComponent column definitions', () => {
         .buildColumnDefs()
         .find((col) => col.field === 'label');
 
-      // Assert — keyed `surah` so the server filters the surah number, not the label text
-      expect(label?.colId).withContext(template).toBe('surah');
+      // Assert — keyed `unit_surah` so the server filters the surah number, not the label text
+      expect(label?.colId).withContext(template).toBe('unit_surah');
       expect(label?.filter).withContext(template).toBe('agNumberColumnFilter');
       expect(label?.floatingFilterComponent).withContext(template).toBeTruthy();
     }
@@ -282,8 +282,8 @@ describe('AssetContentGridComponent column definitions', () => {
         .map((col: { field?: string; colId?: string }) => col.colId ?? col.field);
 
     // Assert
-    expect(fields('surah')).not.toContain('aya');
-    expect(fields('page')).not.toContain('sura');
+    expect(fields('surah')).not.toContain('ayah');
+    expect(fields('page')).not.toContain('surah');
   });
 
   it('keeps the surah floating filter off the page template', () => {
@@ -343,8 +343,8 @@ describe('AssetContentGridComponent column definitions', () => {
             unit_id: 1,
             label: 'Page 1',
             reference_text: '',
-            sura: null,
-            aya: null,
+            surah: null,
+            ayah: null,
             text: '',
             order: 1,
           },

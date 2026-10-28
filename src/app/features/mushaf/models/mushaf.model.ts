@@ -1,16 +1,16 @@
 /**
  * Mushaf data models. The SVG reader uses the quranpedia quran-svg dataset
  * (MushafEdition / MushafSurahMeta / AyahMarker) fetched from the jsDelivr CDN.
- * The Sura/Ayah/Word types mirror the backend `/cms-api/suras/*` schema
+ * The Surah/Ayah/Word types mirror the backend `/cms-api/surahs/*` schema
  * (itqan-cms-backend/apps/quran) and are retained for reference.
  */
 
-export interface Sura {
+export interface Surah {
   id: number;
   name: string;
   transliterated_name: string;
   english_name: string;
-  ayas_count: number;
+  ayahs_count: number;
   start_offset: number;
   revelation_type: string;
   revelation_order: number;
@@ -25,8 +25,8 @@ export interface Word {
 
 export interface Ayah {
   id: number;
-  sura_id: number;
-  number_in_sura: number;
+  surah_id: number;
+  number_in_surah: number;
   text: string;
   juz: number;
   hizb_quarter: number;
@@ -35,8 +35,8 @@ export interface Ayah {
 }
 
 /** Paginated list envelope returned by the backend NinjaPagination. */
-export interface PaginatedSuras {
-  results: Sura[];
+export interface PaginatedSurahs {
+  results: Surah[];
   count: number;
 }
 
