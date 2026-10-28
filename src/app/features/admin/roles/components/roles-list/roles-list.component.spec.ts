@@ -174,6 +174,16 @@ describe('RolesListComponent', () => {
     expect(tenant.refresh).toHaveBeenCalled();
   });
 
+  it('closes the editor after a successful save', () => {
+    setup([PORTAL_PERMISSIONS.PORTAL_READ_GROUP, PORTAL_PERMISSIONS.PORTAL_UPDATE_GROUP]);
+    groups.setPermissions.and.returnValue(of(EDITORS_DETAIL));
+    component.openEditor(EDITORS);
+
+    component.saveEditor();
+
+    expect(component.editing()).toBeNull();
+  });
+
   it('skips the rename call when the names did not change', () => {
     setup([PORTAL_PERMISSIONS.PORTAL_READ_GROUP, PORTAL_PERMISSIONS.PORTAL_UPDATE_GROUP]);
     groups.setPermissions.and.returnValue(of(EDITORS_DETAIL));
