@@ -12,8 +12,7 @@ import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { NzModalModule } from 'ng-zorro-antd/modal';
-import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
+import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
@@ -62,7 +61,6 @@ const NAME_MAX_LENGTH = 150; // matches the backend's auth.Group / PublisherGrou
     NzFormModule,
     NzInputModule,
     NzModalModule,
-    NzPopconfirmModule,
     NzSpinModule,
     NzTableModule,
     NzTagModule,
@@ -78,6 +76,7 @@ export class RolesListComponent {
   private readonly tenant = inject(AdminTenantService);
   private readonly translate = inject(TranslateService);
   private readonly message = inject(NzMessageService);
+  private readonly modal = inject(NzModalService);
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -269,6 +268,20 @@ export class RolesListComponent {
   }
 
   // --- Delete ---
+
+  /** Delete after confirming in a modal, like the members page does. */
+  confirmDelete(role: GroupListOut): void {
+    this.modal.confirm({
+      nzTitle: this.translate.instant('ADMIN.ROLES.DELETE_TITLE', { name: role.name }),
+      nzContent: this.translate.instant('ADMIN.ROLES.DELETE_CONFIRM'),
+      nzOkText: this.translate.instant('ADMIN.ROLES.ACTIONS.DELETE'),
+      nzOkType: 'primary',
+      nzOkDanger: true,
+      nzCancelText: this.translate.instant('ADMIN.ROLES.ACTIONS.CANCEL'),
+      nzDirection: this.translate.currentLang === 'ar' ? 'rtl' : 'ltr',
+      nzOnOk: () => this.deleteRole(role),
+    });
+  }
 
   deleteRole(role: GroupListOut): void {
     this.deletingId.set(role.id);

@@ -2863,7 +2863,7 @@
       "EMPTY_TITLE": "No roles yet",
       "LIST_ERROR_TITLE": "Could not load roles",
       "LIST_ERROR_DESC": "Check your connection and try again.",
-      "DELETE_CONFIRM": "Delete this role? Members who hold it must be moved to another role first.",
+      "DELETE_CONFIRM": "This can't be undone. A role that members still hold can't be deleted; move them to another role first.",
       "PERMISSIONS_TITLE": "Permissions",
       "PERMISSIONS_HINT": "Permissions are grouped by what they are used for. Some permissions include others (for example, creating includes viewing): those are ticked and locked automatically. Untick the permission that includes them to remove them.",
       "COLUMNS": {
@@ -2893,7 +2893,8 @@
         "DELETED": "Role deleted.",
         "DELETE_FAILED": "Could not delete the role."
       },
-      "INCLUDED_BY": "Included with: {{names}}"
+      "INCLUDED_BY": "Included with: {{names}}",
+      "DELETE_TITLE": "Delete the role \"{{name}}\"?"
     }
   },
   "USAGE": {

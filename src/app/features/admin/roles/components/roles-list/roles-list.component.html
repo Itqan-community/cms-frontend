@@ -56,7 +56,7 @@
             <tr class="admin-list-row">
               <!-- The API returns the name in the UI language (Accept-Language). -->
               <td class="admin-list-name">{{ role.name }}</td>
-              <td>{{ role.permissions_count }}</td>
+              <td>{{ role.permissions_count }} / {{ permissionCount() }}</td>
               <td>
                 <div class="roles-list__actions">
                   <button
@@ -83,13 +83,9 @@
                       nzType="default"
                       nzSize="small"
                       type="button"
-                      nz-popconfirm
-                      [nzPopconfirmTitle]="'ADMIN.ROLES.DELETE_CONFIRM' | translate"
-                      [nzOkText]="'ADMIN.ROLES.ACTIONS.DELETE' | translate"
-                      [nzCancelText]="'ADMIN.ROLES.ACTIONS.CANCEL' | translate"
                       [nzLoading]="deletingId() === role.id"
                       [attr.aria-label]="'ADMIN.ROLES.ACTIONS.DELETE' | translate"
-                      (nzOnConfirm)="deleteRole(role)"
+                      (click)="confirmDelete(role)"
                     >
                       <ng-icon name="lucideTrash2" aria-hidden="true" />
                     </button>
