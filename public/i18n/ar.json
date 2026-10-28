@@ -2077,7 +2077,7 @@
       "COLUMNS": {
         "NAME": "الاسم",
         "EMAIL": "البريد الإلكتروني",
-        "GROUP": "المجموعة",
+        "GROUP": "الدور",
         "STATUS": "الحالة",
         "ASSIGNED_LANGUAGES": "اللغات",
         "CREATED_AT": "تاريخ الإضافة",
@@ -2097,8 +2097,8 @@
         "NAME_PLACEHOLDER": "اسم العضو",
         "EMAIL_LABEL": "البريد الإلكتروني",
         "EMAIL_PLACEHOLDER": "email@example.com",
-        "GROUP_LABEL": "المجموعة",
-        "GROUP_PLACEHOLDER": "اختر مجموعة",
+        "GROUP_LABEL": "الدور",
+        "GROUP_PLACEHOLDER": "اختر دورًا",
         "INVITE_INFO": "سيتم إرسال رسالة دعوة إلى هذا البريد الإلكتروني.",
         "SUBMIT_INVITE": "إرسال الدعوة",
         "SUBMIT_EDIT": "حفظ",
@@ -2107,10 +2107,10 @@
         "CONFIRM_CANCEL": "إلغاء",
         "ERR_NAME": "يرجى إدخال الاسم",
         "ERR_EMAIL": "يرجى إدخال بريد إلكتروني صالح",
-        "ERR_GROUP": "يرجى اختيار مجموعة"
+        "ERR_GROUP": "يرجى اختيار دور"
       },
       "CHANGE_GROUP": {
-        "CONFIRM_TITLE": "تغيير المجموعة؟",
+        "CONFIRM_TITLE": "تغيير الدور؟",
         "CONFIRM_BODY": "{{name}} — تعيينهم إلى \"{{group}}\"."
       },
       "REMOVE": {
@@ -2142,14 +2142,14 @@
         "INVITE_ERROR": "تعذر إرسال الدعوة",
         "UPDATE_SUCCESS": "تم تحديث العضو",
         "UPDATE_ERROR": "تعذر تحديث العضو",
-        "CHANGE_GROUP_SUCCESS": "تم تحديث مجموعة العضو",
+        "CHANGE_GROUP_SUCCESS": "تم تحديث دور العضو",
         "REMOVE_SUCCESS": "تمت إزالة العضو",
         "REMOVE_ERROR": "تعذر إزالة العضو",
         "CANCEL_SUCCESS": "تم إلغاء الدعوة",
         "RESEND_SUCCESS": "تمت إعادة إرسال الدعوة",
         "RESEND_ERROR": "تعذر إعادة إرسال الدعوة",
         "NO_PUBLISHER": "يرجى اختيار ناشر",
-        "GROUPS_LOAD_ERROR": "تعذر تحميل المجموعات"
+        "GROUPS_LOAD_ERROR": "تعذر تحميل الأدوار"
       }
     },
     "ACCESS_REQUESTS": {

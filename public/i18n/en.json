@@ -2077,7 +2077,7 @@
       "COLUMNS": {
         "NAME": "Name",
         "EMAIL": "Email",
-        "GROUP": "Group",
+        "GROUP": "Role",
         "STATUS": "Status",
         "ASSIGNED_LANGUAGES": "Languages",
         "CREATED_AT": "Added",
@@ -2097,8 +2097,8 @@
         "NAME_PLACEHOLDER": "Member name",
         "EMAIL_LABEL": "Email",
         "EMAIL_PLACEHOLDER": "email@example.com",
-        "GROUP_LABEL": "Group",
-        "GROUP_PLACEHOLDER": "Select a group",
+        "GROUP_LABEL": "Role",
+        "GROUP_PLACEHOLDER": "Select a role",
         "INVITE_INFO": "An invitation email will be sent to this address.",
         "SUBMIT_INVITE": "Send invitation",
         "SUBMIT_EDIT": "Save",
@@ -2107,10 +2107,10 @@
         "CONFIRM_CANCEL": "Cancel",
         "ERR_NAME": "Please enter a name",
         "ERR_EMAIL": "Please enter a valid email",
-        "ERR_GROUP": "Please select a group"
+        "ERR_GROUP": "Please select a role"
       },
       "CHANGE_GROUP": {
-        "CONFIRM_TITLE": "Change group?",
+        "CONFIRM_TITLE": "Change role?",
         "CONFIRM_BODY": "{{name}} — assign them to \"{{group}}\"."
       },
       "REMOVE": {
@@ -2142,14 +2142,14 @@
         "INVITE_ERROR": "Could not send invitation",
         "UPDATE_SUCCESS": "Member updated",
         "UPDATE_ERROR": "Could not update member",
-        "CHANGE_GROUP_SUCCESS": "Member group updated",
+        "CHANGE_GROUP_SUCCESS": "Member role updated",
         "REMOVE_SUCCESS": "Member removed",
         "REMOVE_ERROR": "Could not remove member",
         "CANCEL_SUCCESS": "Invitation cancelled",
         "RESEND_SUCCESS": "Invitation resent",
         "RESEND_ERROR": "Could not resend invitation",
         "NO_PUBLISHER": "Please select a publisher",
-        "GROUPS_LOAD_ERROR": "Could not load groups"
+        "GROUPS_LOAD_ERROR": "Could not load roles"
       }
     },
     "ACCESS_REQUESTS": {
