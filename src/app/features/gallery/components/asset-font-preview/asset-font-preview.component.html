@@ -1,0 +1,15 @@
+@if (loaded(); as font) {
+  <section class="font-preview">
+    <div class="font-preview__header">
+      <ng-icon name="lucideType" />
+      <h3 class="font-preview__title">{{ 'GALLERY.FONT_PREVIEW.TITLE' | translate }}</h3>
+      <code class="font-preview__file" dir="ltr">{{ font.preview.file_name }}</code>
+    </div>
+    <p class="font-preview__sample" dir="rtl" lang="ar" [style.font-family]="font.family">
+      @for (ayah of font.preview.sample; track ayah.ayah) {
+        <span>{{ ayah.text }} {{ ayahNumber(ayah.ayah) }}</span>
+        {{ ' ' }}
+      }
+    </p>
+  </section>
+}

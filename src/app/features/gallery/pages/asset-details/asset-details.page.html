@@ -49,15 +49,26 @@
         </div>
 
         <!-- Content Preview Card -->
-        <div class="preview-card">
-          <div class="preview-card-header">
-            <ng-icon name="lucideEye" />
-            <span>{{ 'UI.CONTENT_PREVIEW' | translate }}</span>
+        @if (images().length > 0) {
+          <div class="preview-card">
+            <div class="preview-card-header">
+              <ng-icon name="lucideEye" />
+              <span>{{ 'UI.CONTENT_PREVIEW' | translate }}</span>
+            </div>
+            <div class="carousel-wrapper">
+              <app-image-carousel [images]="images()" />
+            </div>
           </div>
-          <div class="carousel-wrapper">
-            <app-image-carousel [images]="images()" />
-          </div>
-        </div>
+        }
+
+        @switch (asset()!.category) {
+          @case ('recitation') {
+            <app-asset-recitation-preview [assetId]="asset()!.id" />
+          }
+          @case ('font') {
+            <app-asset-font-preview [assetId]="asset()!.id" [language]="selectedLanguage()" />
+          }
+        }
 
         <app-asset-file-structure
           [assetId]="asset()!.id"

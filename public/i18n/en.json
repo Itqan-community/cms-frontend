@@ -606,6 +606,12 @@
         "PAGE": "page"
       },
       "LANGUAGE": "Preview language"
+    },
+    "RECITATION_PREVIEW": {
+      "TITLE": "Listen to a sample"
+    },
+    "FONT_PREVIEW": {
+      "TITLE": "Font preview"
     }
   },
   "UI": {

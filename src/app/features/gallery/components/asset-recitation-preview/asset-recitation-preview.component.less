@@ -1,0 +1,47 @@
+.recitation-preview {
+  margin-top: 24px;
+  padding: 16px;
+  border: 1px solid var(--border-color, #e5e7eb);
+  border-radius: 12px;
+}
+
+.recitation-preview__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.recitation-preview__title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.recitation-preview__tracks {
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.recitation-preview__track {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 8px 0;
+
+  & + & {
+    border-top: 1px solid var(--border-color, #e5e7eb);
+  }
+
+  audio {
+    flex: 1 1 260px;
+    min-width: 0;
+    height: 36px;
+  }
+}
+
+.recitation-preview__surah {
+  min-width: 140px;
+  font-weight: 500;
+}
