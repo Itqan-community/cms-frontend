@@ -141,4 +141,28 @@ describe('AdminTenantService', () => {
 
     expect(httpMock.match(`${adminApi}/publishers/me/`).length).toBe(2);
   });
+
+  it('refresh reloads publishers and keeps the selected publisher', (done) => {
+    if (!adminApi) {
+      pending('ADMIN_API_BASE_URL');
+      done();
+      return;
+    }
+    const first = [
+      { id: 10, name: 'A', slug: 'a', icon_url: null, permissions: [] },
+      { id: 20, name: 'B', slug: 'b', icon_url: null, permissions: [] },
+    ];
+    service.ensureReady().subscribe(() => {
+      service.setSelectedPublisherId(20);
+      service.refresh().subscribe(() => {
+        expect(service.selectedPublisherId()).toBe(20);
+        expect(service.publishers()[1].permissions).toEqual(['portal_read_group']);
+        done();
+      });
+      httpMock
+        .expectOne(`${adminApi}/publishers/me/`)
+        .flush([first[0], { ...first[1], permissions: ['portal_read_group'] }]);
+    });
+    httpMock.expectOne(`${adminApi}/publishers/me/`).flush(first);
+  });
 });

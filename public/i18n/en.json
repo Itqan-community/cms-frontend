@@ -1306,7 +1306,9 @@
       "ACCESS_REQUESTS_DESC": "Manage incoming requests for platform access",
       "FONTS": "Fonts",
       "FONTS_DESC": "Manage and upload custom fonts used in your app",
-      "PROGRAMS": "Programs"
+      "PROGRAMS": "Programs",
+      "ROLES": "Roles",
+      "ROLES_DESC": "Define roles and the permissions each one grants"
     },
     "PROFILE": {
       "TITLE": "Publisher profile",
@@ -2846,6 +2848,47 @@
       "SLUG_MANUAL": "The identifier could not be generated. Type it in lowercase words joined by hyphens, starting with the asset type (e.g. tafsir-ibn-kathir).",
       "SLUG_FORMAT": "Use lowercase letters, digits and single hyphens, starting with the asset type (e.g. tafsir-ibn-kathir); max 50 characters.",
       "SLUG_PLACEHOLDER": "e.g. tafsir-ibn-kathir"
+    },
+    "ROLES": {
+      "TITLE": "Roles",
+      "SUBTITLE": "Roles of the selected publisher and the permissions each one grants",
+      "CREATE_BUTTON": "New role",
+      "CREATE_TITLE": "New role",
+      "EMPTY_TITLE": "No roles yet",
+      "LIST_ERROR_TITLE": "Could not load roles",
+      "LIST_ERROR_DESC": "Check your connection and try again.",
+      "DELETE_CONFIRM": "Delete this role? Members who hold it must be moved to another role first.",
+      "PERMISSIONS_TITLE": "Permissions",
+      "PERMISSIONS_HINT": "Stronger permissions include the weaker ones they need (for example, creating includes viewing); they are added automatically when you save.",
+      "COLUMNS": {
+        "NAME": "Role",
+        "NAME_EN": "English name",
+        "NAME_AR": "Arabic name",
+        "ACTIONS": "Actions"
+      },
+      "FIELDS": {
+        "NAME_EN": "English name",
+        "NAME_AR": "Arabic name",
+        "NAME_REQUIRED": "Enter a name of up to 150 characters."
+      },
+      "ACTIONS": {
+        "CREATE": "Create",
+        "EDIT": "Edit",
+        "VIEW": "View",
+        "SAVE": "Save",
+        "DELETE": "Delete",
+        "CANCEL": "Cancel"
+      },
+      "MESSAGES": {
+        "CREATED": "Role created. Choose its permissions.",
+        "CREATE_FAILED": "Could not create the role.",
+        "LOAD_FAILED": "Could not load the role.",
+        "SAVED": "Role saved.",
+        "SAVED_WITH_IMPLIED": "Role saved. Permissions that the selected ones depend on were added too.",
+        "SAVE_FAILED": "Could not save the role.",
+        "DELETED": "Role deleted.",
+        "DELETE_FAILED": "Could not delete the role."
+      }
     }
   },
   "USAGE": {

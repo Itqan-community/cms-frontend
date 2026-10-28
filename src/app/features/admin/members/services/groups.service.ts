@@ -2,7 +2,13 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
-import { GroupListFilters, PagedGroupListOut } from '../models/groups.models';
+import {
+  GroupDetailOut,
+  GroupListFilters,
+  GroupNamesIn,
+  PagedGroupListOut,
+  PermissionOut,
+} from '../models/groups.models';
 
 @Injectable({
   providedIn: 'root',
@@ -29,5 +35,31 @@ export class GroupsService {
       params = params.set('name', filters.name);
     }
     return this.http.get<PagedGroupListOut>(`${this.baseUrl}/`, { params });
+  }
+
+  get(id: number): Observable<GroupDetailOut> {
+    return this.http.get<GroupDetailOut>(`${this.baseUrl}/${id}/`);
+  }
+
+  create(names: GroupNamesIn): Observable<GroupDetailOut> {
+    return this.http.post<GroupDetailOut>(`${this.baseUrl}/`, names);
+  }
+
+  update(id: number, names: GroupNamesIn): Observable<GroupDetailOut> {
+    return this.http.put<GroupDetailOut>(`${this.baseUrl}/${id}/`, names);
+  }
+
+  /** Replaces the role's permissions; the backend adds the ones they imply (e.g. CREATE → READ). */
+  setPermissions(id: number, permissions: string[]): Observable<GroupDetailOut> {
+    return this.http.put<GroupDetailOut>(`${this.baseUrl}/${id}/permissions/`, { permissions });
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}/`);
+  }
+
+  /** Every permission a role can hold, named in the UI language. */
+  listPermissions(): Observable<PermissionOut[]> {
+    return this.http.get<PermissionOut[]>(`${this.baseUrl}/permissions/`);
   }
 }
