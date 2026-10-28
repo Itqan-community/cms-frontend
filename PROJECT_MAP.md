@@ -324,6 +324,11 @@ cards as the sidebar.
 | `audio/`           | Audio management      | —                                   | Routes defined                                                                                                                                                                                                                                                                                                                               |
 | `software/`        | Software management   | —                                   | Routes defined                                                                                                                                                                                                                                                                                                                               |
 
+**Recitation tracks upload:** `RecitationTracksUploadOrchestratorService` sends files in 8 MB
+multipart parts through one page-wide queue shared by batches and single-file retries. The user
+picks how many files upload at once (1–4, default 1 for slow connections) beside the Upload button;
+the choice is kept in `localStorage` (`cms.recitationTracksUploadConcurrency`).
+
 **Recitation folders (variants):** A folder is the same recitation re-rendered at one audio quality,
 optionally with added effects. The vocabulary (`RecitationFolderQuality` × `hasFx`) is
 **frontend-owned** and carried in the folder's `name_ar` / `name_en`, because the portal API accepts
