@@ -99,7 +99,8 @@ export class RolesListComponent {
   private readonly order = computed(() => this.allPermissions().map((p) => p.code_name));
   readonly permissionCount = computed(() => this.allPermissions().length);
   readonly loading = signal(false);
-  readonly loadFailed = signal(false);
+  /** Why the list failed to load (the backend's reason when it gave one); null when it loaded. */
+  readonly loadError = signal<string | null>(null);
 
   readonly createVisible = signal(false);
   readonly creating = signal(false);
@@ -136,7 +137,7 @@ export class RolesListComponent {
 
   load(): void {
     this.loading.set(true);
-    this.loadFailed.set(false);
+    this.loadError.set(null);
     forkJoin({
       roles: this.groups.list({
         page: 1,
@@ -150,8 +151,14 @@ export class RolesListComponent {
         this.catalogue.set(catalogue);
         this.loading.set(false);
       },
-      error: () => {
-        this.loadFailed.set(true);
+      error: (err: unknown) => {
+        this.loadError.set(
+          resolveApiErrorMessage(
+            err,
+            { fallbackKey: 'ADMIN.ROLES.LIST_ERROR_DESC' },
+            this.translate
+          )
+        );
         this.loading.set(false);
       },
     });
