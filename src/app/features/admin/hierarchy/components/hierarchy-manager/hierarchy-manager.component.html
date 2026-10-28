@@ -1,0 +1,267 @@
+<div class="hierarchy-manager admin-list-page">
+  <div class="admin-list-header">
+    <div class="admin-list-header__text">
+      <h2 class="admin-list-header__title">{{ 'ADMIN.HIERARCHY.TITLE' | translate }}</h2>
+      <p class="admin-list-header__subtitle">{{ 'ADMIN.HIERARCHY.SUBTITLE' | translate }}</p>
+    </div>
+    @if (surahsState() === 'loaded' && surahs().length) {
+      <p class="hierarchy-manager__stats">
+        {{ 'ADMIN.HIERARCHY.STATS' | translate: { surahs: surahs().length, ayahs: totalAyahs() } }}
+      </p>
+    }
+  </div>
+
+  @if (usingMockData) {
+    <nz-alert
+      class="hierarchy-manager__notice"
+      nzType="info"
+      nzShowIcon
+      [nzMessage]="'ADMIN.HIERARCHY.MOCK_NOTICE' | translate"
+    ></nz-alert>
+  }
+
+  <div class="hierarchy-manager__toolbar">
+    <nz-input-group [nzPrefix]="searchIconTpl" class="hierarchy-manager__search">
+      <input
+        #searchInput
+        nz-input
+        type="search"
+        role="combobox"
+        aria-autocomplete="list"
+        aria-controls="hierarchy-search-results"
+        [attr.aria-expanded]="isSearching()"
+        [attr.aria-activedescendant]="activeResultId()"
+        [attr.aria-label]="'ADMIN.HIERARCHY.SEARCH_LABEL' | translate"
+        [placeholder]="'ADMIN.HIERARCHY.SEARCH_PLACEHOLDER' | translate"
+        (input)="onSearchInput(searchInput.value)"
+        (keydown)="onSearchKeydown($event)"
+      />
+    </nz-input-group>
+    <ng-template #searchIconTpl>
+      <ng-icon name="lucideSearch" aria-hidden="true" />
+    </ng-template>
+    <p id="hierarchy-keyboard-hint" class="hierarchy-manager__hint">
+      {{ 'ADMIN.HIERARCHY.KEYBOARD_HINT' | translate }}
+    </p>
+  </div>
+
+  <nav
+    class="hierarchy-manager__breadcrumb"
+    [attr.aria-label]="'ADMIN.HIERARCHY.BREADCRUMB_LABEL' | translate"
+  >
+    <ol class="admin-breadcrumb hierarchy-manager__crumbs">
+      <li class="hierarchy-manager__crumb">
+        @if (breadcrumb().length) {
+          <button
+            type="button"
+            class="admin-breadcrumb__link hierarchy-manager__crumb-btn"
+            (click)="onRootCrumb()"
+          >
+            {{ 'ADMIN.HIERARCHY.ROOT' | translate }}
+          </button>
+        } @else {
+          <span class="admin-breadcrumb__current" aria-current="location">
+            {{ 'ADMIN.HIERARCHY.ROOT' | translate }}
+          </span>
+        }
+      </li>
+      @for (crumb of breadcrumb(); track crumb.key; let last = $last) {
+        <li class="hierarchy-manager__crumb">
+          <ng-icon
+            name="lucideChevronLeft"
+            class="admin-breadcrumb__sep ltr-flip"
+            aria-hidden="true"
+          />
+          @if (last) {
+            <span class="admin-breadcrumb__current" aria-current="location">
+              {{ crumb.labelKey | translate: crumb.params }}
+            </span>
+          } @else {
+            <button
+              type="button"
+              class="admin-breadcrumb__link hierarchy-manager__crumb-btn"
+              (click)="onCrumb(crumb.key)"
+            >
+              {{ crumb.labelKey | translate: crumb.params }}
+            </button>
+          }
+        </li>
+      }
+    </ol>
+  </nav>
+
+  @if (isSearching()) {
+    <div class="hierarchy-manager__panel">
+      @switch (searchState()) {
+        @case ('error') {
+          <app-state-message
+            icon="lucideAlertCircle"
+            iconVariant="error"
+            [title]="'ADMIN.HIERARCHY.SEARCH_ERROR' | translate"
+            [actionLabel]="'ADMIN.HIERARCHY.RETRY' | translate"
+            (actionClick)="retrySearch()"
+          />
+        }
+        @case ('loaded') {
+          @if (searchResults().length) {
+            <p class="hierarchy-manager__results-count" role="status">
+              {{
+                'ADMIN.HIERARCHY.RESULTS_COUNT'
+                  | translate: { shown: searchResults().length, total: searchTotal() }
+              }}
+            </p>
+            <ul
+              id="hierarchy-search-results"
+              class="hierarchy-manager__results"
+              role="listbox"
+              [attr.aria-label]="'ADMIN.HIERARCHY.RESULTS_LABEL' | translate"
+            >
+              @for (result of searchResults(); track resultKey(result); let i = $index) {
+                <li role="none">
+                  <button
+                    type="button"
+                    role="option"
+                    tabindex="-1"
+                    class="hierarchy-manager__result"
+                    [class.hierarchy-manager__result--active]="i === activeResultIndex()"
+                    [id]="resultId(i)"
+                    [attr.aria-selected]="i === activeResultIndex()"
+                    (click)="openResult(result)"
+                    (mouseenter)="activeResultIndex.set(i)"
+                  >
+                    <span class="hierarchy-manager__result-key" dir="ltr">
+                      {{ result.ayah_key ?? result.surah_number }}
+                    </span>
+                    <span class="hierarchy-manager__result-main">
+                      <span class="hierarchy-manager__result-title">
+                        @if (result.level === 'surah') {
+                          {{
+                            'ADMIN.HIERARCHY.RESULT_SURAH'
+                              | translate: { name: result.surah_name_ar }
+                          }}
+                        } @else {
+                          {{
+                            'ADMIN.HIERARCHY.RESULT_AYAH'
+                              | translate
+                                : { name: result.surah_name_ar, number: result.ayah_number }
+                          }}
+                        }
+                        <span class="hierarchy-manager__result-secondary" lang="en" dir="ltr">
+                          {{ result.surah_name_en }}
+                        </span>
+                      </span>
+                      @if (result.text) {
+                        <span class="hierarchy-manager__result-text" lang="ar" dir="rtl">{{
+                          result.text
+                        }}</span>
+                      }
+                    </span>
+                  </button>
+                </li>
+              }
+            </ul>
+          } @else {
+            <app-state-message
+              icon="lucideSearch"
+              [title]="'ADMIN.HIERARCHY.NO_RESULTS' | translate"
+              [message]="'ADMIN.HIERARCHY.NO_RESULTS_HINT' | translate"
+            />
+          }
+        }
+        @default {
+          <div class="hierarchy-manager__status" role="status">
+            <nz-spin nzSimple nzSize="small"></nz-spin>
+            <span>{{ 'ADMIN.HIERARCHY.SEARCHING' | translate }}</span>
+          </div>
+        }
+      }
+    </div>
+  }
+
+  <div class="hierarchy-manager__panel" [hidden]="isSearching()">
+    @switch (surahsState()) {
+      @case ('loading') {
+        <nz-skeleton
+          class="hierarchy-manager__skeleton"
+          [nzActive]="true"
+          [nzParagraph]="{ rows: 8 }"
+        ></nz-skeleton>
+      }
+      @case ('error') {
+        <app-state-message
+          icon="lucideAlertCircle"
+          iconVariant="error"
+          [title]="'ADMIN.HIERARCHY.LOAD_ERROR_TITLE' | translate"
+          [message]="'ADMIN.HIERARCHY.LOAD_ERROR_MESSAGE' | translate"
+          [actionLabel]="'ADMIN.HIERARCHY.RETRY' | translate"
+          (actionClick)="loadSurahs()"
+        />
+      }
+      @default {
+        @if (rows().length) {
+          <cdk-virtual-scroll-viewport
+            class="hierarchy-manager__tree"
+            role="tree"
+            tabindex="0"
+            aria-describedby="hierarchy-keyboard-hint"
+            [itemSize]="rowHeight"
+            [attr.aria-label]="'ADMIN.HIERARCHY.TREE_LABEL' | translate"
+            [attr.aria-activedescendant]="activeRowId()"
+            (focus)="onTreeFocus()"
+            (keydown)="onTreeKeydown($event)"
+          >
+            <ng-container *cdkVirtualFor="let row of rows(); trackBy: trackRow">
+              @if (row.kind === 'node') {
+                <app-hierarchy-tree-node
+                  [row]="row"
+                  [active]="row.node.key === activeKey()"
+                  (pick)="onRowPick(row)"
+                />
+              } @else {
+                <div
+                  class="hierarchy-manager__placeholder"
+                  role="treeitem"
+                  aria-disabled="true"
+                  aria-selected="false"
+                  [id]="row.id"
+                  [class.hierarchy-manager__placeholder--error]="row.kind === 'error'"
+                  [attr.aria-level]="row.depth"
+                  [style.padding-inline-start.px]="indent(row.depth)"
+                >
+                  @switch (row.kind) {
+                    @case ('loading') {
+                      <nz-spin nzSimple nzSize="small"></nz-spin>
+                      <span>{{ 'ADMIN.HIERARCHY.LOADING_CHILDREN' | translate }}</span>
+                    }
+                    @case ('error') {
+                      <ng-icon name="lucideAlertCircle" aria-hidden="true" />
+                      <span>{{ 'ADMIN.HIERARCHY.CHILDREN_ERROR' | translate }}</span>
+                      <button
+                        nz-button
+                        nzType="link"
+                        nzSize="small"
+                        type="button"
+                        (click)="retry(row.parentKey)"
+                      >
+                        {{ 'ADMIN.HIERARCHY.RETRY' | translate }}
+                      </button>
+                    }
+                    @default {
+                      <span>{{ 'ADMIN.HIERARCHY.EMPTY_CHILDREN' | translate }}</span>
+                    }
+                  }
+                </div>
+              }
+            </ng-container>
+          </cdk-virtual-scroll-viewport>
+        } @else {
+          <app-state-message
+            icon="lucideInbox"
+            [title]="'ADMIN.HIERARCHY.EMPTY_TITLE' | translate"
+            [message]="'ADMIN.HIERARCHY.EMPTY_MESSAGE' | translate"
+          />
+        }
+      }
+    }
+  </div>
+</div>

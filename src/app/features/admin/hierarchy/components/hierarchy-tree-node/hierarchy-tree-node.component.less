@@ -1,0 +1,115 @@
+:host {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  height: 48px;
+  padding-inline-end: 16px;
+  border-bottom: 1px solid var(--admin-border-100);
+  border-inline-start: 3px solid transparent;
+  cursor: pointer;
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--admin-surface-50);
+  }
+}
+
+:host(.hierarchy-tree-node--active) {
+  background: var(--color-primary-50);
+  border-inline-start-color: var(--color-primary-600);
+}
+
+.hierarchy-tree-node {
+  &__toggle {
+    display: inline-flex;
+    flex-shrink: 0;
+    width: 16px;
+    color: var(--admin-text-500);
+  }
+
+  &__index {
+    flex-shrink: 0;
+    min-width: 32px;
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    background: var(--admin-surface-100);
+    color: var(--admin-text-600);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__main {
+    display: flex;
+    flex: 1;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  &__label {
+    color: var(--admin-text-900);
+    font-weight: 600;
+    white-space: nowrap;
+
+    &--text {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-weight: 400;
+      font-size: 1.05rem;
+    }
+
+    &--word {
+      font-size: 1.15rem;
+    }
+
+    &--letter {
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+  }
+
+  &__secondary,
+  &__muted {
+    color: var(--admin-text-500);
+    font-size: 0.8rem;
+    white-space: nowrap;
+  }
+
+  &__meta {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 12px;
+    color: var(--admin-text-500);
+    font-size: 0.8rem;
+    white-space: nowrap;
+
+    .ant-tag {
+      margin: 0;
+    }
+  }
+
+  &__key {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.75rem;
+    color: var(--admin-text-600);
+  }
+
+  &__timing {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    color: var(--color-primary-700);
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (max-width: 576px) {
+    &__secondary,
+    &__count {
+      display: none;
+    }
+  }
+}

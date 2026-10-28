@@ -9,6 +9,9 @@ export const environment = {
   sentryDsn: '',
   webauthnReplaceRpIdWithHostname: false,
   useProgramsMockApi: false,
+  /** Hidden until the portal hierarchy API is live (no mock data outside dev and staging). */
+  hierarchyManager: false,
+  useHierarchyMockApi: false,
   /** Off until the portal API exposes `is_visible` on recitation folders. */
   recitationFolderVisibility: true,
 };
