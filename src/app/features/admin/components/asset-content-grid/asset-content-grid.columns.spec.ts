@@ -183,7 +183,9 @@ describe('AssetContentGridComponent text columns', () => {
     const component = grid();
     const httpMock = TestBed.inject(HttpTestingController);
     const setFilterModel = jasmine.createSpy('setFilterModel');
-    component.onGridReady({ api: { setFilterModel } } as never);
+    component.onGridReady({
+      api: { setFilterModel, getSizesForCurrentTheme: () => ({ rowHeight: 34, headerHeight: 40 }) },
+    } as never);
     httpMock.match((r) => r.url.endsWith('/columns/')).forEach((req) => req.flush(QA)); // the initial load
 
     // Act
@@ -435,6 +437,7 @@ describe('AssetContentGridComponent review fixes', () => {
     return {
       writes,
       api: {
+        getSizesForCurrentTheme: () => ({ rowHeight: 34, headerHeight: 40 }),
         getEditingCells: () => [],
         getFocusedCell: () => ({ rowIndex: 0, column: { getColId: () => focusedColId } }),
         getAllDisplayedColumns: () => columns,

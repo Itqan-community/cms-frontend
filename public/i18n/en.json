@@ -968,7 +968,8 @@
       "MESSAGES": {
         "PUBLISHED": "Changes committed. Publish the version once its changes are approved.",
         "DRAFT_SAVED": "Draft saved",
-        "COLUMN_EDITS_DROPPED": "{{count}} edit(s) of a column that was deleted or renamed elsewhere could not be saved and were discarded."
+        "COLUMN_EDITS_DROPPED": "{{count}} edit(s) of a column that was deleted or renamed elsewhere could not be saved and were discarded.",
+        "GROUP_EDITS_DROPPED": "{{count}} edit(s) were for groups the source language no longer has and were not saved."
       },
       "PASTE": {
         "SELECT_EDITABLE": "Select a Text cell first, then paste.",
@@ -998,7 +999,15 @@
         "CONTENT_FILE_UNPARSEABLE": "The uploaded file could not be parsed.",
         "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "Publish a version for this language before making it available.",
         "VERSION_NUMBER_REQUIRED": "Enter a starting version number for the first version.",
-        "VERSION_NUMBER_INVALID": "Version number must be in the form major.minor, e.g. 7.0."
+        "VERSION_NUMBER_INVALID": "Version number must be in the form major.minor, e.g. 7.0.",
+        "GROUP_RANGE_INVALID": "This range doesn't exist in the Quran, or it ends before it starts.",
+        "GROUP_EXISTS": "This draft already has a group with exactly this range.",
+        "GROUP_NOT_FOUND": "This group no longer exists in the draft.",
+        "GROUP_RANGES_SOURCE_ONLY": "Groups are added, moved and deleted in the source language; translations follow them.",
+        "GROUP_NOT_IN_SOURCE": "A translation can only write text for the source language's groups.",
+        "GROUP_TEXT_REQUIRED": "Write the group's text in at least one column.",
+        "TEMPLATE_NOT_GROUPED": "Only ayah-group and word-group assets have groups.",
+        "ORPHANED_GROUPS": "Move or delete the text of groups the source no longer has: {{groups}}."
       },
       "TEXT_EDITOR": {
         "HINT": "Enter to apply · Shift+Enter for a new line · Esc to cancel",
@@ -1066,7 +1075,31 @@
         "LABELS_HINT": "Labels are optional display names for the editor and the gallery; without one, the key is shown."
       },
       "COLUMN_MENU": "Column menu",
-      "FILTER_ACTIVE": "Filtered"
+      "FILTER_ACTIVE": "Filtered",
+      "GROUPS": {
+        "ADD": "Add group",
+        "DELETE": "Delete group",
+        "DELETE_CONFIRM_TITLE": "Delete this group?",
+        "DELETE_CONFIRM_BODY": "Its text in every column is removed from this draft.",
+        "FROM": "From",
+        "TO": "To",
+        "SURAH": "Surah",
+        "AYAH": "Ayah",
+        "WORD": "Word",
+        "PREVIEW": "Mushaf text of this range",
+        "PREVIEW_TRUNCATED": "Showing the start of a long range.",
+        "PREVIEW_LOADING": "Loading the mushaf text…",
+        "ORPHANED": "Not in source",
+        "ORPHANED_HINT": "The source language no longer has this range. Move this text to the new range, then delete this row.",
+        "ADD_TITLE": "Add a group",
+        "ACTIONS": "Actions",
+        "CONFIRM": "Save",
+        "CANCEL": "Cancel",
+        "ADD_NEXT": "Add next group",
+        "GROW": "Extend the range by one",
+        "SHRINK": "Shorten the range by one",
+        "POSITION_INVALID": "Write a position as surah:ayah (or surah:ayah:word for word groups), e.g. 2:255."
+      }
     },
     "REVIEW": {
       "TITLE": "Review changes",
@@ -1151,6 +1184,8 @@
       "WORD": "Word based",
       "PAGE": "Page based",
       "PAGE_WITH_LAYOUT": "Page based ({{layout}})",
+      "AYAH_GROUP": "Ayah-group based",
+      "WORD_GROUP": "Word-group based",
       "LABEL": "Content template",
       "LAYOUT_LABEL": "Mushaf layout",
       "LAYOUT_PLACEHOLDER": "Select a mushaf layout",

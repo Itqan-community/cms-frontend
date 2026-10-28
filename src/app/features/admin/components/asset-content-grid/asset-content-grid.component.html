@@ -104,6 +104,18 @@
           <ng-icon name="lucideRedo2" />
         </button>
       }
+      @if (canEditGroups()) {
+        <button
+          nz-button
+          nzType="default"
+          type="button"
+          [disabled]="loading() || saving() || publishing() || draftId() === null"
+          (click)="openAddGroup()"
+        >
+          <ng-icon name="lucidePlus" />
+          {{ 'ADMIN.CONTENT_EDITOR.GROUPS.ADD' | translate }}
+        </button>
+      }
       <button
         nz-button
         nzType="default"
@@ -164,27 +176,69 @@
     (keydown)="onKeydown($event)"
   >
     @if (canCreateGrid()) {
-      <ag-grid-angular
-        class="content-grid__table"
-        [theme]="theme"
-        rowModelType="infinite"
-        [readOnlyEdit]="readOnly()"
-        [datasource]="datasource()"
-        [cacheBlockSize]="cacheBlockSize"
-        [getRowId]="getRowId"
-        [loading]="refreshing()"
-        [localeText]="localeText()"
-        [columnDefs]="columnDefs()"
-        [defaultColDef]="defaultColDef"
-        [enableRtl]="rtl()"
-        [stopEditingWhenCellsLoseFocus]="true"
-        [rowSelection]="rowSelection"
-        (gridReady)="onGridReady($event)"
-        (cellValueChanged)="onCellValueChanged($event)"
-        (selectionChanged)="onSelectionChanged()"
-      ></ag-grid-angular>
+      <div class="content-grid__table-wrap">
+        <ag-grid-angular
+          class="content-grid__table"
+          [theme]="theme"
+          rowModelType="infinite"
+          [readOnlyEdit]="readOnly()"
+          [datasource]="datasource()"
+          [cacheBlockSize]="cacheBlockSize"
+          [getRowId]="getRowId"
+          [loading]="refreshing()"
+          [localeText]="localeText()"
+          [columnDefs]="columnDefs()"
+          [defaultColDef]="defaultColDef"
+          [enableRtl]="rtl()"
+          [stopEditingWhenCellsLoseFocus]="true"
+          [rowSelection]="rowSelection"
+          [rowClassRules]="rowClassRules"
+          [pinnedBottomRowData]="addNextSpacer()"
+          [isFullWidthRow]="isAddNextSpacer"
+          [fullWidthCellRenderer]="blankRow"
+          (gridReady)="onGridReady($event)"
+          (bodyScroll)="onBodyScroll($event)"
+          (cellValueChanged)="onCellValueChanged($event)"
+          (selectionChanged)="onSelectionChanged()"
+        ></ag-grid-angular>
+        @if (addNextTop(); as top) {
+          <button
+            nz-button
+            nzType="primary"
+            nzShape="circle"
+            type="button"
+            class="content-grid__add-next"
+            [style.top]="top"
+            nz-tooltip
+            [nzTooltipTitle]="'ADMIN.CONTENT_EDITOR.GROUPS.ADD_NEXT' | translate"
+            [attr.aria-label]="'ADMIN.CONTENT_EDITOR.GROUPS.ADD_NEXT' | translate"
+            [nzLoading]="groupBusy()"
+            [disabled]="
+              loading() || saving() || publishing() || savingDraft() || draftId() === null
+            "
+            (click)="appendGroup()"
+          >
+            @if (!groupBusy()) {
+              <ng-icon name="lucidePlus" />
+            }
+          </button>
+        }
+      </div>
     }
   </nz-spin>
+
+  @if (isGroup()) {
+    <app-group-range-modal
+      [visible]="addGroupOpen()"
+      [template]="effectiveTemplate()!"
+      [columnKeys]="columnKeys()"
+      [columnTitles]="groupColumnTitles()"
+      [busy]="groupBusy()"
+      [serverError]="groupError()"
+      (confirmed)="confirmGroup($event)"
+      (cancelled)="closeGroupModal()"
+    ></app-group-range-modal>
+  }
 
   <nz-modal
     [nzVisible]="addLanguageVisible()"
