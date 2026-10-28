@@ -116,4 +116,29 @@ describe('AdminTenantService', () => {
     expect(ready).toBeTrue();
     expect(service.publishers()[0].permissions).toEqual([]);
   });
+
+  it('ignores a publisher response that arrives after the user changed and loads the new user’s', () => {
+    let ready: boolean | undefined;
+    service.ensureReady().subscribe((value) => (ready = value));
+    const stale = httpMock.expectOne(`${adminApi}/publishers/me/`);
+
+    currentUser.set({ id: 'u2' });
+    stale.flush([{ id: 10, name: 'A', slug: 'a', icon_url: null, permissions: ['old'] }]);
+    expect(ready).toBeUndefined();
+
+    httpMock
+      .expectOne(`${adminApi}/publishers/me/`)
+      .flush([{ id: 20, name: 'B', slug: 'b', icon_url: null, permissions: ['new'] }]);
+    expect(ready).toBeTrue();
+    expect(service.publishers().map((p) => p.id)).toEqual([20]);
+    expect(service.selectedPublisherId()).toBe(20);
+  });
+
+  it('does not share a pending request of the previous user', () => {
+    service.ensureReady().subscribe();
+    currentUser.set({ id: 'u2' });
+    service.ensureReady().subscribe();
+
+    expect(httpMock.match(`${adminApi}/publishers/me/`).length).toBe(2);
+  });
 });

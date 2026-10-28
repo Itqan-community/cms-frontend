@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { computed, inject, Injectable, Injector, signal } from '@angular/core';
-import { catchError, finalize, map, Observable, of, shareReplay } from 'rxjs';
+import { catchError, finalize, map, Observable, of, shareReplay, switchMap } from 'rxjs';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { environment } from '../../../../environments/environment';
 
@@ -48,6 +48,7 @@ export class AdminTenantService {
   private readonly injector = inject(Injector);
   private readonly apiUrl = `${environment.ADMIN_API_BASE_URL}/publishers/me/`;
   private loadOnce$?: Observable<boolean>;
+  private loadOnceUserId: string | null = null;
 
   /** The loaded list and whose it is: sign-out and sign-in do not reload the page. */
   private readonly loaded = signal<{ userId: string | null; publishers: MyPublisherOut[] }>({
@@ -78,28 +79,38 @@ export class AdminTenantService {
       storeAdminTenantId(this.selectedPublisherId());
       return of(true);
     }
-    if (this.loadOnce$) {
+    const userId = this.currentUserId();
+    if (this.loadOnce$ && this.loadOnceUserId === userId) {
       return this.loadOnce$;
     }
 
     this.isLoading.set(true);
-    const userId = this.currentUserId();
-    const request$ = this.http.get<MyPublisherOut[]>(this.apiUrl).pipe(
-      map((publishers) => this.hydratePublishers(userId, publishers)),
+    // A response for a user who is no longer signed in is dropped, and the current user's
+    // publishers are loaded instead.
+    const isStale = () => userId !== this.currentUserId();
+    const request$: Observable<boolean> = this.http.get<MyPublisherOut[]>(this.apiUrl).pipe(
+      map((publishers) => (isStale() ? null : this.hydratePublishers(userId, publishers))),
       catchError(() => {
+        if (isStale()) {
+          return of(null);
+        }
         this.loaded.set({ userId, publishers: [] });
         this.selectedPublisherId.set(null);
         storeAdminTenantId(null);
         return of(false);
       }),
       finalize(() => {
-        this.isLoading.set(false);
-        this.loadOnce$ = undefined;
+        if (this.loadOnce$ === request$) {
+          this.isLoading.set(false);
+          this.loadOnce$ = undefined;
+        }
       }),
+      switchMap((ready) => (ready === null ? this.ensureReady() : of(ready))),
       shareReplay({ bufferSize: 1, refCount: false })
     );
 
     this.loadOnce$ = request$;
+    this.loadOnceUserId = userId;
     return request$;
   }
 
