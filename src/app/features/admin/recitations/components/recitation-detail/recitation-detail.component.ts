@@ -1083,11 +1083,12 @@ export class RecitationDetailComponent implements OnInit {
     }
   }
 
-  /** Prompts, then stops every in-flight / queued upload. */
+  /** Applies the chosen "Files at a time" limit; the orchestrator validates and saves it. */
   onUploadConcurrencyChange(value: number): void {
     this.uploadOrchestrator.setFileConcurrency(value);
   }
 
+  /** Prompts, then stops every in-flight / queued upload. */
   confirmAbortAllUploads(): void {
     if (!this.hasInFlightUploadRows()) return;
     this.modal.confirm({

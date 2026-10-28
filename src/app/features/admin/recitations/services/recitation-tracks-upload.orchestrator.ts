@@ -131,7 +131,7 @@ export class RecitationTracksUploadOrchestratorService {
       ac.abort();
     }
     for (const job of this.pendingUploads.splice(0)) {
-      job.done();
+      this.settleUnstartedUpload(job);
     }
   }
 
@@ -169,7 +169,7 @@ export class RecitationTracksUploadOrchestratorService {
       const job = this.pendingUploads.shift();
       if (!job) return;
       if (job.signal.aborted) {
-        job.done();
+        this.settleUnstartedUpload(job);
         continue;
       }
       this.activeUploadCount++;
@@ -179,6 +179,12 @@ export class RecitationTracksUploadOrchestratorService {
         this.startQueuedUploads();
       });
     }
+  }
+
+  /** A queued file that never started: reset its row so it does not look in-flight forever. */
+  private settleUnstartedUpload(job: QueuedFileUpload): void {
+    job.cbs.onRowPatch(job.file.filename, { phase: 'cancelled', progress: 0, uploadedBytes: 0 });
+    job.done();
   }
 
   private async runQueuedUpload(job: QueuedFileUpload): Promise<void> {

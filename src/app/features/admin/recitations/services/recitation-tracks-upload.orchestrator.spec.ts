@@ -148,4 +148,22 @@ describe('RecitationTracksUploadOrchestratorService', () => {
 
     expect(startedFilenames).toEqual(['001.mp3']);
   });
+
+  it('marks a queued single-file retry cancelled when all uploads are aborted', async () => {
+    setup(null);
+    const retryCbs = { onRowPatch: jasmine.createSpy('retryOnRowPatch') };
+    const batch = service.uploadAllFiles(1, [file('001.mp3')], cbs);
+    const retry = service.uploadAllFiles(1, [file('002.mp3')], retryCbs);
+    await waitFor(() => pendingStarts.length === 1);
+
+    service.abortCurrentUploadRun();
+    pendingStarts.shift()?.release();
+    await Promise.all([batch, retry]);
+
+    expect(retryCbs.onRowPatch).toHaveBeenCalledWith('002.mp3', {
+      phase: 'cancelled',
+      progress: 0,
+      uploadedBytes: 0,
+    });
+  });
 });
