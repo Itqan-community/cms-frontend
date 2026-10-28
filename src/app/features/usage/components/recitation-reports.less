@@ -1,0 +1,76 @@
+// Shared by the recitation report sections (insights and catalog).
+.recitation-card {
+  background: #fff;
+  border: 1px solid var(--color-neutral-50);
+  border-radius: var(--radius-xl);
+  padding: 16px;
+  min-width: 0;
+
+  &__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-neutral-800);
+  }
+
+  &__hint,
+  &__empty {
+    margin: 0;
+    font-size: 12px;
+    color: var(--color-neutral-400);
+  }
+
+  &__error {
+    margin: 0;
+    color: var(--color-red-600);
+  }
+}
+
+.recitation-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 6px 8px;
+    border-bottom: 1px solid var(--color-neutral-50);
+    text-align: start;
+    font-variant-numeric: tabular-nums;
+  }
+
+  th {
+    font-weight: 600;
+    color: var(--color-neutral-500);
+  }
+
+  &__num {
+    text-align: end !important;
+  }
+
+  &__up {
+    color: var(--color-primary-700);
+  }
+
+  &__down {
+    color: var(--color-red-600);
+  }
+}
+
+.recitation-tag {
+  display: inline-block;
+  padding: 0 6px;
+  border-radius: var(--radius-md);
+  font-size: 11px;
+  background: var(--color-primary-50);
+  color: var(--color-primary-700);
+  white-space: nowrap;
+}

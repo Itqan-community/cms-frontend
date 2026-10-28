@@ -1,4 +1,10 @@
-import { UsageFilters, UsageGranularity, UsageMetric, UsagePreset } from '../models/usage.models';
+import {
+  UsageComparison,
+  UsageFilters,
+  UsageGranularity,
+  UsageMetric,
+  UsagePreset,
+} from '../models/usage.models';
 
 const DAY_MS = 86_400_000;
 const PRESET_DAYS: Record<Exclude<UsagePreset, 'custom'>, number> = {
@@ -9,6 +15,12 @@ const PRESET_DAYS: Record<Exclude<UsagePreset, 'custom'>, number> = {
 };
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const FILTER_PARAMS = ['category', 'channel', 'platform', 'country'] as const;
+/** URL parameter -> id filter. */
+const ID_PARAMS = [
+  ['app', 'app'],
+  ['reciter', 'reciter_id'],
+  ['riwayah', 'riwayah_id'],
+] as const;
 
 export const USAGE_METRICS: UsageMetric[] = [
   'plays',
@@ -21,6 +33,7 @@ export const USAGE_METRICS: UsageMetric[] = [
   'unique_listeners',
   'unique_downloaders',
   'unique_end_users',
+  'listening_seconds',
 ];
 
 /** Dashboard state kept in the URL so reloads and links keep the same view. */
@@ -29,7 +42,10 @@ export interface UsageViewState {
   filters: UsageFilters;
   metric: UsageMetric;
   split: string | null;
+  compare: UsageComparison;
 }
+
+const COMPARISONS: UsageComparison[] = ['previous', 'year', 'hijri_year'];
 
 export function toIsoDay(date: Date): string {
   return date.toISOString().slice(0, 10);
@@ -77,14 +93,19 @@ export function usageStateFromParams(
       filters[name] = params[name];
     }
   }
-  const app = Number(params['app']);
-  if (Number.isInteger(app) && app > 0) {
-    filters.app = app;
+  for (const [param, name] of ID_PARAMS) {
+    const id = Number(params[param]);
+    if (Number.isInteger(id) && id > 0) {
+      filters[name] = id;
+    }
   }
   const metric = USAGE_METRICS.includes(params['metric'] as UsageMetric)
     ? (params['metric'] as UsageMetric)
     : 'plays';
-  return { preset, filters, metric, split: params['split'] || null };
+  const compare = COMPARISONS.includes(params['compare'] as UsageComparison)
+    ? (params['compare'] as UsageComparison)
+    : 'previous';
+  return { preset, filters, metric, split: params['split'] || null, compare };
 }
 
 export function usageStateToParams(state: UsageViewState): Record<string, string> {
@@ -99,12 +120,18 @@ export function usageStateToParams(state: UsageViewState): Record<string, string
       params[name] = value;
     }
   }
-  if (state.filters.app) {
-    params['app'] = String(state.filters.app);
+  for (const [param, name] of ID_PARAMS) {
+    const id = state.filters[name];
+    if (id) {
+      params[param] = String(id);
+    }
   }
   params['metric'] = state.metric;
   if (state.split) {
     params['split'] = state.split;
+  }
+  if (state.compare !== 'previous') {
+    params['compare'] = state.compare;
   }
   return params;
 }
@@ -151,4 +178,70 @@ export function granularityFor(start: string, end: string): UsageGranularity {
     return 'week';
   }
   return 'month';
+}
+
+// -- Comparison windows ------------------------------------------------------------------------
+
+const HIJRI_YEAR_DAYS = 354.367;
+const HIJRI_PARTS = new Intl.DateTimeFormat('en-u-ca-islamic-umalqura-nu-latn', {
+  year: 'numeric',
+  month: 'numeric',
+  day: 'numeric',
+  timeZone: 'UTC',
+});
+
+function hijriParts(date: Date): { year: number; month: number; day: number } {
+  const parts = Object.fromEntries(
+    HIJRI_PARTS.formatToParts(date).map((part) => [part.type, part.value])
+  );
+  return {
+    year: parseInt(parts['year'], 10),
+    month: Number(parts['month']),
+    day: Number(parts['day']),
+  };
+}
+
+/** The same Gregorian date a year earlier (29 Feb → 28 Feb). */
+function lastGregorianYear(date: Date): Date {
+  const year = date.getUTCFullYear() - 1;
+  const month = date.getUTCMonth();
+  const lastDay = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  return new Date(Date.UTC(year, month, Math.min(date.getUTCDate(), lastDay)));
+}
+
+/**
+ * The same Umm al-Qura date a Hijri year earlier (e.g. 1 Ramadan 1448 → 1 Ramadan 1447). When
+ * that month has no day 30, the month's last day.
+ */
+function lastHijriYear(date: Date): Date {
+  const target = hijriParts(date);
+  const guess = date.getTime() - Math.round(HIJRI_YEAR_DAYS) * DAY_MS;
+  let fallback: Date | null = null;
+  for (let offset = -3; offset <= 3; offset++) {
+    const candidate = new Date(guess + offset * DAY_MS);
+    const parts = hijriParts(candidate);
+    if (parts.year !== target.year - 1 || parts.month !== target.month) {
+      continue;
+    }
+    if (parts.day === target.day) {
+      return candidate;
+    }
+    if (parts.day < target.day && (!fallback || candidate > fallback)) {
+      fallback = candidate;
+    }
+  }
+  return fallback ?? new Date(guess);
+}
+
+/** The window the trend is compared with, for the year comparisons (`previous` comes from the API). */
+export function comparisonRange(
+  filters: Pick<UsageFilters, 'start_date' | 'end_date'>,
+  compare: Exclude<UsageComparison, 'previous'>
+): { start_date: string; end_date: string } {
+  const shift = compare === 'year' ? lastGregorianYear : lastHijriYear;
+  const day = (value: string) => new Date(`${value}T00:00:00Z`);
+  return {
+    start_date: toIsoDay(shift(day(filters.start_date))),
+    end_date: toIsoDay(shift(day(filters.end_date))),
+  };
 }

@@ -324,6 +324,11 @@ cards as the sidebar.
 | `audio/`           | Audio management      | —                                   | Routes defined                                                                                                                                                                                                                                                                                                                               |
 | `software/`        | Software management   | —                                   | Routes defined                                                                                                                                                                                                                                                                                                                               |
 
+**Recitation tracks upload:** `RecitationTracksUploadOrchestratorService` sends files in 8 MB
+multipart parts through one page-wide queue shared by batches and single-file retries. The user
+picks how many files upload at once (1–4, default 1 for slow connections) beside the Upload button;
+the choice is kept in `localStorage` (`cms.recitationTracksUploadConcurrency`).
+
 **Recitation folders (variants):** A folder is the same recitation re-rendered at one audio quality,
 optionally with added effects. The vocabulary (`RecitationFolderQuality` × `hasFx`) is
 **frontend-owned** and carried in the folder's `name_ar` / `name_en`, because the portal API accepts
@@ -494,30 +499,34 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 ### Usage reports (`src/app/features/usage/`)
 
 **Purpose:** Usage dashboards on four surfaces, on the backend reports API (cms-backend spec
-`2026-10-18-usage-reports-design.md` §9/§20; plan
+`2026-10-18-usage-reports-design.md` §9/§20/§21; plan
 `docs/superpowers/plans/2026-10-18-usage-reports-4-frontend.md`).
 
 | File                               | Type      | Purpose                                                                                                                                                                            |
 | ---------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `models/usage.models.ts`           | Types     | API contract (summary, timeseries, breakdown, reconciliation, public counts); `USAGE_OTHER_KEY`                                                                                    |
 | `services/usage-api.service.ts`    | Service   | One method per report with a `scope` (`publisher` → `/portal/usage/`, `admin` → `/portal/admin/usage/`, `developer` → `/cms-api/developers/usage/`); public counts → `null` on 404 |
-| `usage-echarts.ts`                 | Setup     | Tree-shaken ECharts (line, bar, pie, heatmap); loaded lazily by the chart component (own chunk)                                                                                    |
-| `utils/usage-chart-options.ts`     | Util      | Pure option builders (trend, donut, bar, hour-of-week heatmap); RTL mirrors axes and legends; `"<3"` as 0 + label                                                                  |
+| `usage-echarts.ts`                 | Setup     | Tree-shaken ECharts (line, bar, pie, heatmap, mark points); loaded lazily by the chart component (own chunk)                                                                       |
+| `utils/usage-chart-options.ts`     | Util      | Pure option builders (trend with spike marks, donut, bar, hour-of-week heatmap, listener growth); Hijri axis labels; RTL mirrors axes and legends; `"<3"` as 0 + label             |
 | `utils/usage-filters.util.ts`      | Util      | Presets, URL query-param state, compact numbers / % change per language, granularity by range                                                                                      |
 | `utils/usage-dashboard.profile.ts` | Util      | Headline cards, metrics and panels per scope / asset category (spec §8); `itemLabel` (countries/languages via `Intl.DisplayNames`)                                                 |
 | `components/usage-chart/`          | Component | Titled chart card: loading / empty / error (retry) / view-as-table                                                                                                                 |
 | `components/usage-dashboard/`      | Component | Filter bar (URL state on pages, local on asset sections), headline cards, trend + split, panels, CSV export, last-updated + API disclaimers                                        |
 | `components/usage-leaderboard/`    | Component | Admin: top publishers / assets with previous-period change                                                                                                                         |
 | `components/usage-unseen-traffic/` | Component | Admin: R2 reads vs edge requests (unseen traffic)                                                                                                                                  |
+| `components/recitation-insights/`  | Component | Recitation dashboards (asset tab + overview): listener growth, weekly cohorts, countries/apps first reached, gallery funnel, asset surah coverage                                  |
+| `components/recitation-catalog/`   | Component | Recitation overview only: this week's top / rising recitations, gallery search terms (top / no results), incomplete recitations                                                    |
 | `components/asset-usage-section/`  | Component | "Usage" section on font/mushaf/tafsir/translation/recitation admin detail pages (`portal_read_usage`)                                                                              |
 | `components/asset-usage-counts/`   | Component | Gallery asset page "plays · downloads · apps"; hidden unless the backend returns 200                                                                                               |
 | `pages/developer-usage/`           | Page      | `/account/usage` (developer scope), linked from `/account/api-keys`                                                                                                                |
 
-`/admin/usage` (`features/admin/usage/`): Dashboard tab for everyone with `portal_read_usage`; Itqan
-admins also get a publisher picker, Leaderboard and Unseen traffic; the Mixpanel iframe is the
-"Legacy board" tab (loaded when opened) until the usage-reports cutover. `/account/api-keys` shows
-and edits each key's public app slug (`app_slug`). The global error toast skips
-`usage_counts_disabled`.
+`/admin/usage` (`features/admin/usage/`): Dashboard and Recitations tabs for everyone with
+`portal_read_usage` (Recitations = the dashboard fixed to the recitation category, local state:
+reciter / riwayah filters, listening hours, recitation insights and catalog; picking "Recitations"
+in the Dashboard category filter shows the same profile); Itqan admins also get a publisher picker,
+Leaderboard and Unseen traffic; the Mixpanel iframe is the "Legacy board" tab (loaded when opened)
+until the usage-reports cutover. `/account/api-keys` shows and edits each key's public app slug
+(`app_slug`). The global error toast skips `usage_counts_disabled`.
 
 ### 6. Error (`src/app/features/error/`)
 

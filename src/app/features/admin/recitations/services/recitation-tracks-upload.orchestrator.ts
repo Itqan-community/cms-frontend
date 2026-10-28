@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import type {
@@ -7,9 +7,33 @@ import type {
 } from '../models/recitation-tracks.models';
 import { RecitationsService } from './recitations.service';
 
-export const RECITATION_TRACKS_CHUNK_SIZE = 32 * 1024 * 1024;
-export const RECITATION_TRACKS_FILE_CONCURRENCY = 4;
+export const RECITATION_TRACKS_CHUNK_SIZE = 8 * 1024 * 1024;
+/** How many files may upload at once; the user picks one, remembered per browser. */
+export const RECITATION_TRACKS_CONCURRENCY_OPTIONS: readonly number[] = [1, 2, 3, 4];
+export const RECITATION_TRACKS_CONCURRENCY_STORAGE_KEY = 'cms.recitationTracksUploadConcurrency';
+/** One at a time by default so slow connections are not split across several files. */
+const DEFAULT_FILE_CONCURRENCY = 1;
 const PUT_MAX_ATTEMPTS = 3;
+
+interface QueuedFileUpload {
+  assetId: number;
+  file: { filename: string; blob: File };
+  cbs: UploadOrchestratorCallbacks;
+  signal: AbortSignal;
+  folderId?: number | null;
+  done: () => void;
+}
+
+function readStoredConcurrency(): number {
+  try {
+    const stored = Number(localStorage.getItem(RECITATION_TRACKS_CONCURRENCY_STORAGE_KEY));
+    return RECITATION_TRACKS_CONCURRENCY_OPTIONS.includes(stored)
+      ? stored
+      : DEFAULT_FILE_CONCURRENCY;
+  } catch {
+    return DEFAULT_FILE_CONCURRENCY;
+  }
+}
 
 export interface UploadOrchestratorCallbacks {
   onRowPatch: (filename: string, patch: Partial<RecitationTrackUploadRowState>) => void;
@@ -83,11 +107,31 @@ export class RecitationTracksUploadOrchestratorService {
   private readonly fileAbortControllers = new Map<string, AbortController>();
   /** Ensures only one logical upload runs per filename at a time (avoids orphaned runs finishing after abort / double-finish). */
   private readonly perFileUploadChain = new Map<string, Promise<void>>();
+  /** Files waiting for a slot, shared by every batch and retry so the limit holds page-wide. */
+  private readonly pendingUploads: QueuedFileUpload[] = [];
+  private activeUploadCount = 0;
 
-  /** Aborts every in-flight batch (all workers + PUTs). */
+  readonly fileConcurrency = signal(readStoredConcurrency());
+
+  /** Raising the limit starts queued files now; lowering it lets in-flight files finish. */
+  setFileConcurrency(value: number): void {
+    if (!RECITATION_TRACKS_CONCURRENCY_OPTIONS.includes(value)) return;
+    this.fileConcurrency.set(value);
+    try {
+      localStorage.setItem(RECITATION_TRACKS_CONCURRENCY_STORAGE_KEY, String(value));
+    } catch {
+      // Storage unavailable (private mode / blocked): the choice lasts for this page only.
+    }
+    this.startQueuedUploads();
+  }
+
+  /** Aborts every in-flight batch (all queued files + PUTs). */
   abortCurrentUploadRun(): void {
     for (const ac of this.activeRunControllers) {
       ac.abort();
+    }
+    for (const job of this.pendingUploads.splice(0)) {
+      this.settleUnstartedUpload(job);
     }
   }
 
@@ -107,39 +151,55 @@ export class RecitationTracksUploadOrchestratorService {
     const signal = ac.signal;
 
     try {
-      const queue = [...files];
-      const workers = Array.from({ length: RECITATION_TRACKS_FILE_CONCURRENCY }, () =>
-        this.worker(assetId, queue, cbs, signal, folderId)
+      const finished = files.map(
+        (file) =>
+          new Promise<void>((done) => {
+            this.pendingUploads.push({ assetId, file, cbs, signal, folderId, done });
+          })
       );
-      await Promise.all(workers);
+      this.startQueuedUploads();
+      await Promise.all(finished);
     } finally {
       this.activeRunControllers.delete(ac);
     }
   }
 
-  private async worker(
-    assetId: number,
-    queue: { filename: string; blob: File }[],
-    cbs: UploadOrchestratorCallbacks,
-    signal: AbortSignal,
-    folderId?: number | null
-  ): Promise<void> {
-    while (queue.length > 0) {
-      if (signal.aborted) return;
-      const item = queue.shift();
-      if (!item) return;
-      try {
-        await this.uploadOneFile(assetId, item, cbs, signal, folderId);
-      } catch (err) {
-        if (err instanceof DOMException && err.name === 'AbortError') {
-          continue;
-        }
-        cbs.onRowPatch(item.filename, {
-          phase: 'failed',
-          errorMessage: this.formatUploadError(err),
-          progress: 0,
-        });
+  private startQueuedUploads(): void {
+    while (this.activeUploadCount < this.fileConcurrency()) {
+      const job = this.pendingUploads.shift();
+      if (!job) return;
+      if (job.signal.aborted) {
+        this.settleUnstartedUpload(job);
+        continue;
       }
+      this.activeUploadCount++;
+      void this.runQueuedUpload(job).finally(() => {
+        this.activeUploadCount--;
+        job.done();
+        this.startQueuedUploads();
+      });
+    }
+  }
+
+  /** A queued file that never started: reset its row so it does not look in-flight forever. */
+  private settleUnstartedUpload(job: QueuedFileUpload): void {
+    job.cbs.onRowPatch(job.file.filename, { phase: 'cancelled', progress: 0, uploadedBytes: 0 });
+    job.done();
+  }
+
+  private async runQueuedUpload(job: QueuedFileUpload): Promise<void> {
+    const { assetId, file, cbs, signal, folderId } = job;
+    try {
+      await this.uploadOneFile(assetId, file, cbs, signal, folderId);
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        return;
+      }
+      cbs.onRowPatch(file.filename, {
+        phase: 'failed',
+        errorMessage: this.formatUploadError(err),
+        progress: 0,
+      });
     }
   }
 

@@ -15,7 +15,8 @@ export type UsageMetric =
   | 'unique_listeners'
   | 'unique_downloaders'
   | 'unique_end_users'
-  | 'views';
+  | 'views'
+  | 'listening_seconds';
 
 export type UsageGranularity = 'hour' | 'day' | 'week' | 'month';
 
@@ -31,9 +32,22 @@ export type UsageDimension =
   | 'kind'
   | 'endpoint'
   | 'hour_of_week'
-  | 'publisher';
+  | 'publisher'
+  | 'reciter'
+  | 'riwayah'
+  | 'qiraah';
 
 export type UsagePreset = '7d' | '30d' | '90d' | '12m' | 'custom';
+
+/** A report date range, as shared between the tabs of the usage page. */
+export interface UsageRange {
+  preset: UsagePreset;
+  start_date: string;
+  end_date: string;
+}
+
+/** What the trend's dashed line compares with: the window just before, or the same dates a year ago. */
+export type UsageComparison = 'previous' | 'year' | 'hijri_year';
 
 /** Report filters; dates are inclusive UTC days (`YYYY-MM-DD`). */
 export interface UsageFilters {
@@ -45,6 +59,8 @@ export interface UsageFilters {
   platform?: string | null;
   country?: string | null;
   app?: number | null;
+  reciter_id?: number | null;
+  riwayah_id?: number | null;
   /** Admin scope only. */
   publisher_id?: number | null;
 }
@@ -146,7 +162,96 @@ export interface BreakdownOptions {
   limit?: number;
   compare?: boolean;
   tz?: string;
+  /** `growth`: largest increase over the previous period first (implies `compare`). */
+  order?: 'value' | 'growth';
 }
 
 /** Key the API uses for the folded rest of a split series. */
 export const USAGE_OTHER_KEY = '__other__';
+
+// -- Recitation reports (backend spec §21) ------------------------------------------------------
+
+export interface ListenerPoint {
+  t: string;
+  /** First seen in this bucket. */
+  new: number;
+  /** Active in this bucket and first seen before it. */
+  returning: number;
+  /** First seen up to the end of this bucket. */
+  cumulative: number;
+}
+
+export interface UsageListeners {
+  granularity: UsageGranularity;
+  points: ListenerPoint[];
+  /** Set when the range started before the events kept; the report starts here instead. */
+  clamped_start: string | null;
+  data_updated_at: string | null;
+}
+
+export interface ListenerCohort {
+  /** Monday of the week the cohort was first seen. */
+  week: string;
+  size: number;
+  /** Share active in week +0, +1, … up to the range end. */
+  retention: number[];
+}
+
+export interface UsageCohorts {
+  cohorts: ListenerCohort[];
+  clamped_start: string | null;
+  data_updated_at: string | null;
+}
+
+export interface FirstSeenItem {
+  key: string;
+  label: string | null;
+  first_seen: string;
+  /** First seen inside the range; null when the range was clamped. */
+  new: boolean | null;
+  plays: number;
+}
+
+export interface UsageFirstSeen {
+  by: 'country' | 'app';
+  items: FirstSeenItem[];
+  clamped_start: string | null;
+  data_updated_at: string | null;
+}
+
+export interface SearchTerm {
+  term: string;
+  searchers: number;
+  searches: number;
+  zero_results: number;
+  latest_results: number;
+  match: { type: 'reciter' | 'riwayah' | 'qiraah'; id: number; label: string } | null;
+}
+
+export interface UsageSearchTerms {
+  items: SearchTerm[];
+}
+
+export interface RecitationCoverageItem {
+  asset_id: number;
+  name: string;
+  surahs: number;
+  missing: number[];
+  /** Missing surahs, most played across every recitation first. */
+  missing_by_demand: number[];
+  timed_share: number | null;
+}
+
+export interface UsageRecitationCoverage {
+  items: RecitationCoverageItem[];
+  demand_days: number;
+  data_updated_at: string | null;
+}
+
+export interface CoverageOptions {
+  asset_id?: number | null;
+  reciter_id?: number | null;
+  riwayah_id?: number | null;
+  incomplete_only?: boolean;
+  limit?: number;
+}

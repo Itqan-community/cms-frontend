@@ -1,0 +1,142 @@
+<div class="recitation-catalog">
+  <section class="recitation-card">
+    <header class="recitation-card__header">
+      <h3 class="recitation-card__title">{{ 'USAGE.RECITATION.TOP_WEEK' | translate }}</h3>
+      <nz-segmented
+        nzSize="small"
+        [nzOptions]="orderOptions()"
+        [ngModel]="order()"
+        (ngModelChange)="setOrder($event)"
+      ></nz-segmented>
+    </header>
+    @if (week().loading) {
+      <p class="recitation-card__empty">…</p>
+    } @else if (week().error) {
+      <p class="recitation-card__error" role="alert">{{ 'USAGE.LOAD_ERROR' | translate }}</p>
+    } @else if (!weekRows().length) {
+      <p class="recitation-card__empty">{{ 'USAGE.NO_DATA' | translate }}</p>
+    } @else {
+      <table class="recitation-table">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">{{ 'USAGE.RECITATION.RECITATION' | translate }}</th>
+            <th scope="col" class="recitation-table__num">
+              {{ 'USAGE.METRICS.plays' | translate }}
+            </th>
+            <th scope="col" class="recitation-table__num">
+              {{ 'USAGE.RECITATION.LAST_WEEK' | translate }}
+            </th>
+            <th scope="col" class="recitation-table__num">{{ 'USAGE.CHANGE' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of weekRows(); track row.rank) {
+            <tr>
+              <td>{{ row.rank }}</td>
+              <td>{{ row.label }}</td>
+              <td class="recitation-table__num">{{ row.value }}</td>
+              <td class="recitation-table__num">{{ row.previous }}</td>
+              <td
+                class="recitation-table__num"
+                [class.recitation-table__up]="row.change?.direction === 'up'"
+                [class.recitation-table__down]="row.change?.direction === 'down'"
+              >
+                {{ row.change?.text ?? '—' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+
+  <section class="recitation-card">
+    <header class="recitation-card__header">
+      <h3 class="recitation-card__title">{{ 'USAGE.RECITATION.SEARCH_TITLE' | translate }}</h3>
+      <nz-segmented
+        nzSize="small"
+        [nzOptions]="searchOptions()"
+        [ngModel]="zeroResults() ? 'zero' : 'top'"
+        (ngModelChange)="setSearchView($event)"
+      ></nz-segmented>
+    </header>
+    <p class="recitation-card__hint">{{ 'USAGE.RECITATION.SEARCH_HINT' | translate }}</p>
+    @if (searches().loading) {
+      <p class="recitation-card__empty">…</p>
+    } @else if (searches().error) {
+      <p class="recitation-card__error" role="alert">{{ 'USAGE.LOAD_ERROR' | translate }}</p>
+    } @else if (!searchRows().length) {
+      <p class="recitation-card__empty">{{ 'USAGE.NO_DATA' | translate }}</p>
+    } @else {
+      <table class="recitation-table">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'USAGE.RECITATION.TERM' | translate }}</th>
+            <th scope="col" class="recitation-table__num">
+              {{ 'USAGE.RECITATION.SEARCHERS' | translate }}
+            </th>
+            <th scope="col" class="recitation-table__num">
+              {{ 'USAGE.RECITATION.NO_RESULT_SHARE' | translate }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of searchRows(); track row.term) {
+            <tr>
+              <td>
+                <bdi>{{ row.term }}</bdi>
+                @if (row.match) {
+                  <span class="recitation-tag">{{ row.match }}</span>
+                }
+              </td>
+              <td class="recitation-table__num">{{ row.searchers }}</td>
+              <td class="recitation-table__num">{{ row.zeroShare }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+
+  <section class="recitation-card recitation-catalog__wide">
+    <header class="recitation-card__header">
+      <h3 class="recitation-card__title">{{ 'USAGE.RECITATION.COVERAGE_TITLE' | translate }}</h3>
+    </header>
+    <p class="recitation-card__hint">
+      {{
+        'USAGE.RECITATION.COVERAGE_HINT' | translate: { days: coverage().data?.demand_days ?? 90 }
+      }}
+    </p>
+    @if (coverage().loading) {
+      <p class="recitation-card__empty">…</p>
+    } @else if (coverage().error) {
+      <p class="recitation-card__error" role="alert">{{ 'USAGE.LOAD_ERROR' | translate }}</p>
+    } @else if (!coverageRows().length) {
+      <p class="recitation-card__empty">{{ 'USAGE.RECITATION.ALL_COMPLETE' | translate }}</p>
+    } @else {
+      <table class="recitation-table">
+        <thead>
+          <tr>
+            <th scope="col">{{ 'USAGE.RECITATION.RECITATION' | translate }}</th>
+            <th scope="col">{{ 'USAGE.RECITATION.SURAHS' | translate }}</th>
+            <th scope="col">{{ 'USAGE.RECITATION.MISSING' | translate }}</th>
+            <th scope="col" class="recitation-table__num">
+              {{ 'USAGE.RECITATION.TIMINGS' | translate }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of coverageRows(); track row.id) {
+            <tr>
+              <td>{{ row.name }}</td>
+              <td>{{ row.surahs }}</td>
+              <td>{{ row.missing }}</td>
+              <td class="recitation-table__num">{{ row.timed }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+</div>

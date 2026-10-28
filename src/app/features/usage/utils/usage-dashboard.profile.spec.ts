@@ -18,10 +18,38 @@ describe('dashboardProfile', () => {
 
   it('recitation assets show listeners, surahs and the hour-of-week heatmap', () => {
     const profile = dashboardProfile('publisher', 'recitation', 7);
-    expect(profile.headline).toEqual(['plays', 'unique_listeners', 'integrating_apps', 'requests']);
+    expect(profile.headline).toEqual([
+      'plays',
+      'unique_listeners',
+      'listening_seconds',
+      'integrating_apps',
+    ]);
+    expect(profile.recitation).toBeTrue();
+    expect(profile.showReciterFilters).toBeFalse();
     expect(profile.panels.map((panel) => panel.by)).toContain('surah');
     expect(profile.panels.find((panel) => panel.by === 'hour_of_week')?.chart).toBe('heatmap');
     expect(profile.showCategoryFilter).toBeFalse();
+  });
+
+  it('the recitation overview adds reciter filters, top reciters and the recitation reports', () => {
+    const profile = dashboardProfile('admin', 'recitation', null);
+    expect(profile.recitation).toBeTrue();
+    expect(profile.showReciterFilters).toBeTrue();
+    expect(profile.splits).toContain('riwayah');
+    expect(profile.panels.map((panel) => panel.by)).toEqual([
+      'reciter',
+      'surah',
+      'asset',
+      'country',
+      'app',
+      'platform',
+    ]);
+  });
+
+  it('developers never get the recitation overview', () => {
+    const profile = dashboardProfile('developer', 'recitation', null);
+    expect(profile.recitation).toBeFalse();
+    expect(profile.defaultMetric).toBe('api_calls');
   });
 
   it('text assets lead with downloads, installs, versions and languages', () => {
@@ -77,6 +105,7 @@ describe('itemLabel', () => {
     expect(itemLabel('country', 'XX', null, t, 'en')).toBe('USAGE.UNKNOWN');
     expect(itemLabel('language', 'ar', null, t, 'en')).toBe('Arabic');
     expect(itemLabel('channel', 'cli', null, t, 'en')).toBe('USAGE.CHANNELS.cli');
-    expect(itemLabel('surah', '2', null, t, 'en')).toBe('USAGE.SURAH_N:{"n":"2"}');
+    expect(itemLabel('surah', '2', null, t, 'en')).toBe('2. Al-Baqarah');
+    expect(itemLabel('surah', '18', null, t, 'ar')).toBe('18. الكهف');
   });
 });

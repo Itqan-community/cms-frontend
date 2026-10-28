@@ -1,3 +1,4 @@
+import { surahLabel } from '../../admin/models/quran-metadata';
 import { USAGE_OTHER_KEY, UsageDimension, UsageMetric, UsageScope } from '../models/usage.models';
 
 /** Headline cards: a metric, the integrating apps or the share of the current version. */
@@ -19,6 +20,10 @@ export interface DashboardProfile {
   showCategoryFilter: boolean;
   showAppFilter: boolean;
   showExport: boolean;
+  /** Recitation reports: listener growth, cohorts, spread, funnel (and catalog sections). */
+  recitation: boolean;
+  /** Reciter and riwayah filters (recitation overview). */
+  showReciterFilters: boolean;
 }
 
 const TEXT_CATEGORIES = new Set(['tafsir', 'translation', 'linguistic', 'tajweed']);
@@ -33,6 +38,7 @@ const ALL_METRICS: UsageMetric[] = [
   'unique_listeners',
   'unique_downloaders',
   'unique_end_users',
+  'listening_seconds',
 ];
 const FILE_METRICS: UsageMetric[] = [
   'downloads',
@@ -61,13 +67,23 @@ export function dashboardProfile(
     showCategoryFilter: false,
     showAppFilter: false,
     showExport: scope !== 'developer',
+    recitation: false,
+    showReciterFilters: false,
   };
   if (assetId != null) {
     if (category === 'recitation') {
       return {
         ...base,
-        headline: ['plays', 'unique_listeners', 'integrating_apps', 'requests'],
-        metrics: ['plays', 'unique_listeners', 'api_calls', 'requests', 'bytes'],
+        recitation: true,
+        headline: ['plays', 'unique_listeners', 'listening_seconds', 'integrating_apps'],
+        metrics: [
+          'plays',
+          'unique_listeners',
+          'listening_seconds',
+          'api_calls',
+          'requests',
+          'bytes',
+        ],
         defaultMetric: 'plays',
         splits: ['channel', 'platform', 'country', 'app'],
         panels: [
@@ -91,6 +107,26 @@ export function dashboardProfile(
       panels: text
         ? [bar('version'), donut('language'), donut('channel'), bar('country')]
         : [bar('version'), donut('channel'), donut('platform'), bar('country')],
+    };
+  }
+  if (category === 'recitation' && scope !== 'developer') {
+    return {
+      ...base,
+      showCategoryFilter: true,
+      recitation: true,
+      showReciterFilters: true,
+      headline: ['plays', 'unique_listeners', 'listening_seconds', 'integrating_apps'],
+      metrics: ['plays', 'unique_listeners', 'listening_seconds', 'api_calls', 'requests', 'bytes'],
+      defaultMetric: 'plays',
+      splits: ['reciter', 'riwayah', 'asset', 'channel', 'platform', 'country', 'app'],
+      panels: [
+        bar('reciter'),
+        bar('surah', 20),
+        bar('asset'),
+        bar('country'),
+        bar('app'),
+        donut('platform'),
+      ],
     };
   }
   if (scope === 'developer') {
@@ -171,7 +207,7 @@ export function itemLabel(
     case 'kind':
       return t(`USAGE.KINDS.${key}`);
     case 'surah':
-      return t('USAGE.SURAH_N', { n: key });
+      return surahLabel(Number(key), lang === 'ar');
     default:
       return key;
   }

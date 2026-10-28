@@ -16,9 +16,12 @@ describe('LoginPage', () => {
   let fixture: ComponentFixture<LoginPage>;
   let loginWithPasskey: jasmine.Spy;
   let passkeyEnvSnapshot: PasskeyEnvironmentSnapshot;
+  let previousIsConditional: (() => Promise<boolean>) | undefined;
+  let restoreIsConditional: boolean;
 
   beforeEach(async () => {
     passkeyEnvSnapshot = snapshotPasskeyEnvironment();
+    restoreIsConditional = false;
     setPasskeyClientEnvironmentSupported(false);
     loginWithPasskey = jasmine.createSpy('loginWithPasskey');
     await TestBed.configureTestingModule({
@@ -53,6 +56,13 @@ describe('LoginPage', () => {
   });
 
   afterEach(() => {
+    if (restoreIsConditional) {
+      (
+        PublicKeyCredential as unknown as {
+          isConditionalMediationAvailable?: () => Promise<boolean>;
+        }
+      ).isConditionalMediationAvailable = previousIsConditional;
+    }
     restorePasskeyEnvironment(passkeyEnvSnapshot);
   });
 
@@ -62,12 +72,72 @@ describe('LoginPage', () => {
     return fixture.componentInstance;
   }
 
-  it('auto-calls loginWithPasskey on init when passkey auto-prompt is supported', async () => {
+  function setConditionalMediationAvailable(available: boolean | undefined): void {
     setPasskeyClientEnvironmentSupported(true);
-    loginWithPasskey.and.resolveTo({ ok: false, reason: 'cancelled' });
+    const pkc = PublicKeyCredential as unknown as {
+      isConditionalMediationAvailable?: () => Promise<boolean>;
+    };
+    previousIsConditional = pkc.isConditionalMediationAvailable;
+    restoreIsConditional = true;
+    pkc.isConditionalMediationAvailable =
+      available === undefined ? undefined : () => Promise.resolve(available);
+  }
+
+  it('starts passkey autofill on init when the browser supports it', async () => {
+    setConditionalMediationAvailable(true);
+    loginWithPasskey.and.returnValue(new Promise(() => undefined));
+    const page = createFixture();
+    await fixture.whenStable();
+    expect(loginWithPasskey).toHaveBeenCalledWith('/gallery', {
+      signal: jasmine.any(AbortSignal),
+    });
+    expect(page.passkeyLoading()).toBe(false);
+  });
+
+  it('does not prompt for a passkey on init when passkey autofill is unavailable', async () => {
+    setConditionalMediationAvailable(false);
     createFixture();
     await fixture.whenStable();
-    expect(loginWithPasskey).toHaveBeenCalledWith('/gallery');
+    expect(loginWithPasskey).not.toHaveBeenCalled();
+  });
+
+  it('marks the email field for passkey autofill', () => {
+    createFixture();
+    const email = (fixture.nativeElement as HTMLElement).querySelector('#email');
+    expect(email?.getAttribute('autocomplete')).toBe('username webauthn');
+  });
+
+  it('aborts pending passkey autofill before a manual passkey login', async () => {
+    setConditionalMediationAvailable(true);
+    loginWithPasskey.and.returnValues(
+      new Promise(() => undefined),
+      Promise.resolve({ ok: false, reason: 'cancelled' })
+    );
+    const page = createFixture();
+    await fixture.whenStable();
+    const autofillSignal = (loginWithPasskey.calls.first().args[1] as { signal: AbortSignal })
+      .signal;
+    await page.onPasskeyLogin();
+    expect(autofillSignal.aborted).toBe(true);
+    expect(loginWithPasskey.calls.mostRecent().args).toEqual(['/gallery']);
+  });
+
+  it('aborts pending passkey autofill on destroy', async () => {
+    setConditionalMediationAvailable(true);
+    loginWithPasskey.and.returnValue(new Promise(() => undefined));
+    createFixture();
+    await fixture.whenStable();
+    const autofillSignal = (loginWithPasskey.calls.first().args[1] as { signal: AbortSignal })
+      .signal;
+    fixture.destroy();
+    expect(autofillSignal.aborted).toBe(true);
+  });
+
+  it('does not set error when passkey autofill is aborted', async () => {
+    const page = createFixture();
+    loginWithPasskey.and.rejectWith(new DOMException('aborted', 'AbortError'));
+    await page.onPasskeyLogin({ auto: true });
+    expect(page.errorMessage()).toBe('');
   });
 
   it('does not set error on auto-cancel', async () => {
@@ -85,7 +155,7 @@ describe('LoginPage', () => {
   });
 
   it('does not auto-prompt when already logged in', async () => {
-    setPasskeyClientEnvironmentSupported(true);
+    setConditionalMediationAvailable(true);
     loginWithPasskey.calls.reset();
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
