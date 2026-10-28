@@ -54,6 +54,10 @@ export const PORTAL_PERMISSIONS = {
 
   PORTAL_VIEW_PUBLISHER_MEMBERS: 'portal_view_publisher_members',
   PORTAL_INVITE_PUBLISHER_MEMBERS: 'portal_invite_publisher_members',
+  PORTAL_READ_GROUP: 'portal_read_group',
+  PORTAL_CREATE_GROUP: 'portal_create_group',
+  PORTAL_UPDATE_GROUP: 'portal_update_group',
+  PORTAL_DELETE_GROUP: 'portal_delete_group',
   PORTAL_UPDATE_PUBLISHER_MEMBERS: 'portal_update_publisher_members',
   PORTAL_DELETE_PUBLISHER_MEMBERS: 'portal_delete_publisher_members',
 

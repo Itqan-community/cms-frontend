@@ -114,6 +114,15 @@ export class AdminTenantService {
     return request$;
   }
 
+  /** Reload publishers (and their permissions), e.g. after editing a role the user holds. */
+  refresh(): Observable<boolean> {
+    const userId = this.currentUserId();
+    return this.http.get<MyPublisherOut[]>(this.apiUrl).pipe(
+      map((publishers) => this.hydratePublishers(userId, publishers)),
+      catchError(() => of(this.isReady()))
+    );
+  }
+
   setSelectedPublisherId(publisherId: number): boolean {
     if (!this.publishers().some((publisher) => publisher.id === publisherId)) {
       return false;

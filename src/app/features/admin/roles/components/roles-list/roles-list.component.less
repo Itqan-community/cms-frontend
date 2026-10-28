@@ -1,0 +1,44 @@
+@import '../../../styles/admin-shared.less';
+
+.roles-list {
+  .admin-table-overrides();
+
+  &__alert {
+    margin-bottom: 16px;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  &__section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0 4px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  &__hint {
+    margin-bottom: 12px;
+    color: rgba(0, 0, 0, 0.45);
+    font-size: 13px;
+  }
+
+  &__permissions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+}

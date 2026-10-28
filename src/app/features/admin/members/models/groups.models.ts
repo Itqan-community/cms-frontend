@@ -11,6 +11,22 @@ export function groupNameOrdering(lang: string | undefined): 'name_en' | 'name_a
   return lang === 'ar' ? 'name_ar' : 'name_en';
 }
 
+/** A permission with its name in the request's language. */
+export interface PermissionOut {
+  code_name: string;
+  name: string;
+}
+
+export interface GroupDetailOut extends GroupListOut {
+  permissions: PermissionOut[];
+}
+
+/** Both names are required when creating or renaming a role. */
+export interface GroupNamesIn {
+  name_en: string;
+  name_ar: string;
+}
+
 export interface PagedGroupListOut {
   results: GroupListOut[];
   count: number;

@@ -1,0 +1,206 @@
+<div class="roles-list admin-list-page">
+  <div class="admin-list-header">
+    <div class="admin-list-header__text">
+      <h2 class="admin-list-header__title">
+        {{ 'ADMIN.ROLES.TITLE' | translate }}
+        @if (!loading()) {
+          <app-admin-title-count [count]="roles().length" />
+        }
+      </h2>
+      <p class="admin-list-header__subtitle">{{ 'ADMIN.ROLES.SUBTITLE' | translate }}</p>
+    </div>
+    @if (canCreate()) {
+      <button
+        nz-button
+        nzType="primary"
+        class="admin-add-btn"
+        type="button"
+        data-testid="roles-create"
+        (click)="openCreate()"
+      >
+        <ng-icon name="lucidePlus" aria-hidden="true" />
+        {{ 'ADMIN.ROLES.CREATE_BUTTON' | translate }}
+      </button>
+    }
+  </div>
+
+  @if (loadFailed()) {
+    <nz-alert
+      nzType="error"
+      [nzMessage]="'ADMIN.ROLES.LIST_ERROR_TITLE' | translate"
+      [nzDescription]="'ADMIN.ROLES.LIST_ERROR_DESC' | translate"
+      nzShowIcon
+      class="roles-list__alert"
+    />
+  }
+
+  <div class="admin-table-wrap">
+    <nz-spin [nzSpinning]="loading()">
+      <nz-table
+        #rolesTable
+        [nzData]="roles()"
+        [nzFrontPagination]="false"
+        [nzShowPagination]="false"
+        nzSize="middle"
+        [nzNoResult]="emptyTpl"
+      >
+        <thead>
+          <tr>
+            <th>{{ 'ADMIN.ROLES.COLUMNS.NAME' | translate }}</th>
+            <th>{{ 'ADMIN.ROLES.COLUMNS.NAME_EN' | translate }}</th>
+            <th>{{ 'ADMIN.ROLES.COLUMNS.NAME_AR' | translate }}</th>
+            <th nzWidth="160px">{{ 'ADMIN.ROLES.COLUMNS.ACTIONS' | translate }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (role of rolesTable.data; track role.id) {
+            <tr class="admin-list-row">
+              <td class="admin-list-name">{{ role.name }}</td>
+              <td dir="ltr">{{ role.name_en }}</td>
+              <td dir="rtl">{{ role.name_ar }}</td>
+              <td>
+                <div class="roles-list__actions">
+                  <button
+                    nz-button
+                    nzType="default"
+                    nzSize="small"
+                    type="button"
+                    [attr.aria-label]="'ADMIN.ROLES.ACTIONS.EDIT' | translate"
+                    (click)="openEditor(role)"
+                  >
+                    <ng-icon name="lucideSquarePen" aria-hidden="true" />
+                    {{
+                      (canUpdate() ? 'ADMIN.ROLES.ACTIONS.EDIT' : 'ADMIN.ROLES.ACTIONS.VIEW')
+                        | translate
+                    }}
+                  </button>
+                  @if (canDelete()) {
+                    <button
+                      nz-button
+                      nzDanger
+                      nzType="default"
+                      nzSize="small"
+                      type="button"
+                      nz-popconfirm
+                      [nzPopconfirmTitle]="'ADMIN.ROLES.DELETE_CONFIRM' | translate"
+                      [nzOkText]="'ADMIN.ROLES.ACTIONS.DELETE' | translate"
+                      [nzCancelText]="'ADMIN.ROLES.ACTIONS.CANCEL' | translate"
+                      [nzLoading]="deletingId() === role.id"
+                      [attr.aria-label]="'ADMIN.ROLES.ACTIONS.DELETE' | translate"
+                      (nzOnConfirm)="deleteRole(role)"
+                    >
+                      <ng-icon name="lucideTrash2" aria-hidden="true" />
+                    </button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </nz-table>
+    </nz-spin>
+  </div>
+
+  <ng-template #emptyTpl>
+    <nz-empty [nzNotFoundContent]="'ADMIN.ROLES.EMPTY_TITLE' | translate" />
+  </ng-template>
+</div>
+
+<!-- Create: both names are required; permissions are chosen in the editor that opens next. -->
+<nz-modal
+  [nzVisible]="createVisible()"
+  [nzTitle]="'ADMIN.ROLES.CREATE_TITLE' | translate"
+  [nzOkText]="'ADMIN.ROLES.ACTIONS.CREATE' | translate"
+  [nzCancelText]="'ADMIN.ROLES.ACTIONS.CANCEL' | translate"
+  [nzOkLoading]="creating()"
+  (nzOnOk)="submitCreate()"
+  (nzOnCancel)="closeCreate()"
+>
+  <ng-container *nzModalContent>
+    <form nz-form nzLayout="vertical" [formGroup]="createForm" (ngSubmit)="submitCreate()">
+      <ng-container
+        [ngTemplateOutlet]="namesFields"
+        [ngTemplateOutletContext]="{ form: createForm }"
+      />
+    </form>
+  </ng-container>
+</nz-modal>
+
+<!-- Edit / view: names and the permission checklist. Read-only without the update permission. -->
+<nz-drawer
+  [nzVisible]="editing() !== null"
+  [nzWidth]="560"
+  [nzTitle]="editing()?.name ?? ''"
+  [nzFooter]="canUpdate() ? editorFooter : undefined"
+  (nzOnClose)="closeEditor()"
+>
+  <ng-container *nzDrawerContent>
+    <nz-spin [nzSpinning]="editorLoading()">
+      <form nz-form nzLayout="vertical" [formGroup]="editForm" (ngSubmit)="saveEditor()">
+        <ng-container
+          [ngTemplateOutlet]="namesFields"
+          [ngTemplateOutletContext]="{ form: editForm }"
+        />
+      </form>
+
+      <h3 class="roles-list__section-title">
+        {{ 'ADMIN.ROLES.PERMISSIONS_TITLE' | translate }}
+        <nz-tag>{{ selected().size }} / {{ catalogue().length }}</nz-tag>
+      </h3>
+      <p class="roles-list__hint">{{ 'ADMIN.ROLES.PERMISSIONS_HINT' | translate }}</p>
+      <ul class="roles-list__permissions">
+        @for (permission of catalogue(); track permission.code_name) {
+          <li>
+            <span
+              nz-checkbox
+              [nzChecked]="isSelected(permission.code_name)"
+              [nzDisabled]="!canUpdate()"
+              (nzCheckedChange)="togglePermission(permission.code_name, $event)"
+            >
+              {{ permission.name }}
+            </span>
+          </li>
+        }
+      </ul>
+    </nz-spin>
+  </ng-container>
+</nz-drawer>
+
+<ng-template #editorFooter>
+  <div class="roles-list__footer">
+    <button nz-button type="button" (click)="closeEditor()">
+      {{ 'ADMIN.ROLES.ACTIONS.CANCEL' | translate }}
+    </button>
+    <button
+      nz-button
+      nzType="primary"
+      type="button"
+      data-testid="roles-save"
+      [nzLoading]="saving()"
+      (click)="saveEditor()"
+    >
+      {{ 'ADMIN.ROLES.ACTIONS.SAVE' | translate }}
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #namesFields let-form="form">
+  <ng-container [formGroup]="form">
+    <nz-form-item>
+      <nz-form-label nzRequired nzFor="role-name-en">
+        {{ 'ADMIN.ROLES.FIELDS.NAME_EN' | translate }}
+      </nz-form-label>
+      <nz-form-control [nzErrorTip]="'ADMIN.ROLES.FIELDS.NAME_REQUIRED' | translate">
+        <input nz-input id="role-name-en" dir="ltr" formControlName="name_en" maxlength="150" />
+      </nz-form-control>
+    </nz-form-item>
+    <nz-form-item>
+      <nz-form-label nzRequired nzFor="role-name-ar">
+        {{ 'ADMIN.ROLES.FIELDS.NAME_AR' | translate }}
+      </nz-form-label>
+      <nz-form-control [nzErrorTip]="'ADMIN.ROLES.FIELDS.NAME_REQUIRED' | translate">
+        <input nz-input id="role-name-ar" dir="rtl" formControlName="name_ar" maxlength="150" />
+      </nz-form-control>
+    </nz-form-item>
+  </ng-container>
+</ng-template>
