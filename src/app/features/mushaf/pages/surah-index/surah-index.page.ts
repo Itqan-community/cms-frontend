@@ -4,19 +4,19 @@ import { ActivatedRoute } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
 import { MushafSwitcherComponent } from '../../components/mushaf-switcher/mushaf-switcher.component';
-import { SuraCardComponent } from '../../components/sura-card/sura-card.component';
+import { SurahCardComponent } from '../../components/surah-card/surah-card.component';
 import { MushafSurahMeta } from '../../models/mushaf.model';
 import { MushafSelectionService } from '../../services/mushaf-selection.service';
 import { MushafSvgService } from '../../services/mushaf-svg.service';
 
 @Component({
-  selector: 'app-mushaf-sura-index',
+  selector: 'app-mushaf-surah-index',
   standalone: true,
-  imports: [SuraCardComponent, MushafSwitcherComponent, StateMessageComponent, TranslateModule],
-  templateUrl: './sura-index.page.html',
-  styleUrl: './sura-index.page.less',
+  imports: [SurahCardComponent, MushafSwitcherComponent, StateMessageComponent, TranslateModule],
+  templateUrl: './surah-index.page.html',
+  styleUrl: './surah-index.page.less',
 })
-export class SuraIndexPage implements OnInit {
+export class SurahIndexPage implements OnInit {
   private readonly svgService = inject(MushafSvgService);
   private readonly selection = inject(MushafSelectionService);
   private readonly route = inject(ActivatedRoute);

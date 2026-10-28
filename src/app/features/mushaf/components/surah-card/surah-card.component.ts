@@ -5,17 +5,17 @@ import { MushafSurahMeta } from '../../models/mushaf.model';
 import { toArabicDigits } from '../../utils/arabic-digits.util';
 
 /**
- * A single sura tile in the mushaf index — number, Arabic name and ayah count.
- * Links to the full-sura view for the active mushaf edition.
+ * A single surah tile in the mushaf index — number, Arabic name and ayah count.
+ * Links to the full-surah view for the active mushaf edition.
  */
 @Component({
-  selector: 'app-sura-card',
+  selector: 'app-surah-card',
   standalone: true,
   imports: [RouterModule, TranslateModule],
-  templateUrl: './sura-card.component.html',
-  styleUrl: './sura-card.component.less',
+  templateUrl: './surah-card.component.html',
+  styleUrl: './surah-card.component.less',
 })
-export class SuraCardComponent {
+export class SurahCardComponent {
   surah = input.required<MushafSurahMeta>();
   /** Active mushaf edition slug, carried into the link as `?mushaf=`. */
   mushafSlug = input.required<string>();

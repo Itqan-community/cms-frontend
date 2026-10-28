@@ -6,7 +6,7 @@ export type ReviewState = 'unreviewed' | 'approved' | 'commented';
 export interface ReviewChange {
   id: number;
   unit_type: AssetTemplate;
-  /** Canonical id of the unit: sura id, ayah id, word id, or page number. */
+  /** Canonical id of the unit: surah id, ayah id, word id, or page number. */
   unit_id: number;
   /** Display reference, e.g. "2. Al-Baqara", "2:255", "2:255:4", "Page 42". */
   label: string;

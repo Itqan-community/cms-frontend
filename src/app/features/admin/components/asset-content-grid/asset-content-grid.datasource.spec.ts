@@ -89,8 +89,8 @@ describe('AssetContentGridComponent word datasource', () => {
             unit_id: 1,
             label: '1:1:1',
             reference_text: '',
-            sura: 1,
-            aya: 1,
+            surah: 1,
+            ayah: 1,
             text: '',
             order: 1,
           },
@@ -138,7 +138,7 @@ describe('AssetContentGridComponent word datasource', () => {
     flushDraft(httpMock, 'a-filtered-tafsir', 9);
     httpMock.expectOne((r) => r.url.includes('entries/')).flush({ results: [], count: 6236 });
     const filterModel = {
-      sura: { filterType: 'number', type: 'equals', filter: 2 },
+      surah: { filterType: 'number', type: 'equals', filter: 2 },
       text: { filterType: 'text', type: 'contains', filter: 'mercy' },
     };
     const successCallback = jasmine.createSpy('successCallback');
@@ -258,8 +258,8 @@ describe('AssetContentGridComponent word datasource', () => {
           unit_id: 1,
           label: '1:1',
           reference_text: '',
-          sura: 1,
-          aya: 1,
+          surah: 1,
+          ayah: 1,
           text: '',
           order: 1,
         },
@@ -300,8 +300,8 @@ describe('AssetContentGridComponent word datasource', () => {
             unit_id: 1,
             label: '1:1:1',
             reference_text: 'بِسْمِ',
-            sura: 1,
-            aya: 1,
+            surah: 1,
+            ayah: 1,
             text: '',
             order: 1,
           },
@@ -339,8 +339,8 @@ describe('AssetContentGridComponent word datasource', () => {
             unit_id: 1,
             label: '1:1:1',
             reference_text: 'بِسْمِ',
-            sura: 1,
-            aya: 1,
+            surah: 1,
+            ayah: 1,
             text: '',
             order: 1,
           },

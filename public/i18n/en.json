@@ -939,8 +939,8 @@
       "ALL_SAVED": "All changes saved to draft",
       "OPEN_BUTTON": "Edit content",
       "COLUMNS": {
-        "SURA": "Surah no.",
-        "AYA": "Ayah no.",
+        "SURAH_NUMBER": "Surah no.",
+        "AYAH_NUMBER": "Ayah no.",
         "SURAH": "Surah",
         "UTHMANI": "Ayah (Uthmani)",
         "UNIT": "Reference",
@@ -1066,7 +1066,7 @@
         "CLOSE": "Close",
         "ERRORS": {
           "GENERIC": "Something went wrong. Try again.",
-          "COLUMN_KEY_INVALID": "A key starts with a lowercase English letter (a-z) and uses only a-z, 0-9 and underscores (at most 64). Unit names such as sura or ayah can't be used.",
+          "COLUMN_KEY_INVALID": "A key starts with a lowercase English letter (a-z) and uses only a-z, 0-9 and underscores (at most 64). Unit names such as surah or ayah can't be used.",
           "COLUMN_KEY_TAKEN": "This asset already has a column with this key.",
           "COLUMN_COMMITTED": "This column is in a committed version, so its key can't change and it can't be deleted.",
           "COLUMN_LAST": "An asset needs at least one column.",
@@ -3071,13 +3071,13 @@
   },
   "MUSHAF": {
     "TITLE": "The Noble Quran",
-    "INDEX_SUBTITLE": "Browse the suras and read the mushaf page by page",
+    "INDEX_SUBTITLE": "Browse the surahs and read the mushaf page by page",
     "AYAHS": "ayahs",
     "AYAH": "Ayah",
     "MECCAN": "Meccan",
     "MEDINAN": "Medinan",
-    "BACK_TO_INDEX": "Back to suras",
-    "SURA_NOT_FOUND": "Sura not found",
+    "BACK_TO_INDEX": "Back to surahs",
+    "SURAH_NOT_FOUND": "Surah not found",
     "AYAH_NOT_FOUND": "Ayah not found",
     "EDITION": "Edition",
     "ATTRIBUTION": "Mushaf rendering by Quranpedia (quran-svg)"

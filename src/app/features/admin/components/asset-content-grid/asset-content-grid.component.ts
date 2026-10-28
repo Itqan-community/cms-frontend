@@ -1643,14 +1643,14 @@ export class AssetContentGridComponent implements OnInit {
    *  - every template shows the pinned unit label and the editable text;
    *  - `reference_text` (the Quranic text being annotated) is shown for every
    *    template except `page`, which carries none;
-   *  - `sura` / `aya` number columns where every unit belongs to one ayah
+   *  - `surah` / `ayah` number columns where every unit belongs to one ayah
    *    (`ayah`, `word`); `surah`/`page` units don't;
    *  - `source_text` (the source language for the same unit) is shown
    *    read-only whenever a non-source language is being edited.
    * Every filter runs on the server over the whole asset (see
-   * `buildDatasource`): text columns get the text filter, `sura` / `aya` the
+   * `buildDatasource`): text columns get the text filter, `surah` / `ayah` the
    * number filter, and the unit column a dropdown of surah names (column id
-   * `surah`, a number filter on the surah) wherever units belong to a surah.
+   * `unit_surah`, a number filter on the surah) wherever units belong to a surah.
    */
   buildColumnDefs(): ColDef<ContentEntry>[] {
     const template = this.effectiveTemplate();
@@ -1705,8 +1705,8 @@ export class AssetContentGridComponent implements OnInit {
         ...(template !== 'page'
           ? {
               // Filters the surah, not the label text: the backend reads the
-              // `surah` filter-model key as a surah-number filter.
-              colId: 'surah',
+              // `unit_surah` filter-model key as a surah-number filter.
+              colId: 'unit_surah',
               filter: 'agNumberColumnFilter',
               filterParams: NUMBER_FILTER_PARAMS,
               floatingFilter: true,
@@ -1722,8 +1722,8 @@ export class AssetContentGridComponent implements OnInit {
     if (template === 'ayah' || template === 'word') {
       columns.push(
         {
-          field: 'sura',
-          headerName: this.colHeader('SURA'),
+          field: 'surah',
+          headerName: this.colHeader('SURAH_NUMBER'),
           width: 160,
           editable: false,
           // Shows "2. Al-Baqara"; the filter still matches the surah number (it
@@ -1735,8 +1735,8 @@ export class AssetContentGridComponent implements OnInit {
           floatingFilter: true,
         },
         {
-          field: 'aya',
-          headerName: this.colHeader('AYA'),
+          field: 'ayah',
+          headerName: this.colHeader('AYAH_NUMBER'),
           width: 100,
           editable: false,
           filter: 'agNumberColumnFilter',
