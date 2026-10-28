@@ -24,11 +24,11 @@
     }
   </div>
 
-  @if (loadFailed()) {
+  @if (loadError(); as reason) {
     <nz-alert
       nzType="error"
       [nzMessage]="'ADMIN.ROLES.LIST_ERROR_TITLE' | translate"
-      [nzDescription]="'ADMIN.ROLES.LIST_ERROR_DESC' | translate"
+      [nzDescription]="reason"
       nzShowIcon
       class="roles-list__alert"
     />

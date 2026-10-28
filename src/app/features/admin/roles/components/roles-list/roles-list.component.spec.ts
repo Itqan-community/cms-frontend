@@ -5,7 +5,9 @@ import { provideIcons } from '@ng-icons/core';
 import { lucidePlus, lucideShieldCheck, lucideSquarePen, lucideTrash2 } from '@ng-icons/lucide';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ModalOptions, NzModalService } from 'ng-zorro-antd/modal';
-import { of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import { of, throwError } from 'rxjs';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 import { GroupDetailOut, GroupListOut } from '../../../members/models/groups.models';
 import { GroupsService } from '../../../members/services/groups.service';
@@ -230,6 +232,47 @@ describe('RolesListComponent', () => {
     expect(options.nzOkDanger).toBeTrue();
     (options.nzOnOk as () => void)();
     expect(groups.delete).toHaveBeenCalledWith(7);
+  });
+
+  it('shows the backend’s reason when a delete fails', () => {
+    setup([PORTAL_PERMISSIONS.PORTAL_READ_GROUP, PORTAL_PERMISSIONS.PORTAL_DELETE_GROUP]);
+    const toast = spyOn(TestBed.inject(NzMessageService), 'error');
+    groups.delete.and.returnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 400,
+            error: {
+              error_name: 'group_in_use',
+              message: 'This role is assigned to members and cannot be deleted.',
+            },
+          })
+      )
+    );
+
+    component.deleteRole(EDITORS);
+
+    expect(toast).toHaveBeenCalledOnceWith(
+      'This role is assigned to members and cannot be deleted.'
+    );
+  });
+
+  it('shows the backend’s reason when the roles fail to load', () => {
+    setup([PORTAL_PERMISSIONS.PORTAL_READ_GROUP]);
+    groups.list.and.returnValue(
+      throwError(
+        () =>
+          new HttpErrorResponse({
+            status: 400,
+            error: { error_name: 'tenant_mismatch', message: 'Pick a publisher first.' },
+          })
+      )
+    );
+
+    component.load();
+    fixture.detectChanges();
+
+    expect(el('.roles-list__alert')?.textContent).toContain('Pick a publisher first.');
   });
 
   it('opens the editor read-only without the update permission', () => {

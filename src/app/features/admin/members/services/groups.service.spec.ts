@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../../environments/environment';
+import { CALLER_SHOWS_ERRORS } from '../../../../core/interceptors/caller-shows-errors.context';
 import { GroupsService } from './groups.service';
 
 describe('GroupsService role management', () => {
@@ -54,5 +55,22 @@ describe('GroupsService role management', () => {
   it('lists the permission catalogue', () => {
     service.listPermissions().subscribe();
     expect(http.expectOne(`${base}/permissions/`).request.method).toBe('GET');
+  });
+
+  it('shows its own errors on the roles page instead of the global toast', () => {
+    service.list().subscribe();
+    service.get(7).subscribe();
+    service.create({ name_en: 'a', name_ar: 'ب' }).subscribe();
+    service.update(7, { name_en: 'a', name_ar: 'ب' }).subscribe();
+    service.setPermissions(7, []).subscribe();
+    service.delete(7).subscribe();
+    service.listPermissions().subscribe();
+    const requests = http.match(() => true);
+    expect(requests.length).toBe(7);
+    for (const req of requests) {
+      expect(req.request.context.get(CALLER_SHOWS_ERRORS))
+        .withContext(`${req.request.method} ${req.request.url}`)
+        .toBeTrue();
+    }
   });
 });
