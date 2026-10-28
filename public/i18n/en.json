@@ -1811,7 +1811,7 @@
         "HINT_FILENAMES_EXAMPLE": "Example for Surah Al-Fatiha: \"001.mp3\"",
         "OVERALL_PROGRESS": "Overall upload progress",
         "CONCURRENCY_LABEL": "Files at a time",
-        "CONCURRENCY_HINT": "Use 1 on slow connections; raise it on fast ones",
+        "CONCURRENCY_HINT": "How many files upload in parallel. On a slow or unstable connection, use 1 so each file gets the full bandwidth and is less likely to fail. On a fast, stable connection, use 3 or 4 to finish the batch sooner.",
         "ABORT_ALL": "Abort all uploads",
         "ABORT_ALL_CONFIRM_TITLE": "Abort all uploads?",
         "ABORT_ALL_CONFIRM_CONTENT": "Queued and in-progress uploads will be stopped. Continue?",

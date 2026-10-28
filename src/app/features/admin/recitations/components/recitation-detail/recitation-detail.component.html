@@ -280,12 +280,20 @@
               <label for="recitation-upload-concurrency">{{
                 'ADMIN.RECITATIONS.TRACKS.CONCURRENCY_LABEL' | translate
               }}</label>
+              <ng-icon
+                name="lucideInfo"
+                class="recitation-detail__concurrency-info"
+                tabindex="0"
+                role="img"
+                nz-tooltip
+                [nzTooltipTitle]="'ADMIN.RECITATIONS.TRACKS.CONCURRENCY_HINT' | translate"
+                [attr.aria-label]="'ADMIN.RECITATIONS.TRACKS.CONCURRENCY_HINT' | translate"
+              />
               <nz-select
                 nzId="recitation-upload-concurrency"
                 class="recitation-detail__concurrency-select"
                 [ngModel]="uploadConcurrency()"
                 (ngModelChange)="onUploadConcurrencyChange($event)"
-                [attr.title]="'ADMIN.RECITATIONS.TRACKS.CONCURRENCY_HINT' | translate"
               >
                 @for (option of uploadConcurrencyOptions; track option) {
                   <nz-option [nzValue]="option" [nzLabel]="'' + option" />
