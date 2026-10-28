@@ -40,4 +40,14 @@ describe('UsageUnseenTrafficComponent', () => {
     expect(text).toContain('Asset A');
     expect(fixture.componentInstance.chartOptions()).not.toBeNull();
   });
+
+  it('explains what the numbers mean, why they matter and how to use them', () => {
+    fixture.detectChanges();
+
+    const guide = (fixture.nativeElement as HTMLElement).querySelector('.usage-unseen__guide');
+    const text = guide?.textContent ?? '';
+    for (const key of ['WHAT_UNSEEN', 'WHY_BODY', 'HOW_ASSET', 'CAVEAT_SIGNED', 'CAVEAT_CACHE']) {
+      expect(text).toContain(`USAGE.UNSEEN.GUIDE.${key}`);
+    }
+  });
 });

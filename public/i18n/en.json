@@ -2990,11 +2990,27 @@
       "RECITATIONS": "Recitations"
     },
     "UNSEEN": {
-      "INTRO": "Reads from storage that never passed through the CDN edge, so the other reports cannot see them (for example direct bucket access).",
+      "INTRO": "Downloads from storage that the other usage reports could not see. Use this tab to check how complete those reports are.",
       "READS": "Storage reads",
       "EDGE_REQUESTS": "Edge requests",
       "UNSEEN": "Unseen reads",
-      "PER_DAY": "Reads per day"
+      "PER_DAY": "Reads per day",
+      "GUIDE": {
+        "TITLE": "How to read this tab",
+        "WHAT_TITLE": "What the numbers mean",
+        "WHAT_READS": "Storage reads: every time a file was read from the storage bucket (Cloudflare R2), whatever route the request took.",
+        "WHAT_EDGE": "Edge requests: requests for the same files that went through the CDN (the storage domain). The other usage reports are built from these.",
+        "WHAT_UNSEEN": "Unseen reads: storage reads beyond the edge requests for the same file in the same hour. These files were downloaded, but the edge never saw it.",
+        "WHY_TITLE": "Why we need it",
+        "WHY_BODY": "The other reports count traffic that passes through the CDN, plus gallery and CLI events recorded by the server. A file fetched straight from the bucket skips the CDN, so it has no country, app, listener or install data. This tab measures that gap, so the report totals are lower bounds with a known margin instead of a guess.",
+        "HOW_TITLE": "How to use it",
+        "HOW_LOW": "Unseen reads close to zero: the other reports capture almost all traffic.",
+        "HOW_ASSET": "A jump for one asset: something is fetching it directly from the bucket, for example a signed link to a restricted asset shared outside the app, or a new feature that hands out bucket links instead of CDN links. Use the table below to find the asset.",
+        "HOW_ALL": "A jump for every asset at once: the hourly log import is probably failing or behind. Check whether the other reports are still up to date.",
+        "CAVEATS_TITLE": "Keep in mind",
+        "CAVEAT_SIGNED": "Restricted assets, and gallery downloads when CDN downloads are off, are served by signed links straight to the bucket. They appear here as unseen even though the reports count them from server events, so some unseen reads are expected.",
+        "CAVEAT_CACHE": "Unseen reads are a lower bound too. Files served from the CDN cache never reach the bucket, so cached requests in the same hour can hide a few direct reads. The numbers are compared per file and hour and never go below zero."
+      }
     },
     "ASSET_SECTION_TITLE": "Usage",
     "PUBLIC": {
