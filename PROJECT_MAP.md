@@ -434,8 +434,12 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
 
 - `admin-auth.service.ts` — `AdminAuthService`: exposes `currentUser`, role signals (`isAdmin`,
   `isItqanAdmin`, `isPublisherAdmin`), and `hasPermission` / `hasAnyPermission` /
-  `hasAllPermissions` based on normalized profile permission codes. Constants:
+  `hasAllPermissions` based on the selected publisher's `permissions` from
+  `GET /portal/publishers/me/` (roles are per publisher), falling back to the profile's permission
+  codes until a publisher is selected. Constants:
   `features/admin/constants/portal-permission.constants.ts`.
+- `admin-tenant.service.ts` — `AdminTenantService`: loads `publishers/me` (each entry carries the
+  caller's `permissions` there) and holds the selected publisher sent as `X-Tenant`.
 - `admin-table-column-prefs.service.ts` — Persists column visibility per table
 - `admin-table-sort-prefs.service.ts` — Persists sort preferences
 - `asset-versions.service.ts` — Version management API

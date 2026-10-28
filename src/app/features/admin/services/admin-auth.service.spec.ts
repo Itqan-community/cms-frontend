@@ -3,6 +3,7 @@ import { signal } from '@angular/core';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { PORTAL_PERMISSIONS } from '../constants/portal-permission.constants';
 import { AdminAuthService } from './admin-auth.service';
+import { AdminTenantService } from './admin-tenant.service';
 
 describe('AdminAuthService', () => {
   let adminAuth: AdminAuthService;
@@ -12,6 +13,11 @@ describe('AdminAuthService', () => {
     TestBed.configureTestingModule({
       providers: [
         AdminAuthService,
+        // No publisher selected, so permissions come from the profile.
+        {
+          provide: AdminTenantService,
+          useValue: { publishers: signal([]), selectedPublisherId: signal(null) },
+        },
         {
           provide: AuthService,
           useValue: {

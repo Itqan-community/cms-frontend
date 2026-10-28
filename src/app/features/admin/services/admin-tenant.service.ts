@@ -8,6 +8,8 @@ export interface MyPublisherOut {
   name: string;
   slug: string;
   icon_url: string | null;
+  /** The caller's effective permissions at this publisher (roles are per publisher). */
+  permissions: string[];
 }
 
 export const ADMIN_TENANT_STORAGE_KEY = 'admin:selectedPublisherId';

@@ -1,17 +1,23 @@
 import { inject, Injectable, computed } from '@angular/core';
 import { AuthService } from '../../../core/auth/services/auth.service';
+import { AdminTenantService } from './admin-tenant.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AdminAuthService {
   private readonly authService = inject(AuthService);
+  private readonly tenant = inject(AdminTenantService);
 
   // Expose the current user from AuthService
   readonly currentUser = this.authService.currentUser;
 
+  // Roles are per publisher, so gate on the selected publisher's permissions; the profile's
+  // list (merged across publishers) is only a fallback until a publisher is selected.
   readonly permissionCodes = computed(() => {
-    const list = this.currentUser()?.permissions;
+    const selectedId = this.tenant.selectedPublisherId();
+    const selected = this.tenant.publishers().find((publisher) => publisher.id === selectedId);
+    const list = selected ? selected.permissions : this.currentUser()?.permissions;
     if (!list?.length) {
       return new Set<string>();
     }
