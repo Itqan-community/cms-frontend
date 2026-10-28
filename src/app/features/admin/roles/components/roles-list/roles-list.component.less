@@ -27,6 +27,31 @@
     font-size: 13px;
   }
 
+  &__group {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  &__group-title {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  &__group-count {
+    color: rgba(0, 0, 0, 0.45);
+    font-size: 12px;
+    font-weight: 400;
+  }
+
   &__permissions {
     display: grid;
     grid-template-columns: 1fr;

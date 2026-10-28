@@ -42,8 +42,23 @@ describe('RolesListComponent', () => {
     groups.list.and.returnValue(of({ results: [EDITORS], count: 1 }));
     groups.listPermissions.and.returnValue(
       of([
-        { code_name: 'portal_read_reciter', name: 'لوحة التحكم - عرض القراء' },
-        { code_name: 'portal_create_reciter', name: 'لوحة التحكم - إضافة القراء' },
+        {
+          key: 'reciters',
+          name: 'القراء',
+          permissions: [
+            { code_name: 'portal_read_reciter', name: 'لوحة التحكم - عرض القراء', implies: [] },
+            {
+              code_name: 'portal_create_reciter',
+              name: 'لوحة التحكم - إنشاء قراء',
+              implies: ['portal_read_reciter', 'portal_update_reciter'],
+            },
+            {
+              code_name: 'portal_update_reciter',
+              name: 'لوحة التحكم - تحديث القراء',
+              implies: ['portal_read_reciter', 'portal_create_reciter'],
+            },
+          ],
+        },
       ])
     );
     groups.get.and.returnValue(of(EDITORS_DETAIL));
@@ -74,10 +89,40 @@ describe('RolesListComponent', () => {
   const el = (selector: string): HTMLElement | null =>
     (fixture.nativeElement as HTMLElement).querySelector(selector);
 
-  it('lists roles by their name in the UI language', () => {
+  it('lists roles by their English and Arabic names only', () => {
     setup([PORTAL_PERMISSIONS.PORTAL_READ_GROUP]);
 
-    expect((fixture.nativeElement as HTMLElement).textContent).toContain('المحررون');
+    const headers = [...(fixture.nativeElement as HTMLElement).querySelectorAll('th')].length;
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('Editors');
+    expect(text).toContain('المحررون');
+    expect(headers).toBe(3);
+  });
+
+  it('groups the permission checklist by usage', () => {
+    setup([PORTAL_PERMISSIONS.PORTAL_READ_GROUP]);
+    component.openEditor(EDITORS);
+    fixture.detectChanges();
+
+    expect(component.catalogue().map((g) => g.name)).toEqual(['القراء']);
+    expect(document.body.textContent).toContain('القراء');
+  });
+
+  it('ticks and locks the permissions a selected one implies', () => {
+    setup([PORTAL_PERMISSIONS.PORTAL_READ_GROUP, PORTAL_PERMISSIONS.PORTAL_UPDATE_GROUP]);
+    groups.get.and.returnValue(of({ ...EDITORS_DETAIL, permissions: [] }));
+    component.openEditor(EDITORS);
+
+    component.togglePermission('portal_create_reciter', true);
+
+    expect(component.isSelected('portal_read_reciter')).toBeTrue();
+    expect(component.isLocked('portal_read_reciter')).toBeTrue();
+    expect(component.isLocked('portal_update_reciter')).toBeTrue();
+    expect(component.isLocked('portal_create_reciter')).toBeFalse();
+
+    component.togglePermission('portal_create_reciter', false);
+
+    expect(component.isSelected('portal_read_reciter')).toBeFalse();
   });
 
   it('hides the create button without the create permission', () => {
@@ -124,6 +169,7 @@ describe('RolesListComponent', () => {
     expect(groups.setPermissions).toHaveBeenCalledWith(7, [
       'portal_create_reciter',
       'portal_read_reciter',
+      'portal_update_reciter',
     ]);
     expect(tenant.refresh).toHaveBeenCalled();
   });

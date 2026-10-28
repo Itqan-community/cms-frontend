@@ -17,6 +17,7 @@ import { NzPopconfirmModule } from 'ng-zorro-antd/popconfirm';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { concatMap, forkJoin, Observable, of } from 'rxjs';
 import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
 import { AdminTitleCountComponent } from '../../../components/admin-title-count/admin-title-count.component';
@@ -26,11 +27,17 @@ import {
   GroupListOut,
   GroupNamesIn,
   groupNameOrdering,
-  PermissionOut,
+  PermissionGroupOut,
 } from '../../../members/models/groups.models';
 import { GroupsService } from '../../../members/services/groups.service';
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import { AdminTenantService } from '../../../services/admin-tenant.service';
+import {
+  explicitFromSaved,
+  ImpliesMap,
+  includedPermissions,
+  togglePermission,
+} from '../../utils/permission-selection.util';
 
 const NAME_MAX_LENGTH = 150; // matches the backend's auth.Group / PublisherGroup name length
 
@@ -59,6 +66,7 @@ const NAME_MAX_LENGTH = 150; // matches the backend's auth.Group / PublisherGrou
     NzSpinModule,
     NzTableModule,
     NzTagModule,
+    NzToolTipModule,
     AdminTitleCountComponent,
   ],
   templateUrl: './roles-list.component.html',
@@ -84,7 +92,13 @@ export class RolesListComponent {
   );
 
   readonly roles = signal<GroupListOut[]>([]);
-  readonly catalogue = signal<PermissionOut[]>([]);
+  readonly catalogue = signal<PermissionGroupOut[]>([]);
+  private readonly allPermissions = computed(() => this.catalogue().flatMap((g) => g.permissions));
+  private readonly implies = computed<ImpliesMap>(
+    () => new Map(this.allPermissions().map((p) => [p.code_name, p.implies]))
+  );
+  private readonly order = computed(() => this.allPermissions().map((p) => p.code_name));
+  readonly permissionCount = computed(() => this.allPermissions().length);
   readonly loading = signal(false);
   readonly loadFailed = signal(false);
 
@@ -95,7 +109,11 @@ export class RolesListComponent {
   readonly editing = signal<GroupDetailOut | null>(null);
   readonly editorLoading = signal(false);
   readonly saving = signal(false);
-  readonly selected = signal<ReadonlySet<string>>(new Set());
+  /** What the user chose; everything these imply is shown ticked and locked. */
+  readonly explicit = signal<string[]>([]);
+  readonly selected = computed<ReadonlySet<string>>(() =>
+    includedPermissions(this.explicit(), this.implies())
+  );
   readonly editForm = this.namesForm();
   readonly deletingId = signal<number | null>(null);
 
@@ -196,14 +214,27 @@ export class RolesListComponent {
     return this.selected().has(code);
   }
 
+  /** Included because another selected permission implies it: ticked, and not editable here. */
+  isLocked(code: string): boolean {
+    return this.selected().has(code) && !this.explicit().includes(code);
+  }
+
+  /** Names of the selected permissions that bring `code` along, for the locked checkbox's tooltip. */
+  includedBy(code: string): string {
+    const names = this.allPermissions()
+      .filter((p) => this.explicit().includes(p.code_name) && p.implies.includes(code))
+      .map((p) => p.name);
+    return this.translate.instant('ADMIN.ROLES.INCLUDED_BY', { names: names.join('، ') });
+  }
+
+  selectedInGroup(group: PermissionGroupOut): number {
+    return group.permissions.filter((p) => this.selected().has(p.code_name)).length;
+  }
+
   togglePermission(code: string, checked: boolean): void {
-    const next = new Set(this.selected());
-    if (checked) {
-      next.add(code);
-    } else {
-      next.delete(code);
-    }
-    this.selected.set(next);
+    this.explicit.set(
+      togglePermission(this.explicit(), code, checked, this.implies(), this.order())
+    );
   }
 
   saveEditor(): void {
@@ -228,15 +259,7 @@ export class RolesListComponent {
           this.saving.set(false);
           this.showDetail(saved);
           this.load();
-          // CREATE implies READ etc.; tell the editor when the backend added more than they picked.
-          const addedImplied = saved.permissions.length > requested.length;
-          this.message.success(
-            this.translate.instant(
-              addedImplied
-                ? 'ADMIN.ROLES.MESSAGES.SAVED_WITH_IMPLIED'
-                : 'ADMIN.ROLES.MESSAGES.SAVED'
-            )
-          );
+          this.message.success(this.translate.instant('ADMIN.ROLES.MESSAGES.SAVED'));
         },
         error: (err: unknown) => {
           this.saving.set(false);
@@ -276,7 +299,13 @@ export class RolesListComponent {
 
   private showDetail(detail: GroupDetailOut): void {
     this.editing.set(detail);
-    this.selected.set(new Set(detail.permissions.map((p) => p.code_name)));
+    this.explicit.set(
+      explicitFromSaved(
+        detail.permissions.map((p) => p.code_name),
+        this.implies(),
+        this.order()
+      )
+    );
     this.editForm.reset({ name_en: detail.name_en, name_ar: detail.name_ar });
     if (this.canUpdate()) {
       this.editForm.enable();

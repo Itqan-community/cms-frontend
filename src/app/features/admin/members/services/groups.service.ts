@@ -7,7 +7,7 @@ import {
   GroupListFilters,
   GroupNamesIn,
   PagedGroupListOut,
-  PermissionOut,
+  PermissionGroupOut,
 } from '../models/groups.models';
 
 @Injectable({
@@ -58,8 +58,8 @@ export class GroupsService {
     return this.http.delete<void>(`${this.baseUrl}/${id}/`);
   }
 
-  /** Every permission a role can hold, named in the UI language. */
-  listPermissions(): Observable<PermissionOut[]> {
-    return this.http.get<PermissionOut[]>(`${this.baseUrl}/permissions/`);
+  /** Every permission a role can hold, grouped by usage and named in the UI language. */
+  listPermissions(): Observable<PermissionGroupOut[]> {
+    return this.http.get<PermissionGroupOut[]>(`${this.baseUrl}/permissions/`);
   }
 }

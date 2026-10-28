@@ -46,7 +46,6 @@
       >
         <thead>
           <tr>
-            <th>{{ 'ADMIN.ROLES.COLUMNS.NAME' | translate }}</th>
             <th>{{ 'ADMIN.ROLES.COLUMNS.NAME_EN' | translate }}</th>
             <th>{{ 'ADMIN.ROLES.COLUMNS.NAME_AR' | translate }}</th>
             <th nzWidth="160px">{{ 'ADMIN.ROLES.COLUMNS.ACTIONS' | translate }}</th>
@@ -55,8 +54,7 @@
         <tbody>
           @for (role of rolesTable.data; track role.id) {
             <tr class="admin-list-row">
-              <td class="admin-list-name">{{ role.name }}</td>
-              <td dir="ltr">{{ role.name_en }}</td>
+              <td class="admin-list-name" dir="ltr">{{ role.name_en }}</td>
               <td dir="rtl">{{ role.name_ar }}</td>
               <td>
                 <div class="roles-list__actions">
@@ -148,23 +146,37 @@
 
       <h3 class="roles-list__section-title">
         {{ 'ADMIN.ROLES.PERMISSIONS_TITLE' | translate }}
-        <nz-tag>{{ selected().size }} / {{ catalogue().length }}</nz-tag>
+        <nz-tag>{{ selected().size }} / {{ permissionCount() }}</nz-tag>
       </h3>
       <p class="roles-list__hint">{{ 'ADMIN.ROLES.PERMISSIONS_HINT' | translate }}</p>
-      <ul class="roles-list__permissions">
-        @for (permission of catalogue(); track permission.code_name) {
-          <li>
-            <span
-              nz-checkbox
-              [nzChecked]="isSelected(permission.code_name)"
-              [nzDisabled]="!canUpdate()"
-              (nzCheckedChange)="togglePermission(permission.code_name, $event)"
-            >
-              {{ permission.name }}
+      @for (group of catalogue(); track group.key) {
+        <section class="roles-list__group" [attr.data-group]="group.key">
+          <h4 class="roles-list__group-title">
+            {{ group.name }}
+            <span class="roles-list__group-count">
+              {{ selectedInGroup(group) }} / {{ group.permissions.length }}
             </span>
-          </li>
-        }
-      </ul>
+          </h4>
+          <ul class="roles-list__permissions">
+            @for (permission of group.permissions; track permission.code_name) {
+              <li>
+                <!-- Included by another selection: ticked and locked, with the reason on hover. -->
+                <span
+                  nz-checkbox
+                  [nzChecked]="isSelected(permission.code_name)"
+                  [nzDisabled]="!canUpdate() || isLocked(permission.code_name)"
+                  [nz-tooltip]="
+                    isLocked(permission.code_name) ? includedBy(permission.code_name) : null
+                  "
+                  (nzCheckedChange)="togglePermission(permission.code_name, $event)"
+                >
+                  {{ permission.name }}
+                </span>
+              </li>
+            }
+          </ul>
+        </section>
+      }
     </nz-spin>
   </ng-container>
 </nz-drawer>
