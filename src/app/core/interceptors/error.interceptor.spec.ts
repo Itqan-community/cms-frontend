@@ -5,6 +5,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { environment } from '../../../environments/environment';
 import { errorInterceptor } from './error.interceptor';
+import { callerShowsErrors } from './caller-shows-errors.context';
 
 describe('errorInterceptor', () => {
   let httpMock: HttpTestingController;
@@ -114,7 +115,7 @@ describe('errorInterceptor', () => {
     req.flush('fail', { status: 404, statusText: 'Not Found' });
   });
 
-  it('shows not-found (not server error) toast for a 404', (done) => {
+  it('shows not-found (not server error) toast for a 404 without a message', (done) => {
     if (!api) {
       pending('API_BASE_URL');
       return;
@@ -127,10 +128,7 @@ describe('errorInterceptor', () => {
       },
     });
     const req = httpMock.expectOne(url);
-    req.flush(
-      { error_name: 'not_found', message: 'لا يوجد' },
-      { status: 404, statusText: 'Not Found' }
-    );
+    req.flush({ error_name: 'not_found' }, { status: 404, statusText: 'Not Found' });
   });
 
   it('shows validation toast (not server error) for a 400 without a usable message', (done) => {
@@ -163,5 +161,37 @@ describe('errorInterceptor', () => {
     });
     const req = httpMock.expectOne(url);
     req.flush({ message: 'fail' }, { status: 500, statusText: 'Server Error' });
+  });
+
+  it('leaves the toast to the caller when the request says the caller shows its own errors', (done) => {
+    const url = `${environment.ADMIN_API_BASE_URL}/groups/7/`;
+    http.delete(url, { context: callerShowsErrors() }).subscribe({
+      error: () => {
+        expect(messageSpy.error).not.toHaveBeenCalled();
+        done();
+      },
+    });
+    httpMock
+      .expectOne(url)
+      .flush(
+        { error_name: 'group_in_use', message: 'This role is assigned to members.' },
+        { status: 400, statusText: 'Bad Request' }
+      );
+  });
+
+  it('shows the backend message for an error the caller does not handle', (done) => {
+    const url = `${environment.ADMIN_API_BASE_URL}/groups/7/`;
+    http.delete(url).subscribe({
+      error: () => {
+        expect(messageSpy.error).toHaveBeenCalledOnceWith('This role is assigned to members.');
+        done();
+      },
+    });
+    httpMock
+      .expectOne(url)
+      .flush(
+        { error_name: 'group_in_use', message: 'This role is assigned to members.' },
+        { status: 400, statusText: 'Bad Request' }
+      );
   });
 });

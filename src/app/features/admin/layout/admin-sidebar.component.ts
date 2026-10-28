@@ -97,6 +97,13 @@ export const TAB_ACCESS_REQUESTS: CmsTab = {
   description: 'ADMIN.MENU.ACCESS_REQUESTS_DESC',
   icon: 'lucideKeyRound',
 };
+export const TAB_ROLES: CmsTab = {
+  id: 'roles',
+  path: 'roles',
+  label: 'ADMIN.MENU.ROLES',
+  description: 'ADMIN.MENU.ROLES_DESC',
+  icon: 'lucideShieldCheck',
+};
 export const TAB_USAGE: CmsTab = {
   id: 'usage',
   path: 'usage',
@@ -141,6 +148,9 @@ export function buildAuthorizedAdminTabs(
     adminAuth.isItqanAdmin()
   ) {
     tabs.push(TAB_MEMBERS);
+  }
+  if (adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_GROUP)) {
+    tabs.push(TAB_ROLES);
   }
   if (
     adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_VIEW_ACCESS_REQUESTS) ||

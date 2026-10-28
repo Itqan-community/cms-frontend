@@ -98,6 +98,11 @@ export const routes: Routes = [
           import('./features/admin/members/members.routes').then((m) => m.membersRoutes),
       },
       {
+        path: 'roles',
+        loadChildren: () =>
+          import('./features/admin/roles/roles.routes').then((m) => m.rolesRoutes),
+      },
+      {
         path: 'access-requests',
         loadChildren: () =>
           import('./features/admin/access-requests/access-requests.routes').then(
