@@ -149,14 +149,14 @@ export function buildAuthorizedAdminTabs(
   ) {
     tabs.push(TAB_MEMBERS);
   }
+  if (adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_GROUP)) {
+    tabs.push(TAB_ROLES);
+  }
   if (
     adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_VIEW_ACCESS_REQUESTS) ||
     adminAuth.isItqanAdmin()
   ) {
     tabs.push(TAB_ACCESS_REQUESTS);
-  }
-  if (adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_GROUP)) {
-    tabs.push(TAB_ROLES);
   }
   if (adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_USAGE)) {
     tabs.push(TAB_USAGE);
