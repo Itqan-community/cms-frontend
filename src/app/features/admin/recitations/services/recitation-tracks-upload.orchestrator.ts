@@ -7,7 +7,7 @@ import type {
 } from '../models/recitation-tracks.models';
 import { RecitationsService } from './recitations.service';
 
-export const RECITATION_TRACKS_CHUNK_SIZE = 32 * 1024 * 1024;
+export const RECITATION_TRACKS_CHUNK_SIZE = 8 * 1024 * 1024;
 export const RECITATION_TRACKS_FILE_CONCURRENCY = 4;
 const PUT_MAX_ATTEMPTS = 3;
 
