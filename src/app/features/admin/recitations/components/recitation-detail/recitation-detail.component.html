@@ -276,6 +276,19 @@
               <ng-icon name="lucideUpload" />
               {{ 'ADMIN.RECITATIONS.TRACKS.UPLOAD' | translate }}
             </button>
+            <label class="recitation-detail__concurrency">
+              <span>{{ 'ADMIN.RECITATIONS.TRACKS.CONCURRENCY_LABEL' | translate }}</span>
+              <nz-select
+                class="recitation-detail__concurrency-select"
+                [ngModel]="uploadConcurrency()"
+                (ngModelChange)="onUploadConcurrencyChange($event)"
+                [attr.title]="'ADMIN.RECITATIONS.TRACKS.CONCURRENCY_HINT' | translate"
+              >
+                @for (option of uploadConcurrencyOptions; track option) {
+                  <nz-option [nzValue]="option" [nzLabel]="'' + option" />
+                }
+              </nz-select>
+            </label>
             @if (uploadRows().length && !hasInFlightUploadRows()) {
               <button
                 nz-button
