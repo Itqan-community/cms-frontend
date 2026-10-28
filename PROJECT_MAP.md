@@ -388,9 +388,9 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   saved on Enter or blur via `PUT …/groups/{id}/`, and −/+ shrinking or growing the end one ayah /
   word via `POST …/groups/{id}/extend/`); "Add next group" under the grid (`POST …/groups/next/`)
   adds a blank group after the furthest one, then scrolls to it and focuses its text. "Add group"
-  and the per-row change-range action (`group-actions-cell.component.ts`) open `group-range-modal/`
-  — from/to pickers with a debounced, cancelling live preview of the mushaf text
-  (`GET content/quran-range/`), optional first text per column — and delete removes a group. A
+  opens `group-range-modal/` — from/to pickers with a debounced, cancelling live preview of the
+  mushaf text (`GET content/quran-range/`), optional first text per column — and the per-row delete
+  button (`group-actions-cell.component.ts`, a group row's only action) removes a group. A
   translated language lists its source's ranges; only an `orphaned` row (a range the source dropped)
   can be deleted, its text opens read-only and can't be cleared or pasted over, and a commit refused
   with `orphaned_groups` lists the groups. **Text columns:** one editable grid column per key of the
