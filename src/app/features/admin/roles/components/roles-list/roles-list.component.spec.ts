@@ -4,6 +4,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideIcons } from '@ng-icons/core';
 import { lucidePlus, lucideShieldCheck, lucideSquarePen, lucideTrash2 } from '@ng-icons/lucide';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ModalOptions, NzModalService } from 'ng-zorro-antd/modal';
 import { of } from 'rxjs';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 import { GroupDetailOut, GroupListOut } from '../../../members/models/groups.models';
@@ -33,6 +34,7 @@ describe('RolesListComponent', () => {
     selectedPublisherId: ReturnType<typeof signal<number | null>>;
   };
   let granted: Set<string>;
+  let modal: jasmine.SpyObj<NzModalService>;
 
   function setup(codes: string[]): void {
     granted = new Set(codes);
@@ -88,6 +90,10 @@ describe('RolesListComponent', () => {
       ],
     });
     fixture = TestBed.createComponent(RolesListComponent);
+    // NzModalModule gives the component its own NzModalService (the template's create modal
+    // needs the real one), so spy on that instance's confirm only.
+    modal = fixture.debugElement.injector.get(NzModalService) as jasmine.SpyObj<NzModalService>;
+    spyOn(modal, 'confirm');
     component = fixture.componentInstance;
     fixture.detectChanges();
   }
@@ -102,7 +108,7 @@ describe('RolesListComponent', () => {
     const cells = [...host.querySelectorAll('tbody tr td')].map((td) => td.textContent?.trim());
     expect(host.querySelectorAll('th').length).toBe(3);
     expect(cells[0]).toBe('المحررون');
-    expect(cells[1]).toBe('3');
+    expect(cells[1]).toBe('3 / 3');
     expect(host.textContent).not.toContain('Editors');
   });
 
@@ -211,6 +217,19 @@ describe('RolesListComponent', () => {
 
     expect(groups.update).not.toHaveBeenCalled();
     expect(groups.setPermissions).toHaveBeenCalled();
+  });
+
+  it('asks for confirmation in a modal before deleting a role', () => {
+    setup([PORTAL_PERMISSIONS.PORTAL_READ_GROUP, PORTAL_PERMISSIONS.PORTAL_DELETE_GROUP]);
+    groups.delete.and.returnValue(of(undefined));
+
+    component.confirmDelete(EDITORS);
+
+    expect(groups.delete).not.toHaveBeenCalled();
+    const options = modal.confirm.calls.mostRecent().args[0] as ModalOptions;
+    expect(options.nzOkDanger).toBeTrue();
+    (options.nzOnOk as () => void)();
+    expect(groups.delete).toHaveBeenCalledWith(7);
   });
 
   it('opens the editor read-only without the update permission', () => {
