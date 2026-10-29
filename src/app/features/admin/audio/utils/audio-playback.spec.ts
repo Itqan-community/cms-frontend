@@ -138,6 +138,19 @@ describe('AudioPlayback', () => {
     expect(playback.mediaDurationMs()).toBeNull();
   });
 
+  it('counts the media as settled once metadata lands or the source fails', () => {
+    const loaded = new AudioPlayback();
+    loaded.attach(fakeMedia({ duration: Infinity }));
+    expect(loaded.mediaSettled()).toBeFalse();
+
+    loaded.onLoadedMetadata();
+    expect(loaded.mediaSettled()).toBeTrue();
+
+    const failed = new AudioPlayback();
+    failed.onMediaError();
+    expect(failed.mediaSettled()).toBeTrue();
+  });
+
   it('tracks play and pause events from the element', () => {
     const playback = new AudioPlayback();
 

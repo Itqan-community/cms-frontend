@@ -2818,6 +2818,7 @@
           "TRACK_LOAD_FAILED": "Could not load the audio track.",
           "TIMESTAMPS_LOAD_FAILED": "Could not load the ayah timestamps. The audio still plays.",
           "TRACK_TOO_LONG": "This track is long, so its waveform is not drawn by default. Loading it downloads the whole file and can take a while. Boundaries are still editable.",
+          "TRACK_LENGTH_UNKNOWN": "This track's length is unknown, so its waveform is not drawn by default. Loading it downloads the whole file and can take a while. Boundaries are still editable.",
           "WAVEFORM_FAILED": "The waveform could not be drawn. Boundaries are still editable."
         },
         "MESSAGES": {

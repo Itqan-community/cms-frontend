@@ -290,7 +290,7 @@ describe('TimestampEditorComponent', () => {
     });
 
     it('does not download the audio until asked', () => {
-      expect(component.peaksTooLong()).toBeTrue();
+      expect(component.peaksOptInRequired()).toBeTrue();
       expect(fetchSpy).not.toHaveBeenCalled();
     });
 
@@ -298,9 +298,62 @@ describe('TimestampEditorComponent', () => {
       component.loadWaveformAnyway();
 
       expect(fetchSpy).toHaveBeenCalledWith(TRACK.audio_url, jasmine.any(Object));
-      expect(component.peaksTooLong()).toBeFalse();
+      expect(component.peaksOptInRequired()).toBeFalse();
       expect(component.peaksError()).toBeNull();
       expect(component.peaksLoading()).toBeTrue();
+    });
+  });
+
+  describe('a track with no length on its row', () => {
+    let fetchSpy: jasmine.Spy;
+
+    /** Stands in for the `<audio>` element reporting its metadata. */
+    function metadataArrives(durationSeconds: number): void {
+      component['playback'].attach({
+        paused: true,
+        currentTime: 0,
+        duration: durationSeconds,
+        play: () => Promise.resolve(),
+        pause: () => undefined,
+      });
+      component.onLoadedMetadata();
+    }
+
+    beforeEach(async () => {
+      fetchSpy = spyOn(window, 'fetch').and.returnValue(new Promise<Response>(() => undefined));
+      await setup({ recitation: 'sample-recitation' }, { noDuration: true });
+    });
+
+    it('waits for the media metadata before deciding whether to decode', () => {
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(component.peaksOptInRequired()).toBeFalse();
+    });
+
+    it('decodes once the metadata shows the track is under the cap', () => {
+      metadataArrives(60);
+
+      expect(fetchSpy).toHaveBeenCalledWith(TRACK.audio_url, jasmine.any(Object));
+    });
+
+    it('asks first once the metadata shows the track is over the cap', () => {
+      metadataArrives(90 * 60);
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(component.peaksOptInRequired()).toBeTrue();
+    });
+
+    it('asks first when the metadata carries no usable length', () => {
+      metadataArrives(Number.POSITIVE_INFINITY);
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(component.peaksOptInRequired()).toBeTrue();
+    });
+
+    it('asks first when the media fails to load at all', () => {
+      component.onMediaError();
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(component.peaksOptInRequired()).toBeTrue();
     });
   });
 

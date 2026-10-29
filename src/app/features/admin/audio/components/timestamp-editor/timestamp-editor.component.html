@@ -74,13 +74,14 @@
       (pause)="onPause()"
       (timeupdate)="onTimeUpdate()"
       (loadedmetadata)="onLoadedMetadata()"
+      (error)="onMediaError()"
     ></audio>
 
     @if (peaksError()) {
       <nz-alert
         nzType="info"
         [nzMessage]="peaksError()"
-        [nzAction]="peaksTooLong() ? loadAnywayAction : null"
+        [nzAction]="peaksOptInRequired() ? loadAnywayAction : null"
         nzShowIcon
       />
       <ng-template #loadAnywayAction>

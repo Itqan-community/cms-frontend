@@ -126,7 +126,9 @@ GB** of PCM in a browser tab, so `waveform-peaks.util.ts`:
 3. **Releases the `AudioBuffer` immediately.** Zoom re-buckets from the cached peaks and never
    decodes again.
 4. Skips tracks over `LARGE_TRACK_MS` (40 min), showing a marker-only timeline and a "Load waveform
-   anyway" button that decodes on request.
+   anyway" button that decodes on request. With no `duration_ms` on the row it waits for the
+   `<audio>` metadata first; if that brings no usable length (or the source fails), the same opt-in
+   is shown rather than decoding blind.
 
 Playback never goes through any of this — it uses a plain `HTMLAudioElement`, which streams.
 

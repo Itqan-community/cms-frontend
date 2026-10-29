@@ -128,8 +128,10 @@ export class TimestampEditorComponent implements OnInit {
   readonly peaksLoading = signal(false);
   /** Non-fatal: markers stay editable on a flat timeline when the trace cannot be drawn. */
   readonly peaksError = signal<string | null>(null);
-  /** Over `LARGE_TRACK_MS` the decode is skipped unless the user asks for it. */
-  readonly peaksTooLong = signal(false);
+  /** Over `LARGE_TRACK_MS`, or of unknown length, the decode is skipped unless the user asks. */
+  readonly peaksOptInRequired = signal(false);
+  /** Set while the decode waits on the media element to learn how long the track is. */
+  private peaksAwaitingDuration = false;
   readonly view = signal<WaveformView>({ startMs: 0, endMs: 1_000 });
 
   readonly loading = signal(true);
@@ -249,13 +251,26 @@ export class TimestampEditorComponent implements OnInit {
     const url = this.track()?.audio_url;
     if (!url) return;
 
-    if (!force && this.durationMs() > LARGE_TRACK_MS) {
-      this.peaksTooLong.set(true);
-      this.peaksError.set(this.translate.instant('ADMIN.AUDIO.TIMESTAMPS.ERRORS.TRACK_TOO_LONG'));
-      return;
+    if (!force) {
+      // With no length on the row the cap has nothing to test. The element's metadata usually
+      // lands within a moment, so the decision waits for it instead of decoding blind.
+      if (this.durationMs() <= 0) {
+        if (this.playback.mediaSettled()) {
+          this.requirePeaksOptIn('ADMIN.AUDIO.TIMESTAMPS.ERRORS.TRACK_LENGTH_UNKNOWN');
+        } else {
+          this.peaksAwaitingDuration = true;
+        }
+        return;
+      }
+
+      if (this.durationMs() > LARGE_TRACK_MS) {
+        this.requirePeaksOptIn('ADMIN.AUDIO.TIMESTAMPS.ERRORS.TRACK_TOO_LONG');
+        return;
+      }
     }
 
-    this.peaksTooLong.set(false);
+    this.peaksAwaitingDuration = false;
+    this.peaksOptInRequired.set(false);
     this.peaksError.set(null);
     this.peaksAbort = new AbortController();
     this.peaksLoading.set(true);
@@ -277,6 +292,19 @@ export class TimestampEditorComponent implements OnInit {
   /** Opt-in past the length cap: the decode can take a while and a lot of memory on a long surah. */
   loadWaveformAnyway(): void {
     void this.loadPeaks(true);
+  }
+
+  private requirePeaksOptIn(messageKey: string): void {
+    this.peaksOptInRequired.set(true);
+    this.peaksError.set(this.translate.instant(messageKey));
+  }
+
+  /** Picks the deferred decode back up once the media element has said what it knows. */
+  private resumeDeferredPeaks(): void {
+    if (!this.peaksAwaitingDuration) return;
+
+    this.peaksAwaitingDuration = false;
+    void this.loadPeaks();
   }
 
   /**
@@ -383,6 +411,13 @@ export class TimestampEditorComponent implements OnInit {
   onLoadedMetadata(): void {
     this.playback.onLoadedMetadata();
     this.adoptDiscoveredDuration();
+    this.resumeDeferredPeaks();
+  }
+
+  /** A source that never loads leaves no length to cap on, so the decode becomes an opt-in. */
+  onMediaError(): void {
+    this.playback.onMediaError();
+    this.resumeDeferredPeaks();
   }
 
   seekTo(ms: number): void {
