@@ -529,6 +529,155 @@ Release 1.13.0.
 
 ---
 
+## [1.14.0] - 2026-10-14
+
+Release 1.14.0.
+
+## Changes
+
+- feat(gallery): show the itqan add command on installable assets
+- feat(admin): publish mushaf and font versions
+- feat(admin): let Itqan admins undo a version removal
+- fix(i18n): clarify the Arabic rollback confirmation text
+- feat(admin): show itqan CLI availability and ask for a rollback reason
+- feat(admin): number mushaf and font versions like tafsirs
+- fix(i18n): say "التحميل جارٍ" instead of "جاري التحميل" in Arabic
+- fix(admin): drop the review selection when a new listing is requested
+- feat(admin): bilingual version name and summary
+- feat(admin): pre-approved checkbox when uploading a version
+- feat(admin): bulk-approve changes on the review page
+
+---
+
+## [1.15.0] - 2026-10-25
+
+Release 1.15.0.
+
+## Changes
+
+- fix(auth): don't lend a cached user's access to a different session user
+- perf(editor): register only the AG Grid modules the grid uses
+- perf(editor): open the draft alongside the languages and take its template
+- fix(auth): keep the provisional session until the profile is applied
+- fix(gallery): wrap long sample cells and show their full text on hover
+- fix(gallery): rename the preview's languages when the interface language changes
+- fix(content): show the generic message for column errors without a translation
+- fix(content): keep unsaved edits when the columns can't be reloaded
+- fix(content): call committed versions محفوظ, not معتمد, in the Arabic column messages
+- fix(content): say column keys use a-z, 0-9 and underscores
+- fix(review): name change columns whenever the asset has several
+- feat(content): highlight only the changed cells of a row
+- fix(content): steadier, clearer column management
+- feat(gallery): show the file structure in the user's language, with a language switch
+- fix(gallery): align file-structure cells under their headers in both directions
+- fix(content): safe multi-column paste, quiet handled errors, per-column source
+- docs: project map for multi-column text assets
+- feat(gallery): file structure preview for text assets
+- feat(review): show which column a change belongs to
+- feat(content): require a major version after reordering columns
+- feat(content): manage asset columns
+- feat(content): edit every text column in the grid
+- feat(content): column models and API client
+- feat(usage): localize chart tooltips, dates and numbers
+- fix(usage): never toast a 404 from the optional gallery counts
+- fix(usage): ignore inherited object keys in the range preset
+- fix(usage): relabel the leaderboard and unseen traffic on language change
+- fix(usage): list every developer app in the app filter
+- fix(usage): drop the previous board request when the publisher changes
+- fix(api-keys): reject a cleared app slug instead of silently keeping it
+- docs(usage): record the chart palette ruling and mark the plan done
+- docs(usage): map the usage reports frontend
+- fix(usage): pass an empty chart option while a chart has no data
+- feat(account): show and edit the app slug of API keys
+- feat(account): add the developer usage page
+- feat(gallery): show public usage counts on asset pages
+- feat(usage): show usage on asset admin pages
+- feat(usage): replace the admin usage page with usage dashboards
+- feat(usage): add the usage dashboard
+- feat(usage): add chart option builders and the usage chart component
+- feat(usage): add the usage reports API service and filter helpers
+- build(usage): add echarts and ngx-echarts
+- docs(usage): add the usage reports frontend plan
+- feat(gallery): mark recitations with ayah timings as timed
+- fix(gallery): label mushaf, linguistic, search and tajweed categories
+- docs: update project map for AI translate rate limits and backend dependency
+- fix(admin): require the asset type prefix on a typed identifier
+- fix(admin): clear a recitation identifier when its reciter or riwayah changes
+- feat(admin): translate create forms from Arabic and generate the asset identifier
+
+---
+
+## [1.16.0] - 2026-10-29
+
+Release 1.16.0.
+
+## Changes
+
+- docs(map): /admin/publishers is gated by permissionGuard
+- fix(issues): search the selected publisher's assets for staff too
+- fix(usage): don't read near-zero unseen traffic as complete reports
+- feat(usage): explain the unseen traffic tab
+- fix(issues): limit the issue form's asset search to the selected publisher
+- fix(admin): recognise Itqan staff from the profile's is_staff
+- feat(recitations): explain the files-at-a-time picker in a tooltip
+- refactor: rename sura/aya to surah/ayah (Marqoom naming)
+- fix(gallery): hide the old font preview while another language loads
+- feat(gallery): play recitation samples and render font previews
+- fix(admin): drop a publisher response that arrives after the user changed
+- fix(admin): keep a failed publisher load from looking like a post-switch denial
+- fix(admin): drop the previous user's publisher permissions after signing in as someone else
+- fix(admin): go to the admin home when a publisher switch lands on a page that publisher denies
+- fix(admin): keep portal access when the selected publisher's role lacks it
+- feat(admin): sort member roles by their name in the UI language
+- feat(admin): gate portal actions on the selected publisher's permissions
+- docs(map): group rows only have a delete action
+- fix(admin): show the generic error for untranslated group range errors
+- fix(auth): only offer passkey login on page load when the user has a passkey
+- fix(recitations): associate the files-at-a-time label with its select
+- fix(recitations): mark queued uploads cancelled when they never start
+- feat(recitations): one upload queue with a user-chosen files-at-a-time limit
+- perf(recitations): upload tracks in 8 MB parts instead of 32 MB
+- build(deps): bump codecov/codecov-action from 6 to 7
+- feat(admin): float the add-next-group button under the last row
+- refactor(admin): drop the group edit button now that ranges are edited in the grid
+- fix(admin): keep group delete visible and add-next button under the last row
+- fix(i18n): call tafsir groups نطاق in Arabic
+- feat(admin): edit tafsir group ranges in the grid
+- perf(usage): don't reload recitation reports when only the metric, split or comparison changes
+- fix(usage): leave missing buckets out of the spike baseline
+- feat(admin): edit ayah-group and word-group tafsir groups in the content grid
+- feat(usage): recitation reports on the asset tab and a Recitations overview
+- fix(admin): open the section list after switching publisher on a record page
+- feat(auth): save the UI language as the user's email language
+- fix(admin): keep failed confirm dialogs open without rejecting
+
+---
+
+## [1.17.0] - 2026-10-29
+
+Release 1.17.0.
+
+## Changes
+
+- fix(admin): drop stale role responses and label the permission checkboxes
+- test(admin): stub only hasPermission in the roles tab spec
+- fix(admin): ignore a refreshed publisher list that arrives after the user changed
+- docs(agents): always show the backend's error message
+- fix(errors): show one toast per failed role or member request
+- fix(errors): show the backend's specific message even when it is not in the UI language
+- fix(admin): confirm role deletion in a modal and show permission counts out of the total
+- feat(admin): list roles by their name in the UI language with their permission count
+- fix(admin): show the Arabic role name first in the roles table and form
+- fix(admin): list roles right below members in the sidebar
+- fix(admin): close the role editor after saving
+- fix(admin): call it role, not group, on the members page
+- feat(admin): group role permissions by usage and lock the ones a selection includes
+- fix(i18n): translate portal as لوحة التحكم in member messages
+- fix(admin): match the role row button's label to its view or edit text
+- feat(admin): roles page to manage roles and their permissions
+
+---
+
 ## [Unreleased]
 
 ### Added
