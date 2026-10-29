@@ -607,6 +607,52 @@ Release 1.15.0.
 
 ---
 
+## [1.16.0] - 2026-10-29
+
+Release 1.16.0.
+
+## Changes
+
+- docs(map): /admin/publishers is gated by permissionGuard
+- fix(issues): search the selected publisher's assets for staff too
+- fix(usage): don't read near-zero unseen traffic as complete reports
+- feat(usage): explain the unseen traffic tab
+- fix(issues): limit the issue form's asset search to the selected publisher
+- fix(admin): recognise Itqan staff from the profile's is_staff
+- feat(recitations): explain the files-at-a-time picker in a tooltip
+- refactor: rename sura/aya to surah/ayah (Marqoom naming)
+- fix(gallery): hide the old font preview while another language loads
+- feat(gallery): play recitation samples and render font previews
+- fix(admin): drop a publisher response that arrives after the user changed
+- fix(admin): keep a failed publisher load from looking like a post-switch denial
+- fix(admin): drop the previous user's publisher permissions after signing in as someone else
+- fix(admin): go to the admin home when a publisher switch lands on a page that publisher denies
+- fix(admin): keep portal access when the selected publisher's role lacks it
+- feat(admin): sort member roles by their name in the UI language
+- feat(admin): gate portal actions on the selected publisher's permissions
+- docs(map): group rows only have a delete action
+- fix(admin): show the generic error for untranslated group range errors
+- fix(auth): only offer passkey login on page load when the user has a passkey
+- fix(recitations): associate the files-at-a-time label with its select
+- fix(recitations): mark queued uploads cancelled when they never start
+- feat(recitations): one upload queue with a user-chosen files-at-a-time limit
+- perf(recitations): upload tracks in 8 MB parts instead of 32 MB
+- build(deps): bump codecov/codecov-action from 6 to 7
+- feat(admin): float the add-next-group button under the last row
+- refactor(admin): drop the group edit button now that ranges are edited in the grid
+- fix(admin): keep group delete visible and add-next button under the last row
+- fix(i18n): call tafsir groups نطاق in Arabic
+- feat(admin): edit tafsir group ranges in the grid
+- perf(usage): don't reload recitation reports when only the metric, split or comparison changes
+- fix(usage): leave missing buckets out of the spike baseline
+- feat(admin): edit ayah-group and word-group tafsir groups in the content grid
+- feat(usage): recitation reports on the asset tab and a Recitations overview
+- fix(admin): open the section list after switching publisher on a record page
+- feat(auth): save the UI language as the user's email language
+- fix(admin): keep failed confirm dialogs open without rejecting
+
+---
+
 ## [Unreleased]
 
 ### Added
