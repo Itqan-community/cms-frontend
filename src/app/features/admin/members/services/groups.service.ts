@@ -1,9 +1,17 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { callerShowsErrors } from '../../../../core/interceptors/caller-shows-errors.context';
 import { environment } from '../../../../../environments/environment';
-import { GroupListFilters, PagedGroupListOut } from '../models/groups.models';
+import {
+  GroupDetailOut,
+  GroupListFilters,
+  GroupNamesIn,
+  PagedGroupListOut,
+  PermissionGroupOut,
+} from '../models/groups.models';
 
+/** Callers (roles page, members role picker) show their own error messages for every call. */
 @Injectable({
   providedIn: 'root',
 })
@@ -28,6 +36,49 @@ export class GroupsService {
     if (filters.name) {
       params = params.set('name', filters.name);
     }
-    return this.http.get<PagedGroupListOut>(`${this.baseUrl}/`, { params });
+    return this.http.get<PagedGroupListOut>(`${this.baseUrl}/`, {
+      params,
+      context: callerShowsErrors(),
+    });
+  }
+
+  get(id: number): Observable<GroupDetailOut> {
+    return this.http.get<GroupDetailOut>(`${this.baseUrl}/${id}/`, {
+      context: callerShowsErrors(),
+    });
+  }
+
+  create(names: GroupNamesIn): Observable<GroupDetailOut> {
+    return this.http.post<GroupDetailOut>(`${this.baseUrl}/`, names, {
+      context: callerShowsErrors(),
+    });
+  }
+
+  update(id: number, names: GroupNamesIn): Observable<GroupDetailOut> {
+    return this.http.put<GroupDetailOut>(`${this.baseUrl}/${id}/`, names, {
+      context: callerShowsErrors(),
+    });
+  }
+
+  /** Replaces the role's permissions; the backend adds the ones they imply (e.g. CREATE → READ). */
+  setPermissions(id: number, permissions: string[]): Observable<GroupDetailOut> {
+    return this.http.put<GroupDetailOut>(
+      `${this.baseUrl}/${id}/permissions/`,
+      { permissions },
+      { context: callerShowsErrors() }
+    );
+  }
+
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}/`, {
+      context: callerShowsErrors(),
+    });
+  }
+
+  /** Every permission a role can hold, grouped by usage and named in the UI language. */
+  listPermissions(): Observable<PermissionGroupOut[]> {
+    return this.http.get<PermissionGroupOut[]>(`${this.baseUrl}/permissions/`, {
+      context: callerShowsErrors(),
+    });
   }
 }

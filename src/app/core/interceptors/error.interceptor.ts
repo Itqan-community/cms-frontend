@@ -10,6 +10,7 @@ import {
   shouldSuppressGlobalErrorToast,
 } from '../../shared/utils/api-error-resolver.util';
 import { isExpectedTotpAuthenticatorStatusProbe404 } from './auth-error-sentry-suppress.util';
+import { CALLER_SHOWS_ERRORS } from './caller-shows-errors.context';
 
 /**
  * Global Error Interceptor
@@ -40,6 +41,11 @@ export function errorInterceptor(
 
       // Mushaf pages already show retry UI for CDN failures.
       if (req.url.includes('cdn.jsdelivr.net')) {
+        return throwError(() => error);
+      }
+
+      // The caller shows its own (more specific) message; a second toast would just repeat it.
+      if (req.context.get(CALLER_SHOWS_ERRORS)) {
         return throwError(() => error);
       }
 

@@ -1312,7 +1312,9 @@
       "ACCESS_REQUESTS_DESC": "Manage incoming requests for platform access",
       "FONTS": "Fonts",
       "FONTS_DESC": "Manage and upload custom fonts used in your app",
-      "PROGRAMS": "Programs"
+      "PROGRAMS": "Programs",
+      "ROLES": "Roles",
+      "ROLES_DESC": "Define roles and the permissions each one grants"
     },
     "PROFILE": {
       "TITLE": "Publisher profile",
@@ -2075,7 +2077,7 @@
       "COLUMNS": {
         "NAME": "Name",
         "EMAIL": "Email",
-        "GROUP": "Group",
+        "GROUP": "Role",
         "STATUS": "Status",
         "ASSIGNED_LANGUAGES": "Languages",
         "CREATED_AT": "Added",
@@ -2095,8 +2097,8 @@
         "NAME_PLACEHOLDER": "Member name",
         "EMAIL_LABEL": "Email",
         "EMAIL_PLACEHOLDER": "email@example.com",
-        "GROUP_LABEL": "Group",
-        "GROUP_PLACEHOLDER": "Select a group",
+        "GROUP_LABEL": "Role",
+        "GROUP_PLACEHOLDER": "Select a role",
         "INVITE_INFO": "An invitation email will be sent to this address.",
         "SUBMIT_INVITE": "Send invitation",
         "SUBMIT_EDIT": "Save",
@@ -2105,10 +2107,10 @@
         "CONFIRM_CANCEL": "Cancel",
         "ERR_NAME": "Please enter a name",
         "ERR_EMAIL": "Please enter a valid email",
-        "ERR_GROUP": "Please select a group"
+        "ERR_GROUP": "Please select a role"
       },
       "CHANGE_GROUP": {
-        "CONFIRM_TITLE": "Change group?",
+        "CONFIRM_TITLE": "Change role?",
         "CONFIRM_BODY": "{{name}} — assign them to \"{{group}}\"."
       },
       "REMOVE": {
@@ -2140,14 +2142,14 @@
         "INVITE_ERROR": "Could not send invitation",
         "UPDATE_SUCCESS": "Member updated",
         "UPDATE_ERROR": "Could not update member",
-        "CHANGE_GROUP_SUCCESS": "Member group updated",
+        "CHANGE_GROUP_SUCCESS": "Member role updated",
         "REMOVE_SUCCESS": "Member removed",
         "REMOVE_ERROR": "Could not remove member",
         "CANCEL_SUCCESS": "Invitation cancelled",
         "RESEND_SUCCESS": "Invitation resent",
         "RESEND_ERROR": "Could not resend invitation",
         "NO_PUBLISHER": "Please select a publisher",
-        "GROUPS_LOAD_ERROR": "Could not load groups"
+        "GROUPS_LOAD_ERROR": "Could not load roles"
       }
     },
     "ACCESS_REQUESTS": {
@@ -2852,6 +2854,47 @@
       "SLUG_MANUAL": "The identifier could not be generated. Type it in lowercase words joined by hyphens, starting with the asset type (e.g. tafsir-ibn-kathir).",
       "SLUG_FORMAT": "Use lowercase letters, digits and single hyphens, starting with the asset type (e.g. tafsir-ibn-kathir); max 50 characters.",
       "SLUG_PLACEHOLDER": "e.g. tafsir-ibn-kathir"
+    },
+    "ROLES": {
+      "TITLE": "Roles",
+      "SUBTITLE": "Roles of the selected publisher and the permissions each one grants",
+      "CREATE_BUTTON": "New role",
+      "CREATE_TITLE": "New role",
+      "EMPTY_TITLE": "No roles yet",
+      "LIST_ERROR_TITLE": "Could not load roles",
+      "LIST_ERROR_DESC": "Check your connection and try again.",
+      "DELETE_CONFIRM": "This can't be undone. A role that members still hold can't be deleted; move them to another role first.",
+      "PERMISSIONS_TITLE": "Permissions",
+      "PERMISSIONS_HINT": "Permissions are grouped by what they are used for. Some permissions include others (for example, creating includes viewing): those are ticked and locked automatically. Untick the permission that includes them to remove them.",
+      "COLUMNS": {
+        "NAME": "Role",
+        "PERMISSIONS": "Permissions",
+        "ACTIONS": "Actions"
+      },
+      "FIELDS": {
+        "NAME_EN": "English name",
+        "NAME_AR": "Arabic name",
+        "NAME_REQUIRED": "Enter a name of up to 150 characters."
+      },
+      "ACTIONS": {
+        "CREATE": "Create",
+        "EDIT": "Edit",
+        "VIEW": "View",
+        "SAVE": "Save",
+        "DELETE": "Delete",
+        "CANCEL": "Cancel"
+      },
+      "MESSAGES": {
+        "CREATED": "Role created. Choose its permissions.",
+        "CREATE_FAILED": "Could not create the role.",
+        "LOAD_FAILED": "Could not load the role.",
+        "SAVED": "Role saved.",
+        "SAVE_FAILED": "Could not save the role.",
+        "DELETED": "Role deleted.",
+        "DELETE_FAILED": "Could not delete the role."
+      },
+      "INCLUDED_BY": "Included with: {{names}}",
+      "DELETE_TITLE": "Delete the role \"{{name}}\"?"
     }
   },
   "USAGE": {

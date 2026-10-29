@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
+import { callerShowsErrors } from '../../../../core/interceptors/caller-shows-errors.context';
 import { environment } from '../../../../../environments/environment';
 import {
   MemberInviteIn,
@@ -51,24 +52,34 @@ export class MembersService {
   }
 
   invite(body: MemberInviteIn): Observable<MemberOut> {
-    return this.http.post<MemberOut>(`${this.baseUrl}/`, body);
+    return this.http.post<MemberOut>(`${this.baseUrl}/`, body, { context: callerShowsErrors() });
   }
 
   update(id: number, body: MemberUpdateIn): Observable<MemberOut> {
-    return this.http.patch<MemberOut>(`${this.baseUrl}/${id}/`, body);
+    return this.http.patch<MemberOut>(`${this.baseUrl}/${id}/`, body, {
+      context: callerShowsErrors(),
+    });
   }
 
   /** Replace the languages this member works in (editing and reviewing alike). */
   setMemberLanguages(id: number, languages: string[]): Observable<MemberOut> {
-    return this.http.put<MemberOut>(`${this.baseUrl}/${id}/languages/`, { languages });
+    return this.http.put<MemberOut>(
+      `${this.baseUrl}/${id}/languages/`,
+      { languages },
+      { context: callerShowsErrors() }
+    );
   }
 
   remove(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}/`);
+    return this.http.delete<void>(`${this.baseUrl}/${id}/`, { context: callerShowsErrors() });
   }
 
   resend(id: number): Observable<MemberOut> {
-    return this.http.post<MemberOut>(`${this.baseUrl}/${id}/resend-invite/`, {});
+    return this.http.post<MemberOut>(
+      `${this.baseUrl}/${id}/resend-invite/`,
+      {},
+      { context: callerShowsErrors() }
+    );
   }
 
   acceptInvitation(token: string): Observable<unknown> {

@@ -421,11 +421,11 @@ export class MembersListComponent extends AdminListBase<MemberOut, MemberUiFilte
             this.memberForm.controls.group_id.setValue(res.results[0].id);
           }
         },
-        error: () => {
+        error: (err) => {
           this.groupOptions.set([]);
           this.groupsLoading.set(false);
           this.groupsLoadFailed.set(true);
-          this.message.error(this.translate.instant('ADMIN.MEMBERS.MESSAGES.GROUPS_LOAD_ERROR'));
+          this.message.error(this.apiErrorMessage(err, 'ADMIN.MEMBERS.MESSAGES.GROUPS_LOAD_ERROR'));
         },
       });
   }
