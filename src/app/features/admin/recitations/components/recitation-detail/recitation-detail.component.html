@@ -214,6 +214,15 @@
               {{ 'ADMIN.RECITATIONS.TIMINGS.HINT' | translate }}
             </p>
 
+            @if (timingsUploadLoading()) {
+              <nz-progress
+                class="recitation-detail__timings-progress"
+                [nzPercent]="timingsUploadPercent()"
+                [nzShowInfo]="true"
+                [nzFormat]="formatNzProgressPercent"
+              ></nz-progress>
+            }
+
             @if (timingsUploadResult(); as tr) {
               <nz-alert
                 nzType="success"

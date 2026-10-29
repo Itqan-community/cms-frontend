@@ -1,6 +1,6 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpEventType, HttpParams, HttpResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, map } from 'rxjs';
+import { Observable, filter, map, tap } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import type {
   RecitationFolderOut,
@@ -114,11 +114,15 @@ export class RecitationsService {
     return this.http.delete<void>(`${this.apiUrl}${slug}/`);
   }
 
-  /** POST /portal/timing/upload/ — multipart: asset_id, files[], optional folder_id */
+  /**
+   * POST /portal/timing/upload/ — multipart: asset_id, files[], optional folder_id.
+   * `onProgress` receives the uploaded fraction (0..1) of the request body.
+   */
   recitationTimingUpload(
     assetId: number,
     files: File[],
-    folderId?: number | null
+    folderId?: number | null,
+    onProgress?: (fraction: number) => void
   ): Observable<RecitationTimingUploadOut> {
     const formData = new FormData();
     formData.append('asset_id', String(assetId));
@@ -128,10 +132,23 @@ export class RecitationsService {
     for (const file of files) {
       formData.append('files', file, file.name);
     }
-    return this.http.post<RecitationTimingUploadOut>(
-      `${this.portalBaseUrl}/timing/upload/`,
-      formData
-    );
+    return this.http
+      .post<RecitationTimingUploadOut>(`${this.portalBaseUrl}/timing/upload/`, formData, {
+        observe: 'events',
+        reportProgress: true,
+      })
+      .pipe(
+        tap((event) => {
+          if (event.type === HttpEventType.UploadProgress && event.total) {
+            onProgress?.(event.loaded / event.total);
+          }
+        }),
+        filter(
+          (event): event is HttpResponse<RecitationTimingUploadOut> =>
+            event.type === HttpEventType.Response
+        ),
+        map((res) => res.body as RecitationTimingUploadOut)
+      );
   }
 
   // --- Recitation folders (portal) ---
