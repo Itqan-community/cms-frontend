@@ -29,6 +29,8 @@ export class AudioPlayback {
   readonly positionMs = signal(0);
   /** What the element reports once its metadata lands, in ms — null while still unknown. */
   readonly mediaDurationMs = signal<number | null>(null);
+  /** True once the element has loaded its metadata or given up — whatever length it knows is in. */
+  readonly mediaSettled = signal(false);
 
   /** Called once the template's element exists. */
   attach(media: PlayableMedia | null): void {
@@ -84,5 +86,11 @@ export class AudioPlayback {
         ? Math.round(seconds * MS_PER_SECOND)
         : null
     );
+    this.mediaSettled.set(true);
+  }
+
+  /** A source that failed to load will report no length either. */
+  onMediaError(): void {
+    this.mediaSettled.set(true);
   }
 }
