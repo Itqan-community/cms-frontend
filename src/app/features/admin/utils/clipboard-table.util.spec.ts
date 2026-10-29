@@ -1,4 +1,9 @@
-import { mapClipboardToColumns, parseClipboardTable, serializeCsv } from './clipboard-table.util';
+import {
+  mapClipboardToColumns,
+  parseClipboardHtml,
+  parseClipboardTable,
+  serializeCsv,
+} from './clipboard-table.util';
 
 describe('parseClipboardTable', () => {
   it('parses TSV (spreadsheet) rows and columns', () => {
@@ -49,6 +54,48 @@ describe('parseClipboardTable', () => {
 
   it('parses a single value', () => {
     expect(parseClipboardTable('solo')).toEqual([['solo']]);
+  });
+});
+
+describe('parseClipboardHtml', () => {
+  it('keeps an in-cell <br> as a line break inside the cell (Excel)', () => {
+    const html =
+      "<html><body><table><tr><td class=xl65>line one<br\r\n  style='mso-data-placement:same-cell;'>line\r\n  two</td>" +
+      '<td>b</td></tr><tr><td>c</td><td>d</td></tr></table></body></html>';
+    expect(parseClipboardHtml(html)).toEqual([
+      ['line one\nline two', 'b'],
+      ['c', 'd'],
+    ]);
+  });
+
+  it('reads a Google Sheets range', () => {
+    const html =
+      '<google-sheets-html-origin><style>td{}</style><table><tbody>' +
+      '<tr><td>a<br>b<br>c</td></tr><tr><td>next</td></tr></tbody></table>';
+    expect(parseClipboardHtml(html)).toEqual([['a\nb\nc'], ['next']]);
+  });
+
+  it('reads a single Google Sheets cell as one cell', () => {
+    const html =
+      '<meta charset="utf-8"><google-sheets-html-origin><span data-sheets-root="1" ' +
+      'data-sheets-value="{}">first<br>second</span></google-sheets-html-origin>';
+    expect(parseClipboardHtml(html)).toEqual([['first\nsecond']]);
+  });
+
+  it('keeps blank cells and fills merged columns with blanks', () => {
+    const html = '<table><tr><td colspan="2">wide</td><td></td><td>x</td></tr></table>';
+    expect(parseClipboardHtml(html)).toEqual([['wide', '', '', 'x']]);
+  });
+
+  it('turns non-breaking spaces into plain spaces', () => {
+    expect(parseClipboardHtml('<table><tr><td>a&nbsp;&nbsp;b</td></tr></table>')).toEqual([
+      ['a  b'],
+    ]);
+  });
+
+  it('returns null when the HTML holds no table', () => {
+    expect(parseClipboardHtml('<p>one</p><p>two</p>')).toBeNull();
+    expect(parseClipboardHtml('')).toBeNull();
   });
 });
 

@@ -509,6 +509,30 @@ describe('AssetContentGridComponent review fixes', () => {
     ]);
   });
 
+  it('keeps line breaks inside a pasted spreadsheet cell, like Excel', () => {
+    // Arrange
+    const component = qaGrid();
+    const { api, writes } = pasteApi(
+      ['label', 'cell__question', 'cell__answer'],
+      'cell__question',
+      [{ unit_id: 2 }, { unit_id: 3 }]
+    );
+    component.onGridReady({ api } as never);
+    const data: Record<string, string> = {
+      'text/plain': 'line one\nline two',
+      'text/html': '<span data-sheets-root="1">line one<br>line two</span>',
+    };
+
+    // Act
+    component.onPaste({
+      clipboardData: { getData: (type: string) => data[type] ?? '' },
+      preventDefault: () => void 0,
+    } as unknown as ClipboardEvent);
+
+    // Assert
+    expect(writes).toEqual([{ row: 0, colId: 'cell__question', value: 'line one\nline two' }]);
+  });
+
   it('opens each column with its own source text in the editor', () => {
     // Arrange
     const component = qaGrid();

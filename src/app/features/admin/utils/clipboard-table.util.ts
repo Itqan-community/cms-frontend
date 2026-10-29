@@ -63,6 +63,53 @@ export function parseClipboardTable(text: string): string[][] {
   return rows.filter((r) => !(r.length === 1 && r[0] === ''));
 }
 
+/** A cell's text as the browser would show it: markup whitespace collapses to
+ *  one space, `<br>` is a line break. */
+function htmlCellText(node: Node): string {
+  let out = '';
+  node.childNodes.forEach((child) => {
+    if (child.nodeType === Node.TEXT_NODE) {
+      out += (child.textContent ?? '').replace(/[ \t\r\n\f]+/g, ' ');
+    } else if (child instanceof HTMLBRElement) {
+      out += '\n';
+    } else if (!(child instanceof HTMLStyleElement || child instanceof HTMLScriptElement)) {
+      out += htmlCellText(child);
+    }
+  });
+  return out;
+}
+
+function cleanCellText(text: string): string {
+  return text
+    .replace(/ *\n */g, '\n')
+    .replace(/^ +| +$/g, '')
+    .replace(/\u00a0/g, ' ');
+}
+
+/**
+ * Parse the `text/html` a spreadsheet puts on the clipboard, which is what Excel
+ * itself pastes from. A line break inside a cell is a `<br>` there, while the
+ * plain-text copy can't always tell it from a row break (Google Sheets copies a
+ * single cell unquoted). Returns null when the HTML holds no spreadsheet data, so
+ * the caller falls back to {@link parseClipboardTable}.
+ */
+export function parseClipboardHtml(html: string): string[][] | null {
+  if (!html) return null;
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const table = doc.querySelector('table');
+  if (table) {
+    return Array.from(table.rows).map((tr) =>
+      Array.from(tr.cells).flatMap((cell) => [
+        cleanCellText(htmlCellText(cell)),
+        ...Array<string>(Math.max(cell.colSpan, 1) - 1).fill(''),
+      ])
+    );
+  }
+  // A single Google Sheets cell comes as a span, not a table.
+  const sheetsCell = doc.querySelector('[data-sheets-root], [data-sheets-value]');
+  return sheetsCell ? [[cleanCellText(htmlCellText(sheetsCell))]] : null;
+}
+
 /** Quote a single CSV field per RFC 4180 when it contains a comma, quote or newline. */
 function csvField(value: string): string {
   if (/[",\n\r]/.test(value)) {

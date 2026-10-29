@@ -80,6 +80,7 @@ import { AssetVersionsService } from '../../services/asset-versions.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import {
   mapClipboardToColumns,
+  parseClipboardHtml,
   parseClipboardTable,
   serializeCsv,
 } from '../../utils/clipboard-table.util';
@@ -794,8 +795,10 @@ export class AssetContentGridComponent implements OnInit {
       return;
     }
 
+    // Like Excel, prefer the spreadsheet's HTML copy: it keeps line breaks inside cells.
+    const html = event.clipboardData?.getData('text/html') ?? '';
     const text = event.clipboardData?.getData('text/plain') ?? '';
-    const parsed = parseClipboardTable(text);
+    const parsed = parseClipboardHtml(html) ?? parseClipboardTable(text);
     if (parsed.length === 0) return;
     // A content CSV (the grid's own copy or a file export) is written by header into
     // the matching text columns, so identifiers and Quran text never land in a cell.
