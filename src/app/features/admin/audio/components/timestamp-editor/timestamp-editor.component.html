@@ -74,10 +74,21 @@
       (pause)="onPause()"
       (timeupdate)="onTimeUpdate()"
       (loadedmetadata)="onLoadedMetadata()"
+      (error)="onMediaError()"
     ></audio>
 
     @if (peaksError()) {
-      <nz-alert nzType="info" [nzMessage]="peaksError()" nzShowIcon />
+      <nz-alert
+        nzType="info"
+        [nzMessage]="peaksError()"
+        [nzAction]="peaksOptInRequired() ? loadAnywayAction : null"
+        nzShowIcon
+      />
+      <ng-template #loadAnywayAction>
+        <button nz-button nzSize="small" type="button" (click)="loadWaveformAnyway()">
+          {{ 'ADMIN.AUDIO.TIMESTAMPS.LOAD_WAVEFORM_ANYWAY' | translate }}
+        </button>
+      </ng-template>
     }
 
     <div class="admin-panel timestamp-editor__waveform-panel">

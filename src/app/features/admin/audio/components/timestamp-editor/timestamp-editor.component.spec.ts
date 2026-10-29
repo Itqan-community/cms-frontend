@@ -64,7 +64,12 @@ describe('TimestampEditorComponent', () => {
   /** Query params decide whether the page has enough context to load anything. */
   async function setup(
     queryParams: Record<string, string>,
-    options: { failTimestamps?: boolean; trackMissing?: boolean; noDuration?: boolean } = {}
+    options: {
+      failTimestamps?: boolean;
+      trackMissing?: boolean;
+      noDuration?: boolean;
+      longTrack?: boolean;
+    } = {}
   ): Promise<void> {
     recitations = jasmine.createSpyObj<RecitationsService>('RecitationsService', [
       'recitationTracksList',
@@ -77,7 +82,11 @@ describe('TimestampEditorComponent', () => {
     ]);
     modal = jasmine.createSpyObj<NzModalService>('NzModalService', ['confirm']);
 
-    const track = options.noDuration ? { ...TRACK, duration_ms: null } : TRACK;
+    const track = options.noDuration
+      ? { ...TRACK, duration_ms: null }
+      : options.longTrack
+        ? { ...TRACK, duration_ms: 90 * 60 * 1_000 }
+        : TRACK;
     recitations.recitationTracksList.and.returnValue(
       of(options.trackMissing ? { results: [], count: 0 } : { results: [track], count: 1 })
     );
@@ -269,6 +278,82 @@ describe('TimestampEditorComponent', () => {
 
       expect(component.durationMs()).toBe(60_000);
       expect(component.canMoveMarkers()).toBeTrue();
+    });
+  });
+
+  describe('a track over the waveform length cap', () => {
+    let fetchSpy: jasmine.Spy;
+
+    beforeEach(async () => {
+      fetchSpy = spyOn(window, 'fetch').and.returnValue(new Promise<Response>(() => undefined));
+      await setup({ recitation: 'sample-recitation' }, { longTrack: true });
+    });
+
+    it('does not download the audio until asked', () => {
+      expect(component.peaksOptInRequired()).toBeTrue();
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('decodes the waveform once the user opts in', () => {
+      component.loadWaveformAnyway();
+
+      expect(fetchSpy).toHaveBeenCalledWith(TRACK.audio_url, jasmine.any(Object));
+      expect(component.peaksOptInRequired()).toBeFalse();
+      expect(component.peaksError()).toBeNull();
+      expect(component.peaksLoading()).toBeTrue();
+    });
+  });
+
+  describe('a track with no length on its row', () => {
+    let fetchSpy: jasmine.Spy;
+
+    /** Stands in for the `<audio>` element reporting its metadata. */
+    function metadataArrives(durationSeconds: number): void {
+      component['playback'].attach({
+        paused: true,
+        currentTime: 0,
+        duration: durationSeconds,
+        play: () => Promise.resolve(),
+        pause: () => undefined,
+      });
+      component.onLoadedMetadata();
+    }
+
+    beforeEach(async () => {
+      fetchSpy = spyOn(window, 'fetch').and.returnValue(new Promise<Response>(() => undefined));
+      await setup({ recitation: 'sample-recitation' }, { noDuration: true });
+    });
+
+    it('waits for the media metadata before deciding whether to decode', () => {
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(component.peaksOptInRequired()).toBeFalse();
+    });
+
+    it('decodes once the metadata shows the track is under the cap', () => {
+      metadataArrives(60);
+
+      expect(fetchSpy).toHaveBeenCalledWith(TRACK.audio_url, jasmine.any(Object));
+    });
+
+    it('asks first once the metadata shows the track is over the cap', () => {
+      metadataArrives(90 * 60);
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(component.peaksOptInRequired()).toBeTrue();
+    });
+
+    it('asks first when the metadata carries no usable length', () => {
+      metadataArrives(Number.POSITIVE_INFINITY);
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(component.peaksOptInRequired()).toBeTrue();
+    });
+
+    it('asks first when the media fails to load at all', () => {
+      component.onMediaError();
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(component.peaksOptInRequired()).toBeTrue();
     });
   });
 
