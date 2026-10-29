@@ -653,6 +653,31 @@ Release 1.16.0.
 
 ---
 
+## [1.17.0] - 2026-10-29
+
+Release 1.17.0.
+
+## Changes
+
+- fix(admin): drop stale role responses and label the permission checkboxes
+- test(admin): stub only hasPermission in the roles tab spec
+- fix(admin): ignore a refreshed publisher list that arrives after the user changed
+- docs(agents): always show the backend's error message
+- fix(errors): show one toast per failed role or member request
+- fix(errors): show the backend's specific message even when it is not in the UI language
+- fix(admin): confirm role deletion in a modal and show permission counts out of the total
+- feat(admin): list roles by their name in the UI language with their permission count
+- fix(admin): show the Arabic role name first in the roles table and form
+- fix(admin): list roles right below members in the sidebar
+- fix(admin): close the role editor after saving
+- fix(admin): call it role, not group, on the members page
+- feat(admin): group role permissions by usage and lock the ones a selection includes
+- fix(i18n): translate portal as لوحة التحكم in member messages
+- fix(admin): match the role row button's label to its view or edit text
+- feat(admin): roles page to manage roles and their permissions
+
+---
+
 ## [Unreleased]
 
 ### Added
