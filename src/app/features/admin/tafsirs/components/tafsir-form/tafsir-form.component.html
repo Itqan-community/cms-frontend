@@ -213,22 +213,12 @@
                   formControlName="template"
                   [nzPlaceHolder]="'ADMIN.ASSET_TEMPLATE.LABEL' | translate"
                 >
-                  <nz-option
-                    nzValue="surah"
-                    [nzLabel]="'ADMIN.ASSET_TEMPLATE.SURAH' | translate"
-                  ></nz-option>
-                  <nz-option
-                    nzValue="ayah"
-                    [nzLabel]="'ADMIN.ASSET_TEMPLATE.AYAH' | translate"
-                  ></nz-option>
-                  <nz-option
-                    nzValue="word"
-                    [nzLabel]="'ADMIN.ASSET_TEMPLATE.WORD' | translate"
-                  ></nz-option>
-                  <nz-option
-                    nzValue="page"
-                    [nzLabel]="'ADMIN.ASSET_TEMPLATE.PAGE' | translate"
-                  ></nz-option>
+                  @for (option of templateOptions; track option) {
+                    <nz-option
+                      [nzValue]="option"
+                      [nzLabel]="'ADMIN.ASSET_TEMPLATE.' + option.toUpperCase() | translate"
+                    ></nz-option>
+                  }
                 </nz-select>
               </nz-form-control>
             </nz-form-item>

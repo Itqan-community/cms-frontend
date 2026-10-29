@@ -1,6 +1,18 @@
 <div class="usage-unseen">
   <p class="usage-unseen__intro">{{ 'USAGE.UNSEEN.INTRO' | translate }}</p>
 
+  <details class="usage-unseen__guide" open>
+    <summary>{{ 'USAGE.UNSEEN.GUIDE.TITLE' | translate }}</summary>
+    @for (section of guide; track section.title) {
+      <h3>{{ 'USAGE.UNSEEN.GUIDE.' + section.title | translate }}</h3>
+      <ul>
+        @for (item of section.items; track item) {
+          <li>{{ 'USAGE.UNSEEN.GUIDE.' + item | translate }}</li>
+        }
+      </ul>
+    }
+  </details>
+
   @if (data(); as report) {
     <div class="usage-unseen__totals">
       @for (measure of measures; track measure) {

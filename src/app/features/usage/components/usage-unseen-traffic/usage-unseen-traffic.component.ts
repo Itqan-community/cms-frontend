@@ -15,6 +15,14 @@ import { usageLang } from '../../utils/usage-lang';
 
 const MEASURES: (keyof ReconciliationNumbers)[] = ['reads', 'edge_requests', 'unseen'];
 
+/** Translation keys (under USAGE.UNSEEN.GUIDE) of the "How to read this tab" sections. */
+const GUIDE = [
+  { title: 'WHAT_TITLE', items: ['WHAT_READS', 'WHAT_EDGE', 'WHAT_UNSEEN'] },
+  { title: 'WHY_TITLE', items: ['WHY_BODY'] },
+  { title: 'HOW_TITLE', items: ['HOW_LOW', 'HOW_ASSET', 'HOW_ALL'] },
+  { title: 'CAVEATS_TITLE', items: ['CAVEAT_SIGNED', 'CAVEAT_CACHE'] },
+];
+
 /** Itqan admin: R2 reads the edge never saw (local caches bypassed, direct bucket access). */
 @Component({
   selector: 'app-usage-unseen-traffic',
@@ -31,6 +39,7 @@ export class UsageUnseenTrafficComponent implements OnChanges {
   private request?: Subscription;
 
   readonly measures = MEASURES;
+  readonly guide = GUIDE;
   readonly loading = signal(true);
   readonly error = signal(false);
   readonly data = signal<UsageReconciliation | null>(null);

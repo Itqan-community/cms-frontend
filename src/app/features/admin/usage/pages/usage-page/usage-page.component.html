@@ -1,7 +1,7 @@
 <div class="usage-page">
   <header class="usage-page__header">
     <h1 class="usage-page__title">{{ 'USAGE.TITLE' | translate }}</h1>
-    @if (isItqanAdmin()) {
+    @if (isStaff()) {
       <nz-select
         class="usage-page__publisher-select"
         [ngModel]="selectedPublisherId()"
@@ -16,11 +16,23 @@
     }
   </header>
 
-  <nz-tabset (nzSelectedIndexChange)="onTabChange($event, isItqanAdmin() ? 3 : 1)">
+  <nz-tabset (nzSelectedIndexChange)="onTabChange($event, isStaff() ? 4 : 2)">
     <nz-tab [nzTitle]="'USAGE.TABS.DASHBOARD' | translate">
       <app-usage-dashboard [scope]="scope()" [publisherId]="selectedPublisherId()" />
     </nz-tab>
-    @if (isItqanAdmin()) {
+    <nz-tab [nzTitle]="'USAGE.TABS.RECITATIONS' | translate">
+      <ng-template nz-tab>
+        <app-usage-dashboard
+          [scope]="scope()"
+          [publisherId]="selectedPublisherId()"
+          category="recitation"
+          [syncUrl]="false"
+          [sharedRange]="range()"
+          (rangeChange)="onRangeChange($event)"
+        />
+      </ng-template>
+    </nz-tab>
+    @if (isStaff()) {
       <nz-tab [nzTitle]="'USAGE.TABS.LEADERBOARD' | translate">
         <ng-template nz-tab>
           <app-usage-leaderboard [filters]="filters()" />

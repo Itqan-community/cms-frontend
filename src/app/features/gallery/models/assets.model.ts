@@ -77,3 +77,23 @@ export interface AssetFileStructure {
   /** Up to three sample rows, as in the file. */
   rows: string[][];
 }
+
+/** A recitation's first tracks, to play on its gallery page. */
+export interface RecitationPreview {
+  tracks: {
+    surah_number: number;
+    surah_name: string;
+    surah_name_en: string;
+    audio_url: string;
+    duration_ms: number;
+  }[];
+}
+
+/** A font's file and Al-Fatiha's ayahs, to render in it on its gallery page. */
+export interface FontPreview {
+  font_url: string;
+  file_name: string;
+  /** The CSS @font-face format of `font_url`. */
+  format: 'woff2' | 'woff' | 'truetype' | 'opentype';
+  sample: { ayah: number; text: string }[];
+}

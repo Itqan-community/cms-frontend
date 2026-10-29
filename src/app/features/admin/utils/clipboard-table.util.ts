@@ -79,6 +79,7 @@ export function serializeCsv(rows: string[][]): string {
   return rows.map((row) => row.map((cell) => csvField(cell ?? '')).join(',')).join('\n');
 }
 
+// `sura` / `aya` are the pre-Marqoom export headers, still recognised when pasted.
 const CSV_ID_HEADERS = new Set(['surah', 'sura', 'ayah', 'aya', 'label', 'word_id', 'page']);
 
 /** Clipboard cells to write: by column key when the table has a recognised header,
@@ -90,8 +91,8 @@ export interface ClipboardCells {
 
 /**
  * When clipboard data is a content CSV (the grid's `label,reference_text,<keys…>`
- * copy, or a file export such as `surah,ayah,<keys…>`, `sura,text`,
- * `word_id,sura,aya,word,text` or `page,text`), keep only the columns named after
+ * copy, or a file export such as `surah,ayah,<keys…>`, `surah,text`,
+ * `word_id,surah,ayah,word,text` or `page,text`), keep only the columns named after
  * one of ``columnKeys`` (no header), so a paste can't write identifiers or Quran
  * text into content cells. Anything else (a raw spreadsheet selection) is left for
  * positional paste.

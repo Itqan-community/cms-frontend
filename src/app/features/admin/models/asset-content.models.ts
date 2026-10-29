@@ -42,7 +42,35 @@ export interface ContentDraftVersion extends VersionText {
 }
 
 /** Content granularity of a text asset. Fixed when the asset is created. */
-export type AssetTemplate = 'surah' | 'ayah' | 'word' | 'page';
+export type AssetTemplate = 'surah' | 'ayah' | 'word' | 'page' | 'ayah_group' | 'word_group';
+
+/** Templates whose rows each cover a publisher-chosen range of ayahs / words (tafsir only). */
+export const GROUP_TEMPLATES: readonly AssetTemplate[] = ['ayah_group', 'word_group'];
+
+export function isGroupTemplate(template: AssetTemplate | null | undefined): boolean {
+  return !!template && GROUP_TEMPLATES.includes(template);
+}
+
+/** A position in the mushaf: an ayah, or a word of it when `word` is set (1-based). */
+export interface QuranPosition {
+  surah: number;
+  ayah: number;
+  word?: number | null;
+}
+
+/** One ayah (or word) of a range preview, in mushaf order. */
+export interface QuranRangeUnit {
+  surah: number;
+  ayah: number;
+  word: number | null;
+  text: string;
+}
+
+export interface QuranRangeResponse {
+  units: QuranRangeUnit[];
+  /** The range is longer than the preview returns. */
+  truncated: boolean;
+}
 
 export interface MushafLayout {
   id: number;
@@ -54,14 +82,15 @@ export interface MushafLayout {
 /** One editable content row returned by the entries endpoint. */
 export interface ContentEntry {
   unit_type: AssetTemplate;
-  /** Canonical id of the unit: sura id, ayah id, word id, or page number. */
+  /** Canonical id of the unit: surah id, ayah id, word id, or page number (an opaque
+   *  key for a group). */
   unit_id: number;
   /** Identifying reference, e.g. "1. Al-Fatiha", "2:255", "2:255:4", "Page 42". */
   label: string;
   /** The Quranic text being annotated; empty for the page template. */
   reference_text: string;
-  sura: number | null;
-  aya: number | null;
+  surah: number | null;
+  ayah: number | null;
   /** Every text column's cell, keyed by column key. */
   cells: Record<string, string>;
   /** The first column (older single-column shape). */
@@ -75,6 +104,11 @@ export interface ContentEntry {
   changed?: boolean;
   /** The columns whose cells differ (absent from older backends: then the whole row). */
   changed_columns?: string[];
+  /** Group templates: the range's ends. */
+  group_from?: QuranPosition | null;
+  group_to?: QuranPosition | null;
+  /** Group templates, translated language: text for a range the source no longer has. */
+  orphaned?: boolean;
 }
 
 /** Paginated entries response (Django Ninja pagination shape). */

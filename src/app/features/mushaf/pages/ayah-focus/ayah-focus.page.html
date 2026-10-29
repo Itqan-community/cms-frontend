@@ -23,7 +23,7 @@
     />
   } @else if (surahMeta() && targetPage() && startPage() && endPage()) {
     <header class="ayah-focus__header">
-      <a class="ayah-focus__sura-link" [routerLink]="suraLink()" [queryParams]="mushafQuery()">
+      <a class="ayah-focus__surah-link" [routerLink]="surahLink()" [queryParams]="mushafQuery()">
         {{ surahMeta()!.nameArabic }}
       </a>
       <span class="ayah-focus__divider">·</span>

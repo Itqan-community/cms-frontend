@@ -606,6 +606,12 @@
         "PAGE": "page"
       },
       "LANGUAGE": "Preview language"
+    },
+    "RECITATION_PREVIEW": {
+      "TITLE": "Listen to a sample"
+    },
+    "FONT_PREVIEW": {
+      "TITLE": "Font preview"
     }
   },
   "UI": {
@@ -933,8 +939,8 @@
       "ALL_SAVED": "All changes saved to draft",
       "OPEN_BUTTON": "Edit content",
       "COLUMNS": {
-        "SURA": "Surah no.",
-        "AYA": "Ayah no.",
+        "SURAH_NUMBER": "Surah no.",
+        "AYAH_NUMBER": "Ayah no.",
         "SURAH": "Surah",
         "UTHMANI": "Ayah (Uthmani)",
         "UNIT": "Reference",
@@ -968,7 +974,8 @@
       "MESSAGES": {
         "PUBLISHED": "Changes committed. Publish the version once its changes are approved.",
         "DRAFT_SAVED": "Draft saved",
-        "COLUMN_EDITS_DROPPED": "{{count}} edit(s) of a column that was deleted or renamed elsewhere could not be saved and were discarded."
+        "COLUMN_EDITS_DROPPED": "{{count}} edit(s) of a column that was deleted or renamed elsewhere could not be saved and were discarded.",
+        "GROUP_EDITS_DROPPED": "{{count}} edit(s) were for groups the source language no longer has and were not saved."
       },
       "PASTE": {
         "SELECT_EDITABLE": "Select a Text cell first, then paste.",
@@ -998,7 +1005,15 @@
         "CONTENT_FILE_UNPARSEABLE": "The uploaded file could not be parsed.",
         "LANGUAGE_HAS_NO_PUBLISHED_VERSION": "Publish a version for this language before making it available.",
         "VERSION_NUMBER_REQUIRED": "Enter a starting version number for the first version.",
-        "VERSION_NUMBER_INVALID": "Version number must be in the form major.minor, e.g. 7.0."
+        "VERSION_NUMBER_INVALID": "Version number must be in the form major.minor, e.g. 7.0.",
+        "GROUP_RANGE_INVALID": "This range doesn't exist in the Quran, or it ends before it starts.",
+        "GROUP_EXISTS": "This draft already has a group with exactly this range.",
+        "GROUP_NOT_FOUND": "This group no longer exists in the draft.",
+        "GROUP_RANGES_SOURCE_ONLY": "Groups are added, moved and deleted in the source language; translations follow them.",
+        "GROUP_NOT_IN_SOURCE": "A translation can only write text for the source language's groups.",
+        "GROUP_TEXT_REQUIRED": "Write the group's text in at least one column.",
+        "TEMPLATE_NOT_GROUPED": "Only ayah-group and word-group assets have groups.",
+        "ORPHANED_GROUPS": "Move or delete the text of groups the source no longer has: {{groups}}."
       },
       "TEXT_EDITOR": {
         "HINT": "Enter to apply · Shift+Enter for a new line · Esc to cancel",
@@ -1051,7 +1066,7 @@
         "CLOSE": "Close",
         "ERRORS": {
           "GENERIC": "Something went wrong. Try again.",
-          "COLUMN_KEY_INVALID": "A key starts with a lowercase English letter (a-z) and uses only a-z, 0-9 and underscores (at most 64). Unit names such as sura or ayah can't be used.",
+          "COLUMN_KEY_INVALID": "A key starts with a lowercase English letter (a-z) and uses only a-z, 0-9 and underscores (at most 64). Unit names such as surah or ayah can't be used.",
           "COLUMN_KEY_TAKEN": "This asset already has a column with this key.",
           "COLUMN_COMMITTED": "This column is in a committed version, so its key can't change and it can't be deleted.",
           "COLUMN_LAST": "An asset needs at least one column.",
@@ -1066,7 +1081,31 @@
         "LABELS_HINT": "Labels are optional display names for the editor and the gallery; without one, the key is shown."
       },
       "COLUMN_MENU": "Column menu",
-      "FILTER_ACTIVE": "Filtered"
+      "FILTER_ACTIVE": "Filtered",
+      "GROUPS": {
+        "ADD": "Add group",
+        "DELETE": "Delete group",
+        "DELETE_CONFIRM_TITLE": "Delete this group?",
+        "DELETE_CONFIRM_BODY": "Its text in every column is removed from this draft.",
+        "FROM": "From",
+        "TO": "To",
+        "SURAH": "Surah",
+        "AYAH": "Ayah",
+        "WORD": "Word",
+        "PREVIEW": "Mushaf text of this range",
+        "PREVIEW_TRUNCATED": "Showing the start of a long range.",
+        "PREVIEW_LOADING": "Loading the mushaf text…",
+        "ORPHANED": "Not in source",
+        "ORPHANED_HINT": "The source language no longer has this range. Move this text to the new range, then delete this row.",
+        "ADD_TITLE": "Add a group",
+        "ACTIONS": "Actions",
+        "CONFIRM": "Save",
+        "CANCEL": "Cancel",
+        "ADD_NEXT": "Add next group",
+        "GROW": "Extend the range by one",
+        "SHRINK": "Shorten the range by one",
+        "POSITION_INVALID": "Write a position as surah:ayah (or surah:ayah:word for word groups), e.g. 2:255."
+      }
     },
     "REVIEW": {
       "TITLE": "Review changes",
@@ -1151,6 +1190,8 @@
       "WORD": "Word based",
       "PAGE": "Page based",
       "PAGE_WITH_LAYOUT": "Page based ({{layout}})",
+      "AYAH_GROUP": "Ayah-group based",
+      "WORD_GROUP": "Word-group based",
       "LABEL": "Content template",
       "LAYOUT_LABEL": "Mushaf layout",
       "LAYOUT_PLACEHOLDER": "Select a mushaf layout",
@@ -1775,6 +1816,8 @@
         "HINT_FILENAMES": "One file per surah, named 001 to 114 with .mp3 extension",
         "HINT_FILENAMES_EXAMPLE": "Example for Surah Al-Fatiha: \"001.mp3\"",
         "OVERALL_PROGRESS": "Overall upload progress",
+        "CONCURRENCY_LABEL": "Files at a time",
+        "CONCURRENCY_HINT": "How many files upload in parallel. On a slow or unstable connection, use 1 so each file gets the full bandwidth and is less likely to fail. On a fast, stable connection, use 3 or 4 to finish the batch sooner.",
         "ABORT_ALL": "Abort all uploads",
         "ABORT_ALL_CONFIRM_TITLE": "Abort all uploads?",
         "ABORT_ALL_CONFIRM_CONTENT": "Queued and in-progress uploads will be stopped. Continue?",
@@ -2840,7 +2883,6 @@
     "UNIDENTIFIED_APPS_NOTE": "Some traffic came from apps that do not send an API key, so it cannot be attributed to an app.",
     "UNIQUES_MONTHLY": "This range reaches past raw-event retention: unique counts are monthly totals added together.",
     "UNIQUES_UNAVAILABLE": "Unique counts are not available for this range with these filters.",
-    "SURAH_N": "Surah {{n}}",
     "PRESETS": {
       "7d": "7 days",
       "30d": "30 days",
@@ -2860,7 +2902,8 @@
       "unique_downloaders": "Unique downloaders",
       "unique_end_users": "Unique end users",
       "integrating_apps": "Integrating apps",
-      "latest_version_share": "On the latest version"
+      "latest_version_share": "On the latest version",
+      "listening_seconds": "Listening hours"
     },
     "CATEGORIES": {
       "recitation": "Recitations",
@@ -2909,7 +2952,10 @@
       "version": "By version",
       "language": "By language",
       "endpoint": "By endpoint",
-      "publisher": "Publisher"
+      "publisher": "Publisher",
+      "reciter": "By reciter",
+      "riwayah": "By riwayah",
+      "qiraah": "By qira'ah"
     },
     "PANELS": {
       "channel": "Channels",
@@ -2921,7 +2967,10 @@
       "hour_of_week": "Hour of the week (your time zone)",
       "version": "Versions",
       "language": "Languages",
-      "endpoint": "Endpoints"
+      "endpoint": "Endpoints",
+      "reciter": "Top reciters",
+      "riwayah": "Riwayat",
+      "qiraah": "Qira'at"
     },
     "DAYS": {
       "MON": "Mon",
@@ -2937,14 +2986,31 @@
       "DASHBOARD": "Dashboard",
       "LEADERBOARD": "Leaderboard",
       "UNSEEN": "Unseen traffic",
-      "LEGACY": "Legacy board"
+      "LEGACY": "Legacy board",
+      "RECITATIONS": "Recitations"
     },
     "UNSEEN": {
-      "INTRO": "Reads from storage that never passed through the CDN edge, so the other reports cannot see them (for example direct bucket access).",
+      "INTRO": "Downloads from storage that the other usage reports could not see. Use this tab to check how complete those reports are.",
       "READS": "Storage reads",
       "EDGE_REQUESTS": "Edge requests",
       "UNSEEN": "Unseen reads",
-      "PER_DAY": "Reads per day"
+      "PER_DAY": "Reads per day",
+      "GUIDE": {
+        "TITLE": "How to read this tab",
+        "WHAT_TITLE": "What the numbers mean",
+        "WHAT_READS": "Storage reads: every time a file was read from the storage bucket (Cloudflare R2), whatever route the request took.",
+        "WHAT_EDGE": "Edge requests: requests for the same files that went through the CDN (the storage domain). The other usage reports are built from these.",
+        "WHAT_UNSEEN": "Unseen reads: storage reads beyond the edge requests for the same file in the same hour. These files were downloaded, but the edge never saw it.",
+        "WHY_TITLE": "Why we need it",
+        "WHY_BODY": "The other reports count traffic that passes through the CDN, plus gallery and CLI events recorded by the server. A file fetched straight from the bucket skips the CDN, so it has no country, app, listener or install data. This tab shows at least how large that gap is, so it is measured instead of guessed.",
+        "HOW_TITLE": "How to use it",
+        "HOW_LOW": "Unseen reads close to zero: few direct reads were detected. This does not prove the reports are complete, because CDN cache hits can offset direct reads (see below).",
+        "HOW_ASSET": "A jump for one asset: something is fetching it directly from the bucket, for example a signed link to a restricted asset shared outside the app, or a new feature that hands out bucket links instead of CDN links. Use the table below to find the asset.",
+        "HOW_ALL": "A jump for every asset at once: the hourly log import is probably failing or behind. Check whether the other reports are still up to date.",
+        "CAVEATS_TITLE": "Keep in mind",
+        "CAVEAT_SIGNED": "Restricted assets, and gallery downloads when CDN downloads are off, are served by signed links straight to the bucket. They appear here as unseen even though the reports count them from server events, so some unseen reads are expected.",
+        "CAVEAT_CACHE": "Unseen reads are a lower bound too. Files served from the CDN cache never reach the bucket, so cached requests in the same hour can hide a few direct reads. The numbers are compared per file and hour and never go below zero."
+      }
     },
     "ASSET_SECTION_TITLE": "Usage",
     "PUBLIC": {
@@ -2957,17 +3023,77 @@
       "SUBTITLE": "How your apps use Itqan: API calls, plays and downloads attributed to your API keys.",
       "BACK_TO_KEYS": "Back to API keys",
       "VIEW_USAGE": "View the usage of your apps"
+    },
+    "RECITATION": {
+      "ALL_RECITERS": "All reciters",
+      "ALL_RIWAYAHS": "All riwayat",
+      "CALENDAR": {
+        "gregorian": "Gregorian",
+        "hijri": "Hijri"
+      },
+      "SPIKE": "Spike",
+      "LISTENERS_TITLE": "Listener growth",
+      "NEW": "New listeners",
+      "RETURNING": "Returning listeners",
+      "CUMULATIVE": "Total listeners (cumulative)",
+      "CLAMPED": "Listener reports start on {{date}}: older events are no longer kept.",
+      "COHORTS_TITLE": "Listener retention by first week",
+      "COHORTS_HINT": "Share of each week's new listeners who kept listening in the following weeks.",
+      "COHORTS_RANGE": "Pick a range of up to 26 weeks to see retention.",
+      "COHORT_WEEK": "First week",
+      "COHORT_SIZE": "Listeners",
+      "WEEK_N": "Week +{{n}}",
+      "SPREAD_COUNTRIES": "Countries reached",
+      "SPREAD_APPS": "Apps reached",
+      "FIRST_SEEN": "First played",
+      "NEW_TAG": "New",
+      "FUNNEL_TITLE": "Gallery funnel",
+      "FUNNEL_HINT": "Asset page views by signed-in visitors, downloads, then plays from every channel.",
+      "COVERAGE": "{{surahs}} / 114 surahs",
+      "TIMED": "Timings: {{share}}",
+      "MISSING_TOP": "Most wanted missing surahs: {{surahs}}",
+      "TOP_WEEK": "This week",
+      "TOP": "Top",
+      "RISING": "Rising",
+      "LAST_WEEK": "Week before",
+      "RECITATION": "Recitation",
+      "SEARCH_TITLE": "Gallery searches",
+      "SEARCH_TOP": "Top searches",
+      "SEARCH_ZERO": "No results",
+      "SEARCH_HINT": "What visitors search for across the whole gallery (terms used by at least 3 people). Searches with no results show demand that nobody serves yet.",
+      "TERM": "Search term",
+      "SEARCHERS": "People",
+      "NO_RESULT_SHARE": "Found nothing",
+      "MATCH_TYPES": {
+        "reciter": "Reciter",
+        "riwayah": "Riwayah",
+        "qiraah": "Qira'ah"
+      },
+      "COVERAGE_TITLE": "Incomplete recitations",
+      "COVERAGE_HINT": "Missing surahs are ordered by how much each surah is played across Itqan (last {{days}} days).",
+      "SURAHS": "Surahs",
+      "MISSING": "Missing (most wanted first)",
+      "TIMINGS": "Ayah timings",
+      "ALL_COMPLETE": "Every recitation has all 114 surahs.",
+      "LISTENERS_HINT": "Bars: listeners active in each period, split into first-timers and returning listeners. Line: everyone who has listened so far, each person counted once.",
+      "ACTIVE": "Active: {{total}} ({{new}} new + {{returning}} returning)"
+    },
+    "COMPARE": {
+      "LABEL": "Compare with",
+      "previous": "Previous period",
+      "year": "Same time last year",
+      "hijri_year": "Same time last Hijri year"
     }
   },
   "MUSHAF": {
     "TITLE": "The Noble Quran",
-    "INDEX_SUBTITLE": "Browse the suras and read the mushaf page by page",
+    "INDEX_SUBTITLE": "Browse the surahs and read the mushaf page by page",
     "AYAHS": "ayahs",
     "AYAH": "Ayah",
     "MECCAN": "Meccan",
     "MEDINAN": "Medinan",
-    "BACK_TO_INDEX": "Back to suras",
-    "SURA_NOT_FOUND": "Sura not found",
+    "BACK_TO_INDEX": "Back to surahs",
+    "SURAH_NOT_FOUND": "Surah not found",
     "AYAH_NOT_FOUND": "Ayah not found",
     "EDITION": "Edition",
     "ATTRIBUTION": "Mushaf rendering by Quranpedia (quran-svg)"

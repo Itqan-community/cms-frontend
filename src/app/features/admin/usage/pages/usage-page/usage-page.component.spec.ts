@@ -1,7 +1,7 @@
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { provideRouter } from '@angular/router';
+import { Router, provideRouter } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { of, Subject } from 'rxjs';
 import { UsageApiService } from '../../../../usage/services/usage-api.service';
@@ -12,7 +12,7 @@ import { UsagePageComponent } from './usage-page.component';
 
 describe('UsagePageComponent', () => {
   let fixture: ComponentFixture<UsagePageComponent>;
-  const isItqanAdmin = signal(false);
+  const isStaff = signal(false);
   const tabTitles = () =>
     Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.ant-tabs-tab')).map(
       (tab) => tab.textContent?.trim()
@@ -35,7 +35,7 @@ describe('UsagePageComponent', () => {
         provideNoopAnimations(),
         provideRouter([]),
         { provide: UsageApiService, useValue: api },
-        { provide: AdminAuthService, useValue: { isItqanAdmin } },
+        { provide: AdminAuthService, useValue: { isStaff } },
         {
           provide: PublishersFilterService,
           useValue: { search: () => of({ results: [{ id: 3, name: 'Pub' }], count: 1 }) },
@@ -45,22 +45,27 @@ describe('UsagePageComponent', () => {
     }).compileComponents();
   });
 
-  it('publishers see the dashboard and the legacy board only', () => {
-    isItqanAdmin.set(false);
-    fixture = TestBed.createComponent(UsagePageComponent);
-    fixture.detectChanges();
-
-    expect(tabTitles()).toEqual(['USAGE.TABS.DASHBOARD', 'USAGE.TABS.LEGACY']);
-    expect(fixture.componentInstance.scope()).toBe('publisher');
-  });
-
-  it('Itqan admins also get the publisher picker, leaderboard and unseen traffic', () => {
-    isItqanAdmin.set(true);
+  it('publishers see the dashboard, recitations and the legacy board', () => {
+    isStaff.set(false);
     fixture = TestBed.createComponent(UsagePageComponent);
     fixture.detectChanges();
 
     expect(tabTitles()).toEqual([
       'USAGE.TABS.DASHBOARD',
+      'USAGE.TABS.RECITATIONS',
+      'USAGE.TABS.LEGACY',
+    ]);
+    expect(fixture.componentInstance.scope()).toBe('publisher');
+  });
+
+  it('Itqan admins also get the publisher picker, leaderboard and unseen traffic', () => {
+    isStaff.set(true);
+    fixture = TestBed.createComponent(UsagePageComponent);
+    fixture.detectChanges();
+
+    expect(tabTitles()).toEqual([
+      'USAGE.TABS.DASHBOARD',
+      'USAGE.TABS.RECITATIONS',
       'USAGE.TABS.LEADERBOARD',
       'USAGE.TABS.UNSEEN',
       'USAGE.TABS.LEGACY',
@@ -75,17 +80,36 @@ describe('UsagePageComponent', () => {
     ];
     const getBoardUrl = jasmine.createSpy('getBoardUrl').and.returnValues(...responses);
     TestBed.overrideProvider(UsageService, { useValue: { getBoardUrl } });
-    isItqanAdmin.set(true);
+    isStaff.set(true);
     fixture = TestBed.createComponent(UsagePageComponent);
     fixture.detectChanges();
     const page = fixture.componentInstance;
 
-    page.onTabChange(3, 3);
+    page.onTabChange(4, 4);
     page.onPublisherChange(5);
     responses[1].next({ board_url: 'https://board/5' });
     responses[0].next({ board_url: 'https://board/all' });
 
     const url = page.boardUrl() as unknown as { changingThisBreaksApplicationSecurity: string };
     expect(url.changingThisBreaksApplicationSecurity).toBe('https://board/5');
+  });
+
+  it('writes a range picked on the Recitations tab to the URL, shared with the Dashboard tab', () => {
+    isStaff.set(false);
+    fixture = TestBed.createComponent(UsagePageComponent);
+    fixture.detectChanges();
+    const navigate = spyOn(TestBed.inject(Router), 'navigate').and.resolveTo(true);
+
+    fixture.componentInstance.onRangeChange({
+      preset: 'custom',
+      start_date: '2026-09-01',
+      end_date: '2026-09-30',
+    });
+
+    expect(navigate.calls.mostRecent().args[1]?.queryParams).toEqual({
+      range: 'custom',
+      start: '2026-09-01',
+      end: '2026-09-30',
+    });
   });
 });

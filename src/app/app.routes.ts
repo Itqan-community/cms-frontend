@@ -3,6 +3,7 @@ import { accountAuthRoutes } from './core/auth/account.routes';
 import { authGuard } from './core/auth/guards/auth.guard';
 import { publisherHostGuard } from './core/guards/publisher-host.guard';
 import { portalAccessGuard } from './features/admin/guards/portal-access.guard';
+import { afterTenantSwitchGuard } from './features/admin/guards/after-tenant-switch.guard';
 import { permissionGuard } from './features/admin/guards/permission.guard';
 import { tenantReadyGuard } from './features/admin/guards/tenant-ready.guard';
 import { PORTAL_PERMISSIONS } from './features/admin/constants/portal-permission.constants';
@@ -150,6 +151,7 @@ export const routes: Routes = [
   },
   {
     path: 'unauthorized',
+    canActivate: [afterTenantSwitchGuard],
     loadComponent: () =>
       import('./features/error/pages/unautorized/unauthorized.page').then(
         (m) => m.UnauthorizedPage

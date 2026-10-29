@@ -52,4 +52,21 @@ describe('UsageChartComponent', () => {
     expect(query('table')?.textContent).toContain('SA');
     expect(query('table')?.textContent).toContain('9');
   });
+
+  it('resizes a chart that was laid out while hidden once its element has a real width', async () => {
+    const dom = document.createElement('div');
+    dom.style.width = '600px';
+    document.body.appendChild(dom);
+    const chart = jasmine.createSpyObj('ECharts', ['getDom', 'getWidth', 'isDisposed', 'resize']);
+    chart.getDom.and.returnValue(dom);
+    chart.getWidth.and.returnValue(100); // ECharts' fallback width for a zero-sized box
+    chart.isDisposed.and.returnValue(false);
+
+    fixture.componentInstance.onChartInit(chart);
+    await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve)));
+
+    expect(chart.resize).toHaveBeenCalled();
+    fixture.destroy();
+    dom.remove();
+  });
 });

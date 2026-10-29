@@ -355,12 +355,13 @@
 // --------------- Descriptions Grid (detail pages) ---------------
 .admin-descriptions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  // minmax(0, …): a long unbroken description must not widen its column past the page.
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 16px;
   margin-bottom: 16px;
 
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
@@ -390,6 +391,7 @@
 
 .admin-desc-text {
   margin: 0;
+  overflow-wrap: anywhere;
   font-size: 0.875rem;
   color: var(--admin-text-600);
   line-height: 1.7;

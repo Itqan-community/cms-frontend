@@ -1,6 +1,11 @@
+/** Admin sections whose sub-routes are tabs, not records owned by a publisher. */
+const TENANT_NEUTRAL_SECTIONS = new Set(['software']);
+
 /**
  * Resolves the URL to load after the header tenant dropdown changes.
  * Publisher entity routes (detail/edit) must follow the newly selected publisher.
+ * Any other record route (asset detail/edit/versions…) belongs to the previous
+ * publisher and would 404, so it falls back to its section list.
  */
 export function resolveUrlAfterTenantChange(currentUrl: string, newPublisherId: number): string {
   const path = currentUrl.split('?')[0];
@@ -8,6 +13,16 @@ export function resolveUrlAfterTenantChange(currentUrl: string, newPublisherId: 
   const match = publisherEntity.exec(path);
   if (path === '/admin/publishers' || (match && Number(match[1]) !== newPublisherId)) {
     return `/admin/publishers/${newPublisherId}`;
+  }
+  const [, root, section, record] = path.split('/');
+  if (
+    root === 'admin' &&
+    section !== 'publishers' &&
+    record &&
+    record !== 'create' &&
+    !TENANT_NEUTRAL_SECTIONS.has(section)
+  ) {
+    return `/admin/${section}`;
   }
   return path || '/admin';
 }
@@ -48,4 +63,26 @@ export function resolvePublisherDetailRecoveryId(
     return accessiblePublisherIds[0];
   }
   return null;
+}
+
+const TENANT_SWITCH_KEY = 'admin:tenantSwitched';
+
+/** Marks that the next page load follows a publisher switch (see {@link consumeTenantSwitch}). */
+export function rememberTenantSwitch(): void {
+  try {
+    sessionStorage.setItem(TENANT_SWITCH_KEY, '1');
+  } catch {
+    // ignore storage errors
+  }
+}
+
+/** Whether the current page load follows a publisher switch; clears the mark. */
+export function consumeTenantSwitch(): boolean {
+  try {
+    const switched = sessionStorage.getItem(TENANT_SWITCH_KEY) != null;
+    sessionStorage.removeItem(TENANT_SWITCH_KEY);
+    return switched;
+  } catch {
+    return false;
+  }
 }

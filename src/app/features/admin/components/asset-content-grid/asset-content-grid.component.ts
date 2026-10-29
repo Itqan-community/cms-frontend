@@ -20,6 +20,8 @@ import type {
   ColDef,
   GetRowIdParams,
   GridReadyEvent,
+  IsFullWidthRowParams,
+  BodyScrollEvent,
   GridApi,
   IDatasource,
   IGetRowsParams,
@@ -38,9 +40,11 @@ import {
   LocaleModule,
   ModuleRegistry,
   NumberFilterModule,
+  PinnedRowModule,
   RenderApiModule,
   RowApiModule,
   RowSelectionModule,
+  RowStyleModule,
   TextFilterModule,
   TooltipModule,
   ValidationModule,
@@ -55,7 +59,7 @@ import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import { Subject, catchError, debounceTime, forkJoin, of, takeUntil } from 'rxjs';
+import { Subject, catchError, debounceTime, forkJoin, of, takeUntil, type Observable } from 'rxjs';
 import type {
   AssetColumn,
   AssetLanguage,
@@ -65,7 +69,9 @@ import type {
   ContentDraftVersion,
   ContentEntry,
   ContentEntryPatch,
+  QuranPosition,
 } from '../../models/asset-content.models';
+import { isGroupTemplate } from '../../models/asset-content.models';
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import type { VersionBump } from '../../models/asset-versions.models';
@@ -86,7 +92,16 @@ import {
   ManageColumnsModalComponent,
   type ColumnsChange,
 } from '../manage-columns-modal/manage-columns-modal.component';
+import {
+  GroupRangeModalComponent,
+  type GroupRangeResult,
+} from '../group-range-modal/group-range-modal.component';
 import { ContentColumnHeaderComponent } from './content-column-header.component';
+import { GroupRangeCellComponent, type GroupRangeCellParams } from './group-range-cell.component';
+import {
+  GroupActionsCellComponent,
+  type GroupActionsCellParams,
+} from './group-actions-cell.component';
 import {
   ContentTextCellEditorComponent,
   type ContentTextEditorParams,
@@ -103,13 +118,17 @@ import {
 // Only the features this grid uses, not `AllCommunityModule`: it keeps the editor's
 // download smaller. Dev builds add `ValidationModule`, which names any module a
 // new grid option or API call needs (AG Grid error #200) instead of failing quietly.
-ModuleRegistry.registerModules([
+export const GRID_MODULES = [
   InfiniteRowModelModule,
   TextFilterModule,
   NumberFilterModule,
   CustomFilterModule,
   CustomEditorModule,
   RowSelectionModule,
+  // `rowClassRules` (orphaned group rows).
+  RowStyleModule,
+  // The blank row under a group grid's rows (`addNextSpacer`).
+  PinnedRowModule,
   CellStyleModule,
   TooltipModule,
   LocaleModule,
@@ -117,7 +136,8 @@ ModuleRegistry.registerModules([
   RenderApiModule,
   ColumnApiModule,
   ...(isDevMode() ? [ValidationModule] : []),
-]);
+];
+ModuleRegistry.registerModules(GRID_MODULES);
 
 /**
  * Stops AG Grid clearing a focused cell on Delete/Backspace for a column that is
@@ -143,6 +163,14 @@ function isCellColumn(colId: string | undefined): colId is string {
 const RTL_LANGUAGE_CODES = new Set(['ar', 'fa', 'ur', 'ps', 'ku', 'he', 'yi', 'sd', 'ug']);
 
 const AUTOSAVE_DEBOUNCE_MS = 800;
+/** Orphaned groups named in a refused commit's message. */
+const ORPHANS_SHOWN = 10;
+/** Diameter of the floating "Add next group" button, in px. */
+const ADD_NEXT_SIZE = 36;
+/** Space between the last row and the floating "Add next group" button, in px. */
+const ADD_NEXT_GAP = 6;
+/** The pinned blank row under a group grid's rows (see `addNextSpacer`). */
+const ADD_NEXT_SPACER = { unit_id: -1 } as ContentEntry;
 /**
  * Rows per infinite-scroll block. Must equal the `cacheBlockSize` bound in
  * the template: AG Grid always requests blocks aligned to that size, so
@@ -198,6 +226,7 @@ function cellChanged(row: ContentEntry | undefined, key: string): boolean {
     NzToolTipModule,
     ManageColumnsModalComponent,
     VersionNumberFieldComponent,
+    GroupRangeModalComponent,
   ],
   templateUrl: './asset-content-grid.component.html',
   styleUrl: './asset-content-grid.component.less',
@@ -330,6 +359,27 @@ export class AssetContentGridComponent implements OnInit {
     const sel = this.selectedLanguage();
     return this.languages().find((l) => l.language === sel)?.is_source ?? true;
   });
+  /** The asset's rows are publisher-chosen ranges (ayah_group / word_group). */
+  readonly isGroup = computed(() => isGroupTemplate(this.effectiveTemplate()));
+  /** Groups are added, moved and deleted in the source language's draft only. */
+  readonly canEditGroups = computed(
+    () => this.isGroup() && this.isEditingSource() && !this.readOnly()
+  );
+  /** The add-group dialog is open. */
+  readonly addGroupOpen = signal(false);
+  readonly groupBusy = signal(false);
+  /** "Add next group" ran: scroll to and focus the last row once it loads. */
+  private focusLastRow = false;
+  readonly groupError = signal<string | null>(null);
+  /** Text column titles for the add dialog's text boxes. */
+  readonly groupColumnTitles = computed(() =>
+    Object.fromEntries(this.columnKeys().map((key) => [key, this.columnTitle(key)]))
+  );
+  /** Orphaned rows (a translation's text for a range its source dropped) are marked. */
+  readonly rowClassRules = {
+    'content-grid__row--orphaned': (params: { data?: ContentEntry }) => !!params.data?.orphaned,
+  };
+
   /** Localized language name for the current UI language (e.g. fr → "الفرنسية"). */
   readonly langName = (code: string): string =>
     localizedLanguageName(code, this.translate.currentLang || 'en');
@@ -396,6 +446,31 @@ export class AssetContentGridComponent implements OnInit {
   private activePatchError = false;
   readonly selectedCount = signal(0);
   readonly entriesTotal = signal(0);
+  /** Row and header heights of the grid's theme, known once the grid is ready. */
+  private readonly gridSizes = signal<{ rowHeight: number; headerHeight: number } | null>(null);
+  /** How far the grid's rows are scrolled. */
+  private readonly scrollTop = signal(0);
+  /** A blank row pinned under the rows, so the floating "Add next group" button
+   *  never covers the last row once the grid is full. */
+  readonly addNextSpacer = computed(() => (this.canEditGroups() ? [ADD_NEXT_SPACER] : undefined));
+  readonly isAddNextSpacer = (params: IsFullWidthRowParams<ContentEntry>): boolean =>
+    params.rowNode.rowPinned === 'bottom';
+  readonly blankRow = (): string => '';
+  /** The floating "Add next group" button's top: just under the last row, and
+   *  never below the pinned blank row at the bottom of the grid. */
+  readonly addNextTop = computed(() => {
+    const sizes = this.gridSizes();
+    if (!sizes || !this.canEditGroups()) return null;
+    const inset = (sizes.rowHeight - ADD_NEXT_SIZE) / 2;
+    // Header + floating filter row, then the rows above the scroll position.
+    const underLastRow =
+      2 * sizes.headerHeight +
+      this.entriesTotal() * sizes.rowHeight -
+      this.scrollTop() +
+      ADD_NEXT_GAP;
+    // The pinned row's top, plus the grid's bottom border.
+    return `min(${underLastRow}px, calc(100% - ${sizes.rowHeight + 1 - inset}px))`;
+  });
   readonly canUndo = signal(false);
   readonly canRedo = signal(false);
 
@@ -525,6 +600,11 @@ export class AssetContentGridComponent implements OnInit {
 
   onGridReady(event: GridReadyEvent<ContentEntry>): void {
     this.gridApi = event.api;
+    this.gridSizes.set(event.api.getSizesForCurrentTheme());
+  }
+
+  onBodyScroll(event: BodyScrollEvent<ContentEntry>): void {
+    if (event.direction === 'vertical') this.scrollTop.set(event.top);
   }
 
   onCellValueChanged(event: CellValueChangedEvent<ContentEntry>): void {
@@ -664,6 +744,7 @@ export class AssetContentGridComponent implements OnInit {
                 done();
                 this.entriesTotal.set(response.count);
                 params.successCallback(response.results, response.count);
+                this.revealAppendedGroup(params, response.count);
               },
               error: (err: HttpErrorResponse) => {
                 done();
@@ -734,8 +815,9 @@ export class AssetContentGridComponent implements OnInit {
     let changed = 0;
     rows.forEach((values, r) => {
       const node = api.getDisplayedRowAtIndex(focused.rowIndex + r);
-      // Rows past the loaded blocks have no data yet; paste stops there.
-      if (!node?.data) return;
+      // Rows past the loaded blocks have no data yet; paste stops there. An orphaned
+      // group's text is read-only: the server would refuse the whole batch.
+      if (!node?.data || node.data.orphaned) return;
       values.forEach((value, c) => {
         const colId = keys ? CELL_PREFIX + keys[c] : cellCols[startColIdx + c];
         if (!colId) return;
@@ -1062,6 +1144,13 @@ export class AssetContentGridComponent implements OnInit {
                 void this.dropEditsOfMissingColumns(batch).then(resolve);
                 return;
               }
+              if (err?.error?.error_name === 'group_not_in_source') {
+                // A range the source no longer has (an orphan, or one the source moved
+                // meanwhile): drop those edits so they don't block every later save.
+                this.dropEditsOfOrphanedGroups(batch);
+                resolve();
+                return;
+              }
               // Re-queue the failed batch so nothing is silently lost.
               this.requeue(batch);
               this.showError(err);
@@ -1130,6 +1219,27 @@ export class AssetContentGridComponent implements OnInit {
           },
         });
     });
+  }
+
+  /** Re-queue a refused batch's edits of rows still shown as normal groups, drop the
+   *  rest (orphaned, or no longer loaded) with a warning, and refetch the rows so a
+   *  range the source moved meanwhile shows as orphaned. */
+  private dropEditsOfOrphanedGroups(batch: ContentEntryPatch[]): void {
+    const kept = batch.filter((patch) => {
+      const data = this.gridApi?.getRowNode(String(patch.unit_id))?.data;
+      return !!data && !data.orphaned;
+    });
+    this.requeue(kept);
+    const dropped = batch.length - kept.length;
+    if (dropped > 0) {
+      this.message.warning(
+        this.translate.instant('ADMIN.CONTENT_EDITOR.MESSAGES.GROUP_EDITS_DROPPED', {
+          count: dropped,
+        })
+      );
+    }
+    this.activePatchError = false;
+    this.gridApi?.refreshInfiniteCache();
   }
 
   /** Put a failed batch back in the queue, behind any newer edit of the same cell. */
@@ -1285,9 +1395,182 @@ export class AssetContentGridComponent implements OnInit {
       });
   }
 
+  /** Whether a group row may be deleted: any row on the source; on a translation
+   *  only an orphaned one (text for a range its source no longer has). */
+  canDeleteGroup(row: ContentEntry): boolean {
+    if (!this.isGroup() || this.readOnly()) return false;
+    return this.isEditingSource() || !!row.orphaned;
+  }
+
+  openAddGroup(): void {
+    this.groupError.set(null);
+    this.addGroupOpen.set(true);
+  }
+
+  closeGroupModal(): void {
+    this.addGroupOpen.set(false);
+    this.groupError.set(null);
+  }
+
+  /** Save pending edits, then add the group; a failure keeps the dialog open. */
+  async confirmGroup(result: GroupRangeResult): Promise<void> {
+    const versionId = this.draftId();
+    if (!this.addGroupOpen() || versionId === null) return;
+    this.groupBusy.set(true);
+    this.groupError.set(null);
+    if (!(await this.flushPending())) {
+      this.groupBusy.set(false);
+      return;
+    }
+    await new Promise<void>((resolve) => {
+      this.contentService
+        .addGroup(this.kind, this.slug, versionId, result.start, result.end, result.cells)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.groupBusy.set(false);
+            this.addGroupOpen.set(false);
+            this.afterGroupChange();
+            resolve();
+          },
+          error: (err: HttpErrorResponse) => {
+            this.groupBusy.set(false);
+            this.groupError.set(this.errorText(err));
+            resolve();
+          },
+        });
+    });
+  }
+
+  /** Confirm, then delete a group's text in every column of the draft. */
+  confirmDeleteGroup(row: ContentEntry): void {
+    this.modal.confirm({
+      nzTitle: this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.DELETE_CONFIRM_TITLE'),
+      nzContent: this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.DELETE_CONFIRM_BODY'),
+      nzOkText: this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.DELETE'),
+      nzOkDanger: true,
+      nzCancelText: this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.CANCEL'),
+      nzDirection: this.rtl() ? 'rtl' : 'ltr',
+      nzOnOk: () => this.deleteGroup(row),
+    });
+  }
+
+  private async deleteGroup(row: ContentEntry): Promise<void> {
+    const versionId = this.draftId();
+    if (versionId === null || !(await this.flushPending())) return;
+    await new Promise<void>((resolve) => {
+      this.contentService
+        .deleteGroup(this.kind, this.slug, versionId, row.unit_id)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: () => {
+            this.afterGroupChange();
+            resolve();
+          },
+          error: (err: HttpErrorResponse) => {
+            this.showError(err);
+            resolve();
+          },
+        });
+    });
+  }
+
+  /** Grow (1) or shrink (-1) a group's end by one ayah / word, from its range cell. */
+  async extendGroupBy(row: ContentEntry, by: 1 | -1): Promise<void> {
+    const versionId = this.draftId();
+    if (versionId === null) return;
+    await this.runGroupChange(
+      this.contentService.extendGroup(this.kind, this.slug, versionId, row.unit_id, by)
+    );
+  }
+
+  /** Save a start / end typed in a group's range cell. */
+  async changeGroupRange(
+    row: ContentEntry,
+    start: QuranPosition,
+    end: QuranPosition
+  ): Promise<void> {
+    const versionId = this.draftId();
+    if (versionId === null) return;
+    await this.runGroupChange(
+      this.contentService.moveGroup(this.kind, this.slug, versionId, row.unit_id, start, end)
+    );
+  }
+
+  /** "Add next group": a blank group right after the furthest one, which the grid
+   *  then scrolls to (it sorts last) with its text cell focused for typing. */
+  async appendGroup(): Promise<void> {
+    const versionId = this.draftId();
+    if (versionId === null) return;
+    const ok = await this.runGroupChange(
+      this.contentService.appendGroup(this.kind, this.slug, versionId)
+    );
+    if (ok) this.focusLastRow = true;
+  }
+
+  /** Save pending edits, run one group change, then refresh; errors show as a
+   *  toast and refresh the rows too (a cell may still show what was typed). */
+  private async runGroupChange(request$: Observable<ContentEntry[]>): Promise<boolean> {
+    if (this.groupBusy()) return false;
+    this.groupBusy.set(true);
+    if (!(await this.flushPending())) {
+      this.groupBusy.set(false);
+      return false;
+    }
+    return new Promise<boolean>((resolve) => {
+      request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+        next: () => {
+          this.groupBusy.set(false);
+          this.afterGroupChange();
+          resolve(true);
+        },
+        error: (err: HttpErrorResponse) => {
+          this.groupBusy.set(false);
+          this.showError(err);
+          this.gridApi?.refreshInfiniteCache();
+          resolve(false);
+        },
+      });
+    });
+  }
+
+  /** After "add next group": bring the last row into view, then focus its first text cell. */
+  private revealAppendedGroup(params: IGetRowsParams, total: number): void {
+    if (!this.focusLastRow || total === 0) return;
+    const last = total - 1;
+    if (last < params.startRow || last >= params.endRow) {
+      this.gridApi?.ensureIndexVisible(last, 'bottom');
+      return;
+    }
+    this.focusLastRow = false;
+    this.gridApi?.setFocusedCell(last, CELL_PREFIX + this.columnKeys()[0]);
+  }
+
+  /** Rows were re-keyed or removed: refetch them, recount the changes, and drop
+   *  undo history that still names the old row ids. */
+  private afterGroupChange(): void {
+    this.savedOnce.set(true);
+    this.clearHistory();
+    this.gridApi?.refreshInfiniteCache();
+    this.refreshPendingCount();
+  }
+
   /** A commit failed. When the server requires a major version (columns were
    *  reordered meanwhile), switch the dialog to major and explain why there. */
   handleCommitError(err: HttpErrorResponse): void {
+    if (err?.error?.error_name === 'orphaned_groups') {
+      // Each label isolated left-to-right ("2:1 → 2:5" reads backwards in Arabic
+      // otherwise); at most ten, and kept on screen until dismissed.
+      const groups: string[] = err.error?.extra?.groups ?? [];
+      const shown = groups.slice(0, ORPHANS_SHOWN).map((label) => `\u2066${label}\u2069`);
+      const list =
+        shown.join(this.rtl() ? '، ' : ', ') + (groups.length > ORPHANS_SHOWN ? ' …' : '');
+      this.message.error(
+        this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.ORPHANED_GROUPS', { groups: list }),
+        { nzDuration: 0 }
+      );
+      return;
+    }
     if (err?.error?.error_name === 'major_bump_required') {
       this.commitRequiresMajor.set(true);
       this.commitBump.set('major');
@@ -1360,14 +1643,14 @@ export class AssetContentGridComponent implements OnInit {
    *  - every template shows the pinned unit label and the editable text;
    *  - `reference_text` (the Quranic text being annotated) is shown for every
    *    template except `page`, which carries none;
-   *  - `sura` / `aya` number columns where every unit belongs to one ayah
+   *  - `surah` / `ayah` number columns where every unit belongs to one ayah
    *    (`ayah`, `word`); `surah`/`page` units don't;
    *  - `source_text` (the source language for the same unit) is shown
    *    read-only whenever a non-source language is being edited.
    * Every filter runs on the server over the whole asset (see
-   * `buildDatasource`): text columns get the text filter, `sura` / `aya` the
+   * `buildDatasource`): text columns get the text filter, `surah` / `ayah` the
    * number filter, and the unit column a dropdown of surah names (column id
-   * `surah`, a number filter on the surah) wherever units belong to a surah.
+   * `unit_surah`, a number filter on the surah) wherever units belong to a surah.
    */
   buildColumnDefs(): ColDef<ContentEntry>[] {
     const template = this.effectiveTemplate();
@@ -1380,14 +1663,50 @@ export class AssetContentGridComponent implements OnInit {
       {
         field: 'label',
         headerName: this.colHeader('UNIT'),
-        width: 120,
+        width: this.isGroup() ? (this.canEditGroups() ? 290 : 170) : 120,
         editable: false,
+        // A range label reads start → end only left-to-right, also in Arabic. The
+        // source's draft edits it in place: typed start / end and grow / shrink.
+        ...(this.isGroup()
+          ? {
+              cellStyle: {
+                direction: 'ltr',
+                unicodeBidi: 'isolate',
+                textAlign: this.rtl() ? 'right' : 'left',
+              },
+              cellRenderer: GroupRangeCellComponent,
+              cellRendererParams: {
+                words: this.effectiveTemplate() === 'word_group',
+                editable: () => this.canEditGroups(),
+                orphanLabel: this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.ORPHANED'),
+                onRangeChange: (entry: ContentEntry, start: QuranPosition, end: QuranPosition) =>
+                  void this.changeGroupRange(entry, start, end),
+                onExtend: (entry: ContentEntry, by: 1 | -1) => void this.extendGroupBy(entry, by),
+                onInvalid: () =>
+                  this.message.error(
+                    this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.POSITION_INVALID')
+                  ),
+              } satisfies Partial<GroupRangeCellParams>,
+              // Keys typed in the range boxes belong to them, not to grid navigation.
+              suppressKeyboardEvent: (params: SuppressKeyboardEventParams<ContentEntry>) =>
+                (params.event.target as HTMLElement | null)?.tagName === 'INPUT',
+            }
+          : {}),
+        // A translation's text for a range its source dropped: marked, with the reason.
+        valueFormatter: ({ data, value }) =>
+          data?.orphaned
+            ? `${value} · ${this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.ORPHANED')}`
+            : (value ?? ''),
+        tooltipValueGetter: ({ data }) =>
+          data?.orphaned
+            ? this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.ORPHANED_HINT')
+            : undefined,
         pinned: this.rtl() ? 'right' : 'left',
         ...(template !== 'page'
           ? {
               // Filters the surah, not the label text: the backend reads the
-              // `surah` filter-model key as a surah-number filter.
-              colId: 'surah',
+              // `unit_surah` filter-model key as a surah-number filter.
+              colId: 'unit_surah',
               filter: 'agNumberColumnFilter',
               filterParams: NUMBER_FILTER_PARAMS,
               floatingFilter: true,
@@ -1403,8 +1722,8 @@ export class AssetContentGridComponent implements OnInit {
     if (template === 'ayah' || template === 'word') {
       columns.push(
         {
-          field: 'sura',
-          headerName: this.colHeader('SURA'),
+          field: 'surah',
+          headerName: this.colHeader('SURAH_NUMBER'),
           width: 160,
           editable: false,
           // Shows "2. Al-Baqara"; the filter still matches the surah number (it
@@ -1416,8 +1735,8 @@ export class AssetContentGridComponent implements OnInit {
           floatingFilter: true,
         },
         {
-          field: 'aya',
-          headerName: this.colHeader('AYA'),
+          field: 'ayah',
+          headerName: this.colHeader('AYAH_NUMBER'),
           width: 100,
           editable: false,
           filter: 'agNumberColumnFilter',
@@ -1490,9 +1809,40 @@ export class AssetContentGridComponent implements OnInit {
           readOnly: this.readOnly(),
           columnKey: key,
         } satisfies ContentTextEditorParams,
+        // An orphaned group's text opens read-only too: it can only be read (and moved by
+        // hand), and Delete / Backspace can't clear it.
+        ...(this.isGroup()
+          ? {
+              suppressKeyboardEvent: (params: SuppressKeyboardEventParams<ContentEntry>) =>
+                !!params.data?.orphaned && suppressClearKeys(params),
+              cellEditorSelector: ({ data }: { data?: ContentEntry }) => ({
+                component: ContentTextCellEditorComponent,
+                params: {
+                  sourceTitle: this.sourceColHeader(),
+                  readOnly: this.readOnly() || !!data?.orphaned,
+                  columnKey: key,
+                } satisfies ContentTextEditorParams,
+              }),
+            }
+          : {}),
         // Yellow when the draft differs from the published version.
         cellClassRules: { 'content-grid__cell--changed': (p) => cellChanged(p.data, key) },
         ...textFilter,
+      });
+    }
+
+    if (this.isGroup() && !this.readOnly()) {
+      columns.push({
+        colId: 'group_actions',
+        headerName: this.translate.instant('ADMIN.CONTENT_EDITOR.GROUPS.ACTIONS'),
+        width: 90,
+        pinned: this.rtl() ? 'left' : 'right',
+        editable: false,
+        cellRenderer: GroupActionsCellComponent,
+        cellRendererParams: {
+          canDelete: (entry: ContentEntry) => this.canDeleteGroup(entry),
+          onDelete: (entry: ContentEntry) => this.confirmDeleteGroup(entry),
+        } satisfies Partial<GroupActionsCellParams>,
       });
     }
 
@@ -1540,12 +1890,16 @@ export class AssetContentGridComponent implements OnInit {
       return;
     }
 
+    this.message.error(this.errorText(err));
+  }
+
+  /** An API error's message in the UI language (the generic one for unknown names). */
+  private errorText(err: HttpErrorResponse): string {
+    const name: string | undefined = err?.error?.error_name;
     const key = name ? `ADMIN.CONTENT_EDITOR.ERRORS.${name.toUpperCase()}` : '';
     const translated = key ? this.translate.instant(key) : '';
-    this.message.error(
-      translated && translated !== key
-        ? translated
-        : this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC')
-    );
+    return translated && translated !== key
+      ? translated
+      : this.translate.instant('ADMIN.CONTENT_EDITOR.ERRORS.GENERIC');
   }
 }

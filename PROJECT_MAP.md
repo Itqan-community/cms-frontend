@@ -63,7 +63,10 @@ User Browser
 3. Background validate: GET app `/auth/session` (token if present); if not established, GET browser
    `/auth/session` (credentials). Parallel GET `/config`. On success merge GET `/auth/profile/`
    permissions; on profile failure keep cached permissions. The provisional flag stays set until the
-   profile is applied, so guards never wait on it. Invalid session with provisional cache
+   profile is applied, so guards never wait on it. Applying the profile also PUTs
+   `preferred_language` (language of the user's emails) when it differs from the UI language;
+   the lang switch reloads the page, so a switch is saved on the next profile load.
+   Invalid session with provisional cache
    → clear + login + SESSION_EXPIRED when applicable. `storage` event syncs login/logout across tabs.
 4. Public routes never wait; authGuard / portalAccessGuard / permissionGuard wait on authReady.
 5. Login: POST /auth/login -> session_token (+ optional JWTs). Interceptor attaches X-Session-Token
@@ -234,34 +237,34 @@ Trust, Profile, CompleteProfile
 
 ### Route Map
 
-| Path                          | Component              | Guards                            | Notes                                                                                                                                      |
-| ----------------------------- | ---------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `/gallery`                    | `GalleryPage`          | —                                 | Main listing                                                                                                                               |
-| `/gallery/asset/:id`          | `AssetDetailsPage`     | —                                 | Detail + access request + download + report issue modal                                                                                    |
-| `/publishers`                 | `PublishersPage`       | `publisherHostGuard`              | Stub                                                                                                                                       |
-| `/publisher/:id`              | `PublisherDetailsPage` | `publisherHostGuard`              | Detail + filtered assets                                                                                                                   |
-| `/license/:id`                | `LicenseDetailsPage`   | —                                 | License detail                                                                                                                             |
-| `/reciters`                   | `RecitersPage`         | —                                 | Public reciter directory                                                                                                                   |
-| `/reciters/:slug`             | `ReciterDetailsPage`   | —                                 | Reciter profile + recitations                                                                                                              |
-| `/mushaf`                     | `SuraIndexPage`        | `authGuard`, `publisherHostGuard` | **Temporarily hidden** — route + `NAV.MUSHAF` commented out; code kept in `features/mushaf/`                                               |
-| `/mushaf/:suraId`             | `SuraViewPage`         | `authGuard`, `publisherHostGuard` | **Temporarily hidden** (same as `/mushaf`)                                                                                                 |
-| `/mushaf/:suraId/:ayahNumber` | `AyahFocusPage`        | `authGuard`, `publisherHostGuard` | **Temporarily hidden** (same as `/mushaf`)                                                                                                 |
-| `/content-standards`          | `UsageStandardsPage`   | `publisherHostGuard`              | Content guidelines                                                                                                                         |
-| `/unauthorized`               | `UnauthorizedPage`     | —                                 | Card UX; CTA + 5s countdown auto-redirect to `/gallery`; `hideHeader`; dir name typo `unautorized/`                                        |
-| `/complete-profile`           | `CompleteProfilePage`  | `authGuard`                       | Profile completion                                                                                                                         |
-| `/account/*`                  | (22 auth pages)        | guestGuard/authGuard              | Auth & account management                                                                                                                  |
-| `/admin`                      | `AdminLayoutComponent` | `authGuard`, `portalAccessGuard`  | Permission-based admin shell (`layout/` header + sidebar)                                                                                  |
-| `/admin` (default)            | `AdminHomeComponent`   | —                                 | Landing grid of the same permission-filtered sidebar modules (no portal redirect)                                                          |
-| `/admin/publishers`           | (lazy routes)          | `itqanAdminGuard`                 | Publisher CRUD (staff)                                                                                                                     |
-| `/admin/tafsirs`              | (lazy routes)          | per-route `permissionGuard`       | Tafsir CRUD                                                                                                                                |
-| `/admin/translations`         | (lazy routes)          | per-route `permissionGuard`       | Translation CRUD                                                                                                                           |
-| `/admin/recitations`          | (lazy routes)          | per-route `permissionGuard`       | Recitation CRUD                                                                                                                            |
-| `/admin/reciters`             | (lazy routes)          | per-route `permissionGuard`       | Reciter CRUD                                                                                                                               |
-| `/admin/issues`               | (lazy routes)          | _(permission guards commented)_   | Issue reports (list/detail/create/edit/delete); TODO enable `portal_*_issue_report` guards                                                 |
-| `/admin/members`              | (lazy routes)          | `membersAccessGuard`              | Publisher member list/invite/edit/remove/resend via `/portal/members/` (modal UX on single list)                                           |
-| `/admin/access-requests`      | (lazy routes)          | `accessRequestsAccessGuard`       | Asset access requests list/accept/reject + settings via `/portal/access-requests/` and `/portal/publishers/{id}/access-requests-settings/` |
-| `/admin/usage`                | (lazy routes)          | `portal_read_usage`               | Usage dashboards (+ admin tabs)                                                                                                            |
-| `**`                          | redirect -> /gallery   | —                                 | Wildcard                                                                                                                                   |
+| Path                           | Component              | Guards                            | Notes                                                                                                                                      |
+| ------------------------------ | ---------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `/gallery`                     | `GalleryPage`          | —                                 | Main listing                                                                                                                               |
+| `/gallery/asset/:id`           | `AssetDetailsPage`     | —                                 | Detail + access request + download + report issue modal                                                                                    |
+| `/publishers`                  | `PublishersPage`       | `publisherHostGuard`              | Stub                                                                                                                                       |
+| `/publisher/:id`               | `PublisherDetailsPage` | `publisherHostGuard`              | Detail + filtered assets                                                                                                                   |
+| `/license/:id`                 | `LicenseDetailsPage`   | —                                 | License detail                                                                                                                             |
+| `/reciters`                    | `RecitersPage`         | —                                 | Public reciter directory                                                                                                                   |
+| `/reciters/:slug`              | `ReciterDetailsPage`   | —                                 | Reciter profile + recitations                                                                                                              |
+| `/mushaf`                      | `SurahIndexPage`       | `authGuard`, `publisherHostGuard` | **Temporarily hidden** — route + `NAV.MUSHAF` commented out; code kept in `features/mushaf/`                                               |
+| `/mushaf/:surahId`             | `SurahViewPage`        | `authGuard`, `publisherHostGuard` | **Temporarily hidden** (same as `/mushaf`)                                                                                                 |
+| `/mushaf/:surahId/:ayahNumber` | `AyahFocusPage`        | `authGuard`, `publisherHostGuard` | **Temporarily hidden** (same as `/mushaf`)                                                                                                 |
+| `/content-standards`           | `UsageStandardsPage`   | `publisherHostGuard`              | Content guidelines                                                                                                                         |
+| `/unauthorized`                | `UnauthorizedPage`     | —                                 | Card UX; CTA + 5s countdown auto-redirect to `/gallery`; `hideHeader`; dir name typo `unautorized/`                                        |
+| `/complete-profile`            | `CompleteProfilePage`  | `authGuard`                       | Profile completion                                                                                                                         |
+| `/account/*`                   | (22 auth pages)        | guestGuard/authGuard              | Auth & account management                                                                                                                  |
+| `/admin`                       | `AdminLayoutComponent` | `authGuard`, `portalAccessGuard`  | Permission-based admin shell (`layout/` header + sidebar)                                                                                  |
+| `/admin` (default)             | `AdminHomeComponent`   | —                                 | Landing grid of the same permission-filtered sidebar modules (no portal redirect)                                                          |
+| `/admin/publishers`            | (lazy routes)          | `permissionGuard`                 | Publisher CRUD (staff)                                                                                                                     |
+| `/admin/tafsirs`               | (lazy routes)          | per-route `permissionGuard`       | Tafsir CRUD                                                                                                                                |
+| `/admin/translations`          | (lazy routes)          | per-route `permissionGuard`       | Translation CRUD                                                                                                                           |
+| `/admin/recitations`           | (lazy routes)          | per-route `permissionGuard`       | Recitation CRUD                                                                                                                            |
+| `/admin/reciters`              | (lazy routes)          | per-route `permissionGuard`       | Reciter CRUD                                                                                                                               |
+| `/admin/issues`                | (lazy routes)          | _(permission guards commented)_   | Issue reports (list/detail/create/edit/delete); TODO enable `portal_*_issue_report` guards                                                 |
+| `/admin/members`               | (lazy routes)          | `membersAccessGuard`              | Publisher member list/invite/edit/remove/resend via `/portal/members/` (modal UX on single list)                                           |
+| `/admin/access-requests`       | (lazy routes)          | `accessRequestsAccessGuard`       | Asset access requests list/accept/reject + settings via `/portal/access-requests/` and `/portal/publishers/{id}/access-requests-settings/` |
+| `/admin/usage`                 | (lazy routes)          | `portal_read_usage`               | Usage dashboards (+ admin tabs)                                                                                                            |
+| `**`                           | redirect -> /gallery   | —                                 | Wildcard                                                                                                                                   |
 
 ---
 
@@ -271,15 +274,15 @@ Trust, Profile, CompleteProfile
 
 **Purpose:** Browse, search, filter, and download Quranic assets.
 
-| File                                                          | Type       | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `models/assets.model.ts`                                      | Interfaces | `ApiAssets`, `Asset`, `AssetDetails`                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `services/assets.service.ts`                                  | Service    | `getAssets(filters)`, `getAssetDetails(id)`                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `pages/gallery/gallery.page.ts`                               | Page       | Wrapper title + `<app-assets-listing/>`                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `pages/asset-details/asset-details.page.ts`                   | Page       | Full detail + access request modal + license modal + download + itqan CLI card (when `package` is set) + "File structure" (`components/asset-file-structure/`, translations/tafsirs: CSV header, column labels, 3 sample rows, and a language switch above them shared with the download language; the language starts at the UI language when offered — `utils/preferred-language.util.ts` — and follows UI changes until the user picks one) |
-| `components/assets-listing/assets-listing.component.ts`       | Component  | Filter state + grid + skeleton + empty state                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `components/asset-card/asset-card.component.ts`               | Component  | Single asset card (icon, license, name, desc, publisher, link)                                                                                                                                                                                                                                                                                                                                                                                 |
-| `components/itqan-add-command/itqan-add-command.component.ts` | Component  | `itqan add <slug> [--language]` + copy + "get the CLI" link (GitHub)                                                                                                                                                                                                                                                                                                                                                                           |
+| File                                                          | Type       | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `models/assets.model.ts`                                      | Interfaces | `ApiAssets`, `Asset`, `AssetDetails`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `services/assets.service.ts`                                  | Service    | `getAssets(filters)`, `getAssetDetails(id)`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `pages/gallery/gallery.page.ts`                               | Page       | Wrapper title + `<app-assets-listing/>`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `pages/asset-details/asset-details.page.ts`                   | Page       | Full detail + access request modal + license modal + download + itqan CLI card (when `package` is set) + "File structure" (`components/asset-file-structure/`, translations/tafsirs: CSV header, column labels, 3 sample rows, and a language switch above them shared with the download language; the language starts at the UI language when offered — `utils/preferred-language.util.ts` — and follows UI changes until the user picks one) + "Listen to a sample" for recitations (`components/asset-recitation-preview/`, one player per track, one plays at a time) + "Font preview" for fonts (`components/asset-font-preview/`, Al-Fatiha set in the font via `FontFace`) + snapshot "Content preview" card only when there are snapshots |
+| `components/assets-listing/assets-listing.component.ts`       | Component  | Filter state + grid + skeleton + empty state                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `components/asset-card/asset-card.component.ts`               | Component  | Single asset card (icon, license, name, desc, publisher, link)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `components/itqan-add-command/itqan-add-command.component.ts` | Component  | `itqan add <slug> [--language]` + copy + "get the CLI" link (GitHub)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
 
 **States:** loading (skeleton), empty (no results with/without filters), error, not-found (404),
 success.
@@ -320,6 +323,11 @@ cards as the sidebar.
 | `usage/`           | API Usage analytics   | Request logs                        | Charts, top endpoints, top entities                                                                                                                                                                                                                                                                                                          |
 | `audio/`           | Audio management      | —                                   | Routes defined                                                                                                                                                                                                                                                                                                                               |
 | `software/`        | Software management   | —                                   | Routes defined                                                                                                                                                                                                                                                                                                                               |
+
+**Recitation tracks upload:** `RecitationTracksUploadOrchestratorService` sends files in 8 MB
+multipart parts through one page-wide queue shared by batches and single-file retries. The user
+picks how many files upload at once (1–4, default 1 for slow connections) beside the Upload button;
+the choice is kept in `localStorage` (`cms.recitationTracksUploadConcurrency`).
 
 **Recitation folders (variants):** A folder is the same recitation re-rendered at one audio quality,
 optionally with added effects. The vocabulary (`RecitationFolderQuality` × `hasFx`) is
@@ -378,16 +386,28 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   has a "Publish now" checkbox (default on, sends `publish`). Without `portal_publish_content` the
   Publish button and checkbox are shown disabled with a permission tooltip.
 - `asset-content-editor/` + `asset-content-grid/` — Per-unit draft editor (surah/ayah/word/page
-  content templates); flush before publish; leave blocked if PATCH fails. **Text columns:** one
-  editable grid column per key of the draft's `column_keys` (colId `cell__<key>`, reading/writing
-  `row.cells[key]`; filters keyed `cell__<key>` / `source__<key>`); unsaved cells are keyed
-  `unit:column` and PATCHed as `{unit_id, column, text}`. Translating, a remembered "Show source"
-  switch inserts each read-only `source__<key>` column before its translation. Users with
-  `portal_manage_asset_columns` + `portal_access_all_languages` get "+ Add column" and a ⚙ in each
-  text column header (`content-column-header.component.ts`, which also marks a filtered column)
-  opening `manage-columns-modal/` (add, optional labels en/ar, reorder, delete uncommitted; a label
-  edit only reloads the headers). Changed cells are highlighted per column (`changed_columns`).
-  After a reorder the commit dialog allows only a major version (`requires_major`, or a
+  content templates, and the tafsir-only `ayah_group` / `word_group` templates); flush before
+  publish; leave blocked if PATCH fails. **Group templates:** each row is a publisher-chosen range
+  (label `2:1 → 2:5`, `group_from` / `group_to`, opaque `unit_id`); no `surah`/`ayah` columns. On
+  the source language the range is edited in place (`group-range-cell.component.ts`: typed start /
+  end saved on Enter or blur via `PUT …/groups/{id}/`, and −/+ shrinking or growing the end one ayah
+  / word via `POST …/groups/{id}/extend/`); "Add next group" under the grid (`POST …/groups/next/`)
+  adds a blank group after the furthest one, then scrolls to it and focuses its text. "Add group"
+  opens `group-range-modal/` — from/to pickers with a debounced, cancelling live preview of the
+  mushaf text (`GET content/quran-range/`), optional first text per column — and the per-row delete
+  button (`group-actions-cell.component.ts`, a group row's only action) removes a group. A
+  translated language lists its source's ranges; only an `orphaned` row (a range the source dropped)
+  can be deleted, its text opens read-only and can't be cleared or pasted over, and a commit refused
+  with `orphaned_groups` lists the groups. **Text columns:** one editable grid column per key of the
+  draft's `column_keys` (colId `cell__<key>`, reading/writing `row.cells[key]`; filters keyed
+  `cell__<key>` / `source__<key>`); unsaved cells are keyed `unit:column` and PATCHed as
+  `{unit_id, column, text}`. Translating, a remembered "Show source" switch inserts each read-only
+  `source__<key>` column before its translation. Users with `portal_manage_asset_columns` +
+  `portal_access_all_languages` get "+ Add column" and a ⚙ in each text column header
+  (`content-column-header.component.ts`, which also marks a filtered column) opening
+  `manage-columns-modal/` (add, optional labels en/ar, reorder, delete uncommitted; a label edit
+  only reloads the headers). Changed cells are highlighted per column (`changed_columns`). After a
+  reorder the commit dialog allows only a major version (`requires_major`, or a
   `major_bump_required` answer). Diffs and review rows name each change's column when the asset has
   several. Column set is driven by `effectiveTemplate()` (the `template` input, else the draft's
   `template`, else a one-row probe's `unit_type` for older backends). The draft is opened alongside
@@ -397,7 +417,7 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   infinite row model via `buildDatasource()` (paginated `entries/`, `cacheBlockSize` pinned to the
   page size, sorting off, one-line rows with truncated text). Column filters run server-side: the
   grid's `filterModel` is sent as the JSON `filters` param — text filters on
-  `text`/`reference_text`/`source_text`, number filters on `sura`/`aya`, and a surah-name dropdown
+  `text`/`reference_text`/`source_text`, number filters on `surah`/`ayah`, and a surah-name dropdown
   (`SurahFloatingFilterComponent`) on the unit column (`colId: 'surah'`). Undo/redo is a custom
   stack (AG Grid's only covers the client-side model), replayed via `getRowId`. The text column
   edits in `ContentTextCellEditorComponent`: a near-fullscreen popup showing the unit label and
@@ -412,18 +432,21 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
 
 **Services:**
 
-- `admin-auth.service.ts` — `AdminAuthService`: exposes `currentUser`, role signals (`isAdmin`,
-  `isItqanAdmin`, `isPublisherAdmin`), and `hasPermission` / `hasAnyPermission` /
-  `hasAllPermissions` based on normalized profile permission codes. Constants:
-  `features/admin/constants/portal-permission.constants.ts`.
+- `admin-auth.service.ts` — `AdminAuthService`: exposes `currentUser`, `isStaff` (Itqan staff, from
+  the profile's `is_staff`), and `hasPermission` / `hasAnyPermission` / `hasAllPermissions` based on
+  the selected publisher's `permissions` from `GET /portal/publishers/me/` (roles are per
+  publisher), falling back to the profile's permission codes until a publisher is selected.
+  Constants: `features/admin/constants/portal-permission.constants.ts`.
+- `admin-tenant.service.ts` — `AdminTenantService`: loads `publishers/me` (each entry carries the
+  caller's `permissions` there) and holds the selected publisher sent as `X-Tenant`.
 - `admin-table-column-prefs.service.ts` — Persists column visibility per table
 - `admin-table-sort-prefs.service.ts` — Persists sort preferences
 - `asset-versions.service.ts` — Version management API
 - `quran-data.service.ts` — Quran metadata (pages, surahs, ayahs)
 
-**Guards:** `admin.guard.ts` (legacy `is_admin` gate), `itqan-admin.guard.ts`,
-`publisher-admin.guard.ts`, `portal-access.guard.ts` (`portal_access`), `permission.guard.ts`
-(factory for route-level permission checks). Wired on `/admin` and lazy admin feature routes.
+**Guards:** `staff.guard.ts` (`isStaff`), `portal-access.guard.ts` (`portal_access`),
+`permission.guard.ts` (factory for route-level permission checks). Wired on `/admin` and lazy admin
+feature routes.
 
 **Pipes:** `admin-country-label.pipe.ts`, `admin-hijri-year.pipe.ts` **Base class:** `AdminListBase`
 — shared list page logic (loading, data fetching, error handling) **Utility:**
@@ -459,18 +482,18 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 
 | File                                   | Type       | Purpose                                                                                                  |
 | -------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------- |
-| `models/mushaf.model.ts`               | Interfaces | `MushafEdition`, `MushafSurahMeta`, `AyahMarker` (+ legacy Sura/Ayah/Word)                               |
+| `models/mushaf.model.ts`               | Interfaces | `MushafEdition`, `MushafSurahMeta`, `AyahMarker` (+ legacy Surah/Ayah/Word)                              |
 | `data/mushaf-editions.ts`              | Data       | 5 editions registry (qiraa/publisher/slug/names/default); no Libyan Awqaf                                |
 | `services/mushaf-svg.service.ts`       | Service    | jsDelivr fetchers: `getSurahs`, `getMarkers`, `getPageSvg`, `resolvePage`, last-ayah `getSurahPageRange` |
 | `services/mushaf-selection.service.ts` | Service    | Selected-edition signal (localStorage + `?mushaf=`; missing query does not clobber)                      |
 | `utils/arabic-digits.util.ts`          | Util       | `toArabicDigits()` for number labels                                                                     |
-| `pages/sura-index/`                    | Page       | Grid of 114 suras (from edition surah.json) + switcher                                                   |
-| `pages/sura-view/`                     | Page       | Infinite-scroll surah pages; ayah click → focus                                                          |
+| `pages/surah-index/`                   | Page       | Grid of 114 surahs (from edition surah.json) + switcher                                                  |
+| `pages/surah-view/`                    | Page       | Infinite-scroll surah pages; ayah click → focus                                                          |
 | `pages/ayah-focus/`                    | Page       | Same scroll from the ayah’s page, highlight; prepend/append pages                                        |
 | `components/mushaf-page/`              | Component  | Inlines page SVG (pinned CDN SHA), wires `.ayahPolygon` hover/click                                      |
 | `components/mushaf-scroll/`            | Component  | Bidirectional infinite page stack                                                                        |
 | `components/mushaf-switcher/`          | Component  | Edition (qiraa) dropdown → updates state + URL                                                           |
-| `components/sura-card/`                | Component  | Sura tile (number, Arabic + English name, ayah count)                                                    |
+| `components/surah-card/`               | Component  | Surah tile (number, Arabic + English name, ayah count)                                                   |
 
 **Data source:** jsDelivr CDN (quranpedia/quran-svg @ pinned SHA). **Editions:** hafs/warsh/qalon
 (KFQC)/douri/shubah. **States:** loading (skeleton), error (retry), not-found (404). **i18n:**
@@ -479,30 +502,34 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 ### Usage reports (`src/app/features/usage/`)
 
 **Purpose:** Usage dashboards on four surfaces, on the backend reports API (cms-backend spec
-`2026-10-18-usage-reports-design.md` §9/§20; plan
+`2026-10-18-usage-reports-design.md` §9/§20/§21; plan
 `docs/superpowers/plans/2026-10-18-usage-reports-4-frontend.md`).
 
 | File                               | Type      | Purpose                                                                                                                                                                            |
 | ---------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `models/usage.models.ts`           | Types     | API contract (summary, timeseries, breakdown, reconciliation, public counts); `USAGE_OTHER_KEY`                                                                                    |
 | `services/usage-api.service.ts`    | Service   | One method per report with a `scope` (`publisher` → `/portal/usage/`, `admin` → `/portal/admin/usage/`, `developer` → `/cms-api/developers/usage/`); public counts → `null` on 404 |
-| `usage-echarts.ts`                 | Setup     | Tree-shaken ECharts (line, bar, pie, heatmap); loaded lazily by the chart component (own chunk)                                                                                    |
-| `utils/usage-chart-options.ts`     | Util      | Pure option builders (trend, donut, bar, hour-of-week heatmap); RTL mirrors axes and legends; `"<3"` as 0 + label                                                                  |
+| `usage-echarts.ts`                 | Setup     | Tree-shaken ECharts (line, bar, pie, heatmap, mark points); loaded lazily by the chart component (own chunk)                                                                       |
+| `utils/usage-chart-options.ts`     | Util      | Pure option builders (trend with spike marks, donut, bar, hour-of-week heatmap, listener growth); Hijri axis labels; RTL mirrors axes and legends; `"<3"` as 0 + label             |
 | `utils/usage-filters.util.ts`      | Util      | Presets, URL query-param state, compact numbers / % change per language, granularity by range                                                                                      |
 | `utils/usage-dashboard.profile.ts` | Util      | Headline cards, metrics and panels per scope / asset category (spec §8); `itemLabel` (countries/languages via `Intl.DisplayNames`)                                                 |
 | `components/usage-chart/`          | Component | Titled chart card: loading / empty / error (retry) / view-as-table                                                                                                                 |
 | `components/usage-dashboard/`      | Component | Filter bar (URL state on pages, local on asset sections), headline cards, trend + split, panels, CSV export, last-updated + API disclaimers                                        |
 | `components/usage-leaderboard/`    | Component | Admin: top publishers / assets with previous-period change                                                                                                                         |
-| `components/usage-unseen-traffic/` | Component | Admin: R2 reads vs edge requests (unseen traffic)                                                                                                                                  |
+| `components/usage-unseen-traffic/` | Component | Admin: R2 reads vs edge requests (unseen traffic), with a "How to read this tab" guide                                                                                             |
+| `components/recitation-insights/`  | Component | Recitation dashboards (asset tab + overview): listener growth, weekly cohorts, countries/apps first reached, gallery funnel, asset surah coverage                                  |
+| `components/recitation-catalog/`   | Component | Recitation overview only: this week's top / rising recitations, gallery search terms (top / no results), incomplete recitations                                                    |
 | `components/asset-usage-section/`  | Component | "Usage" section on font/mushaf/tafsir/translation/recitation admin detail pages (`portal_read_usage`)                                                                              |
 | `components/asset-usage-counts/`   | Component | Gallery asset page "plays · downloads · apps"; hidden unless the backend returns 200                                                                                               |
 | `pages/developer-usage/`           | Page      | `/account/usage` (developer scope), linked from `/account/api-keys`                                                                                                                |
 
-`/admin/usage` (`features/admin/usage/`): Dashboard tab for everyone with `portal_read_usage`; Itqan
-admins also get a publisher picker, Leaderboard and Unseen traffic; the Mixpanel iframe is the
-"Legacy board" tab (loaded when opened) until the usage-reports cutover. `/account/api-keys` shows
-and edits each key's public app slug (`app_slug`). The global error toast skips
-`usage_counts_disabled`.
+`/admin/usage` (`features/admin/usage/`): Dashboard and Recitations tabs for everyone with
+`portal_read_usage` (Recitations = the dashboard fixed to the recitation category, local state:
+reciter / riwayah filters, listening hours, recitation insights and catalog; picking "Recitations"
+in the Dashboard category filter shows the same profile); Itqan staff also get a publisher picker,
+Leaderboard and Unseen traffic; the Mixpanel iframe is the "Legacy board" tab (loaded when opened)
+until the usage-reports cutover. `/account/api-keys` shows and edits each key's public app slug
+(`app_slug`). The global error toast skips `usage_counts_disabled`.
 
 ### 6. Error (`src/app/features/error/`)
 
@@ -614,6 +641,9 @@ and edits each key's public app slug (`app_slug`). The global error toast skips
 - `GET /assets/{id}/usage-counts/` — Public usage counts (404 while turned off)
 - `GET /assets/{id}/file-structure/?language=` — A translation's / tafsir's CSV layout + sample rows
   (404 when unavailable)
+- `GET /assets/{id}/recitation-preview/` — A recitation's first 3 tracks to play (404 when none)
+- `GET /assets/{id}/font-preview/?language=` — A font's file + Al-Fatiha to render in it (404 when
+  unavailable)
 - `GET /developers/usage/{summary,timeseries,breakdown}/` — Developer usage reports
 
 ### Admin Portal (`/portal/`)
@@ -630,6 +660,11 @@ create forms (`POST /portal/ai/translate/`), usage reports (`/portal/usage/*`,
 
 Asset create/edit forms (tafsir, translation, mushaf, font, program, recitation): publisher field is
 view-only — create binds `AdminTenantService.selectedPublisherId()`; edit shows the asset publisher.
+
+Header publisher switch (`resolveUrlAfterTenantChange`): publisher detail/edit/index → the new
+publisher's detail; any other record route (`/admin/<section>/<slug|id>/…`) → `/admin/<section>`,
+since the record belongs to the previous publisher and would 404. `create`, list routes and
+`/admin/software/*` tabs reload unchanged.
 
 ---
 
@@ -675,6 +710,7 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
 | Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                                                                      |
 | Usage reports API                       | Pending backend   | Needs cms-backend#557 deployed; until then the dashboards show their error state.                                                                                |
 | Multi-column text assets                | Pending backend   | Editor columns, column management, file structure need the cms-backend multi-column release (`feat/multi-column-text-assets`); remove once deployed.             |
+| Group tafsir templates                  | Pending backend   | `ayah_group` / `word_group` editing, `groups/` and `content/quran-range/` need the cms-backend `feat/group-templates` release; remove once deployed.             |
 | Usage world map                         | Deferred          | Countries show as a ranked bar + table; a world map needs a GeoJSON bundle (spec §10).                                                                           |
 | WebAuthn RP ID                          | Development mode  | `webauthnReplaceRpIdWithHostname` env flag allows RP ID patching in dev.                                                                                         |
 

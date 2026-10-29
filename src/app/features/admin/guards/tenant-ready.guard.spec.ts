@@ -4,6 +4,7 @@ import { Router, UrlTree } from '@angular/router';
 import { Observable, firstValueFrom, of, throwError } from 'rxjs';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { AdminTenantService } from '../services/admin-tenant.service';
+import { consumeTenantSwitch, rememberTenantSwitch } from '../utils/admin-tenant-navigation.util';
 import { tenantReadyGuard } from './tenant-ready.guard';
 
 describe('tenantReadyGuard', () => {
@@ -51,5 +52,23 @@ describe('tenantReadyGuard', () => {
     const result = await runGuard();
     expect(result).toBe(urlTree);
     expect(routerMock.createUrlTree).toHaveBeenCalledWith(['/unauthorized']);
+  });
+
+  it('forgets a publisher switch when loading publishers fails, so /unauthorized stays put', async () => {
+    rememberTenantSwitch();
+    tenantServiceMock.ensureReady.and.returnValue(of(false));
+
+    await runGuard();
+
+    expect(consumeTenantSwitch()).toBeFalse();
+  });
+
+  it('forgets a publisher switch when the publisher request errors', async () => {
+    rememberTenantSwitch();
+    tenantServiceMock.ensureReady.and.returnValue(throwError(() => new Error('down')));
+
+    await runGuard();
+
+    expect(consumeTenantSwitch()).toBeFalse();
   });
 });

@@ -75,6 +75,41 @@ describe('PasskeyAuthFlowService', () => {
     }
   });
 
+  it('uses conditional mediation with the given signal for passkey autofill', async () => {
+    const pkc = PublicKeyCredential as unknown as {
+      parseRequestOptionsFromJSON?: unknown;
+    };
+    const previousParser = pkc.parseRequestOptionsFromJSON;
+    pkc.parseRequestOptionsFromJSON = undefined;
+    const get = spyOn(navigator.credentials, 'get').and.resolveTo(null);
+    const controller = new AbortController();
+    try {
+      await service.loginWithPasskey('/gallery', { signal: controller.signal });
+      const request = get.calls.mostRecent().args[0] as CredentialRequestOptions;
+      expect(request.mediation).toBe('conditional');
+      expect(request.signal).toBe(controller.signal);
+    } finally {
+      pkc.parseRequestOptionsFromJSON = previousParser;
+    }
+  });
+
+  it('uses a modal request without autofill options', async () => {
+    const pkc = PublicKeyCredential as unknown as {
+      parseRequestOptionsFromJSON?: unknown;
+    };
+    const previousParser = pkc.parseRequestOptionsFromJSON;
+    pkc.parseRequestOptionsFromJSON = undefined;
+    const get = spyOn(navigator.credentials, 'get').and.resolveTo(null);
+    try {
+      await service.loginWithPasskey('/gallery');
+      const request = get.calls.mostRecent().args[0] as CredentialRequestOptions;
+      expect(request.mediation).toBeUndefined();
+      expect(request.signal).toBeUndefined();
+    } finally {
+      pkc.parseRequestOptionsFromJSON = previousParser;
+    }
+  });
+
   it('signup does not fetch WebAuthn options when initiate returns no session_token', async () => {
     const getWebauthnSignupOptions = jasmine.createSpy('getWebauthnSignupOptions');
     TestBed.resetTestingModule();

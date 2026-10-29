@@ -2,11 +2,49 @@ import {
   isPasskeyAutoPromptCancellation,
   shouldAttemptPasskeyAutoPrompt,
 } from './passkey-auto-prompt.util';
+import {
+  restorePasskeyEnvironment,
+  setPasskeyClientEnvironmentSupported,
+  snapshotPasskeyEnvironment,
+  type PasskeyEnvironmentSnapshot,
+} from './passkey-test-env.helper';
 
 describe('passkey-auto-prompt.util', () => {
   describe('shouldAttemptPasskeyAutoPrompt', () => {
-    it('returns true when PublicKeyCredential is available in secure context', () => {
-      expect(shouldAttemptPasskeyAutoPrompt()).toBe(typeof PublicKeyCredential !== 'undefined');
+    let passkeyEnvSnapshot: PasskeyEnvironmentSnapshot;
+    let pkc: { isConditionalMediationAvailable?: () => Promise<boolean> };
+    let previousIsConditional: (() => Promise<boolean>) | undefined;
+
+    beforeEach(() => {
+      passkeyEnvSnapshot = snapshotPasskeyEnvironment();
+      setPasskeyClientEnvironmentSupported(true);
+      pkc = PublicKeyCredential as unknown as typeof pkc;
+      previousIsConditional = pkc.isConditionalMediationAvailable;
+    });
+
+    afterEach(() => {
+      pkc.isConditionalMediationAvailable = previousIsConditional;
+      restorePasskeyEnvironment(passkeyEnvSnapshot);
+    });
+
+    it('returns true when the browser supports passkey autofill', async () => {
+      pkc.isConditionalMediationAvailable = () => Promise.resolve(true);
+      expect(await shouldAttemptPasskeyAutoPrompt()).toBe(true);
+    });
+
+    it('returns false when passkey autofill is unavailable', async () => {
+      pkc.isConditionalMediationAvailable = () => Promise.resolve(false);
+      expect(await shouldAttemptPasskeyAutoPrompt()).toBe(false);
+    });
+
+    it('returns false when the browser cannot report passkey autofill support', async () => {
+      pkc.isConditionalMediationAvailable = undefined;
+      expect(await shouldAttemptPasskeyAutoPrompt()).toBe(false);
+    });
+
+    it('returns false outside a passkey-capable environment', async () => {
+      setPasskeyClientEnvironmentSupported(false);
+      expect(await shouldAttemptPasskeyAutoPrompt()).toBe(false);
     });
   });
 

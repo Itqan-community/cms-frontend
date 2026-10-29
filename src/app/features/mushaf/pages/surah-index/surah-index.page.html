@@ -1,16 +1,16 @@
-<section class="sura-index">
-  <header class="sura-index__header">
-    <h1 class="sura-index__title">{{ 'MUSHAF.TITLE' | translate }}</h1>
-    <p class="sura-index__subtitle">{{ 'MUSHAF.INDEX_SUBTITLE' | translate }}</p>
-    <div class="sura-index__toolbar">
+<section class="surah-index">
+  <header class="surah-index__header">
+    <h1 class="surah-index__title">{{ 'MUSHAF.TITLE' | translate }}</h1>
+    <p class="surah-index__subtitle">{{ 'MUSHAF.INDEX_SUBTITLE' | translate }}</p>
+    <div class="surah-index__toolbar">
       <app-mushaf-switcher />
     </div>
   </header>
 
   @if (loading()) {
-    <div class="sura-index__grid">
+    <div class="surah-index__grid">
       @for (placeholder of [].constructor(12); track $index) {
-        <div class="sura-index__skeleton"></div>
+        <div class="surah-index__skeleton"></div>
       }
     </div>
   } @else if (errorState()) {
@@ -25,9 +25,9 @@
       (actionClick)="retry()"
     />
   } @else {
-    <div class="sura-index__grid">
+    <div class="surah-index__grid">
       @for (surah of surahs(); track surah.number) {
-        <app-sura-card [surah]="surah" [mushafSlug]="selected().slug" />
+        <app-surah-card [surah]="surah" [mushafSlug]="selected().slug" />
       }
     </div>
   }

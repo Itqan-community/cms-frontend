@@ -3,7 +3,16 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute, Router, convertToParamMap } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { BehaviorSubject, of, throwError } from 'rxjs';
-import { UsageBreakdown, UsageSummary, UsageTimeseries } from '../../models/usage.models';
+import {
+  UsageBreakdown,
+  UsageCohorts,
+  UsageFirstSeen,
+  UsageListeners,
+  UsageRecitationCoverage,
+  UsageSearchTerms,
+  UsageSummary,
+  UsageTimeseries,
+} from '../../models/usage.models';
 import { UsageApiService } from '../../services/usage-api.service';
 import { UsageDashboardComponent } from './usage-dashboard.component';
 
@@ -27,6 +36,7 @@ const SUMMARY: UsageSummary = {
     unique_downloaders: metric(3),
     unique_end_users: metric(0),
     views: metric(1),
+    listening_seconds: metric(9000),
   },
   integrating_apps: metric(3),
   unidentified_apps: true,
@@ -52,6 +62,22 @@ const BREAKDOWN: UsageBreakdown = {
   data_updated_at: null,
 };
 
+const LISTENERS: UsageListeners = {
+  granularity: 'day',
+  points: [{ t: '2026-10-12', new: 2, returning: 1, cumulative: 5 }],
+  clamped_start: null,
+  data_updated_at: null,
+};
+const COHORTS: UsageCohorts = { cohorts: [], clamped_start: null, data_updated_at: null };
+const FIRST_SEEN: UsageFirstSeen = {
+  by: 'country',
+  items: [],
+  clamped_start: null,
+  data_updated_at: null,
+};
+const SEARCH_TERMS: UsageSearchTerms = { items: [] };
+const COVERAGE: UsageRecitationCoverage = { items: [], demand_days: 90, data_updated_at: null };
+
 describe('UsageDashboardComponent', () => {
   let fixture: ComponentFixture<UsageDashboardComponent>;
   let api: jasmine.SpyObj<UsageApiService>;
@@ -65,7 +91,17 @@ describe('UsageDashboardComponent', () => {
       'timeseries',
       'breakdown',
       'exportCsv',
+      'listeners',
+      'cohorts',
+      'firstSeen',
+      'searchTerms',
+      'recitationCoverage',
     ]);
+    api.listeners.and.returnValue(of(LISTENERS));
+    api.cohorts.and.returnValue(of(COHORTS));
+    api.firstSeen.and.returnValue(of(FIRST_SEEN));
+    api.searchTerms.and.returnValue(of(SEARCH_TERMS));
+    api.recitationCoverage.and.returnValue(of(COVERAGE));
     api.summary.and.returnValue(of(SUMMARY));
     api.timeseries.and.returnValue(of(TIMESERIES));
     api.breakdown.and.returnValue(of(BREAKDOWN));
@@ -116,6 +152,17 @@ describe('UsageDashboardComponent', () => {
     const extras = router.navigate.calls.mostRecent().args[1];
     expect(extras?.queryParams?.['metric']).toBe('downloads');
     queryParams.next(convertToParamMap({ range: '7d', metric: 'downloads' }));
+    expect(api.timeseries.calls.mostRecent().args[2].metric).toBe('downloads');
+  });
+
+  it('keeps the same filters object when only the metric changes', () => {
+    fixture.componentRef.setInput('syncUrl', false);
+    fixture.detectChanges();
+    const before = fixture.componentInstance.filters();
+
+    fixture.componentInstance.setMetric('downloads');
+
+    expect(fixture.componentInstance.filters()).toBe(before);
     expect(api.timeseries.calls.mostRecent().args[2].metric).toBe('downloads');
   });
 
@@ -177,5 +224,86 @@ describe('UsageDashboardComponent', () => {
     fixture.detectChanges();
 
     expect(text()).toContain('USAGE.LOAD_ERROR');
+  });
+
+  it('shows the recitation reports, filters and listening hours for a fixed recitation category', () => {
+    fixture.componentRef.setInput('category', 'recitation');
+    fixture.componentRef.setInput('syncUrl', false);
+    fixture.detectChanges();
+
+    expect(api.summary.calls.mostRecent().args[1].category).toBe('recitation');
+    const element = fixture.nativeElement as HTMLElement;
+    expect(element.querySelector('app-recitation-insights')).not.toBeNull();
+    expect(element.querySelector('app-recitation-catalog')).not.toBeNull();
+    // 9000 seconds of listening are shown as 2.5 hours.
+    expect(text()).toContain('2.5');
+    const dimensions = api.breakdown.calls.allArgs().map(([, , options]) => options.by);
+    expect(dimensions).toContain('reciter');
+    expect(dimensions).toContain('riwayah');
+  });
+
+  it('clears the reciter and riwayah filters when the category changes', () => {
+    fixture.componentRef.setInput('syncUrl', false);
+    fixture.detectChanges();
+    fixture.componentInstance.setFilter('category', 'recitation');
+    fixture.componentInstance.setFilter('reciter_id', 4);
+
+    fixture.componentInstance.setFilter('category', 'tafsir');
+
+    const filters = api.summary.calls.mostRecent().args[1];
+    expect(filters.category).toBe('tafsir');
+    expect(filters.reciter_id).toBeNull();
+  });
+
+  it('does not show the recitation reports on other dashboards', () => {
+    fixture.detectChanges();
+
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector('app-recitation-insights')
+    ).toBeNull();
+    expect(api.listeners).not.toHaveBeenCalled();
+  });
+
+  it('compares with the same dates a year earlier in a second request', () => {
+    queryParams.next(
+      convertToParamMap({
+        range: 'custom',
+        start: '2026-10-01',
+        end: '2026-10-07',
+        compare: 'year',
+      })
+    );
+    fixture.detectChanges();
+
+    const [current, year] = api.timeseries.calls.allArgs().slice(-2);
+    expect(current[2].compare).toBeFalse();
+    expect(year[1]).toEqual(
+      jasmine.objectContaining({ start_date: '2025-10-01', end_date: '2025-10-07' })
+    );
+  });
+
+  it('follows a shared range and reports its own range changes', () => {
+    fixture.componentRef.setInput('syncUrl', false);
+    fixture.componentRef.setInput('sharedRange', {
+      preset: '90d',
+      start_date: '2026-07-25',
+      end_date: '2026-10-22',
+    });
+    const emitted: unknown[] = [];
+    fixture.componentInstance.rangeChange.subscribe((range) => emitted.push(range));
+    fixture.detectChanges();
+    expect(api.summary.calls.mostRecent().args[1].start_date).toBe('2026-07-25');
+
+    fixture.componentRef.setInput('sharedRange', {
+      preset: 'custom',
+      start_date: '2026-09-01',
+      end_date: '2026-09-30',
+    });
+    fixture.detectChanges();
+    expect(api.summary.calls.mostRecent().args[1].start_date).toBe('2026-09-01');
+    expect(emitted).toEqual([]);
+
+    fixture.componentInstance.setPreset('7d');
+    expect(emitted).toEqual([jasmine.objectContaining({ preset: '7d' })]);
   });
 });

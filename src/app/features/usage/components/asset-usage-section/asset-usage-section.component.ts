@@ -42,5 +42,5 @@ export class AssetUsageSectionComponent {
   readonly canRead = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_USAGE)
   );
-  readonly scope = computed(() => (this.adminAuth.isItqanAdmin() ? 'admin' : 'publisher'));
+  readonly scope = computed(() => (this.adminAuth.isStaff() ? 'admin' : 'publisher'));
 }

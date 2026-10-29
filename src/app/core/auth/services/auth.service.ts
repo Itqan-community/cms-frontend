@@ -340,11 +340,7 @@ export class AuthService {
       const merged: User = {
         ...mapped,
         permissions: prev?.permissions?.length ? prev.permissions : mapped.permissions,
-        is_admin: prev?.is_admin ?? mapped.is_admin,
-        publisher_id:
-          prev?.publisher_id !== undefined && prev?.publisher_id !== null
-            ? prev.publisher_id
-            : mapped.publisher_id,
+        is_staff: prev?.is_staff ?? mapped.is_staff,
         is_profile_completed: prev?.is_profile_completed ?? mapped.is_profile_completed,
         phone: prev?.phone || mapped.phone,
       };
@@ -702,6 +698,24 @@ export class AuthService {
     };
     this.currentUser.set(merged);
     localStorage.setItem(this.USER_KEY, JSON.stringify(merged));
+    this.syncPreferredLanguage(profile);
+  }
+
+  /**
+   * Keeps the language the backend emails the user in equal to the UI language.
+   * The profile loads on boot and login, so a switch (which reloads the page) lands here.
+   */
+  private syncPreferredLanguage(profile: UpdateProfileResponse): void {
+    const uiLang = this.translate.getCurrentLang();
+    if (!profile.preferred_language || (uiLang !== 'en' && uiLang !== 'ar')) {
+      return;
+    }
+    if (profile.preferred_language === uiLang) {
+      return;
+    }
+    this.updateProfile({ preferred_language: uiLang }).subscribe({
+      error: (err) => console.error('[auth] Failed to save preferred language', err),
+    });
   }
 
   /** Full CMS profile payload for account hub (includes bio, URLs, etc.). */

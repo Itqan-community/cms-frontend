@@ -39,13 +39,13 @@ export class AyahFocusPage implements OnInit {
   protected readonly loading = signal(true);
   protected readonly errorState = signal(false);
   protected readonly notFound = signal(false);
-  protected readonly suraId = signal<number>(0);
+  protected readonly surahId = signal<number>(0);
   protected readonly ayahNumber = signal<number>(0);
   protected readonly selected = this.selection.selected;
 
   protected readonly ayahNumberLabel = computed(() => toArabicDigits(this.ayahNumber()));
   protected readonly highlight = computed<AyahRef>(() => ({
-    surah: this.suraId(),
+    surah: this.surahId(),
     ayah: this.ayahNumber(),
   }));
 
@@ -53,31 +53,31 @@ export class AyahFocusPage implements OnInit {
     return this.selected().slug;
   }
 
-  protected readonly suraLink = computed(() => ['/mushaf', this.suraId()]);
+  protected readonly surahLink = computed(() => ['/mushaf', this.surahId()]);
   protected readonly mushafQuery = computed(() => ({ mushaf: this.selected().slug }));
 
   ngOnInit(): void {
     combineLatest([this.route.params, this.route.queryParams])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(([params, query]) => {
-        const suraId = Number(params['suraId']);
+        const surahId = Number(params['surahId']);
         const ayahNumber = Number(params['ayahNumber']);
         const edition = this.selection.select(query['mushaf']);
-        this.suraId.set(suraId);
+        this.surahId.set(surahId);
         this.ayahNumber.set(ayahNumber);
-        this.loadAyah(edition.slug, suraId, ayahNumber);
+        this.loadAyah(edition.slug, surahId, ayahNumber);
       });
   }
 
-  protected loadAyah(slug: string, suraId: number, ayahNumber: number): void {
+  protected loadAyah(slug: string, surahId: number, ayahNumber: number): void {
     this.loading.set(true);
     this.errorState.set(false);
     this.notFound.set(false);
 
     if (
-      !Number.isInteger(suraId) ||
-      suraId < 1 ||
-      suraId > 114 ||
+      !Number.isInteger(surahId) ||
+      surahId < 1 ||
+      surahId > 114 ||
       !Number.isInteger(ayahNumber) ||
       ayahNumber < 1
     ) {
@@ -87,9 +87,9 @@ export class AyahFocusPage implements OnInit {
     }
 
     combineLatest([
-      this.svgService.getSurahMeta(slug, suraId),
-      this.svgService.getSurahPageRange(slug, suraId),
-      this.svgService.resolvePage(slug, suraId, ayahNumber),
+      this.svgService.getSurahMeta(slug, surahId),
+      this.svgService.getSurahPageRange(slug, surahId),
+      this.svgService.resolvePage(slug, surahId, ayahNumber),
     ])
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -113,7 +113,7 @@ export class AyahFocusPage implements OnInit {
   }
 
   protected retry(): void {
-    this.loadAyah(this.slug(), this.suraId(), this.ayahNumber());
+    this.loadAyah(this.slug(), this.surahId(), this.ayahNumber());
   }
 
   protected onAyahClick(ref: AyahRef): void {

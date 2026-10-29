@@ -3,8 +3,12 @@ import {
   buildBarOptions,
   buildDonutOptions,
   buildHourOfWeekOptions,
+  buildListenersOptions,
   buildTrendOptions,
   chartValue,
+  formatPeriod,
+  spikeIndexes,
+  timeLabelInterval,
 } from './usage-chart-options';
 
 interface Axis {
@@ -74,8 +78,51 @@ describe('usage-chart-options', () => {
     expect(options.xAxis.inverse).toBeTrue();
     expect(options.yAxis.position).toBe('right');
     expect(options.legend?.right).toBeDefined();
-    expect(options.series.map((s) => s.name)).toEqual(['SA', 'Previous period']);
+    expect(options.series.map((s) => s.name)).toEqual([
+      'SA',
+      'Previous period (Sep 29, 2026 – Sep 30, 2026)',
+    ]);
     expect(options.series[1].data).toEqual([2, 4]);
+  });
+
+  it('buildTrendOptions shows each comparison point with its own date and escapes names', () => {
+    const options = buildTrendOptions(
+      [{ key: '1', label: '<b>A</b>', points: [{ t: '2026-10-01', value: 5 }] }],
+      {
+        rtl: false,
+        lang: 'en',
+        labels,
+        previous: [
+          { t: '2025-10-01', value: 3 },
+          { t: '2025-10-02', value: 9 },
+        ],
+      }
+    ) as {
+      series: { data: unknown[] }[];
+      tooltip: { formatter: (params: unknown[]) => string };
+    };
+    expect(options.series[1].data).toEqual([3]); // aligned to the current buckets
+
+    const html = options.tooltip.formatter([
+      {
+        marker: '•',
+        seriesName: '<b>A</b>',
+        seriesIndex: 0,
+        dataIndex: 0,
+        value: 5,
+        axisValueLabel: 'Oct 1',
+      },
+      {
+        marker: '•',
+        seriesName: 'x',
+        seriesIndex: 1,
+        dataIndex: 0,
+        value: 3,
+        axisValueLabel: 'Oct 1',
+      },
+    ]);
+    expect(html).toContain('&lt;b&gt;A&lt;/b&gt;');
+    expect(html).toContain('Previous period · Oct 1, 2025');
   });
 
   it('buildTrendOptions uses the label when present and Unknown for empty keys', () => {
@@ -197,5 +244,109 @@ describe('usage-chart-options', () => {
   it('chartValue turns privacy-floor strings into 0', () => {
     expect(chartValue('<3')).toBe(0);
     expect(chartValue(4)).toBe(4);
+  });
+
+  describe('recitation reports', () => {
+    it('spikeIndexes flags values at least 3x the median of the previous 7 points', () => {
+      expect(spikeIndexes([2, 2, 2, 2, 2, 2, 2, 6, 5, 2])).toEqual([7]);
+      expect(spikeIndexes([0, 0, 0, 0, 0, 0, 0, 9])).toEqual([]);
+      expect(spikeIndexes([1, 1, 1])).toEqual([]);
+    });
+
+    it('spikeIndexes leaves missing buckets out of the baseline', () => {
+      // Median of 10, 10, 100, 100 is 55: 150 is below 3x and must not be flagged.
+      expect(spikeIndexes([null, null, null, 10, 10, 100, 100, 150])).toEqual([]);
+      expect(spikeIndexes([null, null, null, null, null, null, null, 5])).toEqual([]);
+    });
+
+    it('buildTrendOptions marks spikes on an unsplit series only', () => {
+      const points = [1, 1, 1, 1, 1, 1, 1, 10].map((value, day) => ({
+        t: `2026-10-${String(day + 1).padStart(2, '0')}`,
+        value,
+      }));
+      const labels = { other: 'Other', unknown: '?', previous: 'Prev', spike: 'Spike' };
+      const single = buildTrendOptions([{ key: 'all', label: null, points }], {
+        rtl: false,
+        labels,
+        spikes: true,
+      }) as { series: { markPoint?: { data: { coord: number[] }[] } }[] };
+      expect(single.series[0].markPoint?.data).toEqual([{ coord: [7, 10] }]);
+      const split = buildTrendOptions(
+        [
+          { key: 'a', label: 'A', points },
+          { key: 'b', label: 'B', points },
+        ],
+        { rtl: false, labels, spikes: true }
+      ) as { series: { markPoint?: unknown }[] };
+      expect(split.series[0].markPoint).toBeUndefined();
+    });
+
+    it('bar charts use compact value ticks', () => {
+      const options = buildBarOptions([{ name: 'A', value: 8000 }], { rtl: false, lang: 'en' }) as {
+        xAxis: { axisLabel: { formatter: (value: number) => string } };
+      };
+      expect(options.xAxis.axisLabel.formatter(8000)).toBe('8K');
+    });
+
+    it('date axes use an explicit label interval (auto collapses reversed RTL axes)', () => {
+      expect(timeLabelInterval(7)).toBe(0);
+      expect(timeLabelInterval(90)).toBe(11);
+      const points = Array.from({ length: 90 }, (_, day) => ({ t: '2026-07-25', value: day }));
+      const options = buildTrendOptions([{ key: 'all', label: null, points }], {
+        rtl: true,
+        labels: { other: 'o', unknown: 'u', previous: 'p' },
+      }) as { xAxis: { axisLabel: { interval: number } } };
+      expect(options.xAxis.axisLabel.interval).toBe(11);
+    });
+
+    it('formatPeriod labels a day in the Hijri calendar when asked', () => {
+      expect(formatPeriod('2026-03-01', 'en', true)).toContain('1447');
+      expect(formatPeriod('2026-03-01', 'en')).toContain('2026');
+    });
+
+    it('buildListenersOptions stacks new and returning listeners and adds the cumulative line', () => {
+      const options = buildListenersOptions(
+        [
+          { t: '2026-10-12', new: 2, returning: 1, cumulative: 5 },
+          { t: '2026-10-13', new: 1, returning: 3, cumulative: 6 },
+        ],
+        {
+          rtl: true,
+          lang: 'en',
+          labels: { new: 'New', returning: 'Back', cumulative: 'All' },
+          activeLabel: ({ total, new: fresh, returning }) =>
+            `Active ${total} = ${fresh} + ${returning}`,
+        }
+      ) as {
+        series: { name: string; stack?: string; yAxisIndex?: number; data: number[] }[];
+        xAxis: { inverse: boolean };
+        tooltip: { formatter: (params: unknown[]) => string };
+      };
+      expect(options.series.map((item) => item.name)).toEqual(['New', 'Back', 'All']);
+      expect(options.series[0].stack).toBe('active');
+      expect(options.series[1].data).toEqual([1, 3]);
+      expect(options.series[2].yAxisIndex).toBe(1);
+      expect(options.xAxis.inverse).toBeTrue();
+      // The tooltip sums the bars and shows the running total separately.
+      const html = options.tooltip.formatter([
+        {
+          marker: '',
+          seriesName: 'New',
+          seriesIndex: 0,
+          dataIndex: 1,
+          value: 1,
+          axisValueLabel: 'Oct 13',
+        },
+        {
+          marker: '•',
+          seriesName: 'All',
+          seriesIndex: 2,
+          dataIndex: 1,
+          value: 6,
+          axisValueLabel: 'Oct 13',
+        },
+      ]);
+      expect(html).toBe('Oct 13<br/>Active 4 = 1 + 3<br/>•All: <b>6</b>');
+    });
   });
 });

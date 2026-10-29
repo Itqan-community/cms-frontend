@@ -25,7 +25,7 @@ import {
   MemberFiltersComponent,
   MemberFiltersPayload,
 } from '../member-filters/member-filters.component';
-import { GroupListOut } from '../../models/groups.models';
+import { GroupListOut, groupNameOrdering } from '../../models/groups.models';
 import { MemberOut, MemberStatus, MemberUiFilters } from '../../models/members.models';
 import { GroupsService } from '../../services/groups.service';
 import { MembersService } from '../../services/members.service';
@@ -371,7 +371,7 @@ export class MembersListComponent extends AdminListBase<MemberOut, MemberUiFilte
   }
 
   canManageRow(member: MemberOut): boolean {
-    if (this.adminAuth.isItqanAdmin()) {
+    if (this.adminAuth.isStaff()) {
       return true;
     }
     const currentEmail = this.adminAuth.currentUser()?.email?.toLowerCase();
@@ -399,33 +399,35 @@ export class MembersListComponent extends AdminListBase<MemberOut, MemberUiFilte
   private loadGroupsForModal(selectedGroupId?: number): void {
     this.groupsLoading.set(true);
     this.groupsLoadFailed.set(false);
-    this.groupsService.list({ page: 1, page_size: 100, ordering: 'name' }).subscribe({
-      next: (res) => {
-        this.groupOptions.set(res.results);
-        this.groupsLoading.set(false);
+    this.groupsService
+      .list({ page: 1, page_size: 100, ordering: groupNameOrdering(this.translate.currentLang) })
+      .subscribe({
+        next: (res) => {
+          this.groupOptions.set(res.results);
+          this.groupsLoading.set(false);
 
-        if (selectedGroupId != null) {
-          const matched = res.results.some((g) => g.id === selectedGroupId);
-          if (matched) {
-            this.memberForm.controls.group_id.setValue(selectedGroupId);
-          } else {
-            this.memberForm.controls.group_id.setValue(null);
-            this.memberForm.controls.group_id.markAsTouched();
+          if (selectedGroupId != null) {
+            const matched = res.results.some((g) => g.id === selectedGroupId);
+            if (matched) {
+              this.memberForm.controls.group_id.setValue(selectedGroupId);
+            } else {
+              this.memberForm.controls.group_id.setValue(null);
+              this.memberForm.controls.group_id.markAsTouched();
+            }
+            return;
           }
-          return;
-        }
 
-        if (this.isInviteMode && res.results.length > 0) {
-          this.memberForm.controls.group_id.setValue(res.results[0].id);
-        }
-      },
-      error: () => {
-        this.groupOptions.set([]);
-        this.groupsLoading.set(false);
-        this.groupsLoadFailed.set(true);
-        this.message.error(this.translate.instant('ADMIN.MEMBERS.MESSAGES.GROUPS_LOAD_ERROR'));
-      },
-    });
+          if (this.isInviteMode && res.results.length > 0) {
+            this.memberForm.controls.group_id.setValue(res.results[0].id);
+          }
+        },
+        error: () => {
+          this.groupOptions.set([]);
+          this.groupsLoading.set(false);
+          this.groupsLoadFailed.set(true);
+          this.message.error(this.translate.instant('ADMIN.MEMBERS.MESSAGES.GROUPS_LOAD_ERROR'));
+        },
+      });
   }
 
   private resolveGroupName(groupId: number | null): string | null {

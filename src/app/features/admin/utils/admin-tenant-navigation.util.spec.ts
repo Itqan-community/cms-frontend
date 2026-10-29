@@ -2,6 +2,8 @@ import {
   buildSelectedPublisherDetailCommands,
   resolvePublisherDetailRecoveryId,
   resolveUrlAfterTenantChange,
+  consumeTenantSwitch,
+  rememberTenantSwitch,
 } from './admin-tenant-navigation.util';
 
 describe('resolveUrlAfterTenantChange', () => {
@@ -38,6 +40,32 @@ describe('resolveUrlAfterTenantChange', () => {
   it('does not redirect when the route already matches the selected publisher', () => {
     expect(resolveUrlAfterTenantChange('/admin/publishers/456', 456)).toBe('/admin/publishers/456');
   });
+
+  it('redirects an asset detail to its section list', () => {
+    expect(resolveUrlAfterTenantChange('/admin/mushafs/hafs-mushaf', 456)).toBe('/admin/mushafs');
+  });
+
+  it('redirects nested asset routes to their section list', () => {
+    expect(resolveUrlAfterTenantChange('/admin/tafsirs/ibn-kathir/versions/7?tab=diff', 456)).toBe(
+      '/admin/tafsirs'
+    );
+    expect(resolveUrlAfterTenantChange('/admin/recitations/husary/edit', 456)).toBe(
+      '/admin/recitations'
+    );
+    expect(resolveUrlAfterTenantChange('/admin/audio/timestamps/12', 456)).toBe('/admin/audio');
+  });
+
+  it('keeps section create routes unchanged', () => {
+    expect(resolveUrlAfterTenantChange('/admin/reciters/create', 456)).toBe(
+      '/admin/reciters/create'
+    );
+  });
+
+  it('keeps software tabs unchanged', () => {
+    expect(resolveUrlAfterTenantChange('/admin/software/backend', 456)).toBe(
+      '/admin/software/backend'
+    );
+  });
 });
 
 describe('buildSelectedPublisherDetailCommands', () => {
@@ -65,5 +93,20 @@ describe('resolvePublisherDetailRecoveryId', () => {
 
   it('returns null when there is no valid recovery target', () => {
     expect(resolvePublisherDetailRecoveryId(999, null, [123, 456])).toBeNull();
+  });
+
+  describe('tenant switch marker', () => {
+    beforeEach(() => sessionStorage.clear());
+
+    it('is consumed once after a switch', () => {
+      rememberTenantSwitch();
+
+      expect(consumeTenantSwitch()).toBeTrue();
+      expect(consumeTenantSwitch()).toBeFalse();
+    });
+
+    it('is absent without a switch', () => {
+      expect(consumeTenantSwitch()).toBeFalse();
+    });
   });
 });

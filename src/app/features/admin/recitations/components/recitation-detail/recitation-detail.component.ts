@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -26,6 +26,7 @@ import { AdminTablePaginationComponent } from '../../../components/admin-table-p
 import { NzProgressModule } from 'ng-zorro-antd/progress';
 import { NzRadioModule } from 'ng-zorro-antd/radio';
 import { NzSelectModule } from 'ng-zorro-antd/select';
+import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
@@ -46,7 +47,10 @@ import type {
 } from '../../models/recitation-tracks.models';
 import type { RecitationTimingUploadOut } from '../../models/recitation-timings.models';
 import { MaddLevel, MeemBehavior, RecitationDetails } from '../../models/recitations.models';
-import { RecitationTracksUploadOrchestratorService } from '../../services/recitation-tracks-upload.orchestrator';
+import {
+  RECITATION_TRACKS_CONCURRENCY_OPTIONS,
+  RecitationTracksUploadOrchestratorService,
+} from '../../services/recitation-tracks-upload.orchestrator';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import { RecitationsService } from '../../services/recitations.service';
@@ -90,7 +94,9 @@ const MAX_MP3_FILES = 114;
     NzAlertModule,
     NzFormModule,
     NzSelectModule,
+    NzToolTipModule,
     NzRadioModule,
+    FormsModule,
     ReactiveFormsModule,
     FolderSwitcherComponent,
   ],
@@ -108,6 +114,9 @@ export class RecitationDetailComponent implements OnInit {
   private readonly adminAuth = inject(AdminAuthService);
   private readonly ga = inject(GoogleAnalyticsService);
   private readonly fb = inject(FormBuilder);
+
+  readonly uploadConcurrencyOptions = RECITATION_TRACKS_CONCURRENCY_OPTIONS;
+  readonly uploadConcurrency = this.uploadOrchestrator.fileConcurrency;
 
   readonly canUpdateRecitation = computed(() =>
     this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_UPDATE_RECITATION)
@@ -688,7 +697,7 @@ export class RecitationDetailComponent implements OnInit {
                 this.translate
               )
             );
-            return Promise.reject(err);
+            return false;
           }),
     });
   }
@@ -740,7 +749,7 @@ export class RecitationDetailComponent implements OnInit {
                 this.translate
               )
             );
-            return Promise.reject(err);
+            return false;
           }),
     });
   }
@@ -1076,6 +1085,11 @@ export class RecitationDetailComponent implements OnInit {
     }
   }
 
+  /** Applies the chosen "Files at a time" limit; the orchestrator validates and saves it. */
+  onUploadConcurrencyChange(value: number): void {
+    this.uploadOrchestrator.setFileConcurrency(value);
+  }
+
   /** Prompts, then stops every in-flight / queued upload. */
   confirmAbortAllUploads(): void {
     if (!this.hasInFlightUploadRows()) return;
@@ -1185,7 +1199,7 @@ export class RecitationDetailComponent implements OnInit {
       nzCancelText: this.translate.instant('ADMIN.RECITATIONS.TRACKS.DELETE.CANCEL'),
       nzDirection: this.translate.currentLang === 'ar' ? 'rtl' : 'ltr',
       nzOnOk: () =>
-        new Promise<void>((resolve, reject) => {
+        new Promise<false | void>((resolve) => {
           this.recitationsService
             .recitationTracksDelete({ asset_id: rec.id, track_ids: [track.id] })
             .subscribe({
@@ -1201,7 +1215,7 @@ export class RecitationDetailComponent implements OnInit {
                 this.message.error(
                   this.translate.instant('ADMIN.RECITATIONS.TRACKS.MESSAGES.DELETE_ERROR')
                 );
-                reject();
+                resolve(false);
               },
             });
         }),
