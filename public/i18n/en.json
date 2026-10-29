@@ -2805,6 +2805,7 @@
         "AYAH": "Ayah {{number}}",
         "EMPTY_TITLE": "No timestamps yet",
         "EMPTY_SUBTITLE": "Upload a timing file for this recitation, then reopen this editor.",
+        "LOAD_WAVEFORM_ANYWAY": "Load waveform anyway",
         "LEAVE": {
           "TITLE": "Leave without saving?",
           "CONTENT": "Your timestamp changes will be lost.",
@@ -2816,7 +2817,7 @@
           "TRACK_NOT_FOUND": "This audio track could not be found in the recitation.",
           "TRACK_LOAD_FAILED": "Could not load the audio track.",
           "TIMESTAMPS_LOAD_FAILED": "Could not load the ayah timestamps. The audio still plays.",
-          "TRACK_TOO_LONG": "This track is too long to draw a waveform for. Boundaries are still editable.",
+          "TRACK_TOO_LONG": "This track is long, so its waveform is not drawn by default. Loading it downloads the whole file and can take a while. Boundaries are still editable.",
           "WAVEFORM_FAILED": "The waveform could not be drawn. Boundaries are still editable."
         },
         "MESSAGES": {

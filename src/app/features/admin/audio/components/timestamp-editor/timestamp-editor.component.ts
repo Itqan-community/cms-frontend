@@ -128,6 +128,8 @@ export class TimestampEditorComponent implements OnInit {
   readonly peaksLoading = signal(false);
   /** Non-fatal: markers stay editable on a flat timeline when the trace cannot be drawn. */
   readonly peaksError = signal<string | null>(null);
+  /** Over `LARGE_TRACK_MS` the decode is skipped unless the user asks for it. */
+  readonly peaksTooLong = signal(false);
   readonly view = signal<WaveformView>({ startMs: 0, endMs: 1_000 });
 
   readonly loading = signal(true);
@@ -243,15 +245,18 @@ export class TimestampEditorComponent implements OnInit {
    * Decodes the audio into drawable peaks. Failure is non-fatal by design — a missing
    * cross-origin header or an over-long track costs the trace, not the editing session.
    */
-  private async loadPeaks(): Promise<void> {
+  private async loadPeaks(force = false): Promise<void> {
     const url = this.track()?.audio_url;
     if (!url) return;
 
-    if (this.durationMs() > LARGE_TRACK_MS) {
+    if (!force && this.durationMs() > LARGE_TRACK_MS) {
+      this.peaksTooLong.set(true);
       this.peaksError.set(this.translate.instant('ADMIN.AUDIO.TIMESTAMPS.ERRORS.TRACK_TOO_LONG'));
       return;
     }
 
+    this.peaksTooLong.set(false);
+    this.peaksError.set(null);
     this.peaksAbort = new AbortController();
     this.peaksLoading.set(true);
 
@@ -267,6 +272,11 @@ export class TimestampEditorComponent implements OnInit {
     } finally {
       this.peaksLoading.set(false);
     }
+  }
+
+  /** Opt-in past the length cap: the decode can take a while and a lot of memory on a long surah. */
+  loadWaveformAnyway(): void {
+    void this.loadPeaks(true);
   }
 
   /**

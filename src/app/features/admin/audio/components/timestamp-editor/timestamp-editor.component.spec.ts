@@ -64,7 +64,12 @@ describe('TimestampEditorComponent', () => {
   /** Query params decide whether the page has enough context to load anything. */
   async function setup(
     queryParams: Record<string, string>,
-    options: { failTimestamps?: boolean; trackMissing?: boolean; noDuration?: boolean } = {}
+    options: {
+      failTimestamps?: boolean;
+      trackMissing?: boolean;
+      noDuration?: boolean;
+      longTrack?: boolean;
+    } = {}
   ): Promise<void> {
     recitations = jasmine.createSpyObj<RecitationsService>('RecitationsService', [
       'recitationTracksList',
@@ -77,7 +82,11 @@ describe('TimestampEditorComponent', () => {
     ]);
     modal = jasmine.createSpyObj<NzModalService>('NzModalService', ['confirm']);
 
-    const track = options.noDuration ? { ...TRACK, duration_ms: null } : TRACK;
+    const track = options.noDuration
+      ? { ...TRACK, duration_ms: null }
+      : options.longTrack
+        ? { ...TRACK, duration_ms: 90 * 60 * 1_000 }
+        : TRACK;
     recitations.recitationTracksList.and.returnValue(
       of(options.trackMissing ? { results: [], count: 0 } : { results: [track], count: 1 })
     );
@@ -269,6 +278,29 @@ describe('TimestampEditorComponent', () => {
 
       expect(component.durationMs()).toBe(60_000);
       expect(component.canMoveMarkers()).toBeTrue();
+    });
+  });
+
+  describe('a track over the waveform length cap', () => {
+    let fetchSpy: jasmine.Spy;
+
+    beforeEach(async () => {
+      fetchSpy = spyOn(window, 'fetch').and.returnValue(new Promise<Response>(() => undefined));
+      await setup({ recitation: 'sample-recitation' }, { longTrack: true });
+    });
+
+    it('does not download the audio until asked', () => {
+      expect(component.peaksTooLong()).toBeTrue();
+      expect(fetchSpy).not.toHaveBeenCalled();
+    });
+
+    it('decodes the waveform once the user opts in', () => {
+      component.loadWaveformAnyway();
+
+      expect(fetchSpy).toHaveBeenCalledWith(TRACK.audio_url, jasmine.any(Object));
+      expect(component.peaksTooLong()).toBeFalse();
+      expect(component.peaksError()).toBeNull();
+      expect(component.peaksLoading()).toBeTrue();
     });
   });
 

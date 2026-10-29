@@ -125,7 +125,8 @@ GB** of PCM in a browser tab, so `waveform-peaks.util.ts`:
 2. Buckets peaks at `PEAKS_RESOLUTION_PER_SECOND` (100/sec, ~5.8 MB for two hours).
 3. **Releases the `AudioBuffer` immediately.** Zoom re-buckets from the cached peaks and never
    decodes again.
-4. Refuses tracks over `LARGE_TRACK_MS` (40 min), showing a marker-only timeline instead.
+4. Skips tracks over `LARGE_TRACK_MS` (40 min), showing a marker-only timeline and a "Load waveform
+   anyway" button that decodes on request.
 
 Playback never goes through any of this — it uses a plain `HTMLAudioElement`, which streams.
 
@@ -266,7 +267,7 @@ tint, and labels positioned by padding instead of centred.
 | `MIN_VIEW_MS`             | 200                  | Tightest zoom                                       |
 | `MARKER_HIT_TOLERANCE_PX` | 8                    | Grab radius, matched to stem width                  |
 | `DECODE_SAMPLE_RATE`      | 8000                 | Mono; finer detail is invisible at any zoom offered |
-| `LARGE_TRACK_MS`          | 40 min               | Above this, no waveform is attempted                |
+| `LARGE_TRACK_MS`          | 40 min               | Above this, the waveform waits for an opt-in        |
 
 ---
 
