@@ -74,6 +74,17 @@ execution authority.
 
 - Always refer back to `[SYSTEM_FLOW]`. Every line must serve only the required user journey.
 
+### Protocol E: Show the Backend's Error
+
+- When an API call fails, show the error the backend returned. Use
+  `resolveApiErrorMessage(err, { fallbackKey }, translate)`. Show a generic message (the
+  `fallbackKey`) only when the backend gave no specific message.
+- Show one message per failure. A caller that shows its own message for a request must send it with
+  `context: callerShowsErrors()` (`core/interceptors/caller-shows-errors.context.ts`). Otherwise the
+  global error interceptor shows a second toast.
+- An inline error (an alert in place of a list) shows the resolved backend message too, not a fixed
+  "check your connection" text.
+
 **Launch command:** Execute sequentially. Each step: (1. Execute → 2. Verify → 3. Update map). Do
 not stop until `[ORPHANS & PENDING]` is empty and the product is complete.
 

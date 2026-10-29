@@ -141,4 +141,43 @@ describe('AdminTenantService', () => {
 
     expect(httpMock.match(`${adminApi}/publishers/me/`).length).toBe(2);
   });
+
+  it('refresh reloads publishers and keeps the selected publisher', (done) => {
+    if (!adminApi) {
+      pending('ADMIN_API_BASE_URL');
+      done();
+      return;
+    }
+    const first = [
+      { id: 10, name: 'A', slug: 'a', icon_url: null, permissions: [] },
+      { id: 20, name: 'B', slug: 'b', icon_url: null, permissions: [] },
+    ];
+    service.ensureReady().subscribe(() => {
+      service.setSelectedPublisherId(20);
+      service.refresh().subscribe(() => {
+        expect(service.selectedPublisherId()).toBe(20);
+        expect(service.publishers()[1].permissions).toEqual(['portal_read_group']);
+        done();
+      });
+      httpMock
+        .expectOne(`${adminApi}/publishers/me/`)
+        .flush([first[0], { ...first[1], permissions: ['portal_read_group'] }]);
+    });
+    httpMock.expectOne(`${adminApi}/publishers/me/`).flush(first);
+  });
+
+  it('refresh ignores a response that arrives after the user changed', () => {
+    service.ensureReady().subscribe();
+    httpMock
+      .expectOne(`${adminApi}/publishers/me/`)
+      .flush([{ id: 10, name: 'A', slug: 'a', icon_url: null, permissions: [] }]);
+
+    service.refresh().subscribe();
+    const pending = httpMock.expectOne(`${adminApi}/publishers/me/`);
+    currentUser.set({ id: 'u2' });
+    pending.flush([{ id: 30, name: 'C', slug: 'c', icon_url: null, permissions: ['old'] }]);
+
+    expect(service.publishers()).toEqual([]);
+    expect(service.selectedPublisherId()).toBe(10);
+  });
 });
