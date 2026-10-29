@@ -158,8 +158,10 @@
             @for (permission of group.permissions; track permission.code_name) {
               <li>
                 <!-- Included by another selection: ticked and locked, with the reason on hover. -->
-                <span
+                <label
                   nz-checkbox
+                  [nzId]="'role-permission-' + permission.code_name"
+                  [for]="'role-permission-' + permission.code_name"
                   [nzChecked]="isSelected(permission.code_name)"
                   [nzDisabled]="!canUpdate() || isLocked(permission.code_name)"
                   [nz-tooltip]="
@@ -168,7 +170,7 @@
                   (nzCheckedChange)="togglePermission(permission.code_name, $event)"
                 >
                   {{ permission.name }}
-                </span>
+                </label>
               </li>
             }
           </ul>

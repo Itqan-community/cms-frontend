@@ -7,9 +7,13 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ModalOptions, NzModalService } from 'ng-zorro-antd/modal';
 import { HttpErrorResponse } from '@angular/common/http';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { of, throwError } from 'rxjs';
+import { of, Subject, throwError } from 'rxjs';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
-import { GroupDetailOut, GroupListOut } from '../../../members/models/groups.models';
+import {
+  GroupDetailOut,
+  GroupListOut,
+  PagedGroupListOut,
+} from '../../../members/models/groups.models';
 import { GroupsService } from '../../../members/services/groups.service';
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import { AdminTenantService } from '../../../services/admin-tenant.service';
@@ -293,5 +297,52 @@ describe('RolesListComponent', () => {
 
     expect(groups.list).toHaveBeenCalledWith(jasmine.objectContaining({ ordering: 'name_ar' }));
     expect(groups.listPermissions).toHaveBeenCalled();
+  });
+  it('ignores the previous publisher’s roles when they arrive after a switch', () => {
+    setup([PORTAL_PERMISSIONS.PORTAL_READ_GROUP]);
+    const stale = new Subject<PagedGroupListOut>();
+    const fresh = new Subject<PagedGroupListOut>();
+    groups.list.and.returnValues(stale, fresh);
+    component.load();
+    tenant.selectedPublisherId.set(4);
+    fixture.detectChanges();
+
+    fresh.next({ results: [{ ...EDITORS, id: 9, name: 'المراجعون' }], count: 1 });
+    fresh.complete();
+    stale.next({ results: [EDITORS], count: 1 });
+    stale.complete();
+
+    expect(component.roles().map((r) => r.id)).toEqual([9]);
+  });
+
+  it('does not reopen a role the user closed while it was loading', () => {
+    setup([PORTAL_PERMISSIONS.PORTAL_READ_GROUP]);
+    const detail = new Subject<GroupDetailOut>();
+    groups.get.and.returnValue(detail);
+    component.openEditor(EDITORS);
+    component.closeEditor();
+
+    detail.next(EDITORS_DETAIL);
+
+    expect(component.editing()).toBeNull();
+    expect(component.editorLoading()).toBeFalse();
+  });
+
+  it('lists the permissions that include a locked one with the UI language’s comma', () => {
+    setup([PORTAL_PERMISSIONS.PORTAL_READ_GROUP]);
+    const translate = TestBed.inject(TranslateService);
+    spyOn(translate, 'instant').and.callFake(
+      (_key: string | string[], params?: object) => (params as { names: string }).names
+    );
+    component.explicit.set(['portal_create_reciter', 'portal_update_reciter']);
+
+    translate.use('en');
+    expect(component.includedBy('portal_read_reciter')).toBe(
+      'لوحة التحكم - إنشاء قراء, لوحة التحكم - تحديث القراء'
+    );
+    translate.use('ar');
+    expect(component.includedBy('portal_read_reciter')).toBe(
+      'لوحة التحكم - إنشاء قراء، لوحة التحكم - تحديث القراء'
+    );
   });
 });

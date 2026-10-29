@@ -17,7 +17,7 @@ import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTableModule } from 'ng-zorro-antd/table';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
-import { concatMap, forkJoin, Observable, of } from 'rxjs';
+import { concatMap, forkJoin, Observable, of, Subscription } from 'rxjs';
 import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
 import { AdminTitleCountComponent } from '../../../components/admin-title-count/admin-title-count.component';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
@@ -117,6 +117,11 @@ export class RolesListComponent {
   readonly editForm = this.namesForm();
   readonly deletingId = signal<number | null>(null);
 
+  // A newer load or editor fetch cancels the older one, so a late response (e.g. the previous
+  // publisher's roles after a switch) never overwrites the current one.
+  private loadSub?: Subscription;
+  private editorSub?: Subscription;
+
   constructor() {
     // Reload whenever the publisher changes; language changes are handled below.
     effect(() => {
@@ -138,7 +143,8 @@ export class RolesListComponent {
   load(): void {
     this.loading.set(true);
     this.loadError.set(null);
-    forkJoin({
+    this.loadSub?.unsubscribe();
+    this.loadSub = forkJoin({
       roles: this.groups.list({
         page: 1,
         page_size: 100,
@@ -200,7 +206,8 @@ export class RolesListComponent {
 
   openEditor(role: GroupListOut): void {
     this.editorLoading.set(true);
-    this.groups.get(role.id).subscribe({
+    this.editorSub?.unsubscribe();
+    this.editorSub = this.groups.get(role.id).subscribe({
       next: (detail) => {
         this.editorLoading.set(false);
         this.showDetail(detail);
@@ -213,6 +220,8 @@ export class RolesListComponent {
   }
 
   closeEditor(): void {
+    this.editorSub?.unsubscribe();
+    this.editorLoading.set(false);
     this.editing.set(null);
   }
 
@@ -230,7 +239,9 @@ export class RolesListComponent {
     const names = this.allPermissions()
       .filter((p) => this.explicit().includes(p.code_name) && p.implies.includes(code))
       .map((p) => p.name);
-    return this.translate.instant('ADMIN.ROLES.INCLUDED_BY', { names: names.join('، ') });
+    return this.translate.instant('ADMIN.ROLES.INCLUDED_BY', {
+      names: names.join(this.translate.currentLang === 'ar' ? '، ' : ', '),
+    });
   }
 
   selectedInGroup(group: PermissionGroupOut): number {
