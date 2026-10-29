@@ -428,7 +428,8 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   only searches the popup. The read-only `source_text` column opens the same popup with
   `readOnly: true` (always cancels) so its full text is readable. Ctrl+V on a focused cell reads the
   clipboard's spreadsheet HTML first, as Excel does (`parseClipboardHtml`: a `<br>` stays a line
-  break inside the cell), else the TSV/CSV text (`parseClipboardTable`)
+  break inside the cell), else the TSV/CSV text (`parseClipboardTable`; a quote opens a quoted value
+  only at the start of a cell)
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`
 - `search-panel/` — Search UI

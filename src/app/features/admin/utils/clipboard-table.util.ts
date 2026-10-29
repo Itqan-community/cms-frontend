@@ -2,7 +2,7 @@
  * Parse clipboard text copied from a spreadsheet or CSV file into a 2D grid of
  * strings. Handles both TSV (how Excel/Google Sheets put data on the clipboard)
  * and CSV, including RFC-4180 quoted fields that contain the delimiter, quotes
- * (escaped as ""), or embedded newlines.
+ * (escaped as ""), or embedded newlines. A quote later in a field is plain text.
  *
  * The delimiter is auto-detected from the first physical line: tab wins if any
  * tab is present, otherwise comma.
@@ -20,6 +20,9 @@ export function parseClipboardTable(text: string): string[][] {
   let row: string[] = [];
   let field = '';
   let inQuotes = false;
+  // Like Excel, only a quote that opens a field starts a quoted value; one later
+  // in the field is plain text.
+  let fieldStart = true;
 
   for (let i = 0; i < normalized.length; i++) {
     const ch = normalized[i];
@@ -38,18 +41,22 @@ export function parseClipboardTable(text: string): string[][] {
       continue;
     }
 
-    if (ch === '"') {
+    if (ch === '"' && fieldStart) {
       inQuotes = true;
+      fieldStart = false;
     } else if (ch === delimiter) {
       row.push(field);
       field = '';
+      fieldStart = true;
     } else if (ch === '\n') {
       row.push(field);
       rows.push(row);
       row = [];
       field = '';
+      fieldStart = true;
     } else {
       field += ch;
+      fieldStart = false;
     }
   }
 

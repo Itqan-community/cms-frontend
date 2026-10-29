@@ -43,6 +43,19 @@ describe('parseClipboardTable', () => {
     expect(table).toEqual([['1', 'say "hi"']]);
   });
 
+  it('keeps a quote in the middle of a cell as text, like Excel', () => {
+    const table = parseClipboardTable('He said "hello\nNext line');
+    expect(table).toEqual([['He said "hello'], ['Next line']]);
+  });
+
+  it('keeps paired quotes in the middle of a cell', () => {
+    const table = parseClipboardTable('a\tHe said "hello" to me\nb\tc');
+    expect(table).toEqual([
+      ['a', 'He said "hello" to me'],
+      ['b', 'c'],
+    ]);
+  });
+
   it('ignores a trailing newline (no blank final row)', () => {
     const table = parseClipboardTable('a,b\n');
     expect(table).toEqual([['a', 'b']]);
