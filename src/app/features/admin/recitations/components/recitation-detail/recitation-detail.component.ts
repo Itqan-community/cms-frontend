@@ -11,7 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { firstValueFrom } from 'rxjs';
+import { finalize, firstValueFrom } from 'rxjs';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
@@ -253,6 +253,8 @@ export class RecitationDetailComponent implements OnInit {
   readonly timingsFileInput = viewChild<ElementRef<HTMLInputElement>>('timingsFileInput');
   readonly timingsFiles = signal<File[]>([]);
   readonly timingsUploadLoading = signal(false);
+  /** Request-body upload progress (0..100) while `timingsUploadLoading` is true. */
+  readonly timingsUploadPercent = signal(0);
   /** Last successful POST /portal/timing/upload/ response — shown in banner (not toast). */
   readonly timingsUploadResult = signal<RecitationTimingUploadOut | null>(null);
 
@@ -812,9 +814,18 @@ export class RecitationDetailComponent implements OnInit {
     if (!rec || files.length === 0 || this.timingsUploadLoading()) return;
 
     this.timingsUploadLoading.set(true);
+    this.timingsUploadPercent.set(0);
     this.timingsUploadResult.set(null);
     this.recitationsService
-      .recitationTimingUpload(rec.id, files, this.selectedFolder()?.id)
+      .recitationTimingUpload(rec.id, files, this.selectedFolder()?.id, (fraction) =>
+        this.timingsUploadPercent.set(Math.min(100, Math.floor(fraction * 100)))
+      )
+      .pipe(
+        finalize(() => {
+          this.timingsUploadLoading.set(false);
+          this.timingsUploadPercent.set(0);
+        })
+      )
       .subscribe({
         next: (res: RecitationTimingUploadOut) => {
           this.timingsUploadResult.set(res);
@@ -844,7 +855,6 @@ export class RecitationDetailComponent implements OnInit {
             this.message.error(detail, { nzDuration: 12000 });
           }
         },
-        complete: () => this.timingsUploadLoading.set(false),
       });
   }
 

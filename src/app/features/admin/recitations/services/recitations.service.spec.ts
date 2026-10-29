@@ -1,3 +1,4 @@
+import { HttpEventType } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { RecitationsService } from './recitations.service';
@@ -303,6 +304,34 @@ describe('RecitationsService', () => {
     req.flush({
       asset_id: 42,
       folder_id: 9,
+      created_total: 1,
+      updated_total: 0,
+      skipped_total: 0,
+      missing_tracks: [],
+      file_errors: [],
+      synced_file_url: null,
+      synced_filename: '',
+    });
+  });
+  it('recitationTimingUpload should report upload progress as a 0..1 fraction', (done) => {
+    const file = new File(['{}'], '001.json', { type: 'application/json' });
+    const progress: number[] = [];
+    service
+      .recitationTimingUpload(42, [file], null, (fraction) => progress.push(fraction))
+      .subscribe((res) => {
+        expect(progress).toEqual([0.25, 1]);
+        expect(res.asset_id).toBe(42);
+        done();
+      });
+
+    const req = httpMock.expectOne((r) => r.url.includes('/portal/timing/upload/'));
+    expect(req.request.reportProgress).toBeTrue();
+    req.event({ type: HttpEventType.UploadProgress, loaded: 25, total: 100 });
+    req.event({ type: HttpEventType.UploadProgress, loaded: 50 });
+    req.event({ type: HttpEventType.UploadProgress, loaded: 100, total: 100 });
+    req.flush({
+      asset_id: 42,
+      folder_id: null,
       created_total: 1,
       updated_total: 0,
       skipped_total: 0,
