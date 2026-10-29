@@ -678,6 +678,17 @@ Release 1.17.0.
 
 ---
 
+## [1.18.0] - 2026-10-29
+
+Release 1.18.0.
+
+## Changes
+
+- fix(audio): hold the waveform decode until the track length is known
+- feat(audio): let long tracks load their waveform on request
+
+---
+
 ## [Unreleased]
 
 ### Added
