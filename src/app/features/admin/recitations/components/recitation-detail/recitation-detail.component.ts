@@ -11,7 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { firstValueFrom } from 'rxjs';
+import { finalize, firstValueFrom } from 'rxjs';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
@@ -815,6 +815,7 @@ export class RecitationDetailComponent implements OnInit {
     this.timingsUploadResult.set(null);
     this.recitationsService
       .recitationTimingUpload(rec.id, files, this.selectedFolder()?.id)
+      .pipe(finalize(() => this.timingsUploadLoading.set(false)))
       .subscribe({
         next: (res: RecitationTimingUploadOut) => {
           this.timingsUploadResult.set(res);
@@ -844,7 +845,6 @@ export class RecitationDetailComponent implements OnInit {
             this.message.error(detail, { nzDuration: 12000 });
           }
         },
-        complete: () => this.timingsUploadLoading.set(false),
       });
   }
 
