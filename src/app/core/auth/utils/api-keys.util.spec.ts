@@ -53,4 +53,24 @@ describe('api-keys.util', () => {
     expect(r.rawKey).toBe('t1');
     expect(r.key.id).toBe('b');
   });
+
+  it('parseApiKeysList reads the full key when the API returns it', () => {
+    const list = parseApiKeysList([{ id: '1', name: 'App', key: 'abcd1234.secretpart' }]);
+    expect(list[0]?.fullKey).toBe('abcd1234.secretpart');
+  });
+
+  it('parseApiKeysList ignores masked values in the key field', () => {
+    const list = parseApiKeysList([
+      { id: '1', name: 'App', key: 'abcd••••' },
+      { id: '2', name: 'App 2', key: 'abcd****' },
+    ]);
+    expect(list[0]?.fullKey).toBeUndefined();
+    expect(list[1]?.fullKey).toBeUndefined();
+  });
+
+  it('parseApiKeysList leaves fullKey unset when only a masked key is returned', () => {
+    const list = parseApiKeysList([{ id: '1', name: 'App', masked_key: 'abcd' }]);
+    expect(list[0]?.fullKey).toBeUndefined();
+    expect(list[0]?.maskedKey).toBe('abcd');
+  });
 });

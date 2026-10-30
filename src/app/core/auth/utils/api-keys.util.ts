@@ -47,8 +47,17 @@ function deriveRevoked(o: Record<string, unknown>): boolean {
   return false;
 }
 
+/** Characters that only appear in masked or truncated previews, never in a real key. */
+const MASK_CHARS = /[•*…]/;
+
+/** Full key from a list/detail row, ignoring masked previews. */
+function pickFullKey(o: Record<string, unknown>): string {
+  const value = pickStr(o, ['key', 'api_key', 'raw_key']);
+  return value && !MASK_CHARS.test(value) ? value : '';
+}
+
 /**
- * Normalize a single API key row from list/detail/create (without raw secret extraction).
+ * Normalize a single API key row from list/detail/create.
  */
 export function normalizeApiKeyRow(raw: unknown): ManagedApiKey | null {
   const o = asRecord(raw);
@@ -70,6 +79,7 @@ export function normalizeApiKeyRow(raw: unknown): ManagedApiKey | null {
 
   const createdAt = pickStr(o, ['created_at', 'created']) || undefined;
   const lastUsedAt = pickStr(o, ['last_used_at', 'last_used', 'last_seen_at']) || undefined;
+  const fullKey = pickFullKey(o) || undefined;
   const appSlug = pickStr(o, ['app_slug']) || undefined;
 
   return {
@@ -77,6 +87,7 @@ export function normalizeApiKeyRow(raw: unknown): ManagedApiKey | null {
     name,
     maskedKey,
     isRevoked,
+    ...(fullKey ? { fullKey } : {}),
     ...(createdAt ? { createdAt } : {}),
     ...(lastUsedAt ? { lastUsedAt } : {}),
     ...(appSlug ? { appSlug } : {}),
