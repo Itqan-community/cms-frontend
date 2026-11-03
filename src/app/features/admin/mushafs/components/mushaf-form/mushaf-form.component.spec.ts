@@ -213,6 +213,18 @@ describe('MushafFormComponent first version', () => {
       expect(resent.in_cli).toBeFalse();
     });
 
+    it('shows the error instead of asking again when the confirmed save still conflicts', () => {
+      submitConflicting();
+      mushafsServiceMock.create.and.returnValue(throwError(() => conflict));
+
+      (modalMock.confirm.calls.mostRecent().args[0]!.nzOnOk as () => void)();
+
+      expect(modalMock.confirm).toHaveBeenCalledTimes(1);
+      expect(TestBed.inject(NzMessageService).error).toHaveBeenCalledWith(
+        'Developers depend on this channel.'
+      );
+    });
+
     it('does not re-send when the admin cancels', () => {
       const component = submitConflicting();
 

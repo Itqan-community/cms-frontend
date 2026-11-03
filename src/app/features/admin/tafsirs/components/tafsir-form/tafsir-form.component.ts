@@ -250,7 +250,8 @@ export class TafsirFormComponent implements OnInit {
       },
       error: (error) => {
         this.submitting.set(false);
-        const conflict = getChannelConsumersConflict(error);
+        // Ask once: a confirmed save that still conflicts shows the backend's message.
+        const conflict = confirmed ? null : getChannelConsumersConflict(error);
         if (conflict) {
           confirmChannelChange(this.modal, this.translate, conflict, () => this.save(body, true));
           return;
