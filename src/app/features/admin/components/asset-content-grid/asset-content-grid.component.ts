@@ -1653,7 +1653,8 @@ export class AssetContentGridComponent implements OnInit {
    * Every filter runs on the server over the whole asset (see
    * `buildDatasource`): text columns get the text filter, `surah` / `ayah` the
    * number filter, and the unit column a dropdown of surah names (column id
-   * `unit_surah`, a number filter on the surah) wherever units belong to a surah.
+   * `unit_surah`, a number filter on the surah) wherever units belong to a surah,
+   * or a page-number filter (column id `unit_page`) for the page template.
    */
   buildColumnDefs(): ColDef<ContentEntry>[] {
     const template = this.effectiveTemplate();
@@ -1718,7 +1719,14 @@ export class AssetContentGridComponent implements OnInit {
               suppressHeaderFilterButton: true,
               suppressFloatingFilterButton: true,
             }
-          : {}),
+          : {
+              // Filters the page number, not the "Page 42" label text: the backend
+              // reads the `unit_page` filter-model key as a page-number filter.
+              colId: 'unit_page',
+              filter: 'agNumberColumnFilter',
+              filterParams: NUMBER_FILTER_PARAMS,
+              floatingFilter: true,
+            }),
       },
     ];
 
