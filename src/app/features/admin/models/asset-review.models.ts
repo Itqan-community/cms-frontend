@@ -10,6 +10,9 @@ export interface ReviewChange {
   unit_id: number;
   /** Display reference, e.g. "2. Al-Baqara", "2:255", "2:255:4", "Page 42". */
   label: string;
+  /** The unit's surah and ayah-in-surah numbers (a range by its start); null for a page. */
+  surah: number | null;
+  ayah: number | null;
   /** The text column of the changed cell, with its display labels. */
   column: string;
   column_label_en: string;
@@ -41,13 +44,19 @@ export interface ReviewVersion {
   created_at: string;
 }
 
+/** The review grid's AG Grid filter model, sent to the backend as-is. Keys are the
+ *  grid's column ids: `unit_surah`, `ayah`, `text`, `change_type`, `column`,
+ *  `commit_ref`, `edited_by`, `reviewed_by`, `comment`. */
+export type ReviewFilterModel = Record<string, unknown>;
+
 /** Bulk approve: the given changes, or — without `change_ids` — every change
- *  matching the state/version filter across all pages. */
+ *  matching the state/version/column filters across all pages. */
 export interface BulkApproveRequest {
   language: string;
   change_ids?: number[];
   state?: Exclude<ReviewState, 'approved'>;
   version?: number;
+  filters?: ReviewFilterModel;
 }
 
 export interface BulkApproveResponse {

@@ -62,6 +62,8 @@ describe('AssetReviewService', () => {
             unit_type: 'ayah',
             unit_id: 1,
             label: '1:1',
+            surah: 1,
+            ayah: 1,
             column: 'text',
             column_label_en: '',
             column_label_ar: '',
@@ -116,6 +118,19 @@ describe('AssetReviewService', () => {
       expect(req.request.method).toBe('GET');
       req.flush({ count: 0, results: [] });
     });
+
+    it('sends the grid filter model as JSON, and nothing for an empty one', () => {
+      const model = { ayah: { filterType: 'number', type: 'equals', filter: 3 } };
+
+      service.listChanges('translation', 'en-sahih', 'en', 1, 25, null, null, model).subscribe();
+      service.listChanges('translation', 'en-sahih', 'en', 1, 25, null, null, {}).subscribe();
+
+      const [filtered, empty] = httpMock.match((r) => r.url.endsWith('/review/changes/'));
+      expect(filtered.request.params.get('filters')).toBe(JSON.stringify(model));
+      expect(empty.request.params.has('filters')).toBeFalse();
+      filtered.flush({ count: 0, results: [] });
+      empty.flush({ count: 0, results: [] });
+    });
   });
 
   describe('setState', () => {
@@ -125,6 +140,8 @@ describe('AssetReviewService', () => {
         unit_type: 'ayah',
         unit_id: 262,
         label: '2:255',
+        surah: 2,
+        ayah: 255,
         column: 'text',
         column_label_en: '',
         column_label_ar: '',

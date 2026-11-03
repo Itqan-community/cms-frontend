@@ -1161,7 +1161,10 @@
         "COMMIT": "Commit",
         "EDITOR": "Editor",
         "STATE": "Review",
-        "ACTIONS": "Actions"
+        "ACTIONS": "Actions",
+        "AYAH": "Ayah",
+        "COLUMN": "Column",
+        "COMMENT": "Comment"
       },
       "FULL_TEXT_DIALOG": {
         "TITLE": "Full text — {{label}}",
@@ -1184,7 +1187,9 @@
         "CHANGE_NOT_FOUND": "Some of the selected changes no longer exist. Reload and try again.",
         "VERSION_NOT_FOUND": "That version no longer exists. Reload and try again.",
         "GENERIC": "Something went wrong. Please try again."
-      }
+      },
+      "REVIEWER_FILTER": "Reviewer…",
+      "CLEAR_FILTERS": "Clear column filters"
     },
     "ASSET_TEMPLATE": {
       "SURAH": "Surah based",
