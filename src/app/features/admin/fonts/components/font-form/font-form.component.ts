@@ -87,6 +87,7 @@ export class FontFormComponent implements OnInit {
     external_url: [''],
     is_open_access: [false],
     restricted_for_tenant: [false],
+    is_draft: [false],
     version_name_en: [''],
     version_name_ar: [''],
     version_number: ['', [versionNumberValidator]],
@@ -210,6 +211,7 @@ export class FontFormComponent implements OnInit {
       is_external: v.is_external ?? false,
       is_open_access: v.is_open_access ?? false,
       restricted_for_tenant: v.restricted_for_tenant ?? false,
+      status: v.is_draft ? 'draft' : 'ready',
       external_url: v.external_url || null,
       thumbnail: this.thumbnailFile() ?? undefined,
     };
@@ -256,6 +258,7 @@ export class FontFormComponent implements OnInit {
             is_external: data.is_external,
             is_open_access: data.is_open_access,
             restricted_for_tenant: data.restricted_for_tenant,
+            is_draft: data.status === 'draft',
             external_url: data.external_url ?? '',
           });
           this.publisherDisplayName.set(data.publisher.name);

@@ -41,6 +41,8 @@ export interface MushafItem {
   is_external: boolean;
   is_open_access: boolean;
   restricted_for_tenant: boolean;
+  /** Draft assets stay in the portal but are hidden from consumers. */
+  status?: AssetStatus;
   thumbnail_url?: string | null;
   created_at: string;
 }
@@ -62,6 +64,8 @@ export interface MushafDetails {
   is_external: boolean;
   is_open_access: boolean;
   restricted_for_tenant: boolean;
+  /** Draft assets stay in the portal but are hidden from consumers. */
+  status?: AssetStatus;
   external_url: string | null;
   versions: AssetVersion[];
   created_at: string;
@@ -97,6 +101,8 @@ export interface MushafFormValue {
   is_external: boolean;
   is_open_access: boolean;
   restricted_for_tenant: boolean;
+  /** Draft assets stay in the portal but are hidden from consumers. */
+  status?: AssetStatus;
   external_url?: string | null;
   thumbnail?: File;
   /** Create-only: first version metadata + content file. */
@@ -110,3 +116,6 @@ export interface MushafFormValue {
   slug?: string;
   file?: File;
 }
+
+/** `Asset.status`: a draft is hidden from the gallery, APIs and the itqan CLI. */
+export type AssetStatus = 'draft' | 'ready';

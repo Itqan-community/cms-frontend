@@ -49,6 +49,9 @@
           @if (translation()!.restricted_for_tenant) {
             <nz-tag nzColor="orange">{{ 'ADMIN.COMMON.TAG_API_ONLY' | translate }}</nz-tag>
           }
+          @if (translation()!.status === 'draft') {
+            <nz-tag>{{ 'ADMIN.COMMON.TAG_DRAFT' | translate }}</nz-tag>
+          }
           <span class="admin-hero-meta__date">
             <ng-icon name="lucideCalendar" />
             {{ translation()!.created_at | date: 'dd/MM/yyyy' }}

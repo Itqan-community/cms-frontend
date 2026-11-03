@@ -122,6 +122,28 @@ describe('MushafFormComponent first version', () => {
     expect(mushafsServiceMock.create).not.toHaveBeenCalled();
   });
 
+  it('creates the asset as a draft when the Draft switch is on', () => {
+    const component = create();
+
+    component.form.patchValue({
+      version_number: '1.0',
+      slug: 'mushaf-madinah-hafs',
+      is_draft: true,
+    });
+    component.onSubmit();
+
+    expect(mushafsServiceMock.create.calls.mostRecent().args[0].status).toBe('draft');
+  });
+
+  it('creates the asset ready by default', () => {
+    const component = create();
+
+    component.form.patchValue({ version_number: '1.0', slug: 'mushaf-madinah-hafs' });
+    component.onSubmit();
+
+    expect(mushafsServiceMock.create.calls.mostRecent().args[0].status).toBe('ready');
+  });
+
   it('sends the suggested slug on create', () => {
     const component = create();
 

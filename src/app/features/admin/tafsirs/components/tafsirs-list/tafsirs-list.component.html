@@ -95,7 +95,11 @@
               }
               @if (showCol('access')) {
                 <td>
-                  @if (tafsir.is_open_access || tafsir.restricted_for_tenant) {
+                  @if (
+                    tafsir.is_open_access ||
+                    tafsir.restricted_for_tenant ||
+                    tafsir.status === 'draft'
+                  ) {
                     <div class="admin-list-access-tags">
                       @if (tafsir.is_open_access) {
                         <nz-tag nzColor="green">{{
@@ -106,6 +110,9 @@
                         <nz-tag nzColor="orange">{{
                           'ADMIN.COMMON.TAG_API_ONLY' | translate
                         }}</nz-tag>
+                      }
+                      @if (tafsir.status === 'draft') {
+                        <nz-tag>{{ 'ADMIN.COMMON.TAG_DRAFT' | translate }}</nz-tag>
                       }
                     </div>
                   } @else {

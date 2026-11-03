@@ -47,6 +47,8 @@ export interface RecitationListItem {
   year: number | null;
   is_open_access: boolean;
   restricted_for_tenant: boolean;
+  /** Draft assets stay in the portal but are hidden from consumers. */
+  status?: AssetStatus;
 }
 
 export interface RecitationDetails {
@@ -69,6 +71,8 @@ export interface RecitationDetails {
   folders?: RecitationDetailFolderRef[];
   is_open_access: boolean;
   restricted_for_tenant: boolean;
+  /** Draft assets stay in the portal but are hidden from consumers. */
+  status?: AssetStatus;
   created_at: string;
   updated_at: string;
 }
@@ -88,6 +92,8 @@ export interface RecitationFormValue {
   license: string;
   is_open_access: boolean;
   restricted_for_tenant: boolean;
+  /** Draft assets stay in the portal but are hidden from consumers. */
+  status?: AssetStatus;
   /** Create-only: package slug suggested by `POST /portal/ai/slug/`. */
   slug?: string;
 }
@@ -139,3 +145,6 @@ export interface NamedId {
   id: number;
   name: string;
 }
+
+/** `Asset.status`: a draft is hidden from the gallery, APIs and the itqan CLI. */
+export type AssetStatus = 'draft' | 'ready';
