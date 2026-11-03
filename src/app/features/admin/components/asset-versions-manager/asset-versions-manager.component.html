@@ -647,19 +647,21 @@
                           <ng-icon name="lucideUndo2" aria-hidden="true" />
                         </button>
                       }
-                      @if (canDeleteVersions() && !ver.is_published) {
-                        <button
-                          type="button"
-                          nz-button
-                          nzType="text"
-                          class="asset-versions-manager__act asset-versions-manager__act--delete action-icon action-icon--delete"
-                          nz-tooltip
-                          [nzTooltipTitle]="t('TOOLTIP_DELETE') | translate"
-                          [attr.aria-label]="t('TOOLTIP_DELETE') | translate"
-                          (click)="deleteRow(ver)"
-                        >
-                          <ng-icon name="lucideTrash2" aria-hidden="true" />
-                        </button>
+                      @if (canDeleteVersions()) {
+                        <!-- On a wrapper: a disabled button shows no tooltip itself. -->
+                        <span nz-tooltip [nzTooltipTitle]="deleteTooltipKey(ver) | translate">
+                          <button
+                            type="button"
+                            nz-button
+                            nzType="text"
+                            class="asset-versions-manager__act asset-versions-manager__act--delete action-icon action-icon--delete"
+                            [attr.aria-label]="deleteTooltipKey(ver) | translate"
+                            [disabled]="!!ver.delete_blocked_reason"
+                            (click)="deleteRow(ver)"
+                          >
+                            <ng-icon name="lucideTrash2" aria-hidden="true" />
+                          </button>
+                        </span>
                       }
                     </div>
                   }

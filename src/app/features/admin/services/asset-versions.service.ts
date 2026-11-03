@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
+import { callerShowsErrors } from '../../../core/interceptors/caller-shows-errors.context';
 import { environment } from '../../../../environments/environment';
 import type {
   AssetVersion,
@@ -116,7 +117,9 @@ export class AssetVersionsService {
   }
 
   delete(kind: AssetVersionParentKind, slug: string, versionId: number): Observable<void> {
-    return this.http.delete<void>(this.versionItemUrl(kind, slug, versionId));
+    return this.http.delete<void>(this.versionItemUrl(kind, slug, versionId), {
+      context: callerShowsErrors(),
+    });
   }
 
   private segmentForKind(kind: AssetVersionParentKind): string {

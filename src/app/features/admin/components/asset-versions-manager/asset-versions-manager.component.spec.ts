@@ -794,6 +794,80 @@ describe('AssetVersionsManagerComponent', () => {
     });
   });
 
+  describe('delete tooltip', () => {
+    function tooltipFor(reason: AssetVersion['delete_blocked_reason']): string {
+      return component.deleteTooltipKey({
+        ...page('ar').results[0],
+        delete_blocked_reason: reason,
+      });
+    }
+
+    it('says why the delete is refused', () => {
+      expect(tooltipFor('version_not_latest')).toBe(
+        'ADMIN.VERSION_PUBLISHING.DELETE_BLOCKED_NOT_LATEST'
+      );
+      expect(tooltipFor('version_is_published')).toBe(
+        'ADMIN.VERSION_PUBLISHING.DELETE_BLOCKED_PUBLISHED'
+      );
+    });
+
+    it('is the plain action label when the version can be deleted', () => {
+      expect(tooltipFor(null)).toBe('ADMIN.TRANSLATIONS.DETAIL.VERSIONS.TOOLTIP_DELETE');
+    });
+  });
+
+  describe('delete action', () => {
+    let options: ModalOptions | undefined;
+
+    beforeEach(() => {
+      modal.confirm.and.callFake(((opts?: ModalOptions) => {
+        options = opts;
+        return {};
+      }) as unknown as NzModalService['confirm']);
+      versionsService.delete.and.returnValue(of(undefined));
+      fixture.detectChanges();
+    });
+
+    it('asks the usual confirmation for an unpublished version', () => {
+      component.deleteRow({ id: 143, name: '1.1', is_published: false } as AssetVersion);
+
+      expect(options?.nzTitle).toBe('ADMIN.TRANSLATIONS.DETAIL.VERSIONS.DELETE_CONFIRM_TITLE');
+      expect(options?.nzOkText).toBe('ADMIN.TRANSLATIONS.DETAIL.VERSIONS.DELETE_OK');
+    });
+
+    it('warns that deleting the published only version unpublishes it', async () => {
+      component.deleteRow({ id: 143, name: '1.0', is_published: true } as AssetVersion);
+
+      expect(options?.nzTitle).toBe('ADMIN.VERSION_PUBLISHING.DELETE_PUBLISHED_TITLE');
+      expect(options?.nzContent).toBe('ADMIN.VERSION_PUBLISHING.DELETE_PUBLISHED_BODY');
+      expect(options?.nzOkText).toBe('ADMIN.VERSION_PUBLISHING.DELETE_PUBLISHED_OK');
+      await (options?.nzOnOk as () => Promise<unknown>)();
+      expect(versionsService.delete).toHaveBeenCalledWith('translation', 'sahih-intl', 143);
+    });
+
+    it("shows the backend's reason when the delete is refused", async () => {
+      versionsService.delete.and.returnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 400,
+              error: {
+                error_name: 'version_not_latest',
+                message: 'Only the newest version can be changed or deleted.',
+              },
+            })
+        )
+      );
+
+      component.deleteRow({ id: 143, name: '1.0' } as AssetVersion);
+
+      await expectAsync((options?.nzOnOk as () => Promise<unknown>)()).toBeResolvedTo(false);
+      expect(message.error).toHaveBeenCalledWith(
+        'Only the newest version can be changed or deleted.'
+      );
+    });
+  });
+
   describe('upload rejections', () => {
     it('explains an upload whose file cannot be read as content rows', () => {
       versionsService.create.and.returnValue(
