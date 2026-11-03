@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { NzTableSortOrder } from 'ng-zorro-antd/table';
 import { AdminTableSortPrefsService } from '../services/admin-table-sort-prefs.service';
+import { hasOffChannel } from './asset-channels.util';
 
 /**
  * Base abstract class for Admin List components.
@@ -16,6 +17,9 @@ export abstract class AdminListBase<T, F extends object> {
   protected readonly route = inject(ActivatedRoute);
   protected readonly sortPrefs = inject(AdminTableSortPrefsService);
   protected readonly translate = inject(TranslateService);
+
+  /** True when an asset is switched off for a distribution channel (shows the "Not in …" tags). */
+  readonly hasOffChannel = hasOffChannel;
 
   readonly items = signal<T[]>([]);
   readonly total = signal(0);

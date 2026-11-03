@@ -21,11 +21,13 @@ import { AssetSortingQuery, MushafFilters, MushafItem } from '../../models/musha
 import { MushafsService } from '../../services/mushafs.service';
 import { canCreateMushaf, canUpdateMushaf } from '../../utils/mushaf-permissions.util';
 import { MushafFiltersComponent } from '../mushaf-filters/mushaf-filters.component';
+import { AssetChannelTagsComponent } from '../../../components/asset-channels/asset-channels.component';
 
 @Component({
   selector: 'app-mushafs-list',
   standalone: true,
   imports: [
+    AssetChannelTagsComponent,
     DatePipe,
     RouterLink,
     NzButtonModule,

@@ -21,11 +21,13 @@ import { AssetSortingQuery, FontFilters, FontItem } from '../../models/fonts.mod
 import { FontsService } from '../../services/fonts.service';
 import { canCreateFont, canUpdateFont } from '../../utils/font-permissions.util';
 import { FontFiltersComponent } from '../font-filters/font-filters.component';
+import { AssetChannelTagsComponent } from '../../../components/asset-channels/asset-channels.component';
 
 @Component({
   selector: 'app-fonts-list',
   standalone: true,
   imports: [
+    AssetChannelTagsComponent,
     DatePipe,
     RouterLink,
     NzButtonModule,

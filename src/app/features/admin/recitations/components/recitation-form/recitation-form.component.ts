@@ -19,11 +19,17 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NgIcon } from '@ng-icons/core';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { ReciterListItem } from '../../../reciters/models/reciters.models';
 import { RecitersAdminService } from '../../../reciters/services/reciters.service';
+import { AssetChannelsFieldsComponent } from '../../../components/asset-channels/asset-channels.component';
+import {
+  confirmChannelChange,
+  getChannelConsumersConflict,
+} from '../../../utils/asset-channels.util';
 import { AdminTenantService } from '../../../services/admin-tenant.service';
 import {
   MaddLevel,
@@ -33,7 +39,6 @@ import {
 } from '../../models/recitations.models';
 import { RecitationsService } from '../../services/recitations.service';
 import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
-import { isRestrictedForTenantConflictError } from '../../../../../shared/utils/error.utils';
 import { AiTranslateActionsComponent } from '../../../components/ai-translate-actions/ai-translate-actions.component';
 import { AiTranslateContext } from '../../../services/ai-translate.service';
 import { assetSlugValidators } from '../../../utils/asset-slug.util';
@@ -54,6 +59,7 @@ function optionalHijriYearRange(minY: number, maxY: number) {
   selector: 'app-recitation-form',
   standalone: true,
   imports: [
+    AssetChannelsFieldsComponent,
     FormsModule,
     ReactiveFormsModule,
     RouterLink,
@@ -63,6 +69,7 @@ function optionalHijriYearRange(minY: number, maxY: number) {
     NzGridModule,
     NgIcon,
     NzInputModule,
+    NzModalModule,
     NzSelectModule,
     NzSkeletonModule,
     NzSwitchModule,
@@ -80,6 +87,7 @@ export class RecitationFormComponent implements OnInit {
   private readonly tenantService = inject(AdminTenantService);
   private readonly recitersService = inject(RecitersAdminService);
   private readonly message = inject(NzMessageService);
+  private readonly modal = inject(NzModalService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -124,7 +132,10 @@ export class RecitationFormComponent implements OnInit {
     year: [null as number | null, [optionalHijriYearRange(1300, 1600)]],
     license: ['', [Validators.required]],
     is_open_access: [false],
-    restricted_for_tenant: [false],
+    in_gallery: [true],
+    in_public_api: [true],
+    in_cli: [true],
+    in_tenants: [true],
     is_draft: [false],
     /** Filled by the AI translate actions; sent on create only. */
     slug: [''],
@@ -198,12 +209,20 @@ export class RecitationFormComponent implements OnInit {
       year: v.year ?? null,
       license: v.license ?? '',
       is_open_access: v.is_open_access ?? false,
-      restricted_for_tenant: v.restricted_for_tenant ?? false,
+      in_gallery: v.in_gallery ?? true,
+      in_public_api: v.in_public_api ?? true,
+      in_cli: v.in_cli ?? true,
+      in_tenants: v.in_tenants ?? true,
       status: v.is_draft ? 'draft' : 'ready',
     };
     const slug = v.slug?.trim();
     if (!this.isEditMode() && slug) body.slug = slug;
 
+    this.save(body);
+  }
+
+  private save(body: RecitationFormValue, confirmed = false): void {
+    if (confirmed) body = { ...body, confirm_channel_change: true };
     this.submitting.set(true);
     const request$ =
       this.isEditMode() && this.editSlug != null
@@ -224,15 +243,14 @@ export class RecitationFormComponent implements OnInit {
       },
       error: (error) => {
         this.submitting.set(false);
-        if (isRestrictedForTenantConflictError(error)) {
-          this.message.error(
-            resolveApiErrorMessage(
-              error,
-              { fallbackKey: 'ERRORS.RESTRICTED_FOR_TENANT_CONFLICT' },
-              this.translate
-            )
-          );
+        const conflict = getChannelConsumersConflict(error);
+        if (conflict) {
+          confirmChannelChange(this.modal, this.translate, conflict, () => this.save(body, true));
+          return;
         }
+        this.message.error(
+          resolveApiErrorMessage(error, { fallbackKey: 'ERRORS.REQUEST_FAILED' }, this.translate)
+        );
       },
     });
   }
@@ -277,7 +295,10 @@ export class RecitationFormComponent implements OnInit {
             year: data.year,
             license: data.license,
             is_open_access: data.is_open_access,
-            restricted_for_tenant: data.restricted_for_tenant,
+            in_gallery: data.in_gallery,
+            in_public_api: data.in_public_api,
+            in_cli: data.in_cli,
+            in_tenants: data.in_tenants,
             is_draft: data.status === 'draft',
           });
           this.publisherDisplayName.set(data.publisher.name);

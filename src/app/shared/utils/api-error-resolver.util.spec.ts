@@ -19,7 +19,7 @@ describe('api-error-resolver.util', () => {
       const err = new HttpErrorResponse({
         status: 409,
         error: {
-          error_name: 'restricted_for_tenant_conflict',
+          error_name: 'invalid_status',
           message: 'English conflict message',
         },
       });
@@ -27,10 +27,10 @@ describe('api-error-resolver.util', () => {
         err,
         { fallbackKey: 'ERRORS.SERVER_ERROR' },
         mockTranslate('en', {
-          'ERRORS.RESTRICTED_FOR_TENANT_CONFLICT': 'Cannot enable restriction.',
+          'ADMIN.ACCESS_REQUESTS.MESSAGES.ALREADY_DECIDED': 'Already decided.',
         })
       );
-      expect(msg).toBe('Cannot enable restriction.');
+      expect(msg).toBe('Already decided.');
     });
 
     it('uses localized backend message when no code map', () => {
@@ -187,14 +187,6 @@ describe('api-error-resolver.util', () => {
       const err = new HttpErrorResponse({
         status: 404,
         url: 'https://api.example/portal/content/tafsirs/qa/columns/',
-      });
-      expect(shouldSuppressGlobalErrorToast(err)).toBe(true);
-    });
-
-    it('suppresses restricted_for_tenant_conflict', () => {
-      const err = new HttpErrorResponse({
-        status: 409,
-        error: { error_name: 'restricted_for_tenant_conflict', message: 'x' },
       });
       expect(shouldSuppressGlobalErrorToast(err)).toBe(true);
     });

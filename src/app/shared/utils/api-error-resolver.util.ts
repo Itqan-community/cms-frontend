@@ -3,7 +3,6 @@ import {
   extractAllauthErrorItems,
   getErrorMessage,
   isAngularHttpFailureMessage,
-  isRestrictedForTenantConflictError,
 } from './error.utils';
 import { isMessageLocalizedForUi, isSpecificBackendMessage } from './message-localization.util';
 
@@ -19,7 +18,6 @@ export interface ResolveApiErrorOptions {
 /** CMS portal `error_name` → i18n key. */
 const CMS_ERROR_NAME_I18N: Record<string, string> = {
   invalid_status: 'ADMIN.ACCESS_REQUESTS.MESSAGES.ALREADY_DECIDED',
-  restricted_for_tenant_conflict: 'ERRORS.RESTRICTED_FOR_TENANT_CONFLICT',
   tenant_required: 'ERRORS.TENANT_REQUIRED',
   quality_name_required: 'ADMIN.RECITATIONS.QUALITIES.ERR_NAME_REQUIRED',
   cannot_delete_default_quality: 'ADMIN.RECITATIONS.QUALITIES.MESSAGES.CANNOT_DELETE_DEFAULT',
@@ -31,9 +29,7 @@ const CMS_ERROR_NAME_I18N: Record<string, string> = {
 };
 
 /** django-allauth `errors[].code` values reused on CMS endpoints. */
-const CMS_ERROR_CODE_I18N: Record<string, string> = {
-  restricted_for_tenant_conflict: 'ERRORS.RESTRICTED_FOR_TENANT_CONFLICT',
-};
+const CMS_ERROR_CODE_I18N: Record<string, string> = {};
 
 function extractErrorName(error: unknown): string | null {
   if (!(error instanceof HttpErrorResponse)) {
@@ -248,10 +244,6 @@ export function shouldSuppressGlobalErrorToast(error: unknown): boolean {
     errorName === 'usage_counts_disabled' ||
     (errorName !== undefined && errorName !== null && CONTENT_COLUMN_ERRORS.has(errorName))
   ) {
-    return true;
-  }
-
-  if (isRestrictedForTenantConflictError(error)) {
     return true;
   }
 
