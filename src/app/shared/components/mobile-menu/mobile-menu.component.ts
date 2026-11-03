@@ -5,6 +5,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { NzDrawerModule, NzDrawerPlacement } from 'ng-zorro-antd/drawer';
 import { NgIcon } from '@ng-icons/core';
 import { LangSwitchComponent } from '../lang-switch/lang-switch.component';
+import { ThemeSwitchComponent } from '../theme-switch/theme-switch.component';
 import { NavigationLink } from '../navigation-menu/navigation-menu.component';
 import { UserActionsComponent } from '../user-actions/user-actions.component';
 
@@ -15,6 +16,7 @@ import { UserActionsComponent } from '../user-actions/user-actions.component';
     NzDrawerModule,
     RouterModule,
     LangSwitchComponent,
+    ThemeSwitchComponent,
     UserActionsComponent,
     TranslatePipe,
     NgClass,

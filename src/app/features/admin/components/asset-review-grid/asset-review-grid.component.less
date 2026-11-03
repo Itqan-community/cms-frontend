@@ -25,7 +25,7 @@
   }
 
   &__empty {
-    color: rgba(0, 0, 0, 0.45);
+    color: var(--color-text-secondary, rgba(0, 0, 0, 0.45));
     padding: 16px 0;
   }
 
@@ -34,7 +34,7 @@
     align-items: center;
     gap: 12px;
     padding: 16px 0;
-    color: #cf1322;
+    color: var(--color-danger-text, #cf1322);
 
     p {
       margin: 0;
@@ -81,8 +81,8 @@
     margin: 6px 0 0;
     padding: 6px 8px;
     border-inline-start: 3px solid #faad14;
-    background: #fffbe6;
-    color: rgba(0, 0, 0, 0.65);
+    background: var(--color-warning-bg, #fffbe6);
+    color: var(--color-text-secondary, rgba(0, 0, 0, 0.65));
     font-size: 12px;
   }
 
@@ -92,18 +92,18 @@
     border-radius: 10px;
     font-size: 12px;
     font-weight: 500;
-    background: rgba(0, 0, 0, 0.06);
-    color: rgba(0, 0, 0, 0.55);
+    background: var(--color-fill-faint, rgba(0, 0, 0, 0.06));
+    color: var(--color-text-secondary, rgba(0, 0, 0, 0.55));
     white-space: nowrap;
 
     &--approved {
-      background: #f6ffed;
-      color: #389e0d;
+      background: var(--color-success-bg, #f6ffed);
+      color: var(--color-success-text, #389e0d);
     }
 
     &--commented {
-      background: #fff7e6;
-      color: #d46b08;
+      background: var(--color-warning-bg, #fff7e6);
+      color: var(--color-warning-text, #d46b08);
     }
   }
 
@@ -111,7 +111,7 @@
     display: block;
     margin-top: 4px;
     font-size: 12px;
-    color: rgba(0, 0, 0, 0.45);
+    color: var(--color-text-secondary, rgba(0, 0, 0, 0.45));
   }
 
   &__actions {

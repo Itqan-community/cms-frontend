@@ -33,6 +33,12 @@
               }
             ],
             "styles": [
+              { "input": "src/antd.less", "bundleName": "antd" },
+              {
+                "input": "src/antd-dark.less",
+                "bundleName": "antd-dark",
+                "inject": false
+              },
               "src/theme.less",
               "src/styles.less",
               "src/app/features/admin/styles/admin-global.less"

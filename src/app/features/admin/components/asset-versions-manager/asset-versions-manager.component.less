@@ -45,13 +45,13 @@
     border-radius: 10px;
     font-size: 12px;
     font-weight: 500;
-    background: rgba(0, 0, 0, 0.06);
-    color: rgba(0, 0, 0, 0.55);
+    background: var(--color-fill-faint, rgba(0, 0, 0, 0.06));
+    color: var(--color-text-secondary, rgba(0, 0, 0, 0.55));
     white-space: nowrap;
 
     &--available {
-      background: #f6ffed;
-      color: #389e0d;
+      background: var(--color-success-bg, #f6ffed);
+      color: var(--color-success-text, #389e0d);
     }
   }
 
@@ -72,39 +72,39 @@
     }
 
     &--published {
-      color: #389e0d;
-      background: #f6ffed;
-      border: 1px solid #b7eb8f;
+      color: var(--color-success-text, #389e0d);
+      background: var(--color-success-bg, #f6ffed);
+      border: 1px solid var(--color-success-border, #b7eb8f);
     }
 
     &--cli-released {
-      color: #0958d9;
-      background: #e6f4ff;
-      border: 1px solid #91caff;
+      color: var(--color-info-text, #0958d9);
+      background: var(--color-info-bg, #e6f4ff);
+      border: 1px solid var(--color-info-border, #91caff);
     }
 
     &--cli-withdrawn {
-      color: #d46b08;
-      background: #fff7e6;
-      border: 1px solid #ffd591;
+      color: var(--color-warning-text, #d46b08);
+      background: var(--color-warning-bg, #fff7e6);
+      border: 1px solid var(--color-warning-border, #ffd591);
     }
 
     &--cli-removed {
-      color: #cf1322;
-      background: #fff1f0;
-      border: 1px solid #ffa39e;
+      color: var(--color-danger-text, #cf1322);
+      background: var(--color-danger-bg, #fff1f0);
+      border: 1px solid var(--color-danger-border, #ffa39e);
     }
 
     &--cli-not_released {
-      color: rgba(0, 0, 0, 0.55);
-      background: rgba(0, 0, 0, 0.04);
-      border: 1px solid rgba(0, 0, 0, 0.12);
+      color: var(--color-text-secondary, rgba(0, 0, 0, 0.55));
+      background: var(--color-fill-faint, rgba(0, 0, 0, 0.04));
+      border: 1px solid var(--color-border, rgba(0, 0, 0, 0.12));
     }
 
     &--latest {
-      color: rgba(0, 0, 0, 0.65);
-      background: #fafafa;
-      border: 1px solid #d9d9d9;
+      color: var(--color-text-secondary, rgba(0, 0, 0, 0.65));
+      background: var(--color-surface-muted, #fafafa);
+      border: 1px solid var(--color-neutral-200);
     }
   }
 
@@ -123,11 +123,11 @@
     }
 
     &--approved {
-      color: #389e0d;
+      color: var(--color-success-text, #389e0d);
     }
 
     &--pending {
-      color: #d46b08;
+      color: var(--color-warning-text, #d46b08);
     }
 
     &--link {
@@ -136,7 +136,7 @@
 
       &:hover,
       &:focus-visible {
-        color: #ad4e00;
+        color: var(--color-warning-text, #ad4e00);
       }
     }
   }
@@ -154,32 +154,32 @@
 
     &--view {
       --act: #1677ff;
-      --act-bg: #e6f4ff;
+      --act-bg: var(--color-info-bg, #e6f4ff);
     }
 
     &--download {
-      --act: #2f5f8f;
-      --act-bg: #eaf1f8;
+      --act: var(--color-info-text, #2f5f8f);
+      --act-bg: var(--color-info-bg, #eaf1f8);
     }
 
     &--publish {
-      --act: #389e0d;
-      --act-bg: #f6ffed;
+      --act: var(--color-success-text, #389e0d);
+      --act-bg: var(--color-success-bg, #f6ffed);
     }
 
     &--restore {
-      --act: #722ed1;
-      --act-bg: #f9f0ff;
+      --act: var(--color-purple-text, #722ed1);
+      --act-bg: var(--color-purple-bg, #f9f0ff);
     }
 
     &--edit {
       --act: #d48806;
-      --act-bg: #fffbe6;
+      --act-bg: var(--color-warning-bg, #fffbe6);
     }
 
     &--delete {
-      --act: #cf1322;
-      --act-bg: #fff1f0;
+      --act: var(--color-danger-text, #cf1322);
+      --act-bg: var(--color-danger-bg, #fff1f0);
     }
 
     // Beats the shared .action-icon grey (and its :link/:visited rule for the
@@ -219,7 +219,7 @@
 
   &__author {
     display: block;
-    color: rgba(0, 0, 0, 0.45);
+    color: var(--color-text-secondary, rgba(0, 0, 0, 0.45));
     font-size: 12px;
   }
 
@@ -238,8 +238,8 @@
     margin-inline-start: 8px;
     padding: 0 6px;
     border-radius: 4px;
-    background: #fffbf0;
-    color: #d46b08;
+    background: var(--color-warning-bg, #fffbf0);
+    color: var(--color-warning-text, #d46b08);
     font-size: 12px;
     font-weight: 500;
     line-height: 20px;
@@ -261,18 +261,18 @@
     white-space: nowrap;
 
     &--added {
-      color: #389e0d;
-      background: #f6ffed;
+      color: var(--color-success-text, #389e0d);
+      background: var(--color-success-bg, #f6ffed);
     }
 
     &--modified {
-      color: #d46b08;
-      background: #fff7e6;
+      color: var(--color-warning-text, #d46b08);
+      background: var(--color-warning-bg, #fff7e6);
     }
 
     &--removed {
-      color: #cf1322;
-      background: #fff1f0;
+      color: var(--color-danger-text, #cf1322);
+      background: var(--color-danger-bg, #fff1f0);
     }
   }
 
@@ -387,7 +387,7 @@
   }
 
   &__diff-error {
-    color: #cf1322;
+    color: var(--color-danger-text, #cf1322);
   }
 
   &__modal-form {

@@ -28,7 +28,7 @@
     padding: 8px 16px;
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-neutral-200);
-    background-color: #fff;
+    background-color: var(--admin-surface-white);
     box-shadow: var(--shadow-sm);
     transition: background-color 0.2s ease;
   }
@@ -56,7 +56,7 @@
   &__card {
     max-width: 512px;
     width: 100%;
-    background-color: #fff;
+    background-color: var(--admin-surface-white);
     border: 1px solid var(--color-neutral-200);
     border-radius: var(--radius-2xl);
     box-shadow: var(--shadow-card);
@@ -72,11 +72,11 @@
   }
   &__title {
     font-weight: 700;
-    color: #333333;
+    color: var(--color-text-strong, #333333);
     font-size: 24px;
   }
   &__subtitle {
-    color: #333333;
+    color: var(--color-text-strong, #333333);
     font-size: 16px;
   }
 
@@ -88,14 +88,14 @@
   &__alert {
     padding: 12px;
     border-radius: var(--radius-lg);
-    border: 1px solid #fecaca;
-    background-color: #fef2f2;
-    color: #dc2626;
+    border: 1px solid var(--color-danger-border, #fecaca);
+    background-color: var(--color-danger-bg, #fef2f2);
+    color: var(--color-danger-text, #dc2626);
     font-size: 14px;
     text-align: center;
   }
   &__error {
-    color: #ef4444;
+    color: var(--color-danger-text, #ef4444);
     margin: 0;
   }
 
@@ -119,19 +119,19 @@
   &__label {
     font-size: 14px;
     font-weight: 500;
-    color: #333333;
+    color: var(--color-text-strong, #333333);
   }
   &__input {
     width: 100%;
     height: 40px;
-    background-color: #fff;
-    border: 1px solid #d1d5db;
+    background-color: var(--admin-surface-white);
+    border: 1px solid var(--admin-border-300);
     border-radius: var(--radius-lg);
     padding: 0 16px;
     font-size: 14px;
   }
   &__input::placeholder {
-    color: #9ca3af;
+    color: var(--admin-text-400);
   }
   &__input:focus {
     outline: none;
@@ -139,7 +139,7 @@
     box-shadow: 0 0 0 2px var(--color-primary-700);
   }
   &__input--invalid {
-    border-color: #ef4444 !important;
+    border-color: var(--color-danger-text, #ef4444) !important;
   }
 
   &__input-wrapper {
@@ -156,7 +156,7 @@
     background-color: transparent;
     border: none;
     cursor: pointer;
-    color: #9ca3af;
+    color: var(--admin-text-400);
     transition: color 0.2s ease;
 
     display: flex;
@@ -164,7 +164,7 @@
     justify-content: center;
 
     &:hover {
-      color: #6b7280;
+      color: var(--admin-text-500);
     }
   }
 
@@ -175,7 +175,7 @@
     width: 24px;
     top: 50%;
     transform: translateY(-50%);
-    color: #9ca3af;
+    color: var(--admin-text-400);
 
     display: flex;
     align-items: center;
@@ -224,7 +224,7 @@
   }
   &__footer-text {
     font-size: 14px;
-    color: #333333;
+    color: var(--color-text-strong, #333333);
   }
   &__footer-link {
     color: var(--color-primary-800);

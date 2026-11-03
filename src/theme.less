@@ -1,6 +1,7 @@
 // Custom Theming for NG-ZORRO
 // For more information: https://ng.ant.design/docs/customize-theme/en
-@import '../node_modules/ng-zorro-antd/ng-zorro-antd.less';
+// Reference import: Less variables only; the CSS itself ships in antd.less / antd-dark.less.
+@import (reference) '../node_modules/ng-zorro-antd/ng-zorro-antd.less';
 
 // Override less variables to here
 // View all variables: https://github.com/NG-ZORRO/ng-zorro-antd/blob/master/components/style/themes/default.less
@@ -107,6 +108,106 @@
   --color-action-delete-bg: #fff1f0;
 }
 
+// Dark theme: the same tokens, re-pointed. ThemeService / index.html set data-theme on <html>.
+html[data-theme='dark'] {
+  color-scheme: dark;
+
+  --color-primary-50: #17221d;
+  --color-primary-100: #1c2b24;
+  --color-primary-200: #26392f;
+  --color-primary-300: #314a3d;
+  --color-primary-400: #456b58;
+  --color-primary-500: #5e8b74;
+  --color-primary-600: #6f9e86;
+  --color-primary-700: #5b8a71;
+  --color-primary-800: #6c9c83;
+  --color-primary-900: #c2d7cc;
+  --color-primary-950: #e0ebe6;
+
+  --color-secondary-50: #1a2422;
+  --color-secondary-100: #22302d;
+  --color-secondary-600: #a7b4b1;
+
+  --color-neutral-50: #303030;
+  --color-neutral-100: #262626;
+  --color-neutral-200: #434343;
+  --color-neutral-300: rgba(255, 255, 255, 0.3);
+  --color-neutral-400: rgba(255, 255, 255, 0.5);
+  --color-neutral-500: rgba(255, 255, 255, 0.7);
+  --color-neutral-600: rgba(255, 255, 255, 0.85);
+  --color-neutral-700: rgba(255, 255, 255, 0.88);
+  --color-neutral-800: rgba(255, 255, 255, 0.92);
+  --color-neutral-900: rgba(255, 255, 255, 0.95);
+
+  --color-red-50: #2a1215;
+  --color-red-600: #e5484d;
+  --color-red-700: #f87171;
+  --color-warning-600: #e8b339;
+
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.5);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+
+  --color-bg: #121212;
+
+  --admin-text-900: #f3f4f6;
+  --admin-text-800: #f5f5f5;
+  --admin-text-700: #d1d5db;
+  --admin-text-600: #b8bec8;
+  --admin-text-500: #9ca3af;
+  --admin-text-400: #7b8390;
+  --admin-text-300: #6b6b6b;
+  --admin-text-200: #5a5a5a;
+  --admin-text-muted: #8a8a8a;
+
+  --admin-border-100: #262626;
+  --admin-border-200: #303030;
+  --admin-border-300: #434343;
+
+  --admin-surface-50: #181818;
+  --admin-surface-100: #232323;
+  --admin-surface-white: #1c1c1c;
+
+  --admin-accent-50: #14261b;
+  --admin-accent-600: #22c55e;
+  --admin-accent-700: #4ade80;
+
+  --color-action-view: #3c9ae8;
+  --color-action-view-bg: #111d2c;
+  --color-action-edit: #e8b339;
+  --color-action-edit-bg: #2b2111;
+  --color-action-delete: #e84749;
+  --color-action-delete-bg: #2a1215;
+
+  // Dark-only tokens. Components reference them as var(--token, <light literal>), so light mode
+  // keeps its original colours.
+  --color-text-strong: rgba(255, 255, 255, 0.85);
+  --color-text-faint: rgba(255, 255, 255, 0.35);
+  --color-surface-muted: #181818;
+  --color-surface-sunken: #2a2a2a;
+  --color-fill-faint: rgba(255, 255, 255, 0.04);
+  --color-danger-text: #f87171;
+  --color-danger-bg: #2a1215;
+  --color-danger-border: #5c2226;
+  --color-warning-text: #fbbf24;
+  --color-warning-bg: #2b2111;
+  --color-warning-border: #594214;
+  --color-success-text: #73d13d;
+  --color-success-bg: #162312;
+  --color-success-border: #274916;
+  --color-info-text: #69b1ff;
+  --color-info-bg: #111d2c;
+  --color-info-border: #15325b;
+  --color-purple-text: #b37feb;
+  --color-purple-bg: #1a1325;
+
+  // Not defined in light (components fall back to literals there); dark needs real values
+  --color-surface: #1c1c1c;
+  --color-border: #303030;
+  --border-color: #303030;
+  --color-fill: #262626;
+  --color-text-secondary: #9ca3af;
+}
+
 // Global styles
 a,
 a:hover,
@@ -137,7 +238,7 @@ a.ant-btn {
 
 .ant-btn {
   border-radius: var(--radius-lg); // 8px
-  background-color: @white;
+  background-color: var(--admin-surface-white);
   cursor: default;
   font-size: 13px;
   font-weight: 500;
@@ -276,9 +377,9 @@ a.ant-btn {
   line-height: 18px;
 
   &.muted {
-    background-color: @white !important;
-    color: @text-color !important;
-    border-color: @border-color-base !important;
+    background-color: var(--admin-surface-white) !important;
+    color: var(--color-neutral-600) !important;
+    border-color: var(--color-neutral-200) !important;
   }
 }
 
@@ -288,8 +389,8 @@ a.ant-btn {
 }
 
 .slick-arrow {
-  background-color: #fff !important;
-  border: 1px solid @border-color-base !important;
+  background-color: var(--admin-surface-white) !important;
+  border: 1px solid var(--color-neutral-200) !important;
   border-radius: 50% !important;
   width: 36px !important;
   height: 36px !important;

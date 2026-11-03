@@ -1,10 +1,11 @@
-import { Component, DestroyRef, inject, input, output, signal } from '@angular/core';
+import { Component, DestroyRef, computed, inject, input, output, signal } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import type { ECharts, EChartsCoreOption } from 'echarts/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NgxEchartsDirective, provideEchartsCore } from 'ngx-echarts';
+import { ThemeService } from '../../../../core/services/theme.service';
 
 export interface UsageTableRow {
   label: string;
@@ -38,6 +39,15 @@ export class UsageChartComponent {
   readonly retry = output<void>();
 
   readonly showTable = signal(false);
+
+  private readonly theme = inject(ThemeService);
+  /** ECharts' built-in dark theme for axis and legend text; ngx-echarts re-inits on change. */
+  readonly chartTheme = computed(() => (this.theme.isDark() ? 'dark' : ''));
+  /** The dark theme paints its own navy background; let the card show through instead. */
+  readonly chartOptions = computed(() => {
+    const options = this.options() ?? {};
+    return this.theme.isDark() ? { backgroundColor: 'transparent', ...options } : options;
+  });
 
   private resizeObserver?: ResizeObserver;
 

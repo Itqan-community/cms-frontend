@@ -432,6 +432,8 @@
     "OPEN_MENU_ARIA": "Open menu",
     "LANG_SWITCH_TO_EN": "English",
     "LANG_SWITCH_TO_AR": "العربية",
+    "THEME_SWITCH_TO_DARK": "Dark mode",
+    "THEME_SWITCH_TO_LIGHT": "Light mode",
     "LOGO_ALT": "Itqan",
     "LOGO_ALT_CMS": "Itqan CMS",
     "USER_AVATAR_ALT": "User avatar",

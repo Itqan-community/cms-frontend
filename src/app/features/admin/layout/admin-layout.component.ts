@@ -10,6 +10,7 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { AuthService } from '../../../core/auth/services/auth.service';
 import { LangSwitchComponent } from '../../../shared/components/lang-switch/lang-switch.component';
+import { ThemeSwitchComponent } from '../../../shared/components/theme-switch/theme-switch.component';
 import { UserActionsComponent } from '../../../shared/components/user-actions/user-actions.component';
 import { isPublisherHost } from '../../../shared/utils/publisherhost.util';
 import { AdminTenantService } from '../services/admin-tenant.service';
@@ -33,6 +34,7 @@ import { AdminSidebarComponent } from './admin-sidebar.component';
     FormsModule,
     NzSelectModule,
     LangSwitchComponent,
+    ThemeSwitchComponent,
     UserActionsComponent,
     TranslateModule,
     AdminSidebarComponent,

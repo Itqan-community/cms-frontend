@@ -432,6 +432,8 @@
     "OPEN_MENU_ARIA": "فتح القائمة",
     "LANG_SWITCH_TO_EN": "English",
     "LANG_SWITCH_TO_AR": "العربية",
+    "THEME_SWITCH_TO_DARK": "الوضع الداكن",
+    "THEME_SWITCH_TO_LIGHT": "الوضع الفاتح",
     "LOGO_ALT": "إتقان",
     "LOGO_ALT_CMS": "إتقان لإدارة المحتوى",
     "USER_AVATAR_ALT": "صورة المستخدم",

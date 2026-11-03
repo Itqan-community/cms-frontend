@@ -188,6 +188,15 @@ describe('usage-chart-options', () => {
     expect(options.visualMap?.max).toBe(9);
   });
 
+  it('buildHourOfWeekOptions starts the heatmap scale from a dark tint in dark mode', () => {
+    const build = (dark: boolean) =>
+      asBuilt(buildHourOfWeekOptions([], { rtl: false, dayLabels: [], dark })) as unknown as {
+        visualMap: { inRange: { color: string[] } };
+      };
+    expect(build(false).visualMap.inRange.color).toEqual(['#f0f5f2', '#527c66', '#22433d']);
+    expect(build(true).visualMap.inRange.color[0]).toBe('#17221d');
+  });
+
   describe('localized tooltips', () => {
     interface Tooltip {
       valueFormatter: (value: unknown) => string;
