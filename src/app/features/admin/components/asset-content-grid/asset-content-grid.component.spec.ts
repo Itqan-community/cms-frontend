@@ -47,7 +47,7 @@ describe('AssetContentGridComponent column definitions', () => {
       .filter(Boolean);
 
     // Assert
-    expect(fields).toEqual(['label', 'cell__text']);
+    expect(fields).toEqual(['unit_page', 'cell__text']);
   });
 
   it('shows the reference text column for the ayah template', () => {
@@ -296,6 +296,18 @@ describe('AssetContentGridComponent column definitions', () => {
     ).toBe(false);
   });
 
+  it('puts a page-number filter on the page template unit column', () => {
+    // Arrange / Act
+    const label = componentFor('page')
+      .buildColumnDefs()
+      .find((col) => col.field === 'label');
+
+    // Assert — keyed `unit_page` so the server filters the page number, not the label text
+    expect(label?.colId).toBe('unit_page');
+    expect(label?.filter).toBe('agNumberColumnFilter');
+    expect(label?.floatingFilter).toBe(true);
+  });
+
   it('localizes the grid loading overlay through the app translations', () => {
     // Arrange / Act — no translations are loaded in tests, so the key comes back as-is
     const localeText = componentFor('ayah').localeText();
@@ -360,7 +372,7 @@ describe('AssetContentGridComponent column definitions', () => {
     // Assert: page columns (no reference_text) even though `template` was
     // never set — proves buildColumnDefs reads the derived template, not the
     // raw (unset) input.
-    expect(fields).toEqual(['label', 'cell__text']);
+    expect(fields).toEqual(['unit_page', 'cell__text']);
 
     httpMock.verify();
   });
