@@ -20,11 +20,13 @@ import { MushafDetails } from '../../models/mushafs.models';
 import { MushafsService } from '../../services/mushafs.service';
 import { canDeleteMushaf, canUpdateMushaf } from '../../utils/mushaf-permissions.util';
 import { AssetUsageSectionComponent } from '../../../../usage/components/asset-usage-section/asset-usage-section.component';
+import { AssetChannelTagsComponent } from '../../../components/asset-channels/asset-channels.component';
 
 @Component({
   selector: 'app-mushaf-detail',
   standalone: true,
   imports: [
+    AssetChannelTagsComponent,
     AssetUsageSectionComponent,
     DatePipe,
     RouterLink,

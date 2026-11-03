@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzModalService } from 'ng-zorro-antd/modal';
 import { of } from 'rxjs';
 
 import { Licenses } from '../../../../../core/enums/licenses.enum';
@@ -36,7 +37,10 @@ describe('TafsirFormComponent template controls', () => {
     language: 'ar',
     is_external: false,
     is_open_access: false,
-    restricted_for_tenant: false,
+    in_gallery: true,
+    in_public_api: true,
+    in_cli: true,
+    in_tenants: true,
     external_url: null,
     template: 'page',
     mushaf_layout: { id: 1, name: 'Standard 15-line', page_count: 604 },
@@ -85,6 +89,9 @@ describe('TafsirFormComponent template controls', () => {
       ],
     });
 
+    TestBed.overrideProvider(NzModalService, {
+      useValue: jasmine.createSpyObj<NzModalService>('NzModalService', ['confirm']),
+    });
     TestBed.overrideComponent(TafsirFormComponent, { set: { template: '' } });
   }
 

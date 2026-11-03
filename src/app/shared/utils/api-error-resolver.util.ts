@@ -19,6 +19,7 @@ export interface ResolveApiErrorOptions {
 /** CMS portal `error_name` → i18n key. */
 const CMS_ERROR_NAME_I18N: Record<string, string> = {
   invalid_status: 'ADMIN.ACCESS_REQUESTS.MESSAGES.ALREADY_DECIDED',
+  // Programs still have the tenant restriction; assets use distribution channels.
   restricted_for_tenant_conflict: 'ERRORS.RESTRICTED_FOR_TENANT_CONFLICT',
   tenant_required: 'ERRORS.TENANT_REQUIRED',
   quality_name_required: 'ADMIN.RECITATIONS.QUALITIES.ERR_NAME_REQUIRED',
@@ -251,6 +252,7 @@ export function shouldSuppressGlobalErrorToast(error: unknown): boolean {
     return true;
   }
 
+  // Program saves show their own message for this 409; the global toast would repeat it.
   if (isRestrictedForTenantConflictError(error)) {
     return true;
   }

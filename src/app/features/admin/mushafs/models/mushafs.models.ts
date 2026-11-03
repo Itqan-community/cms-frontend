@@ -1,3 +1,4 @@
+import type { AssetChannelFlags, AssetChannelFormFlags } from '../../utils/asset-channels.util';
 import { Licenses } from '../../../../core/enums/licenses.enum';
 
 export type AssetSortingQuery =
@@ -30,7 +31,7 @@ export interface AssetVersion {
 }
 
 /** GET /portal/mushafs/ */
-export interface MushafItem {
+export interface MushafItem extends AssetChannelFlags {
   id: number;
   slug: string;
   name: string;
@@ -40,7 +41,6 @@ export interface MushafItem {
   language?: string | null;
   is_external: boolean;
   is_open_access: boolean;
-  restricted_for_tenant: boolean;
   /** Draft assets stay in the portal but are hidden from consumers. */
   status?: AssetStatus;
   thumbnail_url?: string | null;
@@ -48,7 +48,7 @@ export interface MushafItem {
 }
 
 /** GET /portal/mushafs/{mushaf_slug}/ */
-export interface MushafDetails {
+export interface MushafDetails extends AssetChannelFlags {
   id: number;
   slug: string;
   name_ar: string;
@@ -63,7 +63,6 @@ export interface MushafDetails {
   language?: string | null;
   is_external: boolean;
   is_open_access: boolean;
-  restricted_for_tenant: boolean;
   /** Draft assets stay in the portal but are hidden from consumers. */
   status?: AssetStatus;
   external_url: string | null;
@@ -88,7 +87,7 @@ export interface MushafFilters {
   ordering?: AssetSortingQuery;
 }
 
-export interface MushafFormValue {
+export interface MushafFormValue extends AssetChannelFormFlags {
   name_ar: string;
   name_en: string;
   description_ar: string;
@@ -100,7 +99,6 @@ export interface MushafFormValue {
   publisher_id: number;
   is_external: boolean;
   is_open_access: boolean;
-  restricted_for_tenant: boolean;
   /** Draft assets stay in the portal but are hidden from consumers. */
   status?: AssetStatus;
   external_url?: string | null;

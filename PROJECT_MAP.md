@@ -100,10 +100,17 @@ User Browser
    (login required; reporter from session; no portal permission gate on gallery CTA)
 ```
 
-Portal assets (recitations, tafsirs, translations) expose `is_open_access` and
-`restricted_for_tenant` on create/update (POST/PATCH) and in list/detail responses. List filter:
-`is_open_access=true|false`. `restricted_for_tenant=true` assets are excluded from public CMS
-listings by the backend.
+Portal assets (mushafs, fonts, recitations, tafsirs, translations) expose `is_open_access` and four
+distribution-channel flags on create/update (POST/PUT/PATCH) and in list/detail responses:
+`in_gallery` (Itqan gallery), `in_public_api` (developers' public API), `in_cli` (itqan CLI),
+`in_tenants` (publisher tenant sites/API). List filter: `is_open_access=true|false`. The forms show
+them as checkboxes (`app-asset-channels-fields`, all on by default); list/detail pages show a "Not
+in …" tag per channel that is off (`app-asset-channel-tags`). Turning a channel off while developers
+hold approved/pending access returns 409 `channel_has_active_consumers`
+(`extra: {approved_count, pending_count, channels}`); the form opens a confirm modal and, on OK,
+re-sends the same request with `confirm_channel_change: true` (helpers in
+`features/admin/utils/asset-channels.util.ts`). Programs (mock-only, no backend) still use the old
+`restricted_for_tenant` flag.
 
 Every asset form (mushaf, font, tafsir, translation, recitation) has a **Draft** switch (`is_draft`
 control → `status: 'draft' | 'ready'`, `ADMIN.COMMON.LABEL_DRAFT`). A draft stays in the portal
@@ -365,6 +372,8 @@ container owns the API calls and the single picker modal. Quality tab menu suppo
   identifier (slug) to the form's `slug` control (editable input only when generation fails;
   validated per asset type by `utils/asset-slug.util.ts`). A recitation's identifier is cleared when
   its reciter or riwayah changes, and a response for inputs changed mid-request is ignored
+- `asset-channels/` — `app-asset-channels-fields` (distribution-channel checkboxes inside asset
+  forms) and `app-asset-channel-tags` ("Not in …" tags for list/detail pages).
 - `asset-initial-version-fields/` — Optional first version (starting number, bilingual name/summary,
   file) on asset create forms (font/mushaf/tafsir/translation); the number is required once a file
   is attached. Tafsir/translation also pass `contentKind`/`contentTemplate`/`mushafLayoutId` to

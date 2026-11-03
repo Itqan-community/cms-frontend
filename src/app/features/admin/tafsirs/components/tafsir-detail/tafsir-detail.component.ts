@@ -21,11 +21,13 @@ import { AssetVersionsManagerComponent } from '../../../components/asset-version
 import { TafsirDetails } from '../../models/tafsirs.models';
 import { TafsirsService } from '../../services/tafsirs.service';
 import { AssetUsageSectionComponent } from '../../../../usage/components/asset-usage-section/asset-usage-section.component';
+import { AssetChannelTagsComponent } from '../../../components/asset-channels/asset-channels.component';
 
 @Component({
   selector: 'app-tafsir-detail',
   standalone: true,
   imports: [
+    AssetChannelTagsComponent,
     AssetUsageSectionComponent,
     DatePipe,
     RouterLink,

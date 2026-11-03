@@ -26,11 +26,13 @@ import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constan
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import { AdminListBase } from '../../../utils/admin-list-base';
 import { AdminHijriYearPipe } from '../../../pipes/admin-hijri-year.pipe';
+import { AssetChannelTagsComponent } from '../../../components/asset-channels/asset-channels.component';
 
 @Component({
   selector: 'app-recitations-list',
   standalone: true,
   imports: [
+    AssetChannelTagsComponent,
     DatePipe,
     RouterLink,
     NzButtonModule,

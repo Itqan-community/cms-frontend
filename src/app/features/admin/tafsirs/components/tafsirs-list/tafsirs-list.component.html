@@ -96,9 +96,7 @@
               @if (showCol('access')) {
                 <td>
                   @if (
-                    tafsir.is_open_access ||
-                    tafsir.restricted_for_tenant ||
-                    tafsir.status === 'draft'
+                    tafsir.is_open_access || hasOffChannel(tafsir) || tafsir.status === 'draft'
                   ) {
                     <div class="admin-list-access-tags">
                       @if (tafsir.is_open_access) {
@@ -106,11 +104,7 @@
                           'ADMIN.COMMON.TAG_OPEN_ACCESS' | translate
                         }}</nz-tag>
                       }
-                      @if (tafsir.restricted_for_tenant) {
-                        <nz-tag nzColor="orange">{{
-                          'ADMIN.COMMON.TAG_API_ONLY' | translate
-                        }}</nz-tag>
-                      }
+                      <app-asset-channel-tags [asset]="tafsir" />
                       @if (tafsir.status === 'draft') {
                         <nz-tag>{{ 'ADMIN.COMMON.TAG_DRAFT' | translate }}</nz-tag>
                       }
