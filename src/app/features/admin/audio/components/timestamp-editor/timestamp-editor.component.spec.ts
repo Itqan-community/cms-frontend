@@ -24,10 +24,10 @@ const TRACK: RecitationSurahTrackListItem = {
   available_ayah_timings_url: 'https://example.com/timings/001.json',
 };
 
-/** Only the fields the editor reads off the recitation: the asset id and the folder ids. */
+/** Only the fields the editor reads off the recitation: the asset id and the quality ids. */
 const RECITATION = {
   id: 7,
-  folders: [
+  qualities: [
     { id: 3, name: 'Default', slug: 'default', is_default: true },
     { id: 9, name: '128kbps', slug: '128kbps', is_default: false },
   ],
@@ -165,17 +165,17 @@ describe('TimestampEditorComponent', () => {
       expect(component.markers().length).toBe(6);
     });
 
-    it('passes the folder through to the track lookup', async () => {
-      // A folder the recitation actually has (see RECITATION.folders).
-      await setup({ recitation: 'sample-recitation', folder: '128kbps' });
+    it('passes the quality through to the track lookup', async () => {
+      // A quality the recitation actually has (see RECITATION.qualities).
+      await setup({ recitation: 'sample-recitation', quality: '128kbps' });
 
       expect(recitations.recitationTracksList).toHaveBeenCalledWith(
-        jasmine.objectContaining({ folder: '128kbps' })
+        jasmine.objectContaining({ quality: '128kbps' })
       );
     });
 
-    it('refuses a folder the recitation does not have instead of using the default one', async () => {
-      await setup({ recitation: 'sample-recitation', folder: 'high-quality' });
+    it('refuses a quality the recitation does not have instead of using the default one', async () => {
+      await setup({ recitation: 'sample-recitation', quality: 'high-quality' });
 
       expect(component.loadError()).toBeTruthy();
       expect(recitations.recitationTracksList).not.toHaveBeenCalled();
@@ -414,8 +414,8 @@ describe('TimestampEditorComponent', () => {
       expect(component.dirty()).toBeFalse();
     });
 
-    it('saves against the recitation id and the folder the route names', async () => {
-      await setup({ recitation: 'sample-recitation', folder: '128kbps' });
+    it('saves against the recitation id and the quality the route names', async () => {
+      await setup({ recitation: 'sample-recitation', quality: '128kbps' });
       timestamps.save.and.returnValue(of(UPLOAD_OK));
 
       component.selectMarker('ayah-2-start');
@@ -424,12 +424,12 @@ describe('TimestampEditorComponent', () => {
 
       const input = timestamps.save.calls.mostRecent().args[0];
       expect(input.assetId).toBe(7);
-      expect(input.folderId).toBe(9);
+      expect(input.qualityId).toBe(9);
       expect(input.track.id).toBe(12);
       expect(input.timestamps.ayahs[1].start_ms).toBe(9_900);
     });
 
-    it('falls back to the default folder when the route names none', async () => {
+    it('falls back to the default quality when the route names none', async () => {
       await setup({ recitation: 'sample-recitation' });
       timestamps.save.and.returnValue(of(UPLOAD_OK));
 
@@ -437,7 +437,7 @@ describe('TimestampEditorComponent', () => {
       component.nudge(-100);
       await component.save();
 
-      expect(timestamps.save.calls.mostRecent().args[0].folderId).toBeNull();
+      expect(timestamps.save.calls.mostRecent().args[0].qualityId).toBeNull();
     });
 
     it('does not call the API when nothing has changed', async () => {
