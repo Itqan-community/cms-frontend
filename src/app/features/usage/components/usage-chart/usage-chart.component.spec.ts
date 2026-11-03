@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TranslateModule } from '@ngx-translate/core';
+import { ThemeService } from '../../../../core/services/theme.service';
 import { UsageChartComponent } from './usage-chart.component';
 
 describe('UsageChartComponent', () => {
@@ -37,6 +38,18 @@ describe('UsageChartComponent', () => {
     fixture.componentRef.setInput('empty', true);
     fixture.detectChanges();
     expect(query('nz-empty')).not.toBeNull();
+  });
+
+  it('draws with the ECharts dark theme on a transparent background in dark mode', () => {
+    fixture.componentRef.setInput('options', { series: [] });
+    const chart = fixture.componentInstance;
+    expect(chart.chartTheme()).toBe('');
+    expect(chart.chartOptions()).toEqual({ series: [] });
+
+    TestBed.inject(ThemeService).theme.set('dark');
+
+    expect(chart.chartTheme()).toBe('dark');
+    expect(chart.chartOptions()).toEqual({ backgroundColor: 'transparent', series: [] });
   });
 
   it('switches between the chart and the table view', () => {

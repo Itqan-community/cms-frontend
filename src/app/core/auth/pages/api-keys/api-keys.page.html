@@ -95,7 +95,7 @@
               autocomplete="off"
             />
             @if (createForm.controls.name.invalid && createForm.controls.name.touched) {
-              <p class="account-manage__hint" style="color: #b91c1c">
+              <p class="account-manage__hint" style="color: var(--color-danger-text, #b91c1c)">
                 {{ 'FORMS.VALIDATION.REQUIRED' | translate }}
               </p>
             }

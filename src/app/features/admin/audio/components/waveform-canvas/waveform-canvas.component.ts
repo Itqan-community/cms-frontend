@@ -11,6 +11,7 @@ import {
   viewChild,
 } from '@angular/core';
 import type { EditorMarker } from '../../models/audio-timestamps.models';
+import { ThemeService } from '../../../../../core/services/theme.service';
 import { markerAtX, xToMs, zoomView, type WaveformView } from '../../utils/waveform-geometry.util';
 import type { WaveformPeaks } from '../../utils/waveform-peaks.util';
 import { WaveformRenderer, type WaveformTheme } from './waveform-renderer';
@@ -71,6 +72,7 @@ const ZOOM_OUT_FACTOR = 1 / ZOOM_IN_FACTOR;
 export class WaveformCanvasComponent {
   private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly appTheme = inject(ThemeService);
 
   private readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
 
@@ -107,6 +109,14 @@ export class WaveformCanvasComponent {
       };
 
       this.renderer?.draw(scene);
+    });
+
+    // The palette comes from CSS tokens, so re-read it when the light/dark theme switches.
+    effect(() => {
+      this.appTheme.theme();
+      if (!this.renderer) return;
+      this.renderer.setTheme(this.readTheme());
+      this.redraw();
     });
   }
 

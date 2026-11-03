@@ -1,11 +1,11 @@
 // Semantic change colours (Ant Design green / orange / red) — the same hues the
 // rest of the admin uses for additions, edits and deletions.
 @added: #389e0d;
-@added-bg: #f6ffed;
+@added-bg: var(--color-success-bg, #f6ffed);
 @modified: #d46b08;
-@modified-bg: #fff7e6;
+@modified-bg: var(--color-warning-bg, #fff7e6);
 @removed: #cf1322;
-@removed-bg: #fff1f0;
+@removed-bg: var(--color-danger-bg, #fff1f0);
 
 .content-changes {
   display: flex;
@@ -143,7 +143,7 @@
     margin: 0;
     padding: 8px 10px;
     border-radius: 6px;
-    background: #fafafa;
+    background: var(--color-surface-muted, #fafafa);
     color: var(--admin-text-900, #111827);
     line-height: 1.8;
     white-space: pre-line;
@@ -190,18 +190,18 @@
     .content-changes__review--approved & {
       color: @added;
       background: @added-bg;
-      border-color: #b7eb8f;
+      border-color: var(--color-success-border, #b7eb8f);
     }
 
     .content-changes__review--commented & {
       color: @modified;
       background: @modified-bg;
-      border-color: #ffd591;
+      border-color: var(--color-warning-border, #ffd591);
     }
 
     .content-changes__review--unreviewed & {
       color: var(--admin-text-500, #6b7280);
-      background: #fafafa;
+      background: var(--color-surface-muted, #fafafa);
       border-color: var(--admin-border-200, #e5e7eb);
     }
   }
@@ -214,9 +214,9 @@
   &__review-comment {
     margin: 8px 0 0;
     padding: 6px 10px;
-    border-inline-start: 3px solid #ffd591;
+    border-inline-start: 3px solid var(--color-warning-border, #ffd591);
     border-radius: 4px;
-    background: #fffbf0;
+    background: var(--color-warning-bg, #fffbf0);
     color: var(--admin-text-900, #111827);
     font-size: 13px;
     white-space: pre-line;

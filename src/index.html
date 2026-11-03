@@ -14,6 +14,50 @@
     />
   </head>
   <body>
+    <script>
+      // Applies the saved theme (or the OS preference) before the app boots so dark mode does not
+      // flash light. Runs at the start of <body> because the built stylesheet links are only in
+      // <head> by then: antd-dark.css must sit right after antd.css and before styles.css.
+      // ThemeService calls window.itqanApplyTheme for later switches.
+      (function () {
+        var root = document.documentElement;
+        function setMode(theme) {
+          root.setAttribute('data-theme', theme);
+          root.setAttribute('data-ag-theme-mode', theme);
+        }
+        // onApplied, when given, runs once the theme is on screen (after antd-dark.css loads).
+        window.itqanApplyTheme = function (theme, onApplied) {
+          var done = function () {
+            setMode(theme);
+            if (onApplied) onApplied();
+          };
+          var dark = document.getElementById('antd-dark');
+          if (theme !== 'dark') {
+            if (dark) dark.remove();
+            return done();
+          }
+          if (dark) return done();
+          var links = document.querySelectorAll('link[rel="stylesheet"][href*="antd"]');
+          var light = links[links.length - 1];
+          dark = document.createElement('link');
+          dark.id = 'antd-dark';
+          dark.rel = 'stylesheet';
+          dark.href = 'antd-dark.css';
+          if (onApplied) dark.onload = dark.onerror = done;
+          else done();
+          if (light) light.after(dark);
+          else document.head.appendChild(dark);
+        };
+        var saved = null;
+        try {
+          saved = localStorage.getItem('theme');
+        } catch (e) {}
+        var prefersDark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
+        window.itqanApplyTheme(
+          saved === 'dark' || (saved !== 'light' && prefersDark) ? 'dark' : 'light'
+        );
+      })();
+    </script>
     <app-root></app-root>
   </body>
 </html>

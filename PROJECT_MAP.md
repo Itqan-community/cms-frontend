@@ -143,10 +143,11 @@ cms-frontend/
 │   ├── assets/                      # images/, icons/, data/ (Quran JSON)
 │   └── i18n/                        # en.json, ar.json (~1370 keys each)
 ├── src/
-│   ├── index.html                   # Root HTML (Arabic RTL default, Inter font)
+│   ├── index.html                   # Root HTML (Arabic RTL default, Inter font, inline theme bootstrap)
 │   ├── main.ts                      # Angular bootstrap + Sentry init
 │   ├── styles.less                  # Global utilities (sr-only, card, flex)
-│   ├── theme.less                   # CSS vars + NG-ZORRO component overrides
+│   ├── theme.less                   # CSS vars (+ html[data-theme='dark'] values) + NG-ZORRO overrides
+│   ├── antd.less / antd-dark.less   # NG-ZORRO base CSS, light (injected) / dark (lazy, unhashed)
 │   ├── environments/                # 5 env configs (default/prod/staging/local/publisher)
 │   └── app/
 │       ├── app.ts                   # Root component (i18n init, lang switch, header)
@@ -565,6 +566,7 @@ until the usage-reports cutover. `/account/api-keys` shows and edits each key's 
 | `HeaderComponent`              | `app-header`                | Main sticky header (logo, nav, lang switch, user actions)         |
 | `ImageCarouselComponent`       | `app-image-carousel`        | Image carousel (nz-carousel with fade effect)                     |
 | `LangSwitchComponent`          | `app-lang-switch`           | Language toggle (ar/en)                                           |
+| `ThemeSwitchComponent`         | `app-theme-switch`          | Light/dark toggle (header, mobile menu, admin header)             |
 | `LicenseTagComponent`          | `app-license-tag`           | CC license badge (color-coded, popover/mobile drawer)             |
 | `MobileMenuComponent`          | `app-mobile-menu`           | Slide-out mobile drawer with nav + lang + user                    |
 | `NavigationMenuComponent`      | `app-navigation-menu`       | Desktop horizontal nav bar                                        |
@@ -735,7 +737,15 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
    `services/`, `utils/` per entity
 8. **i18n first** — All user-facing strings use `translate` pipe or `TranslateService`
 9. **CSS variables** — Theming via `--color-*`, `--radius-*`, `--shadow-*` custom properties
-10. **RTL support** — Logical CSS properties throughout, `ltr-flip`/`rtl-flip` transform utilities
-11. **Responsive** — Mobile-first with breakpoints at 480/576/768/992/1200/1600px
-12. **Error classification** — `resolveAuthErrorMessage()` for auth pages (code map → localized
+10. **Dark theme** — `ThemeService` (`core/services/theme.service.ts`) + `window.itqanApplyTheme`
+    (inline in `index.html`, runs before boot so there is no light flash) set `data-theme` and
+    `data-ag-theme-mode` on `<html>` and insert `antd-dark.css` right after `antd-*.css`. Choice
+    saved in `localStorage.theme`, else OS preference. New colours: use an existing token, or
+    `var(--dark-only-token, <light literal>)` with the token defined only under
+    `html[data-theme='dark']` in `theme.less` — never a bare hex. AG Grid quartz follows
+    `data-ag-theme-mode` itself; ECharts uses the `dark` theme via `UsageChartComponent`; canvas
+    code re-reads tokens on `ThemeService.theme()` changes
+11. **RTL support** — Logical CSS properties throughout, `ltr-flip`/`rtl-flip` transform utilities
+12. **Responsive** — Mobile-first with breakpoints at 480/576/768/992/1200/1600px
+13. **Error classification** — `resolveAuthErrorMessage()` for auth pages (code map → localized
     backend → i18n fallback); `getErrorMessage()` for low-level allauth envelope parsing

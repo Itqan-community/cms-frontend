@@ -1,13 +1,13 @@
 // Ant Design green / red — the hues the admin uses for additions and deletions.
 @added: #389e0d;
-@added-mark: #d9f7be;
+@added-mark: var(--color-success-border, #d9f7be);
 @removed: #cf1322;
-@removed-mark: #ffccc7;
+@removed-mark: var(--color-danger-border, #ffccc7);
 // Side shades: light enough that the highlighted words still stand out on them.
-@before-bg: #fdf7f6;
-@before-edge: #f3c9c4;
-@after-bg: #f5faf6;
-@after-edge: #bfe0c8;
+@before-bg: var(--color-danger-bg, #fdf7f6);
+@before-edge: var(--color-danger-border, #f3c9c4);
+@after-bg: var(--color-success-bg, #f5faf6);
+@after-edge: var(--color-success-border, #bfe0c8);
 
 .change-compare {
   display: grid;
