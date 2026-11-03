@@ -108,7 +108,7 @@ describe('AudioTimestampsService', () => {
   describe('save', () => {
     it('uploads the boundaries as a timing file through the timing ingest', (done) => {
       service
-        .save({ assetId: 7, folderId: 9, track: TRACK, timestamps: TIMESTAMPS })
+        .save({ assetId: 7, qualityId: 9, track: TRACK, timestamps: TIMESTAMPS })
         .subscribe((out) => {
           expect(out.updated_total).toBe(1);
           done();
@@ -119,7 +119,7 @@ describe('AudioTimestampsService', () => {
 
       const body = req.request.body as FormData;
       expect(body.get('asset_id')).toBe('7');
-      expect(body.get('folder_id')).toBe('9');
+      expect(body.get('quality_id')).toBe('9');
 
       // The ingest pairs a file with a track by the surah in its name, so the audio file's
       // own stem is what travels — a mismatch here is reported as an unmatched surah.
@@ -137,7 +137,7 @@ describe('AudioTimestampsService', () => {
 
       const req = httpMock.expectOne((r) => r.url.includes('/portal/timing/upload/'));
       const body = req.request.body as FormData;
-      expect(body.get('folder_id')).toBeNull();
+      expect(body.get('quality_id')).toBeNull();
       expect((body.get('files') as File).name).toBe('001.json');
 
       req.flush(uploadResult());

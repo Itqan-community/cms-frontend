@@ -1,5 +1,5 @@
 import { PublisherRef } from '../../tafsirs/models/tafsirs.models';
-import type { RecitationDetailFolderRef } from './recitation-folders.models';
+import type { RecitationDetailQualityRef } from './recitation-qualities.models';
 
 export enum MaddLevel {
   TWASSUT = 'twassut',
@@ -67,8 +67,8 @@ export interface RecitationDetails {
   year: number | null;
   license: string;
   ayah_timings_url?: string | null;
-  /** Default-folder export only; per-folder URLs are not on this field. */
-  folders?: RecitationDetailFolderRef[];
+  /** Default-quality export only; per-quality URLs are not on this field. */
+  qualities?: RecitationDetailQualityRef[];
   is_open_access: boolean;
   restricted_for_tenant: boolean;
   /** Draft assets stay in the portal but are hidden from consumers. */

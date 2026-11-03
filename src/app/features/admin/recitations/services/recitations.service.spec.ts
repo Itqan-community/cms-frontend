@@ -108,7 +108,7 @@ describe('RecitationsService', () => {
     );
     expect(req.request.params.get('page')).toBe('2');
     expect(req.request.params.get('page_size')).toBe('10');
-    expect(req.request.params.get('folder')).toBeNull();
+    expect(req.request.params.get('quality')).toBeNull();
     req.flush({
       count: 1,
       results: [
@@ -124,14 +124,14 @@ describe('RecitationsService', () => {
     });
   });
 
-  it('recitationTracksList should pass folder query when provided', (done) => {
+  it('recitationTracksList should pass quality query when provided', (done) => {
     service
       .recitationTracksList({
         recitation_slug: 'my-recitation',
         asset_id: 42,
         page: 1,
         page_size: 10,
-        folder: 'with-echo',
+        quality: 'with-echo',
       })
       .subscribe((res) => {
         expect(res.count).toBe(0);
@@ -142,20 +142,20 @@ describe('RecitationsService', () => {
       (r) =>
         r.url.includes('/portal/recitations/my-recitation/recitation-tracks/') && r.method === 'GET'
     );
-    expect(req.request.params.get('folder')).toBe('with-echo');
+    expect(req.request.params.get('quality')).toBe('with-echo');
     req.flush({ count: 0, results: [] });
   });
 
-  it('should list recitation folders', (done) => {
-    service.recitationFoldersList('my-recitation').subscribe((folders) => {
-      expect(folders.length).toBe(1);
-      expect(folders[0].slug).toBe('default');
-      expect(folders[0].is_default).toBeTrue();
+  it('should list recitation qualities', (done) => {
+    service.recitationQualitiesList('my-recitation').subscribe((qualities) => {
+      expect(qualities.length).toBe(1);
+      expect(qualities[0].slug).toBe('default');
+      expect(qualities[0].is_default).toBeTrue();
       done();
     });
 
     const req = httpMock.expectOne(
-      (r) => r.url.includes('/portal/recitations/my-recitation/folders/') && r.method === 'GET'
+      (r) => r.url.includes('/portal/recitations/my-recitation/qualities/') && r.method === 'GET'
     );
     req.flush([
       {
@@ -172,17 +172,17 @@ describe('RecitationsService', () => {
     ]);
   });
 
-  it('should create a recitation folder', (done) => {
+  it('should create a recitation quality', (done) => {
     service
-      .recitationFolderCreate('my-recitation', { name_ar: 'صدى', name_en: 'Echo' })
-      .subscribe((folder) => {
-        expect(folder.slug).toBe('echo');
-        expect(folder.is_default).toBeFalse();
+      .recitationQualityCreate('my-recitation', { name_ar: 'صدى', name_en: 'Echo' })
+      .subscribe((quality) => {
+        expect(quality.slug).toBe('echo');
+        expect(quality.is_default).toBeFalse();
         done();
       });
 
     const req = httpMock.expectOne(
-      (r) => r.url.includes('/portal/recitations/my-recitation/folders/') && r.method === 'POST'
+      (r) => r.url.includes('/portal/recitations/my-recitation/qualities/') && r.method === 'POST'
     );
     expect(req.request.body).toEqual({ name_ar: 'صدى', name_en: 'Echo' });
     req.flush({
@@ -198,17 +198,17 @@ describe('RecitationsService', () => {
     });
   });
 
-  it('should patch a recitation folder by slug', (done) => {
+  it('should patch a recitation quality by slug', (done) => {
     service
-      .recitationFolderPatch('my-recitation', 'echo', { name_en: 'With echo' })
-      .subscribe((folder) => {
-        expect(folder.name_en).toBe('With echo');
+      .recitationQualityPatch('my-recitation', 'echo', { name_en: 'With echo' })
+      .subscribe((quality) => {
+        expect(quality.name_en).toBe('With echo');
         done();
       });
 
     const req = httpMock.expectOne(
       (r) =>
-        r.url.includes('/portal/recitations/my-recitation/folders/echo/') && r.method === 'PATCH'
+        r.url.includes('/portal/recitations/my-recitation/qualities/echo/') && r.method === 'PATCH'
     );
     expect(req.request.body).toEqual({ name_en: 'With echo' });
     req.flush({
@@ -224,17 +224,17 @@ describe('RecitationsService', () => {
     });
   });
 
-  it('should patch folder visibility', (done) => {
+  it('should patch quality visibility', (done) => {
     service
-      .recitationFolderPatch('my-recitation', 'echo', { is_visible: false })
-      .subscribe((folder) => {
-        expect(folder.is_visible).toBeFalse();
+      .recitationQualityPatch('my-recitation', 'echo', { is_visible: false })
+      .subscribe((quality) => {
+        expect(quality.is_visible).toBeFalse();
         done();
       });
 
     const req = httpMock.expectOne(
       (r) =>
-        r.url.includes('/portal/recitations/my-recitation/folders/echo/') && r.method === 'PATCH'
+        r.url.includes('/portal/recitations/my-recitation/qualities/echo/') && r.method === 'PATCH'
     );
     expect(req.request.body).toEqual({ is_visible: false });
     req.flush({
@@ -251,17 +251,17 @@ describe('RecitationsService', () => {
     });
   });
 
-  it('should patch folder as default', (done) => {
+  it('should patch quality as default', (done) => {
     service
-      .recitationFolderPatch('my-recitation', 'echo', { is_default: true })
-      .subscribe((folder) => {
-        expect(folder.is_default).toBeTrue();
+      .recitationQualityPatch('my-recitation', 'echo', { is_default: true })
+      .subscribe((quality) => {
+        expect(quality.is_default).toBeTrue();
         done();
       });
 
     const req = httpMock.expectOne(
       (r) =>
-        r.url.includes('/portal/recitations/my-recitation/folders/echo/') && r.method === 'PATCH'
+        r.url.includes('/portal/recitations/my-recitation/qualities/echo/') && r.method === 'PATCH'
     );
     expect(req.request.body).toEqual({ is_default: true });
     req.flush({
@@ -278,21 +278,21 @@ describe('RecitationsService', () => {
     });
   });
 
-  it('should delete a recitation folder by slug', (done) => {
-    service.recitationFolderDelete('my-recitation', 'echo').subscribe(() => done());
+  it('should delete a recitation quality by slug', (done) => {
+    service.recitationQualityDelete('my-recitation', 'echo').subscribe(() => done());
 
     const req = httpMock.expectOne(
       (r) =>
-        r.url.includes('/portal/recitations/my-recitation/folders/echo/') && r.method === 'DELETE'
+        r.url.includes('/portal/recitations/my-recitation/qualities/echo/') && r.method === 'DELETE'
     );
     expect(req.request.method).toBe('DELETE');
     req.flush(null);
   });
 
-  it('recitationTimingUpload should append folder_id when provided', (done) => {
+  it('recitationTimingUpload should append quality_id when provided', (done) => {
     const file = new File(['{}'], '001.json', { type: 'application/json' });
     service.recitationTimingUpload(42, [file], 9).subscribe((res) => {
-      expect(res.folder_id).toBe(9);
+      expect(res.quality_id).toBe(9);
       done();
     });
 
@@ -300,10 +300,10 @@ describe('RecitationsService', () => {
     expect(req.request.method).toBe('POST');
     const body = req.request.body as FormData;
     expect(body.get('asset_id')).toBe('42');
-    expect(body.get('folder_id')).toBe('9');
+    expect(body.get('quality_id')).toBe('9');
     req.flush({
       asset_id: 42,
-      folder_id: 9,
+      quality_id: 9,
       created_total: 1,
       updated_total: 0,
       skipped_total: 0,
@@ -331,7 +331,7 @@ describe('RecitationsService', () => {
     req.event({ type: HttpEventType.UploadProgress, loaded: 100, total: 100 });
     req.flush({
       asset_id: 42,
-      folder_id: null,
+      quality_id: null,
       created_total: 1,
       updated_total: 0,
       skipped_total: 0,

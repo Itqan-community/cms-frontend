@@ -24,7 +24,7 @@ until it lines up with the mouth.
 
 |             |                                                                               |
 | ----------- | ----------------------------------------------------------------------------- |
-| Route       | `/admin/audio/timestamps/:trackId?recitation=<slug>&folder=<folder>`          |
+| Route       | `/admin/audio/timestamps/:trackId?recitation=<slug>&quality=<quality>`        |
 | Permission  | `portal_upload_timing` (`PORTAL_PERMISSIONS.PORTAL_UPLOAD_TIMING`)            |
 | Entry point | "Edit timestamps" action on each row of the tracks table in Recitation Detail |
 | Guards      | `permissionGuard` on activate, `timestampEditorCanDeactivate` on leave        |

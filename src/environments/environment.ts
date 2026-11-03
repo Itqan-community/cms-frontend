@@ -13,9 +13,9 @@ export const environment = {
   /** In-memory programs CRUD until portal programs API is live. */
   useProgramsMockApi: true,
   /**
-   * Recitation folder public visibility toggle. Off until the portal API exposes
-   * `is_visible` on folders — a toggle that cannot actually hide a folder would tell
+   * Recitation quality public visibility toggle. Off until the portal API exposes
+   * `is_visible` on qualities — a toggle that cannot actually hide a quality would tell
    * admins something untrue, so the control is not rendered rather than mocked.
    */
-  recitationFolderVisibility: true,
+  recitationQualityVisibility: true,
 };

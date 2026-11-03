@@ -3,9 +3,9 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, filter, map, tap } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import type {
-  RecitationFolderOut,
-  RecitationFolderWriteIn,
-} from '../models/recitation-folders.models';
+  RecitationQualityOut,
+  RecitationQualityWriteIn,
+} from '../models/recitation-qualities.models';
 import type { RecitationTimingUploadOut } from '../models/recitation-timings.models';
 import type {
   RecitationSurahTrackListItem,
@@ -115,19 +115,19 @@ export class RecitationsService {
   }
 
   /**
-   * POST /portal/timing/upload/ — multipart: asset_id, files[], optional folder_id.
+   * POST /portal/timing/upload/ — multipart: asset_id, files[], optional quality_id.
    * `onProgress` receives the uploaded fraction (0..1) of the request body.
    */
   recitationTimingUpload(
     assetId: number,
     files: File[],
-    folderId?: number | null,
+    qualityId?: number | null,
     onProgress?: (fraction: number) => void
   ): Observable<RecitationTimingUploadOut> {
     const formData = new FormData();
     formData.append('asset_id', String(assetId));
-    if (folderId != null) {
-      formData.append('folder_id', String(folderId));
+    if (qualityId != null) {
+      formData.append('quality_id', String(qualityId));
     }
     for (const file of files) {
       formData.append('files', file, file.name);
@@ -151,32 +151,32 @@ export class RecitationsService {
       );
   }
 
-  // --- Recitation folders (portal) ---
+  // --- Recitation qualities (portal) ---
 
-  recitationFoldersList(recitationSlug: string): Observable<RecitationFolderOut[]> {
-    return this.http.get<RecitationFolderOut[]>(this.recitationFoldersUrl(recitationSlug));
+  recitationQualitiesList(recitationSlug: string): Observable<RecitationQualityOut[]> {
+    return this.http.get<RecitationQualityOut[]>(this.recitationQualitiesUrl(recitationSlug));
   }
 
-  recitationFolderCreate(
+  recitationQualityCreate(
     recitationSlug: string,
-    body: RecitationFolderWriteIn
-  ): Observable<RecitationFolderOut> {
-    return this.http.post<RecitationFolderOut>(this.recitationFoldersUrl(recitationSlug), body);
+    body: RecitationQualityWriteIn
+  ): Observable<RecitationQualityOut> {
+    return this.http.post<RecitationQualityOut>(this.recitationQualitiesUrl(recitationSlug), body);
   }
 
-  recitationFolderPatch(
+  recitationQualityPatch(
     recitationSlug: string,
-    folderSlug: string,
-    body: RecitationFolderWriteIn
-  ): Observable<RecitationFolderOut> {
-    return this.http.patch<RecitationFolderOut>(
-      this.recitationFolderItemUrl(recitationSlug, folderSlug),
+    qualitySlug: string,
+    body: RecitationQualityWriteIn
+  ): Observable<RecitationQualityOut> {
+    return this.http.patch<RecitationQualityOut>(
+      this.recitationQualityItemUrl(recitationSlug, qualitySlug),
       body
     );
   }
 
-  recitationFolderDelete(recitationSlug: string, folderSlug: string): Observable<void> {
-    return this.http.delete<void>(this.recitationFolderItemUrl(recitationSlug, folderSlug));
+  recitationQualityDelete(recitationSlug: string, qualitySlug: string): Observable<void> {
+    return this.http.delete<void>(this.recitationQualityItemUrl(recitationSlug, qualitySlug));
   }
 
   // --- Recitation surah tracks (portal) ---
@@ -231,7 +231,7 @@ export class RecitationsService {
   }
 
   /**
-   * GET /portal/recitations/{slug}/recitation-tracks/?folder=&page=&page_size=
+   * GET /portal/recitations/{slug}/recitation-tracks/?quality=&page=&page_size=
    * (Previously numeric asset id in path; backend accepts recitation slug in the same segment.)
    */
   recitationTracksList(params: {
@@ -240,14 +240,14 @@ export class RecitationsService {
     asset_id: number;
     page?: number;
     page_size?: number;
-    /** Folder slug or localized name. Omit to list the default folder. */
-    folder?: string;
+    /** Quality slug or localized name. Omit to list the default quality. */
+    quality?: string;
   }): Observable<{ results: RecitationSurahTrackListItem[]; count: number }> {
     let httpParams = new HttpParams()
       .set('page', (params.page ?? 1).toString())
       .set('page_size', (params.page_size ?? 10).toString());
-    if (params.folder) {
-      httpParams = httpParams.set('folder', params.folder);
+    if (params.quality) {
+      httpParams = httpParams.set('quality', params.quality);
     }
 
     const url = `${this.portalBaseUrl}/recitations/${encodeURIComponent(params.recitation_slug)}/recitation-tracks/`;
@@ -262,12 +262,12 @@ export class RecitationsService {
       );
   }
 
-  private recitationFoldersUrl(recitationSlug: string): string {
-    return `${this.portalBaseUrl}/recitations/${encodeURIComponent(recitationSlug)}/folders/`;
+  private recitationQualitiesUrl(recitationSlug: string): string {
+    return `${this.portalBaseUrl}/recitations/${encodeURIComponent(recitationSlug)}/qualities/`;
   }
 
-  private recitationFolderItemUrl(recitationSlug: string, folderSlug: string): string {
-    return `${this.recitationFoldersUrl(recitationSlug)}${encodeURIComponent(folderSlug)}/`;
+  private recitationQualityItemUrl(recitationSlug: string, qualitySlug: string): string {
+    return `${this.recitationQualitiesUrl(recitationSlug)}${encodeURIComponent(qualitySlug)}/`;
   }
 
   private mapAssetTrackRow(row: RecitationTrackOut, assetId: number): RecitationSurahTrackListItem {
