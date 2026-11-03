@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, forkJoin, map, of, switchMap } from 'rxjs';
+import { callerShowsErrors } from '../../../core/interceptors/caller-shows-errors.context';
 import { environment } from '../../../../environments/environment';
 import type {
   AssetVersion,
@@ -115,8 +116,18 @@ export class AssetVersionsService {
     );
   }
 
-  delete(kind: AssetVersionParentKind, slug: string, versionId: number): Observable<void> {
-    return this.http.delete<void>(this.versionItemUrl(kind, slug, versionId));
+  /** `confirmUnpublish`: the caller warned that this deletes the published only
+   *  version, which unpublishes the asset (the backend refuses it otherwise). */
+  delete(
+    kind: AssetVersionParentKind,
+    slug: string,
+    versionId: number,
+    confirmUnpublish = false
+  ): Observable<void> {
+    return this.http.delete<void>(this.versionItemUrl(kind, slug, versionId), {
+      params: confirmUnpublish ? { confirm_unpublish: 'true' } : {},
+      context: callerShowsErrors(),
+    });
   }
 
   private segmentForKind(kind: AssetVersionParentKind): string {

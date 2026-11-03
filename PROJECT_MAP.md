@@ -378,16 +378,23 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   re-enabled); CSV `export/` then `file_url` fallback. Tafsir/translation/mushaf/font
   (`numbered()`): `name` is the locked version number and `label` the editable version name — the
   package registry (`itqan` CLI) only installs numbered versions; program keeps a free-text `name`.
-  Each row's CLI availability (`package_status`: released / withdrawn / removed / not released, with
-  `withdrawal_reason` / `removal_reason`) shows as a badge. Publishing an older version
-  (`publishing_rolls_back`) requires a reason, sent to `set-published/` and shown by the itqan CLI.
-  Remove (`PORTAL_REMOVE_PACKAGE_VERSION`, reason required) via `packages/versions/{id}/remove/`;
-  the same admins undo it on removed rows via `packages/versions/{id}/reinstate/` (reason required,
-  up to 100 characters, kept in the audit log). Publishing applies to tafsirs, translations, mushafs
-  and fonts (`supportsPublishing()`): mushafs/fonts publish via
-  `{mushafs|fonts}/{slug}/versions/{id}/set-published/` with no review step, and their upload modal
-  has a "Publish now" checkbox (default on, sends `publish`). Without `portal_publish_content` the
-  Publish button and checkbox are shown disabled with a permission tooltip.
+  Delete shows on every row but is blocked (`aria-disabled`, still focusable; the tooltip opens on
+  hover and focus) where the backend's `delete_blocked_reason` says a delete would be refused, with
+  that reason as its tooltip (`DELETE_BLOCKED_*`): only the newest version of a language can be
+  deleted, and the published one only while it is the only version — that one gets an unpublish
+  warning (`ADMIN.VERSION_PUBLISHING.DELETE_PUBLISHED_*`) and sends `confirm_unpublish=true`; a
+  refusal shows the backend's message, and `unpublish_not_confirmed` (published since the list
+  loaded) reloads the list. Each row's CLI availability (`package_status`: released / withdrawn /
+  removed / not released, with `withdrawal_reason` / `removal_reason`) shows as a badge. Publishing
+  an older version (`publishing_rolls_back`) requires a reason, sent to `set-published/` and shown
+  by the itqan CLI. Remove (`PORTAL_REMOVE_PACKAGE_VERSION`, reason required) via
+  `packages/versions/{id}/remove/`; the same admins undo it on removed rows via
+  `packages/versions/{id}/reinstate/` (reason required, up to 100 characters, kept in the audit
+  log). Publishing applies to tafsirs, translations, mushafs and fonts (`supportsPublishing()`):
+  mushafs/fonts publish via `{mushafs|fonts}/{slug}/versions/{id}/set-published/` with no review
+  step, and their upload modal has a "Publish now" checkbox (default on, sends `publish`). Without
+  `portal_publish_content` the Publish button and checkbox are shown disabled with a permission
+  tooltip.
 - `asset-content-editor/` + `asset-content-grid/` — Per-unit draft editor (surah/ayah/word/page
   content templates, and the tafsir-only `ayah_group` / `word_group` templates); flush before
   publish; leave blocked if PATCH fails. **Group templates:** each row is a publisher-chosen range

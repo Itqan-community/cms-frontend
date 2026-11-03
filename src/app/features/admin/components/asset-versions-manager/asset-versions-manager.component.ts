@@ -54,6 +54,7 @@ import type {
   AssetVersionParentKind,
   VersionBump,
 } from '../../models/asset-versions.models';
+import { resolveApiErrorMessage } from '../../../../shared/utils/api-error-resolver.util';
 import { AdminAuthService } from '../../services/admin-auth.service';
 import { AssetContentService } from '../../services/asset-content.service';
 import { AssetVersionsService } from '../../services/asset-versions.service';
@@ -678,23 +679,38 @@ export class AssetVersionsManagerComponent implements OnInit {
   }
 
   deleteRow(row: AssetVersion): void {
-    if (!this.canDeleteVersions()) {
+    // A blocked button stays focusable (aria-disabled) so its reason can be read.
+    if (!this.canDeleteVersions() || row.delete_blocked_reason) {
       return;
     }
     const dir = this.translate.currentLang === 'ar' ? 'rtl' : 'ltr';
+    // Only a language's first and only version can be deleted while published, and
+    // deleting it unpublishes the language, so say so before the publisher accepts.
+    const unpublishes = !!row.is_published;
     this.modal.confirm({
-      nzTitle: this.translate.instant(`${this.i18nPrefix}.DELETE_CONFIRM_TITLE`),
-      nzContent: this.translate.instant(`${this.i18nPrefix}.DELETE_CONFIRM_BODY`, {
-        name: row.name,
-      }),
-      nzOkText: this.translate.instant(`${this.i18nPrefix}.DELETE_OK`),
+      nzTitle: this.translate.instant(
+        unpublishes
+          ? 'ADMIN.VERSION_PUBLISHING.DELETE_PUBLISHED_TITLE'
+          : `${this.i18nPrefix}.DELETE_CONFIRM_TITLE`
+      ),
+      nzContent: this.translate.instant(
+        unpublishes
+          ? 'ADMIN.VERSION_PUBLISHING.DELETE_PUBLISHED_BODY'
+          : `${this.i18nPrefix}.DELETE_CONFIRM_BODY`,
+        { name: row.name }
+      ),
+      nzOkText: this.translate.instant(
+        unpublishes
+          ? 'ADMIN.VERSION_PUBLISHING.DELETE_PUBLISHED_OK'
+          : `${this.i18nPrefix}.DELETE_OK`
+      ),
       nzOkType: 'primary',
       nzOkDanger: true,
       nzCancelText: this.translate.instant('ADMIN.COMMON.CANCEL'),
       nzDirection: dir,
       nzOnOk: () =>
         new Promise<false | void>((resolve) => {
-          this.assetVersionsService.delete(this.kind, this.slug, row.id).subscribe({
+          this.assetVersionsService.delete(this.kind, this.slug, row.id, unpublishes).subscribe({
             next: () => {
               this.message.success(
                 this.translate.instant(`${this.i18nPrefix}.MESSAGES.DELETE_SUCCESS`)
@@ -705,10 +721,23 @@ export class AssetVersionsManagerComponent implements OnInit {
               this.loadList();
               resolve();
             },
-            error: () => {
+            error: (err: unknown) => {
               this.message.error(
-                this.translate.instant(`${this.i18nPrefix}.MESSAGES.DELETE_ERROR`)
+                resolveApiErrorMessage(
+                  err,
+                  { fallbackKey: `${this.i18nPrefix}.MESSAGES.DELETE_ERROR` },
+                  this.translate
+                )
               );
+              if (
+                err instanceof HttpErrorResponse &&
+                err.error?.error_name === 'unpublish_not_confirmed'
+              ) {
+                // Published since the list loaded: reload so a new attempt warns first.
+                this.loadList();
+                resolve();
+                return;
+              }
               resolve(false);
             },
           });
@@ -1280,5 +1309,17 @@ export class AssetVersionsManagerComponent implements OnInit {
 
   canDeleteVersions(): boolean {
     return this.adminAuth.hasPermission(VERSION_PERMISSIONS[this.kind].delete);
+  }
+
+  /** Tooltip for the delete action: why it is disabled, or the plain action label. */
+  deleteTooltipKey(ver: AssetVersion): string {
+    switch (ver.delete_blocked_reason) {
+      case 'version_not_latest':
+        return 'ADMIN.VERSION_PUBLISHING.DELETE_BLOCKED_NOT_LATEST';
+      case 'version_is_published':
+        return 'ADMIN.VERSION_PUBLISHING.DELETE_BLOCKED_PUBLISHED';
+      default:
+        return this.t('TOOLTIP_DELETE');
+    }
   }
 }

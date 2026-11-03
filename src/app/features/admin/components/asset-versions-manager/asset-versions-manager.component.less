@@ -190,16 +190,18 @@
       color: var(--act);
     }
 
-    &.action-icon:not([disabled]):hover,
-    &.action-icon:not([disabled]):focus-visible {
+    &.action-icon:not([disabled], [aria-disabled='true']):hover,
+    &.action-icon:not([disabled], [aria-disabled='true']):focus-visible {
       background: var(--act-bg);
       color: var(--act);
     }
 
     // Unavailable (e.g. publishing an unapproved version): plain grey, no tint.
-    &.action-icon[disabled] {
+    &.action-icon[disabled],
+    &.action-icon[aria-disabled='true'] {
       color: var(--admin-text-300, #bfbfbf);
       background: transparent;
+      cursor: not-allowed;
     }
   }
 
