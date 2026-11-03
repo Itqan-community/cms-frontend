@@ -125,6 +125,7 @@ export class RecitationFormComponent implements OnInit {
     license: ['', [Validators.required]],
     is_open_access: [false],
     restricted_for_tenant: [false],
+    is_draft: [false],
     /** Filled by the AI translate actions; sent on create only. */
     slug: [''],
   });
@@ -198,6 +199,7 @@ export class RecitationFormComponent implements OnInit {
       license: v.license ?? '',
       is_open_access: v.is_open_access ?? false,
       restricted_for_tenant: v.restricted_for_tenant ?? false,
+      status: v.is_draft ? 'draft' : 'ready',
     };
     const slug = v.slug?.trim();
     if (!this.isEditMode() && slug) body.slug = slug;
@@ -276,6 +278,7 @@ export class RecitationFormComponent implements OnInit {
             license: data.license,
             is_open_access: data.is_open_access,
             restricted_for_tenant: data.restricted_for_tenant,
+            is_draft: data.status === 'draft',
           });
           this.publisherDisplayName.set(data.publisher.name);
           this.loadRiwayahs(data.qiraah.id, data.riwayah?.id ?? null);

@@ -42,6 +42,8 @@ export interface TafsirItem {
   is_external: boolean;
   is_open_access: boolean;
   restricted_for_tenant: boolean;
+  /** Draft assets stay in the portal but are hidden from consumers. */
+  status?: AssetStatus;
   template: AssetTemplate | null;
   mushaf_layout: { id: number; name: string; page_count: number } | null;
   created_at: string;
@@ -64,6 +66,8 @@ export interface TafsirDetails {
   is_external: boolean;
   is_open_access: boolean;
   restricted_for_tenant: boolean;
+  /** Draft assets stay in the portal but are hidden from consumers. */
+  status?: AssetStatus;
   external_url: string | null;
   template: AssetTemplate | null;
   mushaf_layout: { id: number; name: string; page_count: number } | null;
@@ -104,6 +108,8 @@ export interface TafsirFormValue {
   is_external: boolean;
   is_open_access: boolean;
   restricted_for_tenant: boolean;
+  /** Draft assets stay in the portal but are hidden from consumers. */
+  status?: AssetStatus;
   external_url?: string | null;
   thumbnail?: File;
   /** Create-only: fixed at creation, immutable afterwards. */
@@ -132,3 +138,6 @@ export interface PublisherFilterResponse {
   results: PublisherFilterItem[];
   count: number;
 }
+
+/** `Asset.status`: a draft is hidden from the gallery, APIs and the itqan CLI. */
+export type AssetStatus = 'draft' | 'ready';

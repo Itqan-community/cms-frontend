@@ -179,6 +179,20 @@ describe('TranslationFormComponent template controls', () => {
     expect(body.mushaf_layout_id).toBe(1);
   });
 
+  it('loads a draft asset with the Draft switch on and sends it back as draft', () => {
+    configure({ slug: 'existing-translation' });
+    translationsServiceMock.getDetail.and.returnValue(of({ ...detail, status: 'draft' }));
+    translationsServiceMock.patch.and.returnValue(of(detail));
+    const fixture = TestBed.createComponent(TranslationFormComponent);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.form.controls.is_draft.value).toBeTrue();
+    fixture.componentInstance.form.controls.is_draft.setValue(false);
+    fixture.componentInstance.onSubmit();
+
+    expect(translationsServiceMock.patch.calls.mostRecent().args[1].status).toBe('ready');
+  });
+
   it('creates without long descriptions, which are optional', () => {
     configure({});
     translationsServiceMock.create.and.returnValue(of(detail));

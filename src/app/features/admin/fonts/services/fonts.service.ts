@@ -77,6 +77,9 @@ export class FontsService {
     if (payload.restricted_for_tenant !== undefined) {
       data.append('restricted_for_tenant', String(payload.restricted_for_tenant));
     }
+    if (payload.status !== undefined) {
+      data.append('status', payload.status);
+    }
     append('external_url', payload.external_url);
     if (payload.thumbnail) {
       data.append('thumbnail', payload.thumbnail);

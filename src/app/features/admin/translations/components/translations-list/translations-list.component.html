@@ -98,7 +98,7 @@
               }
               @if (showCol('access')) {
                 <td>
-                  @if (tr.is_open_access || tr.restricted_for_tenant) {
+                  @if (tr.is_open_access || tr.restricted_for_tenant || tr.status === 'draft') {
                     <div class="admin-list-access-tags">
                       @if (tr.is_open_access) {
                         <nz-tag nzColor="green">{{
@@ -109,6 +109,9 @@
                         <nz-tag nzColor="orange">{{
                           'ADMIN.COMMON.TAG_API_ONLY' | translate
                         }}</nz-tag>
+                      }
+                      @if (tr.status === 'draft') {
+                        <nz-tag>{{ 'ADMIN.COMMON.TAG_DRAFT' | translate }}</nz-tag>
                       }
                     </div>
                   } @else {

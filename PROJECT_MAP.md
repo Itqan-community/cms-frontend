@@ -105,6 +105,10 @@ Portal assets (recitations, tafsirs, translations) expose `is_open_access` and
 `is_open_access=true|false`. `restricted_for_tenant=true` assets are excluded from public CMS
 listings by the backend.
 
+Every asset form (mushaf, font, tafsir, translation, recitation) has a **Draft** switch (`is_draft`
+control → `status: 'draft' | 'ready'`, `ADMIN.COMMON.LABEL_DRAFT`). A draft stays in the portal
+list/detail with a `TAG_DRAFT` tag; the backend hides it from the gallery, APIs and the itqan CLI.
+
 ### Admin CRUD Flow (all entities follow same pattern)
 
 ```
