@@ -23,7 +23,9 @@ if (environment.sentryDsn) {
   });
 }
 
-bootstrapApplication(App, appConfig)
+// public/theme-loader.js: in dark mode, wait for antd-dark.css so NG-ZORRO never renders light.
+void (window.itqanThemeReady ?? Promise.resolve())
+  .then(() => bootstrapApplication(App, appConfig))
   .then(() => {
     // Successful boot: allow a future chunk-load failure in this tab to recover once.
     try {

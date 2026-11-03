@@ -114,17 +114,17 @@
     font-weight: 600;
 
     .content-changes__item--added & {
-      color: @added;
+      color: var(--color-success-text, @added);
       background: @added-bg;
     }
 
     .content-changes__item--modified & {
-      color: @modified;
+      color: var(--color-warning-text, @modified);
       background: @modified-bg;
     }
 
     .content-changes__item--removed & {
-      color: @removed;
+      color: var(--color-danger-text, @removed);
       background: @removed-bg;
     }
   }
@@ -188,13 +188,13 @@
     }
 
     .content-changes__review--approved & {
-      color: @added;
+      color: var(--color-success-text, @added);
       background: @added-bg;
       border-color: var(--color-success-border, #b7eb8f);
     }
 
     .content-changes__review--commented & {
-      color: @modified;
+      color: var(--color-warning-text, @modified);
       background: @modified-bg;
       border-color: var(--color-warning-border, #ffd591);
     }

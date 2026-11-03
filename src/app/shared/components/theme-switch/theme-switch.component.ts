@@ -24,7 +24,7 @@ import { ThemeService } from '../../../core/services/theme.service';
       />
       <span class="sr-only">{{ labelKey() | translate }}</span>
       @if (showLabel()) {
-        <span>{{ labelKey() | translate }}</span>
+        <span aria-hidden="true">{{ labelKey() | translate }}</span>
       }
     </button>
   `,

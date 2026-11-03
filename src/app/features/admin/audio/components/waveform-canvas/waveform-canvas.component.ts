@@ -8,6 +8,7 @@ import {
   inject,
   input,
   output,
+  untracked,
   viewChild,
 } from '@angular/core';
 import type { EditorMarker } from '../../models/audio-timestamps.models';
@@ -116,7 +117,7 @@ export class WaveformCanvasComponent {
       this.appTheme.theme();
       if (!this.renderer) return;
       this.renderer.setTheme(this.readTheme());
-      this.redraw();
+      untracked(() => this.redraw());
     });
   }
 

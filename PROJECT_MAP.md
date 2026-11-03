@@ -143,7 +143,7 @@ cms-frontend/
 │   ├── assets/                      # images/, icons/, data/ (Quran JSON)
 │   └── i18n/                        # en.json, ar.json (~1370 keys each)
 ├── src/
-│   ├── index.html                   # Root HTML (Arabic RTL default, Inter font, inline theme bootstrap)
+│   ├── index.html                   # Root HTML (Arabic RTL default, Inter font, theme-loader.js)
 │   ├── main.ts                      # Angular bootstrap + Sentry init
 │   ├── styles.less                  # Global utilities (sr-only, card, flex)
 │   ├── theme.less                   # CSS vars (+ html[data-theme='dark'] values) + NG-ZORRO overrides
@@ -738,9 +738,11 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
 8. **i18n first** — All user-facing strings use `translate` pipe or `TranslateService`
 9. **CSS variables** — Theming via `--color-*`, `--radius-*`, `--shadow-*` custom properties
 10. **Dark theme** — `ThemeService` (`core/services/theme.service.ts`) + `window.itqanApplyTheme`
-    (inline in `index.html`, runs before boot so there is no light flash) set `data-theme` and
-    `data-ag-theme-mode` on `<html>` and insert `antd-dark.css` right after `antd-*.css`. Choice
-    saved in `localStorage.theme`, else OS preference. New colours: use an existing token, or
+    (`public/theme-loader.js`, a blocking script at the start of `<body>`, so there is no light
+    flash) set `data-theme` and `data-ag-theme-mode` on `<html>` and insert `antd-dark.css` right
+    after `antd-*.css`; `main.ts` waits for `window.itqanThemeReady` before bootstrapping. If
+    `antd-dark.css` fails to load the theme stays light. Choice saved in `localStorage.theme` (only
+    once applied), else OS preference. New colours: use an existing token, or
     `var(--dark-only-token, <light literal>)` with the token defined only under
     `html[data-theme='dark']` in `theme.less` — never a bare hex. AG Grid quartz follows
     `data-ag-theme-mode` itself; ECharts uses the `dark` theme via `UsageChartComponent`; canvas
