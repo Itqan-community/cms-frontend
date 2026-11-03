@@ -679,7 +679,8 @@ export class AssetVersionsManagerComponent implements OnInit {
   }
 
   deleteRow(row: AssetVersion): void {
-    if (!this.canDeleteVersions()) {
+    // A blocked button stays focusable (aria-disabled) so its reason can be read.
+    if (!this.canDeleteVersions() || row.delete_blocked_reason) {
       return;
     }
     const dir = this.translate.currentLang === 'ar' ? 'rtl' : 'ltr';
@@ -709,7 +710,7 @@ export class AssetVersionsManagerComponent implements OnInit {
       nzDirection: dir,
       nzOnOk: () =>
         new Promise<false | void>((resolve) => {
-          this.assetVersionsService.delete(this.kind, this.slug, row.id).subscribe({
+          this.assetVersionsService.delete(this.kind, this.slug, row.id, unpublishes).subscribe({
             next: () => {
               this.message.success(
                 this.translate.instant(`${this.i18nPrefix}.MESSAGES.DELETE_SUCCESS`)
@@ -728,6 +729,15 @@ export class AssetVersionsManagerComponent implements OnInit {
                   this.translate
                 )
               );
+              if (
+                err instanceof HttpErrorResponse &&
+                err.error?.error_name === 'unpublish_not_confirmed'
+              ) {
+                // Published since the list loaded: reload so a new attempt warns first.
+                this.loadList();
+                resolve();
+                return;
+              }
               resolve(false);
             },
           });

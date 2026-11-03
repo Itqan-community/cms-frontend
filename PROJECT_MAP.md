@@ -378,11 +378,13 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   re-enabled); CSV `export/` then `file_url` fallback. Tafsir/translation/mushaf/font
   (`numbered()`): `name` is the locked version number and `label` the editable version name — the
   package registry (`itqan` CLI) only installs numbered versions; program keeps a free-text `name`.
-  Delete shows on every row but is disabled where the backend's `delete_blocked_reason` says a
-  delete would be refused, with that reason as its tooltip (`DELETE_BLOCKED_*`): only the newest
-  version of a language can be deleted, and the published one only while it is the only version —
-  that one gets an unpublish warning (`ADMIN.VERSION_PUBLISHING.DELETE_PUBLISHED_*`); a refusal
-  shows the backend's message. Each row's CLI availability (`package_status`: released / withdrawn /
+  Delete shows on every row but is blocked (`aria-disabled`, still focusable; the tooltip opens on
+  hover and focus) where the backend's `delete_blocked_reason` says a delete would be refused, with
+  that reason as its tooltip (`DELETE_BLOCKED_*`): only the newest version of a language can be
+  deleted, and the published one only while it is the only version — that one gets an unpublish
+  warning (`ADMIN.VERSION_PUBLISHING.DELETE_PUBLISHED_*`) and sends `confirm_unpublish=true`; a
+  refusal shows the backend's message, and `unpublish_not_confirmed` (published since the list
+  loaded) reloads the list. Each row's CLI availability (`package_status`: released / withdrawn /
   removed / not released, with `withdrawal_reason` / `removal_reason`) shows as a badge. Publishing
   an older version (`publishing_rolls_back`) requires a reason, sent to `set-published/` and shown
   by the itqan CLI. Remove (`PORTAL_REMOVE_PACKAGE_VERSION`, reason required) via

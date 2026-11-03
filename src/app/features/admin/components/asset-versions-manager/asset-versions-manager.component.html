@@ -648,20 +648,24 @@
                         </button>
                       }
                       @if (canDeleteVersions()) {
-                        <!-- On a wrapper: a disabled button shows no tooltip itself. -->
-                        <span nz-tooltip [nzTooltipTitle]="deleteTooltipKey(ver) | translate">
-                          <button
-                            type="button"
-                            nz-button
-                            nzType="text"
-                            class="asset-versions-manager__act asset-versions-manager__act--delete action-icon action-icon--delete"
-                            [attr.aria-label]="deleteTooltipKey(ver) | translate"
-                            [disabled]="!!ver.delete_blocked_reason"
-                            (click)="deleteRow(ver)"
-                          >
-                            <ng-icon name="lucideTrash2" aria-hidden="true" />
-                          </button>
-                        </span>
+                        <!-- aria-disabled, not disabled: a blocked button stays focusable so
+                             keyboard users get its reason (the tooltip also opens on focus). -->
+                        <button
+                          type="button"
+                          nz-button
+                          nzType="text"
+                          class="asset-versions-manager__act asset-versions-manager__act--delete action-icon action-icon--delete"
+                          nz-tooltip
+                          #deleteTip="nzTooltip"
+                          [nzTooltipTitle]="deleteTooltipKey(ver) | translate"
+                          [attr.aria-label]="deleteTooltipKey(ver) | translate"
+                          [attr.aria-disabled]="ver.delete_blocked_reason ? 'true' : null"
+                          (focus)="deleteTip.show()"
+                          (blur)="deleteTip.hide()"
+                          (click)="deleteRow(ver)"
+                        >
+                          <ng-icon name="lucideTrash2" aria-hidden="true" />
+                        </button>
                       }
                     </div>
                   }

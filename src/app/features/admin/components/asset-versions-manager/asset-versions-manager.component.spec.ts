@@ -842,7 +842,36 @@ describe('AssetVersionsManagerComponent', () => {
       expect(options?.nzContent).toBe('ADMIN.VERSION_PUBLISHING.DELETE_PUBLISHED_BODY');
       expect(options?.nzOkText).toBe('ADMIN.VERSION_PUBLISHING.DELETE_PUBLISHED_OK');
       await (options?.nzOnOk as () => Promise<unknown>)();
-      expect(versionsService.delete).toHaveBeenCalledWith('translation', 'sahih-intl', 143);
+      expect(versionsService.delete).toHaveBeenCalledWith('translation', 'sahih-intl', 143, true);
+    });
+
+    it('does nothing for a version whose delete is blocked', () => {
+      component.deleteRow({
+        id: 143,
+        name: '1.0',
+        delete_blocked_reason: 'version_not_latest',
+      } as AssetVersion);
+
+      expect(modal.confirm).not.toHaveBeenCalled();
+    });
+
+    it('reloads the list when the version was published since it loaded', async () => {
+      versionsService.delete.and.returnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 409,
+              error: { error_name: 'unpublish_not_confirmed', message: 'Published since.' },
+            })
+        )
+      );
+      versionsService.list.calls.reset();
+      component.deleteRow({ id: 143, name: '1.0', is_published: false } as AssetVersion);
+
+      await expectAsync((options?.nzOnOk as () => Promise<unknown>)()).toBeResolvedTo(undefined);
+      expect(versionsService.delete).toHaveBeenCalledWith('translation', 'sahih-intl', 143, false);
+      expect(message.error).toHaveBeenCalledWith('Published since.');
+      expect(versionsService.list).toHaveBeenCalled();
     });
 
     it("shows the backend's reason when the delete is refused", async () => {
