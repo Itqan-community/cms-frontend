@@ -432,6 +432,17 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   clipboard's spreadsheet HTML first, as Excel does (`parseClipboardHtml`: a `<br>` stays a line
   break inside the cell), else the TSV/CSV text (`parseClipboardTable`; a quote opens a quoted value
   only at the start of a cell)
+- `asset-review-grid/` — Translation/tafsir review (`/admin/{translations|tafsirs}/:slug/review`):
+  language, version and state selects in the toolbar, then an AG Grid of changes. Client-side row
+  model holding one server page (`app-admin-table-pagination`), so rows size to their diff
+  (`autoHeight`, `domLayout="autoHeight"`). Floating filters run server-side: the grid's filter
+  model goes as the JSON `filters` param of `review/changes/` and of "Approve all" — `unit_surah`
+  (surah dropdown), `ayah` (number), `column` / `change_type` (`OptionsFloatingFilterComponent`
+  dropdowns, text `equals`), `text` (before or after), `commit_ref`, `edited_by`, `comment`,
+  `reviewed_by` (text). Text conditions always pass locally (`textMatcher: () => true`) so the page
+  the server matched is never re-filtered. Cells live in `review-grid-cells.component.ts` (diff with
+  "Show full text", state + reviewer, approve/comment/unreview) and read the grid through `context`
+  (`ReviewGridContext`). Checkbox selection (approved rows not selectable) feeds "Approve selected"
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`
 - `search-panel/` — Search UI

@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
@@ -8,25 +7,52 @@ import {
   computed,
   inject,
   input,
+  isDevMode,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { AgGridAngular } from 'ag-grid-angular';
+import type {
+  ColDef,
+  FilterChangedEvent,
+  GetRowIdParams,
+  GridApi,
+  GridReadyEvent,
+  INumberFilterParams,
+  ITextFilterParams,
+  LocaleText,
+  RowSelectionOptions,
+} from 'ag-grid-community';
+import {
+  CellStyleModule,
+  ClientSideRowModelModule,
+  CustomFilterModule,
+  LocaleModule,
+  ModuleRegistry,
+  NumberFilterModule,
+  RowApiModule,
+  RowAutoHeightModule,
+  RowSelectionModule,
+  TextFilterModule,
+  ValidationModule,
+  themeQuartz,
+} from 'ag-grid-community';
 import { Subject, takeUntil } from 'rxjs';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
-import { NzTableModule } from 'ng-zorro-antd/table';
 
 import { AdminTablePaginationComponent } from '../admin-table-pagination/admin-table-pagination.component';
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
+import type { AssetColumn, AssetTemplate } from '../../models/asset-content.models';
 import type {
   BulkApproveRequest,
   ReviewChange,
+  ReviewFilterModel,
   ReviewState,
   ReviewVersion,
 } from '../../models/asset-review.models';
@@ -37,47 +63,84 @@ import { AssetReviewService } from '../../services/asset-review.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { localizedLanguageName } from '../../utils/iso-639.util';
 import { isPreviewCut } from '../../utils/text-preview.util';
-import { diffWords, type WordDiff } from '../../utils/word-diff.util';
+import { diffWords } from '../../utils/word-diff.util';
 import { ChangeCompareComponent } from '../change-compare/change-compare.component';
 import { columnLabel } from '../../utils/column-label.util';
+import { SurahFloatingFilterComponent } from '../asset-content-grid/surah-floating-filter.component';
+import {
+  OptionsFloatingFilterComponent,
+  ReviewActionsCellComponent,
+  ReviewChangeCellComponent,
+  ReviewStateCellComponent,
+  type OptionsFloatingFilterParams,
+  type ReviewActionType,
+  type ReviewGridContext,
+  type RowCompare,
+} from './review-grid-cells.component';
 
-export type ReviewActionType = 'approve' | 'comment' | 'unreview';
+export type { ReviewActionType } from './review-grid-cells.component';
+
+// Only what this grid uses (see the content editor's `GRID_MODULES`). Rows are one
+// server page at a time, so the client-side row model can size each row to its
+// diff (`autoHeight`), which the infinite row model can't.
+ModuleRegistry.registerModules([
+  ClientSideRowModelModule,
+  TextFilterModule,
+  NumberFilterModule,
+  CustomFilterModule,
+  RowSelectionModule,
+  RowAutoHeightModule,
+  // `getRowNode` (un-ticking a row once approved).
+  RowApiModule,
+  CellStyleModule,
+  LocaleModule,
+  ...(isDevMode() ? [ValidationModule] : []),
+]);
 
 type StateFilter = 'all' | ReviewState;
 
 const DEFAULT_PAGE_SIZE = 25;
 /** Unchanged words kept around each change — the same as the versions list. */
 const CONTEXT_WORDS = 2;
+const CHANGE_TYPES: readonly ReviewChange['change_type'][] = ['added', 'modified', 'removed'];
+/** Templates whose units sit in one surah / start at an ayah (all but `page`). */
+const AYAH_TEMPLATES: readonly AssetTemplate[] = ['ayah', 'word', 'ayah_group', 'word_group'];
 
-/** What a review row compares: the reviewed text against what it replaces. */
-interface RowCompare {
-  before: string;
-  after: string;
-  words: WordDiff | null;
-  /** Shown cut short inline: offer "Show full text". */
-  cut: boolean;
-}
+/**
+ * Every filter runs on the server, over the whole language (see `loadChanges`).
+ * The client-side row model also filters the page it holds, so text conditions
+ * always pass locally (the server already matched them, ignoring vocalization and
+ * across before/after); `blank` / `notBlank` and number filters agree on both sides.
+ */
+const TEXT_FILTER_PARAMS: ITextFilterParams = {
+  maxNumConditions: 2,
+  trimInput: true,
+  textMatcher: () => true,
+};
+const NUMBER_FILTER_PARAMS: INumberFilterParams = {
+  maxNumConditions: 2,
+  inRangeInclusive: true,
+  allowedCharPattern: '\\d',
+};
 
 @Component({
   selector: 'app-asset-review-grid',
   standalone: true,
   imports: [
-    DatePipe,
     FormsModule,
     TranslateModule,
     NzButtonModule,
     NzInputModule,
     NzModalModule,
     NzSelectModule,
-    NzSpinModule,
-    NzTableModule,
+    AgGridAngular,
     AdminTablePaginationComponent,
     ChangeCompareComponent,
   ],
   templateUrl: './asset-review-grid.component.html',
   styleUrl: './asset-review-grid.component.less',
 })
-export class AssetReviewGridComponent implements OnInit {
+export class AssetReviewGridComponent implements OnInit, ReviewGridContext {
   private readonly reviewService = inject(AssetReviewService);
   private readonly contentService = inject(AssetContentService);
   private readonly adminAuth = inject(AdminAuthService);
@@ -107,15 +170,21 @@ export class AssetReviewGridComponent implements OnInit {
   readonly languages = signal<string[]>([]);
   readonly selectedLanguage = signal<string | null>(null);
   readonly changes = signal<ReviewChange[]>([]);
-  /** The asset's number of text columns (null until loaded, or when unavailable). */
-  private readonly columnCount = signal<number | null>(null);
-  /** Several text columns: each row names the column its change belongs to. Until
-   *  the asset's columns load, guessed from the changes on this page. */
+  /** The asset's text columns (null until loaded, or when unavailable). */
+  private readonly columns = signal<AssetColumn[] | null>(null);
+  /** Several text columns: a column shows (and filters) each change's column.
+   *  Until the asset's columns load, guessed from the changes on this page. */
   readonly multiColumn = computed(() => {
-    const count = this.columnCount();
-    if (count !== null) return count > 1;
+    const columns = this.columns();
+    if (columns !== null) return columns.length > 1;
     return this.changes().some((c) => !!c.column && c.column !== 'text');
   });
+  /** The asset's unit template, from its changes (fixed per asset); null until any load. */
+  readonly template = signal<AssetTemplate | null>(null);
+  /** The grid's column filters, sent with every listing and with "Approve all". */
+  readonly filterModel = signal<ReviewFilterModel>({});
+  readonly hasColumnFilters = computed(() => Object.keys(this.filterModel()).length > 0);
+  private gridApi: GridApi<ReviewChange> | null = null;
   readonly total = signal(0);
   readonly page = signal(1);
   readonly pageSize = signal(DEFAULT_PAGE_SIZE);
@@ -133,15 +202,6 @@ export class AssetReviewGridComponent implements OnInit {
 
   /** Rows ticked for "Approve selected" — on the current page only. */
   readonly selectedIds = signal<ReadonlySet<number>>(new Set());
-  /** Rows that can be ticked: approved ones have nothing left to approve. */
-  readonly selectableRows = computed(() =>
-    this.changes().filter((r) => r.review_state !== 'approved')
-  );
-  readonly allSelected = computed(() => {
-    const rows = this.selectableRows();
-    return rows.length > 0 && rows.every((r) => this.selectedIds().has(r.id));
-  });
-  readonly someSelected = computed(() => this.selectedIds().size > 0 && !this.allSelected());
   /** A bulk approve is in flight. */
   readonly bulkApproving = signal(false);
   /** "Approve all" has nothing to do when only approved changes are listed. */
@@ -159,7 +219,7 @@ export class AssetReviewGridComponent implements OnInit {
    * the net change since the last approval; a unit never approved compares with
    * the text this commit replaced.
    */
-  readonly compare = computed(() => {
+  readonly compare = computed<ReadonlyMap<number, RowCompare>>(() => {
     const byId = new Map<number, RowCompare>();
     for (const row of this.changes()) {
       const before = row.baseline_text || row.old_text || '';
@@ -187,11 +247,6 @@ export class AssetReviewGridComponent implements OnInit {
   readonly langName = (code: string): string =>
     localizedLanguageName(code, this.translate.currentLang || 'en');
 
-  /** i18n key for a review state (e.g. "approved" → ADMIN.REVIEW.STATE.APPROVED). */
-  stateKey(state: ReviewState): string {
-    return `ADMIN.REVIEW.STATE.${state.toUpperCase()}`;
-  }
-
   /** A row's column, labelled in the interface language (its key when unlabelled). */
   columnName(change: ReviewChange): string {
     return columnLabel(
@@ -205,23 +260,231 @@ export class AssetReviewGridComponent implements OnInit {
     return `ADMIN.REVIEW.TYPE.${type.toUpperCase()}`;
   }
 
+  readonly rtl = computed(() => this.translate.currentLang === 'ar');
+  readonly theme = themeQuartz;
+  /** The cells' view of this component (`ReviewGridContext`). */
+  readonly gridContext: ReviewGridContext = this;
+
+  /** Grid-owned text in the UI language: the editor's filter texts (AG Grid's own
+   *  locale keys) and the empty-page message. Read once, when the grid is created. */
+  readonly localeText = computed<LocaleText>(() => {
+    const grid: unknown = this.translate.instant('ADMIN.CONTENT_EDITOR.GRID');
+    return {
+      loadingOoo: this.translate.instant('COMMON.LOADING'),
+      noRowsToShow: this.translate.instant('ADMIN.REVIEW.NO_CHANGES'),
+      ...(typeof grid === 'object' && grid !== null ? (grid as LocaleText) : {}),
+    };
+  });
+
+  /** Ticking a row selects it for "Approve selected"; approved rows can't be ticked. */
+  readonly rowSelection: RowSelectionOptions<ReviewChange> = {
+    mode: 'multiRow',
+    checkboxes: true,
+    headerCheckbox: true,
+    isRowSelectable: (node) => node.data?.review_state !== 'approved',
+  };
+
+  readonly defaultColDef: ColDef<ReviewChange> = {
+    resizable: true,
+    // Changes come back newest commit first; the endpoint has no other order.
+    sortable: false,
+    suppressMovable: true,
+  };
+
+  readonly getRowId = (params: GetRowIdParams<ReviewChange>): string => String(params.data.id);
+
+  readonly columnDefs = computed(() => this.buildColumnDefs());
+
   ngOnInit(): void {
     if (!this.canReview()) {
       return;
     }
     this.loadLanguages();
-    this.loadColumnCount();
+    this.loadColumns();
   }
 
-  /** How many text columns the asset has; failures keep the page-based guess. */
-  private loadColumnCount(): void {
+  /** The asset's text columns; failures keep the page-based guess. */
+  private loadColumns(): void {
     this.contentService
       .listColumns(this.kind, this.slug)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (columns) => this.columnCount.set(columns.length || null),
-        error: () => this.columnCount.set(null),
+        next: (columns) => this.columns.set(columns.length ? columns : null),
+        error: () => this.columns.set(null),
       });
+  }
+
+  /**
+   * One column per field a reviewer narrows by, each with a floating filter:
+   * the unit (a surah dropdown, filtering `unit_surah`), its ayah number, the
+   * text column (several-column assets), the change type, the change's text
+   * (before or after), its commit, editor and comment, and who reviewed it.
+   * Every filter model key is a backend `filters` key (see `TEXT_FILTER_PARAMS`).
+   */
+  buildColumnDefs(): ColDef<ReviewChange>[] {
+    const template = this.template();
+    const textFilter: ColDef<ReviewChange> = {
+      filter: 'agTextColumnFilter',
+      filterParams: TEXT_FILTER_PARAMS,
+      floatingFilter: true,
+    };
+    const optionsFilter = (options: OptionsFloatingFilterParams['options']) =>
+      ({
+        ...textFilter,
+        floatingFilterComponent: OptionsFloatingFilterComponent,
+        floatingFilterComponentParams: {
+          options,
+          allLabel: this.translate.instant('ADMIN.REVIEW.FILTER.ALL'),
+        } satisfies Partial<OptionsFloatingFilterParams>,
+        // The dropdown is the whole filter UI for this column.
+        suppressHeaderFilterButton: true,
+        suppressFloatingFilterButton: true,
+      }) satisfies ColDef<ReviewChange>;
+    const hasSurah = template !== 'page';
+    const columns: ColDef<ReviewChange>[] = [
+      {
+        colId: 'unit_surah',
+        headerName: this.translate.instant('ADMIN.REVIEW.COLUMN.UNIT'),
+        width: hasSurah ? 170 : 120,
+        pinned: this.rtl() ? 'right' : 'left',
+        // Filters on the surah number; shows the unit's reference.
+        valueGetter: ({ data }) => data?.surah ?? null,
+        valueFormatter: ({ data }) => data?.label ?? '',
+        // A range label reads start → end only left-to-right, also in Arabic.
+        cellStyle: { direction: 'ltr', unicodeBidi: 'isolate' },
+        ...(hasSurah
+          ? {
+              filter: 'agNumberColumnFilter',
+              filterParams: NUMBER_FILTER_PARAMS,
+              floatingFilter: true,
+              floatingFilterComponent: SurahFloatingFilterComponent,
+              suppressHeaderFilterButton: true,
+              suppressFloatingFilterButton: true,
+            }
+          : {}),
+      },
+    ];
+    if (template === null || AYAH_TEMPLATES.includes(template)) {
+      columns.push({
+        field: 'ayah',
+        headerName: this.translate.instant('ADMIN.REVIEW.COLUMN.AYAH'),
+        width: 110,
+        filter: 'agNumberColumnFilter',
+        filterParams: NUMBER_FILTER_PARAMS,
+        floatingFilter: true,
+      });
+    }
+    if (this.multiColumn()) {
+      columns.push({
+        field: 'column',
+        headerName: this.translate.instant('ADMIN.REVIEW.COLUMN.COLUMN'),
+        width: 150,
+        valueFormatter: ({ data }) => (data ? this.columnName(data) : ''),
+        cellClass: 'asset-review-grid__column',
+        ...optionsFilter(
+          (this.columns() ?? []).map((c) => ({
+            value: c.key,
+            label: columnLabel(c, this.translate.currentLang),
+          }))
+        ),
+      });
+    }
+    columns.push(
+      {
+        field: 'change_type',
+        headerName: this.translate.instant('ADMIN.REVIEW.COLUMN.TYPE'),
+        width: 120,
+        valueFormatter: ({ value }) =>
+          value ? this.translate.instant(this.typeKey(value as ReviewChange['change_type'])) : '',
+        ...optionsFilter(
+          CHANGE_TYPES.map((type) => ({
+            value: type,
+            label: this.translate.instant(this.typeKey(type)),
+          }))
+        ),
+      },
+      {
+        colId: 'text',
+        headerName: this.translate.instant('ADMIN.REVIEW.COLUMN.CHANGE'),
+        flex: 1,
+        minWidth: 320,
+        // The text the change is about: what it wrote, or what it removed.
+        valueGetter: ({ data }) => data?.new_text || data?.old_text || '',
+        cellRenderer: ReviewChangeCellComponent,
+        autoHeight: true,
+        ...textFilter,
+      },
+      {
+        field: 'commit_ref',
+        headerName: this.translate.instant('ADMIN.REVIEW.COLUMN.COMMIT'),
+        width: 120,
+        cellClass: 'admin-mono',
+        ...textFilter,
+      },
+      {
+        field: 'edited_by',
+        headerName: this.translate.instant('ADMIN.REVIEW.COLUMN.EDITOR'),
+        width: 150,
+        cellClass: 'asset-review-grid__editor',
+        valueFormatter: ({ value }) =>
+          (value as string | null) ?? this.translate.instant('COMMON.EM_DASH'),
+        ...textFilter,
+      },
+      {
+        field: 'comment',
+        headerName: this.translate.instant('ADMIN.REVIEW.COLUMN.COMMENT'),
+        width: 200,
+        wrapText: true,
+        autoHeight: true,
+        cellClass: 'asset-review-grid__comment-cell',
+        ...textFilter,
+      },
+      {
+        // The state is the toolbar's filter; this column's filter is the reviewer.
+        colId: 'reviewed_by',
+        field: 'reviewed_by',
+        headerName: this.translate.instant('ADMIN.REVIEW.COLUMN.STATE'),
+        width: 170,
+        cellRenderer: ReviewStateCellComponent,
+        autoHeight: true,
+        ...textFilter,
+        filterParams: {
+          ...TEXT_FILTER_PARAMS,
+          filterPlaceholder: this.translate.instant('ADMIN.REVIEW.REVIEWER_FILTER'),
+        },
+      },
+      {
+        colId: 'actions',
+        headerName: this.translate.instant('ADMIN.REVIEW.COLUMN.ACTIONS'),
+        width: 230,
+        pinned: this.rtl() ? 'left' : 'right',
+        cellRenderer: ReviewActionsCellComponent,
+        autoHeight: true,
+      }
+    );
+    return columns;
+  }
+
+  onGridReady(event: GridReadyEvent<ReviewChange>): void {
+    this.gridApi = event.api;
+  }
+
+  /** A column filter changed: list page 1 of what the filters now match. */
+  onFilterChanged(event: FilterChangedEvent<ReviewChange>): void {
+    this.filterModel.set(event.api.getFilterModel());
+    this.page.set(1);
+    this.loadChanges();
+  }
+
+  clearColumnFilters(): void {
+    // Raises `filterChanged`, which reloads.
+    this.gridApi?.setFilterModel(null);
+  }
+
+  /** Ticked rows, as the grid reports them. */
+  onSelectionChanged(): void {
+    const rows = this.gridApi?.getSelectedRows() ?? [];
+    this.selectedIds.set(new Set(rows.map((r) => r.id)));
   }
 
   loadLanguages(): void {
@@ -280,6 +543,7 @@ export class AssetReviewGridComponent implements OnInit {
     // The ticked rows belong to the old listing: drop them now, so "Approve
     // selected" can't send them along with the new language or filters.
     this.selectedIds.set(new Set());
+    this.gridApi?.deselectAll();
     const filter = this.stateFilter();
     this.reviewService
       .listChanges(
@@ -289,11 +553,13 @@ export class AssetReviewGridComponent implements OnInit {
         this.page(),
         this.pageSize(),
         filter === 'all' ? null : filter,
-        this.selectedVersion()
+        this.selectedVersion(),
+        this.filterModel()
       )
       .pipe(takeUntil(this.cancelInFlightChanges$), takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
+          if (res.results.length) this.template.set(res.results[0].unit_type);
           this.changes.set(res.results);
           this.total.set(res.count);
           this.loading.set(false);
@@ -376,10 +642,7 @@ export class AssetReviewGridComponent implements OnInit {
       next.delete(id);
     }
     this.selectedIds.set(next);
-  }
-
-  toggleAll(checked: boolean): void {
-    this.selectedIds.set(new Set(checked ? this.selectableRows().map((r) => r.id) : []));
+    this.gridApi?.getRowNode(String(id))?.setSelected(checked);
   }
 
   approveSelected(): void {
@@ -403,6 +666,7 @@ export class AssetReviewGridComponent implements OnInit {
       language,
       ...(filter === 'unreviewed' || filter === 'commented' ? { state: filter } : {}),
       ...(version !== null ? { version } : {}),
+      ...(this.hasColumnFilters() ? { filters: this.filterModel() } : {}),
     };
     this.modal.confirm({
       nzTitle: this.translate.instant('ADMIN.REVIEW.BULK.CONFIRM_TITLE'),
