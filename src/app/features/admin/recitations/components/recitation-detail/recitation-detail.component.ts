@@ -70,6 +70,7 @@ import {
 } from '../../utils/timing-upload-result.format';
 import { QualitySwitcherComponent } from '../quality-switcher/quality-switcher.component';
 import { AssetUsageSectionComponent } from '../../../../usage/components/asset-usage-section/asset-usage-section.component';
+import { AssetChannelTagsComponent } from '../../../components/asset-channels/asset-channels.component';
 
 const TRACKS_PAGE_SIZE = 10;
 const MAX_MP3_FILES = 114;
@@ -78,6 +79,7 @@ const MAX_MP3_FILES = 114;
   selector: 'app-recitation-detail',
   standalone: true,
   imports: [
+    AssetChannelTagsComponent,
     AssetUsageSectionComponent,
     DatePipe,
     RouterLink,
@@ -142,7 +144,7 @@ export class RecitationDetailComponent implements OnInit {
 
   readonly canViewOnGallery = computed(() => {
     const rec = this.recitation();
-    return !!rec?.id && !rec.restricted_for_tenant;
+    return !!rec?.id && rec.in_gallery;
   });
 
   readonly canViewReciter = computed(() => {

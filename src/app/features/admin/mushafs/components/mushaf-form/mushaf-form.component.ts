@@ -9,6 +9,7 @@ import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NgIcon } from '@ng-icons/core';
 import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
@@ -16,8 +17,12 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
-import { isRestrictedForTenantConflictError } from '../../../../../shared/utils/error.utils';
 import { AssetInitialVersionFieldsComponent } from '../../../components/asset-initial-version-fields/asset-initial-version-fields.component';
+import { AssetChannelsFieldsComponent } from '../../../components/asset-channels/asset-channels.component';
+import {
+  confirmChannelChange,
+  getChannelConsumersConflict,
+} from '../../../utils/asset-channels.util';
 import { AdminTenantService } from '../../../services/admin-tenant.service';
 import { versionNumberValidator } from '../../../utils/version-number.util';
 import {
@@ -33,6 +38,7 @@ import { assetSlugValidators } from '../../../utils/asset-slug.util';
   selector: 'app-mushaf-form',
   standalone: true,
   imports: [
+    AssetChannelsFieldsComponent,
     ReactiveFormsModule,
     RouterLink,
     NzButtonModule,
@@ -40,6 +46,7 @@ import { assetSlugValidators } from '../../../utils/asset-slug.util';
     NzGridModule,
     NgIcon,
     NzInputModule,
+    NzModalModule,
     NzSelectModule,
     NzSkeletonModule,
     NzSwitchModule,
@@ -59,6 +66,7 @@ export class MushafFormComponent implements OnInit {
   private readonly mushafsService = inject(MushafsService);
   private readonly tenantService = inject(AdminTenantService);
   private readonly message = inject(NzMessageService);
+  private readonly modal = inject(NzModalService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
 
@@ -86,7 +94,10 @@ export class MushafFormComponent implements OnInit {
     is_external: [false],
     external_url: [''],
     is_open_access: [false],
-    restricted_for_tenant: [false],
+    in_gallery: [true],
+    in_public_api: [true],
+    in_cli: [true],
+    in_tenants: [true],
     is_draft: [false],
     version_name_en: [''],
     version_name_ar: [''],
@@ -161,7 +172,11 @@ export class MushafFormComponent implements OnInit {
       return;
     }
 
-    const body = this.buildBody();
+    this.save(this.buildBody());
+  }
+
+  private save(body: MushafFormValue, confirmed = false): void {
+    if (confirmed) body = { ...body, confirm_channel_change: true };
     this.submitting.set(true);
 
     const request$ =
@@ -183,15 +198,15 @@ export class MushafFormComponent implements OnInit {
       },
       error: (error) => {
         this.submitting.set(false);
-        if (isRestrictedForTenantConflictError(error)) {
-          this.message.error(
-            resolveApiErrorMessage(
-              error,
-              { fallbackKey: 'ERRORS.RESTRICTED_FOR_TENANT_CONFLICT' },
-              this.translate
-            )
-          );
+        // Ask once: a confirmed save that still conflicts shows the backend's message.
+        const conflict = confirmed ? null : getChannelConsumersConflict(error);
+        if (conflict) {
+          confirmChannelChange(this.modal, this.translate, conflict, () => this.save(body, true));
+          return;
         }
+        this.message.error(
+          resolveApiErrorMessage(error, { fallbackKey: 'ERRORS.REQUEST_FAILED' }, this.translate)
+        );
       },
     });
   }
@@ -210,7 +225,10 @@ export class MushafFormComponent implements OnInit {
       publisher_id: v.publisher_id!,
       is_external: v.is_external ?? false,
       is_open_access: v.is_open_access ?? false,
-      restricted_for_tenant: v.restricted_for_tenant ?? false,
+      in_gallery: v.in_gallery ?? true,
+      in_public_api: v.in_public_api ?? true,
+      in_cli: v.in_cli ?? true,
+      in_tenants: v.in_tenants ?? true,
       status: v.is_draft ? 'draft' : 'ready',
       external_url: v.external_url || null,
       thumbnail: this.thumbnailFile() ?? undefined,
@@ -257,7 +275,10 @@ export class MushafFormComponent implements OnInit {
             publisher_id: data.publisher.id,
             is_external: data.is_external,
             is_open_access: data.is_open_access,
-            restricted_for_tenant: data.restricted_for_tenant,
+            in_gallery: data.in_gallery,
+            in_public_api: data.in_public_api,
+            in_cli: data.in_cli,
+            in_tenants: data.in_tenants,
             is_draft: data.status === 'draft',
             external_url: data.external_url ?? '',
           });

@@ -2,6 +2,7 @@ import { HttpClient, HttpEventType, HttpParams, HttpResponse } from '@angular/co
 import { Injectable, inject } from '@angular/core';
 import { Observable, filter, map, tap } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { callerShowsErrors } from '../../../../core/interceptors/caller-shows-errors.context';
 import type {
   RecitationQualityOut,
   RecitationQualityWriteIn,
@@ -103,11 +104,13 @@ export class RecitationsService {
   }
 
   create(body: RecitationFormValue): Observable<RecitationDetails> {
-    return this.http.post<RecitationDetails>(this.apiUrl, body);
+    return this.http.post<RecitationDetails>(this.apiUrl, body, { context: callerShowsErrors() });
   }
 
   patch(slug: string, body: Partial<RecitationFormValue>): Observable<RecitationDetails> {
-    return this.http.patch<RecitationDetails>(`${this.apiUrl}${slug}/`, body);
+    return this.http.patch<RecitationDetails>(`${this.apiUrl}${slug}/`, body, {
+      context: callerShowsErrors(),
+    });
   }
 
   delete(slug: string): Observable<void> {

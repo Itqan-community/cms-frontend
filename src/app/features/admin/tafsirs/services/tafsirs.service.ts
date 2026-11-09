@@ -2,6 +2,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { callerShowsErrors } from '../../../../core/interceptors/caller-shows-errors.context';
+import { appendChannelFlags } from '../../utils/asset-channels.util';
 import {
   TafsirDetails,
   TafsirFilters,
@@ -40,15 +42,21 @@ export class TafsirsService {
   }
 
   create(body: TafsirFormValue): Observable<TafsirDetails> {
-    return this.http.post<TafsirDetails>(this.apiUrl, this.toFormData(body));
+    return this.http.post<TafsirDetails>(this.apiUrl, this.toFormData(body), {
+      context: callerShowsErrors(),
+    });
   }
 
   update(slug: string, body: TafsirFormValue): Observable<TafsirDetails> {
-    return this.http.put<TafsirDetails>(`${this.apiUrl}${slug}/`, this.toFormData(body));
+    return this.http.put<TafsirDetails>(`${this.apiUrl}${slug}/`, this.toFormData(body), {
+      context: callerShowsErrors(),
+    });
   }
 
   patch(slug: string, body: Partial<TafsirFormValue>): Observable<TafsirDetails> {
-    return this.http.patch<TafsirDetails>(`${this.apiUrl}${slug}/`, this.toFormData(body));
+    return this.http.patch<TafsirDetails>(`${this.apiUrl}${slug}/`, this.toFormData(body), {
+      context: callerShowsErrors(),
+    });
   }
 
   delete(slug: string): Observable<void> {
@@ -79,9 +87,7 @@ export class TafsirsService {
     if (payload.is_open_access !== undefined) {
       data.append('is_open_access', String(payload.is_open_access));
     }
-    if (payload.restricted_for_tenant !== undefined) {
-      data.append('restricted_for_tenant', String(payload.restricted_for_tenant));
-    }
+    appendChannelFlags(data, payload);
     if (payload.status !== undefined) {
       data.append('status', payload.status);
     }

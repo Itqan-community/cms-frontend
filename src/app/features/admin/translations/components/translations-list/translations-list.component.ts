@@ -26,11 +26,13 @@ import { TranslationFiltersComponent } from '../translation-filters/translation-
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import { AdminListBase } from '../../../utils/admin-list-base';
+import { AssetChannelTagsComponent } from '../../../components/asset-channels/asset-channels.component';
 
 @Component({
   selector: 'app-translations-list',
   standalone: true,
   imports: [
+    AssetChannelTagsComponent,
     DatePipe,
     RouterLink,
     NzButtonModule,

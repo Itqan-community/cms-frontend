@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
+import { NzModalService } from 'ng-zorro-antd/modal';
 import { of } from 'rxjs';
 
 import { Licenses } from '../../../../../core/enums/licenses.enum';
@@ -47,6 +48,9 @@ describe('FontFormComponent first version', () => {
           ]),
         },
       ],
+    });
+    TestBed.overrideProvider(NzModalService, {
+      useValue: jasmine.createSpyObj<NzModalService>('NzModalService', ['confirm']),
     });
     TestBed.overrideComponent(FontFormComponent, { set: { template: '' } });
 
