@@ -100,7 +100,7 @@ User Browser
    (login required; reporter from session; no portal permission gate on gallery CTA)
 ```
 
-Portal assets (mushafs, fonts, recitations, tafsirs, translations) expose `is_open_access` and four
+Portal assets (mushafs, fonts, recitations, text assets) expose `is_open_access` and four
 distribution-channel flags on create/update (POST/PUT/PATCH) and in list/detail responses:
 `in_gallery` (Itqan gallery), `in_public_api` (developers' public API), `in_cli` (itqan CLI),
 `in_tenants` (publisher tenant sites/API). List filter: `is_open_access=true|false`. The forms show
@@ -112,16 +112,16 @@ re-sends the same request with `confirm_channel_change: true` (helpers in
 `features/admin/utils/asset-channels.util.ts`). Programs (mock-only, no backend) still use the old
 `restricted_for_tenant` flag.
 
-Every asset form (mushaf, font, tafsir, translation, recitation) has a **Draft** switch (`is_draft`
-control → `status: 'draft' | 'ready'`, `ADMIN.COMMON.LABEL_DRAFT`). A draft stays in the portal
-list/detail with a `TAG_DRAFT` tag; the backend hides it from the gallery, APIs and the itqan CLI.
+Every asset form (mushaf, font, text asset, recitation) has a **Draft** switch (`is_draft` control →
+`status: 'draft' | 'ready'`, `ADMIN.COMMON.LABEL_DRAFT`). A draft stays in the portal list/detail
+with a `TAG_DRAFT` tag; the backend hides it from the gallery, APIs and the itqan CLI.
 
 ### Admin CRUD Flow (all entities follow same pattern)
 
 ```
 List  -> GET    /portal/{entity}/
 Detail -> GET   /portal/{entity}/{id}/
-Create -> POST  /portal/{entity}/  (multipart FormData always for font/mushaf/tafsir/translation;
+Create -> POST  /portal/{entity}/  (multipart FormData always for font/mushaf/text asset;
                optional initial version fields: version_number + version_label_en/ar +
                version_summary_en/ar + file; the form's version_name_* go out as version_label_*)
 Update -> PUT   /portal/{entity}/{id}/
@@ -129,10 +129,10 @@ Delete -> DELETE /portal/{entity}/{id}/
 
 Each entity has: ListComponent, FormComponent (create+edit), DetailComponent
 Base class: AdminListBase (src/app/features/admin/utils/admin-list-base.ts)
-Create forms for font/mushaf/tafsir/translation include shared
+Create forms for font/mushaf/text asset include shared
 `asset-initial-version-fields` (optional on create). Additional versions on detail via
 `asset-versions-manager`.
-Create forms (font/mushaf/tafsir/translation/recitation/reciter) also show
+Create forms (font/mushaf/text asset/recitation/reciter) also show
 `ai-translate-actions`: POST /portal/ai/translate/ (Gemini free tier, backend-side key)
 -> fills only the empty *_en controls from the *_ar ones; "web" mode also writes the
 description/bio fields from Wikipedia (backend-side) and lists the source links.
@@ -178,17 +178,17 @@ cms-frontend/
 
 ### Core Layer (`src/app/core/`)
 
-| Subdirectory     | Contents                                                                                                                       | Purpose                                                           |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
-| `auth/`          | 21 pages + 1 service + 3 guards + headless API module (20+ files)                                                              | Full django-allauth headless SPA integration                      |
-| `auth/headless/` | `HeadlessAuthApiService` (~60 methods), `HeadlessAppTokenService`, types, hooks, WebAuthn utils, CSRF utils, provider redirect | allauth headless contract implementation                          |
-| `constants/`     | `BREAKPOINTS`, `NAV_LINKS`                                                                                                     | Responsive breakpoints + navigation link definitions              |
-| `enums/`         | `Categories` (tafsir/translation/recitation), `Licenses` (CC0-CC-BY-NC-ND + colors)                                            | Content categorization and licensing                              |
-| `guards/`        | `publisherHostGuard`                                                                                                           | Blocks publisher subdomain visitors from CMS routes               |
-| `interceptors/`  | 6 interceptors (credentials, CSRF response, app-session-token, headers/global, auth-error, error)                              | HTTP pipeline: session token, CSRF, error handling, Sentry        |
-| `sentry/`        | chunk-load recovery, `beforeSend` noise filter, app ErrorHandler wrapper                                                       | Benign network/chunk failures: one-time reload + drop from Sentry |
-| `services/`      | `GoogleAnalyticsService`, `WebVitalsService`, `ViewportService`                                                                | Analytics, Core Web Vitals, responsive viewport detection         |
-| `utils/`         | `csrf.util.ts`                                                                                                                 | Django CSRF (same-origin cookies + cross-origin override)         |
+| Subdirectory     | Contents                                                                                                                                                                       | Purpose                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------- |
+| `auth/`          | 21 pages + 1 service + 3 guards + headless API module (20+ files)                                                                                                              | Full django-allauth headless SPA integration                      |
+| `auth/headless/` | `HeadlessAuthApiService` (~60 methods), `HeadlessAppTokenService`, types, hooks, WebAuthn utils, CSRF utils, provider redirect                                                 | allauth headless contract implementation                          |
+| `constants/`     | `BREAKPOINTS`, `NAV_LINKS`                                                                                                                                                     | Responsive breakpoints + navigation link definitions              |
+| `enums/`         | `Categories` (text/recitation/font/program) + `GALLERY_TEXT_TAGS` (tafsir/translation gallery filters, sent as `tag`) + `assetKindIcon`, `Licenses` (CC0-CC-BY-NC-ND + colors) | Content categorization and licensing                              |
+| `guards/`        | `publisherHostGuard`                                                                                                                                                           | Blocks publisher subdomain visitors from CMS routes               |
+| `interceptors/`  | 6 interceptors (credentials, CSRF response, app-session-token, headers/global, auth-error, error)                                                                              | HTTP pipeline: session token, CSRF, error handling, Sentry        |
+| `sentry/`        | chunk-load recovery, `beforeSend` noise filter, app ErrorHandler wrapper                                                                                                       | Benign network/chunk failures: one-time reload + drop from Sentry |
+| `services/`      | `GoogleAnalyticsService`, `WebVitalsService`, `ViewportService`                                                                                                                | Analytics, Core Web Vitals, responsive viewport detection         |
+| `utils/`         | `csrf.util.ts`                                                                                                                                                                 | Django CSRF (same-origin cookies + cross-origin override)         |
 
 ### Interceptor Pipeline (order matters)
 
@@ -249,35 +249,35 @@ Trust, Profile, CompleteProfile
 
 ### Route Map
 
-| Path                           | Component              | Guards                                   | Notes                                                                                                                                                                   |
-| ------------------------------ | ---------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/gallery`                     | `GalleryPage`          | —                                        | Main listing                                                                                                                                                            |
-| `/gallery/asset/:id`           | `AssetDetailsPage`     | —                                        | Detail + access request + download + report issue modal                                                                                                                 |
-| `/publishers`                  | `PublishersPage`       | `publisherHostGuard`                     | Stub                                                                                                                                                                    |
-| `/publisher/:id`               | `PublisherDetailsPage` | `publisherHostGuard`                     | Detail + filtered assets                                                                                                                                                |
-| `/license/:id`                 | `LicenseDetailsPage`   | —                                        | License detail                                                                                                                                                          |
-| `/reciters`                    | `RecitersPage`         | —                                        | Public reciter directory                                                                                                                                                |
-| `/reciters/:slug`              | `ReciterDetailsPage`   | —                                        | Reciter profile + recitations                                                                                                                                           |
-| `/mushaf`                      | `SurahIndexPage`       | `authGuard`, `publisherHostGuard`        | **Temporarily hidden** — route + `NAV.MUSHAF` commented out; code kept in `features/mushaf/`                                                                            |
-| `/mushaf/:surahId`             | `SurahViewPage`        | `authGuard`, `publisherHostGuard`        | **Temporarily hidden** (same as `/mushaf`)                                                                                                                              |
-| `/mushaf/:surahId/:ayahNumber` | `AyahFocusPage`        | `authGuard`, `publisherHostGuard`        | **Temporarily hidden** (same as `/mushaf`)                                                                                                                              |
-| `/content-standards`           | `UsageStandardsPage`   | `publisherHostGuard`                     | Content guidelines                                                                                                                                                      |
-| `/unauthorized`                | `UnauthorizedPage`     | —                                        | Card UX; CTA + 5s countdown auto-redirect to `/gallery`; `hideHeader`; dir name typo `unautorized/`                                                                     |
-| `/complete-profile`            | `CompleteProfilePage`  | `authGuard`                              | Profile completion                                                                                                                                                      |
-| `/account/*`                   | (22 auth pages)        | guestGuard/authGuard                     | Auth & account management                                                                                                                                               |
-| `/admin`                       | `AdminLayoutComponent` | `authGuard`, `portalAccessGuard`         | Permission-based admin shell (`layout/` header + sidebar)                                                                                                               |
-| `/admin` (default)             | `AdminHomeComponent`   | —                                        | Landing grid of the same permission-filtered sidebar modules (no portal redirect)                                                                                       |
-| `/admin/publishers`            | (lazy routes)          | `permissionGuard`                        | Publisher CRUD (staff)                                                                                                                                                  |
-| `/admin/tafsirs`               | (lazy routes)          | per-route `permissionGuard`              | Tafsir CRUD                                                                                                                                                             |
-| `/admin/translations`          | (lazy routes)          | per-route `permissionGuard`              | Translation CRUD                                                                                                                                                        |
-| `/admin/recitations`           | (lazy routes)          | per-route `permissionGuard`              | Recitation CRUD                                                                                                                                                         |
-| `/admin/reciters`              | (lazy routes)          | per-route `permissionGuard`              | Reciter CRUD                                                                                                                                                            |
-| `/admin/issues`                | (lazy routes)          | _(permission guards commented)_          | Issue reports (list/detail/create/edit/delete); TODO enable `portal_*_issue_report` guards                                                                              |
-| `/admin/members`               | (lazy routes)          | `membersAccessGuard`                     | Publisher member list/invite/edit/remove/resend via `/portal/members/` (modal UX on single list)                                                                        |
-| `/admin/roles`                 | (lazy routes)          | `rolesAccessGuard` (`portal_read_group`) | Roles of the selected publisher: create (English + Arabic name), rename, edit permissions, delete via `/portal/groups/`; names and permission labels in the UI language |
-| `/admin/access-requests`       | (lazy routes)          | `accessRequestsAccessGuard`              | Asset access requests list/accept/reject + settings via `/portal/access-requests/` and `/portal/publishers/{id}/access-requests-settings/`                              |
-| `/admin/usage`                 | (lazy routes)          | `portal_read_usage`                      | Usage dashboards (+ admin tabs)                                                                                                                                         |
-| `**`                           | redirect -> /gallery   | —                                        | Wildcard                                                                                                                                                                |
+| Path                                    | Component              | Guards                                   | Notes                                                                                                                                                                   |
+| --------------------------------------- | ---------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/gallery`                              | `GalleryPage`          | —                                        | Main listing                                                                                                                                                            |
+| `/gallery/asset/:id`                    | `AssetDetailsPage`     | —                                        | Detail + access request + download + report issue modal                                                                                                                 |
+| `/publishers`                           | `PublishersPage`       | `publisherHostGuard`                     | Stub                                                                                                                                                                    |
+| `/publisher/:id`                        | `PublisherDetailsPage` | `publisherHostGuard`                     | Detail + filtered assets                                                                                                                                                |
+| `/license/:id`                          | `LicenseDetailsPage`   | —                                        | License detail                                                                                                                                                          |
+| `/reciters`                             | `RecitersPage`         | —                                        | Public reciter directory                                                                                                                                                |
+| `/reciters/:slug`                       | `ReciterDetailsPage`   | —                                        | Reciter profile + recitations                                                                                                                                           |
+| `/mushaf`                               | `SurahIndexPage`       | `authGuard`, `publisherHostGuard`        | **Temporarily hidden** — route + `NAV.MUSHAF` commented out; code kept in `features/mushaf/`                                                                            |
+| `/mushaf/:surahId`                      | `SurahViewPage`        | `authGuard`, `publisherHostGuard`        | **Temporarily hidden** (same as `/mushaf`)                                                                                                                              |
+| `/mushaf/:surahId/:ayahNumber`          | `AyahFocusPage`        | `authGuard`, `publisherHostGuard`        | **Temporarily hidden** (same as `/mushaf`)                                                                                                                              |
+| `/content-standards`                    | `UsageStandardsPage`   | `publisherHostGuard`                     | Content guidelines                                                                                                                                                      |
+| `/unauthorized`                         | `UnauthorizedPage`     | —                                        | Card UX; CTA + 5s countdown auto-redirect to `/gallery`; `hideHeader`; dir name typo `unautorized/`                                                                     |
+| `/complete-profile`                     | `CompleteProfilePage`  | `authGuard`                              | Profile completion                                                                                                                                                      |
+| `/account/*`                            | (22 auth pages)        | guestGuard/authGuard                     | Auth & account management                                                                                                                                               |
+| `/admin`                                | `AdminLayoutComponent` | `authGuard`, `portalAccessGuard`         | Permission-based admin shell (`layout/` header + sidebar)                                                                                                               |
+| `/admin` (default)                      | `AdminHomeComponent`   | —                                        | Landing grid of the same permission-filtered sidebar modules (no portal redirect)                                                                                       |
+| `/admin/publishers`                     | (lazy routes)          | `permissionGuard`                        | Publisher CRUD (staff)                                                                                                                                                  |
+| `/admin/text-assets`                    | (lazy routes)          | per-route `permissionGuard`              | Text asset CRUD (tafsirs, translations, … by tag)                                                                                                                       |
+| `/admin/tafsirs`, `/admin/translations` | redirect               | —                                        | Old links → `/admin/text-assets?tag=…` (`:slug` kept)                                                                                                                   |
+| `/admin/recitations`                    | (lazy routes)          | per-route `permissionGuard`              | Recitation CRUD                                                                                                                                                         |
+| `/admin/reciters`                       | (lazy routes)          | per-route `permissionGuard`              | Reciter CRUD                                                                                                                                                            |
+| `/admin/issues`                         | (lazy routes)          | _(permission guards commented)_          | Issue reports (list/detail/create/edit/delete); TODO enable `portal_*_issue_report` guards                                                                              |
+| `/admin/members`                        | (lazy routes)          | `membersAccessGuard`                     | Publisher member list/invite/edit/remove/resend via `/portal/members/` (modal UX on single list)                                                                        |
+| `/admin/roles`                          | (lazy routes)          | `rolesAccessGuard` (`portal_read_group`) | Roles of the selected publisher: create (English + Arabic name), rename, edit permissions, delete via `/portal/groups/`; names and permission labels in the UI language |
+| `/admin/access-requests`                | (lazy routes)          | `accessRequestsAccessGuard`              | Asset access requests list/accept/reject + settings via `/portal/access-requests/` and `/portal/publishers/{id}/access-requests-settings/`                              |
+| `/admin/usage`                          | (lazy routes)          | `portal_read_usage`                      | Usage dashboards (+ admin tabs)                                                                                                                                         |
+| `**`                                    | redirect -> /gallery   | —                                        | Wildcard                                                                                                                                                                |
 
 ---
 
@@ -323,8 +323,7 @@ cards as the sidebar.
 | Module             | Entity                    | Key Models                                        | Notes                                                                                                                                                                                                                                                                                                                                            |
 | ------------------ | ------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `publishers/`      | Publisher admin           | `Publisher`                                       | CRUD + image upload                                                                                                                                                                                                                                                                                                                              |
-| `tafsirs/`         | Tafsir (exegesis)         | `Tafsir`, `TafsirVersion`                         | CRUD + optional initial version on create (always multipart) + version management on detail                                                                                                                                                                                                                                                      |
-| `translations/`    | Translation               | `Translation`, `TranslationVersion`               | CRUD; create always multipart FormData with optional initial version; update/patch remain JSON; version management on detail                                                                                                                                                                                                                     |
+| `text-assets/`     | Text asset (by tag)       | `TextAssetItem`, `TextAssetDetails`, `AssetTag`   | CRUD + tags (`AssetTagsService`, first tag prefixes the slug; group templates need `tafsir`) + optional initial version on create (always multipart)                                                                                                                                                                                             |
 | `recitations/`     | Recitation (audio)        | `Recitation`, `RecitationQualityOut`              | CRUD + ng-zorro quality tabs (`QualitySwitcherComponent`; per-tab settings dropdown) + quality variants chosen from a fixed quality×effects taxonomy + quality-scoped tracks & timings upload with progress; full bulk upload success redirects to `/gallery/asset/{id}`; partial failure clears validate banner and keeps failed rows for retry |
 | `reciters/`        | Reciter                   | `Reciter`                                         | CRUD + image upload + death info                                                                                                                                                                                                                                                                                                                 |
 | `issues/`          | Issue reports             | `IssueReportOut`                                  | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions                                                                                                                                                                                                                                                |
@@ -363,7 +362,7 @@ container owns the API calls and the single picker modal. Quality tab menu suppo
 
 - `admin-column-picker/` — Column visibility toggles for tables
 - `ai-translate-actions/` — "Translate from Arabic" / "Write from the web" buttons on create forms
-  (font/mushaf/tafsir/translation/recitation/reciter; placed under the English name field so it is
+  (font/mushaf/text asset/recitation/reciter; placed under the English name field so it is
   discoverable; hidden on edit). Fills only empty `<key>_en` controls from `<key>_ar` (`name`,
   `description`, `long_description`, `bio`, `version_name`, `version_summary`; missing pairs
   skipped); recitation passes the selected reciter/riwayah as `context`. Uses
@@ -375,53 +374,54 @@ container owns the API calls and the single picker modal. Quality tab menu suppo
 - `asset-channels/` — `app-asset-channels-fields` (distribution-channel checkboxes inside asset
   forms) and `app-asset-channel-tags` ("Not in …" tags for list/detail pages).
 - `asset-initial-version-fields/` — Optional first version (starting number, bilingual name/summary,
-  file) on asset create forms (font/mushaf/tafsir/translation); the number is required once a file
-  is attached. Tafsir/translation also pass `contentKind`/`contentTemplate`/`mushafLayoutId` to
-  offer the empty CSV template for the chosen template
-- `version-number-field/` — Version numbering for tafsir/translation/mushaf/font (`major.minor`,
-  issued by the server, per language; mushafs/fonts have one sequence): a starting number for a
-  language's first version, else a minor/major bump previewed from the latest number
+  file) on asset create forms (font/mushaf/text asset); the number is required once a file is
+  attached. Text assets also pass `contentKind`/`contentTemplate`/`mushafLayoutId` to offer the
+  empty CSV template for the chosen template
+- `version-number-field/` — Version numbering for text asset/mushaf/font (`major.minor`, issued by
+  the server, per language; mushafs/fonts have one sequence): a starting number for a language's
+  first version, else a minor/major bump previewed from the latest number
   (`utils/version-number.util.ts`). Used by the upload modal, restore confirm, commit dialog and
   add-language dialog
-- `csv-template-download/` — "Download CSV template" button (tafsir/translation): an empty fill-in
-  sheet, one row per unit with a blank `text` column. By template on create
+- `csv-template-download/` — "Download CSV template" button (text assets): an empty fill-in sheet,
+  one row per unit with a blank `text` column. By template on create
   (`content/{category}/csv-template/?template=&mushaf_layout_id=`), by asset in the version
   upload/edit modal (`content/{category}/{slug}/csv-template/`)
-- `asset-versions-manager/` — Version CRUD (tafsir/translation/mushaf/font; program when
-  re-enabled); CSV `export/` then `file_url` fallback. Tafsir/translation/mushaf/font
-  (`numbered()`): `name` is the locked version number and `label` the editable version name — the
-  package registry (`itqan` CLI) only installs numbered versions; program keeps a free-text `name`.
-  Delete shows on every row but is blocked (`aria-disabled`, still focusable; the tooltip opens on
-  hover and focus) where the backend's `delete_blocked_reason` says a delete would be refused, with
-  that reason as its tooltip (`DELETE_BLOCKED_*`): only the newest version of a language can be
-  deleted, and the published one only while it is the only version — that one gets an unpublish
-  warning (`ADMIN.VERSION_PUBLISHING.DELETE_PUBLISHED_*`) and sends `confirm_unpublish=true`; a
-  refusal shows the backend's message, and `unpublish_not_confirmed` (published since the list
-  loaded) reloads the list. Each row's CLI availability (`package_status`: released / withdrawn /
-  removed / not released, with `withdrawal_reason` / `removal_reason`) shows as a badge. Publishing
-  an older version (`publishing_rolls_back`) requires a reason, sent to `set-published/` and shown
-  by the itqan CLI. Remove (`PORTAL_REMOVE_PACKAGE_VERSION`, reason required) via
+- `asset-versions-manager/` — Version CRUD (text asset/mushaf/font; program when re-enabled); CSV
+  `export/` then `file_url` fallback. Text asset/mushaf/font (`numbered()`): `name` is the locked
+  version number and `label` the editable version name — the package registry (`itqan` CLI) only
+  installs numbered versions; program keeps a free-text `name`. Delete shows on every row but is
+  blocked (`aria-disabled`, still focusable; the tooltip opens on hover and focus) where the
+  backend's `delete_blocked_reason` says a delete would be refused, with that reason as its tooltip
+  (`DELETE_BLOCKED_*`): only the newest version of a language can be deleted, and the published one
+  only while it is the only version — that one gets an unpublish warning
+  (`ADMIN.VERSION_PUBLISHING.DELETE_PUBLISHED_*`) and sends `confirm_unpublish=true`; a refusal
+  shows the backend's message, and `unpublish_not_confirmed` (published since the list loaded)
+  reloads the list. Each row's CLI availability (`package_status`: released / withdrawn / removed /
+  not released, with `withdrawal_reason` / `removal_reason`) shows as a badge. Publishing an older
+  version (`publishing_rolls_back`) requires a reason, sent to `set-published/` and shown by the
+  itqan CLI. Remove (`PORTAL_REMOVE_PACKAGE_VERSION`, reason required) via
   `packages/versions/{id}/remove/`; the same admins undo it on removed rows via
   `packages/versions/{id}/reinstate/` (reason required, up to 100 characters, kept in the audit
-  log). Publishing applies to tafsirs, translations, mushafs and fonts (`supportsPublishing()`):
-  mushafs/fonts publish via `{mushafs|fonts}/{slug}/versions/{id}/set-published/` with no review
-  step, and their upload modal has a "Publish now" checkbox (default on, sends `publish`). Without
+  log). Publishing applies to text assets, mushafs and fonts (`supportsPublishing()`): mushafs/fonts
+  publish via `{mushafs|fonts}/{slug}/versions/{id}/set-published/` with no review step, and their
+  upload modal has a "Publish now" checkbox (default on, sends `publish`). Without
   `portal_publish_content` the Publish button and checkbox are shown disabled with a permission
   tooltip.
 - `asset-content-editor/` + `asset-content-grid/` — Per-unit draft editor (surah/ayah/word/page
-  content templates, and the tafsir-only `ayah_group` / `word_group` templates); flush before
-  publish; leave blocked if PATCH fails. **Group templates:** each row is a publisher-chosen range
-  (label `2:1 → 2:5`, `group_from` / `group_to`, opaque `unit_id`); no `surah`/`ayah` columns. On
-  the source language the range is edited in place (`group-range-cell.component.ts`: typed start /
-  end saved on Enter or blur via `PUT …/groups/{id}/`, and −/+ shrinking or growing the end one ayah
-  / word via `POST …/groups/{id}/extend/`); "Add next group" under the grid (`POST …/groups/next/`)
-  adds a blank group after the furthest one, then scrolls to it and focuses its text. "Add group"
-  opens `group-range-modal/` — from/to pickers with a debounced, cancelling live preview of the
-  mushaf text (`GET content/quran-range/`), optional first text per column — and the per-row delete
-  button (`group-actions-cell.component.ts`, a group row's only action) removes a group. A
-  translated language lists its source's ranges; only an `orphaned` row (a range the source dropped)
-  can be deleted, its text opens read-only and can't be cleared or pasted over, and a commit refused
-  with `orphaned_groups` lists the groups. **Text columns:** one editable grid column per key of the
+  content templates, and the `ayah_group` / `word_group` templates (assets tagged tafsir only));
+  flush before publish; leave blocked if PATCH fails. **Group templates:** each row is a
+  publisher-chosen range (label `2:1 → 2:5`, `group_from` / `group_to`, opaque `unit_id`); no
+  `surah`/`ayah` columns. On the source language the range is edited in place
+  (`group-range-cell.component.ts`: typed start / end saved on Enter or blur via
+  `PUT …/groups/{id}/`, and −/+ shrinking or growing the end one ayah / word via
+  `POST …/groups/{id}/extend/`); "Add next group" under the grid (`POST …/groups/next/`) adds a
+  blank group after the furthest one, then scrolls to it and focuses its text. "Add group" opens
+  `group-range-modal/` — from/to pickers with a debounced, cancelling live preview of the mushaf
+  text (`GET content/quran-range/`), optional first text per column — and the per-row delete button
+  (`group-actions-cell.component.ts`, a group row's only action) removes a group. A translated
+  language lists its source's ranges; only an `orphaned` row (a range the source dropped) can be
+  deleted, its text opens read-only and can't be cleared or pasted over, and a commit refused with
+  `orphaned_groups` lists the groups. **Text columns:** one editable grid column per key of the
   draft's `column_keys` (colId `cell__<key>`, reading/writing `row.cells[key]`; filters keyed
   `cell__<key>` / `source__<key>`); unsaved cells are keyed `unit:column` and PATCHed as
   `{unit_id, column, text}`. Translating, a remembered "Show source" switch inserts each read-only
@@ -452,16 +452,16 @@ container owns the API calls and the single picker modal. Quality tab menu suppo
   clipboard's spreadsheet HTML first, as Excel does (`parseClipboardHtml`: a `<br>` stays a line
   break inside the cell), else the TSV/CSV text (`parseClipboardTable`; a quote opens a quoted value
   only at the start of a cell)
-- `asset-review-grid/` — Translation/tafsir review (`/admin/{translations|tafsirs}/:slug/review`):
-  language, version and state selects in the toolbar, then an AG Grid of changes. Client-side row
-  model holding one server page (`app-admin-table-pagination`), so rows size to their diff
-  (`autoHeight`, `domLayout="autoHeight"`). Floating filters run server-side: the grid's filter
-  model goes as the JSON `filters` param of `review/changes/` and of "Approve all" — `unit_surah`
-  (surah dropdown), `ayah` (number), `column` / `change_type` (`OptionsFloatingFilterComponent`
-  dropdowns, text `equals`), `text` (before or after), `commit_ref`, `edited_by`, `comment`,
-  `reviewed_by` (text). Text conditions always pass locally (`textMatcher: () => true`) so the page
-  the server matched is never re-filtered. Cells live in `review-grid-cells.component.ts` (diff with
-  "Show full text", state + reviewer, approve/comment/unreview) and read the grid through `context`
+- `asset-review-grid/` — Text asset review (`/admin/text-assets/:slug/review`): language, version
+  and state selects in the toolbar, then an AG Grid of changes. Client-side row model holding one
+  server page (`app-admin-table-pagination`), so rows size to their diff (`autoHeight`,
+  `domLayout="autoHeight"`). Floating filters run server-side: the grid's filter model goes as the
+  JSON `filters` param of `review/changes/` and of "Approve all" — `unit_surah` (surah dropdown),
+  `ayah` (number), `column` / `change_type` (`OptionsFloatingFilterComponent` dropdowns, text
+  `equals`), `text` (before or after), `commit_ref`, `edited_by`, `comment`, `reviewed_by` (text).
+  Text conditions always pass locally (`textMatcher: () => true`) so the page the server matched is
+  never re-filtered. Cells live in `review-grid-cells.component.ts` (diff with "Show full text",
+  state + reviewer, approve/comment/unreview) and read the grid through `context`
   (`ReviewGridContext`). Checkbox selection (approved rows not selectable) feeds "Approve selected"
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`
@@ -557,7 +557,7 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 | `components/usage-unseen-traffic/` | Component | Admin: R2 reads vs edge requests (unseen traffic), with a "How to read this tab" guide                                                                                             |
 | `components/recitation-insights/`  | Component | Recitation dashboards (asset tab + overview): listener growth, weekly cohorts, countries/apps first reached, gallery funnel, asset surah coverage                                  |
 | `components/recitation-catalog/`   | Component | Recitation overview only: this week's top / rising recitations, gallery search terms (top / no results), incomplete recitations                                                    |
-| `components/asset-usage-section/`  | Component | "Usage" section on font/mushaf/tafsir/translation/recitation admin detail pages (`portal_read_usage`)                                                                              |
+| `components/asset-usage-section/`  | Component | "Usage" section on font/mushaf/text asset/recitation admin detail pages (`portal_read_usage`)                                                                                      |
 | `components/asset-usage-counts/`   | Component | Gallery asset page "plays · downloads · apps"; hidden unless the backend returns 200                                                                                               |
 | `pages/developer-usage/`           | Page      | `/account/usage` (developer scope), linked from `/account/api-keys`                                                                                                                |
 
@@ -687,8 +687,8 @@ until the usage-reports cutover. `/account/api-keys` shows and edits each key's 
 
 ### Admin Portal (`/portal/`)
 
-Full CRUD for: publishers, tafsirs (versions), translations (versions), recitations (with tracks),
-reciters, issue reports (`/portal/issue-reports/`), publisher members (`/portal/members/`), groups
+Full CRUD for: publishers, text assets (versions, tags), recitations (with tracks), reciters, issue
+reports (`/portal/issue-reports/`), publisher members (`/portal/members/`), groups
 (`GET /portal/groups/` for member invite/edit options), asset access requests
 (`/portal/access-requests/` — list, detail, accept, reject;
 `/portal/publishers/{id}/access-requests-settings/` — auto-acceptance), mushafs (`/portal/mushafs/`
@@ -697,7 +697,7 @@ create forms (`POST /portal/ai/translate/`), usage reports (`/portal/usage/*`,
 `/portal/admin/usage/*`). Programs portal module is dormant (route/nav hidden) until BE ships
 `/portal/programs/`.
 
-Asset create/edit forms (tafsir, translation, mushaf, font, program, recitation): publisher field is
+Asset create/edit forms (text asset, mushaf, font, program, recitation): publisher field is
 view-only — create binds `AdminTenantService.selectedPublisherId()`; edit shows the asset publisher.
 
 Header publisher switch (`resolveUrlAfterTenantChange`): publisher detail/edit/index → the new

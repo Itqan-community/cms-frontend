@@ -24,7 +24,7 @@ export class AssetReviewService {
   private readonly base = environment.ADMIN_API_BASE_URL;
 
   private reviewBase(kind: AssetVersionParentKind, slug: string): string {
-    const segment = kind === 'tafsir' ? 'tafsirs' : 'translations';
+    const segment = 'text-assets';
     return `${this.base}/content/${segment}/${encodeURIComponent(slug)}/review/`;
   }
 

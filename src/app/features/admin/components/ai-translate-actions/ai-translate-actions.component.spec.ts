@@ -45,7 +45,7 @@ describe('AiTranslateActionsComponent', () => {
     fixture = TestBed.createComponent(AiTranslateActionsComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('form', form);
-    fixture.componentRef.setInput('category', 'tafsir');
+    fixture.componentRef.setInput('category', 'text');
     fixture.detectChanges();
   });
 
@@ -58,7 +58,7 @@ describe('AiTranslateActionsComponent', () => {
 
     expect(api.translate).toHaveBeenCalledOnceWith({
       mode: 'translate',
-      category: 'tafsir',
+      category: 'text',
       fields: { name: 'تفسير السعدي' },
       context: {},
       slug_for: { name_ar: 'تفسير السعدي', name_en: '', language: 'ar' },

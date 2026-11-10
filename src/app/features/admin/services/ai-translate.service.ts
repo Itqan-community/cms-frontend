@@ -4,13 +4,7 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
 
 export type AiTranslateMode = 'translate' | 'web';
-export type AiTranslateCategory =
-  | 'mushaf'
-  | 'tafsir'
-  | 'translation'
-  | 'font'
-  | 'recitation'
-  | 'reciter';
+export type AiTranslateCategory = 'mushaf' | 'text' | 'font' | 'recitation' | 'reciter';
 export type AiFieldKey =
   | 'name'
   | 'description'
@@ -27,6 +21,8 @@ export interface AiSlugFor {
   reciter_id?: number;
   riwayah_id?: number;
   year?: number;
+  /** Text assets: the tag that prefixes the package name. */
+  tag?: string;
 }
 
 export interface AiTranslateContext {

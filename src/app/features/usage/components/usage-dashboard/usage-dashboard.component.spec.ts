@@ -169,7 +169,7 @@ describe('UsageDashboardComponent', () => {
   it('keeps state locally when not synced to the URL', () => {
     fixture.componentRef.setInput('syncUrl', false);
     fixture.componentRef.setInput('assetId', 7);
-    fixture.componentRef.setInput('category', 'tafsir');
+    fixture.componentRef.setInput('category', 'text');
     fixture.detectChanges();
 
     expect(api.summary.calls.mostRecent().args[1].asset_id).toBe(7);
@@ -248,10 +248,10 @@ describe('UsageDashboardComponent', () => {
     fixture.componentInstance.setFilter('category', 'recitation');
     fixture.componentInstance.setFilter('reciter_id', 4);
 
-    fixture.componentInstance.setFilter('category', 'tafsir');
+    fixture.componentInstance.setFilter('category', 'text');
 
     const filters = api.summary.calls.mostRecent().args[1];
-    expect(filters.category).toBe('tafsir');
+    expect(filters.category).toBe('text');
     expect(filters.reciter_id).toBeNull();
   });
 

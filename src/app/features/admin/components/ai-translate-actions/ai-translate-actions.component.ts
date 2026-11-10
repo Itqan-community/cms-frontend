@@ -201,6 +201,8 @@ export class AiTranslateActionsComponent {
     };
     const language = value('language');
     if (typeof language === 'string' && language) slugFor.language = language;
+    const tags = value('tags');
+    if (Array.isArray(tags) && typeof tags[0] === 'string') slugFor.tag = tags[0];
     for (const key of ['reciter_id', 'riwayah_id', 'year'] as const) {
       const id = value(key);
       if (typeof id === 'number') slugFor[key] = id;

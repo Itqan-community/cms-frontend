@@ -46,17 +46,15 @@ export const routes: Routes = [
         pathMatch: 'full',
       },
       {
-        path: 'tafsirs',
+        path: 'text-assets',
         loadChildren: () =>
-          import('./features/admin/tafsirs/tafsirs.routes').then((m) => m.tafsirRoutes),
+          import('./features/admin/text-assets/text-assets.routes').then((m) => m.textAssetRoutes),
       },
-      {
-        path: 'translations',
-        loadChildren: () =>
-          import('./features/admin/translations/translations.routes').then(
-            (m) => m.translationRoutes
-          ),
-      },
+      // Old bookmarks: the list filtered by the kind the page used to show.
+      { path: 'tafsirs', redirectTo: '/admin/text-assets?tag=tafsir', pathMatch: 'full' },
+      { path: 'translations', redirectTo: '/admin/text-assets?tag=translation', pathMatch: 'full' },
+      { path: 'tafsirs/:slug', redirectTo: 'text-assets/:slug' },
+      { path: 'translations/:slug', redirectTo: 'text-assets/:slug' },
       {
         path: 'mushafs',
         loadChildren: () =>

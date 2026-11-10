@@ -15,15 +15,10 @@ export const PORTAL_PERMISSIONS = {
 
   PORTAL_UPLOAD_TIMING: 'portal_upload_timing',
 
-  PORTAL_READ_TAFSIR: 'portal_read_tafsir',
-  PORTAL_CREATE_TAFSIR: 'portal_create_tafsir',
-  PORTAL_UPDATE_TAFSIR: 'portal_update_tafsir',
-  PORTAL_DELETE_TAFSIR: 'portal_delete_tafsir',
-
-  PORTAL_READ_TRANSLATION: 'portal_read_translation',
-  PORTAL_CREATE_TRANSLATION: 'portal_create_translation',
-  PORTAL_UPDATE_TRANSLATION: 'portal_update_translation',
-  PORTAL_DELETE_TRANSLATION: 'portal_delete_translation',
+  PORTAL_READ_TEXT_ASSET: 'portal_read_text_asset',
+  PORTAL_CREATE_TEXT_ASSET: 'portal_create_text_asset',
+  PORTAL_UPDATE_TEXT_ASSET: 'portal_update_text_asset',
+  PORTAL_DELETE_TEXT_ASSET: 'portal_delete_text_asset',
 
   PORTAL_READ_MUSHAF: 'portal_read_mushaf',
   PORTAL_CREATE_MUSHAF: 'portal_create_mushaf',
@@ -72,8 +67,7 @@ export const PORTAL_PERMISSIONS = {
   PORTAL_REMOVE_PACKAGE_VERSION: 'portal_remove_package_version',
   /** Editing an asset's text (content editor, uploading or restoring a version);
    *  PORTAL_UPDATE_* covers metadata only. */
-  PORTAL_EDIT_TRANSLATION_CONTENT: 'portal_edit_translation_content',
-  PORTAL_EDIT_TAFSIR_CONTENT: 'portal_edit_tafsir_content',
+  PORTAL_EDIT_TEXT_ASSET_CONTENT: 'portal_edit_text_asset_content',
 
   PORTAL_ACCESS_ALL_LANGUAGES: 'portal_access_all_languages',
   PORTAL_MANAGE_ASSET_COLUMNS: 'portal_manage_asset_columns',

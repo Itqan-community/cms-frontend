@@ -189,7 +189,8 @@ export class IssueFormComponent implements OnInit {
           this.assetOptions.set([
             {
               id: issue.asset_id,
-              category: Categories.TAFSIR,
+              category: Categories.TEXT,
+              tags: [],
               name: issue.asset_name,
               description: '',
               publisher: { id: 0, name: '' },

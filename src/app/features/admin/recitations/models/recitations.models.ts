@@ -1,5 +1,5 @@
 import type { AssetChannelFlags, AssetChannelFormFlags } from '../../utils/asset-channels.util';
-import { PublisherRef } from '../../tafsirs/models/tafsirs.models';
+import { PublisherRef } from '../../text-assets/models/text-assets.models';
 import type { RecitationDetailQualityRef } from './recitation-qualities.models';
 
 export enum MaddLevel {

@@ -43,7 +43,7 @@ describe('AssetFileStructureComponent', () => {
 
   it('shows the header, the column labels and the sample rows', () => {
     // Arrange
-    const fixture = render('tafsir', 'ar');
+    const fixture = render('text', 'ar');
 
     // Act
     httpMock.expectOne((r) => r.url === url && r.params.get('language') === 'ar').flush(QA);
@@ -63,7 +63,7 @@ describe('AssetFileStructureComponent', () => {
 
   it('follows the download language', () => {
     // Arrange
-    const fixture = render('tafsir', 'ar');
+    const fixture = render('text', 'ar');
     httpMock.expectOne((r) => r.params.get('language') === 'ar').flush(QA);
 
     // Act
@@ -76,7 +76,7 @@ describe('AssetFileStructureComponent', () => {
 
   it('hides itself when the language has no file structure', () => {
     // Arrange
-    const fixture = render('translation', 'fr');
+    const fixture = render('text', 'fr');
 
     // Act
     httpMock
@@ -93,7 +93,7 @@ describe('AssetFileStructureComponent', () => {
 
   it('offers the asset languages above the table and reports the pick', () => {
     // Arrange
-    const fixture = render('tafsir', 'ar');
+    const fixture = render('text', 'ar');
     fixture.componentRef.setInput('languages', ['ar', 'en']);
     httpMock.expectOne((r) => r.params.get('language') === 'ar').flush(QA);
     fixture.detectChanges();
@@ -117,7 +117,7 @@ describe('AssetFileStructureComponent', () => {
     // Arrange
     const translate = TestBed.inject(TranslateService);
     translate.use('en');
-    const fixture = render('tafsir', 'ar');
+    const fixture = render('text', 'ar');
     fixture.componentRef.setInput('languages', ['ar', 'en']);
     httpMock.expectOne((r) => r.params.get('language') === 'ar').flush(QA);
     fixture.detectChanges();
@@ -134,7 +134,7 @@ describe('AssetFileStructureComponent', () => {
   it('lets a long sample cell be read in full', () => {
     // Arrange
     const long = 'a long answer '.repeat(40).trim();
-    const fixture = render('tafsir', 'ar');
+    const fixture = render('text', 'ar');
 
     // Act
     httpMock
@@ -149,7 +149,7 @@ describe('AssetFileStructureComponent', () => {
 
   it('shows no language switch for a single-language asset', () => {
     // Arrange
-    const fixture = render('tafsir', 'ar');
+    const fixture = render('text', 'ar');
     fixture.componentRef.setInput('languages', ['ar']);
 
     // Act
@@ -164,7 +164,7 @@ describe('AssetFileStructureComponent', () => {
 
   it('keeps the previous table, marked busy, while the next language loads', () => {
     // Arrange
-    const fixture = render('tafsir', 'ar');
+    const fixture = render('text', 'ar');
     httpMock.expectOne((r) => r.params.get('language') === 'ar').flush(QA);
     fixture.detectChanges();
 
