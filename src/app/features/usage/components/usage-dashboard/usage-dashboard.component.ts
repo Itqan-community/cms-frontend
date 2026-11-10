@@ -97,8 +97,7 @@ const PRESETS: UsagePreset[] = ['7d', '30d', '90d', '12m', 'custom'];
 const CATEGORIES = [
   'recitation',
   'mushaf',
-  'tafsir',
-  'translation',
+  'text',
   'linguistic',
   'tajweed',
   'font',

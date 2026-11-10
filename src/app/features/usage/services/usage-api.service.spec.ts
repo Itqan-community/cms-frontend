@@ -20,14 +20,14 @@ describe('UsageApiService', () => {
   afterEach(() => http.verify());
 
   it('summary calls the endpoint of each scope with the filters', () => {
-    service.summary('publisher', { ...range, category: 'tafsir', channel: null }).subscribe();
+    service.summary('publisher', { ...range, category: 'text', channel: null }).subscribe();
     service.summary('admin', { ...range, publisher_id: 4 }).subscribe();
     service.summary('developer', range).subscribe();
 
     const publisher = http.expectOne(
       (r) => r.url === `${environment.ADMIN_API_BASE_URL}/usage/summary/`
     );
-    expect(publisher.request.params.get('category')).toBe('tafsir');
+    expect(publisher.request.params.get('category')).toBe('text');
     expect(publisher.request.params.has('channel')).toBeFalse();
     const admin = http.expectOne(
       (r) => r.url === `${environment.ADMIN_API_BASE_URL}/admin/usage/summary/`

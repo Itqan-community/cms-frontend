@@ -25,7 +25,7 @@ describe('CsvTemplateDownloadComponent', () => {
       .compileComponents();
     fixture = TestBed.createComponent(CsvTemplateDownloadComponent);
     component = fixture.componentInstance;
-    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('kind', 'text');
     httpMock = TestBed.inject(HttpTestingController);
     anchor = jasmine.createSpyObj<HTMLAnchorElement>('a', ['click']);
     const createElement = document.createElement.bind(document);
@@ -54,7 +54,7 @@ describe('CsvTemplateDownloadComponent', () => {
 
     // Act
     component.download();
-    const req = httpMock.expectOne((r) => r.url.endsWith('/content/tafsirs/csv-template/'));
+    const req = httpMock.expectOne((r) => r.url.endsWith('/content/text-assets/csv-template/'));
     req.flush(new Blob(['page,text\n']));
 
     // Assert
@@ -72,7 +72,7 @@ describe('CsvTemplateDownloadComponent', () => {
     // Act
     component.download();
     httpMock
-      .expectOne((r) => r.url.endsWith('/content/tafsirs/tabari/csv-template/'))
+      .expectOne((r) => r.url.endsWith('/content/text-assets/tabari/csv-template/'))
       .flush(new Blob(['surah,ayah,text\n']));
 
     // Assert

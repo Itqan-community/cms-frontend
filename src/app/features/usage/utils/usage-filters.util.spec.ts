@@ -29,7 +29,7 @@ describe('usage-filters.util', () => {
       range: 'custom',
       start: '2026-01-01',
       end: '2026-01-31',
-      category: 'tafsir',
+      category: 'text',
       channel: 'cli',
       app: '4',
       metric: 'downloads',
@@ -39,7 +39,7 @@ describe('usage-filters.util', () => {
     expect(state.filters).toEqual({
       start_date: '2026-01-01',
       end_date: '2026-01-31',
-      category: 'tafsir',
+      category: 'text',
       channel: 'cli',
       app: 4,
     });

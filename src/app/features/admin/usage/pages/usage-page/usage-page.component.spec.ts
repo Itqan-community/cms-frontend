@@ -5,7 +5,7 @@ import { Router, provideRouter } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { of, Subject } from 'rxjs';
 import { UsageApiService } from '../../../../usage/services/usage-api.service';
-import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
+import { PublishersFilterService } from '../../../text-assets/services/publishers-filter.service';
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import { UsageService } from '../../services/usage.service';
 import { UsagePageComponent } from './usage-page.component';

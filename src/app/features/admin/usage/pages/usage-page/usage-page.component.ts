@@ -16,8 +16,8 @@ import { UsageUnseenTrafficComponent } from '../../../../usage/components/usage-
 import { UsageFilters, UsageRange, UsageScope } from '../../../../usage/models/usage.models';
 import { usageStateFromParams } from '../../../../usage/utils/usage-filters.util';
 import { AdminAuthService } from '../../../services/admin-auth.service';
-import { PublisherFilterItem } from '../../../tafsirs/models/tafsirs.models';
-import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
+import { PublisherFilterItem } from '../../../text-assets/models/text-assets.models';
+import { PublishersFilterService } from '../../../text-assets/services/publishers-filter.service';
 import { UsageService } from '../../services/usage.service';
 
 /**

@@ -1,3 +1,4 @@
+import { Categories, GALLERY_TEXT_TAGS } from '../../../core/enums/categories.enum';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { environment } from '../../../../environments/environment';
@@ -35,9 +36,18 @@ export class AssetsService {
   ) {
     let params = new HttpParams().set('page', String(page)).set('page_size', String(page_size));
 
-    (categories ?? []).forEach((c) => {
+    // Tafsir and translation are tags of the text category: send them as tags, plus the
+    // text category once, so the backend lists them next to the other categories picked.
+    const tags = (categories ?? []).filter((c) =>
+      (GALLERY_TEXT_TAGS as readonly string[]).includes(c)
+    );
+    const others = (categories ?? []).filter((c) => !tags.includes(c));
+    for (const c of tags.length ? [...others, Categories.TEXT] : others) {
       params = params.append('category', c);
-    });
+    }
+    for (const tag of tags) {
+      params = params.append('tag', tag);
+    }
 
     (licenses ?? []).forEach((l) => {
       params = params.append('license_code', l);

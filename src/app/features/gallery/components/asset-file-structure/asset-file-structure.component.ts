@@ -11,7 +11,7 @@ import type { AssetFileStructure } from '../../models/assets.model';
 import { AssetsService } from '../../services/assets.service';
 
 /** Categories whose downloads are CSVs with text columns. */
-const TEXT_CATEGORIES = new Set(['tafsir', 'translation']);
+const TEXT_CATEGORIES = new Set(['text']);
 
 /** A loaded preview and the language it was loaded for. */
 interface LoadedStructure {

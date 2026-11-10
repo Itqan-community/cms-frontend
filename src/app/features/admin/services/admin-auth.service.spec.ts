@@ -32,7 +32,7 @@ describe('AdminAuthService', () => {
               is_profile_completed: true,
               permissions: [
                 PORTAL_PERMISSIONS.PORTAL_ACCESS,
-                PORTAL_PERMISSIONS.PORTAL_READ_TAFSIR,
+                PORTAL_PERMISSIONS.PORTAL_READ_TEXT_ASSET,
               ],
             }),
           },
@@ -44,14 +44,14 @@ describe('AdminAuthService', () => {
 
   it('hasPermission returns true only for granted codes', () => {
     expect(adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS)).toBe(true);
-    expect(adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TAFSIR)).toBe(false);
+    expect(adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_DELETE_TEXT_ASSET)).toBe(false);
   });
 
   it('hasAnyPermission respects mode', () => {
     expect(
       adminAuth.hasAnyPermission([
         PORTAL_PERMISSIONS.PORTAL_DELETE_RECITER,
-        PORTAL_PERMISSIONS.PORTAL_READ_TAFSIR,
+        PORTAL_PERMISSIONS.PORTAL_READ_TEXT_ASSET,
       ])
     ).toBe(true);
     expect(adminAuth.hasAnyPermission([PORTAL_PERMISSIONS.PORTAL_DELETE_RECITER])).toBe(false);
@@ -62,13 +62,13 @@ describe('AdminAuthService', () => {
     expect(
       adminAuth.hasAllPermissions([
         PORTAL_PERMISSIONS.PORTAL_ACCESS,
-        PORTAL_PERMISSIONS.PORTAL_READ_TAFSIR,
+        PORTAL_PERMISSIONS.PORTAL_READ_TEXT_ASSET,
       ])
     ).toBe(true);
     expect(
       adminAuth.hasAllPermissions([
         PORTAL_PERMISSIONS.PORTAL_ACCESS,
-        PORTAL_PERMISSIONS.PORTAL_CREATE_TAFSIR,
+        PORTAL_PERMISSIONS.PORTAL_CREATE_TEXT_ASSET,
       ])
     ).toBe(false);
     expect(adminAuth.hasAllPermissions([])).toBe(true);

@@ -33,8 +33,8 @@
           <div class="title-row">
             <h1 class="asset-title">{{ asset()!.name }}</h1>
             <nz-tag class="category-badge">
-              <ng-icon [name]="getCategoryIcon(asset()!.category)" />
-              <span>{{ 'CATEGORIES.' + asset()!.category | translate }}</span>
+              <ng-icon [name]="getCategoryIcon(asset()!)" />
+              <span>{{ categoryLabel(asset()!) }}</span>
             </nz-tag>
             <app-asset-template-badge
               [template]="asset()!.template"

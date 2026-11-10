@@ -27,7 +27,7 @@ describe('ManageColumnsModalComponent', () => {
 
   function create(columns: AssetColumn[] = [TEXT, ANSWER]) {
     const fixture = TestBed.createComponent(ManageColumnsModalComponent);
-    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('kind', 'text');
     fixture.componentRef.setInput('slug', 'ayah-qa');
     fixture.componentRef.setInput('columns', columns);
     fixture.componentRef.setInput('visible', false);
@@ -80,7 +80,7 @@ describe('ManageColumnsModalComponent', () => {
     modal.add();
 
     // Assert
-    expect(service.createColumn).toHaveBeenCalledWith('tafsir', 'ayah-qa', {
+    expect(service.createColumn).toHaveBeenCalledWith('text', 'ayah-qa', {
       key: 'extra',
       label_en: 'Extra',
       label_ar: '',
@@ -159,10 +159,7 @@ describe('ManageColumnsModalComponent', () => {
     modal.move(0, 1);
 
     // Assert
-    expect(service.reorderColumns).toHaveBeenCalledWith('tafsir', 'ayah-qa', [
-      'answer',
-      'question',
-    ]);
+    expect(service.reorderColumns).toHaveBeenCalledWith('text', 'ayah-qa', ['answer', 'question']);
   });
 
   it('builds a second quick move on the first one, before the parent reloads', () => {

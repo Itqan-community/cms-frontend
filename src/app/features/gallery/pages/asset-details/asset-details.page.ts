@@ -37,6 +37,7 @@ import {
 import { IssuesService } from '../../../admin/issues/services/issues.service';
 import { localizedLanguageName } from '../../../admin/utils/iso-639.util';
 import { AssetDetails } from '../../models/assets.model';
+import { assetKindIcon } from '../../../../core/enums/categories.enum';
 import { AssetFileStructureComponent } from '../../components/asset-file-structure/asset-file-structure.component';
 import { AssetFontPreviewComponent } from '../../components/asset-font-preview/asset-font-preview.component';
 import { AssetRecitationPreviewComponent } from '../../components/asset-recitation-preview/asset-recitation-preview.component';
@@ -199,21 +200,17 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
     this.getAssetDetails(this.id);
   }
 
-  getCategoryIcon(category: string): string {
-    switch (category) {
-      case 'tafsir':
-        return 'lucideFileText';
-      case 'translation':
-        return 'lucideLanguages';
-      case 'recitation':
-        return 'lucideMic';
-      case 'font':
-        return 'lucideType';
-      case 'program':
-        return 'lucideLayers';
-      default:
-        return 'lucideFile';
-    }
+  getCategoryIcon(asset: AssetDetails): string {
+    return assetKindIcon(asset.category, asset.tags);
+  }
+
+  /** A text asset is labelled by its tags (Tafsir, Translation); the rest by category. */
+  categoryLabel(asset: AssetDetails): string {
+    if (asset.tags?.length)
+      return asset.tags
+        .map((tag) => tag.name)
+        .join(this.translate.currentLang === 'ar' ? '، ' : ', ');
+    return this.translate.instant('CATEGORIES.' + asset.category);
   }
 
   /** Language name localized to the current UI language (e.g. fr → "الفرنسية"). */

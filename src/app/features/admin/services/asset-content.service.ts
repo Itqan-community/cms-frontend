@@ -341,7 +341,7 @@ export class AssetContentService {
     if (mushafLayoutId != null) {
       params = params.set('mushaf_layout_id', mushafLayoutId);
     }
-    return this.http.get(`${this.base}/content/${this.segment(kind)}/csv-template/`, {
+    return this.http.get(`${this.base}/content/text-assets/csv-template/`, {
       params,
       responseType: 'blob',
     });
@@ -352,12 +352,8 @@ export class AssetContentService {
     return this.http.get(`${this.draftBase(kind, slug)}csv-template/`, { responseType: 'blob' });
   }
 
-  private segment(kind: AssetVersionParentKind): string {
-    return kind === 'tafsir' ? 'tafsirs' : 'translations';
-  }
-
   private draftBase(kind: AssetVersionParentKind, slug: string): string {
-    return `${this.base}/content/${this.segment(kind)}/${encodeURIComponent(slug)}/`;
+    return `${this.base}/content/text-assets/${encodeURIComponent(slug)}/`;
   }
 
   private columnUrl(kind: AssetVersionParentKind, slug: string, key: string): string {

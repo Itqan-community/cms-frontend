@@ -23,14 +23,14 @@ describe('AiTranslateService', () => {
   it('posts the request to the portal translate endpoint', () => {
     let result: AiTranslateResponse | undefined;
     service
-      .translate({ mode: 'translate', category: 'tafsir', fields: { name: 'تفسير' } })
+      .translate({ mode: 'translate', category: 'text', fields: { name: 'تفسير' } })
       .subscribe((r) => (result = r));
 
     const req = httpMock.expectOne(`${environment.ADMIN_API_BASE_URL}/ai/translate/`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({
       mode: 'translate',
-      category: 'tafsir',
+      category: 'text',
       fields: { name: 'تفسير' },
     });
     req.flush({ fields: { name: 'Tafsir' }, sources: [], slug: null });

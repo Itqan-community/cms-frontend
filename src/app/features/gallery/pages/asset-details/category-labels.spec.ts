@@ -6,10 +6,9 @@
 const API_CATEGORIES = [
   'recitation',
   'mushaf',
-  'tafsir',
+  'text',
   'program',
   'linguistic',
-  'translation',
   'font',
   'search',
   'tajweed',

@@ -93,7 +93,7 @@ describe('AssetReviewGridComponent', () => {
 
     fixture = TestBed.createComponent(AssetReviewGridComponent);
     component = fixture.componentInstance;
-    component.kind = 'translation';
+    component.kind = 'text';
     component.slug = 'en-sahih';
     // The component's own NzModalService (NzModalModule provides one, shadowing any
     // root stub); the template's <nz-modal>s need the real one, so only confirm is
@@ -143,7 +143,7 @@ describe('AssetReviewGridComponent', () => {
     expect(adminAuthSpy.hasPermission).toHaveBeenCalledWith(
       PORTAL_PERMISSIONS.PORTAL_REVIEW_CONTENT
     );
-    expect(reviewServiceSpy.listLanguages).toHaveBeenCalledWith('translation', 'en-sahih');
+    expect(reviewServiceSpy.listLanguages).toHaveBeenCalledWith('text', 'en-sahih');
     expect(component.languages()).toEqual(['en', 'fr']);
     expect(component.selectedLanguage()).toBe('en');
     expect(reviewServiceSpy.listChanges).toHaveBeenCalled();
@@ -156,7 +156,7 @@ describe('AssetReviewGridComponent', () => {
 
     expect(component.selectedLanguage()).toBe('fr');
     expect(reviewServiceSpy.listChanges).toHaveBeenCalledWith(
-      'translation',
+      'text',
       'en-sahih',
       'fr',
       1,
@@ -171,7 +171,7 @@ describe('AssetReviewGridComponent', () => {
     adminAuthSpy.hasPermission.and.returnValue(false);
     const unauthorizedFixture = TestBed.createComponent(AssetReviewGridComponent);
     const unauthorizedComp = unauthorizedFixture.componentInstance;
-    unauthorizedComp.kind = 'translation';
+    unauthorizedComp.kind = 'text';
     unauthorizedComp.slug = 'en-sahih';
 
     unauthorizedFixture.detectChanges();
@@ -198,10 +198,10 @@ describe('AssetReviewGridComponent', () => {
     component.onLanguageChange('fr');
 
     expect(component.selectedLanguage()).toBe('fr');
-    expect(lastLanguageSpy.set).toHaveBeenCalledWith('translation', 'en-sahih', 'fr');
+    expect(lastLanguageSpy.set).toHaveBeenCalledWith('text', 'en-sahih', 'fr');
     expect(component.page()).toBe(1);
     expect(reviewServiceSpy.listChanges).toHaveBeenCalledWith(
-      'translation',
+      'text',
       'en-sahih',
       'fr',
       1,
@@ -222,7 +222,7 @@ describe('AssetReviewGridComponent', () => {
     expect(component.stateFilter()).toBe('approved');
     expect(component.page()).toBe(1);
     expect(reviewServiceSpy.listChanges).toHaveBeenCalledWith(
-      'translation',
+      'text',
       'en-sahih',
       'en',
       1,
@@ -239,7 +239,7 @@ describe('AssetReviewGridComponent', () => {
     component.approve(mockChange);
 
     expect(reviewServiceSpy.setState).toHaveBeenCalledWith(
-      'translation',
+      'text',
       'en-sahih',
       mockChange.id,
       'approved',
@@ -255,7 +255,7 @@ describe('AssetReviewGridComponent', () => {
     component.unreview(mockChange);
 
     expect(reviewServiceSpy.setState).toHaveBeenCalledWith(
-      'translation',
+      'text',
       'en-sahih',
       mockChange.id,
       'unreviewed',
@@ -277,7 +277,7 @@ describe('AssetReviewGridComponent', () => {
     component.confirmComment();
 
     expect(reviewServiceSpy.setState).toHaveBeenCalledWith(
-      'translation',
+      'text',
       'en-sahih',
       mockChange.id,
       'commented',
@@ -337,7 +337,7 @@ describe('AssetReviewGridComponent', () => {
     it('lists every change until a version is picked, then only what makes it up', () => {
       // Arrange
       fixture.detectChanges();
-      expect(reviewServiceSpy.listVersions).toHaveBeenCalledWith('translation', 'en-sahih', 'en');
+      expect(reviewServiceSpy.listVersions).toHaveBeenCalledWith('text', 'en-sahih', 'en');
       expect(component.versions().map((v) => v.name)).toEqual(['v2', 'v1']);
       expect(reviewServiceSpy.listChanges.calls.mostRecent().args[6]).toBeNull();
 
@@ -514,7 +514,7 @@ describe('AssetReviewGridComponent', () => {
 
       component.approveSelected();
 
-      expect(reviewServiceSpy.bulkApprove).toHaveBeenCalledWith('translation', 'en-sahih', {
+      expect(reviewServiceSpy.bulkApprove).toHaveBeenCalledWith('text', 'en-sahih', {
         language: 'en',
         change_ids: [2],
       });
@@ -530,7 +530,7 @@ describe('AssetReviewGridComponent', () => {
       component.approveAll();
 
       expect(modalConfirm).toHaveBeenCalled();
-      expect(reviewServiceSpy.bulkApprove).toHaveBeenCalledWith('translation', 'en-sahih', {
+      expect(reviewServiceSpy.bulkApprove).toHaveBeenCalledWith('text', 'en-sahih', {
         language: 'en',
         state: 'unreviewed',
         version: 10,
@@ -543,7 +543,7 @@ describe('AssetReviewGridComponent', () => {
 
       component.approveAll();
 
-      expect(reviewServiceSpy.bulkApprove).toHaveBeenCalledWith('translation', 'en-sahih', {
+      expect(reviewServiceSpy.bulkApprove).toHaveBeenCalledWith('text', 'en-sahih', {
         language: 'en',
         state: 'unreviewed',
         filters: { ayah: { filterType: 'number', type: 'equals', filter: 3 } },
@@ -556,7 +556,7 @@ describe('AssetReviewGridComponent', () => {
 
       component.approveAll();
 
-      expect(reviewServiceSpy.bulkApprove).toHaveBeenCalledWith('translation', 'en-sahih', {
+      expect(reviewServiceSpy.bulkApprove).toHaveBeenCalledWith('text', 'en-sahih', {
         language: 'en',
       });
     });
@@ -632,7 +632,7 @@ describe('AssetReviewGridComponent', () => {
     component.changes.set([{ ...mockChange, column: 'text' }]);
 
     // Assert
-    expect(contentServiceSpy.listColumns).toHaveBeenCalledWith('translation', 'en-sahih');
+    expect(contentServiceSpy.listColumns).toHaveBeenCalledWith('text', 'en-sahih');
     expect(component.multiColumn()).toBeTrue();
   });
 
@@ -690,7 +690,7 @@ describe('AssetReviewGridComponent', () => {
 
       expect(component.page()).toBe(1);
       expect(reviewServiceSpy.listChanges).toHaveBeenCalledOnceWith(
-        'translation',
+        'text',
         'en-sahih',
         'en',
         1,
