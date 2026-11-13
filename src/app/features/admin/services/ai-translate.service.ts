@@ -12,6 +12,8 @@ export type AiFieldKey =
   | 'bio'
   | 'version_name'
   | 'version_summary';
+/** Fields "Write from the web" can also write in Arabic. */
+export type AiWebFieldKey = 'description' | 'long_description' | 'bio';
 
 /** Inputs for the package slug suggested by the same call (asset create forms; not reciters). */
 export interface AiSlugFor {
@@ -37,11 +39,17 @@ export interface AiTranslateRequest {
   fields: Partial<Record<AiFieldKey, string>>;
   context?: AiTranslateContext;
   slug_for?: AiSlugFor;
+  /** Arabic values whose English is already filled: prompt context only, never returned. */
+  reference?: Partial<Record<AiFieldKey, string>>;
+  /** `web` mode: fields whose Arabic is empty, to write in Arabic too (returned in `fields_ar`). */
+  fill_arabic?: AiWebFieldKey[];
 }
 
 export interface AiTranslateResponse {
   /** English values for the requested fields. */
   fields: Partial<Record<AiFieldKey, string>>;
+  /** Arabic values written in `web` mode for the requested `fill_arabic` fields. */
+  fields_ar?: Partial<Record<AiWebFieldKey, string>>;
   /** Web pages used in `web` mode. */
   sources: string[];
   /** Suggested package slug when `slug_for` was sent; null when none could be made. */

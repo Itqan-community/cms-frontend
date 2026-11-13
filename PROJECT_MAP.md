@@ -364,7 +364,10 @@ container owns the API calls and the single picker modal. Quality tab menu suppo
   (font/mushaf/text asset/recitation/reciter; placed under the English name field so it is
   discoverable; hidden on edit). Fills only empty `<key>_en` controls from `<key>_ar` (`name`,
   `description`, `long_description`, `bio`, `version_name`, `version_summary`; missing pairs
-  skipped); recitation passes the selected reciter/riwayah as `context`. Uses
+  skipped); Arabic values whose English is already filled go as `reference` (prompt context only).
+  "Write from the web" also sends empty Arabic `description`/`long_description`/`bio` as
+  `fill_arabic` and writes the returned `fields_ar` into those `<key>_ar` controls if still empty.
+  Recitation passes the selected reciter/riwayah as `context`. Uses
   `services/ai-translate.service.ts`; 429 with `error_name: ai_rate_limited` → wait-a-minute
   message, any other 429 → daily free-limit message. Also sends `slug_for` and writes the returned
   identifier (slug) to the form's `slug` control (editable input only when generation fails;
