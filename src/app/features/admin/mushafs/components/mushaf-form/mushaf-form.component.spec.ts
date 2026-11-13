@@ -234,3 +234,85 @@ describe('MushafFormComponent first version', () => {
     });
   });
 });
+
+describe('MushafFormComponent edit for a publisher without a website', () => {
+  it('saves the stored Publisher website flag unchanged while it is hidden', () => {
+    const mushafsServiceMock = jasmine.createSpyObj<MushafsService>('MushafsService', [
+      'getDetail',
+      'create',
+      'patch',
+    ]);
+    mushafsServiceMock.getDetail.and.returnValue(
+      of({
+        name_ar: 'مصحف',
+        name_en: 'Mushaf',
+        description_ar: 'وصف',
+        description_en: 'Description',
+        long_description_ar: '',
+        long_description_en: '',
+        license: Licenses.CC0,
+        language: 'ar',
+        publisher: { id: 2, name: 'No site' },
+        is_external: false,
+        is_open_access: true,
+        in_gallery: true,
+        in_public_api: true,
+        in_cli: true,
+        in_tenants: false,
+        status: 'ready',
+        external_url: null,
+        thumbnail_url: null,
+      } as unknown as MushafDetails)
+    );
+    mushafsServiceMock.patch.and.returnValue(of({ slug: 'mushaf' } as MushafDetails));
+    TestBed.configureTestingModule({
+      imports: [MushafFormComponent],
+      providers: [
+        { provide: ActivatedRoute, useValue: { snapshot: { params: { slug: 'mushaf' } } } },
+        { provide: Router, useValue: jasmine.createSpyObj<Router>('Router', ['navigate']) },
+        { provide: MushafsService, useValue: mushafsServiceMock },
+        {
+          provide: AdminTenantService,
+          useValue: {
+            publishers: signal([
+              {
+                id: 2,
+                name: 'No site',
+                slug: 'no-site',
+                icon_url: null,
+                permissions: [],
+                has_website: false,
+              },
+            ]),
+            selectedPublisherId: signal(2),
+          },
+        },
+        {
+          provide: NzMessageService,
+          useValue: jasmine.createSpyObj<NzMessageService>('NzMessageService', [
+            'success',
+            'error',
+          ]),
+        },
+        {
+          provide: TranslateService,
+          useValue: jasmine.createSpyObj<TranslateService>('TranslateService', [
+            'instant',
+            'getCurrentLang',
+          ]),
+        },
+      ],
+    });
+    TestBed.overrideProvider(NzModalService, {
+      useValue: jasmine.createSpyObj<NzModalService>('NzModalService', ['confirm']),
+    });
+    TestBed.overrideComponent(MushafFormComponent, { set: { template: '' } });
+    const fixture = TestBed.createComponent(MushafFormComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.onSubmit();
+
+    const body = mushafsServiceMock.patch.calls.mostRecent().args[1];
+    expect(body.in_tenants).toBeFalse();
+  });
+});

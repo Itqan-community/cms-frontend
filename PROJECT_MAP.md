@@ -100,14 +100,16 @@ User Browser
 Portal assets (mushafs, fonts, recitations, text assets) expose `is_open_access` and four
 distribution-channel flags on create/update (POST/PUT/PATCH) and in list/detail responses:
 `in_gallery` (Itqan gallery), `in_public_api` (developers' public API), `in_cli` (itqan CLI),
-`in_tenants` (publisher tenant sites/API). List filter: `is_open_access=true|false`. The forms show
-them as checkboxes (`app-asset-channels-fields`, all on by default); list/detail pages show a "Not
-in …" tag per channel that is off (`app-asset-channel-tags`). Turning a channel off while developers
-hold approved/pending access returns 409 `channel_has_active_consumers`
-(`extra: {approved_count, pending_count, channels}`); the form opens a confirm modal and, on OK,
-re-sends the same request with `confirm_channel_change: true` (helpers in
-`features/admin/utils/asset-channels.util.ts`). Programs (mock-only, no backend) still use the old
-`restricted_for_tenant` flag.
+`in_tenants` ("Publisher website": the publisher's tenant site/API). List filter:
+`is_open_access=true|false`. The forms show them as checkboxes (`app-asset-channels-fields`, all on
+by default); "Publisher website" appears only when the form's `publisher_id` has `has_website` in
+`publishers/me` (it has a domain), and while hidden its control keeps the loaded/default value, so a
+save never changes it. List/detail pages show a "Not in …" tag per channel that is off
+(`app-asset-channel-tags`). Turning a channel off while developers hold approved/pending access
+returns 409 `channel_has_active_consumers` (`extra: {approved_count, pending_count, channels}`); the
+form opens a confirm modal and, on OK, re-sends the same request with `confirm_channel_change: true`
+(helpers in `features/admin/utils/asset-channels.util.ts`). Programs (mock-only, no backend) still
+use the old `restricted_for_tenant` flag.
 
 Every asset form (mushaf, font, text asset, recitation) has a **Draft** switch (`is_draft` control →
 `status: 'draft' | 'ready'`, `ADMIN.COMMON.LABEL_DRAFT`). A draft stays in the portal list/detail
@@ -483,7 +485,8 @@ container owns the API calls and the single picker modal. Quality tab menu suppo
   publisher), falling back to the profile's permission codes until a publisher is selected.
   Constants: `features/admin/constants/portal-permission.constants.ts`.
 - `admin-tenant.service.ts` — `AdminTenantService`: loads `publishers/me` (each entry carries the
-  caller's `permissions` there) and holds the selected publisher sent as `X-Tenant`.
+  caller's `permissions` there and `has_website`) and holds the selected publisher sent as
+  `X-Tenant`.
 - `admin-table-column-prefs.service.ts` — Persists column visibility per table
 - `admin-table-sort-prefs.service.ts` — Persists sort preferences
 - `asset-versions.service.ts` — Version management API
