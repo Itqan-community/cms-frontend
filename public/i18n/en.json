@@ -1877,6 +1877,7 @@
       "COLUMNS": {
         "ID": "ID",
         "ASSET": "Asset",
+        "LOCATION": "Location",
         "DESCRIPTION": "Description",
         "STATUS": "Status",
         "REPORTER": "Reporter",
@@ -3033,5 +3034,25 @@
     "NOT_FOUND_TITLE": "Reciter not found",
     "NOT_FOUND_MESSAGE": "The reciter you're looking for doesn't exist or is no longer available.",
     "BACK_TO_RECITERS": "Back to Reciters"
+  },
+  "ISSUE_CONTEXT": {
+    "TITLE": "Location",
+    "HINT": "Point to where the issue is.",
+    "SURAH": "Surah",
+    "SURAH_PLACEHOLDER": "Choose a surah",
+    "AYAH": "Ayah",
+    "AYAH_PLACEHOLDER": "Choose an ayah",
+    "PAGE": "Page",
+    "PAGE_PLACEHOLDER": "Page number",
+    "GLYPH": "Glyph",
+    "GLYPH_PLACEHOLDER": "e.g. ب or lam-alef",
+    "PAGE_VALUE": "Page {{page}}",
+    "GLYPH_VALUE": "Glyph “{{glyph}}”",
+    "HINT_FONT": "Enter a page, a glyph, or both.",
+    "HINT_LEGACY": "This report was filed without a location. You can add one.",
+    "ERR_SURAH": "Choose a surah",
+    "ERR_AYAH": "Choose an ayah",
+    "ERR_PAGE": "Enter the page",
+    "ERR_PAGE_OR_GLYPH": "Enter a page, a glyph, or both"
   }
 }

@@ -1877,6 +1877,7 @@
       "COLUMNS": {
         "ID": "المعرّف",
         "ASSET": "الأصل",
+        "LOCATION": "الموضع",
         "DESCRIPTION": "الوصف",
         "STATUS": "الحالة",
         "REPORTER": "المُبلّغ",
@@ -3033,5 +3034,25 @@
     "NOT_FOUND_TITLE": "القارئ غير موجود",
     "NOT_FOUND_MESSAGE": "القارئ الذي تبحث عنه غير موجود أو لم يعد متاحاً.",
     "BACK_TO_RECITERS": "العودة إلى القراء"
+  },
+  "ISSUE_CONTEXT": {
+    "TITLE": "الموضع",
+    "HINT": "حدّد موضع المشكلة.",
+    "SURAH": "السورة",
+    "SURAH_PLACEHOLDER": "اختر السورة",
+    "AYAH": "الآية",
+    "AYAH_PLACEHOLDER": "اختر الآية",
+    "PAGE": "الصفحة",
+    "PAGE_PLACEHOLDER": "رقم الصفحة",
+    "GLYPH": "الحرف",
+    "GLYPH_PLACEHOLDER": "مثل: ب أو لام ألف",
+    "PAGE_VALUE": "صفحة {{page}}",
+    "GLYPH_VALUE": "الحرف «{{glyph}}»",
+    "HINT_FONT": "أدخل رقم الصفحة أو الحرف أو كليهما.",
+    "HINT_LEGACY": "سُجّل هذا البلاغ دون موضع، ويمكنك إضافته.",
+    "ERR_SURAH": "اختر السورة",
+    "ERR_AYAH": "اختر الآية",
+    "ERR_PAGE": "أدخل رقم الصفحة",
+    "ERR_PAGE_OR_GLYPH": "أدخل رقم الصفحة أو الحرف أو كليهما"
   }
 }

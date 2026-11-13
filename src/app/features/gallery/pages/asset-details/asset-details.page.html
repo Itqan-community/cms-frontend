@@ -282,6 +282,13 @@
       <p class="modal-caption">{{ asset()?.name }}</p>
 
       <form [formGroup]="reportIssueForm" nz-form>
+        @if (reportIssueContextKind(); as kind) {
+          <app-issue-context-fields
+            [kind]="kind"
+            [form]="reportIssueContextForm"
+            [maxPage]="asset()?.mushaf_layout?.page_count ?? null"
+          />
+        }
         <nz-form-item>
           <nz-form-label [nzRequired]="true">
             {{ 'GALLERY.REPORT_ISSUE.DESCRIPTION_LABEL' | translate }}

@@ -84,6 +84,15 @@
           </nz-form-item>
         }
 
+        @if (contextKind(); as kind) {
+          <app-issue-context-fields
+            [kind]="kind"
+            [form]="contextForm"
+            [maxPage]="assetPageCount()"
+            [required]="contextRequired()"
+          />
+        }
+
         <nz-form-item>
           <nz-form-label nzRequired>{{
             'ADMIN.ISSUES.FORM.DESCRIPTION_LABEL' | translate
