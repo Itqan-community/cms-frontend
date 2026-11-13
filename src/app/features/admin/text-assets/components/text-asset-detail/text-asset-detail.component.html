@@ -102,43 +102,43 @@
       </div>
     </div>
 
-    <div class="admin-descriptions">
-      <div class="admin-desc-col">
-        <h3 class="admin-desc-title">
-          <ng-icon name="lucideFileText" />
-          {{ 'ADMIN.TEXT_ASSETS.DETAIL.DESC_AR_TITLE' | translate }}
-        </h3>
-        <p class="admin-desc-text">{{ textAsset()!.description_ar }}</p>
-        <h3 class="admin-desc-title">
-          <ng-icon name="lucideAlignRight" />
-          {{ 'ADMIN.TEXT_ASSETS.DETAIL.LONG_AR_TITLE' | translate }}
-        </h3>
-        <p class="admin-desc-text">{{ textAsset()!.long_description_ar }}</p>
+    <app-asset-detail-tabs [assetId]="textAsset()!.id" category="text">
+      <div class="admin-descriptions">
+        <div class="admin-desc-col">
+          <h3 class="admin-desc-title">
+            <ng-icon name="lucideFileText" />
+            {{ 'ADMIN.TEXT_ASSETS.DETAIL.DESC_AR_TITLE' | translate }}
+          </h3>
+          <p class="admin-desc-text">{{ textAsset()!.description_ar }}</p>
+          <h3 class="admin-desc-title">
+            <ng-icon name="lucideAlignRight" />
+            {{ 'ADMIN.TEXT_ASSETS.DETAIL.LONG_AR_TITLE' | translate }}
+          </h3>
+          <p class="admin-desc-text">{{ textAsset()!.long_description_ar }}</p>
+        </div>
+        <div class="admin-desc-col">
+          <h3 class="admin-desc-title" dir="ltr">
+            <ng-icon name="lucideFileText" />
+            {{ 'ADMIN.TEXT_ASSETS.DETAIL.DESC_EN_TITLE' | translate }}
+          </h3>
+          <p class="admin-desc-text" dir="ltr">{{ textAsset()!.description_en }}</p>
+          <h3 class="admin-desc-title" dir="ltr">
+            <ng-icon name="lucideAlignLeft" />
+            {{ 'ADMIN.TEXT_ASSETS.DETAIL.LONG_EN_TITLE' | translate }}
+          </h3>
+          <p class="admin-desc-text" dir="ltr">{{ textAsset()!.long_description_en }}</p>
+        </div>
       </div>
-      <div class="admin-desc-col">
-        <h3 class="admin-desc-title" dir="ltr">
-          <ng-icon name="lucideFileText" />
-          {{ 'ADMIN.TEXT_ASSETS.DETAIL.DESC_EN_TITLE' | translate }}
-        </h3>
-        <p class="admin-desc-text" dir="ltr">{{ textAsset()!.description_en }}</p>
-        <h3 class="admin-desc-title" dir="ltr">
-          <ng-icon name="lucideAlignLeft" />
-          {{ 'ADMIN.TEXT_ASSETS.DETAIL.LONG_EN_TITLE' | translate }}
-        </h3>
-        <p class="admin-desc-text" dir="ltr">{{ textAsset()!.long_description_en }}</p>
-      </div>
-    </div>
 
-    <app-asset-versions-manager
-      kind="text"
-      [slug]="textAsset()!.slug"
-      [assetId]="textAsset()!.id"
-      [assetNameEn]="textAsset()!.name_en"
-      i18nPrefix="ADMIN.TEXT_ASSETS.DETAIL.VERSIONS"
-      sectionTitleKey="ADMIN.TEXT_ASSETS.DETAIL.VERSIONS_TITLE"
-    />
-
-    <app-asset-usage-section [assetId]="textAsset()!.id" category="text" />
+      <app-asset-versions-manager
+        kind="text"
+        [slug]="textAsset()!.slug"
+        [assetId]="textAsset()!.id"
+        [assetNameEn]="textAsset()!.name_en"
+        i18nPrefix="ADMIN.TEXT_ASSETS.DETAIL.VERSIONS"
+        sectionTitleKey="ADMIN.TEXT_ASSETS.DETAIL.VERSIONS_TITLE"
+      />
+    </app-asset-detail-tabs>
 
     <div class="admin-back">
       <a routerLink="/admin/text-assets">
