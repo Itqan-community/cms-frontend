@@ -4,6 +4,61 @@
     <p class="admin-home__subtitle">{{ 'ADMIN.HOME.SUBTITLE' | translate }}</p>
   </div>
 
+  @if (countsLoading()) {
+    <nz-skeleton
+      class="admin-home__counts"
+      [nzActive]="true"
+      [nzTitle]="false"
+      [nzParagraph]="{ rows: 2 }"
+    />
+  } @else if (countsError()) {
+    <nz-alert
+      class="admin-home__counts"
+      nzType="warning"
+      nzShowIcon
+      [nzMessage]="countsError()!"
+    ></nz-alert>
+  } @else if (assetCounts().length) {
+    <section class="admin-home__counts" aria-labelledby="admin-home-counts-title">
+      <h2 id="admin-home-counts-title" class="admin-home__section-title">
+        {{ 'ADMIN.HOME.ASSETS_TITLE' | translate }}
+      </h2>
+      <div nz-row [nzGutter]="[16, 16]">
+        @for (count of assetCounts(); track count.category) {
+          <div nz-col [nzXs]="24" [nzSm]="12" [nzXl]="6">
+            <div class="admin-home__count">
+              <a [routerLink]="count.route" class="admin-home__count-link">
+                <ng-icon [name]="count.icon" class="admin-home__count-icon" aria-hidden="true" />
+                <span class="admin-home__count-value">{{ count.total }}</span>
+                <span class="admin-home__count-label">{{ count.labelKey | translate }}</span>
+              </a>
+              @if (count.drafts) {
+                <span class="admin-home__count-drafts">
+                  {{ 'ADMIN.HOME.DRAFTS' | translate: { count: count.drafts } }}
+                </span>
+              }
+              @if (count.tags.length) {
+                <ul class="admin-home__count-tags">
+                  @for (tag of count.tags; track tag.slug) {
+                    <li>
+                      <a
+                        class="admin-home__count-tag"
+                        [routerLink]="count.route"
+                        [queryParams]="{ tag: tag.slug }"
+                      >
+                        {{ tag.name }} <strong>{{ tag.total }}</strong>
+                      </a>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
   <div nz-row [nzGutter]="[24, 24]">
     @for (section of sections(); track section.route) {
       <div nz-col [nzXs]="24" [nzSm]="12" [nzLg]="12" [nzXl]="6">
