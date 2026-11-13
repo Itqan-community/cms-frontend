@@ -12,7 +12,8 @@ import { AssetCardComponent } from './asset-card.component';
 describe('AssetCardComponent', () => {
   const asset: Asset = {
     id: 27,
-    category: Categories.TAFSIR,
+    category: Categories.TEXT,
+    tags: [{ slug: 'tafsir', name: 'Tafsir' }],
     name: 'Hassaan Tafsir',
     description: 'A tafsir',
     publisher: { id: 1, name: 'Dar Alfa' },

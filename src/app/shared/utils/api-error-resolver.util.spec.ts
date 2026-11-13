@@ -186,7 +186,7 @@ describe('api-error-resolver.util', () => {
     it('suppresses a 404 for the columns of an asset on a backend without columns', () => {
       const err = new HttpErrorResponse({
         status: 404,
-        url: 'https://api.example/portal/content/tafsirs/qa/columns/',
+        url: 'https://api.example/portal/content/text-assets/qa/columns/',
       });
       expect(shouldSuppressGlobalErrorToast(err)).toBe(true);
     });

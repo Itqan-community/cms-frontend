@@ -21,32 +21,32 @@ describe('LastActiveLanguageService', () => {
   });
 
   it('should return null when no language is saved', () => {
-    expect(service.get('translation', 'en-sahih')).toBeNull();
+    expect(service.get('text', 'en-sahih')).toBeNull();
   });
 
   it('should save and retrieve language from sessionStorage', () => {
-    service.set('translation', 'en-sahih', 'fr');
-    expect(service.get('translation', 'en-sahih')).toBe('fr');
-    expect(sessionStorage.getItem('cms:last-language:translation:en-sahih')).toBe('fr');
+    service.set('text', 'en-sahih', 'fr');
+    expect(service.get('text', 'en-sahih')).toBe('fr');
+    expect(sessionStorage.getItem('cms:last-language:text:en-sahih')).toBe('fr');
   });
 
   it('should isolate keys by kind and slug', () => {
-    service.set('translation', 'slug-1', 'ar');
-    service.set('tafsir', 'slug-1', 'en');
-    service.set('translation', 'slug-2', 'ur');
+    service.set('text', 'slug-1', 'ar');
+    service.set('mushaf', 'slug-1', 'en');
+    service.set('text', 'slug-2', 'ur');
 
-    expect(service.get('translation', 'slug-1')).toBe('ar');
-    expect(service.get('tafsir', 'slug-1')).toBe('en');
-    expect(service.get('translation', 'slug-2')).toBe('ur');
+    expect(service.get('text', 'slug-1')).toBe('ar');
+    expect(service.get('mushaf', 'slug-1')).toBe('en');
+    expect(service.get('text', 'slug-2')).toBe('ur');
   });
 
   it('should handle sessionStorage exceptions gracefully on get', () => {
     spyOn(sessionStorage, 'getItem').and.throwError('Storage disabled');
-    expect(service.get('translation', 'en-sahih')).toBeNull();
+    expect(service.get('text', 'en-sahih')).toBeNull();
   });
 
   it('should handle sessionStorage exceptions gracefully on set', () => {
     spyOn(sessionStorage, 'setItem').and.throwError('QuotaExceeded');
-    expect(() => service.set('translation', 'en-sahih', 'fr')).not.toThrow();
+    expect(() => service.set('text', 'en-sahih', 'fr')).not.toThrow();
   });
 });

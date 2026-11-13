@@ -92,7 +92,7 @@ export interface AssetVersionFormPayload {
   publish?: boolean;
 }
 
-export type AssetVersionParentKind = 'tafsir' | 'translation' | 'mushaf' | 'font' | 'program';
+export type AssetVersionParentKind = 'text' | 'mushaf' | 'font' | 'program';
 
 /**
  * A version's availability in the package manager (itqan CLI).

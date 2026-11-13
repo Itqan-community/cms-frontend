@@ -20,8 +20,8 @@ import { NzInputModule } from 'ng-zorro-antd/input';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NgIcon } from '@ng-icons/core';
-import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
-import { PublisherFilterItem } from '../../../tafsirs/models/tafsirs.models';
+import { PublishersFilterService } from '../../../text-assets/services/publishers-filter.service';
+import { PublisherFilterItem } from '../../../text-assets/models/text-assets.models';
 import { ProgramFilters } from '../../models/programs.models';
 import {
   createDisplayLocalizationLabels,

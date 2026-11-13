@@ -28,24 +28,24 @@ describe('AssetReviewService', () => {
 
   describe('listLanguages', () => {
     it('should fetch languages for a translation', (done) => {
-      service.listLanguages('translation', 'en-sahih').subscribe((langs) => {
+      service.listLanguages('text', 'en-sahih').subscribe((langs) => {
         expect(langs).toEqual(['en', 'fr']);
         done();
       });
 
-      const req = httpMock.expectOne(`${base}/content/translations/en-sahih/review/languages/`);
+      const req = httpMock.expectOne(`${base}/content/text-assets/en-sahih/review/languages/`);
       expect(req.request.method).toBe('GET');
       req.flush(['en', 'fr']);
     });
 
     it('should fetch languages for a tafsir with encoded slug', (done) => {
-      service.listLanguages('tafsir', 'ar-muyassar/special').subscribe((langs) => {
+      service.listLanguages('text', 'ar-muyassar/special').subscribe((langs) => {
         expect(langs).toEqual(['ar']);
         done();
       });
 
       const req = httpMock.expectOne(
-        `${base}/content/tafsirs/ar-muyassar%2Fspecial/review/languages/`
+        `${base}/content/text-assets/ar-muyassar%2Fspecial/review/languages/`
       );
       expect(req.request.method).toBe('GET');
       req.flush(['ar']);
@@ -82,7 +82,7 @@ describe('AssetReviewService', () => {
         ],
       };
 
-      service.listChanges('translation', 'en-sahih', 'en', 1, 25, 'unreviewed').subscribe((res) => {
+      service.listChanges('text', 'en-sahih', 'en', 1, 25, 'unreviewed').subscribe((res) => {
         expect(res.count).toBe(1);
         expect(res.results.length).toBe(1);
         expect(res.results[0].id).toBe(10);
@@ -91,7 +91,7 @@ describe('AssetReviewService', () => {
 
       const req = httpMock.expectOne(
         (r) =>
-          r.url === `${base}/content/translations/en-sahih/review/changes/` &&
+          r.url === `${base}/content/text-assets/en-sahih/review/changes/` &&
           r.params.get('language') === 'en' &&
           r.params.get('page') === '1' &&
           r.params.get('page_size') === '25' &&
@@ -102,14 +102,14 @@ describe('AssetReviewService', () => {
     });
 
     it('should omit state param when not provided', (done) => {
-      service.listChanges('tafsir', 'muyassar', 'ar', 2, 50, null).subscribe((res) => {
+      service.listChanges('text', 'muyassar', 'ar', 2, 50, null).subscribe((res) => {
         expect(res.results).toEqual([]);
         done();
       });
 
       const req = httpMock.expectOne(
         (r) =>
-          r.url === `${base}/content/tafsirs/muyassar/review/changes/` &&
+          r.url === `${base}/content/text-assets/muyassar/review/changes/` &&
           r.params.get('language') === 'ar' &&
           r.params.get('page') === '2' &&
           r.params.get('page_size') === '50' &&
@@ -122,8 +122,8 @@ describe('AssetReviewService', () => {
     it('sends the grid filter model as JSON, and nothing for an empty one', () => {
       const model = { ayah: { filterType: 'number', type: 'equals', filter: 3 } };
 
-      service.listChanges('translation', 'en-sahih', 'en', 1, 25, null, null, model).subscribe();
-      service.listChanges('translation', 'en-sahih', 'en', 1, 25, null, null, {}).subscribe();
+      service.listChanges('text', 'en-sahih', 'en', 1, 25, null, null, model).subscribe();
+      service.listChanges('text', 'en-sahih', 'en', 1, 25, null, null, {}).subscribe();
 
       const [filtered, empty] = httpMock.match((r) => r.url.endsWith('/review/changes/'));
       expect(filtered.request.params.get('filters')).toBe(JSON.stringify(model));
@@ -159,14 +159,14 @@ describe('AssetReviewService', () => {
       };
 
       service
-        .setState('translation', 'en-sahih', 42, 'commented', 'Please verify translation')
+        .setState('text', 'en-sahih', 42, 'commented', 'Please verify translation')
         .subscribe((res) => {
           expect(res.review_state).toBe('commented');
           expect(res.comment).toBe('Please verify translation');
           done();
         });
 
-      const req = httpMock.expectOne(`${base}/content/translations/en-sahih/review/changes/42/`);
+      const req = httpMock.expectOne(`${base}/content/text-assets/en-sahih/review/changes/42/`);
       expect(req.request.method).toBe('PATCH');
       expect(req.request.body).toEqual({
         state: 'commented',
@@ -176,12 +176,12 @@ describe('AssetReviewService', () => {
     });
 
     it('should default comment to empty string if omitted', (done) => {
-      service.setState('tafsir', 'muyassar', 99, 'approved').subscribe((res) => {
+      service.setState('text', 'muyassar', 99, 'approved').subscribe((res) => {
         expect(res.review_state).toBe('approved');
         done();
       });
 
-      const req = httpMock.expectOne(`${base}/content/tafsirs/muyassar/review/changes/99/`);
+      const req = httpMock.expectOne(`${base}/content/text-assets/muyassar/review/changes/99/`);
       expect(req.request.method).toBe('PATCH');
       expect(req.request.body).toEqual({
         state: 'approved',
@@ -194,14 +194,14 @@ describe('AssetReviewService', () => {
   describe('bulkApprove', () => {
     it('posts the selection to the bulk-approve endpoint', (done) => {
       service
-        .bulkApprove('tafsir', 'muyassar', { language: 'ar', change_ids: [1, 2] })
+        .bulkApprove('text', 'muyassar', { language: 'ar', change_ids: [1, 2] })
         .subscribe((res) => {
           expect(res.approved).toBe(2);
           done();
         });
 
       const req = httpMock.expectOne(
-        `${base}/content/tafsirs/muyassar/review/changes/bulk-approve/`
+        `${base}/content/text-assets/muyassar/review/changes/bulk-approve/`
       );
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual({ language: 'ar', change_ids: [1, 2] });
