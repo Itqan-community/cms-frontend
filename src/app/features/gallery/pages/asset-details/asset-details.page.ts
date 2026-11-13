@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
@@ -31,7 +31,15 @@ import { ImageCarouselComponent } from '../../../../shared/components/image-caro
 import { LicenseTagComponent } from '../../../../shared/components/license-tag/license-tag.component';
 import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
 import { resolveApiErrorMessage } from '../../../../shared/utils/api-error-resolver.util';
+import { IssueContextFieldsComponent } from '../../../admin/issues/components/issue-context-fields/issue-context-fields.component';
 import { IssuesService } from '../../../admin/issues/services/issues.service';
+import {
+  createIssueContextForm,
+  issueContextFromForm,
+  issueContextKind,
+  markIssueContextTouched,
+  setIssueContextRequired,
+} from '../../../admin/issues/utils/issue-context.util';
 import { localizedLanguageName } from '../../../admin/utils/iso-639.util';
 import { AssetDetails } from '../../models/assets.model';
 import { assetKindIcon } from '../../../../core/enums/categories.enum';
@@ -68,6 +76,7 @@ import { AssetUsageCountsComponent } from '../../../usage/components/asset-usage
     ReactiveFormsModule,
     FormsModule,
     AssetGetCtaComponent,
+    IssueContextFieldsComponent,
   ],
   templateUrl: './asset-details.page.html',
   styleUrl: './asset-details.page.less',
@@ -104,6 +113,9 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
 
   accessRequestForm: FormGroup;
   reportIssueForm: FormGroup;
+  /** Where in the asset the reported issue is; fields follow the asset's category. */
+  readonly reportIssueContextForm = createIssueContextForm();
+  readonly reportIssueContextKind = computed(() => issueContextKind(this.asset()?.category));
 
   usageOptions = [{ value: 'commercial' }, { value: 'non-commercial' }];
 
@@ -278,12 +290,20 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
       return;
     }
 
+    this.showReportIssueModal();
+  }
+
+  /** Open the modal with the location fields required for this asset's category. */
+  private showReportIssueModal(): void {
+    this.reportIssueContextForm.reset();
+    setIssueContextRequired(this.reportIssueContextKind(), this.reportIssueContextForm);
     this.isReportIssueModalVisible.set(true);
   }
 
   closeReportIssueModal() {
     this.isReportIssueModalVisible.set(false);
     this.reportIssueForm.reset();
+    this.reportIssueContextForm.reset();
   }
 
   handleReportIssueModalCancel() {
@@ -291,8 +311,9 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
   }
 
   handleReportIssueModalOk() {
-    if (!this.reportIssueForm.valid) {
+    if (!this.reportIssueForm.valid || this.reportIssueContextForm.invalid) {
       this.reportIssueForm.get('description')?.markAsTouched();
+      markIssueContextTouched(this.reportIssueContextForm);
       return;
     }
 
@@ -302,10 +323,14 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
     }
 
     const description = this.reportIssueForm.value.description ?? '';
+    const context = issueContextFromForm(
+      this.reportIssueContextKind(),
+      this.reportIssueContextForm
+    );
     this.isSubmittingReportIssue.set(true);
 
     this.issuesService
-      .create({ asset_id: asset.id, description })
+      .create({ asset_id: asset.id, description, context })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -323,9 +348,9 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
             this.message.error(this.translate.instant('GALLERY.REPORT_ISSUE.FORBIDDEN'));
             return;
           }
-          const errorKey =
+          const fallbackKey =
             error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'GALLERY.REPORT_ISSUE.ERROR';
-          this.message.error(this.translate.instant(errorKey));
+          this.message.error(resolveApiErrorMessage(error, { fallbackKey }, this.translate));
         },
       });
   }
@@ -336,7 +361,7 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
       return;
     }
 
-    this.isReportIssueModalVisible.set(true);
+    this.showReportIssueModal();
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { reportIssue: null },

@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { callerShowsErrors } from '../../../../core/interceptors/caller-shows-errors.context';
 import {
   IssueReportCreateIn,
   IssueReportListFilters,
@@ -42,11 +43,16 @@ export class IssuesService {
   }
 
   create(body: IssueReportCreateIn): Observable<IssueReportOut> {
-    return this.http.post<IssueReportOut>(`${this.baseUrl}/`, body);
+    // Callers show the backend's message (e.g. an invalid issue location) themselves.
+    return this.http.post<IssueReportOut>(`${this.baseUrl}/`, body, {
+      context: callerShowsErrors(),
+    });
   }
 
   patch(id: number, body: IssueReportUpdateIn): Observable<IssueReportOut> {
-    return this.http.patch<IssueReportOut>(`${this.baseUrl}/${id}/`, body);
+    return this.http.patch<IssueReportOut>(`${this.baseUrl}/${id}/`, body, {
+      context: callerShowsErrors(),
+    });
   }
 
   delete(id: number): Observable<void> {

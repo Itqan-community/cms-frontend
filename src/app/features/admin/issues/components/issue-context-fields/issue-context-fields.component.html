@@ -1,0 +1,100 @@
+<fieldset class="issue-context" [formGroup]="form()">
+  <legend class="issue-context__title">{{ 'ISSUE_CONTEXT.TITLE' | translate }}</legend>
+  <p class="issue-context__hint">
+    {{
+      (!required()
+        ? 'ISSUE_CONTEXT.HINT_LEGACY'
+        : kind() === 'font'
+          ? 'ISSUE_CONTEXT.HINT_FONT'
+          : 'ISSUE_CONTEXT.HINT'
+      ) | translate
+    }}
+  </p>
+
+  <div class="issue-context__row">
+    @if (kind() === 'ayah') {
+      <nz-form-item class="issue-context__surah">
+        <nz-form-label nzFor="issue-context-surah" [nzRequired]="required()">{{
+          'ISSUE_CONTEXT.SURAH' | translate
+        }}</nz-form-label>
+        <nz-form-control [nzErrorTip]="'ISSUE_CONTEXT.ERR_SURAH' | translate">
+          <nz-select
+            nzId="issue-context-surah"
+            formControlName="surah"
+            nzShowSearch
+            [nzAllowClear]="!required()"
+            [nzPlaceHolder]="'ISSUE_CONTEXT.SURAH_PLACEHOLDER' | translate"
+          >
+            @for (surah of surahs; track surah.id) {
+              <nz-option [nzValue]="surah.id" [nzLabel]="surahName(surah.id)"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+
+      <nz-form-item class="issue-context__ayah">
+        <nz-form-label nzFor="issue-context-ayah" [nzRequired]="required()">{{
+          'ISSUE_CONTEXT.AYAH' | translate
+        }}</nz-form-label>
+        <nz-form-control [nzErrorTip]="'ISSUE_CONTEXT.ERR_AYAH' | translate">
+          <nz-select
+            nzId="issue-context-ayah"
+            formControlName="ayah"
+            nzShowSearch
+            [nzAllowClear]="!required()"
+            [nzPlaceHolder]="'ISSUE_CONTEXT.AYAH_PLACEHOLDER' | translate"
+          >
+            @for (ayah of ayahOptions(form().controls.surah.value); track ayah) {
+              <nz-option [nzValue]="ayah" [nzLabel]="'' + ayah"></nz-option>
+            }
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    }
+
+    @if (kind() === 'page' || kind() === 'font') {
+      <nz-form-item class="issue-context__page">
+        <nz-form-label nzFor="issue-context-page" [nzRequired]="required() && kind() === 'page'">{{
+          'ISSUE_CONTEXT.PAGE' | translate
+        }}</nz-form-label>
+        <nz-form-control
+          [nzErrorTip]="'ISSUE_CONTEXT.ERR_PAGE' | translate"
+          [nzValidateStatus]="showPageOrGlyphError() ? 'error' : form().controls.page"
+        >
+          <nz-input-number
+            nzId="issue-context-page"
+            formControlName="page"
+            [nzMin]="1"
+            [nzMax]="maxPage() ?? 32767"
+            [nzStep]="1"
+            [nzPrecision]="0"
+            [nzPlaceHolder]="'ISSUE_CONTEXT.PAGE_PLACEHOLDER' | translate"
+          ></nz-input-number>
+        </nz-form-control>
+      </nz-form-item>
+    }
+
+    @if (kind() === 'font') {
+      <nz-form-item class="issue-context__glyph">
+        <nz-form-label nzFor="issue-context-glyph">{{
+          'ISSUE_CONTEXT.GLYPH' | translate
+        }}</nz-form-label>
+        <nz-form-control [nzValidateStatus]="showPageOrGlyphError() ? 'error' : ''">
+          <input
+            id="issue-context-glyph"
+            nz-input
+            formControlName="glyph"
+            [maxlength]="glyphMaxLength"
+            [placeholder]="'ISSUE_CONTEXT.GLYPH_PLACEHOLDER' | translate"
+          />
+        </nz-form-control>
+      </nz-form-item>
+    }
+  </div>
+
+  @if (showPageOrGlyphError()) {
+    <p class="issue-context__error" role="alert">
+      {{ 'ISSUE_CONTEXT.ERR_PAGE_OR_GLYPH' | translate }}
+    </p>
+  }
+</fieldset>
