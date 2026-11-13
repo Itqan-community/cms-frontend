@@ -56,6 +56,20 @@
                     <nz-option [nzValue]="tag.slug" [nzLabel]="tag.name"></nz-option>
                   }
                 </nz-select>
+                @if (tagsError(); as tagsErrorMessage) {
+                  <div class="text-asset-form__tags-error" role="alert">
+                    {{ tagsErrorMessage }}
+                    <button
+                      nz-button
+                      nzType="link"
+                      nzSize="small"
+                      type="button"
+                      (click)="loadTags()"
+                    >
+                      {{ 'ADMIN.TEXT_ASSETS.FORM.TAGS_RETRY' | translate }}
+                    </button>
+                  </div>
+                }
               </nz-form-control>
             </nz-form-item>
           </div>

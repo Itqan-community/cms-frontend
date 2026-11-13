@@ -1455,6 +1455,8 @@
         "PUBLISHER": "Publisher",
         "TAGS": "Tags",
         "ERR_TAGS": "Choose at least one tag",
+        "TAGS_LOAD_ERROR": "Could not load the tags.",
+        "TAGS_RETRY": "Try again",
         "PLACEHOLDER_TAGS": "e.g. Tafsir, Translation",
         "TAGS_HINT": "The package name starts with the first tag (e.g. tafsir-…). Itqan staff add new tags."
       },

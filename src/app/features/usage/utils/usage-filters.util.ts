@@ -15,6 +15,7 @@ const PRESET_DAYS: Record<Exclude<UsagePreset, 'custom'>, number> = {
 };
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const FILTER_PARAMS = ['category', 'channel', 'platform', 'country'] as const;
+const LEGACY_TEXT_CATEGORIES = new Set(['tafsir', 'translation']);
 /** URL parameter -> id filter. */
 const ID_PARAMS = [
   ['app', 'app'],
@@ -102,6 +103,10 @@ export function usageStateFromParams(
     if (params[name]) {
       filters[name] = params[name];
     }
+  }
+  // Saved links from before tafsirs and translations became text assets.
+  if (filters['category'] && LEGACY_TEXT_CATEGORIES.has(filters['category'])) {
+    filters['category'] = 'text';
   }
   for (const [param, name] of ID_PARAMS) {
     const id = Number(params[param]);
