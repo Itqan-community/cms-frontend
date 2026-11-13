@@ -689,6 +689,29 @@ Release 1.18.0.
 
 ---
 
+## [2.0.0] - 2026-11-13
+
+Release 2.0.0.
+
+## Changes
+
+- fix(admin): address review on asset distribution channels
+- feat(admin)!: choose each asset's distribution channels
+- feat(admin)!: rename recitation folders to qualities
+- feat(admin): add a draft switch to every asset form
+- fix(admin): address review on version deletion
+- feat(admin): explain why a version can't be deleted
+- feat(review): move the review page to AG Grid with column filters
+- fix(theme): address review on the dark theme
+- feat(admin): filter page-template content by page number
+- feat(theme): add a dark theme with a light/dark toggle
+- feat(recitations): show upload progress for timing files
+- fix(recitations): re-enable timings upload button after a failed upload
+- fix(admin): keep a quote inside a pasted cell as text
+- fix(admin): keep line breaks inside pasted spreadsheet cells
+
+---
+
 ## [Unreleased]
 
 ### Added
