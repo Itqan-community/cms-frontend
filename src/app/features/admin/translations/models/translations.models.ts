@@ -1,3 +1,4 @@
+import type { AssetChannelFlags, AssetChannelFormFlags } from '../../utils/asset-channels.util';
 import { Licenses } from '../../../../core/enums/licenses.enum';
 import type { AssetTemplate } from '../../models/asset-content.models';
 
@@ -31,7 +32,7 @@ export interface AssetVersion {
 }
 
 /** GET /portal/translations/ */
-export interface TranslationItem {
+export interface TranslationItem extends AssetChannelFlags {
   id: number;
   slug?: string;
   name: string;
@@ -41,14 +42,15 @@ export interface TranslationItem {
   language?: string | null;
   is_external: boolean;
   is_open_access: boolean;
-  restricted_for_tenant: boolean;
+  /** Draft assets stay in the portal but are hidden from consumers. */
+  status?: AssetStatus;
   template: AssetTemplate | null;
   mushaf_layout: { id: number; name: string; page_count: number } | null;
   created_at: string;
 }
 
 /** GET /portal/translations/{translation_slug}/ */
-export interface TranslationDetails {
+export interface TranslationDetails extends AssetChannelFlags {
   id: number;
   slug?: string;
   name_ar: string;
@@ -63,7 +65,8 @@ export interface TranslationDetails {
   language?: string | null;
   is_external: boolean;
   is_open_access: boolean;
-  restricted_for_tenant: boolean;
+  /** Draft assets stay in the portal but are hidden from consumers. */
+  status?: AssetStatus;
   external_url: string | null;
   template: AssetTemplate | null;
   mushaf_layout: { id: number; name: string; page_count: number } | null;
@@ -89,7 +92,7 @@ export interface TranslationFilters {
 }
 
 /** JSON payload for create / update */
-export interface TranslationFormValue {
+export interface TranslationFormValue extends AssetChannelFormFlags {
   name_ar: string;
   name_en: string;
   description_ar: string;
@@ -101,7 +104,8 @@ export interface TranslationFormValue {
   publisher_id: number;
   is_external: boolean;
   is_open_access: boolean;
-  restricted_for_tenant: boolean;
+  /** Draft assets stay in the portal but are hidden from consumers. */
+  status?: AssetStatus;
   external_url?: string | null;
   /** Create-only: fixed at creation, immutable afterwards. */
   template?: AssetTemplate;
@@ -128,3 +132,6 @@ export interface PublisherFilterResponse {
   results: PublisherFilterItem[];
   count: number;
 }
+
+/** `Asset.status`: a draft is hidden from the gallery, APIs and the itqan CLI. */
+export type AssetStatus = 'draft' | 'ready';

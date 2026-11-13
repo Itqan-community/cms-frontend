@@ -50,6 +50,18 @@
               [nzLabel]="'ADMIN.REVIEW.FILTER.COMMENTED' | translate"
             ></nz-option>
           </nz-select>
+          @if (hasColumnFilters()) {
+            <button
+              nz-button
+              nzType="link"
+              type="button"
+              class="asset-review-grid__clear-filters"
+              [disabled]="loading()"
+              (click)="clearColumnFilters()"
+            >
+              {{ 'ADMIN.REVIEW.CLEAR_FILTERS' | translate }}
+            </button>
+          }
         }
       </div>
       @if (hasLanguages()) {
@@ -93,156 +105,33 @@
     } @else if (!hasLanguages()) {
       <p class="asset-review-grid__empty">{{ 'ADMIN.REVIEW.NO_ASSIGNED_LANGUAGES' | translate }}</p>
     } @else {
-      <nz-spin [nzSpinning]="loading()">
-        <nz-table
-          #reviewTable
-          [nzData]="changes()"
-          [nzFrontPagination]="false"
-          [nzShowPagination]="false"
-          nzSize="middle"
-          nzTableLayout="fixed"
-          [nzNoResult]="emptyTpl"
-        >
-          <thead>
-            <tr>
-              <th
-                nzWidth="48px"
-                [nzChecked]="allSelected()"
-                [nzIndeterminate]="someSelected()"
-                [nzDisabled]="!selectableRows().length || bulkApproving()"
-                [attr.aria-label]="'ADMIN.REVIEW.BULK.SELECT_ALL' | translate"
-                (nzCheckedChange)="toggleAll($event)"
-              ></th>
-              <th nzWidth="90px">{{ 'ADMIN.REVIEW.COLUMN.UNIT' | translate }}</th>
-              <th nzWidth="80px">{{ 'ADMIN.REVIEW.COLUMN.TYPE' | translate }}</th>
-              <th>{{ 'ADMIN.REVIEW.COLUMN.CHANGE' | translate }}</th>
-              <th nzWidth="80px">{{ 'ADMIN.REVIEW.COLUMN.COMMIT' | translate }}</th>
-              <th nzWidth="120px">{{ 'ADMIN.REVIEW.COLUMN.EDITOR' | translate }}</th>
-              <th nzWidth="130px">{{ 'ADMIN.REVIEW.COLUMN.STATE' | translate }}</th>
-              <th nzWidth="180px">{{ 'ADMIN.REVIEW.COLUMN.ACTIONS' | translate }}</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of reviewTable.data; track row.id) {
-              <tr>
-                <td
-                  [nzChecked]="selectedIds().has(row.id)"
-                  [nzDisabled]="row.review_state === 'approved' || bulkApproving()"
-                  [attr.aria-label]="
-                    'ADMIN.REVIEW.BULK.SELECT_ROW' | translate: { label: row.label }
-                  "
-                  (nzCheckedChange)="toggleRow(row.id, $event)"
-                ></td>
-                <td>
-                  {{ row.label }}
-                  @if (multiColumn()) {
-                    <span class="asset-review-grid__column" dir="auto">{{ columnName(row) }}</span>
-                  }
-                </td>
-                <td>{{ typeKey(row.change_type) | translate }}</td>
-                <td class="asset-review-grid__change">
-                  @if (compare().get(row.id); as cmp) {
-                    <app-change-compare
-                      [before]="cmp.before"
-                      [after]="cmp.after"
-                      [words]="cmp.words"
-                      [stacked]="true"
-                    />
-                    @if (cmp.cut) {
-                      <button
-                        nz-button
-                        nzType="link"
-                        nzSize="small"
-                        type="button"
-                        class="asset-review-grid__full-text"
-                        (click)="openFullText(row)"
-                      >
-                        {{ 'ADMIN.CONTENT_CHANGES.SHOW_FULL_TEXT' | translate }}
-                      </button>
-                    }
-                  }
-                  @if (row.comment) {
-                    <p class="asset-review-grid__comment" dir="auto">{{ row.comment }}</p>
-                  }
-                </td>
-                <td class="admin-mono">{{ row.commit_ref }}</td>
-                <td class="asset-review-grid__editor">
-                  {{ row.edited_by ?? ('COMMON.EM_DASH' | translate) }}
-                </td>
-                <td>
-                  <span
-                    class="asset-review-grid__state"
-                    [class.asset-review-grid__state--approved]="row.review_state === 'approved'"
-                    [class.asset-review-grid__state--commented]="row.review_state === 'commented'"
-                  >
-                    {{ stateKey(row.review_state) | translate }}
-                  </span>
-                  @if (row.reviewed_by) {
-                    <span class="asset-review-grid__reviewer">
-                      {{ row.reviewed_by }}
-                      @if (row.reviewed_at) {
-                        · {{ row.reviewed_at | date: 'short' }}
-                      }
-                    </span>
-                  }
-                </td>
-                <td>
-                  <div class="asset-review-grid__actions">
-                    <button
-                      nz-button
-                      nzSize="small"
-                      [nzType]="row.review_state === 'approved' ? 'primary' : 'default'"
-                      [nzLoading]="
-                        savingAction()?.id === row.id && savingAction()?.action === 'approve'
-                      "
-                      [disabled]="savingAction()?.id === row.id"
-                      (click)="approve(row)"
-                    >
-                      {{ 'ADMIN.REVIEW.ACTION.APPROVE' | translate }}
-                    </button>
-                    <button
-                      nz-button
-                      nzSize="small"
-                      [nzType]="row.review_state === 'commented' ? 'primary' : 'default'"
-                      [disabled]="savingAction()?.id === row.id"
-                      (click)="openComment(row)"
-                    >
-                      {{ 'ADMIN.REVIEW.ACTION.COMMENT' | translate }}
-                    </button>
-                    @if (row.review_state !== 'unreviewed') {
-                      <button
-                        nz-button
-                        nzSize="small"
-                        nzType="link"
-                        [nzLoading]="
-                          savingAction()?.id === row.id && savingAction()?.action === 'unreview'
-                        "
-                        [disabled]="savingAction()?.id === row.id"
-                        (click)="unreview(row)"
-                      >
-                        {{ 'ADMIN.REVIEW.ACTION.UNREVIEW' | translate }}
-                      </button>
-                    }
-                  </div>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </nz-table>
+      <ag-grid-angular
+        class="asset-review-grid__table"
+        [theme]="theme"
+        domLayout="autoHeight"
+        [suppressColumnVirtualisation]="true"
+        [rowData]="changes()"
+        [getRowId]="getRowId"
+        [columnDefs]="columnDefs()"
+        [defaultColDef]="defaultColDef"
+        [rowSelection]="rowSelection"
+        [context]="gridContext"
+        [loading]="loading()"
+        [localeText]="localeText()"
+        [enableRtl]="rtl()"
+        (gridReady)="onGridReady($event)"
+        (filterChanged)="onFilterChanged($event)"
+        (selectionChanged)="onSelectionChanged()"
+      ></ag-grid-angular>
 
-        <app-admin-table-pagination
-          [page]="page()"
-          [pageSize]="pageSize()"
-          [total]="total()"
-          [loading]="loading()"
-          (pageChange)="onPageChange($event)"
-          (pageSizeChange)="onPageSizeChange($event)"
-        />
-      </nz-spin>
-
-      <ng-template #emptyTpl>
-        <p class="asset-review-grid__empty">{{ 'ADMIN.REVIEW.NO_CHANGES' | translate }}</p>
-      </ng-template>
+      <app-admin-table-pagination
+        [page]="page()"
+        [pageSize]="pageSize()"
+        [total]="total()"
+        [loading]="loading()"
+        (pageChange)="onPageChange($event)"
+        (pageSizeChange)="onPageSizeChange($event)"
+      />
     }
 
     <nz-modal

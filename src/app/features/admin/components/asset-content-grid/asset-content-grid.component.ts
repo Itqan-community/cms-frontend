@@ -80,6 +80,7 @@ import { AssetVersionsService } from '../../services/asset-versions.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import {
   mapClipboardToColumns,
+  parseClipboardHtml,
   parseClipboardTable,
   serializeCsv,
 } from '../../utils/clipboard-table.util';
@@ -794,8 +795,10 @@ export class AssetContentGridComponent implements OnInit {
       return;
     }
 
+    // Like Excel, prefer the spreadsheet's HTML copy: it keeps line breaks inside cells.
+    const html = event.clipboardData?.getData('text/html') ?? '';
     const text = event.clipboardData?.getData('text/plain') ?? '';
-    const parsed = parseClipboardTable(text);
+    const parsed = parseClipboardHtml(html) ?? parseClipboardTable(text);
     if (parsed.length === 0) return;
     // A content CSV (the grid's own copy or a file export) is written by header into
     // the matching text columns, so identifiers and Quran text never land in a cell.
@@ -1650,7 +1653,8 @@ export class AssetContentGridComponent implements OnInit {
    * Every filter runs on the server over the whole asset (see
    * `buildDatasource`): text columns get the text filter, `surah` / `ayah` the
    * number filter, and the unit column a dropdown of surah names (column id
-   * `unit_surah`, a number filter on the surah) wherever units belong to a surah.
+   * `unit_surah`, a number filter on the surah) wherever units belong to a surah,
+   * or a page-number filter (column id `unit_page`) for the page template.
    */
   buildColumnDefs(): ColDef<ContentEntry>[] {
     const template = this.effectiveTemplate();
@@ -1715,7 +1719,14 @@ export class AssetContentGridComponent implements OnInit {
               suppressHeaderFilterButton: true,
               suppressFloatingFilterButton: true,
             }
-          : {}),
+          : {
+              // Filters the page number, not the "Page 42" label text: the backend
+              // reads the `unit_page` filter-model key as a page-number filter.
+              colId: 'unit_page',
+              filter: 'agNumberColumnFilter',
+              filterParams: NUMBER_FILTER_PARAMS,
+              floatingFilter: true,
+            }),
       },
     ];
 

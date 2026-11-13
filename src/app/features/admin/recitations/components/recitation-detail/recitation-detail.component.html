@@ -37,8 +37,9 @@
           @if (recitation()!.is_open_access) {
             <nz-tag nzColor="green">{{ 'ADMIN.COMMON.TAG_OPEN_ACCESS' | translate }}</nz-tag>
           }
-          @if (recitation()!.restricted_for_tenant) {
-            <nz-tag nzColor="orange">{{ 'ADMIN.COMMON.TAG_API_ONLY' | translate }}</nz-tag>
+          <app-asset-channel-tags [asset]="recitation()!" />
+          @if (recitation()!.status === 'draft') {
+            <nz-tag>{{ 'ADMIN.COMMON.TAG_DRAFT' | translate }}</nz-tag>
           }
           <span class="admin-hero-meta__date">
             <ng-icon name="lucideCalendar" />
@@ -119,22 +120,22 @@
       </div>
     </div>
 
-    @if (folders().length) {
-      <app-folder-switcher
-        class="recitation-detail__folders"
-        [folders]="folders()"
-        [activeFolderSlug]="selectedFolderSlug()"
-        [canCreate]="canCreateFolder()"
+    @if (qualities().length) {
+      <app-quality-switcher
+        class="recitation-detail__qualities"
+        [qualities]="qualities()"
+        [activeQualitySlug]="selectedQualitySlug()"
+        [canCreate]="canCreateQuality()"
         [canRename]="canUpdateRecitation()"
         [canDelete]="canDeleteRecitation()"
-        [canToggleVisibility]="canToggleFolderVisibility()"
-        [canSetDefault]="canSetDefaultFolder()"
-        (folderSelect)="onFolderSelect($event)"
-        (addFolder)="openCreateFolderModal()"
-        (renameFolder)="openRenameFolderModal($event)"
-        (deleteFolder)="confirmDeleteFolder($event)"
-        (toggleVisibility)="onToggleFolderVisibility($event)"
-        (setDefaultFolder)="confirmSetDefaultFolder($event)"
+        [canToggleVisibility]="canToggleQualityVisibility()"
+        [canSetDefault]="canSetDefaultQuality()"
+        (qualitySelect)="onQualitySelect($event)"
+        (addQuality)="openCreateQualityModal()"
+        (renameQuality)="openRenameQualityModal($event)"
+        (deleteQuality)="confirmDeleteQuality($event)"
+        (toggleVisibility)="onToggleQualityVisibility($event)"
+        (setDefaultQuality)="confirmSetDefaultQuality($event)"
       />
     }
 
@@ -213,6 +214,15 @@
             <p class="recitation-detail__tracks-hint">
               {{ 'ADMIN.RECITATIONS.TIMINGS.HINT' | translate }}
             </p>
+
+            @if (timingsUploadLoading()) {
+              <nz-progress
+                class="recitation-detail__timings-progress"
+                [nzPercent]="timingsUploadPercent()"
+                [nzShowInfo]="true"
+                [nzFormat]="formatNzProgressPercent"
+              ></nz-progress>
+            }
 
             @if (timingsUploadResult(); as tr) {
               <nz-alert
@@ -629,49 +639,49 @@
   }
 
   <nz-modal
-    [nzVisible]="folderFormModalVisible()"
-    (nzVisibleChange)="onFolderFormVisibleChange($event)"
-    (nzOnCancel)="onFolderFormVisibleChange(false)"
+    [nzVisible]="qualityFormModalVisible()"
+    (nzVisibleChange)="onQualityFormVisibleChange($event)"
+    (nzOnCancel)="onQualityFormVisibleChange(false)"
     [nzTitle]="
-      (folderFormMode() === 'create'
-        ? 'ADMIN.RECITATIONS.FOLDERS.MODAL.TITLE_CREATE'
-        : 'ADMIN.RECITATIONS.FOLDERS.MODAL.TITLE_EDIT'
+      (qualityFormMode() === 'create'
+        ? 'ADMIN.RECITATIONS.QUALITIES.MODAL.TITLE_CREATE'
+        : 'ADMIN.RECITATIONS.QUALITIES.MODAL.TITLE_EDIT'
       ) | translate
     "
     [nzWidth]="'min(520px, 92vw)'"
     nzCentered
-    [nzOkLoading]="folderFormSubmitting()"
+    [nzOkLoading]="qualityFormSubmitting()"
     [nzOkText]="
-      (folderFormMode() === 'create'
-        ? 'ADMIN.RECITATIONS.FOLDERS.MODAL.SUBMIT_CREATE'
-        : 'ADMIN.RECITATIONS.FOLDERS.MODAL.SUBMIT_EDIT'
+      (qualityFormMode() === 'create'
+        ? 'ADMIN.RECITATIONS.QUALITIES.MODAL.SUBMIT_CREATE'
+        : 'ADMIN.RECITATIONS.QUALITIES.MODAL.SUBMIT_EDIT'
       ) | translate
     "
     [nzCancelText]="'ADMIN.COMMON.CANCEL' | translate"
-    [nzOkDisabled]="folderForm.invalid || selectedVariantTaken()"
-    (nzOnOk)="submitFolderForm()"
+    [nzOkDisabled]="qualityForm.invalid || selectedVariantTaken()"
+    (nzOnOk)="submitQualityForm()"
   >
     <ng-container *nzModalContent>
-      <form nz-form [formGroup]="folderForm" nzLayout="vertical">
-        <p class="recitation-detail__folder-form-hint">
-          {{ 'ADMIN.RECITATIONS.FOLDERS.MODAL.HINT' | translate }}
+      <form nz-form [formGroup]="qualityForm" nzLayout="vertical">
+        <p class="recitation-detail__quality-form-hint">
+          {{ 'ADMIN.RECITATIONS.QUALITIES.MODAL.HINT' | translate }}
         </p>
-        @if (folderFormTarget()?.slug === 'default') {
+        @if (qualityFormTarget()?.slug === 'default') {
           <p
-            class="recitation-detail__folder-form-hint recitation-detail__folder-form-hint--default"
+            class="recitation-detail__quality-form-hint recitation-detail__quality-form-hint--default"
           >
-            {{ 'ADMIN.RECITATIONS.FOLDERS.MODAL.DEFAULT_SLUG_HINT' | translate }}
+            {{ 'ADMIN.RECITATIONS.QUALITIES.MODAL.DEFAULT_SLUG_HINT' | translate }}
           </p>
         }
 
         <nz-form-item>
           <nz-form-label nzRequired>{{
-            'ADMIN.RECITATIONS.FOLDERS.MODAL.QUALITY_LABEL' | translate
+            'ADMIN.RECITATIONS.QUALITIES.MODAL.QUALITY_LABEL' | translate
           }}</nz-form-label>
           <nz-form-control>
             <nz-select
               formControlName="quality"
-              [nzPlaceHolder]="'ADMIN.RECITATIONS.FOLDERS.MODAL.QUALITY_PLACEHOLDER' | translate"
+              [nzPlaceHolder]="'ADMIN.RECITATIONS.QUALITIES.MODAL.QUALITY_PLACEHOLDER' | translate"
             >
               @for (option of qualityOptions(); track option.quality) {
                 <nz-option
@@ -686,7 +696,7 @@
 
         <nz-form-item>
           <nz-form-label nzRequired>{{
-            'ADMIN.RECITATIONS.FOLDERS.MODAL.EFFECTS_LABEL' | translate
+            'ADMIN.RECITATIONS.QUALITIES.MODAL.EFFECTS_LABEL' | translate
           }}</nz-form-label>
           <nz-form-control>
             <nz-radio-group formControlName="hasFx">
@@ -696,8 +706,8 @@
                 <label nz-radio [nzValue]="option.hasFx" [nzDisabled]="option.taken">
                   {{ option.label | translate }}
                   @if (option.taken) {
-                    <span class="recitation-detail__folder-form-taken">{{
-                      'ADMIN.RECITATIONS.FOLDERS.MODAL.ALREADY_ADDED' | translate
+                    <span class="recitation-detail__quality-form-taken">{{
+                      'ADMIN.RECITATIONS.QUALITIES.MODAL.ALREADY_ADDED' | translate
                     }}</span>
                   }
                 </label>
@@ -706,21 +716,21 @@
           </nz-form-control>
         </nz-form-item>
 
-        @if (folderNamePreview(); as preview) {
-          <div class="recitation-detail__folder-preview">
-            <span class="recitation-detail__folder-preview-label">{{
-              'ADMIN.RECITATIONS.FOLDERS.MODAL.PREVIEW_LABEL' | translate
+        @if (qualityNamePreview(); as preview) {
+          <div class="recitation-detail__quality-preview">
+            <span class="recitation-detail__quality-preview-label">{{
+              'ADMIN.RECITATIONS.QUALITIES.MODAL.PREVIEW_LABEL' | translate
             }}</span>
-            <span class="recitation-detail__folder-preview-name">{{ preview.name_ar }}</span>
-            <span class="recitation-detail__folder-preview-name" dir="ltr">{{
+            <span class="recitation-detail__quality-preview-name">{{ preview.name_ar }}</span>
+            <span class="recitation-detail__quality-preview-name" dir="ltr">{{
               preview.name_en
             }}</span>
           </div>
         }
 
         @if (selectedVariantTaken()) {
-          <p class="recitation-detail__folder-form-error">
-            {{ 'ADMIN.RECITATIONS.FOLDERS.MODAL.ERR_VARIANT_TAKEN' | translate }}
+          <p class="recitation-detail__quality-form-error">
+            {{ 'ADMIN.RECITATIONS.QUALITIES.MODAL.ERR_VARIANT_TAKEN' | translate }}
           </p>
         }
       </form>

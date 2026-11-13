@@ -1,3 +1,6 @@
+/** Why a version cannot be deleted: the error a delete would return. */
+export type VersionDeleteBlockedReason = 'version_not_latest' | 'version_is_published';
+
 /** Portal asset version (tafsir / translation). */
 export interface AssetVersion {
   id: number;
@@ -22,6 +25,10 @@ export interface AssetVersion {
   pending_review_count?: number;
   /** First committed version of its language: everything in it is listed as added. */
   is_first?: boolean;
+  /** Why the version cannot be deleted (the error a delete would return), or null. Only
+   *  the newest version of a language can be deleted; a published one only while it is
+   *  the language's first and only version (deleting it unpublishes the language). */
+  delete_blocked_reason?: VersionDeleteBlockedReason | null;
   /** Translations/tafsirs: the version number ("major.minor"), issued by the server and
    *  never editable. Other kinds: a free-text version name. */
   name: string;

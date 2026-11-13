@@ -30,7 +30,7 @@
     padding: 8px 16px;
     border-radius: var(--radius-lg);
     border: 1px solid var(--color-neutral-200);
-    background-color: #fff;
+    background-color: var(--admin-surface-white);
     box-shadow: var(--shadow-sm);
     transition: background-color 0.2s ease;
     color: inherit;
@@ -67,7 +67,7 @@
   &__card {
     max-width: 448px;
     width: 100%;
-    background-color: #fff;
+    background-color: var(--admin-surface-white);
     border: 1px solid var(--color-neutral-200);
     border-radius: var(--radius-2xl);
     box-shadow: var(--shadow-card);
@@ -91,14 +91,14 @@
   &__title {
     text-align: center;
     font-weight: 700;
-    color: #333333;
+    color: var(--color-text-strong, #333333);
     font-size: 24px;
     margin-bottom: 8px;
   }
 
   &__subtitle {
     text-align: center;
-    color: #333333;
+    color: var(--color-text-strong, #333333);
     font-size: 16px;
     margin-bottom: 24px;
   }
@@ -112,9 +112,9 @@
   &__alert {
     padding: 12px;
     border-radius: var(--radius-lg);
-    border: 1px solid #fecaca;
-    background-color: #fef2f2;
-    color: #dc2626;
+    border: 1px solid var(--color-danger-border, #fecaca);
+    background-color: var(--color-danger-bg, #fef2f2);
+    color: var(--color-danger-text, #dc2626);
     font-size: 14px;
     text-align: center;
     margin-bottom: 16px;
@@ -123,9 +123,9 @@
   &__info {
     padding: 12px;
     border-radius: var(--radius-lg);
-    border: 1px solid #bfdbfe;
-    background: #eff6ff;
-    color: #1d4ed8;
+    border: 1px solid var(--color-info-border, #bfdbfe);
+    background: var(--color-info-bg, #eff6ff);
+    color: var(--color-info-text, #1d4ed8);
     font-size: 14px;
     text-align: center;
     margin-bottom: 16px;
@@ -134,7 +134,7 @@
   &__hint {
     text-align: center;
     font-size: 14px;
-    color: #4b5563;
+    color: var(--admin-text-600);
     margin-bottom: 16px;
   }
 
@@ -147,11 +147,11 @@
   &__label {
     font-size: 14px;
     font-weight: 500;
-    color: #333333;
+    color: var(--color-text-strong, #333333);
   }
 
   &__error {
-    color: #ef4444;
+    color: var(--color-danger-text, #ef4444);
     margin: 0;
     font-size: 14px;
   }
@@ -159,14 +159,14 @@
   &__input {
     width: 100%;
     height: 40px;
-    background-color: #fff;
-    border: 1px solid #d1d5db;
+    background-color: var(--admin-surface-white);
+    border: 1px solid var(--admin-border-300);
     border-radius: var(--radius-lg);
     padding: 0 16px;
     font-size: 14px;
 
     &::placeholder {
-      color: #9ca3af;
+      color: var(--admin-text-400);
     }
 
     &:focus {
@@ -177,7 +177,7 @@
   }
 
   &__input--invalid {
-    border-color: #ef4444 !important;
+    border-color: var(--color-danger-text, #ef4444) !important;
   }
 
   &__input-wrapper {
@@ -194,14 +194,14 @@
     background-color: transparent;
     border: none;
     cursor: pointer;
-    color: #9ca3af;
+    color: var(--admin-text-400);
     transition: color 0.2s ease;
     display: flex;
     align-items: center;
     justify-content: center;
 
     &:hover {
-      color: #6b7280;
+      color: var(--admin-text-500);
     }
   }
 
@@ -212,7 +212,7 @@
     width: 24px;
     top: 50%;
     transform: translateY(-50%);
-    color: #9ca3af;
+    color: var(--admin-text-400);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -249,8 +249,8 @@
 
   &__submit--secondary {
     margin-top: 12px;
-    background: #fff;
-    color: #333333;
+    background: var(--admin-surface-white);
+    color: var(--color-text-strong, #333333);
     border: 1px solid var(--color-neutral-200);
 
     &:hover:not(:disabled) {
@@ -260,8 +260,8 @@
 
   &__submit--passkey {
     margin-top: 12px;
-    background: #fff;
-    color: #333333;
+    background: var(--admin-surface-white);
+    color: var(--color-text-strong, #333333);
     border: 1px solid var(--color-neutral-200);
 
     &:hover:not(:disabled) {
@@ -288,12 +288,12 @@
   &__secondary {
     width: 100%;
     height: 40px;
-    background: #fff;
-    border: 1px solid #d1d5db;
+    background: var(--admin-surface-white);
+    border: 1px solid var(--admin-border-300);
     border-radius: var(--radius-lg);
     font-size: 14px;
     cursor: pointer;
-    color: #333333;
+    color: var(--color-text-strong, #333333);
 
     &:disabled {
       opacity: 0.5;
@@ -307,7 +307,7 @@
     gap: 12px;
     margin: 16px 0;
     font-size: 12px;
-    color: #6b7280;
+    color: var(--admin-text-500);
 
     &::before,
     &::after {

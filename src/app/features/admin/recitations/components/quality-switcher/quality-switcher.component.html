@@ -1,0 +1,128 @@
+<nz-tabset
+  class="quality-switcher__tabs"
+  [nzSelectedIndex]="selectedIndex()"
+  (nzSelectedIndexChange)="onTabIndexChange($event)"
+  [nzTabBarExtraContent]="canCreate() ? addQualityTpl : undefined"
+>
+  @for (quality of qualities(); track quality.slug) {
+    <nz-tab [nzTitle]="qualityTabTitle">
+      <ng-template #qualityTabTitle>
+        <span
+          class="quality-switcher__tab-title-wrap"
+          [class.quality-switcher__tab-title-wrap--hidden]="isHidden(quality)"
+        >
+          <ng-icon name="lucideFolder" class="quality-switcher__tab-icon" />
+          <span class="quality-switcher__tab-name">{{ qualityLabel(quality) }}</span>
+          @if (quality.is_default) {
+            <nz-tag nzColor="default" class="quality-switcher__tab-tag">{{
+              'ADMIN.RECITATIONS.QUALITIES.DEFAULT_BADGE' | translate
+            }}</nz-tag>
+          }
+          @if (isHidden(quality)) {
+            <ng-icon
+              name="lucideEyeOff"
+              class="quality-switcher__tab-hidden-icon"
+              [attr.aria-label]="'ADMIN.RECITATIONS.QUALITIES.HIDDEN_BADGE' | translate"
+              [nz-tooltip]="'ADMIN.RECITATIONS.QUALITIES.HIDDEN_HINT' | translate"
+            />
+          }
+          <span class="quality-switcher__tab-count">{{ quality.tracks_count }}</span>
+          @if (hasRowActions(quality)) {
+            <button
+              nz-dropdown
+              [nzDropdownMenu]="qualityMenu"
+              nzTrigger="click"
+              nz-button
+              nzType="text"
+              nzSize="small"
+              type="button"
+              class="quality-switcher__tab-menu-btn"
+              [attr.aria-label]="'ADMIN.RECITATIONS.QUALITIES.ACTIONS' | translate"
+              [nz-tooltip]="'ADMIN.RECITATIONS.QUALITIES.ACTIONS' | translate"
+              (click)="$event.stopPropagation()"
+            >
+              <ng-icon name="lucideSettings" />
+            </button>
+            <nz-dropdown-menu #qualityMenu="nzDropdownMenu">
+              <ul nz-menu>
+                @if (canEditVariant(quality)) {
+                  <li
+                    nz-menu-item
+                    tabindex="0"
+                    (click)="onRename(quality)"
+                    (keyup.enter)="onRename(quality)"
+                  >
+                    <ng-icon name="lucideSquarePen" class="quality-switcher__menu-icon" />
+                    <span>{{ variantActionKey(quality) | translate }}</span>
+                  </li>
+                }
+                @if (canHideQuality(quality)) {
+                  <li
+                    nz-menu-item
+                    tabindex="0"
+                    (click)="onToggleVisibility(quality)"
+                    (keyup.enter)="onToggleVisibility(quality)"
+                  >
+                    <ng-icon
+                      [name]="isHidden(quality) ? 'lucideEye' : 'lucideEyeOff'"
+                      class="quality-switcher__menu-icon"
+                    />
+                    <span>{{
+                      (isHidden(quality)
+                        ? 'ADMIN.RECITATIONS.QUALITIES.SHOW_PUBLICLY'
+                        : 'ADMIN.RECITATIONS.QUALITIES.HIDE_FROM_PUBLIC'
+                      ) | translate
+                    }}</span>
+                  </li>
+                }
+                @if (canSetDefaultQuality(quality)) {
+                  <li
+                    nz-menu-item
+                    tabindex="0"
+                    (click)="onSetDefault(quality)"
+                    (keyup.enter)="onSetDefault(quality)"
+                  >
+                    <ng-icon name="lucideStar" class="quality-switcher__menu-icon" />
+                    <span>{{ 'ADMIN.RECITATIONS.QUALITIES.SET_AS_DEFAULT' | translate }}</span>
+                  </li>
+                }
+                @if (canDelete()) {
+                  <li
+                    nz-menu-item
+                    nzDanger
+                    tabindex="0"
+                    [nzDisabled]="quality.is_default"
+                    [nz-tooltip]="
+                      quality.is_default
+                        ? ('ADMIN.RECITATIONS.QUALITIES.MESSAGES.CANNOT_DELETE_DEFAULT' | translate)
+                        : null
+                    "
+                    (click)="onDelete(quality)"
+                    (keyup.enter)="onDelete(quality)"
+                  >
+                    <ng-icon name="lucideTrash2" class="quality-switcher__menu-icon" />
+                    <span>{{ 'ADMIN.RECITATIONS.QUALITIES.DELETE.OK' | translate }}</span>
+                  </li>
+                }
+              </ul>
+            </nz-dropdown-menu>
+          }
+        </span>
+      </ng-template>
+    </nz-tab>
+  }
+</nz-tabset>
+
+<ng-template #addQualityTpl>
+  <button
+    nz-button
+    nzType="dashed"
+    nzSize="small"
+    type="button"
+    class="quality-switcher__add-btn"
+    (click)="addQuality.emit()"
+  >
+    <ng-icon name="lucidePlus" />
+    {{ 'ADMIN.RECITATIONS.QUALITIES.ADD' | translate }}
+  </button>
+</ng-template>

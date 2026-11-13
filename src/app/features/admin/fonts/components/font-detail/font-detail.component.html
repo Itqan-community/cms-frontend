@@ -40,8 +40,9 @@
           @if (font()!.is_open_access) {
             <nz-tag nzColor="green">{{ 'ADMIN.COMMON.TAG_OPEN_ACCESS' | translate }}</nz-tag>
           }
-          @if (font()!.restricted_for_tenant) {
-            <nz-tag nzColor="orange">{{ 'ADMIN.COMMON.TAG_API_ONLY' | translate }}</nz-tag>
+          <app-asset-channel-tags [asset]="font()!" />
+          @if (font()!.status === 'draft') {
+            <nz-tag>{{ 'ADMIN.COMMON.TAG_DRAFT' | translate }}</nz-tag>
           }
           <span class="admin-hero-meta__date">
             <ng-icon name="lucideCalendar" />

@@ -2,6 +2,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { callerShowsErrors } from '../../../../core/interceptors/caller-shows-errors.context';
+import { appendChannelFlags } from '../../utils/asset-channels.util';
 import {
   TranslationDetails,
   TranslationFilters,
@@ -40,15 +42,21 @@ export class TranslationsService {
   }
 
   create(body: TranslationFormValue): Observable<TranslationDetails> {
-    return this.http.post<TranslationDetails>(this.apiUrl, this.toCreateFormData(body));
+    return this.http.post<TranslationDetails>(this.apiUrl, this.toCreateFormData(body), {
+      context: callerShowsErrors(),
+    });
   }
 
   update(slug: string, body: TranslationFormValue): Observable<TranslationDetails> {
-    return this.http.put<TranslationDetails>(`${this.apiUrl}${slug}/`, body);
+    return this.http.put<TranslationDetails>(`${this.apiUrl}${slug}/`, body, {
+      context: callerShowsErrors(),
+    });
   }
 
   patch(slug: string, body: Partial<TranslationFormValue>): Observable<TranslationDetails> {
-    return this.http.patch<TranslationDetails>(`${this.apiUrl}${slug}/`, body);
+    return this.http.patch<TranslationDetails>(`${this.apiUrl}${slug}/`, body, {
+      context: callerShowsErrors(),
+    });
   }
 
   delete(slug: string): Observable<void> {
@@ -75,7 +83,10 @@ export class TranslationsService {
     append('publisher_id', payload.publisher_id);
     data.append('is_external', String(payload.is_external));
     data.append('is_open_access', String(payload.is_open_access));
-    data.append('restricted_for_tenant', String(payload.restricted_for_tenant));
+    appendChannelFlags(data, payload);
+    if (payload.status !== undefined) {
+      data.append('status', payload.status);
+    }
     append('external_url', payload.external_url);
     append('template', payload.template);
     append('mushaf_layout_id', payload.mushaf_layout_id);

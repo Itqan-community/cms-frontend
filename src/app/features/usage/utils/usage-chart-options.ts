@@ -315,7 +315,7 @@ export function buildBarOptions(
 /** 7 × 24 heatmap; keys are `<ISO weekday>-<hour>` in the viewer's time zone. */
 export function buildHourOfWeekOptions(
   items: UsageBreakdownItem[],
-  options: { rtl: boolean; lang?: string; dayLabels: string[] }
+  options: { rtl: boolean; lang?: string; dayLabels: string[]; dark?: boolean }
 ): EChartsCoreOption {
   const values = new Map(items.map((item) => [item.key, chartValue(item.value)]));
   const data: [number, number, number][] = [];
@@ -351,7 +351,8 @@ export function buildHourOfWeekOptions(
       orient: 'horizontal',
       left: 'center',
       bottom: 0,
-      inRange: { color: ['#f0f5f2', '#527c66', '#22433d'] },
+      // Empty cells blend into the card: pale on light, the dark primary-50 tint on dark.
+      inRange: { color: [options.dark ? '#17221d' : '#f0f5f2', '#527c66', '#22433d'] },
     },
     series: [{ type: 'heatmap', data, emphasis: { itemStyle: { borderColor: '#333' } } }],
   };

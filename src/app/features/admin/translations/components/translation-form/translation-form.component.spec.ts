@@ -2,8 +2,10 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { NzMessageService } from 'ng-zorro-antd/message';
-import { of } from 'rxjs';
+import { NzModalService } from 'ng-zorro-antd/modal';
+import { of, throwError } from 'rxjs';
 
 import { Licenses } from '../../../../../core/enums/licenses.enum';
 import type { MushafLayout } from '../../../models/asset-content.models';
@@ -16,6 +18,7 @@ import { TranslationFormComponent } from './translation-form.component';
 describe('TranslationFormComponent template controls', () => {
   let translationsServiceMock: jasmine.SpyObj<TranslationsService>;
   let layoutsServiceMock: jasmine.SpyObj<MushafLayoutsService>;
+  let modalMock: jasmine.SpyObj<NzModalService>;
 
   const layouts: MushafLayout[] = [
     { id: 1, name: 'Standard 15-line', page_count: 604, assets_count: 3 },
@@ -36,7 +39,10 @@ describe('TranslationFormComponent template controls', () => {
     language: 'ar',
     is_external: false,
     is_open_access: false,
-    restricted_for_tenant: false,
+    in_gallery: true,
+    in_public_api: true,
+    in_cli: true,
+    in_tenants: true,
     external_url: null,
     template: 'page',
     mushaf_layout: { id: 1, name: 'Standard 15-line', page_count: 604 },
@@ -85,6 +91,8 @@ describe('TranslationFormComponent template controls', () => {
       ],
     });
 
+    modalMock = jasmine.createSpyObj<NzModalService>('NzModalService', ['confirm']);
+    TestBed.overrideProvider(NzModalService, { useValue: modalMock });
     TestBed.overrideComponent(TranslationFormComponent, { set: { template: '' } });
   }
 
@@ -179,6 +187,20 @@ describe('TranslationFormComponent template controls', () => {
     expect(body.mushaf_layout_id).toBe(1);
   });
 
+  it('loads a draft asset with the Draft switch on and sends it back as draft', () => {
+    configure({ slug: 'existing-translation' });
+    translationsServiceMock.getDetail.and.returnValue(of({ ...detail, status: 'draft' }));
+    translationsServiceMock.patch.and.returnValue(of(detail));
+    const fixture = TestBed.createComponent(TranslationFormComponent);
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.form.controls.is_draft.value).toBeTrue();
+    fixture.componentInstance.form.controls.is_draft.setValue(false);
+    fixture.componentInstance.onSubmit();
+
+    expect(translationsServiceMock.patch.calls.mostRecent().args[1].status).toBe('ready');
+  });
+
   it('creates without long descriptions, which are optional', () => {
     configure({});
     translationsServiceMock.create.and.returnValue(of(detail));
@@ -201,5 +223,98 @@ describe('TranslationFormComponent template controls', () => {
     expect(fixture.componentInstance.form.controls.long_description_ar.valid).toBeTrue();
     expect(fixture.componentInstance.form.controls.long_description_en.valid).toBeTrue();
     expect(translationsServiceMock.create).toHaveBeenCalled();
+  });
+
+  it('starts a new translation with every channel on and sends the flags', () => {
+    configure({});
+    translationsServiceMock.create.and.returnValue(of(detail));
+    const fixture = TestBed.createComponent(TranslationFormComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.form.patchValue({
+      name_ar: 'اسم',
+      description_ar: 'وصف',
+      description_en: 'Description',
+      license: Licenses.CC0,
+      language: 'ar',
+      publisher_id: 1,
+      slug: 'translation-sample',
+      template: 'ayah',
+    });
+    fixture.componentInstance.onSubmit();
+
+    const body = translationsServiceMock.create.calls.mostRecent().args[0];
+    expect([body.in_gallery, body.in_public_api, body.in_cli, body.in_tenants]).toEqual([
+      true,
+      true,
+      true,
+      true,
+    ]);
+  });
+
+  it('loads the channel flags of the translation being edited', () => {
+    configure({ slug: 'existing-translation' });
+    translationsServiceMock.getDetail.and.returnValue(
+      of({ ...detail, in_gallery: false, in_cli: false })
+    );
+    const fixture = TestBed.createComponent(TranslationFormComponent);
+
+    fixture.detectChanges();
+
+    expect(fixture.componentInstance.form.getRawValue()).toEqual(
+      jasmine.objectContaining({
+        in_gallery: false,
+        in_public_api: true,
+        in_cli: false,
+        in_tenants: true,
+      })
+    );
+  });
+
+  it('confirms a channel_has_active_consumers conflict and re-sends the update once', () => {
+    configure({ slug: 'existing-translation' });
+    const conflict = new HttpErrorResponse({
+      status: 409,
+      error: {
+        error_name: 'channel_has_active_consumers',
+        message: 'Developers depend on this channel.',
+        extra: { approved_count: 3, pending_count: 0, channels: ['in_public_api'] },
+      },
+    });
+    translationsServiceMock.patch.and.returnValues(
+      throwError(() => conflict),
+      of(detail)
+    );
+    const fixture = TestBed.createComponent(TranslationFormComponent);
+    fixture.detectChanges();
+    fixture.componentInstance.form.patchValue({ in_public_api: false });
+
+    fixture.componentInstance.onSubmit();
+
+    expect(modalMock.confirm).toHaveBeenCalledTimes(1);
+    expect(translationsServiceMock.patch).toHaveBeenCalledTimes(1);
+
+    (modalMock.confirm.calls.mostRecent().args[0]!.nzOnOk as () => void)();
+
+    expect(translationsServiceMock.patch).toHaveBeenCalledTimes(2);
+    const resent = translationsServiceMock.patch.calls.mostRecent().args[1];
+    expect(resent.confirm_channel_change).toBeTrue();
+    expect(resent.in_public_api).toBeFalse();
+  });
+
+  it('shows the backend message for any other save error', () => {
+    configure({ slug: 'existing-translation' });
+    translationsServiceMock.patch.and.returnValue(
+      throwError(
+        () => new HttpErrorResponse({ status: 400, error: { message: 'Backend says no.' } })
+      )
+    );
+    const fixture = TestBed.createComponent(TranslationFormComponent);
+    fixture.detectChanges();
+
+    fixture.componentInstance.onSubmit();
+
+    expect(modalMock.confirm).not.toHaveBeenCalled();
+    expect(TestBed.inject(NzMessageService).error).toHaveBeenCalled();
   });
 });

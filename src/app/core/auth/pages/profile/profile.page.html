@@ -92,7 +92,9 @@
             [placeholder]="'PROFILE.BUSINESS_MODEL_PLACEHOLDER' | translate"
           ></textarea>
           @if (profileForm.get('bio')?.invalid && profileForm.get('bio')?.touched) {
-            <p class="account-manage__hint" style="color: #b91c1c">{{ getBioError() }}</p>
+            <p class="account-manage__hint" style="color: var(--color-danger-text, #b91c1c)">
+              {{ getBioError() }}
+            </p>
           }
 
           <label class="account-manage__label" for="project_url">{{

@@ -1,5 +1,6 @@
+import type { AssetChannelFlags, AssetChannelFormFlags } from '../../utils/asset-channels.util';
 import { PublisherRef } from '../../tafsirs/models/tafsirs.models';
-import type { RecitationDetailFolderRef } from './recitation-folders.models';
+import type { RecitationDetailQualityRef } from './recitation-qualities.models';
 
 export enum MaddLevel {
   TWASSUT = 'twassut',
@@ -31,7 +32,7 @@ export interface MinimalRiwayah {
 }
 
 /** GET /portal/recitations/ row */
-export interface RecitationListItem {
+export interface RecitationListItem extends AssetChannelFlags {
   id: number;
   slug?: string;
   name: string;
@@ -46,10 +47,11 @@ export interface RecitationListItem {
   meem_behaviour: MeemBehavior | null;
   year: number | null;
   is_open_access: boolean;
-  restricted_for_tenant: boolean;
+  /** Draft assets stay in the portal but are hidden from consumers. */
+  status?: AssetStatus;
 }
 
-export interface RecitationDetails {
+export interface RecitationDetails extends AssetChannelFlags {
   id: number;
   slug?: string;
   name_ar: string;
@@ -65,15 +67,16 @@ export interface RecitationDetails {
   year: number | null;
   license: string;
   ayah_timings_url?: string | null;
-  /** Default-folder export only; per-folder URLs are not on this field. */
-  folders?: RecitationDetailFolderRef[];
+  /** Default-quality export only; per-quality URLs are not on this field. */
+  qualities?: RecitationDetailQualityRef[];
   is_open_access: boolean;
-  restricted_for_tenant: boolean;
+  /** Draft assets stay in the portal but are hidden from consumers. */
+  status?: AssetStatus;
   created_at: string;
   updated_at: string;
 }
 
-export interface RecitationFormValue {
+export interface RecitationFormValue extends AssetChannelFormFlags {
   name_ar: string;
   name_en: string;
   description_ar: string;
@@ -87,7 +90,8 @@ export interface RecitationFormValue {
   year: number | null;
   license: string;
   is_open_access: boolean;
-  restricted_for_tenant: boolean;
+  /** Draft assets stay in the portal but are hidden from consumers. */
+  status?: AssetStatus;
   /** Create-only: package slug suggested by `POST /portal/ai/slug/`. */
   slug?: string;
 }
@@ -139,3 +143,6 @@ export interface NamedId {
   id: number;
   name: string;
 }
+
+/** `Asset.status`: a draft is hidden from the gallery, APIs and the itqan CLI. */
+export type AssetStatus = 'draft' | 'ready';

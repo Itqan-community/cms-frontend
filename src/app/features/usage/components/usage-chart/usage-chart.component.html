@@ -44,7 +44,8 @@
       echarts
       class="usage-chart__canvas"
       [style.height.px]="height()"
-      [options]="options() ?? {}"
+      [options]="chartOptions()"
+      [theme]="chartTheme()"
       [autoResize]="true"
       (chartInit)="onChartInit($event)"
     ></div>

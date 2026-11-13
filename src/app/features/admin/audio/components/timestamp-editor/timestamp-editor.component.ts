@@ -22,7 +22,7 @@ import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { firstValueFrom } from 'rxjs';
 import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
-import type { RecitationDetailFolderRef } from '../../../recitations/models/recitation-folders.models';
+import type { RecitationDetailQualityRef } from '../../../recitations/models/recitation-qualities.models';
 import type { RecitationSurahTrackListItem } from '../../../recitations/models/recitation-tracks.models';
 import type { RecitationDetails } from '../../../recitations/models/recitations.models';
 import { buildTimingUploadSuccessDescription } from '../../../recitations/utils/timing-upload-result.format';
@@ -144,12 +144,12 @@ export class TimestampEditorComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private peaksAbort: AbortController | null = null;
   private recitationSlug = '';
-  private folder: string | null = null;
+  private quality: string | null = null;
   private loadedTimestamps: TrackTimestamps | null = null;
   /** Recitation id — what `POST /portal/timing/upload/` calls `asset_id`. Resolved on load. */
   private assetId = 0;
-  /** Id of the folder named by the `folder` query param; null saves into the default folder. */
-  private folderId: number | null = null;
+  /** Id of the quality named by the `quality` query param; null saves into the default quality. */
+  private qualityId: number | null = null;
   /** Recitation-wide timing file, used when the track row carries no URL of its own. */
   private recitationTimingsUrl: string | null = null;
 
@@ -207,7 +207,7 @@ export class TimestampEditorComponent implements OnInit {
   ngOnInit(): void {
     const trackId = Number(this.route.snapshot.paramMap.get('trackId'));
     this.recitationSlug = this.route.snapshot.queryParamMap.get('recitation') ?? '';
-    this.folder = this.route.snapshot.queryParamMap.get('folder');
+    this.quality = this.route.snapshot.queryParamMap.get('quality');
 
     if (!Number.isFinite(trackId) || trackId <= 0 || !this.recitationSlug) {
       this.loadError.set(this.translate.instant('ADMIN.AUDIO.TIMESTAMPS.ERRORS.MISSING_CONTEXT'));
@@ -226,7 +226,7 @@ export class TimestampEditorComponent implements OnInit {
       // rather than on demand: a save must not be the first call that can fail on them.
       const recitation = await firstValueFrom(this.recitations.getDetail(this.recitationSlug));
       this.assetId = recitation.id;
-      this.folderId = this.resolveFolderId(recitation.folders);
+      this.qualityId = this.resolveQualityId(recitation.qualities);
       this.recitationTimingsUrl = this.resolveRecitationTimingsUrl(recitation);
       this.track.set(await this.fetchTrack(trackId));
     } catch (error) {
@@ -319,15 +319,15 @@ export class TimestampEditorComponent implements OnInit {
   }
 
   /**
-   * The route carries a folder slug (or name); the upload API wants its id. No folder means the
-   * default one — the same folder the track lookup falls back to, so the read and the write stay
-   * on the same set of tracks. A folder that matches nothing is an error rather than a silent
-   * save into the default folder.
+   * The route carries a quality slug (or name); the upload API wants its id. No quality means the
+   * default one — the same quality the track lookup falls back to, so the read and the write stay
+   * on the same set of tracks. A quality that matches nothing is an error rather than a silent
+   * save into the default quality.
    */
-  private resolveFolderId(folders: RecitationDetailFolderRef[] | undefined): number | null {
-    if (!this.folder) return null;
+  private resolveQualityId(qualities: RecitationDetailQualityRef[] | undefined): number | null {
+    if (!this.quality) return null;
 
-    const match = folders?.find((f) => f.slug === this.folder || f.name === this.folder);
+    const match = qualities?.find((f) => f.slug === this.quality || f.name === this.quality);
     if (!match) throw new TrackNotFoundError();
     return match.id;
   }
@@ -335,17 +335,17 @@ export class TimestampEditorComponent implements OnInit {
   /**
    * The recitation-wide timing file to fall back on, or null when it would be the wrong one.
    *
-   * `ayah_timings_url` is the **default folder's** export — the model says so, and the detail
-   * page's download button treats it the same way. A non-default folder's timings are not on
-   * that field, so reading it there would show another folder's boundaries, which is worse than
+   * `ayah_timings_url` is the **default quality's** export — the model says so, and the detail
+   * page's download button treats it the same way. A non-default quality's timings are not on
+   * that field, so reading it there would show another quality's boundaries, which is worse than
    * showing none.
    */
   private resolveRecitationTimingsUrl(recitation: RecitationDetails): string | null {
-    // No folder in the route means the track lookup itself falls back to the default folder.
-    if (!this.folder) return recitation.ayah_timings_url ?? null;
+    // No quality in the route means the track lookup itself falls back to the default quality.
+    if (!this.quality) return recitation.ayah_timings_url ?? null;
 
-    const active = recitation.folders?.find(
-      (f) => f.slug === this.folder || f.name === this.folder
+    const active = recitation.qualities?.find(
+      (f) => f.slug === this.quality || f.name === this.quality
     );
 
     return active?.is_default ? (recitation.ayah_timings_url ?? null) : null;
@@ -359,7 +359,7 @@ export class TimestampEditorComponent implements OnInit {
         asset_id: this.assetId,
         page: 1,
         page_size: TRACK_LOOKUP_PAGE_SIZE,
-        folder: this.folder ?? undefined,
+        quality: this.quality ?? undefined,
       })
     );
 
@@ -504,7 +504,7 @@ export class TimestampEditorComponent implements OnInit {
       await firstValueFrom(
         this.timestamps.save({
           assetId: this.assetId,
-          folderId: this.folderId,
+          qualityId: this.qualityId,
           track,
           timestamps: saved,
         })

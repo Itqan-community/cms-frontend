@@ -100,10 +100,21 @@ User Browser
    (login required; reporter from session; no portal permission gate on gallery CTA)
 ```
 
-Portal assets (recitations, tafsirs, translations) expose `is_open_access` and
-`restricted_for_tenant` on create/update (POST/PATCH) and in list/detail responses. List filter:
-`is_open_access=true|false`. `restricted_for_tenant=true` assets are excluded from public CMS
-listings by the backend.
+Portal assets (mushafs, fonts, recitations, tafsirs, translations) expose `is_open_access` and four
+distribution-channel flags on create/update (POST/PUT/PATCH) and in list/detail responses:
+`in_gallery` (Itqan gallery), `in_public_api` (developers' public API), `in_cli` (itqan CLI),
+`in_tenants` (publisher tenant sites/API). List filter: `is_open_access=true|false`. The forms show
+them as checkboxes (`app-asset-channels-fields`, all on by default); list/detail pages show a "Not
+in …" tag per channel that is off (`app-asset-channel-tags`). Turning a channel off while developers
+hold approved/pending access returns 409 `channel_has_active_consumers`
+(`extra: {approved_count, pending_count, channels}`); the form opens a confirm modal and, on OK,
+re-sends the same request with `confirm_channel_change: true` (helpers in
+`features/admin/utils/asset-channels.util.ts`). Programs (mock-only, no backend) still use the old
+`restricted_for_tenant` flag.
+
+Every asset form (mushaf, font, tafsir, translation, recitation) has a **Draft** switch (`is_draft`
+control → `status: 'draft' | 'ready'`, `ADMIN.COMMON.LABEL_DRAFT`). A draft stays in the portal
+list/detail with a `TAG_DRAFT` tag; the backend hides it from the gallery, APIs and the itqan CLI.
 
 ### Admin CRUD Flow (all entities follow same pattern)
 
@@ -143,10 +154,11 @@ cms-frontend/
 │   ├── assets/                      # images/, icons/, data/ (Quran JSON)
 │   └── i18n/                        # en.json, ar.json (~1370 keys each)
 ├── src/
-│   ├── index.html                   # Root HTML (Arabic RTL default, Inter font)
+│   ├── index.html                   # Root HTML (Arabic RTL default, Inter font, theme-loader.js)
 │   ├── main.ts                      # Angular bootstrap + Sentry init
 │   ├── styles.less                  # Global utilities (sr-only, card, flex)
-│   ├── theme.less                   # CSS vars + NG-ZORRO component overrides
+│   ├── theme.less                   # CSS vars (+ html[data-theme='dark'] values) + NG-ZORRO overrides
+│   ├── antd.less / antd-dark.less   # NG-ZORRO base CSS, light (injected) / dark (lazy, unhashed)
 │   ├── environments/                # 5 env configs (default/prod/staging/local/publisher)
 │   └── app/
 │       ├── app.ts                   # Root component (i18n init, lang switch, header)
@@ -308,43 +320,43 @@ cards as the sidebar.
 
 **Modules (each follows identical CRUD pattern):**
 
-| Module             | Entity                    | Key Models                                        | Notes                                                                                                                                                                                                                                                                                                                                        |
-| ------------------ | ------------------------- | ------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `publishers/`      | Publisher admin           | `Publisher`                                       | CRUD + image upload                                                                                                                                                                                                                                                                                                                          |
-| `tafsirs/`         | Tafsir (exegesis)         | `Tafsir`, `TafsirVersion`                         | CRUD + optional initial version on create (always multipart) + version management on detail                                                                                                                                                                                                                                                  |
-| `translations/`    | Translation               | `Translation`, `TranslationVersion`               | CRUD; create always multipart FormData with optional initial version; update/patch remain JSON; version management on detail                                                                                                                                                                                                                 |
-| `recitations/`     | Recitation (audio)        | `Recitation`, `RecitationFolderOut`               | CRUD + ng-zorro folder tabs (`FolderSwitcherComponent`; per-tab settings dropdown) + folder variants chosen from a fixed quality×effects taxonomy + folder-scoped tracks upload with progress + timings; full bulk upload success redirects to `/gallery/asset/{id}`; partial failure clears validate banner and keeps failed rows for retry |
-| `reciters/`        | Reciter                   | `Reciter`                                         | CRUD + image upload + death info                                                                                                                                                                                                                                                                                                             |
-| `issues/`          | Issue reports             | `IssueReportOut`                                  | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions                                                                                                                                                                                                                                            |
-| `members/`         | Publisher members         | `MemberOut`, `GroupListOut`                       | List/invite/update/remove/resend via `/portal/members/`; list shows `group_name`; invite/edit submit `group_id` from `GET /portal/groups/`; scoped by `AdminTenantService.selectedPublisherId()`                                                                                                                                             |
-| `roles/`           | Roles (permission groups) | `GroupDetailOut`, `PermissionOut`, `GroupNamesIn` | Single page: table + create modal + editor drawer with the permission checklist from `GET /portal/groups/permissions/`; reloads on language and publisher change; refreshes `AdminTenantService` after saving so the caller's own buttons update. Uses `members/services/groups.service.ts`                                                  |
-| `access-requests/` | Asset access requests     | `AccessRequestOut`                                | List/accept/reject + publisher settings (`/portal/publishers/{id}/access-requests-settings/`); detail drawer; permission-gated actions                                                                                                                                                                                                       |
-| `mushafs/`         | Mushaf portal assets      | `MushafItem`, `MushafDetails`                     | List/detail/create/edit/delete; optional initial version on create; further versions via live `/portal/mushafs/`; permission-gated (`portal_*_mushaf`)                                                                                                                                                                                       |
-| `fonts/`           | Font portal assets        | `FontItem`, `FontDetails`                         | Same CRUD pattern via live `/portal/fonts/` (optional initial version on create); permission-gated (`portal_*_font`)                                                                                                                                                                                                                         |
-| `programs/`        | Program portal assets     | `ProgramItem`, `ProgramDetails`                   | Feature code present; route/sidebar/redirect hidden until BE `/portal/programs/` ships; mock via `useProgramsMockApi`                                                                                                                                                                                                                        |
-| `usage/`           | API Usage analytics       | Request logs                                      | Charts, top endpoints, top entities                                                                                                                                                                                                                                                                                                          |
-| `audio/`           | Audio management          | —                                                 | Routes defined                                                                                                                                                                                                                                                                                                                               |
-| `software/`        | Software management       | —                                                 | Routes defined                                                                                                                                                                                                                                                                                                                               |
+| Module             | Entity                    | Key Models                                        | Notes                                                                                                                                                                                                                                                                                                                                            |
+| ------------------ | ------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `publishers/`      | Publisher admin           | `Publisher`                                       | CRUD + image upload                                                                                                                                                                                                                                                                                                                              |
+| `tafsirs/`         | Tafsir (exegesis)         | `Tafsir`, `TafsirVersion`                         | CRUD + optional initial version on create (always multipart) + version management on detail                                                                                                                                                                                                                                                      |
+| `translations/`    | Translation               | `Translation`, `TranslationVersion`               | CRUD; create always multipart FormData with optional initial version; update/patch remain JSON; version management on detail                                                                                                                                                                                                                     |
+| `recitations/`     | Recitation (audio)        | `Recitation`, `RecitationQualityOut`              | CRUD + ng-zorro quality tabs (`QualitySwitcherComponent`; per-tab settings dropdown) + quality variants chosen from a fixed quality×effects taxonomy + quality-scoped tracks & timings upload with progress; full bulk upload success redirects to `/gallery/asset/{id}`; partial failure clears validate banner and keeps failed rows for retry |
+| `reciters/`        | Reciter                   | `Reciter`                                         | CRUD + image upload + death info                                                                                                                                                                                                                                                                                                                 |
+| `issues/`          | Issue reports             | `IssueReportOut`                                  | List/filter/detail CRUD via `/portal/issue-reports/`; route/UI guards pending backend permissions                                                                                                                                                                                                                                                |
+| `members/`         | Publisher members         | `MemberOut`, `GroupListOut`                       | List/invite/update/remove/resend via `/portal/members/`; list shows `group_name`; invite/edit submit `group_id` from `GET /portal/groups/`; scoped by `AdminTenantService.selectedPublisherId()`                                                                                                                                                 |
+| `roles/`           | Roles (permission groups) | `GroupDetailOut`, `PermissionOut`, `GroupNamesIn` | Single page: table + create modal + editor drawer with the permission checklist from `GET /portal/groups/permissions/`; reloads on language and publisher change; refreshes `AdminTenantService` after saving so the caller's own buttons update. Uses `members/services/groups.service.ts`                                                      |
+| `access-requests/` | Asset access requests     | `AccessRequestOut`                                | List/accept/reject + publisher settings (`/portal/publishers/{id}/access-requests-settings/`); detail drawer; permission-gated actions                                                                                                                                                                                                           |
+| `mushafs/`         | Mushaf portal assets      | `MushafItem`, `MushafDetails`                     | List/detail/create/edit/delete; optional initial version on create; further versions via live `/portal/mushafs/`; permission-gated (`portal_*_mushaf`)                                                                                                                                                                                           |
+| `fonts/`           | Font portal assets        | `FontItem`, `FontDetails`                         | Same CRUD pattern via live `/portal/fonts/` (optional initial version on create); permission-gated (`portal_*_font`)                                                                                                                                                                                                                             |
+| `programs/`        | Program portal assets     | `ProgramItem`, `ProgramDetails`                   | Feature code present; route/sidebar/redirect hidden until BE `/portal/programs/` ships; mock via `useProgramsMockApi`                                                                                                                                                                                                                            |
+| `usage/`           | API Usage analytics       | Request logs                                      | Charts, top endpoints, top entities                                                                                                                                                                                                                                                                                                              |
+| `audio/`           | Audio management          | —                                                 | Routes defined                                                                                                                                                                                                                                                                                                                                   |
+| `software/`        | Software management       | —                                                 | Routes defined                                                                                                                                                                                                                                                                                                                                   |
 
 **Recitation tracks upload:** `RecitationTracksUploadOrchestratorService` sends files in 8 MB
 multipart parts through one page-wide queue shared by batches and single-file retries. The user
 picks how many files upload at once (1–4, default 1 for slow connections) beside the Upload button;
 the choice is kept in `localStorage` (`cms.recitationTracksUploadConcurrency`).
 
-**Recitation folders (variants):** A folder is the same recitation re-rendered at one audio quality,
-optionally with added effects. The vocabulary (`RecitationFolderQuality` × `hasFx`) is
-**frontend-owned** and carried in the folder's `name_ar` / `name_en`, because the portal API accepts
-only names. `utils/recitation-folder.util.ts` is the single place names are minted
-(`formatFolderVariantNames`) and read back (`parseFolderVariant`, which regenerates every
-combination and compares rather than pattern-matching, so a folder is only ever claimed as a known
-variant when its name is exactly what this app would have produced; free-text folders stay
-unclassified). Consequences: duplicate variants are prevented client-side only; the default folder
+**Recitation qualities (variants):** A quality is the same recitation re-rendered at one audio
+quality, optionally with added effects. The vocabulary (`RecitationQualityBitrate` × `hasFx`) is
+**frontend-owned** and carried in the quality's `name_ar` / `name_en`, because the portal API
+accepts only names. `utils/recitation-quality.util.ts` is the single place names are minted
+(`formatQualityVariantNames`) and read back (`parseQualityVariant`, which regenerates every
+combination and compares rather than pattern-matching, so a quality is only ever claimed as a known
+variant when its name is exactly what this app would have produced; free-text qualities stay
+unclassified). Consequences: duplicate variants are prevented client-side only; the default quality
 reserves its classified variant (or _as-uploaded, no effects_ when unclassified) and may always be
-relabelled because its slug stays `default`; non-default classified folders that already hold tracks
-cannot be relabelled, since their slug is the public `?folder=` identifier.
-`FolderSwitcherComponent` uses `nz-tabset` (touch-scrollable nav) and is presentational — the
-container owns the API calls and the single picker modal. Folder tab menu supports hide/show
-(`is_visible`) and set-default (`is_default: true`); default folder cannot be hidden. Backend spec:
+relabelled because its slug stays `default`; non-default classified qualities that already hold
+tracks cannot be relabelled, since their slug is the public `?quality=` identifier.
+`QualitySwitcherComponent` uses `nz-tabset` (touch-scrollable nav) and is presentational — the
+container owns the API calls and the single picker modal. Quality tab menu supports hide/show
+(`is_visible`) and set-default (`is_default: true`); default quality cannot be hidden. Backend spec:
 `.temp/docs/recitation-folders-backend-spec.md`.
 
 **Shared admin components:**
@@ -360,6 +372,8 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   identifier (slug) to the form's `slug` control (editable input only when generation fails;
   validated per asset type by `utils/asset-slug.util.ts`). A recitation's identifier is cleared when
   its reciter or riwayah changes, and a response for inputs changed mid-request is ignored
+- `asset-channels/` — `app-asset-channels-fields` (distribution-channel checkboxes inside asset
+  forms) and `app-asset-channel-tags` ("Not in …" tags for list/detail pages).
 - `asset-initial-version-fields/` — Optional first version (starting number, bilingual name/summary,
   file) on asset create forms (font/mushaf/tafsir/translation); the number is required once a file
   is attached. Tafsir/translation also pass `contentKind`/`contentTemplate`/`mushafLayoutId` to
@@ -377,16 +391,23 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   re-enabled); CSV `export/` then `file_url` fallback. Tafsir/translation/mushaf/font
   (`numbered()`): `name` is the locked version number and `label` the editable version name — the
   package registry (`itqan` CLI) only installs numbered versions; program keeps a free-text `name`.
-  Each row's CLI availability (`package_status`: released / withdrawn / removed / not released, with
-  `withdrawal_reason` / `removal_reason`) shows as a badge. Publishing an older version
-  (`publishing_rolls_back`) requires a reason, sent to `set-published/` and shown by the itqan CLI.
-  Remove (`PORTAL_REMOVE_PACKAGE_VERSION`, reason required) via `packages/versions/{id}/remove/`;
-  the same admins undo it on removed rows via `packages/versions/{id}/reinstate/` (reason required,
-  up to 100 characters, kept in the audit log). Publishing applies to tafsirs, translations, mushafs
-  and fonts (`supportsPublishing()`): mushafs/fonts publish via
-  `{mushafs|fonts}/{slug}/versions/{id}/set-published/` with no review step, and their upload modal
-  has a "Publish now" checkbox (default on, sends `publish`). Without `portal_publish_content` the
-  Publish button and checkbox are shown disabled with a permission tooltip.
+  Delete shows on every row but is blocked (`aria-disabled`, still focusable; the tooltip opens on
+  hover and focus) where the backend's `delete_blocked_reason` says a delete would be refused, with
+  that reason as its tooltip (`DELETE_BLOCKED_*`): only the newest version of a language can be
+  deleted, and the published one only while it is the only version — that one gets an unpublish
+  warning (`ADMIN.VERSION_PUBLISHING.DELETE_PUBLISHED_*`) and sends `confirm_unpublish=true`; a
+  refusal shows the backend's message, and `unpublish_not_confirmed` (published since the list
+  loaded) reloads the list. Each row's CLI availability (`package_status`: released / withdrawn /
+  removed / not released, with `withdrawal_reason` / `removal_reason`) shows as a badge. Publishing
+  an older version (`publishing_rolls_back`) requires a reason, sent to `set-published/` and shown
+  by the itqan CLI. Remove (`PORTAL_REMOVE_PACKAGE_VERSION`, reason required) via
+  `packages/versions/{id}/remove/`; the same admins undo it on removed rows via
+  `packages/versions/{id}/reinstate/` (reason required, up to 100 characters, kept in the audit
+  log). Publishing applies to tafsirs, translations, mushafs and fonts (`supportsPublishing()`):
+  mushafs/fonts publish via `{mushafs|fonts}/{slug}/versions/{id}/set-published/` with no review
+  step, and their upload modal has a "Publish now" checkbox (default on, sends `publish`). Without
+  `portal_publish_content` the Publish button and checkbox are shown disabled with a permission
+  tooltip.
 - `asset-content-editor/` + `asset-content-grid/` — Per-unit draft editor (surah/ayah/word/page
   content templates, and the tafsir-only `ayah_group` / `word_group` templates); flush before
   publish; leave blocked if PATCH fails. **Group templates:** each row is a publisher-chosen range
@@ -420,13 +441,28 @@ container owns the API calls and the single picker modal. Folder tab menu suppor
   page size, sorting off, one-line rows with truncated text). Column filters run server-side: the
   grid's `filterModel` is sent as the JSON `filters` param — text filters on
   `text`/`reference_text`/`source_text`, number filters on `surah`/`ayah`, and a surah-name dropdown
-  (`SurahFloatingFilterComponent`) on the unit column (`colId: 'surah'`). Undo/redo is a custom
-  stack (AG Grid's only covers the client-side model), replayed via `getRowId`. The text column
-  edits in `ContentTextCellEditorComponent`: a near-fullscreen popup showing the unit label and
+  (`SurahFloatingFilterComponent`) on the unit column (`colId: 'unit_surah'`), or a page-number
+  filter (`colId: 'unit_page'`) on the page template's unit column. Undo/redo is a custom stack (AG
+  Grid's only covers the client-side model), replayed via `getRowId`. The text column edits in
+  `ContentTextCellEditorComponent`: a near-fullscreen popup showing the unit label and
   `reference_text` (plus `source_text` when editing a translation); an outside click commits it
   (`stopEditingWhenCellsLoseFocus`), and the page behind is `visibility: hidden` so find-in-page
   only searches the popup. The read-only `source_text` column opens the same popup with
-  `readOnly: true` (always cancels) so its full text is readable
+  `readOnly: true` (always cancels) so its full text is readable. Ctrl+V on a focused cell reads the
+  clipboard's spreadsheet HTML first, as Excel does (`parseClipboardHtml`: a `<br>` stays a line
+  break inside the cell), else the TSV/CSV text (`parseClipboardTable`; a quote opens a quoted value
+  only at the start of a cell)
+- `asset-review-grid/` — Translation/tafsir review (`/admin/{translations|tafsirs}/:slug/review`):
+  language, version and state selects in the toolbar, then an AG Grid of changes. Client-side row
+  model holding one server page (`app-admin-table-pagination`), so rows size to their diff
+  (`autoHeight`, `domLayout="autoHeight"`). Floating filters run server-side: the grid's filter
+  model goes as the JSON `filters` param of `review/changes/` and of "Approve all" — `unit_surah`
+  (surah dropdown), `ayah` (number), `column` / `change_type` (`OptionsFloatingFilterComponent`
+  dropdowns, text `equals`), `text` (before or after), `commit_ref`, `edited_by`, `comment`,
+  `reviewed_by` (text). Text conditions always pass locally (`textMatcher: () => true`) so the page
+  the server matched is never re-filtered. Cells live in `review-grid-cells.component.ts` (diff with
+  "Show full text", state + reviewer, approve/comment/unreview) and read the grid through `context`
+  (`ReviewGridContext`). Checkbox selection (approved rows not selectable) feeds "Approve selected"
 - `coming-soon/` — Shared placeholder card; optional route `data.icon`; CTA + 5s countdown to
   `/gallery`
 - `search-panel/` — Search UI
@@ -562,6 +598,7 @@ until the usage-reports cutover. `/account/api-keys` shows and edits each key's 
 | `HeaderComponent`              | `app-header`                | Main sticky header (logo, nav, lang switch, user actions)         |
 | `ImageCarouselComponent`       | `app-image-carousel`        | Image carousel (nz-carousel with fade effect)                     |
 | `LangSwitchComponent`          | `app-lang-switch`           | Language toggle (ar/en)                                           |
+| `ThemeSwitchComponent`         | `app-theme-switch`          | Light/dark toggle (header, mobile menu, admin header)             |
 | `LicenseTagComponent`          | `app-license-tag`           | CC license badge (color-coded, popover/mobile drawer)             |
 | `MobileMenuComponent`          | `app-mobile-menu`           | Slide-out mobile drawer with nav + lang + user                    |
 | `NavigationMenuComponent`      | `app-navigation-menu`       | Desktop horizontal nav bar                                        |
@@ -705,10 +742,10 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
 | `features/admin/audio/`                 | Partial           | Routes defined but implementation details need verification.                                                                                                     |
 | `features/admin/software/`              | Partial           | Routes defined but implementation details need verification.                                                                                                     |
 | AI translate / asset identifier         | Pending backend   | Create forms need `POST /portal/ai/translate/` (cms-backend#553) deployed; until then Translate fails and admins must type the identifier. Remove once deployed. |
-| Recitation folder visibility            | Implemented       | `is_visible` PATCH + hide/show in folder tab menu; requires backend Phase A on the API environment.                                                              |
-| Recitation folder set-default           | Implemented       | `PATCH { is_default: true }` from folder tab menu; slugs stay fixed; hidden folders cannot be promoted.                                                          |
-| Recitation folder variant taxonomy      | Frontend-owned    | Quality×effects vocabulary lives in `recitation-folder.util.ts` and is carried in folder names; no server-side uniqueness enforcement.                           |
-| Recitation folder variant relabelling   | Constrained       | Non-default classified folders with tracks cannot change variant (slug is public `?folder=`); default folder always editable (`?folder=default`).                |
+| Recitation quality visibility           | Implemented       | `is_visible` PATCH + hide/show in quality tab menu; requires backend Phase A on the API environment.                                                             |
+| Recitation quality set-default          | Implemented       | `PATCH { is_default: true }` from quality tab menu; slugs stay fixed; hidden qualities cannot be promoted.                                                       |
+| Recitation quality variant taxonomy     | Frontend-owned    | Quality×effects vocabulary lives in `recitation-quality.util.ts` and is carried in quality names; no server-side uniqueness enforcement.                         |
+| Recitation quality variant relabelling  | Constrained       | Non-default classified qualities with tracks cannot change variant (slug is public `?quality=`); default quality always editable (`?quality=default`).           |
 | Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                                                                      |
 | Usage reports API                       | Pending backend   | Needs cms-backend#557 deployed; until then the dashboards show their error state.                                                                                |
 | Multi-column text assets                | Pending backend   | Editor columns, column management, file structure need the cms-backend multi-column release (`feat/multi-column-text-assets`); remove once deployed.             |
@@ -727,12 +764,22 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
 4. **DestroyRef + takeUntilDestroyed** — Automatic cleanup of subscriptions
 5. **Consistent naming** — `.page.ts` for routed pages, `.component.ts` for reusable components,
    `.service.ts` for services
-6. **Feature folder structure** — `models/`, `services/`, `pages/`, `components/` per feature
+6. **Feature quality structure** — `models/`, `services/`, `pages/`, `components/` per feature
 7. **Admin module structure** — `routes.ts`, `-layout.component.ts`, `components/`, `models/`,
    `services/`, `utils/` per entity
 8. **i18n first** — All user-facing strings use `translate` pipe or `TranslateService`
 9. **CSS variables** — Theming via `--color-*`, `--radius-*`, `--shadow-*` custom properties
-10. **RTL support** — Logical CSS properties throughout, `ltr-flip`/`rtl-flip` transform utilities
-11. **Responsive** — Mobile-first with breakpoints at 480/576/768/992/1200/1600px
-12. **Error classification** — `resolveAuthErrorMessage()` for auth pages (code map → localized
+10. **Dark theme** — `ThemeService` (`core/services/theme.service.ts`) + `window.itqanApplyTheme`
+    (`public/theme-loader.js`, a blocking script at the start of `<body>`, so there is no light
+    flash) set `data-theme` and `data-ag-theme-mode` on `<html>` and insert `antd-dark.css` right
+    after `antd-*.css`; `main.ts` waits for `window.itqanThemeReady` before bootstrapping. If
+    `antd-dark.css` fails to load the theme stays light. Choice saved in `localStorage.theme` (only
+    once applied), else OS preference. New colours: use an existing token, or
+    `var(--dark-only-token, <light literal>)` with the token defined only under
+    `html[data-theme='dark']` in `theme.less` — never a bare hex. AG Grid quartz follows
+    `data-ag-theme-mode` itself; ECharts uses the `dark` theme via `UsageChartComponent`; canvas
+    code re-reads tokens on `ThemeService.theme()` changes
+11. **RTL support** — Logical CSS properties throughout, `ltr-flip`/`rtl-flip` transform utilities
+12. **Responsive** — Mobile-first with breakpoints at 480/576/768/992/1200/1600px
+13. **Error classification** — `resolveAuthErrorMessage()` for auth pages (code map → localized
     backend → i18n fallback); `getErrorMessage()` for low-level allauth envelope parsing

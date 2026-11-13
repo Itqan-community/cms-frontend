@@ -2,6 +2,8 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
+import { callerShowsErrors } from '../../../../core/interceptors/caller-shows-errors.context';
+import { appendChannelFlags } from '../../utils/asset-channels.util';
 import { FontDetails, FontFilters, FontFormValue, FontsList } from '../models/fonts.models';
 
 @Injectable({
@@ -35,15 +37,21 @@ export class FontsService {
   }
 
   create(body: FontFormValue): Observable<FontDetails> {
-    return this.http.post<FontDetails>(this.apiUrl, this.toFormData(body));
+    return this.http.post<FontDetails>(this.apiUrl, this.toFormData(body), {
+      context: callerShowsErrors(),
+    });
   }
 
   update(slug: string, body: FontFormValue): Observable<FontDetails> {
-    return this.http.put<FontDetails>(`${this.apiUrl}${slug}/`, this.toFormData(body));
+    return this.http.put<FontDetails>(`${this.apiUrl}${slug}/`, this.toFormData(body), {
+      context: callerShowsErrors(),
+    });
   }
 
   patch(slug: string, body: Partial<FontFormValue>): Observable<FontDetails> {
-    return this.http.patch<FontDetails>(`${this.apiUrl}${slug}/`, this.toFormData(body));
+    return this.http.patch<FontDetails>(`${this.apiUrl}${slug}/`, this.toFormData(body), {
+      context: callerShowsErrors(),
+    });
   }
 
   delete(slug: string): Observable<void> {
@@ -74,8 +82,9 @@ export class FontsService {
     if (payload.is_open_access !== undefined) {
       data.append('is_open_access', String(payload.is_open_access));
     }
-    if (payload.restricted_for_tenant !== undefined) {
-      data.append('restricted_for_tenant', String(payload.restricted_for_tenant));
+    appendChannelFlags(data, payload);
+    if (payload.status !== undefined) {
+      data.append('status', payload.status);
     }
     append('external_url', payload.external_url);
     if (payload.thumbnail) {

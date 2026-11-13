@@ -8,6 +8,7 @@ import type {
   BulkApproveResponse,
   ReviewChange,
   ReviewChangesResponse,
+  ReviewFilterModel,
   ReviewState,
   ReviewVersion,
 } from '../models/asset-review.models';
@@ -44,7 +45,8 @@ export class AssetReviewService {
   }
 
   /** Paginated changes for one (asset, language): every change, or with `version`
-   *  only those that make up that version; optionally filtered by state. */
+   *  only those that make up that version; optionally filtered by state and by the
+   *  grid's column filters (applied before paging, so `count` is the filtered total). */
   listChanges(
     kind: AssetVersionParentKind,
     slug: string,
@@ -52,7 +54,8 @@ export class AssetReviewService {
     page: number,
     pageSize: number,
     state?: ReviewState | null,
-    version?: number | null
+    version?: number | null,
+    filters?: ReviewFilterModel | null
   ): Observable<ReviewChangesResponse> {
     let params = new HttpParams()
       .set('language', language)
@@ -64,6 +67,9 @@ export class AssetReviewService {
     if (version != null) {
       // The changes that make up this version (what decides whether it is approved).
       params = params.set('version', version.toString());
+    }
+    if (filters && Object.keys(filters).length > 0) {
+      params = params.set('filters', JSON.stringify(filters));
     }
     return this.http.get<ReviewChangesResponse>(`${this.reviewBase(kind, slug)}changes/`, {
       params,

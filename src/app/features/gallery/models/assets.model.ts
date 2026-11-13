@@ -22,7 +22,7 @@ export interface Asset {
   is_open_access?: boolean;
   template: AssetTemplate | null;
   mushaf_layout: { id: number; name: string; page_count: number } | null;
-  /** True when a recitation has per-ayah timings in a visible folder. */
+  /** True when a recitation has per-ayah timings in a visible quality. */
   has_ayah_timings: boolean;
 }
 

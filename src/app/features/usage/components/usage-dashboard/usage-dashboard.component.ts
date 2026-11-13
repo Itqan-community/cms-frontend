@@ -21,6 +21,7 @@ import { NzSegmentedModule } from 'ng-zorro-antd/segmented';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { Observable, Subscription } from 'rxjs';
+import { ThemeService } from '../../../../core/services/theme.service';
 import {
   UsageBreakdown,
   UsageComparison,
@@ -160,6 +161,7 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
   private readonly router = inject(Router);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly theme = inject(ThemeService);
   private readonly running = new Map<string, Subscription>();
   private initialized = false;
 
@@ -336,6 +338,7 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
                   rtl: this.rtl(),
                   lang: this.lang(),
                   dayLabels: DAY_KEYS.map((day) => this.t(`USAGE.DAYS.${day}`)),
+                  dark: this.theme.isDark(),
                 })
               : buildBarOptions(items, { rtl: this.rtl(), lang: this.lang() });
       }

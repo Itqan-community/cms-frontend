@@ -41,7 +41,7 @@ import { getErrorMessage } from '../../../../shared/utils/error.utils';
         justify-content: center;
         background: var(--color-bg);
         font-size: 16px;
-        color: #333333;
+        color: var(--color-text-strong, #333333);
       }
     `,
   ],

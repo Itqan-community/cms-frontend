@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
+import type { ColDef, GridApi } from 'ag-grid-community';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { type ModalOptions, NzModalService } from 'ng-zorro-antd/modal';
 import { Subject, of, throwError } from 'rxjs';
@@ -27,6 +28,8 @@ describe('AssetReviewGridComponent', () => {
     unit_type: 'ayah',
     unit_id: 1,
     label: '1:1',
+    surah: 1,
+    ayah: 1,
     column: 'text',
     column_label_en: '',
     column_label_ar: '',
@@ -102,6 +105,38 @@ describe('AssetReviewGridComponent', () => {
     });
   });
 
+  /** Waits for the grid: it runs outside Angular's zone, so `whenStable` alone
+   *  misses its timers (async events, row rendering). */
+  async function settle(): Promise<void> {
+    await fixture.whenStable();
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    fixture.detectChanges();
+  }
+
+  /** Loads the page and lets the grid render its rows. */
+  async function render(): Promise<HTMLElement> {
+    fixture.detectChanges();
+    await settle();
+    return fixture.nativeElement as HTMLElement;
+  }
+
+  function gridApi(): GridApi {
+    return (component as unknown as { gridApi: GridApi }).gridApi;
+  }
+
+  /** The first row's cell in grid column `colId`. */
+  function cell(el: HTMLElement, colId: string): HTMLElement {
+    return el.querySelector<HTMLElement>(`.ag-cell[col-id="${colId}"]`)!;
+  }
+
+  /** Sets the grid's column filters as a reviewer would, and waits for the reload. */
+  async function applyFilter(model: Record<string, unknown>): Promise<void> {
+    const api = gridApi();
+    await api.setColumnFilterModel(Object.keys(model)[0], Object.values(model)[0]);
+    api.onFilterChanged();
+    await settle();
+  }
+
   it('should create and load languages on init when user has permission', () => {
     fixture.detectChanges();
 
@@ -127,7 +162,8 @@ describe('AssetReviewGridComponent', () => {
       1,
       25,
       'unreviewed',
-      null
+      null,
+      {}
     );
   });
 
@@ -171,7 +207,8 @@ describe('AssetReviewGridComponent', () => {
       1,
       25,
       'unreviewed',
-      null
+      null,
+      {}
     );
   });
 
@@ -191,7 +228,8 @@ describe('AssetReviewGridComponent', () => {
       1,
       25,
       'approved',
-      null
+      null,
+      {}
     );
   });
 
@@ -281,7 +319,7 @@ describe('AssetReviewGridComponent', () => {
     expect(component.loading()).toBeFalse();
   });
 
-  it('should label each row by its template unit, not an ayah reference', () => {
+  it('should label each row by its template unit, not an ayah reference', async () => {
     const wordChange: ReviewChange = {
       ...mockChange,
       unit_type: 'word',
@@ -290,11 +328,9 @@ describe('AssetReviewGridComponent', () => {
     };
     reviewServiceSpy.listChanges.and.returnValue(of({ count: 1, results: [wordChange] }));
 
-    fixture.detectChanges();
+    const el = await render();
 
-    // The first cell is the row's selection checkbox; the reference follows it.
-    const referenceCell: HTMLElement = fixture.nativeElement.querySelector('tbody tr td + td');
-    expect(referenceCell.textContent?.trim()).toBe('2:255:4');
+    expect(cell(el, 'unit_surah').textContent?.trim()).toBe('2:255:4');
   });
 
   describe('version filter', () => {
@@ -350,14 +386,13 @@ describe('AssetReviewGridComponent', () => {
   });
 
   describe('change comparison', () => {
-    function render(change: ReviewChange): HTMLElement {
+    function renderChange(change: ReviewChange): Promise<HTMLElement> {
       reviewServiceSpy.listChanges.and.returnValue(of({ count: 1, results: [change] }));
-      fixture.detectChanges();
-      return fixture.nativeElement as HTMLElement;
+      return render();
     }
 
-    it('stacks the last-approved text above the new text, highlighting what changed', () => {
-      const el = render(mockChange);
+    it('stacks the last-approved text above the new text, highlighting what changed', async () => {
+      const el = await renderChange(mockChange);
 
       expect(el.querySelector('.change-compare--stacked')).not.toBeNull();
       const before = el.querySelector('.change-compare__text--before')!;
@@ -367,14 +402,19 @@ describe('AssetReviewGridComponent', () => {
       expect(after.querySelector('.change-compare__word--added')?.textContent).toBe('new');
     });
 
-    it('compares with the replaced text when the unit was never approved', () => {
-      const el = render({ ...mockChange, baseline_text: '' });
+    it('compares with the replaced text when the unit was never approved', async () => {
+      const el = await renderChange({ ...mockChange, baseline_text: '' });
 
       expect(el.querySelector('.change-compare__text--before')!.textContent).toContain('old text');
     });
 
-    it('shows a removed unit with its old text before and nothing after', () => {
-      const el = render({ ...mockChange, change_type: 'removed', new_text: '', baseline_text: '' });
+    it('shows a removed unit with its old text before and nothing after', async () => {
+      const el = await renderChange({
+        ...mockChange,
+        change_type: 'removed',
+        new_text: '',
+        baseline_text: '',
+      });
 
       expect(el.querySelector('.change-compare__text--before')!.textContent).toContain('old text');
       expect(
@@ -382,7 +422,7 @@ describe('AssetReviewGridComponent', () => {
       ).not.toBeNull();
     });
 
-    it('folds long unchanged text and opens the full text in a popup', () => {
+    it('folds long unchanged text and opens the full text in a popup', async () => {
       const words = (from: number, to: number) =>
         Array.from({ length: to - from }, (_, i) => `w${from + i}`).join(' ');
       const row: ReviewChange = {
@@ -390,7 +430,7 @@ describe('AssetReviewGridComponent', () => {
         baseline_text: `${words(0, 40)} God ${words(40, 80)}`,
         new_text: `${words(0, 40)} Allah ${words(40, 80)}`,
       };
-      const el = render(row);
+      const el = await renderChange(row);
       const inlineAfter = el.querySelector('.change-compare__text--after')!;
       expect(inlineAfter.querySelectorAll('.change-compare__gap').length).toBe(2);
 
@@ -404,10 +444,10 @@ describe('AssetReviewGridComponent', () => {
       expect(component.fullTextRow()).toBeNull();
     });
 
-    it('cuts a whole new text short and offers it in full in the popup', () => {
+    it('cuts a whole new text short and offers it in full in the popup', async () => {
       // Arrange — e.g. a newly uploaded language: every unit is a long "added" text
       const longText = Array.from({ length: 400 }, (_, i) => `word${i}`).join(' ');
-      const el = render({
+      const el = await renderChange({
         ...mockChange,
         change_type: 'added',
         old_text: '',
@@ -422,29 +462,28 @@ describe('AssetReviewGridComponent', () => {
       expect(el.querySelector('.asset-review-grid__full-text')).not.toBeNull();
     });
 
-    it('offers no full-text popup when nothing is folded', () => {
-      const el = render(mockChange);
+    it('offers no full-text popup when nothing is folded', async () => {
+      const el = await renderChange(mockChange);
 
       expect(el.querySelector('.asset-review-grid__full-text')).toBeNull();
     });
   });
 
   describe('editor column', () => {
-    it('names the editor who made each change', () => {
-      fixture.detectChanges();
+    it('names the editor who made each change', async () => {
+      const el = await render();
 
-      const cell: HTMLElement = fixture.nativeElement.querySelector('.asset-review-grid__editor');
-      expect(cell.textContent?.trim()).toBe('Editor Name');
+      expect(cell(el, 'edited_by').textContent?.trim()).toBe('Editor Name');
     });
 
-    it('shows a dash when the editor was not recorded', () => {
+    it('shows a dash when the editor was not recorded', async () => {
       reviewServiceSpy.listChanges.and.returnValue(
         of({ count: 1, results: [{ ...mockChange, edited_by: null }] })
       );
-      fixture.detectChanges();
 
-      const cell: HTMLElement = fixture.nativeElement.querySelector('.asset-review-grid__editor');
-      expect(cell.textContent?.trim()).toBe('COMMON.EM_DASH');
+      const el = await render();
+
+      expect(cell(el, 'edited_by').textContent?.trim()).toBe('COMMON.EM_DASH');
     });
   });
 
@@ -459,13 +498,13 @@ describe('AssetReviewGridComponent', () => {
       reviewServiceSpy.bulkApprove.and.returnValue(of({ approved: 2 }));
     });
 
-    it('selects only the rows that still need approval', () => {
-      fixture.detectChanges();
+    it('selects only the rows that still need approval', async () => {
+      await render();
 
-      component.toggleAll(true);
+      gridApi().selectAll();
+      await settle();
 
-      expect([...component.selectedIds()]).toEqual([1, 2]);
-      expect(component.allSelected()).toBeTrue();
+      expect([...component.selectedIds()].sort()).toEqual([1, 2]);
     });
 
     it('approves the selected rows, then reloads with the selection cleared', () => {
@@ -495,6 +534,19 @@ describe('AssetReviewGridComponent', () => {
         language: 'en',
         state: 'unreviewed',
         version: 10,
+      });
+    });
+
+    it('approves only what the column filters match', async () => {
+      await render();
+      await applyFilter({ ayah: { filterType: 'number', type: 'equals', filter: 3 } });
+
+      component.approveAll();
+
+      expect(reviewServiceSpy.bulkApprove).toHaveBeenCalledWith('translation', 'en-sahih', {
+        language: 'en',
+        state: 'unreviewed',
+        filters: { ayah: { filterType: 'number', type: 'equals', filter: 3 } },
       });
     });
 
@@ -604,5 +656,106 @@ describe('AssetReviewGridComponent', () => {
 
     // Act / Assert
     expect(component.multiColumn()).toBeFalse();
+  });
+
+  describe('column filters', () => {
+    const colIds = (defs: ColDef[]) => defs.map((d) => d.colId ?? d.field);
+
+    it('filters every reviewable field by a backend filter key', async () => {
+      await render();
+
+      const filtered = component
+        .columnDefs()
+        .filter((d) => d.filter)
+        .map((d) => d.colId ?? d.field);
+
+      expect(filtered).toEqual([
+        'unit_surah',
+        'ayah',
+        'change_type',
+        'text',
+        'commit_ref',
+        'edited_by',
+        'comment',
+        'reviewed_by',
+      ]);
+    });
+
+    it('lists page 1 of what a changed filter matches', async () => {
+      await render();
+      component.page.set(3);
+      reviewServiceSpy.listChanges.calls.reset();
+
+      await applyFilter({ text: { filterType: 'text', type: 'contains', filter: 'nom' } });
+
+      expect(component.page()).toBe(1);
+      expect(reviewServiceSpy.listChanges).toHaveBeenCalledOnceWith(
+        'translation',
+        'en-sahih',
+        'en',
+        1,
+        25,
+        'unreviewed',
+        null,
+        { text: { filterType: 'text', type: 'contains', filter: 'nom' } }
+      );
+      expect(component.hasColumnFilters()).toBeTrue();
+    });
+
+    it('keeps every row the server matched, even where the text differs locally', async () => {
+      // The server matched "الحمد" in vocalized text, which a plain local match would miss.
+      reviewServiceSpy.listChanges.and.returnValue(
+        of({ count: 1, results: [{ ...mockChange, new_text: 'الْحَمْدُ لِلَّهِ' }] })
+      );
+      await render();
+
+      await applyFilter({ text: { filterType: 'text', type: 'contains', filter: 'الحمد' } });
+
+      expect(gridApi().getDisplayedRowCount()).toBe(1);
+    });
+
+    it('clears the column filters and lists everything again', async () => {
+      await render();
+      await applyFilter({ ayah: { filterType: 'number', type: 'equals', filter: 3 } });
+      reviewServiceSpy.listChanges.calls.reset();
+
+      component.clearColumnFilters();
+      await settle();
+
+      expect(component.hasColumnFilters()).toBeFalse();
+      expect(reviewServiceSpy.listChanges.calls.mostRecent().args[7]).toEqual({});
+    });
+
+    it('offers a column filter only when the asset has several columns', async () => {
+      contentServiceSpy.listColumns.and.returnValue(
+        of([
+          { key: 'question', label_en: 'Question', label_ar: '', order: 0, committed: true },
+          { key: 'answer', label_en: '', label_ar: '', order: 1, committed: false },
+        ])
+      );
+      await render();
+
+      const column = component.columnDefs().find((d) => d.field === 'column');
+
+      expect(column?.floatingFilterComponentParams.options).toEqual([
+        { value: 'question', label: 'Question' },
+        { value: 'answer', label: 'answer' },
+      ]);
+    });
+
+    it('has no surah or ayah filter for page units', async () => {
+      reviewServiceSpy.listChanges.and.returnValue(
+        of({
+          count: 1,
+          results: [{ ...mockChange, unit_type: 'page', label: 'Page 3', surah: null, ayah: null }],
+        })
+      );
+      await render();
+
+      const defs = component.columnDefs();
+
+      expect(colIds(defs)).not.toContain('ayah');
+      expect(defs.find((d) => d.colId === 'unit_surah')?.filter).toBeUndefined();
+    });
   });
 });

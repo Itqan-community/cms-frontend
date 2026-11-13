@@ -18,7 +18,7 @@
 
   &__divider-label {
     font-size: 12px;
-    color: #6b7280;
+    color: var(--admin-text-500);
     white-space: nowrap;
   }
 
@@ -57,12 +57,12 @@
   }
 
   &__btn--google {
-    background-color: #fff;
-    border: 1px solid #dadce0;
-    color: #1f1f1f;
+    background-color: var(--admin-surface-white);
+    border: 1px solid var(--color-border, #dadce0);
+    color: var(--color-text-strong, #1f1f1f);
 
     &:hover {
-      background-color: #f7f8f8;
+      background-color: var(--color-surface-muted, #f7f8f8);
     }
   }
 
@@ -78,9 +78,9 @@
   }
 
   &__btn--passkey {
-    background-color: #fff;
+    background-color: var(--admin-surface-white);
     border: 1px solid var(--color-neutral-200);
-    color: #333333;
+    color: var(--color-text-strong, #333333);
 
     &:hover {
       background-color: var(--color-neutral-100);

@@ -25,7 +25,7 @@
   }
 
   &__empty {
-    color: rgba(0, 0, 0, 0.45);
+    color: var(--color-text-secondary, rgba(0, 0, 0, 0.45));
     padding: 16px 0;
   }
 
@@ -34,7 +34,7 @@
     align-items: center;
     gap: 12px;
     padding: 16px 0;
-    color: #cf1322;
+    color: var(--color-danger-text, #cf1322);
 
     p {
       margin: 0;
@@ -55,14 +55,14 @@
     font-size: 13px;
   }
 
-  // Long texts must wrap inside the cell rather than widen the table.
-  &__change {
-    min-width: 0;
-    white-space: normal;
+  &__clear-filters {
+    padding-inline: 4px;
   }
 
-  &__full-text {
-    padding-inline: 0;
+  &__table {
+    display: block;
+    width: 100%;
+    margin-bottom: 12px;
   }
 
   &__full-text-meta {
@@ -72,61 +72,77 @@
     color: var(--admin-text-500, #6b7280);
     font-size: 12px;
   }
+}
 
-  &__editor {
+// Cells are rendered by the grid and by their own components, outside this
+// component's view encapsulation.
+:host ::ng-deep {
+  // Rows grow to their content (`autoHeight`): pad and wrap like a table cell.
+  .ag-cell-auto-height,
+  .ag-cell-wrap-text {
+    padding-block: 8px;
+    line-height: 1.5;
+  }
+
+  // Long texts must wrap inside the cell rather than widen the table.
+  .asset-review-grid__change {
+    min-width: 0;
+    white-space: normal;
+  }
+
+  .asset-review-grid__full-text {
+    padding-inline: 0;
+  }
+
+  .asset-review-grid__editor {
     overflow-wrap: anywhere;
   }
 
-  &__comment {
-    margin: 6px 0 0;
-    padding: 6px 8px;
-    border-inline-start: 3px solid #faad14;
-    background: #fffbe6;
-    color: rgba(0, 0, 0, 0.65);
+  .asset-review-grid__comment-cell {
+    color: var(--color-text-secondary, rgba(0, 0, 0, 0.65));
     font-size: 12px;
+    word-break: normal;
   }
 
-  &__state {
+  .asset-review-grid__column {
+    opacity: 0.75;
+  }
+
+  .asset-review-grid__state {
     display: inline-block;
     padding: 1px 10px;
     border-radius: 10px;
     font-size: 12px;
     font-weight: 500;
-    background: rgba(0, 0, 0, 0.06);
-    color: rgba(0, 0, 0, 0.55);
+    line-height: 20px;
+    background: var(--color-fill-faint, rgba(0, 0, 0, 0.06));
+    color: var(--color-text-secondary, rgba(0, 0, 0, 0.55));
     white-space: nowrap;
 
     &--approved {
-      background: #f6ffed;
-      color: #389e0d;
+      background: var(--color-success-bg, #f6ffed);
+      color: var(--color-success-text, #389e0d);
     }
 
     &--commented {
-      background: #fff7e6;
-      color: #d46b08;
+      background: var(--color-warning-bg, #fff7e6);
+      color: var(--color-warning-text, #d46b08);
     }
   }
 
-  &__reviewer {
+  .asset-review-grid__reviewer {
     display: block;
     margin-top: 4px;
     font-size: 12px;
-    color: rgba(0, 0, 0, 0.45);
+    line-height: 1.4;
+    white-space: normal;
+    color: var(--color-text-secondary, rgba(0, 0, 0, 0.45));
   }
 
-  &__actions {
+  .asset-review-grid__actions {
     display: flex;
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
   }
-}
-
-.asset-review-grid__column {
-  margin-inline-start: 6px;
-  border: 1px solid currentColor;
-  border-radius: 10px;
-  padding: 0 8px;
-  font-size: 0.85em;
-  opacity: 0.75;
 }

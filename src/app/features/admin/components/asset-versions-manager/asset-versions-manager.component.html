@@ -647,15 +647,21 @@
                           <ng-icon name="lucideUndo2" aria-hidden="true" />
                         </button>
                       }
-                      @if (canDeleteVersions() && !ver.is_published) {
+                      @if (canDeleteVersions()) {
+                        <!-- aria-disabled, not disabled: a blocked button stays focusable so
+                             keyboard users get its reason (the tooltip also opens on focus). -->
                         <button
                           type="button"
                           nz-button
                           nzType="text"
                           class="asset-versions-manager__act asset-versions-manager__act--delete action-icon action-icon--delete"
                           nz-tooltip
-                          [nzTooltipTitle]="t('TOOLTIP_DELETE') | translate"
-                          [attr.aria-label]="t('TOOLTIP_DELETE') | translate"
+                          #deleteTip="nzTooltip"
+                          [nzTooltipTitle]="deleteTooltipKey(ver) | translate"
+                          [attr.aria-label]="deleteTooltipKey(ver) | translate"
+                          [attr.aria-disabled]="ver.delete_blocked_reason ? 'true' : null"
+                          (focus)="deleteTip.show()"
+                          (blur)="deleteTip.hide()"
                           (click)="deleteRow(ver)"
                         >
                           <ng-icon name="lucideTrash2" aria-hidden="true" />

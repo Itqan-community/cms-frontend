@@ -8,6 +8,7 @@ import { PORTAL_PERMISSIONS } from '../../../features/admin/constants/portal-per
 import { AdminAuthService } from '../../../features/admin/services/admin-auth.service';
 import { isPublisherHost } from '../../utils/publisherhost.util';
 import { LangSwitchComponent } from '../lang-switch/lang-switch.component';
+import { ThemeSwitchComponent } from '../theme-switch/theme-switch.component';
 import { MobileMenuComponent } from '../mobile-menu/mobile-menu.component';
 import {
   NavigationLink,
@@ -21,6 +22,7 @@ import { UserActionsComponent } from '../user-actions/user-actions.component';
   imports: [
     RouterLink,
     LangSwitchComponent,
+    ThemeSwitchComponent,
     NavigationMenuComponent,
     UserActionsComponent,
     MobileMenuComponent,

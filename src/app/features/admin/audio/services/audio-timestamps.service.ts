@@ -16,8 +16,8 @@ export type TimestampTrackRef = Pick<
 export interface SaveTimestampsInput {
   /** Recitation id — the upload API's `asset_id`. */
   assetId: number;
-  /** Folder the track lives in. Omitted saves into the recitation's default folder. */
-  folderId?: number | null;
+  /** Quality the track lives in. Omitted saves into the recitation's default quality. */
+  qualityId?: number | null;
   track: TimestampTrackRef;
   timestamps: TrackTimestamps;
 }
@@ -77,7 +77,7 @@ export class AudioTimestampsService {
     const file = serializeTimingFile(input.timestamps, input.track);
 
     return this.recitations
-      .recitationTimingUpload(input.assetId, [file], input.folderId)
+      .recitationTimingUpload(input.assetId, [file], input.qualityId)
       .pipe(map((out) => assertAccepted(out, input.track)));
   }
 }
