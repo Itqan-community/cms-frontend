@@ -369,6 +369,9 @@ container owns the API calls and the single picker modal. Quality tab menu suppo
   its reciter or riwayah changes, and a response for inputs changed mid-request is ignored
 - `asset-channels/` — `app-asset-channels-fields` (distribution-channel checkboxes inside asset
   forms) and `app-asset-channel-tags` ("Not in …" tags for list/detail pages).
+- `asset-detail-tabs/` — Details / Analytics tabs on font/mushaf/text asset/recitation detail pages:
+  projected content is Details; Analytics (`asset-usage-section`) renders on first open only (no
+  usage requests before) and is kept as `?tab=analytics`. Without `portal_read_usage`: no tabs
 - `asset-initial-version-fields/` — Optional first version (starting number, bilingual name/summary,
   file) on asset create forms (font/mushaf/text asset); the number is required once a file is
   attached. Text assets also pass `contentKind`/`contentTemplate`/`mushafLayoutId` to offer the
@@ -553,7 +556,7 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 | `components/usage-unseen-traffic/` | Component | Admin: R2 reads vs edge requests (unseen traffic), with a "How to read this tab" guide                                                                                             |
 | `components/recitation-insights/`  | Component | Recitation dashboards (asset tab + overview): listener growth, weekly cohorts, countries/apps first reached, gallery funnel, asset surah coverage                                  |
 | `components/recitation-catalog/`   | Component | Recitation overview only: this week's top / rising recitations, gallery search terms (top / no results), incomplete recitations                                                    |
-| `components/asset-usage-section/`  | Component | "Usage" section on font/mushaf/text asset/recitation admin detail pages (`portal_read_usage`)                                                                                      |
+| `components/asset-usage-section/`  | Component | Analytics tab content on asset admin detail pages (inside `admin/components/asset-detail-tabs/`; `portal_read_usage`)                                                              |
 | `components/asset-usage-counts/`   | Component | Gallery asset page "plays · downloads · apps"; hidden unless the backend returns 200                                                                                               |
 | `pages/developer-usage/`           | Page      | `/account/usage` (developer scope), linked from `/account/api-keys`                                                                                                                |
 

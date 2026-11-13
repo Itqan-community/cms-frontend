@@ -19,7 +19,7 @@ import {
 import { MushafDetails } from '../../models/mushafs.models';
 import { MushafsService } from '../../services/mushafs.service';
 import { canDeleteMushaf, canUpdateMushaf } from '../../utils/mushaf-permissions.util';
-import { AssetUsageSectionComponent } from '../../../../usage/components/asset-usage-section/asset-usage-section.component';
+import { AssetDetailTabsComponent } from '../../../components/asset-detail-tabs/asset-detail-tabs.component';
 import { AssetChannelTagsComponent } from '../../../components/asset-channels/asset-channels.component';
 
 @Component({
@@ -27,7 +27,7 @@ import { AssetChannelTagsComponent } from '../../../components/asset-channels/as
   standalone: true,
   imports: [
     AssetChannelTagsComponent,
-    AssetUsageSectionComponent,
+    AssetDetailTabsComponent,
     DatePipe,
     RouterLink,
     NzModalModule,

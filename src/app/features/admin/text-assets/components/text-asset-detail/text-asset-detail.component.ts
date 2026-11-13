@@ -20,7 +20,7 @@ import {
 import { AssetVersionsManagerComponent } from '../../../components/asset-versions-manager/asset-versions-manager.component';
 import { TextAssetDetails } from '../../models/text-assets.models';
 import { TextAssetsService } from '../../services/text-assets.service';
-import { AssetUsageSectionComponent } from '../../../../usage/components/asset-usage-section/asset-usage-section.component';
+import { AssetDetailTabsComponent } from '../../../components/asset-detail-tabs/asset-detail-tabs.component';
 import { AssetChannelTagsComponent } from '../../../components/asset-channels/asset-channels.component';
 
 @Component({
@@ -28,7 +28,7 @@ import { AssetChannelTagsComponent } from '../../../components/asset-channels/as
   standalone: true,
   imports: [
     AssetChannelTagsComponent,
-    AssetUsageSectionComponent,
+    AssetDetailTabsComponent,
     DatePipe,
     RouterLink,
     NzModalModule,

@@ -2923,7 +2923,10 @@
         "CAVEAT_CACHE": "Unseen reads are a lower bound too. Files served from the CDN cache never reach the bucket, so cached requests in the same hour can hide a few direct reads. The numbers are compared per file and hour and never go below zero."
       }
     },
-    "ASSET_SECTION_TITLE": "Usage",
+    "ASSET_TABS": {
+      "DETAILS": "Details",
+      "ANALYTICS": "Analytics"
+    },
     "PUBLIC": {
       "PLAYS": "plays",
       "DOWNLOADS": "downloads",
