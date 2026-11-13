@@ -12,6 +12,7 @@ import {
   UsageFilters,
   UsageFirstSeen,
   UsageGranularity,
+  UsageSeriesGranularity,
   UsageListeners,
   UsageReconciliation,
   UsageRecitationCoverage,
@@ -88,10 +89,14 @@ export class UsageApiService {
   }
 
   /** Itqan admin: R2 reads the edge never saw. */
-  reconciliation(filters: UsageFilters, limit = 20): Observable<UsageReconciliation> {
+  reconciliation(
+    filters: UsageFilters,
+    limit = 20,
+    granularity: UsageSeriesGranularity = 'day'
+  ): Observable<UsageReconciliation> {
     const { start_date, end_date, publisher_id } = filters;
     return this.http.get<UsageReconciliation>(`${SCOPE_BASES.admin()}/reconciliation/`, {
-      params: toParams({ start_date, end_date, publisher_id, limit }),
+      params: toParams({ start_date, end_date, publisher_id, limit, granularity }),
     });
   }
 
@@ -110,7 +115,7 @@ export class UsageApiService {
   listeners(
     scope: PortalScope,
     filters: UsageFilters,
-    granularity: Exclude<UsageGranularity, 'hour'>
+    granularity: UsageSeriesGranularity
   ): Observable<UsageListeners> {
     return this.http.get<UsageListeners>(`${SCOPE_BASES[scope]()}/listeners/`, {
       params: toParams({ ...filters }, { granularity }),

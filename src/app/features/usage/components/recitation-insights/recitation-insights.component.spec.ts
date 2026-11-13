@@ -22,6 +22,7 @@ describe('RecitationInsightsComponent', () => {
     api.listeners.and.returnValue(
       of({
         granularity: 'day',
+        partial_buckets: [],
         points: [{ t: '2026-10-12', new: 2, returning: 1, cumulative: 5 }],
         clamped_start: '2026-10-01',
         data_updated_at: null,
@@ -97,6 +98,19 @@ describe('RecitationInsightsComponent', () => {
     expect(text()).toContain('Quran App');
     expect(text()).toContain('50%');
     expect(api.recitationCoverage).not.toHaveBeenCalled();
+  });
+
+  it('uses the dashboard granularity and reloads only the listener chart when it changes', () => {
+    fixture.componentRef.setInput('granularity', 'week');
+    render({});
+    expect(api.listeners.calls.mostRecent().args[2]).toBe('week');
+    const cohorts = api.cohorts.calls.count();
+
+    fixture.componentRef.setInput('granularity', 'month');
+    fixture.detectChanges();
+
+    expect(api.listeners.calls.mostRecent().args[2]).toBe('month');
+    expect(api.cohorts.calls.count()).toBe(cohorts);
   });
 
   it('skips cohorts for ranges longer than 26 weeks', () => {

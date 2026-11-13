@@ -14,7 +14,10 @@ import { UsageDashboardComponent } from '../../../../usage/components/usage-dash
 import { UsageLeaderboardComponent } from '../../../../usage/components/usage-leaderboard/usage-leaderboard.component';
 import { UsageUnseenTrafficComponent } from '../../../../usage/components/usage-unseen-traffic/usage-unseen-traffic.component';
 import { UsageFilters, UsageRange, UsageScope } from '../../../../usage/models/usage.models';
-import { usageStateFromParams } from '../../../../usage/utils/usage-filters.util';
+import {
+  resolveGranularity,
+  usageStateFromParams,
+} from '../../../../usage/utils/usage-filters.util';
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import { PublisherFilterItem } from '../../../text-assets/models/text-assets.models';
 import { PublishersFilterService } from '../../../text-assets/services/publishers-filter.service';
@@ -65,8 +68,15 @@ export class UsagePageComponent implements OnInit {
     for (const key of params?.keys ?? []) {
       raw[key] = params?.get(key) ?? '';
     }
-    const { preset, filters } = usageStateFromParams(raw);
-    return { preset, start_date: filters.start_date, end_date: filters.end_date };
+    const { preset, filters, granularity } = usageStateFromParams(raw);
+    return { preset, start_date: filters.start_date, end_date: filters.end_date, granularity };
+  });
+
+  /** The dashboard's bucket size, for the unseen-traffic chart (which has no hourly buckets). */
+  readonly seriesGranularity = computed(() => {
+    const { start_date, end_date, granularity } = this.range();
+    const resolved = resolveGranularity(granularity, start_date, end_date);
+    return resolved === 'hour' ? 'day' : resolved;
   });
 
   /** Same range as the dashboard, for the leaderboard and unseen traffic. */
@@ -106,6 +116,7 @@ export class UsagePageComponent implements OnInit {
         range: range.preset,
         start: custom ? range.start_date : null,
         end: custom ? range.end_date : null,
+        granularity: range.granularity ?? null,
       },
       queryParamsHandling: 'merge',
     });
