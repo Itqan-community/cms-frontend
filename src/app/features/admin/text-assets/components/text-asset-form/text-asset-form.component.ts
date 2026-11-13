@@ -77,6 +77,8 @@ export class TextAssetFormComponent implements OnInit {
 
   readonly tagOptions = signal<AssetTag[]>([]);
   readonly tagsLoading = signal(false);
+  /** The backend's message when the tag list failed to load; the select offers a retry. */
+  readonly tagsError = signal<string | null>(null);
 
   readonly isEditMode = signal(false);
   readonly loadingDetail = signal(false);
@@ -192,8 +194,9 @@ export class TextAssetFormComponent implements OnInit {
     slug.updateValueAndValidity();
   }
 
-  private loadTags(): void {
+  loadTags(): void {
     this.tagsLoading.set(true);
+    this.tagsError.set(null);
     this.assetTagsService
       .list()
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -202,7 +205,16 @@ export class TextAssetFormComponent implements OnInit {
           this.tagOptions.set(tags);
           this.tagsLoading.set(false);
         },
-        error: () => this.tagsLoading.set(false),
+        error: (error: unknown) => {
+          this.tagsLoading.set(false);
+          this.tagsError.set(
+            resolveApiErrorMessage(
+              error,
+              { fallbackKey: 'ADMIN.TEXT_ASSETS.FORM.TAGS_LOAD_ERROR' },
+              this.translate
+            )
+          );
+        },
       });
   }
 

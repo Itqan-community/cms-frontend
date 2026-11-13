@@ -26,6 +26,14 @@ describe('usage-filters.util', () => {
     expect(state.metric).toBe('plays');
   });
 
+  it('maps saved tafsir and translation category links to text', () => {
+    expect(usageStateFromParams({ category: 'tafsir' }, today).filters['category']).toBe('text');
+    expect(usageStateFromParams({ category: 'translation' }, today).filters['category']).toBe(
+      'text'
+    );
+    expect(usageStateFromParams({ category: 'mushaf' }, today).filters['category']).toBe('mushaf');
+  });
+
   it('round-trips a custom range and filters through query params', () => {
     const params = {
       range: 'custom',

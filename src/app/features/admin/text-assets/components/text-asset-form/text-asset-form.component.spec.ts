@@ -4,7 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
-import { of } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { of, throwError } from 'rxjs';
 
 import { Licenses } from '../../../../../core/enums/licenses.enum';
 import type { MushafLayout } from '../../../models/asset-content.models';
@@ -106,6 +107,25 @@ describe('TextAssetFormComponent template controls', () => {
     });
     TestBed.overrideComponent(TextAssetFormComponent, { set: { template: '' } });
   }
+
+  it("shows the backend's message and retries when the tags fail to load", () => {
+    configure({});
+    const list = jasmine.createSpy('list').and.returnValues(
+      throwError(() => new HttpErrorResponse({ status: 503, error: { message: 'Tags are down' } })),
+      of([{ slug: 'tafsir', name: 'Tafsir' }])
+    );
+    TestBed.overrideProvider(AssetTagsService, { useValue: { list } });
+    const fixture = TestBed.createComponent(TextAssetFormComponent);
+    fixture.detectChanges();
+    const component = fixture.componentInstance;
+
+    expect(component.tagsError()).toBe('Tags are down');
+
+    component.loadTags();
+
+    expect(component.tagsError()).toBeNull();
+    expect(component.tagOptions()).toEqual([{ slug: 'tafsir', name: 'Tafsir' }]);
+  });
 
   it('requires a template when creating', () => {
     configure({});

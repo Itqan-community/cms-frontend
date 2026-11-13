@@ -249,7 +249,9 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
       return;
     }
 
-    if (this.asset()?.access_status === 'not_requested') {
+    // The backend sends null only for open access or anonymous users; treat a missing status as
+    // not requested so the enabled button never does nothing.
+    if ((this.asset()?.access_status ?? 'not_requested') === 'not_requested') {
       this.openAccessRequestModal();
     }
   }
