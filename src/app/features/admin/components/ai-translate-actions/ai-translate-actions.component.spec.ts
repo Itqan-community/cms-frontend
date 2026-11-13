@@ -252,6 +252,40 @@ describe('AiTranslateActionsComponent', () => {
     );
   });
 
+  describe('text asset identity', () => {
+    beforeEach(() => {
+      form.addControl('tags', new FormControl<string[]>(['translation']));
+      fixture.detectChanges();
+    });
+
+    it('should clear the generated identifier when the first tag changes', () => {
+      api.translate.and.returnValue(ok({ slug: 'translation-en-sahih' }));
+      component.run('translate');
+
+      form.patchValue({ tags: ['tafsir', 'translation'] });
+
+      expect(form.value.slug).toBe('');
+    });
+
+    it('should clear the generated identifier when the language changes', () => {
+      api.translate.and.returnValue(ok({ slug: 'translation-en-sahih' }));
+      component.run('translate');
+
+      form.patchValue({ language: 'en' });
+
+      expect(form.value.slug).toBe('');
+    });
+
+    it('should keep the identifier when a later tag is added', () => {
+      api.translate.and.returnValue(ok({ slug: 'translation-en-sahih' }));
+      component.run('translate');
+
+      form.patchValue({ tags: ['translation', 'tafsir'] });
+
+      expect(form.value.slug).toBe('translation-en-sahih');
+    });
+  });
+
   describe('recitation identity', () => {
     beforeEach(() => {
       form.addControl('reciter_id', new FormControl<number | null>(7));

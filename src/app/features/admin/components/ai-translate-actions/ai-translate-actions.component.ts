@@ -67,15 +67,16 @@ export class AiTranslateActionsComponent {
   readonly slugEditable = signal(false);
 
   /**
-   * A recitation's identifier is built from its reciter and riwayah: when either changes, a
-   * generated identifier no longer matches and must be generated again.
+   * A recitation's identifier is built from its reciter and riwayah, and a text asset's from its
+   * first tag and language: when one changes, a generated identifier no longer matches and must
+   * be generated again.
    */
   private readonly clearStaleIdentifier = effect((onCleanup) => {
     const form = this.form();
-    if (this.category() !== 'recitation') return;
-    let identity = this.recitationIdentity();
+    if (this.category() !== 'recitation' && this.category() !== 'text') return;
+    let identity = this.slugIdentity();
     const subscription = form.valueChanges.subscribe(() => {
-      const next = this.recitationIdentity();
+      const next = this.slugIdentity();
       if (next === identity) return;
       identity = next;
       const control = this.slugControl();
@@ -204,8 +205,13 @@ export class AiTranslateActionsComponent {
     }
   }
 
-  private recitationIdentity(): string {
+  private slugIdentity(): string {
     const form = this.form();
+    if (this.category() === 'text') {
+      const tags = form.get('tags')?.value;
+      const firstTag = Array.isArray(tags) ? (tags[0] ?? '') : '';
+      return `${firstTag}|${form.get('language')?.value ?? ''}`;
+    }
     return `${form.get('reciter_id')?.value ?? ''}|${form.get('riwayah_id')?.value ?? ''}`;
   }
 
