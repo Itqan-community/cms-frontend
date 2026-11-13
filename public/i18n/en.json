@@ -912,7 +912,10 @@
     "HOME": {
       "LABEL": "Home",
       "TITLE": "Overview",
-      "SUBTITLE": "Manage platform content and settings"
+      "SUBTITLE": "Manage platform content and settings",
+      "ASSETS_TITLE": "Your assets",
+      "DRAFTS": "Drafts: {{count}}",
+      "COUNTS_ERROR": "Could not load the asset counts."
     },
     "CONTENT_EDITOR": {
       "SHOW_SOURCE": "Show source",

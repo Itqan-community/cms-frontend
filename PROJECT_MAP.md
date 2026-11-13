@@ -261,7 +261,7 @@ Trust, Profile, CompleteProfile
 | `/complete-profile`                     | `CompleteProfilePage`  | `authGuard`                              | Profile completion                                                                                                                                                      |
 | `/account/*`                            | (22 auth pages)        | guestGuard/authGuard                     | Auth & account management                                                                                                                                               |
 | `/admin`                                | `AdminLayoutComponent` | `authGuard`, `portalAccessGuard`         | Permission-based admin shell (`layout/` header + sidebar)                                                                                                               |
-| `/admin` (default)                      | `AdminHomeComponent`   | —                                        | Landing grid of the same permission-filtered sidebar modules (no portal redirect)                                                                                       |
+| `/admin` (default)                      | `AdminHomeComponent`   | —                                        | Asset counts per type (`GET /portal/asset-counts/`) above the permission-filtered module grid                                                                           |
 | `/admin/publishers`                     | (lazy routes)          | `permissionGuard`                        | Publisher CRUD (staff)                                                                                                                                                  |
 | `/admin/text-assets`                    | (lazy routes)          | per-route `permissionGuard`              | Text asset CRUD (tafsirs, translations, … by tag)                                                                                                                       |
 | `/admin/tafsirs`, `/admin/translations` | redirect               | —                                        | Old links → `/admin/text-assets?tag=…` (`:slug` kept)                                                                                                                   |
@@ -312,7 +312,10 @@ success.
 
 **Layout:** `layout/AdminLayoutComponent` + `AdminSidebarComponent` (shell, hideHeader, fullWidth).
 `/admin` renders `pages/admin-home/AdminHomeComponent` with the same permission-filtered module
-cards as the sidebar.
+cards as the sidebar. Above them, `services/asset-counts.service.ts` (`GET /portal/asset-counts/`,
+`callerShowsErrors`, inline alert on failure) gives the selected publisher's asset count per type
+(drafts included, draft count shown apart); each count links to its list, and text tags link to
+`/admin/text-assets?tag=<slug>`. Loaded once per visit: a publisher switch reloads the page.
 
 **Modules (each follows identical CRUD pattern):**
 
