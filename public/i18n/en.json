@@ -2712,9 +2712,9 @@
     "AI_TRANSLATE": {
       "TRANSLATE": "Translate from Arabic",
       "WEB": "Write from the web",
-      "HINT": "Fills empty English fields only. Review before saving.",
-      "DONE": "English fields filled. Please review them.",
-      "NOTHING_TO_FILL": "All English fields are filled. Clear a field to regenerate it.",
+      "HINT": "Fills empty fields only; \"Write from the web\" also writes empty Arabic descriptions. Review before saving.",
+      "DONE": "Empty fields filled. Please review them.",
+      "NOTHING_TO_FILL": "All fields are filled. Clear a field to regenerate it.",
       "NEED_ARABIC": "Enter the Arabic details first.",
       "QUOTA": "Today's free AI limit is reached. Try again tomorrow.",
       "RATE_LIMITED": "Too many AI requests right now. Wait a minute and try again.",

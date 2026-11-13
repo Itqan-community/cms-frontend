@@ -16,6 +16,7 @@ import {
   AiTranslateMode,
   AiTranslateRequest,
   AiTranslateService,
+  AiWebFieldKey,
 } from '../../services/ai-translate.service';
 
 /** `<key>_ar` → `<key>_en` control pairs; pairs missing from the form are skipped. */
@@ -27,13 +28,15 @@ const FIELD_KEYS: AiFieldKey[] = [
   'version_name',
   'version_summary',
 ];
-/** Fields "Write from the web" fills even when their Arabic value is empty. */
+/** Fields "Write from the web" fills, in Arabic and English, even when their Arabic value is empty. */
 const WEB_FIELDS = new Set<AiFieldKey>(['description', 'long_description', 'bio']);
 
 /**
  * "Translate from Arabic" / "Write from the web" buttons for admin create forms.
- * One request per click: it fills only English controls that are empty (typed English is never
- * overwritten) and, when the form has a `slug` control, also returns the asset's package slug.
+ * One request per click: it fills only controls that are empty (typed text is never overwritten).
+ * Translate fills English; web also fills empty Arabic description fields. Arabic values whose
+ * English is already filled go along as context. When the form has a `slug` control, the same
+ * call also returns the asset's package slug.
  */
 @Component({
   selector: 'app-ai-translate-actions',
@@ -107,6 +110,8 @@ export class AiTranslateActionsComponent {
   run(mode: AiTranslateMode): void {
     const form = this.form();
     const fields: Partial<Record<AiFieldKey, string>> = {};
+    const reference: Partial<Record<AiFieldKey, string>> = {};
+    const fillArabic: AiWebFieldKey[] = [];
     let hasTarget = false;
     let hasArabic = false;
     for (const key of FIELD_KEYS) {
@@ -116,12 +121,17 @@ export class AiTranslateActionsComponent {
       const arabic = String(ar.value ?? '').trim();
       hasArabic ||= !!arabic;
       const englishEmpty = !String(en.value ?? '').trim();
-      if (englishEmpty && (arabic || (mode === 'web' && WEB_FIELDS.has(key)))) {
+      const webField = mode === 'web' && WEB_FIELDS.has(key);
+      if (englishEmpty && (arabic || webField)) {
         fields[key] = arabic;
         hasTarget = true;
-      } else if (mode === 'web' && key === 'name' && arabic) {
-        // The Arabic name is what the web research looks up, even when the English name is set.
-        fields[key] = arabic;
+      } else if (arabic) {
+        // English is already there: the Arabic is context (and the web lookup uses the name).
+        reference[key] = arabic;
+      }
+      if (webField && !arabic) {
+        fillArabic.push(key as AiWebFieldKey);
+        hasTarget = true;
       }
     }
     const slugFor = this.slugInputs();
@@ -142,6 +152,8 @@ export class AiTranslateActionsComponent {
       context: this.context(),
     };
     if (slugFor) request.slug_for = slugFor;
+    if (Object.keys(reference).length) request.reference = reference;
+    if (fillArabic.length) request.fill_arabic = fillArabic;
     // The identifier is only valid for the inputs it was generated from.
     const slugInputsSent = JSON.stringify(slugFor);
     this.loading.set(mode);
@@ -150,13 +162,8 @@ export class AiTranslateActionsComponent {
       next: (res) => {
         // Checked before filling English fields, which are themselves slug inputs.
         const inputsUnchanged = JSON.stringify(this.slugInputs()) === slugInputsSent;
-        for (const [key, value] of Object.entries(res.fields)) {
-          const en = form.get(`${key}_en`);
-          if (en && value && !String(en.value ?? '').trim()) {
-            en.setValue(value);
-            en.markAsDirty();
-          }
-        }
+        this.fillEmpty('en', res.fields);
+        this.fillEmpty('ar', res.fields_ar ?? {});
         if (slugFor && inputsUnchanged) this.applySlug(res.slug);
         this.sources.set(res.sources ?? []);
         this.loading.set(null);
@@ -184,6 +191,17 @@ export class AiTranslateActionsComponent {
         );
       },
     });
+  }
+
+  /** Sets `<key>_<lang>` controls that are still empty (typed while the request ran counts). */
+  private fillEmpty(lang: 'ar' | 'en', values: Partial<Record<AiFieldKey, string>>): void {
+    for (const [key, value] of Object.entries(values)) {
+      const control = this.form().get(`${key}_${lang}`);
+      if (control && value && !String(control.value ?? '').trim()) {
+        control.setValue(value);
+        control.markAsDirty();
+      }
+    }
   }
 
   private recitationIdentity(): string {
