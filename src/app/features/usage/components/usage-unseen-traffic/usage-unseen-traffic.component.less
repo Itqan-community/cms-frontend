@@ -32,9 +32,13 @@
     }
   }
 
+  // Same tile grid as the dashboard's headline cards: at most 4 per row, filling the width.
   &__totals {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(~'min(100%, max(160px, calc((100% - 3 * 12px) / 4)))', 1fr)
+    );
     gap: 12px;
   }
 

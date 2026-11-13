@@ -33,15 +33,24 @@
     }
   }
 
+  // Stat tiles: at most 4 per row (each track is at least a quarter of the row), at least 160px
+  // wide, and never wider than the row on a phone. auto-fit lets a short row fill the width.
   &__cards {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(~'min(100%, max(160px, calc((100% - 3 * 12px) / 4)))', 1fr)
+    );
     gap: 12px;
   }
 
+  // Chart panels: at most 3 per row, at least 320px wide (2 per row below ~990px, 1 below ~660px).
   &__panels {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(
+      auto-fill,
+      minmax(~'min(100%, max(320px, calc((100% - 2 * 16px) / 3)))', 1fr)
+    );
     gap: 16px;
   }
 
