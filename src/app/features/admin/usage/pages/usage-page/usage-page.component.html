@@ -40,7 +40,7 @@
       </nz-tab>
       <nz-tab [nzTitle]="'USAGE.TABS.UNSEEN' | translate">
         <ng-template nz-tab>
-          <app-usage-unseen-traffic [filters]="filters()" />
+          <app-usage-unseen-traffic [filters]="filters()" [granularity]="seriesGranularity()" />
         </ng-template>
       </nz-tab>
     }

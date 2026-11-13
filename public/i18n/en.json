@@ -2910,6 +2910,8 @@
       "EDGE_REQUESTS": "Edge requests",
       "UNSEEN": "Unseen reads",
       "PER_DAY": "Reads per day",
+      "PER_WEEK": "Reads per week",
+      "PER_MONTH": "Reads per month",
       "GUIDE": {
         "TITLE": "How to read this tab",
         "WHAT_TITLE": "What the numbers mean",
@@ -3001,6 +3003,18 @@
       "previous": "Previous period",
       "year": "Same time last year",
       "hijri_year": "Same time last Hijri year"
+    },
+    "GRANULARITY": {
+      "LABEL": "Bucket size",
+      "hour": "Hourly",
+      "day": "Daily",
+      "week": "Weekly",
+      "month": "Monthly",
+      "WEEK_OF": "Week of {{date}}",
+      "PARTIAL_WEEK": "partial week: {{from}} – {{to}}",
+      "PARTIAL_MONTH": "partial month: {{from}} – {{to}}",
+      "WEEK_HINT": "Weeks are ISO weeks, Monday to Sunday. The first and last week can be partial.",
+      "MONTH_HINT": "The first and last month can be partial."
     }
   },
   "MUSHAF": {

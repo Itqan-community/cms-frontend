@@ -1,5 +1,6 @@
 import { UsageSeries } from '../models/usage.models';
 import {
+  bucketLabels,
   buildBarOptions,
   buildDonutOptions,
   buildHourOfWeekOptions,
@@ -247,6 +248,72 @@ describe('usage-chart-options', () => {
       expect(text).toContain('الجمعة');
       expect(text).toContain(new Intl.NumberFormat('ar').format(1200));
       expect(text).not.toContain('[');
+    });
+  });
+
+  describe('bucket labels', () => {
+    const texts = {
+      weekOf: (date: string) => `Week of ${date}`,
+      partialWeek: (from: string, to: string) => `partial week: ${from} – ${to}`,
+      partialMonth: (from: string, to: string) => `partial month: ${from} – ${to}`,
+    };
+
+    it('labels ISO weeks by their Monday and names the days a partial week covers', () => {
+      const labels = bucketLabels(['2026-10-05', '2026-10-12'], 'week', {
+        lang: 'en',
+        partial: ['2026-10-05', '2026-10-12'],
+        range: { start_date: '2026-10-10', end_date: '2026-10-16' },
+        texts,
+      });
+
+      expect(labels.axis).toEqual(['Oct 5, 2026', 'Oct 12, 2026']);
+      expect(labels.titles).toEqual([
+        'Week of Oct 5, 2026 (partial week: Oct 10, 2026 – Oct 11, 2026)',
+        'Week of Oct 12, 2026 (partial week: Oct 12, 2026 – Oct 16, 2026)',
+      ]);
+    });
+
+    it('labels months by name and only flags the partial ones', () => {
+      const labels = bucketLabels(['2026-08-01', '2026-09-01', '2026-10-01'], 'month', {
+        lang: 'en',
+        partial: ['2026-08-01'],
+        range: { start_date: '2026-08-20', end_date: '2026-10-31' },
+        texts,
+      });
+
+      expect(labels.axis).toEqual(['Aug 2026', 'Sep 2026', 'Oct 2026']);
+      expect(labels.titles[0]).toBe('Aug 2026 (partial month: Aug 20, 2026 – Aug 31, 2026)');
+      expect(labels.titles.slice(1)).toEqual(['Sep 2026', 'Oct 2026']);
+    });
+
+    it('labels Arabic weeks with Arabic dates', () => {
+      const labels = bucketLabels(['2026-10-05'], 'week', {
+        lang: 'ar',
+        texts: { ...texts, weekOf: (date: string) => `أسبوع ${date}` },
+      });
+
+      expect(labels.titles[0]).toBe(`أسبوع ${formatPeriod('2026-10-05', 'ar')}`);
+    });
+
+    it('puts the bucket titles in the trend tooltip', () => {
+      const buckets = { axis: ['Oct 5, 2026'], titles: ['Week of Oct 5, 2026'] };
+      const options = buildTrendOptions(
+        [{ key: 'all', label: 'Plays', points: [{ t: '2026-10-05', value: 3 }] }],
+        { rtl: false, lang: 'en', labels: { other: '', unknown: '', previous: '' }, buckets }
+      ) as { tooltip: { formatter: (params: unknown[]) => string }; xAxis: Axis };
+
+      expect(options.xAxis.data).toEqual(['Oct 5, 2026']);
+      const html = options.tooltip.formatter([
+        {
+          marker: '',
+          seriesName: 'Plays',
+          seriesIndex: 0,
+          dataIndex: 0,
+          value: 3,
+          axisValueLabel: 'x',
+        },
+      ]);
+      expect(html).toContain('Week of Oct 5, 2026');
     });
   });
 

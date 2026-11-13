@@ -110,6 +110,18 @@ describe('UsagePageComponent', () => {
       range: 'custom',
       start: '2026-09-01',
       end: '2026-09-30',
+      granularity: null,
     });
+
+    fixture.componentInstance.onRangeChange({
+      preset: '30d',
+      start_date: '2026-09-01',
+      end_date: '2026-09-30',
+      granularity: 'week',
+    });
+
+    expect(navigate.calls.mostRecent().args[1]?.queryParams).toEqual(
+      jasmine.objectContaining({ range: '30d', granularity: 'week' })
+    );
   });
 });

@@ -43,9 +43,19 @@ export interface UsageViewState {
   metric: UsageMetric;
   split: string | null;
   compare: UsageComparison;
+  /** The bucket size the user picked; `null` follows the range length (`granularityFor`). */
+  granularity: UsageGranularity | null;
 }
 
 const COMPARISONS: UsageComparison[] = ['previous', 'year', 'hijri_year'];
+const GRANULARITIES: UsageGranularity[] = ['hour', 'day', 'week', 'month'];
+/** The backend rejects daily series over longer ranges (`invalid_granularity`). */
+const MAX_DAILY_DAYS = 186;
+/** Hourly charts beyond a week have too many points to read. */
+const MAX_HOURLY_DAYS = 7;
+/** Coarser buckets than these ranges leave one or two points. */
+const MIN_WEEKLY_DAYS = 14;
+const MIN_MONTHLY_DAYS = 60;
 
 export function toIsoDay(date: Date): string {
   return date.toISOString().slice(0, 10);
@@ -105,7 +115,12 @@ export function usageStateFromParams(
   const compare = COMPARISONS.includes(params['compare'] as UsageComparison)
     ? (params['compare'] as UsageComparison)
     : 'previous';
-  return { preset, filters, metric, split: params['split'] || null, compare };
+  const granularity = keptGranularity(
+    params['granularity'] as UsageGranularity,
+    filters.start_date,
+    filters.end_date
+  );
+  return { preset, filters, metric, split: params['split'] || null, compare, granularity };
 }
 
 export function usageStateToParams(state: UsageViewState): Record<string, string> {
@@ -132,6 +147,9 @@ export function usageStateToParams(state: UsageViewState): Record<string, string
   }
   if (state.compare !== 'previous') {
     params['compare'] = state.compare;
+  }
+  if (state.granularity) {
+    params['granularity'] = state.granularity;
   }
   return params;
 }
@@ -165,9 +183,48 @@ export function formatChange(
   return { text, direction: change > 0 ? 'up' : change < 0 ? 'down' : 'flat' };
 }
 
+function rangeDays(start: string, end: string): number {
+  return (Date.parse(end) - Date.parse(start)) / DAY_MS + 1;
+}
+
+/** The bucket sizes that make sense for the range, finest first (always includes the default). */
+export function granularityOptions(start: string, end: string): UsageGranularity[] {
+  const days = rangeDays(start, end);
+  return GRANULARITIES.filter((granularity) => {
+    switch (granularity) {
+      case 'hour':
+        return days <= MAX_HOURLY_DAYS;
+      case 'day':
+        return days <= MAX_DAILY_DAYS;
+      case 'week':
+        return days >= MIN_WEEKLY_DAYS;
+      case 'month':
+        return days >= MIN_MONTHLY_DAYS;
+    }
+  });
+}
+
+/** A picked bucket size, or `null` when there is none or the range does not offer it. */
+export function keptGranularity(
+  granularity: UsageGranularity | null | undefined,
+  start: string,
+  end: string
+): UsageGranularity | null {
+  return granularity && granularityOptions(start, end).includes(granularity) ? granularity : null;
+}
+
+/** The picked bucket size when the range offers it, else the default for the range. */
+export function resolveGranularity(
+  granularity: UsageGranularity | null | undefined,
+  start: string,
+  end: string
+): UsageGranularity {
+  return keptGranularity(granularity, start, end) ?? granularityFor(start, end);
+}
+
 /** A bucket size that keeps a chart readable for the range. */
 export function granularityFor(start: string, end: string): UsageGranularity {
-  const days = (Date.parse(end) - Date.parse(start)) / DAY_MS + 1;
+  const days = rangeDays(start, end);
   if (days <= 2) {
     return 'hour';
   }

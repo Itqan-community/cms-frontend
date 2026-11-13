@@ -14,6 +14,8 @@ describe('UsageUnseenTrafficComponent', () => {
       of({
         total: { reads: 13, edge_requests: 7, unseen: 8 },
         assets: [{ key: '5', label: 'Asset A', reads: 11, edge_requests: 7, unseen: 6 }],
+        granularity: 'day',
+        partial_buckets: [],
         days: [{ t: '2026-10-01', reads: 13, edge_requests: 7, unseen: 8 }],
         data_updated_at: null,
       })
@@ -34,11 +36,35 @@ describe('UsageUnseenTrafficComponent', () => {
   it('shows totals, the daily chart and the assets with the most unseen reads', () => {
     fixture.detectChanges();
 
-    expect(api.reconciliation).toHaveBeenCalledWith(jasmine.objectContaining({ publisher_id: 3 }));
+    expect(api.reconciliation).toHaveBeenCalledWith(
+      jasmine.objectContaining({ publisher_id: 3 }),
+      20,
+      'day'
+    );
     const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
     expect(text).toContain('USAGE.UNSEEN.READS');
     expect(text).toContain('Asset A');
     expect(fixture.componentInstance.chartOptions()).not.toBeNull();
+  });
+
+  it('requests the picked bucket size and titles the chart per week', () => {
+    api.reconciliation.and.returnValue(
+      of({
+        total: { reads: 13, edge_requests: 7, unseen: 8 },
+        assets: [],
+        granularity: 'week',
+        partial_buckets: ['2026-09-28'],
+        days: [{ t: '2026-09-28', reads: 13, edge_requests: 7, unseen: 8 }],
+        data_updated_at: null,
+      })
+    );
+    fixture.componentRef.setInput('granularity', 'week');
+    fixture.detectChanges();
+
+    expect(api.reconciliation.calls.mostRecent().args[2]).toBe('week');
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('USAGE.UNSEEN.PER_WEEK');
+    expect(text).toContain('USAGE.GRANULARITY.WEEK_HINT');
   });
 
   it('explains what the numbers mean, why they matter and how to use them', () => {

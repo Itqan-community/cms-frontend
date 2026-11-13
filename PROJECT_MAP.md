@@ -550,31 +550,32 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 `2026-10-18-usage-reports-design.md` §9/§20/§21; plan
 `docs/superpowers/plans/2026-10-18-usage-reports-4-frontend.md`).
 
-| File                               | Type      | Purpose                                                                                                                                                                            |
-| ---------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `models/usage.models.ts`           | Types     | API contract (summary, timeseries, breakdown, reconciliation, public counts); `USAGE_OTHER_KEY`                                                                                    |
-| `services/usage-api.service.ts`    | Service   | One method per report with a `scope` (`publisher` → `/portal/usage/`, `admin` → `/portal/admin/usage/`, `developer` → `/cms-api/developers/usage/`); public counts → `null` on 404 |
-| `usage-echarts.ts`                 | Setup     | Tree-shaken ECharts (line, bar, pie, heatmap, mark points); loaded lazily by the chart component (own chunk)                                                                       |
-| `utils/usage-chart-options.ts`     | Util      | Pure option builders (trend with spike marks, donut, bar, hour-of-week heatmap, listener growth); Hijri axis labels; RTL mirrors axes and legends; `"<3"` as 0 + label             |
-| `utils/usage-filters.util.ts`      | Util      | Presets, URL query-param state, compact numbers / % change per language, granularity by range                                                                                      |
-| `utils/usage-dashboard.profile.ts` | Util      | Headline cards, metrics and panels per scope / asset category (spec §8); `itemLabel` (countries/languages via `Intl.DisplayNames`)                                                 |
-| `components/usage-chart/`          | Component | Titled chart card: loading / empty / error (retry) / view-as-table                                                                                                                 |
-| `components/usage-dashboard/`      | Component | Filter bar (URL state on pages, local on asset sections), headline cards, trend + split, panels, CSV export, last-updated + API disclaimers                                        |
-| `components/usage-leaderboard/`    | Component | Admin: top publishers / assets with previous-period change                                                                                                                         |
-| `components/usage-unseen-traffic/` | Component | Admin: R2 reads vs edge requests (unseen traffic), with a "How to read this tab" guide                                                                                             |
-| `components/recitation-insights/`  | Component | Recitation dashboards (asset tab + overview): listener growth, weekly cohorts, countries/apps first reached, gallery funnel, asset surah coverage                                  |
-| `components/recitation-catalog/`   | Component | Recitation overview only: this week's top / rising recitations, gallery search terms (top / no results), incomplete recitations                                                    |
-| `components/asset-usage-section/`  | Component | Analytics tab content on asset admin detail pages (inside `admin/components/asset-detail-tabs/`; `portal_read_usage`)                                                              |
-| `components/asset-usage-counts/`   | Component | Gallery asset page "plays · downloads · apps"; hidden unless the backend returns 200                                                                                               |
-| `pages/developer-usage/`           | Page      | `/account/usage` (developer scope), linked from `/account/api-keys`                                                                                                                |
+| File                               | Type      | Purpose                                                                                                                                                                                                                    |
+| ---------------------------------- | --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `models/usage.models.ts`           | Types     | API contract (summary, timeseries, breakdown, reconciliation, public counts); `USAGE_OTHER_KEY`                                                                                                                            |
+| `services/usage-api.service.ts`    | Service   | One method per report with a `scope` (`publisher` → `/portal/usage/`, `admin` → `/portal/admin/usage/`, `developer` → `/cms-api/developers/usage/`); public counts → `null` on 404                                         |
+| `usage-echarts.ts`                 | Setup     | Tree-shaken ECharts (line, bar, pie, heatmap, mark points); loaded lazily by the chart component (own chunk)                                                                                                               |
+| `utils/usage-chart-options.ts`     | Util      | Pure option builders (trend with spike marks, donut, bar, hour-of-week heatmap, listener growth); Hijri axis labels; week/month bucket labels with partial-bucket notes; RTL mirrors axes and legends; `"<3"` as 0 + label |
+| `utils/usage-filters.util.ts`      | Util      | Presets, URL query-param state (incl. `granularity`), compact numbers / % change per language, default granularity by range and the bucket sizes each range offers                                                         |
+| `utils/usage-dashboard.profile.ts` | Util      | Headline cards, metrics and panels per scope / asset category (spec §8); `itemLabel` (countries/languages via `Intl.DisplayNames`)                                                                                         |
+| `components/usage-chart/`          | Component | Titled chart card: loading / empty / error (retry) / view-as-table                                                                                                                                                         |
+| `components/usage-dashboard/`      | Component | Filter bar (URL state on pages, local on asset sections), headline cards, trend + split + bucket-size picker (day / week / month; hour for short ranges), panels, CSV export, last-updated + API disclaimers               |
+| `components/usage-leaderboard/`    | Component | Admin: top publishers / assets with previous-period change                                                                                                                                                                 |
+| `components/usage-unseen-traffic/` | Component | Admin: R2 reads vs edge requests (unseen traffic), with a "How to read this tab" guide                                                                                                                                     |
+| `components/recitation-insights/`  | Component | Recitation dashboards (asset tab + overview): listener growth, weekly cohorts, countries/apps first reached, gallery funnel, asset surah coverage                                                                          |
+| `components/recitation-catalog/`   | Component | Recitation overview only: this week's top / rising recitations, gallery search terms (top / no results), incomplete recitations                                                                                            |
+| `components/asset-usage-section/`  | Component | Analytics tab content on asset admin detail pages (inside `admin/components/asset-detail-tabs/`; `portal_read_usage`)                                                                                                      |
+| `components/asset-usage-counts/`   | Component | Gallery asset page "plays · downloads · apps"; hidden unless the backend returns 200                                                                                                                                       |
+| `pages/developer-usage/`           | Page      | `/account/usage` (developer scope), linked from `/account/api-keys`                                                                                                                                                        |
 
 `/admin/usage` (`features/admin/usage/`): Dashboard and Recitations tabs for everyone with
 `portal_read_usage` (Recitations = the dashboard fixed to the recitation category, local state:
 reciter / riwayah filters, listening hours, recitation insights and catalog; picking "Recitations"
 in the Dashboard category filter shows the same profile); Itqan staff also get a publisher picker,
-Leaderboard and Unseen traffic; the Mixpanel iframe is the "Legacy board" tab (loaded when opened)
-until the usage-reports cutover. `/account/api-keys` shows and edits each key's public app slug
-(`app_slug`). The global error toast skips `usage_counts_disabled`.
+Leaderboard and Unseen traffic (bucketed like the dashboard trend: the `granularity` URL param is
+shared by the tabs); the Mixpanel iframe is the "Legacy board" tab (loaded when opened) until the
+usage-reports cutover. `/account/api-keys` shows and edits each key's public app slug (`app_slug`).
+The global error toast skips `usage_counts_disabled`.
 
 ### 6. Error (`src/app/features/error/`)
 
