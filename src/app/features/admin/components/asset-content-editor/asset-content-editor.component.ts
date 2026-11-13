@@ -24,18 +24,16 @@ export class AssetContentEditorComponent implements OnInit, HasUnsavedContent {
   private readonly route = inject(ActivatedRoute);
   readonly grid = viewChild(AssetContentGridComponent);
 
-  readonly kind = signal<AssetVersionParentKind>('translation');
+  readonly kind = signal<AssetVersionParentKind>('text');
   readonly slug = signal<string>('');
   /** Set on the read-only version route: the version shown instead of a draft. */
   readonly viewVersionId = signal<number | null>(null);
 
-  get listSegment(): string {
-    return this.kind() === 'tafsir' ? 'tafsirs' : 'translations';
-  }
+  readonly listSegment = 'text-assets';
 
   ngOnInit(): void {
     const dataKind = this.route.snapshot.data['kind'] as AssetVersionParentKind | undefined;
-    this.kind.set(dataKind ?? 'translation');
+    this.kind.set(dataKind ?? 'text');
     this.slug.set(this.route.snapshot.params['slug'] ?? '');
     if (this.route.snapshot.data['readOnly']) {
       this.viewVersionId.set(Number(this.route.snapshot.params['versionId']));

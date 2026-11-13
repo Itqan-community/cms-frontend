@@ -33,8 +33,8 @@
           <div class="title-row">
             <h1 class="asset-title">{{ asset()!.name }}</h1>
             <nz-tag class="category-badge">
-              <ng-icon [name]="getCategoryIcon(asset()!.category)" />
-              <span>{{ 'CATEGORIES.' + asset()!.category | translate }}</span>
+              <ng-icon [name]="getCategoryIcon(asset()!)" />
+              <span>{{ categoryLabel(asset()!) }}</span>
             </nz-tag>
             <app-asset-template-badge
               [template]="asset()!.template"
@@ -106,35 +106,19 @@
                 <ng-icon name="lucideAlertTriangle" />
                 {{ 'GALLERY.REPORT_ISSUE.BUTTON' | translate }}
               </button>
-              @if ((asset()!.available_languages?.length ?? 0) > 1) {
-                <label class="download-language-label" for="download-language">
-                  {{ 'GALLERY.DOWNLOAD_LANGUAGE' | translate }}
-                </label>
-                <nz-select
-                  id="download-language"
-                  class="download-language-select"
+              @if (showRequestAccess()) {
+                <button
+                  nz-button
+                  nzType="primary"
                   nzBlock
-                  [ngModel]="selectedLanguage()"
-                  (ngModelChange)="pickLanguage($event)"
-                  [nzDisabled]="isDownloading()"
+                  class="request-access-button"
+                  (click)="requestAccess()"
+                  [disabled]="isRequestAccessBlocked()"
                 >
-                  @for (lang of asset()!.available_languages; track lang) {
-                    <nz-option [nzValue]="lang" [nzLabel]="languageName(lang)"></nz-option>
-                  }
-                </nz-select>
+                  {{ 'GALLERY.REQUEST_ACCESS_BUTTON' | translate }}
+                  <ng-icon name="lucideKeyRound" />
+                </button>
               }
-              <button
-                nz-button
-                nzType="primary"
-                nzBlock
-                class="download-button-primary"
-                (click)="downloadResource()"
-                [nzLoading]="isDownloading()"
-                [disabled]="isDownloading() || isDownloadBlocked()"
-              >
-                {{ primaryActionLabelKey() | translate }}
-                <ng-icon [name]="primaryActionIcon()" />
-              </button>
               @if (asset()!.is_open_access) {
                 <p class="open-access-hint">{{ 'GALLERY.OPEN_ACCESS_HINT' | translate }}</p>
               } @else if (asset()!.access_status === 'pending') {
@@ -145,24 +129,46 @@
                 <p class="access-status-hint access-status-hint--rejected">
                   {{ 'GALLERY.ACCESS_REJECTED_HINT' | translate }}
                 </p>
+              } @else if (asset()!.access_status === 'approved') {
+                <p class="access-status-hint access-status-hint--approved">
+                  {{ 'GALLERY.ACCESS_APPROVED_HINT' | translate }}
+                </p>
               }
             </div>
           </div>
         </div>
 
-        @if (asset()!.package; as pkg) {
-          <!-- itqan CLI Card -->
-          <div class="card itqan-cli-card">
-            <div class="card-header">
-              <ng-icon name="lucideTerminal" />
-              <h3 class="card-title">{{ 'GALLERY.ITQAN_CLI.TITLE' | translate }}</h3>
-            </div>
-
-            <div class="card-content">
-              <app-itqan-add-command [package]="pkg" [language]="selectedLanguage()" />
-            </div>
+        <!-- Get the asset: public API (recitations) or the itqan CLI -->
+        <div class="card get-asset-card">
+          <div class="card-header">
+            <ng-icon name="lucideTerminal" />
+            <h3 class="card-title">{{ 'GALLERY.GET_ASSET.TITLE' | translate }}</h3>
           </div>
-        }
+
+          <div class="card-content get-asset-content">
+            @if ((asset()!.available_languages?.length ?? 0) > 1) {
+              <label class="language-label" for="asset-language">
+                {{ 'GALLERY.ASSET_LANGUAGE' | translate }}
+              </label>
+              <nz-select
+                id="asset-language"
+                class="language-select"
+                nzBlock
+                [ngModel]="selectedLanguage()"
+                (ngModelChange)="pickLanguage($event)"
+              >
+                @for (lang of asset()!.available_languages; track lang) {
+                  <nz-option [nzValue]="lang" [nzLabel]="languageName(lang)"></nz-option>
+                }
+              </nz-select>
+            }
+            <app-asset-get-cta
+              [category]="asset()!.category"
+              [package]="asset()!.package ?? null"
+              [language]="selectedLanguage()"
+            />
+          </div>
+        </div>
 
         <!-- Publisher Card -->
         <div class="card publisher-card">
@@ -276,6 +282,13 @@
       <p class="modal-caption">{{ asset()?.name }}</p>
 
       <form [formGroup]="reportIssueForm" nz-form>
+        @if (reportIssueContextKind(); as kind) {
+          <app-issue-context-fields
+            [kind]="kind"
+            [form]="reportIssueContextForm"
+            [maxPage]="asset()?.mushaf_layout?.page_count ?? null"
+          />
+        }
         <nz-form-item>
           <nz-form-label [nzRequired]="true">
             {{ 'GALLERY.REPORT_ISSUE.DESCRIPTION_LABEL' | translate }}
@@ -301,42 +314,6 @@
           </nz-form-control>
         </nz-form-item>
       </form>
-    </div>
-  </nz-modal>
-
-  <!-- License Terms Modal -->
-  <nz-modal
-    [nzVisible]="isLicenseModalVisible()"
-    [nzTitle]="'ACCESS_REQUEST.LICENSE_TERMS_TITLE' | translate"
-    [nzOkText]="'ACCESS_REQUEST.CONFIRM' | translate"
-    [nzCancelText]="'COMMON.CANCEL' | translate"
-    [nzOkDisabled]="!canConfirmLicense()"
-    (nzOnCancel)="closeLicenseModal()"
-    (nzOnOk)="handleLicenseConfirm()"
-  >
-    <div *nzModalContent>
-      <div class="license-modal-content">
-        <div class="license-header">
-          <p class="license-subtitle">
-            {{ asset()?.name }} - {{ asset()?.license }}
-            {{ 'ACCESS_REQUEST.LICENSE_INFO' | translate }}
-          </p>
-        </div>
-
-        <div class="license-card">
-          <div class="license-terms-scroll" (scroll)="handleLicenseScroll($event)">
-            <pre class="license-text">{{
-              'ACCESS_REQUEST.LICENSE_TERMS.BODY'
-                | translate: { name: asset()?.name, license: asset()?.license }
-            }}</pre>
-          </div>
-          @if (showScrollHint) {
-            <div class="license-scroll-hint">
-              {{ 'ACCESS_REQUEST.SCROLL_HINT' | translate }}
-            </div>
-          }
-        </div>
-      </div>
     </div>
   </nz-modal>
 </div>

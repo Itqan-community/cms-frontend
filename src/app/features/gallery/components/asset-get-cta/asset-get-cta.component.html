@@ -1,0 +1,15 @@
+@if (category() === 'recitation') {
+  <p class="hint">{{ 'GALLERY.GET_ASSET.RECITATION_HINT' | translate }}</p>
+} @else if (package(); as pkg) {
+  <app-itqan-add-command [package]="pkg" [language]="language()" />
+} @else {
+  <p class="hint">{{ 'GALLERY.GET_ASSET.NOT_INSTALLABLE_HINT' | translate }}</p>
+  <a class="cta-link cli-link" [href]="cliUrl" target="_blank" rel="noopener noreferrer">
+    {{ 'GALLERY.GET_ASSET.CLI_LINK' | translate }}
+    <ng-icon name="lucideExternalLink" />
+  </a>
+}
+<a class="cta-link api-docs-link" [href]="apiDocsUrl" target="_blank" rel="noopener noreferrer">
+  {{ 'GALLERY.GET_ASSET.API_DOCS_LINK' | translate }}
+  <ng-icon name="lucideExternalLink" />
+</a>

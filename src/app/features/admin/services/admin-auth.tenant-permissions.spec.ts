@@ -19,8 +19,9 @@ describe('AdminAuthService tenant permissions', () => {
         slug: 'a',
         icon_url: null,
         permissions: [PORTAL_PERMISSIONS.PORTAL_INVITE_PUBLISHER_MEMBERS],
+        has_website: false,
       },
-      { id: 2, name: 'B', slug: 'b', icon_url: null, permissions: [] },
+      { id: 2, name: 'B', slug: 'b', icon_url: null, permissions: [], has_website: false },
     ]);
     selectedPublisherId.set(null);
     TestBed.configureTestingModule({

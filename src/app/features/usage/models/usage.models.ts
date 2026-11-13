@@ -19,6 +19,8 @@ export type UsageMetric =
   | 'listening_seconds';
 
 export type UsageGranularity = 'hour' | 'day' | 'week' | 'month';
+/** Buckets of the charts that never go hourly (listener growth, unseen traffic). */
+export type UsageSeriesGranularity = Exclude<UsageGranularity, 'hour'>;
 
 export type UsageDimension =
   | 'asset'
@@ -44,6 +46,8 @@ export interface UsageRange {
   preset: UsagePreset;
   start_date: string;
   end_date: string;
+  /** The bucket size the user picked; `null` follows the range length. */
+  granularity?: UsageGranularity | null;
 }
 
 /** What the trend's dashed line compares with: the window just before, or the same dates a year ago. */
@@ -105,6 +109,8 @@ export interface UsageSeries {
 export interface UsageTimeseries {
   metric: UsageMetric;
   granularity: UsageGranularity;
+  /** Bucket starts (`t`) of the ISO weeks or months the range only partly covers. */
+  partial_buckets: string[];
   series: UsageSeries[];
   previous: UsagePoint[] | null;
   data_updated_at: string | null;
@@ -136,6 +142,9 @@ export interface ReconciliationNumbers {
 export interface UsageReconciliation {
   total: ReconciliationNumbers;
   assets: (ReconciliationNumbers & { key: string; label: string | null })[];
+  granularity: UsageSeriesGranularity;
+  partial_buckets: string[];
+  /** One row per bucket of `granularity`. */
   days: (ReconciliationNumbers & { t: string })[];
   data_updated_at: string | null;
 }
@@ -183,6 +192,7 @@ export interface ListenerPoint {
 
 export interface UsageListeners {
   granularity: UsageGranularity;
+  partial_buckets: string[];
   points: ListenerPoint[];
   /** Set when the range started before the events kept; the report starts here instead. */
   clamped_start: string | null;

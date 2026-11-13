@@ -6,7 +6,7 @@ import { NzPopoverModule } from 'ng-zorro-antd/popover';
 import { NgIcon } from '@ng-icons/core';
 import { AdminTableColumnPrefsService } from '../../services/admin-table-column-prefs.service';
 
-/** `label` is an ngx-translate key (e.g. ADMIN.TAFSIRS.COLUMNS.NAME). */
+/** `label` is an ngx-translate key (e.g. ADMIN.TEXT_ASSETS.COLUMNS.NAME). */
 export interface AdminTableColumnOption {
   key: string;
   label: string;

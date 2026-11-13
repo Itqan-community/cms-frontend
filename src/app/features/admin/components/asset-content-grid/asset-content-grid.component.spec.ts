@@ -319,7 +319,7 @@ describe('AssetContentGridComponent column definitions', () => {
   it('derives the template from the loaded rows when the input is left unbound', () => {
     // Arrange
     const fixture = TestBed.createComponent(AssetContentGridComponent);
-    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('kind', 'text');
     fixture.componentRef.setInput('slug', 'demo-tafsir');
 
     // Act: ngOnInit kicks off listLanguages() -> createDraft() -> getEntries();
@@ -408,7 +408,7 @@ describe('AssetContentGridComponent column definitions', () => {
   describe('read-only version view', () => {
     function openViewer() {
       const fixture = TestBed.createComponent(AssetContentGridComponent);
-      fixture.componentRef.setInput('kind', 'tafsir');
+      fixture.componentRef.setInput('kind', 'text');
       fixture.componentRef.setInput('slug', 'demo-tafsir');
       fixture.componentRef.setInput('viewVersionId', 7);
       fixture.detectChanges();
@@ -493,7 +493,7 @@ describe('AssetContentGridComponent column definitions', () => {
   describe('commit button', () => {
     function openEditor(pendingCount: number) {
       const fixture = TestBed.createComponent(AssetContentGridComponent);
-      fixture.componentRef.setInput('kind', 'tafsir');
+      fixture.componentRef.setInput('kind', 'text');
       fixture.componentRef.setInput('slug', 'demo-tafsir');
       fixture.detectChanges();
       const httpMock = TestBed.inject(HttpTestingController);
@@ -544,7 +544,7 @@ describe('AssetContentGridComponent column definitions', () => {
     it('ignores an older count that answers after a newer one', () => {
       // Arrange — the count on opening is still in flight…
       const fixture = TestBed.createComponent(AssetContentGridComponent);
-      fixture.componentRef.setInput('kind', 'tafsir');
+      fixture.componentRef.setInput('kind', 'text');
       fixture.componentRef.setInput('slug', 'demo-tafsir');
       fixture.detectChanges();
       const httpMock = TestBed.inject(HttpTestingController);

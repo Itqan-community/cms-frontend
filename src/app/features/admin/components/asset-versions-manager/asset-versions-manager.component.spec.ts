@@ -124,11 +124,11 @@ describe('AssetVersionsManagerComponent', () => {
 
     fixture = TestBed.createComponent(AssetVersionsManagerComponent);
     component = fixture.componentInstance;
-    component.kind = 'translation';
+    component.kind = 'text';
     component.slug = 'sahih-intl';
     component.assetId = 7;
-    component.i18nPrefix = 'ADMIN.TRANSLATIONS.DETAIL.VERSIONS';
-    component.sectionTitleKey = 'ADMIN.TRANSLATIONS.DETAIL.VERSIONS_TITLE';
+    component.i18nPrefix = 'ADMIN.TEXT_ASSETS.DETAIL.VERSIONS';
+    component.sectionTitleKey = 'ADMIN.TEXT_ASSETS.DETAIL.VERSIONS_TITLE';
   });
 
   describe('language-aware upload', () => {
@@ -190,7 +190,7 @@ describe('AssetVersionsManagerComponent', () => {
     });
 
     it('never sends it for a user who cannot review', () => {
-      granted = new Set([PORTAL_PERMISSIONS.PORTAL_EDIT_TRANSLATION_CONTENT]);
+      granted = new Set([PORTAL_PERMISSIONS.PORTAL_EDIT_TEXT_ASSET_CONTENT]);
 
       uploadWith(true);
 
@@ -402,8 +402,8 @@ describe('AssetVersionsManagerComponent', () => {
 
     it('keeps uploading and restoring for users who can edit the content', () => {
       withPermissions(
-        PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION,
-        PORTAL_PERMISSIONS.PORTAL_EDIT_TRANSLATION_CONTENT
+        PORTAL_PERMISSIONS.PORTAL_UPDATE_TEXT_ASSET,
+        PORTAL_PERMISSIONS.PORTAL_EDIT_TEXT_ASSET_CONTENT
       );
 
       component.openCreateModal();
@@ -413,7 +413,7 @@ describe('AssetVersionsManagerComponent', () => {
     });
 
     it('lets metadata-only editors rename versions but not upload, replace files or restore', () => {
-      withPermissions(PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION);
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_UPDATE_TEXT_ASSET);
 
       component.openCreateModal();
 
@@ -425,7 +425,7 @@ describe('AssetVersionsManagerComponent', () => {
 
   describe('language availability', () => {
     it('lets the source language be shown or hidden too', () => {
-      granted = new Set([PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION]);
+      granted = new Set([PORTAL_PERMISSIONS.PORTAL_UPDATE_TEXT_ASSET]);
       fixture.detectChanges();
 
       component.onLanguageChange('ar'); // the source
@@ -474,7 +474,7 @@ describe('AssetVersionsManagerComponent', () => {
     });
 
     it('shows the publish button disabled, explaining the permission, to users who cannot publish', () => {
-      withPermissions(PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION);
+      withPermissions(PORTAL_PERMISSIONS.PORTAL_UPDATE_TEXT_ASSET);
 
       expect(component.supportsPublishing()).toBeTrue();
       expect(component.canPublish()).toBeFalse();
@@ -506,12 +506,7 @@ describe('AssetVersionsManagerComponent', () => {
 
       component.publishVersion(version({ id: 3, is_approved: true }));
 
-      expect(contentService.setPublishedVersion).toHaveBeenCalledWith(
-        'translation',
-        'sahih-intl',
-        3,
-        ''
-      );
+      expect(contentService.setPublishedVersion).toHaveBeenCalledWith('text', 'sahih-intl', 3, '');
       expect(message.success).toHaveBeenCalled();
       expect(versionsService.list).toHaveBeenCalled();
       expect(component.publishingId()).toBeNull();
@@ -575,7 +570,7 @@ describe('AssetVersionsManagerComponent', () => {
       component.submit();
 
       expect(versionsService.create).toHaveBeenCalledWith(
-        'translation',
+        'text',
         'sahih-intl',
         jasmine.objectContaining({
           label_en: 'First edition',
@@ -668,13 +663,8 @@ describe('AssetVersionsManagerComponent', () => {
 
       component.restoreVersion(page('ar').results[0]);
 
-      expect(versionsService.latestNumber).toHaveBeenCalledWith('translation', 'sahih-intl', 'ar');
-      expect(contentService.restoreVersion).toHaveBeenCalledWith(
-        'translation',
-        'sahih-intl',
-        1,
-        'major'
-      );
+      expect(versionsService.latestNumber).toHaveBeenCalledWith('text', 'sahih-intl', 'ar');
+      expect(contentService.restoreVersion).toHaveBeenCalledWith('text', 'sahih-intl', 1, 'major');
     });
 
     it('switches the restore to major instead of failing when columns were reordered', async () => {
@@ -812,7 +802,7 @@ describe('AssetVersionsManagerComponent', () => {
     });
 
     it('is the plain action label when the version can be deleted', () => {
-      expect(tooltipFor(null)).toBe('ADMIN.TRANSLATIONS.DETAIL.VERSIONS.TOOLTIP_DELETE');
+      expect(tooltipFor(null)).toBe('ADMIN.TEXT_ASSETS.DETAIL.VERSIONS.TOOLTIP_DELETE');
     });
   });
 
@@ -831,8 +821,8 @@ describe('AssetVersionsManagerComponent', () => {
     it('asks the usual confirmation for an unpublished version', () => {
       component.deleteRow({ id: 143, name: '1.1', is_published: false } as AssetVersion);
 
-      expect(options?.nzTitle).toBe('ADMIN.TRANSLATIONS.DETAIL.VERSIONS.DELETE_CONFIRM_TITLE');
-      expect(options?.nzOkText).toBe('ADMIN.TRANSLATIONS.DETAIL.VERSIONS.DELETE_OK');
+      expect(options?.nzTitle).toBe('ADMIN.TEXT_ASSETS.DETAIL.VERSIONS.DELETE_CONFIRM_TITLE');
+      expect(options?.nzOkText).toBe('ADMIN.TEXT_ASSETS.DETAIL.VERSIONS.DELETE_OK');
     });
 
     it('warns that deleting the published only version unpublishes it', async () => {
@@ -842,7 +832,7 @@ describe('AssetVersionsManagerComponent', () => {
       expect(options?.nzContent).toBe('ADMIN.VERSION_PUBLISHING.DELETE_PUBLISHED_BODY');
       expect(options?.nzOkText).toBe('ADMIN.VERSION_PUBLISHING.DELETE_PUBLISHED_OK');
       await (options?.nzOnOk as () => Promise<unknown>)();
-      expect(versionsService.delete).toHaveBeenCalledWith('translation', 'sahih-intl', 143, true);
+      expect(versionsService.delete).toHaveBeenCalledWith('text', 'sahih-intl', 143, true);
     });
 
     it('does nothing for a version whose delete is blocked', () => {
@@ -869,7 +859,7 @@ describe('AssetVersionsManagerComponent', () => {
       component.deleteRow({ id: 143, name: '1.0', is_published: false } as AssetVersion);
 
       await expectAsync((options?.nzOnOk as () => Promise<unknown>)()).toBeResolvedTo(undefined);
-      expect(versionsService.delete).toHaveBeenCalledWith('translation', 'sahih-intl', 143, false);
+      expect(versionsService.delete).toHaveBeenCalledWith('text', 'sahih-intl', 143, false);
       expect(message.error).toHaveBeenCalledWith('Published since.');
       expect(versionsService.list).toHaveBeenCalled();
     });
@@ -960,7 +950,7 @@ describe('AssetVersionsManagerComponent', () => {
       component.publishVersion(version({ is_approved: true, publishing_rolls_back: true }));
 
       expect(contentService.setPublishedVersion).toHaveBeenCalledWith(
-        'translation',
+        'text',
         'sahih-intl',
         1,
         'Errors in Surah 2'
@@ -986,12 +976,7 @@ describe('AssetVersionsManagerComponent', () => {
 
       component.publishVersion(version({ is_approved: true, publishing_rolls_back: false }));
 
-      expect(contentService.setPublishedVersion).toHaveBeenCalledWith(
-        'translation',
-        'sahih-intl',
-        1,
-        ''
-      );
+      expect(contentService.setPublishedVersion).toHaveBeenCalledWith('text', 'sahih-intl', 1, '');
     });
 
     it('offers removal only to holders of the remove permission', () => {

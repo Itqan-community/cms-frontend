@@ -1,0 +1,47 @@
+.issue-context {
+  margin: 0 0 8px;
+  padding: 0;
+  border: 0;
+}
+
+.issue-context__title {
+  margin-bottom: 2px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 0;
+}
+
+.issue-context__hint {
+  margin: 0 0 8px;
+  font-size: 13px;
+  opacity: 0.75;
+}
+
+.issue-context__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 12px;
+}
+
+.issue-context__surah {
+  flex: 1 1 220px;
+}
+
+.issue-context__ayah,
+.issue-context__page {
+  flex: 0 1 140px;
+
+  nz-input-number {
+    width: 100%;
+  }
+}
+
+.issue-context__glyph {
+  flex: 1 1 160px;
+}
+
+.issue-context__error {
+  margin: -12px 0 16px;
+  color: var(--color-red-600);
+  font-size: 14px;
+}

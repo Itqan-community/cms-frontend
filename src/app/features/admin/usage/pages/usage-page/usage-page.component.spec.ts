@@ -5,7 +5,7 @@ import { Router, provideRouter } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { of, Subject } from 'rxjs';
 import { UsageApiService } from '../../../../usage/services/usage-api.service';
-import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
+import { PublishersFilterService } from '../../../text-assets/services/publishers-filter.service';
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import { UsageService } from '../../services/usage.service';
 import { UsagePageComponent } from './usage-page.component';
@@ -110,6 +110,18 @@ describe('UsagePageComponent', () => {
       range: 'custom',
       start: '2026-09-01',
       end: '2026-09-30',
+      granularity: null,
     });
+
+    fixture.componentInstance.onRangeChange({
+      preset: '30d',
+      start_date: '2026-09-01',
+      end_date: '2026-09-30',
+      granularity: 'week',
+    });
+
+    expect(navigate.calls.mostRecent().args[1]?.queryParams).toEqual(
+      jasmine.objectContaining({ range: '30d', granularity: 'week' })
+    );
   });
 });

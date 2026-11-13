@@ -1632,7 +1632,7 @@ export class AssetContentGridComponent implements OnInit {
   }
 
   private listSegment(): string {
-    return this.kind === 'tafsir' ? 'tafsirs' : 'translations';
+    return 'text-assets';
   }
 
   private colHeader(key: string): string {

@@ -26,7 +26,7 @@ export interface DashboardProfile {
   showReciterFilters: boolean;
 }
 
-const TEXT_CATEGORIES = new Set(['tafsir', 'translation', 'linguistic', 'tajweed']);
+const TEXT_CATEGORIES = new Set(['text', 'linguistic', 'tajweed']);
 const ALL_METRICS: UsageMetric[] = [
   'plays',
   'downloads',

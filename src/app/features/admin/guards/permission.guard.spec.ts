@@ -23,7 +23,7 @@ describe('permissionGuard', () => {
           useValue: {
             hasAnyPermission: () => false,
             hasAllPermissions: (codes: string[]) =>
-              codes.includes(PORTAL_PERMISSIONS.PORTAL_READ_TAFSIR),
+              codes.includes(PORTAL_PERMISSIONS.PORTAL_READ_TEXT_ASSET),
           },
         },
         {
@@ -34,7 +34,7 @@ describe('permissionGuard', () => {
       ],
     });
     const guard = permissionGuard({
-      permissions: [PORTAL_PERMISSIONS.PORTAL_READ_TAFSIR],
+      permissions: [PORTAL_PERMISSIONS.PORTAL_READ_TEXT_ASSET],
     });
     const result = await runGuard(
       TestBed.runInInjectionContext(() => guard(null as never, null as never))
@@ -61,7 +61,7 @@ describe('permissionGuard', () => {
       ],
     });
     const guard = permissionGuard({
-      permissions: [PORTAL_PERMISSIONS.PORTAL_READ_TAFSIR],
+      permissions: [PORTAL_PERMISSIONS.PORTAL_READ_TEXT_ASSET],
     });
     const result = await runGuard(
       TestBed.runInInjectionContext(() => guard(null as never, null as never))

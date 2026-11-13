@@ -23,8 +23,8 @@ import { Subject, debounceTime, distinctUntilChanged, forkJoin } from 'rxjs';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { ReciterListItem } from '../../../reciters/models/reciters.models';
 import { RecitersAdminService } from '../../../reciters/services/reciters.service';
-import { PublisherFilterItem } from '../../../tafsirs/models/tafsirs.models';
-import { PublishersFilterService } from '../../../tafsirs/services/publishers-filter.service';
+import { PublisherFilterItem } from '../../../text-assets/models/text-assets.models';
+import { PublishersFilterService } from '../../../text-assets/services/publishers-filter.service';
 import {
   MaddLevel,
   MeemBehavior,
