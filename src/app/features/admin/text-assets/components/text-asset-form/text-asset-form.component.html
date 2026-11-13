@@ -35,6 +35,32 @@
           <ng-icon name="lucideSquarePen" /> {{ 'ADMIN.TEXT_ASSETS.FORM.SECTION_NAME' | translate }}
         </h3>
         <div nz-row [nzGutter]="20">
+          <div nz-col [nzSpan]="24">
+            <nz-form-item>
+              <nz-form-label nzRequired>{{
+                'ADMIN.TEXT_ASSETS.FORM.TAGS' | translate
+              }}</nz-form-label>
+              <nz-form-control
+                [nzErrorTip]="'ADMIN.TEXT_ASSETS.FORM.ERR_TAGS' | translate"
+                [nzExtra]="
+                  isEditMode() ? undefined : ('ADMIN.TEXT_ASSETS.FORM.TAGS_HINT' | translate)
+                "
+              >
+                <nz-select
+                  formControlName="tags"
+                  nzMode="multiple"
+                  [nzPlaceHolder]="'ADMIN.TEXT_ASSETS.FORM.PLACEHOLDER_TAGS' | translate"
+                  [nzLoading]="tagsLoading()"
+                >
+                  @for (tag of tagOptions(); track tag.slug) {
+                    <nz-option [nzValue]="tag.slug" [nzLabel]="tag.name"></nz-option>
+                  }
+                </nz-select>
+              </nz-form-control>
+            </nz-form-item>
+          </div>
+        </div>
+        <div nz-row [nzGutter]="20">
           <div nz-col [nzSpan]="12" [nzXs]="24" [nzSm]="12">
             <nz-form-item>
               <nz-form-label nzRequired>{{
@@ -197,33 +223,6 @@
               }}</nz-form-label>
               <nz-form-control [nzErrorTip]="'ADMIN.TEXT_ASSETS.FORM.ERR_PUBLISHER' | translate">
                 <input nz-input [value]="publisherDisplayName()" disabled />
-              </nz-form-control>
-            </nz-form-item>
-          </div>
-        </div>
-
-        <div nz-row [nzGutter]="20">
-          <div nz-col [nzSpan]="24">
-            <nz-form-item>
-              <nz-form-label nzRequired>{{
-                'ADMIN.TEXT_ASSETS.FORM.TAGS' | translate
-              }}</nz-form-label>
-              <nz-form-control
-                [nzErrorTip]="'ADMIN.TEXT_ASSETS.FORM.ERR_TAGS' | translate"
-                [nzExtra]="
-                  isEditMode() ? undefined : ('ADMIN.TEXT_ASSETS.FORM.TAGS_HINT' | translate)
-                "
-              >
-                <nz-select
-                  formControlName="tags"
-                  nzMode="multiple"
-                  [nzPlaceHolder]="'ADMIN.TEXT_ASSETS.FORM.PLACEHOLDER_TAGS' | translate"
-                  [nzLoading]="tagsLoading()"
-                >
-                  @for (tag of tagOptions(); track tag.slug) {
-                    <nz-option [nzValue]="tag.slug" [nzLabel]="tag.name"></nz-option>
-                  }
-                </nz-select>
               </nz-form-control>
             </nz-form-item>
           </div>
