@@ -564,12 +564,12 @@
     "AYAH_TIMED_BADGE": "Ayah-timed",
     "OPEN_ACCESS_HINT": "No access request required for this resource.",
     "REQUEST_ACCESS_BUTTON": "Request Access",
-    "ACCESS_PENDING_HINT": "Your access request is being reviewed. You will be able to download once it is approved.",
-    "ACCESS_PENDING_TOAST": "Your access request is still pending approval.",
+    "ACCESS_PENDING_HINT": "Your access request is being reviewed. You will be able to use this resource once it is approved.",
     "ACCESS_REJECTED_HINT": "Access to this resource was not approved. Please contact Itqan for assistance.",
+    "ACCESS_APPROVED_HINT": "You have access to this resource.",
     "ACCESS_REJECTED_TOAST": "Access to this resource was not approved. Please contact Itqan for assistance.",
     "ACCESS_REQUEST_SUBMITTED_PENDING": "Your access request was submitted and is awaiting approval.",
-    "ACCESS_REQUEST_APPROVED": "Access approved. Starting download.",
+    "ACCESS_REQUEST_APPROVED": "Access approved.",
     "DETAILS_TITLE": "Asset Details",
     "ASSET_ID": "Asset ID",
     "DETAILS_DESC": "This is a placeholder for asset details.",
@@ -590,9 +590,15 @@
       "FORBIDDEN": "You do not have permission to submit this report",
       "LOGIN_REQUIRED": "Please log in to report an issue"
     },
-    "DOWNLOAD_LANGUAGE": "Download language",
+    "ASSET_LANGUAGE": "Language",
+    "GET_ASSET": {
+      "TITLE": "Use this asset",
+      "RECITATION_HINT": "Recitations are served through the public API. Use it to stream or fetch the audio in your app.",
+      "NOT_INSTALLABLE_HINT": "This asset can't be installed with the itqan CLI yet. Check the itqan CLI or the public API for how to get it.",
+      "CLI_LINK": "itqan CLI",
+      "API_DOCS_LINK": "Public API documentation"
+    },
     "ITQAN_CLI": {
-      "TITLE": "Install with the itqan CLI",
       "HINT": "Add it to your project with one command:",
       "COPY": "Copy command",
       "COPIED": "Command copied",
@@ -647,9 +653,6 @@
     "NO_ASSETS_AVAILABLE": "No assets available",
     "RESOURCE_ACTIONS": "Resource Actions",
     "USAGE_STANDARDS": "Usage Standards",
-    "DOWNLOAD_ORIGINAL_RESOURCE": "Download Original Resource",
-    "DOWNLOAD_RESOURCE": "Download Resource",
-    "DOWNLOADING": "Downloading...",
     "LICENSE_INFO": "License Information",
     "TECHNICAL_DETAILS": "Technical Details",
     "STATISTICS": "Statistics",
@@ -734,13 +737,6 @@
     "USAGE_LABEL": "How do you plan to use this resource?",
     "USAGE_PLACEHOLDER": "Select usage type",
     "PROCEED": "Proceed",
-    "LICENSE_TERMS_TITLE": "License Terms",
-    "LICENSE_INFO": "License Information",
-    "CONFIRM": "Confirm",
-    "SCROLL_HINT": "Please scroll down to read the full content",
-    "LICENSE_TERMS": {
-      "BODY": "License Agreement for {{name}}\n\nLicense type: {{license}}\n\nTerms and Conditions\n\n1. Grant of License\nBy downloading this resource, you agree to comply with the terms of the {{license}} license.\n\n2. Permitted Uses\n- You may use this resource for personal and commercial projects\n- You may modify and adapt the resource for your needs\n- You must provide appropriate attribution when required\n\n3. Restrictions\n- You may not redistribute original files without permission\n- You may not claim ownership of the original work\n- Commercial use may require additional permissions\n\n4. Warranties and Liability\nThis resource is provided \"as is\" without warranties of any kind.\nThe publisher is not liable for any damages resulting from use of this resource.\n\n5. Termination\nThis license terminates automatically if you violate any terms.\nUpon termination, you must cease all use and delete all copies.\n\nBy clicking \"Confirm\", you acknowledge that you have read and agree to these terms."
-    },
     "USAGE_OPTIONS": {
       "commercial": "Commercial",
       "non-commercial": "Non-Commercial"
