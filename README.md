@@ -1,9 +1,9 @@
-# Itqan CMS Frontend
+# Fanar Frontend
 
-> An open-source Quranic Content Management System frontend built with Angular 20. Itqan CMS
-> empowers developers and publishers by providing a comprehensive platform to access, manage, and
-> distribute Quranic assets with proper licensing. Built for the global Islamic tech community to
-> create innovative Quranic applications and services.
+> An open-source Quranic Content Management System frontend built with Angular 20. Fanar empowers
+> developers and publishers by providing a comprehensive platform to access, manage, and distribute
+> Quranic assets with proper licensing. Built for the global Islamic tech community to create
+> innovative Quranic applications and services.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Angular](https://img.shields.io/badge/Angular-20.3-red.svg)](https://angular.dev)
@@ -139,10 +139,10 @@ ng generate --help
 
 The application supports two deployment environments:
 
-| Environment    | Branch    | URL                           | Config File              |
-| -------------- | --------- | ----------------------------- | ------------------------ |
-| **Staging**    | `staging` | https://staging.cms.itqan.dev | `environment.staging.ts` |
-| **Production** | `master`  | https://cms.itqan.dev         | `environment.prod.ts`    |
+| Environment    | Branch    | URL                             | Config File              |
+| -------------- | --------- | ------------------------------- | ------------------------ |
+| **Staging**    | `staging` | https://staging.fanar.itqan.dev | `environment.staging.ts` |
+| **Production** | `master`  | https://fanar.itqan.dev         | `environment.prod.ts`    |
 
 ### Building for Different Environments
 
@@ -255,7 +255,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 🔗 Links
 
 - **Backend Repository**: [cms-backend](https://github.com/Itqan-community/cms-backend)
-- **Production Site**: [https://cms.itqan.dev](https://cms.itqan.dev)
+- **Production Site**: [https://fanar.itqan.dev](https://fanar.itqan.dev)
 - **Community Forum**: [community.itqan.dev](https://community.itqan.dev)
 - **Documentation**: [Angular Docs](https://angular.dev) | [Ng-Zorro Docs](https://ng.ant.design/)
 - **Issues**: [Report a Bug](https://github.com/Itqan-community/cms-frontend/issues)
