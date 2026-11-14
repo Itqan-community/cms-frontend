@@ -712,6 +712,28 @@ Release 2.0.0.
 
 ---
 
+## [2.1.0] - 2026-11-14
+
+Release 2.1.0.
+
+## Changes
+
+- fix(admin): address review on text assets and the portal updates
+- feat(admin): show the Publisher website channel only for publishers with a website
+- feat(usage): pick day, week or month buckets for usage charts
+- feat(admin): require an asset location on issue reports
+- feat(admin): pick a text asset's tags first so the AI identifier uses them
+- feat(admin): send the Arabic fields to the AI buttons and fill Arabic descriptions from the web
+- fix(theme): stop invalid fields turning white in the dark theme
+- feat(admin): show asset counts per type on the portal home
+- feat(admin): move asset analytics into their own tab
+- feat(gallery): replace the download button with a "Use this asset" card
+- fix(usage): cap tiles and charts per row on wide screens
+- fix(i18n): say "not uploaded yet" instead of "missing" for surahs
+- feat(admin)!: merge translations and tafsirs into text assets
+
+---
+
 ## [Unreleased]
 
 ### Added
