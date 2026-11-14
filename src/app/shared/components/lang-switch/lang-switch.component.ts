@@ -2,6 +2,7 @@ import { Component, inject, input } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
+import { LANG_QUERY_PARAM, persistUiLanguage } from '../../../core/i18n/ui-language';
 
 @Component({
   selector: 'app-lang-switch',
@@ -44,7 +45,14 @@ export class LangSwitchComponent {
   toggleLang() {
     const current = this.translate.getCurrentLang() || 'ar';
     const next = current === 'ar' ? 'en' : 'ar';
-    localStorage.setItem('lang', next);
+    persistUiLanguage(next);
+    // A `?lang=` URL renders that language, so point it at the new one instead of reloading.
+    const url = new URL(window.location.href);
+    if (url.searchParams.has(LANG_QUERY_PARAM)) {
+      url.searchParams.set(LANG_QUERY_PARAM, next);
+      window.location.assign(url.toString());
+      return;
+    }
     window.location.reload();
   }
 }

@@ -1,10 +1,11 @@
-import { Location } from '@angular/common';
+import { DOCUMENT, Location } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRouteSnapshot, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ar_EG, en_US, NzI18nService } from 'ng-zorro-antd/i18n';
 import { filter, firstValueFrom } from 'rxjs';
+import { persistUiLanguage, UI_LANGUAGE } from './core/i18n/ui-language';
 import { GoogleAnalyticsService } from './core/services/google-analytics.service';
 import { WebVitalsService } from './core/services/web-vitals.service';
 import { HeaderComponent } from './shared/components/header/header.component';
@@ -23,6 +24,8 @@ export class App {
   protected router = inject(Router);
   private readonly webVitalsService = inject(WebVitalsService);
   private readonly googleAnalyticsService = inject(GoogleAnalyticsService);
+  private readonly document = inject(DOCUMENT);
+  private readonly uiLanguage = inject(UI_LANGUAGE);
 
   protected readonly title = signal('ITQAN | إتقان');
   protected hideHeader = signal(false);
@@ -54,12 +57,12 @@ export class App {
       .pipe(filter((e) => e instanceof NavigationEnd))
       .subscribe(syncShellFromRoute);
 
-    const currentLang = localStorage.getItem('lang') || 'ar';
+    const currentLang = this.uiLanguage;
 
     const applyLanguageShell = (lang: string): void => {
       const isAr = lang === 'ar';
-      document.documentElement.setAttribute('lang', lang);
-      document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
+      this.document.documentElement.setAttribute('lang', lang);
+      this.document.documentElement.setAttribute('dir', isAr ? 'rtl' : 'ltr');
       this.nzI18n.setLocale(isAr ? ar_EG : en_US);
     };
     applyLanguageShell(currentLang);
@@ -75,13 +78,13 @@ export class App {
   }
 
   switchLang() {
-    const currentLang = localStorage.getItem('lang') || 'ar';
+    const currentLang = this.translate.getCurrentLang() || this.uiLanguage;
     const newLang = currentLang === 'ar' ? 'en' : 'ar';
-    localStorage.setItem('lang', newLang);
+    persistUiLanguage(newLang);
     void firstValueFrom(this.translate.use(newLang))
       .then(() => {
-        document.documentElement.setAttribute('lang', newLang);
-        document.documentElement.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr');
+        this.document.documentElement.setAttribute('lang', newLang);
+        this.document.documentElement.setAttribute('dir', newLang === 'ar' ? 'rtl' : 'ltr');
         this.setAppTitle();
       })
       .catch((err: unknown) => {
