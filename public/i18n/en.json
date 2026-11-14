@@ -2821,6 +2821,7 @@
       "plays": "Plays",
       "downloads": "Downloads",
       "installs": "CLI installs",
+      "updates": "CLI updates",
       "api_calls": "API calls",
       "views": "Page views",
       "requests": "Requests",
@@ -2866,6 +2867,7 @@
       "gallery_download": "Gallery downloads",
       "api_call": "API calls",
       "cli_install": "CLI installs",
+      "cli_update": "CLI updates",
       "view": "Page views"
     },
     "SPLIT_BY": {

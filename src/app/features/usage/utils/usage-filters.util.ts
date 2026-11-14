@@ -27,6 +27,7 @@ export const USAGE_METRICS: UsageMetric[] = [
   'plays',
   'downloads',
   'installs',
+  'updates',
   'api_calls',
   'views',
   'requests',

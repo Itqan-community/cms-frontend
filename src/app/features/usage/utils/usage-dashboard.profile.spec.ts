@@ -56,6 +56,8 @@ describe('dashboardProfile', () => {
     const profile = dashboardProfile('admin', 'text', 7);
     expect(profile.defaultMetric).toBe('downloads');
     expect(profile.headline).toContain('latest_version_share');
+    expect(profile.headline).toContain('updates');
+    expect(profile.metrics).toContain('updates');
     expect(profile.panels.map((panel) => panel.by)).toEqual([
       'version',
       'language',

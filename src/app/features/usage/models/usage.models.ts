@@ -9,6 +9,7 @@ export type UsageMetric =
   | 'plays'
   | 'downloads'
   | 'installs'
+  | 'updates'
   | 'api_calls'
   | 'requests'
   | 'bytes'
