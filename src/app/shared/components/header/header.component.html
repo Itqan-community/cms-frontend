@@ -65,8 +65,11 @@
   </div>
 </header>
 
-<app-mobile-menu
-  [(isOpen)]="isMobileMenuOpen"
-  [links]="navLinks()"
-  (logout)="onLogout()"
-></app-mobile-menu>
+<!-- Browser only: the closed drawer's placement timer would hold every server render for 300 ms -->
+@defer (on idle) {
+  <app-mobile-menu
+    [(isOpen)]="isMobileMenuOpen"
+    [links]="navLinks()"
+    (logout)="onLogout()"
+  ></app-mobile-menu>
+}

@@ -1,4 +1,5 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
+import { Injectable, computed, inject, signal } from '@angular/core';
 
 export type AppTheme = 'light' | 'dark';
 
@@ -20,7 +21,7 @@ declare global {
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   readonly theme = signal<AppTheme>(
-    document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
+    inject(DOCUMENT).documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'
   );
   readonly isDark = computed(() => this.theme() === 'dark');
 

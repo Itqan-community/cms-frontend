@@ -1,5 +1,3 @@
-const hostname = window.location.hostname;
-
 // Map domains/subdomains to publisher IDs (for PoC)
 // This can map full domains, subdomains, or patterns
 const publisherMap: Record<string, number> = {
@@ -17,6 +15,10 @@ const publisherMap: Record<string, number> = {
 const mainDomains = ['cms.itqan.dev', 'localhost'];
 
 export function getPublisher(): string | null {
+  // The SSR server renders the main CMS only; publisher sites run the client-only `publisher` build.
+  if (typeof window === 'undefined') return null;
+  const hostname = window.location.hostname;
+
   // Check if it's a main CMS domain
   if (mainDomains.includes(hostname)) return null;
 
