@@ -1558,6 +1558,7 @@
         "PUBLISHER": "Publisher",
         "RECITER": "Reciter",
         "QIRAAH": "Qiraah",
+        "TIMING": "Timing",
         "YEAR": "Year",
         "LICENSE": "License",
         "CREATED_AT": "Date Added",
@@ -1710,6 +1711,7 @@
         "COL_FILENAME": "Filename",
         "COL_DURATION": "Duration",
         "COL_SIZE": "Size",
+        "COL_TIMING": "Timing",
         "COL_PREVIEW": "Preview",
         "SURAH": "Surah",
         "RETRY": "Retry",
@@ -1761,6 +1763,13 @@
       },
       "TIMINGS": {
         "SECTION_TITLE": "Ayah timings",
+        "STATUS": {
+          "FULL": "Timed",
+          "PARTIAL": "Partial · {{percent}}%",
+          "NONE": "No timing",
+          "TOOLTIP": "{{timed}} of {{total}} ayahs timed",
+          "NO_TRACKS": "No tracks uploaded yet"
+        },
         "NO_FILE_YET": "No ayah timing file has been uploaded yet.",
         "CHOOSE_FILES": "Choose JSON files",
         "UPLOAD": "Upload timings",

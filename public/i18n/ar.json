@@ -1558,6 +1558,7 @@
         "PUBLISHER": "الناشر",
         "RECITER": "القارئ",
         "QIRAAH": "القراءة",
+        "TIMING": "التزمين",
         "YEAR": "السنة",
         "LICENSE": "الترخيص",
         "CREATED_AT": "تاريخ الإضافة",
@@ -1722,6 +1723,7 @@
         "COL_FILENAME": "اسم الملف",
         "COL_DURATION": "المدة",
         "COL_SIZE": "الحجم",
+        "COL_TIMING": "التزمين",
         "COL_PREVIEW": "معاينة",
         "SURAH": "سورة",
         "RETRY": "إعادة المحاولة",
@@ -1773,6 +1775,13 @@
       },
       "TIMINGS": {
         "SECTION_TITLE": "تزمين الآيات",
+        "STATUS": {
+          "FULL": "مزمنة",
+          "PARTIAL": "مزمنة جزئيًا · {{percent}}٪",
+          "NONE": "غير مزمنة",
+          "TOOLTIP": "{{timed}} من {{total}} آية مزمنة",
+          "NO_TRACKS": "لم تُرفع مقاطع بعد"
+        },
         "NO_FILE_YET": "لم يُرفع ملف تزمين للآيات بعد.",
         "CHOOSE_FILES": "اختر ملفات JSON",
         "UPLOAD": "رفع التزمين",

@@ -46,7 +46,12 @@ import type {
   RecitationTrackValidateUploadOut,
 } from '../../models/recitation-tracks.models';
 import type { RecitationTimingUploadOut } from '../../models/recitation-timings.models';
-import { MaddLevel, MeemBehavior, RecitationDetails } from '../../models/recitations.models';
+import {
+  MaddLevel,
+  MeemBehavior,
+  RecitationDetails,
+  type TimingCoverage,
+} from '../../models/recitations.models';
 import {
   RECITATION_TRACKS_CONCURRENCY_OPTIONS,
   RecitationTracksUploadOrchestratorService,
@@ -69,6 +74,7 @@ import {
   buildTimingUploadSuccessDescription,
 } from '../../utils/timing-upload-result.format';
 import { QualitySwitcherComponent } from '../quality-switcher/quality-switcher.component';
+import { TimingCoverageTagComponent } from '../timing-coverage-tag/timing-coverage-tag.component';
 import { AssetDetailTabsComponent } from '../../../components/asset-detail-tabs/asset-detail-tabs.component';
 import { AssetChannelTagsComponent } from '../../../components/asset-channels/asset-channels.component';
 
@@ -101,6 +107,7 @@ const MAX_MP3_FILES = 114;
     FormsModule,
     ReactiveFormsModule,
     QualitySwitcherComponent,
+    TimingCoverageTagComponent,
   ],
   templateUrl: './recitation-detail.component.html',
   styleUrl: './recitation-detail.component.less',
@@ -169,6 +176,17 @@ export class RecitationDetailComponent implements OnInit {
   readonly selectedQuality = computed(() => {
     const slug = this.selectedQualitySlug();
     return this.qualities().find((f) => f.slug === slug) ?? null;
+  });
+
+  /** Timing coverage of the selected quality; null until the qualities API returns it. */
+  readonly selectedQualityTimingCoverage = computed<TimingCoverage | null>(() => {
+    const quality = this.selectedQuality();
+    if (!quality?.timing_status) return null;
+    return {
+      timing_status: quality.timing_status,
+      timed_ayahs_count: quality.timed_ayahs_count ?? 0,
+      ayahs_count: quality.ayahs_count ?? 0,
+    };
   });
 
   readonly timingDownloadUrl = computed(() => {
