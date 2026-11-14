@@ -3,6 +3,8 @@
  * @see .temp/CMS Portal - Bulk Upload Recitations - Implementation Plan.md
  */
 
+import type { TimingCoverage } from './recitations.models';
+
 export type RecitationTrackValidateFileStatus = 'valid' | 'skip' | 'invalid';
 
 export type RecitationTrackValidateUploadStatus = 'valid' | 'invalid';
@@ -132,7 +134,7 @@ export interface RecitationTrackUploadRowState {
 /**
  * GET /portal/recitations/{recitation_slug}/recitation-tracks/ — single row (OpenAPI RecitationTrackOut).
  */
-export interface RecitationTrackOut {
+export interface RecitationTrackOut extends TimingCoverage {
   id: number;
   surah_number: number;
   audio_url: string | null;
@@ -150,7 +152,7 @@ export interface PagedRecitationTrackOut {
 }
 
 /** Normalized row for the admin tracks table + audio preview. */
-export interface RecitationSurahTrackListItem {
+export interface RecitationSurahTrackListItem extends TimingCoverage {
   id: number;
   asset_id: number;
   surah_number: number;

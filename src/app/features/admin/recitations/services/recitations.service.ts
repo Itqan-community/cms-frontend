@@ -283,6 +283,9 @@ export class RecitationsService {
       size_bytes: row.size_bytes,
       audio_url: row.audio_url ?? '',
       available_ayah_timings_url: row.available_ayah_timings_url ?? null,
+      timing_status: row.timing_status,
+      timed_ayahs_count: row.timed_ayahs_count,
+      ayahs_count: row.ayahs_count,
     };
   }
 }
