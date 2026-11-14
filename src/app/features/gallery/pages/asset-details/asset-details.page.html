@@ -93,18 +93,18 @@
               <a routerLink="/content-standards">
                 <button nz-button nzBlock class="action-button">
                   <ng-icon name="lucideFileText" />
-                  {{ 'UI.USAGE_STANDARDS' | translate }}
+                  <span>{{ 'UI.USAGE_STANDARDS' | translate }}</span>
                 </button>
               </a>
               <a [routerLink]="['/license', asset()!.license]">
                 <button nz-button nzBlock class="action-button">
                   <ng-icon name="lucideFileText" />
-                  {{ 'GALLERY.VIEW_LICENSE' | translate }}
+                  <span>{{ 'GALLERY.VIEW_LICENSE' | translate }}</span>
                 </button>
               </a>
               <button nz-button nzBlock class="action-button" (click)="openReportIssueModal()">
                 <ng-icon name="lucideAlertTriangle" />
-                {{ 'GALLERY.REPORT_ISSUE.BUTTON' | translate }}
+                <span>{{ 'GALLERY.REPORT_ISSUE.BUTTON' | translate }}</span>
               </button>
               @if (showRequestAccess()) {
                 <button
@@ -115,7 +115,7 @@
                   (click)="requestAccess()"
                   [disabled]="isRequestAccessBlocked()"
                 >
-                  {{ 'GALLERY.REQUEST_ACCESS_BUTTON' | translate }}
+                  <span>{{ 'GALLERY.REQUEST_ACCESS_BUTTON' | translate }}</span>
                   <ng-icon name="lucideKeyRound" />
                 </button>
               }

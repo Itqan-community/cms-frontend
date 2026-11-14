@@ -67,7 +67,7 @@ import { Asset } from '../../models/assets.model';
             }
             <a nz-button nzSize="large" routerLink="/gallery/asset/{{ asset().id }}" class="w-full">
               <ng-icon name="lucideEye" />
-              {{ 'GALLERY.VIEW_DETAILS' | translate }}
+              <span>{{ 'GALLERY.VIEW_DETAILS' | translate }}</span>
             </a>
           </div>
         </div>
