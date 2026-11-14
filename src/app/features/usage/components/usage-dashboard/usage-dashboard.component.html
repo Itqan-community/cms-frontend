@@ -206,7 +206,7 @@
     @for (view of panels(); track view.panel.by) {
       <app-usage-chart
         [class.usage-dashboard__panel--wide]="view.panel.chart === 'heatmap'"
-        [title]="'USAGE.PANELS.' + view.panel.by | translate"
+        [title]="view.panel.titleKey ?? 'USAGE.PANELS.' + view.panel.by | translate"
         [options]="view.options"
         [rows]="view.rows"
         [loading]="view.state.loading"
@@ -229,6 +229,10 @@
     @if (assetId() === null) {
       <app-recitation-catalog [scope]="portal" [filters]="filters()" />
     }
+  }
+
+  @if (profile().text && portalScope(); as portal) {
+    <app-text-insights [scope]="portal" [filters]="filters()" [granularity]="seriesGranularity()" />
   }
 
   <footer class="usage-dashboard__footer">

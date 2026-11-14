@@ -54,12 +54,48 @@ describe('dashboardProfile', () => {
     expect(profile.defaultMetric).toBe('api_calls');
   });
 
-  it('text assets lead with downloads, installs, versions and languages', () => {
+  it('text assets lead with CLI installs and updates and show public API calls per surah', () => {
     const profile = dashboardProfile('admin', 'text', 7);
+    expect(profile.text).toBeTrue();
+    expect(profile.defaultMetric).toBe('installs');
+    expect(profile.headline).toEqual([
+      'installs',
+      'updates',
+      'public_api_calls',
+      'views',
+      'latest_version_share',
+    ]);
+    expect(profile.metrics).not.toContain('plays');
+    const surah = profile.panels.find((panel) => panel.by === 'surah');
+    expect(surah?.metric).toBe('public_api_calls');
+    expect(surah?.limit).toBe(114);
+    expect(profile.panels.map((panel) => panel.by)).toEqual([
+      'surah',
+      'version',
+      'channel',
+      'country',
+    ]);
+  });
+
+  it('the text-asset overview ranks assets and keeps the text reports, but not for developers', () => {
+    const profile = dashboardProfile('publisher', 'text', null);
+    expect(profile.text).toBeTrue();
+    expect(profile.recitation).toBeFalse();
+    expect(profile.splits).toContain('asset');
+    expect(profile.panels.map((panel) => panel.by)).toEqual([
+      'asset',
+      'surah',
+      'language',
+      'country',
+    ]);
+    expect(dashboardProfile('developer', 'text', null).text).toBeFalse();
+  });
+
+  it('linguistic and tajweed assets keep the file dashboard with versions and languages', () => {
+    const profile = dashboardProfile('admin', 'linguistic', 7);
+    expect(profile.text).toBeFalse();
     expect(profile.defaultMetric).toBe('downloads');
-    expect(profile.headline).toContain('latest_version_share');
     expect(profile.headline).toContain('updates');
-    expect(profile.metrics).toContain('updates');
     expect(profile.panels.map((panel) => panel.by)).toEqual([
       'version',
       'language',

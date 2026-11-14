@@ -31,6 +31,7 @@ export const USAGE_METRICS = Object.keys({
   installs: true,
   updates: true,
   api_calls: true,
+  public_api_calls: true,
   views: true,
   requests: true,
   bytes: true,

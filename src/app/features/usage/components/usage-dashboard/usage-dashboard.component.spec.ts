@@ -32,6 +32,7 @@ const SUMMARY: UsageSummary = {
     updates: metric(1),
     usage: metric(1600),
     api_calls: metric(9),
+    public_api_calls: metric(7),
     requests: metric(40),
     bytes: metric(10),
     unique_listeners: metric(80),
@@ -100,6 +101,8 @@ describe('UsageDashboardComponent', () => {
       'firstSeen',
       'searchTerms',
       'recitationCoverage',
+      'cliVersions',
+      'accessRequests',
     ]);
     api.listeners.and.returnValue(of(LISTENERS));
     api.cohorts.and.returnValue(of(COHORTS));
@@ -110,6 +113,17 @@ describe('UsageDashboardComponent', () => {
     api.timeseries.and.returnValue(of(TIMESERIES));
     api.breakdown.and.returnValue(of(BREAKDOWN));
     api.exportCsv.and.returnValue(of(new Blob(['period\n'])));
+    api.cliVersions.and.returnValue(of({ items: [], data_updated_at: null }));
+    api.accessRequests.and.returnValue(
+      of({
+        total: { value: 0, previous: 0, change: null },
+        statuses: { pending: 0, approved: 0, rejected: 0 },
+        granularity: 'day',
+        partial_buckets: [],
+        points: [],
+        assets: [],
+      })
+    );
     queryParams = new BehaviorSubject(convertToParamMap({ range: '7d', channel: 'cli' }));
     router = jasmine.createSpyObj<Router>('Router', ['navigate']);
     router.navigate.and.returnValue(Promise.resolve(true));
@@ -245,7 +259,11 @@ describe('UsageDashboardComponent', () => {
     fixture.detectChanges();
 
     expect(api.summary.calls.mostRecent().args[1].asset_id).toBe(7);
-    expect(api.timeseries.calls.mostRecent().args[2].metric).toBe('downloads');
+    expect(api.timeseries.calls.mostRecent().args[2].metric).toBe('installs');
+    // The surah panel always shows public API calls; the text reports load for the asset.
+    const surah = api.breakdown.calls.allArgs().find((args) => args[2].by === 'surah');
+    expect(surah?.[2].metric).toBe('public_api_calls');
+    expect(api.cliVersions.calls.mostRecent().args[1].asset_id).toBe(7);
 
     fixture.componentInstance.setPreset('90d');
     expect(router.navigate).not.toHaveBeenCalled();

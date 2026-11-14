@@ -11,6 +11,7 @@ export type UsageMetric =
   | 'installs'
   | 'updates'
   | 'api_calls'
+  | 'public_api_calls'
   | 'usage'
   | 'requests'
   | 'bytes'
@@ -266,4 +267,35 @@ export interface CoverageOptions {
   riwayah_id?: number | null;
   incomplete_only?: boolean;
   limit?: number;
+}
+
+// -- Text-asset reports ---------------------------------------------------------------------------
+
+export interface CliVersionItem {
+  asset_id: number | null;
+  asset: string | null;
+  version_id: number;
+  /** Null when the version no longer exists. */
+  version: string | null;
+  language: string | null;
+  /** First installs and repeats of the same version. */
+  installs: number;
+  /** Installs of another version than the installation had before. */
+  updates: number;
+}
+
+export interface UsageCliVersions {
+  items: CliVersionItem[];
+  data_updated_at: string | null;
+}
+
+export interface UsageAccessRequests {
+  total: MetricValue;
+  /** Current status of the requests made in the range. */
+  statuses: { pending: number; approved: number; rejected: number };
+  granularity: UsageSeriesGranularity;
+  partial_buckets: string[];
+  points: UsagePoint[];
+  /** The assets with the most requests (top 10). */
+  assets: { key: string; label: string | null; value: number }[];
 }
