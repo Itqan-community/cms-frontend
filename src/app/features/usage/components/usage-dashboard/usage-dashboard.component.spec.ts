@@ -153,6 +153,14 @@ describe('UsageDashboardComponent', () => {
     expect(api.breakdown.calls.count()).toBe(5);
   });
 
+  it('opens a category from the URL on the default metric of that category', () => {
+    queryParams.next(convertToParamMap({ range: '7d', category: 'text' }));
+    fixture.detectChanges();
+
+    expect(api.summary.calls.mostRecent().args[1].category).toBe('text');
+    expect(api.timeseries.calls.mostRecent().args[2].metric).toBe('installs');
+  });
+
   it('renders headline values with their change, the disclaimers and the update time', () => {
     fixture.detectChanges();
 

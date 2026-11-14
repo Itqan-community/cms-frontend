@@ -682,7 +682,10 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
       raw[key] = params.get(key) ?? '';
     }
     const parsed = usageStateFromParams(raw);
-    const state = raw['metric'] ? parsed : { ...parsed, metric: this.profile().defaultMetric };
+    const category =
+      this.assetId() != null ? this.category() : (this.category() ?? parsed.filters.category);
+    const defaultMetric = dashboardProfile(this.scope(), category, this.assetId()).defaultMetric;
+    const state = raw['metric'] ? parsed : { ...parsed, metric: defaultMetric };
     const previous = this.state();
     this.state.set(state);
     if (this.loaded && this.onlyGranularityChanged(previous, state)) {
