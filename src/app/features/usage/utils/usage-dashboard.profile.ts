@@ -28,6 +28,7 @@ export interface DashboardProfile {
 
 const TEXT_CATEGORIES = new Set(['text', 'linguistic', 'tajweed']);
 const ALL_METRICS: UsageMetric[] = [
+  'usage',
   'plays',
   'downloads',
   'installs',
@@ -152,10 +153,12 @@ export function dashboardProfile(
       panels: [bar('app'), bar('endpoint'), bar('asset'), bar('country')],
     };
   }
+  // Every channel at once; the recitations tab covers listening.
   return {
     ...base,
     showCategoryFilter: true,
     headline: [
+      'usage',
       'plays',
       'downloads',
       'installs',
@@ -164,7 +167,7 @@ export function dashboardProfile(
       'integrating_apps',
     ],
     metrics: ALL_METRICS,
-    defaultMetric: 'plays',
+    defaultMetric: 'usage',
     splits: ['channel', 'platform', 'country', 'asset', 'app', 'kind'],
     panels: [donut('channel'), donut('platform'), bar('country'), bar('asset'), bar('app')],
   };

@@ -23,20 +23,22 @@ const ID_PARAMS = [
   ['riwayah', 'riwayah_id'],
 ] as const;
 
-export const USAGE_METRICS: UsageMetric[] = [
-  'plays',
-  'downloads',
-  'installs',
-  'updates',
-  'api_calls',
-  'views',
-  'requests',
-  'bytes',
-  'unique_listeners',
-  'unique_downloaders',
-  'unique_end_users',
-  'listening_seconds',
-];
+/** Metrics a URL may name; the `Record` makes a new `UsageMetric` fail to compile until listed. */
+export const USAGE_METRICS = Object.keys({
+  usage: true,
+  plays: true,
+  downloads: true,
+  installs: true,
+  updates: true,
+  api_calls: true,
+  views: true,
+  requests: true,
+  bytes: true,
+  unique_listeners: true,
+  unique_downloaders: true,
+  unique_end_users: true,
+  listening_seconds: true,
+} satisfies Record<UsageMetric, true>) as UsageMetric[];
 
 /** Dashboard state kept in the URL so reloads and links keep the same view. */
 export interface UsageViewState {

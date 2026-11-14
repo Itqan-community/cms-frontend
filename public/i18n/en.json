@@ -2825,6 +2825,7 @@
       "downloads": "Downloads",
       "installs": "CLI installs",
       "updates": "CLI updates",
+      "usage": "All usage",
       "api_calls": "API calls",
       "views": "Page views",
       "requests": "Requests",
