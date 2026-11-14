@@ -1,9 +1,11 @@
 import { dashboardProfile, itemLabel } from './usage-dashboard.profile';
 
 describe('dashboardProfile', () => {
-  it('portal dashboards lead with plays and offer category filters and export', () => {
+  it('portal dashboards lead with usage from every channel and offer category filters and export', () => {
     const profile = dashboardProfile('publisher', null, null);
-    expect(profile.defaultMetric).toBe('plays');
+    expect(profile.defaultMetric).toBe('usage');
+    expect(profile.headline[0]).toBe('usage');
+    expect(profile.metrics).toContain('plays');
     expect(profile.headline).toContain('integrating_apps');
     expect(profile.showCategoryFilter).toBeTrue();
     expect(profile.showExport).toBeTrue();
