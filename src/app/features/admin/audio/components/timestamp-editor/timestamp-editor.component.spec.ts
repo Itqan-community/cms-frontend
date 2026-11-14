@@ -22,6 +22,9 @@ const TRACK: RecitationSurahTrackListItem = {
   size_bytes: 1_024,
   audio_url: 'https://example.com/001.mp3',
   available_ayah_timings_url: 'https://example.com/timings/001.json',
+  timing_status: 'full',
+  timed_ayahs_count: 7,
+  ayahs_count: 7,
 };
 
 /** Only the fields the editor reads off the recitation: the asset id and the quality ids. */

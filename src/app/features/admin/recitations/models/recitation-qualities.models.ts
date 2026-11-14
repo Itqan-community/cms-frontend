@@ -1,5 +1,7 @@
+import type { TimingCoverage } from './recitations.models';
+
 /** GET /portal/recitations/{slug}/qualities/ — OpenAPI QualityOut (portal qualities router). */
-export interface RecitationQualityOut {
+export interface RecitationQualityOut extends Partial<TimingCoverage> {
   id: number;
   name: string;
   name_ar: string | null;
