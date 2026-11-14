@@ -19,11 +19,12 @@ import {
   UsageFirstSeen,
   UsageListeners,
   UsageScope,
+  UsageSeriesGranularity,
   UsageSummary,
 } from '../../models/usage.models';
 import { surahLabel } from '../../../admin/models/quran-metadata';
 import { UsageApiService } from '../../services/usage-api.service';
-import { buildListenersOptions, formatPeriod } from '../../utils/usage-chart-options';
+import { bucketLabels, buildListenersOptions, formatPeriod } from '../../utils/usage-chart-options';
 import { itemLabel } from '../../utils/usage-dashboard.profile';
 import { formatCompact, granularityFor } from '../../utils/usage-filters.util';
 import { usageLang } from '../../utils/usage-lang';
@@ -57,6 +58,8 @@ export class RecitationInsightsComponent implements OnChanges {
   readonly filters = input.required<UsageFilters>();
   readonly summary = input<UsageSummary | null>(null);
   readonly hijri = input(false);
+  /** The dashboard's bucket size; by default the one for the range length. */
+  readonly granularity = input<UsageSeriesGranularity | null>(null);
 
   private readonly api = inject(UsageApiService);
   private readonly translate = inject(TranslateService);
@@ -73,10 +76,35 @@ export class RecitationInsightsComponent implements OnChanges {
   readonly t = (key: string, params?: Record<string, unknown>): string =>
     this.translate.instant(key, params) as string;
 
-  readonly granularity = computed(() => {
+  readonly bucketSize = computed<UsageSeriesGranularity>(() => {
+    const picked = this.granularity();
+    if (picked) {
+      return picked;
+    }
     const { start_date, end_date } = this.filters();
     const granularity = granularityFor(start_date, end_date);
     return granularity === 'hour' ? 'day' : granularity;
+  });
+
+  readonly listenersBuckets = computed(() => {
+    const data = this.listeners().data;
+    const { start_date, end_date } = this.filters();
+    return bucketLabels(
+      (data?.points ?? []).map((point) => point.t),
+      data?.granularity ?? 'day',
+      {
+        lang: this.lang(),
+        hijri: this.hijri(),
+        partial: data?.partial_buckets,
+        // The report starts at the retention cutoff when the range starts before it.
+        range: { start_date: data?.clamped_start ?? start_date, end_date },
+        texts: {
+          weekOf: (date) => this.t('USAGE.GRANULARITY.WEEK_OF', { date }),
+          partialWeek: (from, to) => this.t('USAGE.GRANULARITY.PARTIAL_WEEK', { from, to }),
+          partialMonth: (from, to) => this.t('USAGE.GRANULARITY.PARTIAL_MONTH', { from, to }),
+        },
+      }
+    );
   });
 
   readonly cohortsAllowed = computed(() => {
@@ -104,12 +132,13 @@ export class RecitationInsightsComponent implements OnChanges {
         cumulative: this.t('USAGE.RECITATION.CUMULATIVE'),
       },
       activeLabel: (counts) => this.t('USAGE.RECITATION.ACTIVE', counts),
+      buckets: this.listenersBuckets(),
     });
   });
 
   readonly listenersRows = computed<UsageTableRow[]>(() =>
-    (this.listeners().data?.points ?? []).map((point) => ({
-      label: formatPeriod(point.t, this.lang(), this.hijri()),
+    (this.listeners().data?.points ?? []).map((point, index) => ({
+      label: this.listenersBuckets().titles[index] ?? point.t,
       value: [point.new, point.returning, point.cumulative]
         .map((value) => formatCompact(value, this.lang()))
         .join(' · '),
@@ -198,15 +227,16 @@ export class RecitationInsightsComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['filters'] || changes['scope']) {
       this.load();
+    } else if (changes['granularity']) {
+      // Only the listener chart has buckets.
+      this.loadListeners();
     }
   }
 
   load(): void {
     const scope = this.scope();
     const filters = this.filters();
-    this.track('listeners', this.api.listeners(scope, filters, this.granularity()), (value) =>
-      this.listeners.set(value)
-    );
+    this.loadListeners();
     if (this.cohortsAllowed()) {
       this.track('cohorts', this.api.cohorts(scope, filters), (value) => this.cohorts.set(value));
     } else {
@@ -234,6 +264,14 @@ export class RecitationInsightsComponent implements OnChanges {
           })
       );
     }
+  }
+
+  private loadListeners(): void {
+    this.track(
+      'listeners',
+      this.api.listeners(this.scope(), this.filters(), this.bucketSize()),
+      (value) => this.listeners.set(value)
+    );
   }
 
   private firstSeenRows(data: UsageFirstSeen | null) {

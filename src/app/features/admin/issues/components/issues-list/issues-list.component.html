@@ -48,6 +48,7 @@
           <tr>
             <th nzWidth="72px">{{ 'ADMIN.ISSUES.COLUMNS.ID' | translate }}</th>
             <th nzWidth="160px">{{ 'ADMIN.ISSUES.COLUMNS.ASSET' | translate }}</th>
+            <th nzWidth="150px">{{ 'ADMIN.ISSUES.COLUMNS.LOCATION' | translate }}</th>
             <th nzWidth="240px">{{ 'ADMIN.ISSUES.COLUMNS.DESCRIPTION' | translate }}</th>
             <th nzWidth="120px">{{ 'ADMIN.ISSUES.COLUMNS.STATUS' | translate }}</th>
             <th nzWidth="180px">{{ 'ADMIN.ISSUES.COLUMNS.REPORTER' | translate }}</th>
@@ -71,6 +72,7 @@
                   {{ row.asset_name }}
                 </a>
               </td>
+              <td>{{ contextLabel(row) }}</td>
               <td class="admin-list-desc">{{ truncate(row.description) }}</td>
               <td>
                 <nz-tag [nzColor]="statusTagColor(row.status)">{{

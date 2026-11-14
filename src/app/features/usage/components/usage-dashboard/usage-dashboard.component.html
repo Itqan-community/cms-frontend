@@ -171,6 +171,15 @@
         }
       </nz-select>
     }
+    @if (granularityChoices().length > 1) {
+      <nz-segmented
+        nzSize="small"
+        [attr.aria-label]="'USAGE.GRANULARITY.LABEL' | translate"
+        [nzOptions]="granularityChoices()"
+        [ngModel]="granularity()"
+        (ngModelChange)="setGranularity($event)"
+      ></nz-segmented>
+    }
     @if (profile().recitation) {
       <nz-segmented
         nzSize="small"
@@ -183,6 +192,7 @@
 
   <app-usage-chart
     [title]="'USAGE.TREND' | translate: { metric: ('USAGE.METRICS.' + state().metric | translate) }"
+    [hint]="trendHint()"
     [options]="trendOptions()"
     [rows]="trendRows()"
     [loading]="trend().loading"
@@ -214,6 +224,7 @@
       [filters]="filters()"
       [summary]="summary().data"
       [hijri]="hijri()"
+      [granularity]="seriesGranularity()"
     />
     @if (assetId() === null) {
       <app-recitation-catalog [scope]="portal" [filters]="filters()" />

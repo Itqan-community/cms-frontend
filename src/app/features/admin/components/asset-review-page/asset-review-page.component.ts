@@ -20,19 +20,17 @@ import { AssetReviewGridComponent } from '../asset-review-grid/asset-review-grid
 export class AssetReviewPageComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
 
-  readonly kind = signal<AssetVersionParentKind>('translation');
+  readonly kind = signal<AssetVersionParentKind>('text');
   readonly slug = signal<string>('');
   /** From a version's "pending review" link: open on that language and version. */
   readonly language = signal<string | null>(null);
   readonly version = signal<number | null>(null);
 
-  get listSegment(): string {
-    return this.kind() === 'tafsir' ? 'tafsirs' : 'translations';
-  }
+  readonly listSegment = 'text-assets';
 
   ngOnInit(): void {
     const dataKind = this.route.snapshot.data['kind'] as AssetVersionParentKind | undefined;
-    this.kind.set(dataKind ?? 'translation');
+    this.kind.set(dataKind ?? 'text');
     this.slug.set(this.route.snapshot.params['slug'] ?? '');
     const query = this.route.snapshot.queryParamMap;
     this.language.set(query.get('language'));

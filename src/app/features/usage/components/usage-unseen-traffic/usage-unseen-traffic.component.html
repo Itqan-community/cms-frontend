@@ -27,7 +27,8 @@
   }
 
   <app-usage-chart
-    [title]="'USAGE.UNSEEN.PER_DAY' | translate"
+    [title]="'USAGE.UNSEEN.PER_' + (data()?.granularity ?? granularity()).toUpperCase() | translate"
+    [hint]="hint() | translate"
     [options]="chartOptions()"
     [rows]="chartRows()"
     [loading]="loading()"

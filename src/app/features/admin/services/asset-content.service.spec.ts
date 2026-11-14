@@ -8,7 +8,7 @@ import { AssetContentService } from './asset-content.service';
 describe('AssetContentService columns', () => {
   let service: AssetContentService;
   let httpMock: HttpTestingController;
-  const base = `${environment.ADMIN_API_BASE_URL}/content/tafsirs/ayah-qa/columns/`;
+  const base = `${environment.ADMIN_API_BASE_URL}/content/text-assets/ayah-qa/columns/`;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -23,7 +23,7 @@ describe('AssetContentService columns', () => {
   });
 
   it('lists the columns', () => {
-    service.listColumns('tafsir', 'ayah-qa').subscribe();
+    service.listColumns('text', 'ayah-qa').subscribe();
     const req = httpMock.expectOne(base);
     expect(req.request.method).toBe('GET');
     req.flush([]);
@@ -31,7 +31,7 @@ describe('AssetContentService columns', () => {
 
   it('creates a column with its key and labels', () => {
     service
-      .createColumn('tafsir', 'ayah-qa', { key: 'answer', label_en: 'Answer', label_ar: 'الجواب' })
+      .createColumn('text', 'ayah-qa', { key: 'answer', label_en: 'Answer', label_ar: 'الجواب' })
       .subscribe();
     const req = httpMock.expectOne(base);
     expect(req.request.method).toBe('POST');
@@ -40,7 +40,7 @@ describe('AssetContentService columns', () => {
   });
 
   it('updates a column by its encoded key', () => {
-    service.updateColumn('tafsir', 'ayah-qa', 'answer', { label_ar: 'ج' }).subscribe();
+    service.updateColumn('text', 'ayah-qa', 'answer', { label_ar: 'ج' }).subscribe();
     const req = httpMock.expectOne(`${base}answer/`);
     expect(req.request.method).toBe('PATCH');
     expect(req.request.body).toEqual({ label_ar: 'ج' });
@@ -48,7 +48,7 @@ describe('AssetContentService columns', () => {
   });
 
   it('reorders columns', () => {
-    service.reorderColumns('tafsir', 'ayah-qa', ['answer', 'question']).subscribe();
+    service.reorderColumns('text', 'ayah-qa', ['answer', 'question']).subscribe();
     const req = httpMock.expectOne(`${base}order/`);
     expect(req.request.method).toBe('PUT');
     expect(req.request.body).toEqual({ keys: ['answer', 'question'] });
@@ -56,7 +56,7 @@ describe('AssetContentService columns', () => {
   });
 
   it('deletes a column', () => {
-    service.deleteColumn('tafsir', 'ayah-qa', 'answer').subscribe();
+    service.deleteColumn('text', 'ayah-qa', 'answer').subscribe();
     const req = httpMock.expectOne(`${base}answer/`);
     expect(req.request.method).toBe('DELETE');
     req.flush(null);
@@ -66,7 +66,7 @@ describe('AssetContentService columns', () => {
 describe('AssetContentService groups', () => {
   let service: AssetContentService;
   let httpMock: HttpTestingController;
-  const versionBase = `${environment.ADMIN_API_BASE_URL}/content/tafsirs/grouped/versions/7/`;
+  const versionBase = `${environment.ADMIN_API_BASE_URL}/content/text-assets/grouped/versions/7/`;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -83,7 +83,7 @@ describe('AssetContentService groups', () => {
   it('adds a group with its range and first text', () => {
     service
       .addGroup(
-        'tafsir',
+        'text',
         'grouped',
         7,
         { surah: 2, ayah: 1 },
@@ -103,7 +103,7 @@ describe('AssetContentService groups', () => {
 
   it('moves a group by its unit id', () => {
     service
-      .moveGroup('tafsir', 'grouped', 7, 2000005, { surah: 2, ayah: 2 }, { surah: 2, ayah: 6 })
+      .moveGroup('text', 'grouped', 7, 2000005, { surah: 2, ayah: 2 }, { surah: 2, ayah: 6 })
       .subscribe();
     const req = httpMock.expectOne(`${versionBase}groups/2000005/`);
     expect(req.request.method).toBe('PUT');
@@ -112,14 +112,14 @@ describe('AssetContentService groups', () => {
   });
 
   it('appends the next group', () => {
-    service.appendGroup('tafsir', 'grouped', 7).subscribe();
+    service.appendGroup('text', 'grouped', 7).subscribe();
     const req = httpMock.expectOne(`${versionBase}groups/next/`);
     expect(req.request.method).toBe('POST');
     req.flush([]);
   });
 
   it('grows or shrinks a group by one step', () => {
-    service.extendGroup('tafsir', 'grouped', 7, 2000005, -1).subscribe();
+    service.extendGroup('text', 'grouped', 7, 2000005, -1).subscribe();
     const req = httpMock.expectOne(`${versionBase}groups/2000005/extend/`);
     expect(req.request.method).toBe('POST');
     expect(req.request.body).toEqual({ by: -1 });
@@ -127,7 +127,7 @@ describe('AssetContentService groups', () => {
   });
 
   it('deletes a group by its unit id', () => {
-    service.deleteGroup('tafsir', 'grouped', 7, 2000005).subscribe();
+    service.deleteGroup('text', 'grouped', 7, 2000005).subscribe();
     const req = httpMock.expectOne(`${versionBase}groups/2000005/`);
     expect(req.request.method).toBe('DELETE');
     req.flush(null);

@@ -11,6 +11,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 import { IssueReportOut, IssueReportStatus } from '../../models/issues.models';
 import { IssuesService } from '../../services/issues.service';
+import { formatIssueContext } from '../../utils/issue-context.util';
 
 @Component({
   selector: 'app-issue-detail',
@@ -53,6 +54,11 @@ export class IssueDetailComponent implements OnInit {
   });
 
   private issueId!: number;
+
+  /** "Al-Baqarah 2:255", "Page 12", …; empty when the report has no location. */
+  contextLabel(issue: IssueReportOut): string {
+    return formatIssueContext(issue.context, this.translate);
+  }
 
   ngOnInit(): void {
     const raw = this.route.snapshot.params['id'];

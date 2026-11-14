@@ -128,7 +128,7 @@ describe('AssetContentGridComponent groups', () => {
 
   function grid(): AssetContentGridComponent {
     const fixture = TestBed.createComponent(AssetContentGridComponent);
-    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('kind', 'text');
     fixture.componentRef.setInput('slug', 'grouped');
     fixture.detectChanges();
     const component = fixture.componentInstance;
@@ -221,7 +221,7 @@ describe('AssetContentGridComponent groups', () => {
 
     // Assert
     expect(service.addGroup).toHaveBeenCalledWith(
-      'tafsir',
+      'text',
       'grouped',
       7,
       { surah: 1, ayah: 1 },
@@ -266,7 +266,7 @@ describe('AssetContentGridComponent groups', () => {
     await options.nzOnOk();
 
     // Assert
-    expect(service.deleteGroup).toHaveBeenCalledWith('tafsir', 'grouped', 7, 1000003);
+    expect(service.deleteGroup).toHaveBeenCalledWith('text', 'grouped', 7, 1000003);
     expect(gridApi.refreshInfiniteCache).toHaveBeenCalled();
   });
 
@@ -433,7 +433,7 @@ describe('AssetContentGridComponent groups', () => {
     await component.extendGroupBy(row(), 1);
 
     // Assert
-    expect(service.extendGroup).toHaveBeenCalledWith('tafsir', 'grouped', 7, 1000003, 1);
+    expect(service.extendGroup).toHaveBeenCalledWith('text', 'grouped', 7, 1000003, 1);
     expect(gridApi.refreshInfiniteCache).toHaveBeenCalled();
   });
 
@@ -447,7 +447,7 @@ describe('AssetContentGridComponent groups', () => {
 
     // Assert
     expect(service.moveGroup).toHaveBeenCalledWith(
-      'tafsir',
+      'text',
       'grouped',
       7,
       1000003,
@@ -482,7 +482,7 @@ describe('AssetContentGridComponent groups', () => {
     await Promise.resolve();
 
     // Assert
-    expect(service.appendGroup).toHaveBeenCalledWith('tafsir', 'grouped', 7);
+    expect(service.appendGroup).toHaveBeenCalledWith('text', 'grouped', 7);
     expect(gridApi.ensureIndexVisible).toHaveBeenCalledWith(119, 'bottom');
     expect(gridApi.setFocusedCell).toHaveBeenCalledWith(119, 'cell__text');
   });

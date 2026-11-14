@@ -71,6 +71,15 @@
         </h3>
         <p class="admin-desc-text">{{ issue()!.description }}</p>
       </div>
+      @if (contextLabel(issue()!); as location) {
+        <div class="admin-desc-col">
+          <h3 class="admin-desc-title">
+            <ng-icon name="lucideMapPin" />
+            {{ 'ISSUE_CONTEXT.TITLE' | translate }}
+          </h3>
+          <p class="admin-desc-text">{{ location }}</p>
+        </div>
+      }
     </div>
 
     <div class="admin-back">

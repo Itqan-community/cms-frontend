@@ -1,5 +1,5 @@
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
-import { Component, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Component, computed, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
@@ -30,18 +30,23 @@ import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/br
 import { ImageCarouselComponent } from '../../../../shared/components/image-carousel/image-carousel.component';
 import { LicenseTagComponent } from '../../../../shared/components/license-tag/license-tag.component';
 import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
-import {
-  fallbackKeyForHttpStatus,
-  resolveApiErrorMessage,
-} from '../../../../shared/utils/api-error-resolver.util';
+import { resolveApiErrorMessage } from '../../../../shared/utils/api-error-resolver.util';
+import { IssueContextFieldsComponent } from '../../../admin/issues/components/issue-context-fields/issue-context-fields.component';
 import { IssuesService } from '../../../admin/issues/services/issues.service';
+import {
+  createIssueContextForm,
+  issueContextFromForm,
+  issueContextKind,
+  markIssueContextTouched,
+  setIssueContextRequired,
+} from '../../../admin/issues/utils/issue-context.util';
 import { localizedLanguageName } from '../../../admin/utils/iso-639.util';
 import { AssetDetails } from '../../models/assets.model';
+import { assetKindIcon } from '../../../../core/enums/categories.enum';
 import { AssetFileStructureComponent } from '../../components/asset-file-structure/asset-file-structure.component';
 import { AssetFontPreviewComponent } from '../../components/asset-font-preview/asset-font-preview.component';
 import { AssetRecitationPreviewComponent } from '../../components/asset-recitation-preview/asset-recitation-preview.component';
-import { ItqanAddCommandComponent } from '../../components/itqan-add-command/itqan-add-command.component';
-import { AssetLicenseAcceptanceService } from '../../services/asset-license-acceptance.service';
+import { AssetGetCtaComponent } from '../../components/asset-get-cta/asset-get-cta.component';
 import { preferredLanguage } from '../../utils/preferred-language.util';
 import { AssetsService } from '../../services/assets.service';
 import { AssetUsageCountsComponent } from '../../../usage/components/asset-usage-counts/asset-usage-counts.component';
@@ -70,14 +75,14 @@ import { AssetUsageCountsComponent } from '../../../usage/components/asset-usage
     NzSelectModule,
     ReactiveFormsModule,
     FormsModule,
-    ItqanAddCommandComponent,
+    AssetGetCtaComponent,
+    IssueContextFieldsComponent,
   ],
   templateUrl: './asset-details.page.html',
   styleUrl: './asset-details.page.less',
 })
 export class AssetDetailsPage implements OnInit, OnDestroy {
   private readonly assetsService = inject(AssetsService);
-  private readonly licenseAcceptance = inject(AssetLicenseAcceptanceService);
   private readonly issuesService = inject(IssuesService);
   private readonly route = inject(ActivatedRoute);
   private readonly authService = inject(AuthService);
@@ -97,11 +102,8 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
   errorState = signal<boolean>(false);
   notFound = signal<boolean>(false);
   isModalVisible = signal<boolean>(false);
-  isLicenseModalVisible = signal<boolean>(false);
-  canConfirmLicense = signal<boolean>(false);
   isSubmittingRequest = signal<boolean>(false);
-  isDownloading = signal<boolean>(false);
-  /** Language chosen for download and the file-structure preview (null = source/default).
+  /** Language chosen for the install command and the previews (null = source/default).
    *  Starts at the UI language when the asset offers it and follows UI language
    *  changes until the user picks one. */
   selectedLanguage = signal<string | null>(null);
@@ -111,6 +113,9 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
 
   accessRequestForm: FormGroup;
   reportIssueForm: FormGroup;
+  /** Where in the asset the reported issue is; fields follow the asset's category. */
+  readonly reportIssueContextForm = createIssueContextForm();
+  readonly reportIssueContextKind = computed(() => issueContextKind(this.asset()?.category));
 
   usageOptions = [{ value: 'commercial' }, { value: 'non-commercial' }];
 
@@ -134,7 +139,7 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
     });
   }
 
-  /** The user chose a language (download select or preview switch): keep it. */
+  /** The user chose a language (language select or preview switch): keep it. */
   pickLanguage(language: string | null): void {
     this.languagePicked = true;
     this.selectedLanguage.set(language);
@@ -199,21 +204,17 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
     this.getAssetDetails(this.id);
   }
 
-  getCategoryIcon(category: string): string {
-    switch (category) {
-      case 'tafsir':
-        return 'lucideFileText';
-      case 'translation':
-        return 'lucideLanguages';
-      case 'recitation':
-        return 'lucideMic';
-      case 'font':
-        return 'lucideType';
-      case 'program':
-        return 'lucideLayers';
-      default:
-        return 'lucideFile';
-    }
+  getCategoryIcon(asset: AssetDetails): string {
+    return assetKindIcon(asset.category, asset.tags);
+  }
+
+  /** A text asset is labelled by its tags (Tafsir, Translation); the rest by category. */
+  categoryLabel(asset: AssetDetails): string {
+    if (asset.tags?.length)
+      return asset.tags
+        .map((tag) => tag.name)
+        .join(this.translate.currentLang === 'ar' ? '، ' : ', ');
+    return this.translate.instant('CATEGORIES.' + asset.category);
   }
 
   /** Language name localized to the current UI language (e.g. fr → "الفرنسية"). */
@@ -221,40 +222,17 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
     return localizedLanguageName(code, this.translate.currentLang || 'en');
   }
 
-  downloadResource() {
-    if (!this.authService.isLoggedIn()) {
-      void this.router.navigate(['/account/login'], {
-        queryParams: { next: this.router.url },
-      });
-      return;
-    }
-
+  /** "Request access" shows until the user has access; open-access assets need none. */
+  showRequestAccess(): boolean {
     const asset = this.asset();
-    if (!asset?.id) {
-      return;
+    if (!asset || asset.is_open_access) {
+      return false;
     }
-
-    const status = asset.access_status ?? null;
-
-    if (status === 'not_requested') {
-      this.openAccessRequestModal();
-      return;
-    }
-
-    if (status === 'pending') {
-      this.message.info(this.translate.instant('GALLERY.ACCESS_PENDING_TOAST'));
-      return;
-    }
-
-    if (status === 'rejected') {
-      this.message.warning(this.translate.instant('GALLERY.ACCESS_REJECTED_TOAST'));
-      return;
-    }
-
-    this.proceedToDownloadAfterAccess();
+    return !this.authService.isLoggedIn() || asset.access_status !== 'approved';
   }
 
-  isDownloadBlocked(): boolean {
+  /** A pending or rejected request can't be sent again; the hint below says why. */
+  isRequestAccessBlocked(): boolean {
     if (!this.authService.isLoggedIn()) {
       return false;
     }
@@ -263,28 +241,19 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
     return status === 'pending' || status === 'rejected';
   }
 
-  isRequestAccessAction(): boolean {
+  requestAccess() {
     if (!this.authService.isLoggedIn()) {
-      return false;
+      void this.router.navigate(['/account/login'], {
+        queryParams: { next: this.router.url },
+      });
+      return;
     }
 
-    return (this.asset()?.access_status ?? null) === 'not_requested';
-  }
-
-  primaryActionLabelKey(): string {
-    if (this.isDownloading()) {
-      return 'UI.DOWNLOADING';
+    // The backend sends null only for open access or anonymous users; treat a missing status as
+    // not requested so the enabled button never does nothing.
+    if ((this.asset()?.access_status ?? 'not_requested') === 'not_requested') {
+      this.openAccessRequestModal();
     }
-
-    if (this.isRequestAccessAction()) {
-      return 'GALLERY.REQUEST_ACCESS_BUTTON';
-    }
-
-    return 'UI.DOWNLOAD_RESOURCE';
-  }
-
-  primaryActionIcon(): string {
-    return this.isRequestAccessAction() ? 'lucideKeyRound' : 'lucideDownloadCloud';
   }
 
   private refreshAssetDetails(): Observable<AssetDetails> {
@@ -299,7 +268,6 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
   private handleAccessStatusAfterRequest(status: AssetDetails['access_status']): void {
     if (status === 'approved' || status == null) {
       this.message.success(this.translate.instant('GALLERY.ACCESS_REQUEST_APPROVED'));
-      this.proceedToDownloadAfterAccess();
       return;
     }
 
@@ -316,21 +284,6 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
     this.message.error(this.translate.instant('ACCESS_REQUEST.ERRORS.SUBMISSION_FAILED'));
   }
 
-  private proceedToDownloadAfterAccess(): void {
-    const asset = this.asset();
-    if (!asset?.id) {
-      return;
-    }
-
-    const userId = this.authService.currentUser()?.id;
-    if (userId && this.licenseAcceptance.hasAccepted(userId)) {
-      this.downloadAsset(asset.id);
-      return;
-    }
-
-    this.openLicenseModal();
-  }
-
   openReportIssueModal() {
     if (!this.authService.isLoggedIn()) {
       void this.router.navigate(['/account/login'], {
@@ -339,12 +292,20 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
       return;
     }
 
+    this.showReportIssueModal();
+  }
+
+  /** Open the modal with the location fields required for this asset's category. */
+  private showReportIssueModal(): void {
+    this.reportIssueContextForm.reset();
+    setIssueContextRequired(this.reportIssueContextKind(), this.reportIssueContextForm);
     this.isReportIssueModalVisible.set(true);
   }
 
   closeReportIssueModal() {
     this.isReportIssueModalVisible.set(false);
     this.reportIssueForm.reset();
+    this.reportIssueContextForm.reset();
   }
 
   handleReportIssueModalCancel() {
@@ -352,8 +313,9 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
   }
 
   handleReportIssueModalOk() {
-    if (!this.reportIssueForm.valid) {
+    if (!this.reportIssueForm.valid || this.reportIssueContextForm.invalid) {
       this.reportIssueForm.get('description')?.markAsTouched();
+      markIssueContextTouched(this.reportIssueContextForm);
       return;
     }
 
@@ -363,10 +325,14 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
     }
 
     const description = this.reportIssueForm.value.description ?? '';
+    const context = issueContextFromForm(
+      this.reportIssueContextKind(),
+      this.reportIssueContextForm
+    );
     this.isSubmittingReportIssue.set(true);
 
     this.issuesService
-      .create({ asset_id: asset.id, description })
+      .create({ asset_id: asset.id, description, context })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -384,9 +350,9 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
             this.message.error(this.translate.instant('GALLERY.REPORT_ISSUE.FORBIDDEN'));
             return;
           }
-          const errorKey =
+          const fallbackKey =
             error.status === 0 ? 'ERRORS.NETWORK_ERROR' : 'GALLERY.REPORT_ISSUE.ERROR';
-          this.message.error(this.translate.instant(errorKey));
+          this.message.error(resolveApiErrorMessage(error, { fallbackKey }, this.translate));
         },
       });
   }
@@ -397,7 +363,7 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
       return;
     }
 
-    this.isReportIssueModalVisible.set(true);
+    this.showReportIssueModal();
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { reportIssue: null },
@@ -483,142 +449,6 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
         this.accessRequestForm.get(key)?.markAsTouched();
       });
     }
-  }
-
-  openLicenseModal() {
-    this.isLicenseModalVisible.set(true);
-    this.canConfirmLicense.set(false);
-  }
-
-  closeLicenseModal() {
-    this.isLicenseModalVisible.set(false);
-    this.canConfirmLicense.set(false);
-  }
-
-  handleLicenseScroll(event: Event) {
-    const element = event.target as HTMLElement;
-    const scrollTop = element.scrollTop;
-    const scrollHeight = element.scrollHeight;
-    const clientHeight = element.clientHeight;
-
-    // Check if scrolled to bottom (with 5px threshold)
-    if (scrollTop + clientHeight >= scrollHeight - 5) {
-      this.canConfirmLicense.set(true);
-    }
-  }
-
-  get showScrollHint(): boolean {
-    return !this.canConfirmLicense();
-  }
-
-  handleLicenseConfirm() {
-    const userId = this.authService.currentUser()?.id;
-    if (userId) {
-      this.licenseAcceptance.recordAcceptance(userId);
-    }
-    this.closeLicenseModal();
-    const asset = this.asset();
-    if (asset?.id) {
-      this.downloadAsset(asset.id);
-    }
-  }
-
-  downloadOriginalResource() {
-    if (!this.authService.isLoggedIn()) {
-      void this.router.navigate(['/account/login'], {
-        queryParams: { next: this.router.url },
-      });
-      return;
-    }
-
-    const asset = this.asset();
-    if (!asset?.resource?.id) {
-      return;
-    }
-
-    this.performResourceDownload(asset.resource.id);
-  }
-
-  private downloadAsset(assetId: number): void {
-    this.isDownloading.set(true);
-    // Step 1: Get the download_url from backend (scoped to the chosen language, if any)
-    const language = this.selectedLanguage();
-    const params = language ? new HttpParams().set('language', language) : undefined;
-    this.http
-      .get<{ download_url: string; filename?: string }>(
-        `${environment.API_BASE_URL}/assets/${assetId}/download/`,
-        { params }
-      )
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.isDownloading.set(false);
-          const downloadUrl = response.download_url;
-          // The backend names the file {name}-{language}-{version}; fall back to the URL path.
-          const filename = response.filename || this.extractFilenameFromPath(downloadUrl);
-          // Step 2: Download the actual file
-          this.downloadFileFromUrl(downloadUrl, filename);
-        },
-        error: (error) => {
-          this.isDownloading.set(false);
-          const errorMessage = resolveApiErrorMessage(
-            error,
-            { fallbackKey: fallbackKeyForHttpStatus(error.status) },
-            this.translate
-          );
-          this.message.error(errorMessage);
-        },
-      });
-  }
-
-  private performResourceDownload(resourceId: number): void {
-    this.isDownloading.set(true);
-    // Step 1: Get the download_url from backend
-    this.http
-      .get<{
-        download_url: string;
-      }>(`${environment.API_BASE_URL}/resources/${resourceId}/download/`)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.isDownloading.set(false);
-          const downloadUrl = response.download_url;
-          // Extract filename from URL path
-          const filename = this.extractFilenameFromPath(downloadUrl);
-          // Step 2: Download the actual file
-          this.downloadFileFromUrl(downloadUrl, filename);
-        },
-        error: (error) => {
-          this.isDownloading.set(false);
-          const errorMessage = resolveApiErrorMessage(
-            error,
-            { fallbackKey: fallbackKeyForHttpStatus(error.status) },
-            this.translate
-          );
-          this.message.error(errorMessage);
-        },
-      });
-  }
-
-  private downloadFileFromUrl(fileUrl: string, filename: string): void {
-    // Create link and trigger download
-    const link = document.createElement('a');
-    link.href = fileUrl;
-    link.download = filename;
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-
-    // Remove the link after a short delay
-    setTimeout(() => {
-      document.body.removeChild(link);
-    }, 100);
-  }
-
-  private extractFilenameFromPath(path: string): string {
-    // Extract filename from a full path (e.g., "media/uploads/resources/15/versions/100/tr-ab-en_hilali.csv" -> "tr-ab-en_hilali.csv")
-    const parts = path.split('/');
-    return parts[parts.length - 1] || path;
   }
 
   getLicenseType(license: string): Licenses {

@@ -3,7 +3,9 @@ import {
   formatChange,
   formatCompact,
   granularityFor,
+  granularityOptions,
   presetRange,
+  resolveGranularity,
   usageStateFromParams,
   usageStateToParams,
 } from './usage-filters.util';
@@ -24,12 +26,20 @@ describe('usage-filters.util', () => {
     expect(state.metric).toBe('plays');
   });
 
+  it('maps saved tafsir and translation category links to text', () => {
+    expect(usageStateFromParams({ category: 'tafsir' }, today).filters['category']).toBe('text');
+    expect(usageStateFromParams({ category: 'translation' }, today).filters['category']).toBe(
+      'text'
+    );
+    expect(usageStateFromParams({ category: 'mushaf' }, today).filters['category']).toBe('mushaf');
+  });
+
   it('round-trips a custom range and filters through query params', () => {
     const params = {
       range: 'custom',
       start: '2026-01-01',
       end: '2026-01-31',
-      category: 'tafsir',
+      category: 'text',
       channel: 'cli',
       app: '4',
       metric: 'downloads',
@@ -39,11 +49,39 @@ describe('usage-filters.util', () => {
     expect(state.filters).toEqual({
       start_date: '2026-01-01',
       end_date: '2026-01-31',
-      category: 'tafsir',
+      category: 'text',
       channel: 'cli',
       app: 4,
     });
     expect(usageStateToParams(state)).toEqual(params);
+  });
+
+  it('granularityOptions hides bucket sizes that make no sense for the range', () => {
+    expect(granularityOptions('2026-10-12', '2026-10-18')).toEqual(['hour', 'day']);
+    expect(granularityOptions('2026-09-19', '2026-10-18')).toEqual(['day', 'week']);
+    expect(granularityOptions('2026-07-21', '2026-10-18')).toEqual(['day', 'week', 'month']);
+    expect(granularityOptions('2025-10-19', '2026-10-18')).toEqual(['week', 'month']);
+    expect(granularityOptions('2026-10-01', '2026-10-10')).toEqual(['day']);
+  });
+
+  it('resolveGranularity keeps a picked size the range offers and falls back to the default', () => {
+    expect(resolveGranularity('week', '2026-09-19', '2026-10-18')).toBe('week');
+    expect(resolveGranularity('day', '2025-10-19', '2026-10-18')).toBe('week');
+    expect(resolveGranularity(null, '2025-01-01', '2026-10-18')).toBe('month');
+  });
+
+  it('keeps the picked granularity in the URL and drops one the range does not offer', () => {
+    const weekly = usageStateFromParams({ range: '30d', granularity: 'week' }, today);
+    expect(weekly.granularity).toBe('week');
+    expect(usageStateToParams(weekly)['granularity']).toBe('week');
+
+    expect(
+      usageStateFromParams({ range: '12m', granularity: 'day' }, today).granularity
+    ).toBeNull();
+    expect(
+      usageStateFromParams({ range: '30d', granularity: 'year' }, today).granularity
+    ).toBeNull();
+    expect(usageStateToParams(usageStateFromParams({}, today))['granularity']).toBeUndefined();
   });
 
   it('comparisonRange shifts to the same Gregorian dates or the same Hijri dates a year earlier', () => {

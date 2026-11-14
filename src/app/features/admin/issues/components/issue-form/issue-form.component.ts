@@ -1,4 +1,4 @@
-import { Component, DestroyRef, OnInit, inject, signal } from '@angular/core';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -13,16 +13,26 @@ import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { Subject, debounceTime, distinctUntilChanged, finalize, switchMap } from 'rxjs';
 import { Categories } from '../../../../../core/enums/categories.enum';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
+import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
 import { Asset } from '../../../../gallery/models/assets.model';
 import { AssetsService } from '../../../../gallery/services/assets.service';
 import { AdminTenantService } from '../../../services/admin-tenant.service';
 import { IssueReportStatus } from '../../models/issues.models';
 import { IssuesService } from '../../services/issues.service';
+import {
+  createIssueContextForm,
+  issueContextFromForm,
+  issueContextKind,
+  markIssueContextTouched,
+  setIssueContextRequired,
+} from '../../utils/issue-context.util';
+import { IssueContextFieldsComponent } from '../issue-context-fields/issue-context-fields.component';
 
 @Component({
   selector: 'app-issue-form',
   standalone: true,
   imports: [
+    IssueContextFieldsComponent,
     ReactiveFormsModule,
     RouterLink,
     NzButtonModule,
@@ -68,6 +78,19 @@ export class IssueFormComponent implements OnInit {
     status: [null as IssueReportStatus | null],
   });
 
+  /** Where in the asset the issue is; its fields follow the selected asset's category. */
+  readonly contextForm = createIssueContextForm();
+  /** The selected asset's category (edit mode: the report's asset). */
+  readonly assetCategory = signal<string | null>(null);
+  /** The selected asset's page count, when it follows a mushaf layout. */
+  readonly assetPageCount = signal<number | null>(null);
+  readonly contextKind = computed(() => issueContextKind(this.assetCategory()));
+  /**
+   * The location is required, except when editing a report from before locations existed:
+   * it may get one, but can still change status or description without.
+   */
+  readonly contextRequired = signal(true);
+
   private editId: number | null = null;
 
   ngOnInit(): void {
@@ -99,8 +122,21 @@ export class IssueFormComponent implements OnInit {
       });
 
     if (!this.isEditMode()) {
+      // Re-validation on a blocked submit re-emits the same id: only a real change resets the location.
+      this.form.controls.asset_id.valueChanges
+        .pipe(distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
+        .subscribe((id) => this.onAssetSelected(id));
       this.assetSearch.next('');
     }
+  }
+
+  /** A different asset means different location fields and rules, so the old location is dropped. */
+  private onAssetSelected(id: number | null): void {
+    const asset = this.assetOptions().find((a) => a.id === id) ?? null;
+    this.assetCategory.set(asset?.category ?? null);
+    this.assetPageCount.set(asset?.mushaf_layout?.page_count ?? null);
+    this.contextForm.reset();
+    setIssueContextRequired(this.contextKind(), this.contextForm);
   }
 
   /**
@@ -120,11 +156,12 @@ export class IssueFormComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.form.invalid) {
+    if (this.form.invalid || this.contextForm.invalid) {
       Object.values(this.form.controls).forEach((c) => {
         c.markAsDirty();
-        c.updateValueAndValidity({ onlySelf: true });
+        c.updateValueAndValidity({ onlySelf: true, emitEvent: false });
       });
+      markIssueContextTouched(this.contextForm);
       return;
     }
 
@@ -133,8 +170,14 @@ export class IssueFormComponent implements OnInit {
     if (this.isEditMode() && this.editId != null) {
       const description = this.form.get('description')?.value ?? '';
       const status = this.form.get('status')?.value ?? null;
+      const context = issueContextFromForm(this.contextKind(), this.contextForm);
+      // An older report left without a location keeps it that way (context omitted).
+      const body =
+        context == null && !this.contextRequired()
+          ? { description, status }
+          : { description, status, context };
       this.issuesService
-        .patch(this.editId, { description, status })
+        .patch(this.editId, body)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: (res) => {
@@ -142,9 +185,15 @@ export class IssueFormComponent implements OnInit {
             this.submitting.set(false);
             void this.router.navigate(['/admin/issues', res.id]);
           },
-          error: () => {
+          error: (err: unknown) => {
             this.submitting.set(false);
-            this.message.error(this.translate.instant('ADMIN.ISSUES.MESSAGES.UPDATE_ERROR'));
+            this.message.error(
+              resolveApiErrorMessage(
+                err,
+                { fallbackKey: 'ADMIN.ISSUES.MESSAGES.UPDATE_ERROR' },
+                this.translate
+              )
+            );
           },
         });
       return;
@@ -157,8 +206,9 @@ export class IssueFormComponent implements OnInit {
       return;
     }
 
+    const context = issueContextFromForm(this.contextKind(), this.contextForm);
     this.issuesService
-      .create({ asset_id, description })
+      .create({ asset_id, description, context })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -166,9 +216,15 @@ export class IssueFormComponent implements OnInit {
           this.submitting.set(false);
           void this.router.navigate(['/admin/issues', res.id]);
         },
-        error: () => {
+        error: (err: unknown) => {
           this.submitting.set(false);
-          this.message.error(this.translate.instant('ADMIN.ISSUES.MESSAGES.CREATE_ERROR'));
+          this.message.error(
+            resolveApiErrorMessage(
+              err,
+              { fallbackKey: 'ADMIN.ISSUES.MESSAGES.CREATE_ERROR' },
+              this.translate
+            )
+          );
         },
       });
   }
@@ -186,10 +242,20 @@ export class IssueFormComponent implements OnInit {
             description: issue.description,
             status: issue.status,
           });
+          this.assetCategory.set(issue.asset_category);
+          this.contextForm.reset({
+            surah: issue.context?.surah ?? null,
+            ayah: issue.context?.ayah ?? null,
+            page: issue.context?.page ?? null,
+            glyph: issue.context?.glyph ?? '',
+          });
+          this.contextRequired.set(issue.context != null);
+          setIssueContextRequired(this.contextKind(), this.contextForm, this.contextRequired());
           this.assetOptions.set([
             {
               id: issue.asset_id,
-              category: Categories.TAFSIR,
+              category: Categories.TEXT,
+              tags: [],
               name: issue.asset_name,
               description: '',
               publisher: { id: 0, name: '' },

@@ -110,13 +110,9 @@ const VERSION_PERMISSIONS: Record<
   AssetVersionParentKind,
   { mutate: PortalPermissionCode; delete: PortalPermissionCode }
 > = {
-  tafsir: {
-    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_TAFSIR,
-    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_TAFSIR,
-  },
-  translation: {
-    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_TRANSLATION,
-    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_TRANSLATION,
+  text: {
+    mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_TEXT_ASSET,
+    delete: PORTAL_PERMISSIONS.PORTAL_DELETE_TEXT_ASSET,
   },
   mushaf: {
     mutate: PORTAL_PERMISSIONS.PORTAL_UPDATE_MUSHAF,
@@ -186,7 +182,7 @@ export class AssetVersionsManagerComponent implements OnInit {
   @Input({ required: true }) kind!: AssetVersionParentKind;
   /** Slug from route (tafsir or translation). */
   @Input({ required: true }) slug!: string;
-  /** i18n prefix for panel strings, e.g. ADMIN.TAFSIRS.DETAIL.VERSIONS */
+  /** i18n prefix for panel strings, e.g. ADMIN.TEXT_ASSETS.DETAIL.VERSIONS */
   @Input({ required: true }) i18nPrefix!: string;
   /** i18n key for section heading (existing VERSIONS_TITLE). */
   @Input({ required: true }) sectionTitleKey!: string;
@@ -319,14 +315,14 @@ export class AssetVersionsManagerComponent implements OnInit {
     summary: ['', [Validators.required]],
   });
 
-  /** Admin route segment of the parent asset list (e.g. `tafsirs`). */
+  /** Admin route segment of the parent asset list (e.g. `text-assets`). */
   listSegment(): string {
-    return this.kind === 'tafsir' ? 'tafsirs' : 'translations';
+    return this.kind === 'text' ? 'text-assets' : `${this.kind}s`;
   }
 
-  /** Only translations and tafsirs carry per-language content/versions. */
+  /** Only text assets carry per-language content/versions. */
   supportsLanguages(): boolean {
-    return this.kind === 'translation' || this.kind === 'tafsir';
+    return this.kind === 'text';
   }
 
   /** Translations, tafsirs, mushafs and fonts: `name` is a server-issued version number
@@ -443,17 +439,12 @@ export class AssetVersionsManagerComponent implements OnInit {
     this.loadList();
   }
 
-  /** Uploading, replacing a file and restoring change the text. Translations and
-   *  tafsirs have their own content permission; other kinds use their update one. */
+  /** Uploading, replacing a file and restoring change the text. Text assets have
+   *  their own content permission; other kinds use their update one. */
   canEditContent(): boolean {
-    switch (this.kind) {
-      case 'tafsir':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_EDIT_TAFSIR_CONTENT);
-      case 'translation':
-        return this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_EDIT_TRANSLATION_CONTENT);
-      default:
-        return this.canMutateVersions();
-    }
+    return this.kind === 'text'
+      ? this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_EDIT_TEXT_ASSET_CONTENT)
+      : this.canMutateVersions();
   }
 
   openCreateModal(): void {

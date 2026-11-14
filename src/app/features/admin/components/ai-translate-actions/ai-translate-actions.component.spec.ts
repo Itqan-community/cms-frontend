@@ -45,11 +45,11 @@ describe('AiTranslateActionsComponent', () => {
     fixture = TestBed.createComponent(AiTranslateActionsComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('form', form);
-    fixture.componentRef.setInput('category', 'tafsir');
+    fixture.componentRef.setInput('category', 'text');
     fixture.detectChanges();
   });
 
-  it('should send the empty english fields and the slug inputs in one request', () => {
+  it('should send the empty english fields, the arabic context and the slug inputs in one request', () => {
     api.translate.and.returnValue(
       ok({ fields: { name: 'Tafsir Al-Saadi' }, slug: 'tafsir-saadi' })
     );
@@ -58,10 +58,12 @@ describe('AiTranslateActionsComponent', () => {
 
     expect(api.translate).toHaveBeenCalledOnceWith({
       mode: 'translate',
-      category: 'tafsir',
+      category: 'text',
       fields: { name: 'تفسير السعدي' },
       context: {},
       slug_for: { name_ar: 'تفسير السعدي', name_en: '', language: 'ar' },
+      // The English description is typed, so its Arabic only helps name the asset.
+      reference: { description: 'وصف' },
     });
     expect(form.value.name_en).toBe('Tafsir Al-Saadi');
     expect(form.controls['name_en'].dirty).toBeTrue();
@@ -143,26 +145,90 @@ describe('AiTranslateActionsComponent', () => {
     expect(message.info).toHaveBeenCalledOnceWith('ADMIN.AI_TRANSLATE.NOTHING_TO_FILL');
   });
 
-  it('should request empty description fields and the arabic name in web mode', () => {
+  it('should request empty description fields and send the arabic name as context in web mode', () => {
     form.patchValue({ name_en: 'Already named', description_en: '' });
     api.translate.and.returnValue(
       ok({
         fields: { name: 'Ignored', description: 'From web', long_description: 'Long' },
+        fields_ar: { long_description: 'شرح من الويب' },
         sources: ['https://a.example'],
       })
     );
 
     component.run('web');
 
-    expect(api.translate.calls.mostRecent().args[0].fields).toEqual({
-      name: 'تفسير السعدي',
-      description: 'وصف',
-      long_description: '',
-    });
+    const request = api.translate.calls.mostRecent().args[0];
+    expect(request.fields).toEqual({ description: 'وصف', long_description: '' });
+    expect(request.reference).toEqual({ name: 'تفسير السعدي' });
+    expect(request.fill_arabic).toEqual(['long_description']);
     expect(form.value.name_en).toBe('Already named');
     expect(form.value.description_en).toBe('From web');
     expect(form.value.long_description_en).toBe('Long');
+    expect(form.value.long_description_ar).toBe('شرح من الويب');
+    expect(form.controls['long_description_ar'].dirty).toBeTrue();
     expect(component.sources()).toEqual(['https://a.example']);
+  });
+
+  it('should fill empty arabic description fields in web mode even when english is complete', () => {
+    form.removeControl('slug');
+    form.patchValue({ name_en: 'Tafsir Al-Saadi', long_description_en: 'Typed long' });
+    api.translate.and.returnValue(ok({ fields_ar: { long_description: 'شرح من الويب' } }));
+
+    component.run('web');
+
+    expect(api.translate).toHaveBeenCalledOnceWith({
+      mode: 'web',
+      category: 'text',
+      fields: {},
+      context: {},
+      reference: { name: 'تفسير السعدي', description: 'وصف' },
+      fill_arabic: ['long_description'],
+    });
+    expect(form.value.long_description_ar).toBe('شرح من الويب');
+    expect(form.value.long_description_en).toBe('Typed long');
+  });
+
+  it('should not overwrite arabic typed while the web request was running', () => {
+    const response = new Subject<AiTranslateResponse>();
+    api.translate.and.returnValue(response.asObservable());
+
+    component.run('web');
+    form.patchValue({ long_description_ar: 'كتبه المشرف' });
+    response.next({
+      fields: {},
+      fields_ar: { description: 'لا يُستخدم', long_description: 'من الويب' },
+      sources: [],
+      slug: null,
+    });
+    response.complete();
+
+    expect(form.value.long_description_ar).toBe('كتبه المشرف');
+    // A filled Arabic field is never sent for writing, and is never replaced.
+    expect(form.value.description_ar).toBe('وصف');
+  });
+
+  it('should never ask for arabic fields when translating', () => {
+    api.translate.and.returnValue(ok({}));
+
+    component.run('translate');
+
+    expect(api.translate.calls.mostRecent().args[0].fill_arabic).toBeUndefined();
+  });
+
+  it('should say nothing to fill in web mode when arabic and english descriptions are all filled', () => {
+    const translate = TestBed.inject(TranslateService);
+    spyOn(translate, 'instant').and.callFake((key: string | string[]) => String(key));
+    form.removeControl('slug');
+    form.patchValue({
+      name_en: 'Done',
+      long_description_ar: 'شرح',
+      long_description_en: 'Long',
+    });
+
+    component.run('web');
+
+    expect(api.translate).not.toHaveBeenCalled();
+    expect(message.info).toHaveBeenCalledOnceWith('ADMIN.AI_TRANSLATE.NOTHING_TO_FILL');
   });
 
   it('should show decoded, readable source links', () => {
@@ -184,6 +250,40 @@ describe('AiTranslateActionsComponent', () => {
     expect(api.translate.calls.mostRecent().args[0].slug_for).toEqual(
       jasmine.objectContaining({ reciter_id: 7, riwayah_id: 3, year: 1440 })
     );
+  });
+
+  describe('text asset identity', () => {
+    beforeEach(() => {
+      form.addControl('tags', new FormControl<string[]>(['translation']));
+      fixture.detectChanges();
+    });
+
+    it('should clear the generated identifier when the first tag changes', () => {
+      api.translate.and.returnValue(ok({ slug: 'translation-en-sahih' }));
+      component.run('translate');
+
+      form.patchValue({ tags: ['tafsir', 'translation'] });
+
+      expect(form.value.slug).toBe('');
+    });
+
+    it('should clear the generated identifier when the language changes', () => {
+      api.translate.and.returnValue(ok({ slug: 'translation-en-sahih' }));
+      component.run('translate');
+
+      form.patchValue({ language: 'en' });
+
+      expect(form.value.slug).toBe('');
+    });
+
+    it('should keep the identifier when a later tag is added', () => {
+      api.translate.and.returnValue(ok({ slug: 'translation-en-sahih' }));
+      component.run('translate');
+
+      form.patchValue({ tags: ['translation', 'tafsir'] });
+
+      expect(form.value.slug).toBe('translation-en-sahih');
+    });
   });
 
   describe('recitation identity', () => {

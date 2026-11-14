@@ -27,6 +27,7 @@ import {
   UsageComparison,
   UsageDimension,
   UsageFilters,
+  UsageGranularity,
   UsageMetric,
   UsagePoint,
   UsagePreset,
@@ -37,11 +38,12 @@ import {
 } from '../../models/usage.models';
 import { UsageApiService } from '../../services/usage-api.service';
 import {
+  BucketTexts,
+  bucketLabels,
   buildBarOptions,
   buildDonutOptions,
   buildHourOfWeekOptions,
   buildTrendOptions,
-  formatPeriod,
 } from '../../utils/usage-chart-options';
 import {
   UsageHeadline,
@@ -54,8 +56,10 @@ import {
   comparisonRange,
   formatChange,
   formatCompact,
-  granularityFor,
+  granularityOptions,
+  keptGranularity,
   presetRange,
+  resolveGranularity,
   toIsoDay,
   usageStateFromParams,
   usageStateToParams,
@@ -91,14 +95,14 @@ const URL_KEYS = [
   'metric',
   'split',
   'compare',
+  'granularity',
 ];
 const COMPARISONS: UsageComparison[] = ['previous', 'year', 'hijri_year'];
 const PRESETS: UsagePreset[] = ['7d', '30d', '90d', '12m', 'custom'];
 const CATEGORIES = [
   'recitation',
   'mushaf',
-  'tafsir',
-  'translation',
+  'text',
   'linguistic',
   'tajweed',
   'font',
@@ -164,6 +168,8 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
   private readonly theme = inject(ThemeService);
   private readonly running = new Map<string, Subscription>();
   private initialized = false;
+  /** Set once the URL state has loaded every report; later bucket-only changes reload the trend. */
+  private loaded = false;
 
   readonly categories = CATEGORIES;
   readonly channels = CHANNELS;
@@ -220,9 +226,41 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
         (Object.keys({ ...a, ...b }) as (keyof UsageFilters)[]).every((key) => a[key] === b[key]),
     }
   );
-  readonly granularity = computed(() =>
-    granularityFor(this.state().filters.start_date, this.state().filters.end_date)
-  );
+  readonly granularity = computed(() => {
+    const { filters, granularity } = this.state();
+    return resolveGranularity(granularity, filters.start_date, filters.end_date);
+  });
+  /** The listener chart has no hourly buckets. */
+  readonly seriesGranularity = computed(() => {
+    const granularity = this.granularity();
+    return granularity === 'hour' ? 'day' : granularity;
+  });
+  /** Bucket sizes the range offers; the picker shows when there is a choice. */
+  readonly granularityChoices = computed(() => {
+    this.lang();
+    const { start_date, end_date } = this.state().filters;
+    return granularityOptions(start_date, end_date).map((value) => ({
+      label: this.t(`USAGE.GRANULARITY.${value}`),
+      value,
+    }));
+  });
+  readonly bucketTexts = computed<BucketTexts>(() => {
+    this.lang();
+    return {
+      weekOf: (date) => this.t('USAGE.GRANULARITY.WEEK_OF', { date }),
+      partialWeek: (from, to) => this.t('USAGE.GRANULARITY.PARTIAL_WEEK', { from, to }),
+      partialMonth: (from, to) => this.t('USAGE.GRANULARITY.PARTIAL_MONTH', { from, to }),
+    };
+  });
+  /** How weeks and partial buckets are counted, under the trend title. */
+  readonly trendHint = computed(() => {
+    this.lang();
+    const granularity = this.trend().data?.granularity;
+    if (granularity === 'week') {
+      return this.t('USAGE.GRANULARITY.WEEK_HINT');
+    }
+    return granularity === 'month' ? this.t('USAGE.GRANULARITY.MONTH_HINT') : '';
+  });
   readonly customRange = computed(() => [
     new Date(`${this.state().filters.start_date}T00:00:00`),
     new Date(`${this.state().filters.end_date}T00:00:00`),
@@ -262,6 +300,22 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
     });
   });
 
+  readonly trendBuckets = computed(() => {
+    const data = this.trend().data;
+    const { start_date, end_date } = this.state().filters;
+    return bucketLabels(
+      (data?.series[0]?.points ?? []).map((point) => point.t),
+      data?.granularity ?? 'day',
+      {
+        lang: this.lang(),
+        hijri: this.hijri(),
+        partial: data?.partial_buckets,
+        range: { start_date, end_date },
+        texts: this.bucketTexts(),
+      }
+    );
+  });
+
   readonly trendOptions = computed<EChartsCoreOption | null>(() => {
     const data = this.trend().data;
     if (!data) {
@@ -297,6 +351,7 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
         previous: compared && scale(compared),
         hijri: this.hijri(),
         spikes: !split,
+        buckets: this.trendBuckets(),
       }
     );
   });
@@ -304,8 +359,9 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
   readonly trendRows = computed<UsageTableRow[]>(() => {
     const data = this.trend().data;
     const series = data?.series ?? [];
+    const titles = this.trendBuckets().titles;
     return (series[0]?.points ?? []).map((point, index) => ({
-      label: formatPeriod(point.t, this.lang(), this.hijri()),
+      label: titles[index] ?? point.t,
       value: series
         .map((item) =>
           formatCompact(displayValue(data!.metric, item.points[index]?.value ?? null), this.lang())
@@ -422,21 +478,26 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
       this.update({ preset });
       return;
     }
-    this.update({ preset, filters: { ...this.state().filters, ...presetRange(preset) } });
+    this.update(this.withDates({ preset }, presetRange(preset)));
   }
 
   setCustomRange(range: Date[] | null): void {
     if (!range || range.length !== 2) {
       return;
     }
-    this.update({
-      preset: 'custom',
-      filters: {
-        ...this.state().filters,
-        start_date: toIsoDay(this.localDay(range[0])),
-        end_date: toIsoDay(this.localDay(range[1])),
-      },
-    });
+    this.update(
+      this.withDates(
+        { preset: 'custom' },
+        {
+          start_date: toIsoDay(this.localDay(range[0])),
+          end_date: toIsoDay(this.localDay(range[1])),
+        }
+      )
+    );
+  }
+
+  setGranularity(granularity: UsageGranularity): void {
+    this.update({ granularity });
   }
 
   setFilter(
@@ -478,33 +539,9 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
   load(): void {
     const scope = this.scope();
     const filters = this.filters();
-    const { metric, split, compare } = this.state();
+    const { metric } = this.state();
     this.track('summary', this.api.summary(scope, filters), (value) => this.summary.set(value));
-    this.track(
-      'trend',
-      this.api.timeseries(scope, filters, {
-        metric,
-        granularity: this.granularity(),
-        split_by: split as UsageDimension | null,
-        top: 8,
-        compare: !split && compare === 'previous',
-      }),
-      (value) => this.trend.set(value)
-    );
-    if (!split && compare !== 'previous') {
-      this.track(
-        'yearTrend',
-        this.api.timeseries(
-          scope,
-          { ...filters, ...comparisonRange(filters, compare) },
-          { metric, granularity: this.granularity() }
-        ),
-        (value) => this.yearTrend.set(value)
-      );
-    } else {
-      this.running.get('yearTrend')?.unsubscribe();
-      this.yearTrend.set({ loading: false, error: false, data: null });
-    }
+    this.loadTrend();
     if (this.profile().showAppFilter) {
       // Keep the previous choices until the new list arrives, so the select never empties.
       this.track(
@@ -549,13 +586,72 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
     }
   }
 
+  /** The trend and its year comparison: the only dashboard reports with time buckets. */
+  private loadTrend(): void {
+    const scope = this.scope();
+    const filters = this.filters();
+    const { metric, split, compare } = this.state();
+    this.track(
+      'trend',
+      this.api.timeseries(scope, filters, {
+        metric,
+        granularity: this.granularity(),
+        split_by: split as UsageDimension | null,
+        top: 8,
+        compare: !split && compare === 'previous',
+      }),
+      (value) => this.trend.set(value)
+    );
+    if (!split && compare !== 'previous') {
+      this.track(
+        'yearTrend',
+        this.api.timeseries(
+          scope,
+          { ...filters, ...comparisonRange(filters, compare) },
+          { metric, granularity: this.granularity() }
+        ),
+        (value) => this.yearTrend.set(value)
+      );
+    } else {
+      this.running.get('yearTrend')?.unsubscribe();
+      this.yearTrend.set({ loading: false, error: false, data: null });
+    }
+  }
+
+  /** Whether `next` differs from `previous` in the bucket size only. */
+  private onlyGranularityChanged(previous: UsageViewState, next: UsageViewState): boolean {
+    const keys = Object.keys({ ...previous.filters, ...next.filters }) as (keyof UsageFilters)[];
+    return (
+      previous.granularity !== next.granularity &&
+      previous.preset === next.preset &&
+      previous.metric === next.metric &&
+      previous.split === next.split &&
+      previous.compare === next.compare &&
+      keys.every((key) => previous.filters[key] === next.filters[key])
+    );
+  }
+
+  /** A new date range; a picked bucket size the range does not offer falls back to the default. */
+  private withDates(
+    patch: Partial<UsageViewState>,
+    dates: { start_date: string; end_date: string }
+  ): Partial<UsageViewState> {
+    const { filters, granularity } = this.state();
+    return {
+      ...patch,
+      filters: { ...filters, ...dates },
+      granularity: keptGranularity(granularity, dates.start_date, dates.end_date),
+    };
+  }
+
   /** Whether the current state already shows `range`. */
   private hasRange(range: UsageRange): boolean {
-    const { preset, filters } = this.state();
+    const { preset, filters, granularity } = this.state();
     return (
       preset === range.preset &&
       filters.start_date === range.start_date &&
-      filters.end_date === range.end_date
+      filters.end_date === range.end_date &&
+      granularity === (range.granularity ?? null)
     );
   }
 
@@ -564,7 +660,12 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
       return state;
     }
     const { preset, start_date, end_date } = range;
-    return { ...state, preset, filters: { ...state.filters, start_date, end_date } };
+    return {
+      ...state,
+      preset,
+      filters: { ...state.filters, start_date, end_date },
+      granularity: keptGranularity(range.granularity, start_date, end_date),
+    };
   }
 
   private choiceOptions(data: UsageBreakdown | null): { id: number; name: string }[] {
@@ -578,21 +679,34 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
     for (const key of params.keys) {
       raw[key] = params.get(key) ?? '';
     }
-    const state = usageStateFromParams(raw);
-    this.state.set(raw['metric'] ? state : { ...state, metric: this.profile().defaultMetric });
+    const parsed = usageStateFromParams(raw);
+    const state = raw['metric'] ? parsed : { ...parsed, metric: this.profile().defaultMetric };
+    const previous = this.state();
+    this.state.set(state);
+    if (this.loaded && this.onlyGranularityChanged(previous, state)) {
+      this.loadTrend();
+      return;
+    }
+    this.loaded = true;
     this.load();
   }
 
   private update(patch: Partial<UsageViewState>): void {
-    const next = { ...this.state(), ...patch };
+    const previous = this.state();
+    const next = { ...previous, ...patch };
     if (!this.syncUrl()) {
       this.state.set(next);
-      this.load();
+      if (this.onlyGranularityChanged(previous, next)) {
+        this.loadTrend();
+      } else {
+        this.load();
+      }
       if (this.sharedRange() && !this.hasRange(this.sharedRange()!)) {
         this.rangeChange.emit({
           preset: next.preset,
           start_date: next.filters.start_date,
           end_date: next.filters.end_date,
+          granularity: next.granularity,
         });
       }
       return;

@@ -132,10 +132,8 @@ export class AssetVersionsService {
 
   private segmentForKind(kind: AssetVersionParentKind): string {
     switch (kind) {
-      case 'tafsir':
-        return 'tafsirs';
-      case 'translation':
-        return 'translations';
+      case 'text':
+        return 'text-assets';
       case 'mushaf':
         return 'mushafs';
       case 'font':

@@ -6,9 +6,10 @@ import {
   ReconciliationNumbers,
   UsageFilters,
   UsageReconciliation,
+  UsageSeriesGranularity,
 } from '../../models/usage.models';
 import { UsageApiService } from '../../services/usage-api.service';
-import { buildTrendOptions, formatPeriod } from '../../utils/usage-chart-options';
+import { bucketLabels, buildTrendOptions } from '../../utils/usage-chart-options';
 import { formatCompact } from '../../utils/usage-filters.util';
 import { UsageChartComponent } from '../usage-chart/usage-chart.component';
 import { usageLang } from '../../utils/usage-lang';
@@ -33,6 +34,7 @@ const GUIDE = [
 })
 export class UsageUnseenTrafficComponent implements OnChanges {
   readonly filters = input.required<UsageFilters>();
+  readonly granularity = input<UsageSeriesGranularity>('day');
 
   private readonly api = inject(UsageApiService);
   private readonly translate = inject(TranslateService);
@@ -45,6 +47,37 @@ export class UsageUnseenTrafficComponent implements OnChanges {
   readonly data = signal<UsageReconciliation | null>(null);
 
   readonly lang = usageLang();
+
+  /** How weeks and partial buckets are counted (a translation key, or none for days). */
+  readonly hint = computed(() => {
+    const granularity = this.data()?.granularity;
+    return granularity === 'week'
+      ? 'USAGE.GRANULARITY.WEEK_HINT'
+      : granularity === 'month'
+        ? 'USAGE.GRANULARITY.MONTH_HINT'
+        : '';
+  });
+
+  readonly buckets = computed(() => {
+    const data = this.data();
+    const { start_date, end_date } = this.filters();
+    return bucketLabels(
+      (data?.days ?? []).map((day) => day.t),
+      data?.granularity ?? 'day',
+      {
+        lang: this.lang(),
+        partial: data?.partial_buckets,
+        range: { start_date, end_date },
+        texts: {
+          weekOf: (date) => this.translate.instant('USAGE.GRANULARITY.WEEK_OF', { date }) as string,
+          partialWeek: (from, to) =>
+            this.translate.instant('USAGE.GRANULARITY.PARTIAL_WEEK', { from, to }) as string,
+          partialMonth: (from, to) =>
+            this.translate.instant('USAGE.GRANULARITY.PARTIAL_MONTH', { from, to }) as string,
+        },
+      }
+    );
+  });
 
   readonly chartOptions = computed<EChartsCoreOption | null>(() => {
     const days = this.data()?.days;
@@ -61,13 +94,14 @@ export class UsageUnseenTrafficComponent implements OnChanges {
         rtl: this.lang() === 'ar',
         lang: this.lang(),
         labels: { other: '', unknown: '', previous: '' },
+        buckets: this.buckets(),
       }
     );
   });
 
   readonly chartRows = computed(() =>
-    (this.data()?.days ?? []).map((day) => ({
-      label: formatPeriod(day.t, this.lang()),
+    (this.data()?.days ?? []).map((day, index) => ({
+      label: this.buckets().titles[index] ?? day.t,
       value: MEASURES.map((measure) => formatCompact(day[measure], this.lang())).join(' · '),
     }))
   );
@@ -84,7 +118,7 @@ export class UsageUnseenTrafficComponent implements OnChanges {
     this.request?.unsubscribe();
     this.loading.set(true);
     this.error.set(false);
-    this.request = this.api.reconciliation(this.filters()).subscribe({
+    this.request = this.api.reconciliation(this.filters(), 20, this.granularity()).subscribe({
       next: (data) => {
         this.data.set(data);
         this.loading.set(false);

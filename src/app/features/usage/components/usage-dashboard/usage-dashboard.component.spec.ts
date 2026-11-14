@@ -49,6 +49,7 @@ const SUMMARY: UsageSummary = {
 const TIMESERIES: UsageTimeseries = {
   metric: 'plays',
   granularity: 'day',
+  partial_buckets: [],
   series: [{ key: 'all', label: null, points: [{ t: '2026-10-12', value: 3 }] }],
   previous: null,
   data_updated_at: null,
@@ -64,6 +65,7 @@ const BREAKDOWN: UsageBreakdown = {
 
 const LISTENERS: UsageListeners = {
   granularity: 'day',
+  partial_buckets: [],
   points: [{ t: '2026-10-12', new: 2, returning: 1, cumulative: 5 }],
   clamped_start: null,
   data_updated_at: null,
@@ -155,6 +157,74 @@ describe('UsageDashboardComponent', () => {
     expect(api.timeseries.calls.mostRecent().args[2].metric).toBe('downloads');
   });
 
+  it('offers the bucket sizes of the range and writes the picked one to the URL', () => {
+    queryParams.next(convertToParamMap({ range: '12m' }));
+    fixture.detectChanges();
+    expect(fixture.componentInstance.granularityChoices().map((choice) => choice.value)).toEqual([
+      'week',
+      'month',
+    ]);
+    expect(api.timeseries.calls.mostRecent().args[2].granularity).toBe('week');
+
+    fixture.componentInstance.setGranularity('month');
+
+    const extras = router.navigate.calls.mostRecent().args[1];
+    expect(extras?.queryParams?.['granularity']).toBe('month');
+  });
+
+  it('reloads only the trend when the URL changes the granularity alone', () => {
+    queryParams.next(convertToParamMap({ range: '30d' }));
+    fixture.detectChanges();
+    const summaries = api.summary.calls.count();
+    const breakdowns = api.breakdown.calls.count();
+
+    queryParams.next(convertToParamMap({ range: '30d', granularity: 'week' }));
+
+    expect(api.timeseries.calls.mostRecent().args[2].granularity).toBe('week');
+    expect(api.summary.calls.count()).toBe(summaries);
+    expect(api.breakdown.calls.count()).toBe(breakdowns);
+  });
+
+  it('drops a picked granularity the new range does not offer', () => {
+    fixture.componentRef.setInput('syncUrl', false);
+    fixture.detectChanges();
+    fixture.componentInstance.setPreset('90d');
+    fixture.componentInstance.setGranularity('day');
+
+    fixture.componentInstance.setPreset('12m');
+
+    expect(fixture.componentInstance.state().granularity).toBeNull();
+    expect(api.timeseries.calls.mostRecent().args[2].granularity).toBe('week');
+  });
+
+  it('labels weekly buckets and flags the partial ones in the table rows', () => {
+    api.timeseries.and.returnValue(
+      of({
+        ...TIMESERIES,
+        granularity: 'week',
+        partial_buckets: ['2026-09-14'],
+        series: [
+          {
+            key: 'all',
+            label: null,
+            points: [
+              { t: '2026-09-14', value: 1 },
+              { t: '2026-09-21', value: 2 },
+            ],
+          },
+        ],
+      })
+    );
+    queryParams.next(convertToParamMap({ range: '30d', granularity: 'week' }));
+    fixture.detectChanges();
+
+    const rows = fixture.componentInstance.trendRows().map((row) => row.label);
+    expect(rows[0]).toContain('USAGE.GRANULARITY.WEEK_OF');
+    expect(rows[0]).toContain('USAGE.GRANULARITY.PARTIAL_WEEK');
+    expect(rows[1]).not.toContain('PARTIAL');
+    expect(fixture.componentInstance.trendHint()).toBe('USAGE.GRANULARITY.WEEK_HINT');
+  });
+
   it('keeps the same filters object when only the metric changes', () => {
     fixture.componentRef.setInput('syncUrl', false);
     fixture.detectChanges();
@@ -169,7 +239,7 @@ describe('UsageDashboardComponent', () => {
   it('keeps state locally when not synced to the URL', () => {
     fixture.componentRef.setInput('syncUrl', false);
     fixture.componentRef.setInput('assetId', 7);
-    fixture.componentRef.setInput('category', 'tafsir');
+    fixture.componentRef.setInput('category', 'text');
     fixture.detectChanges();
 
     expect(api.summary.calls.mostRecent().args[1].asset_id).toBe(7);
@@ -248,10 +318,10 @@ describe('UsageDashboardComponent', () => {
     fixture.componentInstance.setFilter('category', 'recitation');
     fixture.componentInstance.setFilter('reciter_id', 4);
 
-    fixture.componentInstance.setFilter('category', 'tafsir');
+    fixture.componentInstance.setFilter('category', 'text');
 
     const filters = api.summary.calls.mostRecent().args[1];
-    expect(filters.category).toBe('tafsir');
+    expect(filters.category).toBe('text');
     expect(filters.reciter_id).toBeNull();
   });
 
@@ -305,5 +375,8 @@ describe('UsageDashboardComponent', () => {
 
     fixture.componentInstance.setPreset('7d');
     expect(emitted).toEqual([jasmine.objectContaining({ preset: '7d' })]);
+
+    fixture.componentInstance.setGranularity('hour');
+    expect(emitted[1]).toEqual(jasmine.objectContaining({ preset: '7d', granularity: 'hour' }));
   });
 });

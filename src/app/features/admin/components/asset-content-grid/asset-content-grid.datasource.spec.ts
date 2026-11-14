@@ -71,7 +71,7 @@ describe('AssetContentGridComponent word datasource', () => {
   it('translates a block request into a page request and reports the total', async () => {
     // Arrange
     const fixture = TestBed.createComponent(AssetContentGridComponent);
-    fixture.componentRef.setInput('kind', 'translation');
+    fixture.componentRef.setInput('kind', 'text');
     fixture.componentRef.setInput('slug', 'a-translation');
     fixture.componentRef.setInput('template', 'word');
     fixture.detectChanges();
@@ -131,7 +131,7 @@ describe('AssetContentGridComponent word datasource', () => {
   it('sends the grid filter model to the server and reports the filtered total', async () => {
     // Arrange
     const fixture = TestBed.createComponent(AssetContentGridComponent);
-    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('kind', 'text');
     fixture.componentRef.setInput('slug', 'a-filtered-tafsir');
     fixture.componentRef.setInput('template', 'ayah');
     fixture.detectChanges();
@@ -169,7 +169,7 @@ describe('AssetContentGridComponent word datasource', () => {
   it('shows the loading overlay while a first block (e.g. after a filter change) is in flight', async () => {
     // Arrange
     const fixture = TestBed.createComponent(AssetContentGridComponent);
-    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('kind', 'text');
     fixture.componentRef.setInput('slug', 'a-loading-tafsir');
     fixture.componentRef.setInput('template', 'ayah');
     fixture.detectChanges();
@@ -211,7 +211,7 @@ describe('AssetContentGridComponent word datasource', () => {
   it('shows "all changes saved" only after an edit is saved, not on open', async () => {
     // Arrange — opening the editor always creates or reuses a draft
     const fixture = TestBed.createComponent(AssetContentGridComponent);
-    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('kind', 'text');
     fixture.componentRef.setInput('slug', 'a-saved-tafsir');
     fixture.detectChanges();
     flushDraft(httpMock, 'a-saved-tafsir', 9);
@@ -245,7 +245,7 @@ describe('AssetContentGridComponent word datasource', () => {
   it('scrolls an ayah asset through the infinite datasource too', async () => {
     // Arrange — no template bound: the one-row probe tells the grid it's ayah
     const fixture = TestBed.createComponent(AssetContentGridComponent);
-    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('kind', 'text');
     fixture.componentRef.setInput('slug', 'an-ayah-tafsir');
     fixture.detectChanges();
     flushDraft(httpMock, 'an-ayah-tafsir', 5);
@@ -287,7 +287,7 @@ describe('AssetContentGridComponent word datasource', () => {
     // Grid option: the live grid must be created *after* that, or it stays
     // client-side with no rows and never asks the datasource for a block.
     const fixture = TestBed.createComponent(AssetContentGridComponent);
-    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('kind', 'text');
     fixture.componentRef.setInput('slug', 'a-word-tafsir');
     fixture.detectChanges();
     flushDraft(httpMock, 'a-word-tafsir', 3);
@@ -325,7 +325,7 @@ describe('AssetContentGridComponent word datasource', () => {
 
   it('reports the total unit count for a word asset in the page title', () => {
     const fixture = TestBed.createComponent(AssetContentGridComponent);
-    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('kind', 'text');
     fixture.componentRef.setInput('slug', 'a-counted-tafsir');
     fixture.detectChanges();
     flushDraft(httpMock, 'a-counted-tafsir', 4);
@@ -399,7 +399,7 @@ describe('AssetContentGridComponent opening', () => {
 
   function open(slug: string) {
     const fixture = TestBed.createComponent(AssetContentGridComponent);
-    fixture.componentRef.setInput('kind', 'tafsir');
+    fixture.componentRef.setInput('kind', 'text');
     fixture.componentRef.setInput('slug', slug);
     fixture.detectChanges();
     httpMock

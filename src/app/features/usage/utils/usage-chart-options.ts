@@ -3,6 +3,7 @@ import {
   ListenerPoint,
   USAGE_OTHER_KEY,
   UsageBreakdownItem,
+  UsageGranularity,
   UsagePoint,
   UsageSeries,
 } from '../models/usage.models';
@@ -83,6 +84,81 @@ export function formatPeriod(value: string, lang: string | undefined, hijri = fa
   return Number.isNaN(date.getTime())
     ? value
     : format(date, { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+}
+
+/** Translated texts of week and partial-bucket labels. */
+export interface BucketTexts {
+  /** "Week of 10 Aug 2026". */
+  weekOf: (date: string) => string;
+  /** "partial week: 12 Aug – 16 Aug" (the days of the bucket the range covers). */
+  partialWeek: (from: string, to: string) => string;
+  partialMonth: (from: string, to: string) => string;
+}
+
+export interface BucketLabels {
+  /** Axis labels: the date (week start), the month, or the hour. */
+  axis: string[];
+  /** Tooltip and table labels: "Week of …", plus the covered days of a partial bucket. */
+  titles: string[];
+}
+
+const ISO_DAY = /^\d{4}-\d{2}-\d{2}$/;
+
+function addDays(day: string, days: number): string {
+  return new Date(Date.parse(`${day}T00:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10);
+}
+
+/** The last day of the week (Sunday) or month starting on `start`. */
+function bucketEnd(start: string, granularity: 'week' | 'month'): string {
+  if (granularity === 'week') {
+    return addDays(start, 6);
+  }
+  const date = new Date(`${start}T00:00:00Z`);
+  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + 1, 0))
+    .toISOString()
+    .slice(0, 10);
+}
+
+/**
+ * Labels for the buckets of a series. Weeks are ISO weeks (Monday to Sunday) and months are
+ * Gregorian, labelled by their first day; a partial first or last bucket names the days of the
+ * range it covers.
+ */
+export function bucketLabels(
+  times: string[],
+  granularity: UsageGranularity,
+  options: {
+    lang?: string;
+    hijri?: boolean;
+    partial?: string[];
+    range?: { start_date: string; end_date: string };
+    texts?: BucketTexts;
+  }
+): BucketLabels {
+  const { lang, hijri, texts, range } = options;
+  const partial = new Set(options.partial ?? []);
+  const axis = times.map((time) =>
+    // A Gregorian month has no single Hijri month name; Hijri labels keep its first day.
+    granularity === 'month' && !hijri && ISO_DAY.test(time)
+      ? formatPeriod(time.slice(0, 7), lang)
+      : formatPeriod(time, lang, hijri)
+  );
+  const titles = times.map((time, index) => {
+    if ((granularity !== 'week' && granularity !== 'month') || !texts) {
+      return axis[index];
+    }
+    const title = granularity === 'week' ? texts.weekOf(axis[index]) : axis[index];
+    if (!partial.has(time) || !range || !ISO_DAY.test(time)) {
+      return title;
+    }
+    const end = bucketEnd(time, granularity);
+    const from = formatPeriod(time < range.start_date ? range.start_date : time, lang, hijri);
+    const to = formatPeriod(end > range.end_date ? range.end_date : end, lang, hijri);
+    const note =
+      granularity === 'week' ? texts.partialWeek(from, to) : texts.partialMonth(from, to);
+    return `${title} (${note})`;
+  });
+  return { axis, titles };
 }
 
 function formatHour(hour: number, lang: string | undefined): string {
@@ -183,10 +259,15 @@ export function buildTrendOptions(
     hijri?: boolean;
     /** Mark spikes on an unsplit series. */
     spikes?: boolean;
+    /** Bucket labels (see `bucketLabels`); by default each point's date. */
+    buckets?: BucketLabels;
   }
 ): EChartsCoreOption {
-  const { rtl, lang, labels, previous } = options;
-  const times = series[0]?.points.map((point) => formatPeriod(point.t, lang, options.hijri)) ?? [];
+  const { rtl, lang, labels, previous, buckets } = options;
+  const times =
+    buckets?.axis ??
+    series[0]?.points.map((point) => formatPeriod(point.t, lang, options.hijri)) ??
+    [];
   const lines: Record<string, unknown>[] = series.map((item) => ({
     name: seriesName(item, labels),
     type: 'line',
@@ -221,7 +302,7 @@ export function buildTrendOptions(
   // Each comparison point is labelled with its own date, which differs from the axis date.
   const formatter = (params: AxisTooltipParam[]) =>
     [
-      escapeHtml(params[0]?.axisValueLabel ?? ''),
+      escapeHtml(buckets?.titles[params[0]?.dataIndex ?? -1] ?? params[0]?.axisValueLabel ?? ''),
       ...params.map((param) => {
         const name =
           param.seriesIndex === comparedIndex
@@ -368,9 +449,11 @@ export function buildListenersOptions(
     labels: { new: string; returning: string; cumulative: string };
     /** Tooltip line summing the bars, e.g. "Active: 13 (2 new + 11 returning)". */
     activeLabel: (counts: { total: string; new: string; returning: string }) => string;
+    /** Bucket labels (see `bucketLabels`); by default each point's date. */
+    buckets?: BucketLabels;
   }
 ): EChartsCoreOption {
-  const { rtl, lang, labels } = options;
+  const { rtl, lang, labels, buckets } = options;
   // Active = new + returning; the cumulative line is a separate running total, so say so.
   const formatter = (params: AxisTooltipParam[]) => {
     const point = points[params[0]?.dataIndex ?? 0];
@@ -379,7 +462,7 @@ export function buildListenersOptions(
     }
     const cumulative = params.find((param) => param.seriesIndex === 2);
     return [
-      escapeHtml(params[0].axisValueLabel),
+      escapeHtml(buckets?.titles[params[0].dataIndex] ?? params[0].axisValueLabel),
       escapeHtml(
         options.activeLabel({
           total: formatNumber(point.new + point.returning, lang),
@@ -398,7 +481,7 @@ export function buildListenersOptions(
     xAxis: {
       type: 'category',
       inverse: rtl,
-      data: points.map((point) => formatPeriod(point.t, lang, options.hijri)),
+      data: buckets?.axis ?? points.map((point) => formatPeriod(point.t, lang, options.hijri)),
       axisLabel: { interval: timeLabelInterval(points.length) },
     },
     yAxis: [

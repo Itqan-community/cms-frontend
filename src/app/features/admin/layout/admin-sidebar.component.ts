@@ -41,19 +41,12 @@ export const TAB_MUSHAFS: CmsTab = {
   description: 'ADMIN.MENU.MUSHAFS_DESC',
   icon: 'lucideBookOpen',
 };
-export const TAB_TAFSIRS: CmsTab = {
-  id: 'tafsirs',
-  path: 'tafsirs',
-  label: 'ADMIN.MENU.TAFSIRS',
-  description: 'ADMIN.MENU.TAFSIRS_DESC',
+export const TAB_TEXT_ASSETS: CmsTab = {
+  id: 'text-assets',
+  path: 'text-assets',
+  label: 'ADMIN.MENU.TEXT_ASSETS',
+  description: 'ADMIN.MENU.TEXT_ASSETS_DESC',
   icon: 'lucideGraduationCap',
-};
-export const TAB_TRANSLATIONS: CmsTab = {
-  id: 'translations',
-  path: 'translations',
-  label: 'ADMIN.MENU.TRANSLATIONS',
-  description: 'ADMIN.MENU.TRANSLATIONS_DESC',
-  icon: 'lucideGlobe',
 };
 export const TAB_PUBLISHERS: CmsTab = {
   id: 'publishers',
@@ -123,11 +116,8 @@ export function buildAuthorizedAdminTabs(
   if (adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_PUBLISHER)) {
     tabs.push(TAB_PUBLISHERS);
   }
-  if (adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_TAFSIR)) {
-    tabs.push(TAB_TAFSIRS);
-  }
-  if (adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_TRANSLATION)) {
-    tabs.push(TAB_TRANSLATIONS);
+  if (adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_TEXT_ASSET)) {
+    tabs.push(TAB_TEXT_ASSETS);
   }
   if (adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_READ_MUSHAF)) {
     tabs.push(TAB_MUSHAFS);

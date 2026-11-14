@@ -4,7 +4,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzTagModule } from 'ng-zorro-antd/tag';
-import { Categories } from '../../../../core/enums/categories.enum';
+import { assetKindIcon } from '../../../../core/enums/categories.enum';
 import { AssetTemplateBadgeComponent } from '../../../../shared/components/asset-template-badge/asset-template-badge.component';
 import { LicenseTagComponent } from '../../../../shared/components/license-tag/license-tag.component';
 import { Asset } from '../../models/assets.model';
@@ -79,19 +79,6 @@ export class AssetCardComponent {
   asset = input.required<Asset>();
 
   get categoryIconName(): string {
-    switch (this.asset().category) {
-      case Categories.TAFSIR:
-        return 'lucideFileText';
-      case Categories.TRANSLATION:
-        return 'lucideLanguages';
-      case Categories.RECITATION:
-        return 'lucideMic';
-      case Categories.FONT:
-        return 'lucidePalette';
-      case Categories.PROGRAM:
-        return 'lucideLayers';
-      default:
-        return 'lucideFile';
-    }
+    return assetKindIcon(this.asset().category, this.asset().tags);
   }
 }

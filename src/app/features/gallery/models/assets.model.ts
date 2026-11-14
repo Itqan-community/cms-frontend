@@ -9,9 +9,17 @@ export interface ApiAssets {
   count: number;
 }
 
+/** What kind of text a text asset holds; `name` follows the request language. */
+export interface AssetTagRef {
+  slug: string;
+  name: string;
+}
+
 export interface Asset {
   id: number;
   category: Categories;
+  /** Text assets only: tafsir, translation, … */
+  tags: AssetTagRef[];
   name: string;
   description: string;
   publisher: {
@@ -29,6 +37,8 @@ export interface Asset {
 export interface AssetDetails {
   id: number;
   category: string;
+  /** Text assets only: tafsir, translation, … */
+  tags: AssetTagRef[];
   name: string;
   description: string;
   long_description: string;

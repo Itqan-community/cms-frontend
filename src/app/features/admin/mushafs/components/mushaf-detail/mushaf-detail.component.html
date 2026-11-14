@@ -81,38 +81,40 @@
       </div>
     </div>
 
-    <div class="admin-descriptions">
-      <div class="admin-desc-col">
-        <h3 class="admin-desc-title">
-          <ng-icon name="lucideFileText" /> {{ 'ADMIN.MUSHAFS.DETAIL.DESC_AR_TITLE' | translate }}
-        </h3>
-        <p class="admin-desc-text">{{ mushaf()!.description_ar }}</p>
-        <h3 class="admin-desc-title">
-          <ng-icon name="lucideAlignRight" /> {{ 'ADMIN.MUSHAFS.DETAIL.LONG_AR_TITLE' | translate }}
-        </h3>
-        <p class="admin-desc-text">{{ mushaf()!.long_description_ar }}</p>
+    <app-asset-detail-tabs [assetId]="mushaf()!.id" category="mushaf">
+      <div class="admin-descriptions">
+        <div class="admin-desc-col">
+          <h3 class="admin-desc-title">
+            <ng-icon name="lucideFileText" /> {{ 'ADMIN.MUSHAFS.DETAIL.DESC_AR_TITLE' | translate }}
+          </h3>
+          <p class="admin-desc-text">{{ mushaf()!.description_ar }}</p>
+          <h3 class="admin-desc-title">
+            <ng-icon name="lucideAlignRight" />
+            {{ 'ADMIN.MUSHAFS.DETAIL.LONG_AR_TITLE' | translate }}
+          </h3>
+          <p class="admin-desc-text">{{ mushaf()!.long_description_ar }}</p>
+        </div>
+        <div class="admin-desc-col">
+          <h3 class="admin-desc-title" dir="ltr">
+            <ng-icon name="lucideFileText" /> {{ 'ADMIN.MUSHAFS.DETAIL.DESC_EN_TITLE' | translate }}
+          </h3>
+          <p class="admin-desc-text" dir="ltr">{{ mushaf()!.description_en }}</p>
+          <h3 class="admin-desc-title" dir="ltr">
+            <ng-icon name="lucideAlignLeft" />
+            {{ 'ADMIN.MUSHAFS.DETAIL.LONG_EN_TITLE' | translate }}
+          </h3>
+          <p class="admin-desc-text" dir="ltr">{{ mushaf()!.long_description_en }}</p>
+        </div>
       </div>
-      <div class="admin-desc-col">
-        <h3 class="admin-desc-title" dir="ltr">
-          <ng-icon name="lucideFileText" /> {{ 'ADMIN.MUSHAFS.DETAIL.DESC_EN_TITLE' | translate }}
-        </h3>
-        <p class="admin-desc-text" dir="ltr">{{ mushaf()!.description_en }}</p>
-        <h3 class="admin-desc-title" dir="ltr">
-          <ng-icon name="lucideAlignLeft" /> {{ 'ADMIN.MUSHAFS.DETAIL.LONG_EN_TITLE' | translate }}
-        </h3>
-        <p class="admin-desc-text" dir="ltr">{{ mushaf()!.long_description_en }}</p>
-      </div>
-    </div>
 
-    <app-asset-versions-manager
-      kind="mushaf"
-      [slug]="mushaf()!.slug"
-      [assetId]="mushaf()!.id"
-      i18nPrefix="ADMIN.MUSHAFS.DETAIL.VERSIONS"
-      sectionTitleKey="ADMIN.MUSHAFS.DETAIL.VERSIONS_TITLE"
-    />
-
-    <app-asset-usage-section [assetId]="mushaf()!.id" category="mushaf" />
+      <app-asset-versions-manager
+        kind="mushaf"
+        [slug]="mushaf()!.slug"
+        [assetId]="mushaf()!.id"
+        i18nPrefix="ADMIN.MUSHAFS.DETAIL.VERSIONS"
+        sectionTitleKey="ADMIN.MUSHAFS.DETAIL.VERSIONS_TITLE"
+      />
+    </app-asset-detail-tabs>
 
     <div class="admin-back">
       <a routerLink="/admin/mushafs">

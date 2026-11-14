@@ -81,38 +81,38 @@
       </div>
     </div>
 
-    <div class="admin-descriptions">
-      <div class="admin-desc-col">
-        <h3 class="admin-desc-title">
-          <ng-icon name="lucideFileText" /> {{ 'ADMIN.FONTS.DETAIL.DESC_AR_TITLE' | translate }}
-        </h3>
-        <p class="admin-desc-text">{{ font()!.description_ar }}</p>
-        <h3 class="admin-desc-title">
-          <ng-icon name="lucideAlignRight" /> {{ 'ADMIN.FONTS.DETAIL.LONG_AR_TITLE' | translate }}
-        </h3>
-        <p class="admin-desc-text">{{ font()!.long_description_ar }}</p>
+    <app-asset-detail-tabs [assetId]="font()!.id" category="font">
+      <div class="admin-descriptions">
+        <div class="admin-desc-col">
+          <h3 class="admin-desc-title">
+            <ng-icon name="lucideFileText" /> {{ 'ADMIN.FONTS.DETAIL.DESC_AR_TITLE' | translate }}
+          </h3>
+          <p class="admin-desc-text">{{ font()!.description_ar }}</p>
+          <h3 class="admin-desc-title">
+            <ng-icon name="lucideAlignRight" /> {{ 'ADMIN.FONTS.DETAIL.LONG_AR_TITLE' | translate }}
+          </h3>
+          <p class="admin-desc-text">{{ font()!.long_description_ar }}</p>
+        </div>
+        <div class="admin-desc-col">
+          <h3 class="admin-desc-title" dir="ltr">
+            <ng-icon name="lucideFileText" /> {{ 'ADMIN.FONTS.DETAIL.DESC_EN_TITLE' | translate }}
+          </h3>
+          <p class="admin-desc-text" dir="ltr">{{ font()!.description_en }}</p>
+          <h3 class="admin-desc-title" dir="ltr">
+            <ng-icon name="lucideAlignLeft" /> {{ 'ADMIN.FONTS.DETAIL.LONG_EN_TITLE' | translate }}
+          </h3>
+          <p class="admin-desc-text" dir="ltr">{{ font()!.long_description_en }}</p>
+        </div>
       </div>
-      <div class="admin-desc-col">
-        <h3 class="admin-desc-title" dir="ltr">
-          <ng-icon name="lucideFileText" /> {{ 'ADMIN.FONTS.DETAIL.DESC_EN_TITLE' | translate }}
-        </h3>
-        <p class="admin-desc-text" dir="ltr">{{ font()!.description_en }}</p>
-        <h3 class="admin-desc-title" dir="ltr">
-          <ng-icon name="lucideAlignLeft" /> {{ 'ADMIN.FONTS.DETAIL.LONG_EN_TITLE' | translate }}
-        </h3>
-        <p class="admin-desc-text" dir="ltr">{{ font()!.long_description_en }}</p>
-      </div>
-    </div>
 
-    <app-asset-versions-manager
-      kind="font"
-      [slug]="font()!.slug"
-      [assetId]="font()!.id"
-      i18nPrefix="ADMIN.FONTS.DETAIL.VERSIONS"
-      sectionTitleKey="ADMIN.FONTS.DETAIL.VERSIONS_TITLE"
-    />
-
-    <app-asset-usage-section [assetId]="font()!.id" category="font" />
+      <app-asset-versions-manager
+        kind="font"
+        [slug]="font()!.slug"
+        [assetId]="font()!.id"
+        i18nPrefix="ADMIN.FONTS.DETAIL.VERSIONS"
+        sectionTitleKey="ADMIN.FONTS.DETAIL.VERSIONS_TITLE"
+      />
+    </app-asset-detail-tabs>
 
     <div class="admin-back">
       <a routerLink="/admin/fonts">

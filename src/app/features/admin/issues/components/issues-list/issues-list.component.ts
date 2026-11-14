@@ -23,6 +23,7 @@ import {
   IssueReportUrlFilters,
 } from '../../models/issues.models';
 import { IssuesService } from '../../services/issues.service';
+import { formatIssueContext } from '../../utils/issue-context.util';
 
 @Component({
   selector: 'app-issues-list',
@@ -135,6 +136,13 @@ export class IssuesListComponent extends AdminListBase<IssueReportOut, IssueRepo
       default:
         return 'default';
     }
+  }
+
+  /** "Al-Baqarah 2:255", "Page 12", …; an em dash on description-only reports. */
+  contextLabel(row: IssueReportOut): string {
+    return (
+      formatIssueContext(row.context, this.translate) || this.translate.instant('COMMON.EM_DASH')
+    );
   }
 
   truncate(text: string | null | undefined, max = 120): string {

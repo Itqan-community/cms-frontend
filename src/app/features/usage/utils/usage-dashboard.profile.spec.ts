@@ -53,7 +53,7 @@ describe('dashboardProfile', () => {
   });
 
   it('text assets lead with downloads, installs, versions and languages', () => {
-    const profile = dashboardProfile('admin', 'tafsir', 7);
+    const profile = dashboardProfile('admin', 'text', 7);
     expect(profile.defaultMetric).toBe('downloads');
     expect(profile.headline).toContain('latest_version_share');
     expect(profile.panels.map((panel) => panel.by)).toEqual([
