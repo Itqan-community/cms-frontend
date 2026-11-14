@@ -8,6 +8,10 @@ export interface UsagePanel {
   by: UsageDimension;
   chart: 'donut' | 'bar' | 'heatmap';
   limit: number;
+  /** A fixed metric; by default the panel follows the metric picked for the trend. */
+  metric?: UsageMetric;
+  /** Translation key of the title; by default `USAGE.PANELS.<by>`. */
+  titleKey?: string;
 }
 
 /** What a dashboard shows for a scope and (on asset pages) an asset category (spec §8 headlines). */
@@ -24,13 +28,17 @@ export interface DashboardProfile {
   recitation: boolean;
   /** Reciter and riwayah filters (recitation overview). */
   showReciterFilters: boolean;
+  /** Text-asset reports: CLI installs and updates per version, access requests. */
+  text: boolean;
 }
 
 const TEXT_CATEGORIES = new Set(['text', 'linguistic', 'tajweed']);
 const ALL_METRICS: UsageMetric[] = [
+  'usage',
   'plays',
   'downloads',
   'installs',
+  'updates',
   'api_calls',
   'views',
   'requests',
@@ -43,6 +51,7 @@ const ALL_METRICS: UsageMetric[] = [
 const FILE_METRICS: UsageMetric[] = [
   'downloads',
   'installs',
+  'updates',
   'unique_downloaders',
   'api_calls',
   'requests',
@@ -51,12 +60,32 @@ const FILE_METRICS: UsageMetric[] = [
 const FILE_HEADLINE: UsageHeadline[] = [
   'downloads',
   'installs',
+  'updates',
   'unique_downloaders',
   'latest_version_share',
 ];
 
 const bar = (by: UsageDimension, limit = 10): UsagePanel => ({ by, chart: 'bar', limit });
 const donut = (by: UsageDimension): UsagePanel => ({ by, chart: 'donut', limit: 10 });
+
+/** Text assets have no plays: CLI installs and updates, public API calls and gallery views. */
+const TEXT_METRICS: UsageMetric[] = [
+  'installs',
+  'updates',
+  'public_api_calls',
+  'views',
+  'downloads',
+  'usage',
+];
+const TEXT_HEADLINE: UsageHeadline[] = ['installs', 'updates', 'public_api_calls', 'views'];
+/** Public API calls per surah, whatever metric the trend shows. */
+const TEXT_SURAH_PANEL: UsagePanel = {
+  by: 'surah',
+  chart: 'bar',
+  limit: 114,
+  metric: 'public_api_calls',
+  titleKey: 'USAGE.TEXT.SURAH_PANEL',
+};
 
 export function dashboardProfile(
   scope: UsageScope,
@@ -69,8 +98,20 @@ export function dashboardProfile(
     showExport: scope !== 'developer',
     recitation: false,
     showReciterFilters: false,
+    text: false,
   };
   if (assetId != null) {
+    if (category === 'text') {
+      return {
+        ...base,
+        text: true,
+        headline: [...TEXT_HEADLINE, 'latest_version_share'],
+        metrics: TEXT_METRICS,
+        defaultMetric: 'installs',
+        splits: ['version', 'language', 'channel', 'country'],
+        panels: [TEXT_SURAH_PANEL, bar('version'), donut('channel'), bar('country')],
+      };
+    }
     if (category === 'recitation') {
       return {
         ...base,
@@ -129,6 +170,18 @@ export function dashboardProfile(
       ],
     };
   }
+  if (category === 'text' && scope !== 'developer') {
+    return {
+      ...base,
+      showCategoryFilter: true,
+      text: true,
+      headline: TEXT_HEADLINE,
+      metrics: TEXT_METRICS,
+      defaultMetric: 'installs',
+      splits: ['asset', 'version', 'language', 'channel', 'country'],
+      panels: [bar('asset'), TEXT_SURAH_PANEL, donut('language'), bar('country')],
+    };
+  }
   if (scope === 'developer') {
     return {
       ...base,
@@ -149,10 +202,12 @@ export function dashboardProfile(
       panels: [bar('app'), bar('endpoint'), bar('asset'), bar('country')],
     };
   }
+  // Every channel at once; the recitations tab covers listening.
   return {
     ...base,
     showCategoryFilter: true,
     headline: [
+      'usage',
       'plays',
       'downloads',
       'installs',
@@ -161,7 +216,7 @@ export function dashboardProfile(
       'integrating_apps',
     ],
     metrics: ALL_METRICS,
-    defaultMetric: 'plays',
+    defaultMetric: 'usage',
     splits: ['channel', 'platform', 'country', 'asset', 'app', 'kind'],
     panels: [donut('channel'), donut('platform'), bar('country'), bar('asset'), bar('app')],
   };

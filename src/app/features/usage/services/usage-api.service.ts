@@ -2,12 +2,15 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, of, throwError } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { callerShowsErrors } from '../../../core/interceptors/caller-shows-errors.context';
 import {
   BreakdownOptions,
   CoverageOptions,
   PublicUsageCounts,
   TimeseriesOptions,
   UsageBreakdown,
+  UsageAccessRequests,
+  UsageCliVersions,
   UsageCohorts,
   UsageFilters,
   UsageFirstSeen,
@@ -161,6 +164,30 @@ export class UsageApiService {
   ): Observable<UsageRecitationCoverage> {
     return this.http.get<UsageRecitationCoverage>(`${SCOPE_BASES[scope]()}/recitation-coverage/`, {
       params: toParams({ ...options }),
+    });
+  }
+
+  /** Text-asset reports: CLI installs and updates per asset version (the caller shows errors). */
+  cliVersions(scope: PortalScope, filters: UsageFilters, limit = 50): Observable<UsageCliVersions> {
+    return this.http.get<UsageCliVersions>(`${SCOPE_BASES[scope]()}/cli-versions/`, {
+      params: toParams({ ...filters }, { limit }),
+      context: callerShowsErrors(),
+    });
+  }
+
+  /**
+   * Text-asset reports: access requests made in the range. Only the dates, asset, category and
+   * (admin) publisher apply; requests have no channel, platform or country.
+   */
+  accessRequests(
+    scope: PortalScope,
+    filters: UsageFilters,
+    granularity: UsageSeriesGranularity
+  ): Observable<UsageAccessRequests> {
+    const { start_date, end_date, asset_id, category, publisher_id } = filters;
+    return this.http.get<UsageAccessRequests>(`${SCOPE_BASES[scope]()}/access-requests/`, {
+      params: toParams({ start_date, end_date, asset_id, category, publisher_id, granularity }),
+      context: callerShowsErrors(),
     });
   }
 

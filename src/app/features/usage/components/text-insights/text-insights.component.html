@@ -1,0 +1,118 @@
+<div class="text-insights">
+  <section class="recitation-card text-insights__wide">
+    <header class="recitation-card__header">
+      <h3 class="recitation-card__title">{{ 'USAGE.TEXT.VERSIONS_TITLE' | translate }}</h3>
+      <p class="recitation-card__hint">{{ 'USAGE.TEXT.VERSIONS_HINT' | translate }}</p>
+    </header>
+    @if (versions().loading) {
+      <p class="recitation-card__empty">…</p>
+    } @else if (versions().error; as error) {
+      <div class="text-insights__error" role="alert">
+        <p class="recitation-card__error">{{ error }}</p>
+        <button type="button" class="text-insights__retry" (click)="load()">
+          {{ 'USAGE.RETRY' | translate }}
+        </button>
+      </div>
+    } @else if (!versionRows().length) {
+      <p class="recitation-card__empty">{{ 'USAGE.NO_DATA' | translate }}</p>
+    } @else {
+      <div class="text-insights__scroll">
+        <table class="recitation-table">
+          <thead>
+            <tr>
+              @if (!singleAsset()) {
+                <th scope="col">{{ 'USAGE.TEXT.ASSET' | translate }}</th>
+              }
+              <th scope="col">{{ 'USAGE.TEXT.VERSION' | translate }}</th>
+              <th scope="col">{{ 'USAGE.TEXT.LANGUAGE' | translate }}</th>
+              <th scope="col" class="recitation-table__num">
+                {{ 'USAGE.METRICS.installs' | translate }}
+              </th>
+              <th scope="col" class="recitation-table__num">
+                {{ 'USAGE.METRICS.updates' | translate }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of versionRows(); track row.key) {
+              <tr>
+                @if (!singleAsset()) {
+                  <td>{{ row.asset }}</td>
+                }
+                <th scope="row">
+                  <bdi>{{ row.version }}</bdi>
+                </th>
+                <td>{{ row.language }}</td>
+                <td class="recitation-table__num">{{ row.installs }}</td>
+                <td class="recitation-table__num">{{ row.updates }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <section class="recitation-card text-insights__wide">
+    <header class="recitation-card__header">
+      <h3 class="recitation-card__title">{{ 'USAGE.TEXT.REQUESTS_TITLE' | translate }}</h3>
+      <p class="recitation-card__hint">{{ 'USAGE.TEXT.REQUESTS_HINT' | translate }}</p>
+    </header>
+    @if (requests().error; as error) {
+      <div class="text-insights__error" role="alert">
+        <p class="recitation-card__error">{{ error }}</p>
+        <button type="button" class="text-insights__retry" (click)="loadRequests()">
+          {{ 'USAGE.RETRY' | translate }}
+        </button>
+      </div>
+    } @else {
+      @if (requestTotals(); as totals) {
+        <div class="text-insights__totals">
+          <span class="text-insights__value">{{ totals.value }}</span>
+          @if (totals.change) {
+            <span
+              class="text-insights__change text-insights__change--{{ totals.change.direction }}"
+            >
+              {{ totals.change.text }} {{ 'USAGE.VS_PREVIOUS' | translate }}
+            </span>
+          }
+          @for (status of totals.statuses; track status.status) {
+            <span class="recitation-tag">{{ status.text }}</span>
+          }
+        </div>
+      }
+      <app-usage-chart
+        [options]="requestOptions()"
+        [rows]="requestRows()"
+        [loading]="requests().loading"
+        [empty]="!requests().loading && requestsEmpty()"
+        [height]="220"
+        (retry)="loadRequests()"
+      />
+    }
+  </section>
+
+  @if (!singleAsset()) {
+    <section class="recitation-card">
+      <header class="recitation-card__header">
+        <h3 class="recitation-card__title">{{ 'USAGE.TEXT.REQUESTS_ASSETS' | translate }}</h3>
+      </header>
+      @if (requests().loading) {
+        <p class="recitation-card__empty">…</p>
+      } @else if (!requests().error && !requestAssets().length) {
+        <p class="recitation-card__empty">{{ 'USAGE.NO_DATA' | translate }}</p>
+      } @else if (!requests().error) {
+        <table class="recitation-table">
+          <tbody>
+            @for (row of requestAssets(); track row.key) {
+              <tr>
+                <th scope="row">{{ row.label }}</th>
+                <td class="recitation-table__num">{{ row.value }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </section>
+  }
+</div>

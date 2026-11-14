@@ -2,6 +2,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { environment } from '../../../../environments/environment';
+import { CALLER_SHOWS_ERRORS } from '../../../core/interceptors/caller-shows-errors.context';
 import { UsageApiService } from './usage-api.service';
 
 describe('UsageApiService', () => {
@@ -134,5 +135,27 @@ describe('UsageApiService', () => {
     expect(coverage.request.params.get('publisher_id')).toBe('2');
     expect(coverage.request.params.has('reciter_id')).toBeFalse();
     [listeners, firstSeen, searches, coverage].forEach((req) => req.flush({}));
+  });
+
+  it('text reports send only the filters each one supports and handle their own errors', () => {
+    const filters = { ...range, asset_id: 5, channel: 'cli', publisher_id: 2 };
+    service.cliVersions('admin', filters).subscribe();
+    service.accessRequests('publisher', filters, 'week').subscribe();
+
+    const versions = http.expectOne(
+      (r) => r.url === `${environment.ADMIN_API_BASE_URL}/admin/usage/cli-versions/`
+    );
+    expect(versions.request.params.get('limit')).toBe('50');
+    expect(versions.request.params.get('channel')).toBe('cli');
+    const requests = http.expectOne(
+      (r) => r.url === `${environment.ADMIN_API_BASE_URL}/usage/access-requests/`
+    );
+    expect(requests.request.params.get('granularity')).toBe('week');
+    expect(requests.request.params.get('asset_id')).toBe('5');
+    expect(requests.request.params.has('channel')).toBeFalse();
+    for (const req of [versions, requests]) {
+      expect(req.request.context.get(CALLER_SHOWS_ERRORS)).toBeTrue();
+      req.flush({});
+    }
   });
 });

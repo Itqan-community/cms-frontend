@@ -566,19 +566,23 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 | `components/usage-leaderboard/`    | Component | Admin: top publishers / assets with previous-period change                                                                                                                                                                 |
 | `components/usage-unseen-traffic/` | Component | Admin: R2 reads vs edge requests (unseen traffic), with a "How to read this tab" guide                                                                                                                                     |
 | `components/recitation-insights/`  | Component | Recitation dashboards (asset tab + overview): listener growth, weekly cohorts, countries/apps first reached, gallery funnel, asset surah coverage                                                                          |
+| `components/text-insights/`        | Component | Text dashboards (asset tab + overview): CLI installs and updates per version, access requests (total vs previous, statuses, series, top assets); own error messages from the backend                                       |
 | `components/recitation-catalog/`   | Component | Recitation overview only: this week's top / rising recitations, gallery search terms (top / no results), incomplete recitations                                                                                            |
 | `components/asset-usage-section/`  | Component | Analytics tab content on asset admin detail pages (inside `admin/components/asset-detail-tabs/`; `portal_read_usage`)                                                                                                      |
 | `components/asset-usage-counts/`   | Component | Gallery asset page "plays · downloads · apps"; hidden unless the backend returns 200                                                                                                                                       |
 | `pages/developer-usage/`           | Page      | `/account/usage` (developer scope), linked from `/account/api-keys`                                                                                                                                                        |
 
-`/admin/usage` (`features/admin/usage/`): Dashboard and Recitations tabs for everyone with
-`portal_read_usage` (Recitations = the dashboard fixed to the recitation category, local state:
-reciter / riwayah filters, listening hours, recitation insights and catalog; picking "Recitations"
-in the Dashboard category filter shows the same profile); Itqan staff also get a publisher picker,
-Leaderboard and Unseen traffic (bucketed like the dashboard trend: the `granularity` URL param is
-shared by the tabs); the Mixpanel iframe is the "Legacy board" tab (loaded when opened) until the
-usage-reports cutover. `/account/api-keys` shows and edits each key's public app slug (`app_slug`).
-The global error toast skips `usage_counts_disabled`.
+`/admin/usage` (`features/admin/usage/`): Dashboard, Recitations and Text assets tabs for everyone
+with `portal_read_usage`. The Dashboard trend defaults to `usage` (every channel: plays, downloads,
+CLI installs and updates, public API calls, gallery views). Recitations = the dashboard fixed to the
+recitation category, local state: reciter / riwayah filters, listening hours, recitation insights
+and catalog; Text assets = the dashboard fixed to the text category: CLI installs and updates,
+public API calls per surah, gallery views, text insights (the asset Analytics tab of a text asset
+shows the same); picking either in the Dashboard category filter shows the same profile; Itqan staff
+also get a publisher picker, Leaderboard and Unseen traffic (bucketed like the dashboard trend: the
+`granularity` URL param is shared by the tabs); the Mixpanel iframe is the "Legacy board" tab
+(loaded when opened) until the usage-reports cutover. `/account/api-keys` shows and edits each key's
+public app slug (`app_slug`). The global error toast skips `usage_counts_disabled`.
 
 ### 6. Error (`src/app/features/error/`)
 

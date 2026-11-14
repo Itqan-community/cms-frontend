@@ -45,7 +45,7 @@ describe('UsagePageComponent', () => {
     }).compileComponents();
   });
 
-  it('publishers see the dashboard, recitations and the legacy board', () => {
+  it('publishers see the dashboard, recitations, text assets and the legacy board', () => {
     isStaff.set(false);
     fixture = TestBed.createComponent(UsagePageComponent);
     fixture.detectChanges();
@@ -53,6 +53,7 @@ describe('UsagePageComponent', () => {
     expect(tabTitles()).toEqual([
       'USAGE.TABS.DASHBOARD',
       'USAGE.TABS.RECITATIONS',
+      'USAGE.TABS.TEXT_ASSETS',
       'USAGE.TABS.LEGACY',
     ]);
     expect(fixture.componentInstance.scope()).toBe('publisher');
@@ -66,6 +67,7 @@ describe('UsagePageComponent', () => {
     expect(tabTitles()).toEqual([
       'USAGE.TABS.DASHBOARD',
       'USAGE.TABS.RECITATIONS',
+      'USAGE.TABS.TEXT_ASSETS',
       'USAGE.TABS.LEADERBOARD',
       'USAGE.TABS.UNSEEN',
       'USAGE.TABS.LEGACY',
@@ -85,7 +87,7 @@ describe('UsagePageComponent', () => {
     fixture.detectChanges();
     const page = fixture.componentInstance;
 
-    page.onTabChange(4, 4);
+    page.onTabChange(5, 5);
     page.onPublisherChange(5);
     responses[1].next({ board_url: 'https://board/5' });
     responses[0].next({ board_url: 'https://board/all' });

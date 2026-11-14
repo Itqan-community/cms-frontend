@@ -2821,7 +2821,10 @@
       "plays": "Plays",
       "downloads": "Downloads",
       "installs": "CLI installs",
+      "updates": "CLI updates",
+      "usage": "All usage",
       "api_calls": "API calls",
+      "public_api_calls": "Public API calls",
       "views": "Page views",
       "requests": "Requests",
       "bytes": "Bytes delivered",
@@ -2866,6 +2869,7 @@
       "gallery_download": "Gallery downloads",
       "api_call": "API calls",
       "cli_install": "CLI installs",
+      "cli_update": "CLI updates",
       "view": "Page views"
     },
     "SPLIT_BY": {
@@ -2913,7 +2917,8 @@
       "LEADERBOARD": "Leaderboard",
       "UNSEEN": "Unseen traffic",
       "LEGACY": "Legacy board",
-      "RECITATIONS": "Recitations"
+      "RECITATIONS": "Recitations",
+      "TEXT_ASSETS": "Text assets"
     },
     "UNSEEN": {
       "INTRO": "Downloads from storage that the other usage reports could not see. Use this tab to check how complete those reports are.",
@@ -3008,6 +3013,24 @@
       "ALL_COMPLETE": "Every recitation has all 114 surahs.",
       "LISTENERS_HINT": "Bars: listeners active in each period, split into first-timers and returning listeners. Line: everyone who has listened so far, each person counted once.",
       "ACTIVE": "Active: {{total}} ({{new}} new + {{returning}} returning)"
+    },
+    "TEXT": {
+      "SURAH_PANEL": "Public API calls per surah",
+      "VERSIONS_TITLE": "CLI installs and updates per version",
+      "VERSIONS_HINT": "An update is an install of another version than the one that installation had before.",
+      "ASSET": "Asset",
+      "VERSION": "Version",
+      "LANGUAGE": "Language",
+      "UNNAMED_VERSION": "Unnamed version",
+      "REQUESTS_TITLE": "Access requests",
+      "REQUESTS_HINT": "Requests made in the period. Channel and platform filters do not apply.",
+      "REQUESTS_SERIES": "Access requests",
+      "REQUESTS_ASSETS": "Most requested assets",
+      "STATUS": {
+        "pending": "Pending: {{count}}",
+        "approved": "Approved: {{count}}",
+        "rejected": "Rejected: {{count}}"
+      }
     },
     "COMPARE": {
       "LABEL": "Compare with",
