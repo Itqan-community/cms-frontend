@@ -1,14 +1,9 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import { Subscription } from 'rxjs';
-import { NzAlertModule } from 'ng-zorro-antd/alert';
-import { NzEmptyModule } from 'ng-zorro-antd/empty';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
 import { UsageDashboardComponent } from '../../../../usage/components/usage-dashboard/usage-dashboard.component';
 import { UsageLeaderboardComponent } from '../../../../usage/components/usage-leaderboard/usage-leaderboard.component';
@@ -21,22 +16,17 @@ import {
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import { PublisherFilterItem } from '../../../text-assets/models/text-assets.models';
 import { PublishersFilterService } from '../../../text-assets/services/publishers-filter.service';
-import { UsageService } from '../../services/usage.service';
 
 /**
  * Admin → Usage: the usage dashboard for the publisher in the request. Itqan staff also get a
- * publisher picker, the leaderboard and unseen traffic. The Mixpanel board stays as "Legacy
- * board" until the usage-reports cutover.
+ * publisher picker, the leaderboard and unseen traffic.
  */
 @Component({
   selector: 'app-usage-page',
   standalone: true,
   imports: [
     FormsModule,
-    NzAlertModule,
-    NzEmptyModule,
     NzSelectModule,
-    NzSpinModule,
     NzTabsModule,
     TranslateModule,
     UsageDashboardComponent,
@@ -48,9 +38,7 @@ import { UsageService } from '../../services/usage.service';
 })
 export class UsagePageComponent implements OnInit {
   private readonly adminAuth = inject(AdminAuthService);
-  private readonly usageService = inject(UsageService);
   private readonly publishersFilterService = inject(PublishersFilterService);
-  private readonly sanitizer = inject(DomSanitizer);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -85,12 +73,6 @@ export class UsagePageComponent implements OnInit {
     return { start_date, end_date, publisher_id: this.selectedPublisherId() };
   });
 
-  readonly boardLoading = signal(false);
-  readonly boardError = signal(false);
-  readonly boardUrl = signal<SafeResourceUrl | null>(null);
-  private boardRequested = false;
-  private boardRequest?: Subscription;
-
   ngOnInit(): void {
     if (this.isStaff()) {
       this.publishersFilterService
@@ -102,9 +84,6 @@ export class UsagePageComponent implements OnInit {
 
   onPublisherChange(publisherId: number | null): void {
     this.selectedPublisherId.set(publisherId);
-    if (this.boardRequested) {
-      this.loadBoardUrl();
-    }
   }
 
   /** A range picked on the Recitations or Text assets tab becomes the page's range (and the Dashboard's). */
@@ -120,37 +99,5 @@ export class UsagePageComponent implements OnInit {
       },
       queryParamsHandling: 'merge',
     });
-  }
-
-  onTabChange(index: number, legacyIndex: number): void {
-    if (index === legacyIndex && !this.boardRequested) {
-      this.boardRequested = true;
-      this.loadBoardUrl();
-    }
-  }
-
-  private loadBoardUrl(): void {
-    // Drop the previous publisher's request so a late answer cannot replace the current board.
-    this.boardRequest?.unsubscribe();
-    this.boardLoading.set(true);
-    this.boardError.set(false);
-    this.boardUrl.set(null);
-    this.boardRequest = this.usageService
-      .getBoardUrl(this.selectedPublisherId())
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: ({ board_url }) => {
-          this.boardLoading.set(false);
-          if (board_url) {
-            this.boardUrl.set(this.sanitizer.bypassSecurityTrustResourceUrl(board_url));
-          } else {
-            this.boardError.set(true);
-          }
-        },
-        error: () => {
-          this.boardLoading.set(false);
-          this.boardError.set(true);
-        },
-      });
   }
 }
