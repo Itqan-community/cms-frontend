@@ -7,6 +7,7 @@ import {
   OnDestroy,
   OnInit,
   PLATFORM_ID,
+  RESPONSE_INIT,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -52,6 +53,7 @@ export class ReciterDetailsPage implements OnInit, OnDestroy {
   private readonly seo = inject(SeoService);
   private readonly jsonLd = inject(JsonLdService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly responseInit = inject(RESPONSE_INIT, { optional: true });
 
   isServer = isPlatformServer(this.platformId);
 
@@ -96,6 +98,9 @@ export class ReciterDetailsPage implements OnInit, OnDestroy {
           this.assetsLoading.set(false);
           if (err instanceof HttpErrorResponse && err.status === 404) {
             this.notFound.set(true);
+            if (this.responseInit) {
+              this.responseInit.status = 404;
+            }
           }
         },
         complete: () => this.reciterLoading.set(false),

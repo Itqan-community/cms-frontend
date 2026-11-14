@@ -1,5 +1,16 @@
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  OnDestroy,
+  OnInit,
+  PLATFORM_ID,
+  RESPONSE_INIT,
+  signal,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
@@ -94,6 +105,12 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   private readonly seo = inject(SeoService);
   private readonly jsonLd = inject(JsonLdService);
+  private readonly responseInit = inject(RESPONSE_INIT, { optional: true });
+  /** First page of a server-rendered visit: the asset comes from the server's guest render. */
+  private readonly hydratingServerRender =
+    isPlatformBrowser(inject(PLATFORM_ID)) &&
+    !this.router.navigated &&
+    inject(DOCUMENT).querySelector('[ng-server-context]') !== null;
 
   readonly id = this.route.snapshot.params['id'];
   asset = signal<AssetDetails | null>(null);
@@ -162,11 +179,15 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
           this.loading.set(false);
           this.setSeoFromAsset(asset);
           this.maybeOpenReportIssueModal();
+          this.refreshUserAccessAfterHydration();
         },
         error: (err) => {
           this.loading.set(false);
           if (err instanceof HttpErrorResponse && err.status === 404) {
             this.notFound.set(true);
+            if (this.responseInit) {
+              this.responseInit.status = 404;
+            }
           } else {
             this.errorState.set(true);
           }
@@ -176,6 +197,23 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.jsonLd.remove();
+  }
+
+  /**
+   * The server renders as a guest, so its asset has no `access_status` for this user. A signed-in
+   * user gets it fetched again (past the transfer cache) once the page is on screen.
+   */
+  private refreshUserAccessAfterHydration(): void {
+    if (!this.hydratingServerRender || !this.authService.canActivateAsLoggedIn()) {
+      return;
+    }
+    this.assetsService
+      .getAssetDetails(this.id, { skipTransferCache: true })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (asset) => this.applyRefreshedAsset(asset),
+        error: (err: unknown) => console.warn('Could not refresh the access status', err),
+      });
   }
 
   private setSeoFromAsset(asset: AssetDetails): void {

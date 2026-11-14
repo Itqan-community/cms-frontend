@@ -651,11 +651,15 @@ The global error toast skips `usage_counts_disabled`.
 - **Library:** @ngx-translate/core (HTTP loader, JSON files at `/i18n/{lang}.json`)
 - **Languages:** English (`en`), Arabic (`ar`)
 - **Default:** Arabic (`ar`) — set in both `index.html` and `app.config.ts`
-- **Persistence:** `localStorage.getItem('lang')`
+- **Persistence:** `localStorage.lang` mirrored into a `lang` cookie (`core/i18n/ui-language.ts`,
+  `persistUiLanguage`) so the SSR server renders the chosen language
+- **Resolution:** `UI_LANGUAGE` token. Browser: `?lang=` > localStorage > cookie > `ar`. Server:
+  `?lang=` > cookie > `ar` (`resolveRequestLanguage`, passed in `REQUEST_CONTEXT`). A server render
+  in another language than the saved one (pre-cookie users) reloads once
 - **Bootstrap:** `initializeAppTranslations()` retries once; on final failure boots anyway (no
   unhandled ErrorHandler) so flaky mobile loads of `/i18n/*.json` do not crash the app
-- **Switch:** Full page reload on language toggle (`LangSwitchComponent`); `App.switchLang` catches
-  failed `translate.use`
+- **Switch:** Full page reload on language toggle (`LangSwitchComponent`); on a `?lang=` URL it
+  swaps the param instead; `App.switchLang` catches failed `translate.use`
 - **RTL:** `<html dir="rtl">` with logical CSS properties (`margin-inline`, `padding-inline`)
 - **Keys:** 1486 per language (parity verified); domains include auth, navigation, gallery, admin,
   content standards, licenses, errors, forms, access-request license terms
@@ -733,6 +737,25 @@ since the record belongs to the previous publisher and would 404. `create`, list
 Legacy Netlify config remains in `netlify.toml` and `deploy/netlify/*` for reference; staging deploy
 uses Cloudflare Pages Functions instead of Netlify external redirects.
 
+### SSR (built, not deployed yet)
+
+- **Build:** `npm run build:ssr` (`production,ssr`) / `npm run build:ssr:staging`; the `ssr`
+  configuration adds `server`, `outputMode: server`, `ssr.entry`. The plain `build:{env}` static
+  builds are unchanged (still `dist/browser/index.html`).
+- **Run:** `npm run serve:ssr` (`node dist/server/server.mjs`, `PORT`, optional `API_PROXY_ORIGIN`
+  to proxy `/cms-api`, `/accounts`, `/portal` like `functions/`). Image: `deploy/ssr/Dockerfile`.
+- **Render modes:** `app.routes.server.ts` — Server for `/gallery`, `/gallery/asset/:id`,
+  `/publishers`, `/publisher/:id`, `/reciters`, `/reciters/:slug`, `/license/:id`,
+  `/content-standards`; Client (shell) for everything else (portal, account, auth).
+- **Data:** `provideClientHydration(withEventReplay(), withHttpTransferCacheOptions)`; server uses
+  `FetchBackend` (keep-alive), bundled translations, `HTTP_TRANSFER_CACHE_ORIGIN_MAP` when proxying.
+  Server renders as a guest (no auth bootstrap); `<app-header ngSkipHydration>`; asset detail
+  refetches `access_status` for signed-in users after hydration. Missing asset/reciter → HTTP 404.
+- **SEO:** `SeoService` canonical (`?lang=en` for English), hreflang ar/en/x-default, og:locale,
+  og:site_name; sitemap lists static, reciter, asset and publisher pages in both languages.
+- **Cache:** hashed files + `/assets/` 1y immutable; HTML `public, max-age=0, must-revalidate`, or
+  `private, no-cache` when the language came from the cookie.
+
 ---
 
 ## [ORPHANS & PENDING]
@@ -756,6 +779,7 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
 | Recitation quality variant taxonomy     | Frontend-owned    | Quality×effects vocabulary lives in `recitation-quality.util.ts` and is carried in quality names; no server-side uniqueness enforcement.                         |
 | Recitation quality variant relabelling  | Constrained       | Non-default classified qualities with tracks cannot change variant (slug is public `?quality=`); default quality always editable (`?quality=default`).           |
 | Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                                                                      |
+| SSR hosting                             | Pending infra     | SSR build + `deploy/ssr/Dockerfile` ready; cms.itqan.dev still serves the static build until hosting moves to the Node server.                                   |
 | Usage reports API                       | Pending backend   | Needs cms-backend#557 deployed; until then the dashboards show their error state.                                                                                |
 | Multi-column text assets                | Pending backend   | Editor columns, column management, file structure need the cms-backend multi-column release (`feat/multi-column-text-assets`); remove once deployed.             |
 | Group tafsir templates                  | Pending backend   | `ayah_group` / `word_group` editing, `groups/` and `content/quran-range/` need the cms-backend `feat/group-templates` release; remove once deployed.             |

@@ -2,6 +2,7 @@ import {
   ApplicationConfig,
   ErrorHandler,
   inject,
+  PLATFORM_ID,
   provideAppInitializer,
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
@@ -13,8 +14,13 @@ import { environment } from '../environments/environment';
 import { routes } from './app.routes';
 import { ar_EG, provideNzI18n } from 'ng-zorro-antd/i18n';
 import { appLucideIconsProvider } from './icons/provide-app-lucide-icons';
-import { registerLocaleData } from '@angular/common';
+import { isPlatformBrowser, registerLocaleData } from '@angular/common';
 import ar from '@angular/common/locales/ar';
+import {
+  provideClientHydration,
+  withEventReplay,
+  withHttpTransferCacheOptions,
+} from '@angular/platform-browser';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideTranslateService } from '@ngx-translate/core';
@@ -51,6 +57,9 @@ export const appConfig: ApplicationConfig = {
           }),
         ]
       : []),
+    // SSR: reuse the server's DOM, and answer the first GETs from the data the server already
+    // fetched (requests carrying auth headers are never cached).
+    provideClientHydration(withEventReplay(), withHttpTransferCacheOptions({})),
     provideNzI18n(ar_EG),
     appLucideIconsProvider,
     provideAnimationsAsync(),
@@ -67,8 +76,11 @@ export const appConfig: ApplicationConfig = {
     ),
     provideAppInitializer(() => initializeAppTranslations()),
     // Fire-and-forget: public pages paint immediately; protected routes wait on authReady.
+    // The SSR server renders every page as a guest, so it never checks a session.
     provideAppInitializer(() => {
-      void inject(AuthService).bootstrapOnce();
+      if (isPlatformBrowser(inject(PLATFORM_ID))) {
+        void inject(AuthService).bootstrapOnce();
+      }
     }),
     // ngx-translate setup
     provideTranslateService({

@@ -74,8 +74,10 @@ export class AssetsService {
    *   console.log(asset);
    * });
    */
-  getAssetDetails(id: string) {
-    return this.http.get<AssetDetails>(`${this.BASE_URL}/assets/${id}/`);
+  getAssetDetails(id: string, options: { skipTransferCache?: boolean } = {}) {
+    return this.http.get<AssetDetails>(`${this.BASE_URL}/assets/${id}/`, {
+      transferCache: !options.skipTransferCache,
+    });
   }
 
   /** A translation's / tafsir's download layout and sample rows for one language
