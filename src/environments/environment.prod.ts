@@ -1,6 +1,6 @@
 export const environment = {
   production: true,
-  SITE_URL: 'https://cms.itqan.dev',
+  SITE_URL: 'https://fanar.itqan.dev',
   API_BASE_URL: 'https://api.cms.itqan.dev/cms-api',
   API_DOCS_URL: 'https://docs.cms.itqan.dev',
   gaTrackingId: 'G-Y38325E2JX',
