@@ -29,6 +29,7 @@ const SUMMARY: UsageSummary = {
     plays: metric(1500, 1000, 0.5),
     downloads: metric(4),
     installs: metric(2),
+    updates: metric(1),
     api_calls: metric(9),
     requests: metric(40),
     bytes: metric(10),
