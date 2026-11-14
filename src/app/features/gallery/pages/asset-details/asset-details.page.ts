@@ -230,6 +230,7 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
       '@type': 'CreativeWork',
       name: asset.name,
       description,
+      url: `${environment.SITE_URL}/gallery/asset/${asset.id}`,
       image: asset.thumbnail_url || undefined,
       creator: {
         '@type': 'Organization',

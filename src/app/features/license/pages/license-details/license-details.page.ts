@@ -1,6 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { SeoService } from '../../../../core/services/seo.service';
 import { NgIcon } from '@ng-icons/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
 import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/breadcrumb.component';
@@ -12,10 +13,20 @@ import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/br
   templateUrl: './license-details.page.html',
   styleUrls: ['./license-details.page.less'],
 })
-export class LicenseDetailsPage {
+export class LicenseDetailsPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly seo = inject(SeoService);
+  private readonly translate = inject(TranslateService);
 
   readonly licenseId = this.route.snapshot.paramMap.get('id') || '';
+
+  ngOnInit(): void {
+    this.seo.setSeo({
+      title: `${this.licenseId} | ITQAN`,
+      description: this.translate.instant(this.getLicenseTranslationKey(this.licenseId)),
+      path: `/license/${encodeURIComponent(this.licenseId)}`,
+    });
+  }
 
   getLicenseTranslationKey(licenseCode: string): string {
     // Convert URL format (CC-BY) to translation key format (CC-BY)
