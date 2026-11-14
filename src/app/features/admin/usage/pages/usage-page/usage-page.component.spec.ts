@@ -3,11 +3,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { Router, provideRouter } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import { of, Subject } from 'rxjs';
+import { of } from 'rxjs';
 import { UsageApiService } from '../../../../usage/services/usage-api.service';
 import { PublishersFilterService } from '../../../text-assets/services/publishers-filter.service';
 import { AdminAuthService } from '../../../services/admin-auth.service';
-import { UsageService } from '../../services/usage.service';
 import { UsagePageComponent } from './usage-page.component';
 
 describe('UsagePageComponent', () => {
@@ -40,21 +39,16 @@ describe('UsagePageComponent', () => {
           provide: PublishersFilterService,
           useValue: { search: () => of({ results: [{ id: 3, name: 'Pub' }], count: 1 }) },
         },
-        { provide: UsageService, useValue: { getBoardUrl: () => of({ board_url: null }) } },
       ],
     }).compileComponents();
   });
 
-  it('publishers see the dashboard, recitations and the legacy board', () => {
+  it('publishers see the dashboard and recitations', () => {
     isStaff.set(false);
     fixture = TestBed.createComponent(UsagePageComponent);
     fixture.detectChanges();
 
-    expect(tabTitles()).toEqual([
-      'USAGE.TABS.DASHBOARD',
-      'USAGE.TABS.RECITATIONS',
-      'USAGE.TABS.LEGACY',
-    ]);
+    expect(tabTitles()).toEqual(['USAGE.TABS.DASHBOARD', 'USAGE.TABS.RECITATIONS']);
     expect(fixture.componentInstance.scope()).toBe('publisher');
   });
 
@@ -68,30 +62,9 @@ describe('UsagePageComponent', () => {
       'USAGE.TABS.RECITATIONS',
       'USAGE.TABS.LEADERBOARD',
       'USAGE.TABS.UNSEEN',
-      'USAGE.TABS.LEGACY',
     ]);
     expect(fixture.componentInstance.scope()).toBe('admin');
     expect(fixture.componentInstance.publishers().length).toBe(1);
-  });
-  it('a late board response for a previous publisher does not replace the current board', () => {
-    const responses = [
-      new Subject<{ board_url: string | null }>(),
-      new Subject<{ board_url: string | null }>(),
-    ];
-    const getBoardUrl = jasmine.createSpy('getBoardUrl').and.returnValues(...responses);
-    TestBed.overrideProvider(UsageService, { useValue: { getBoardUrl } });
-    isStaff.set(true);
-    fixture = TestBed.createComponent(UsagePageComponent);
-    fixture.detectChanges();
-    const page = fixture.componentInstance;
-
-    page.onTabChange(4, 4);
-    page.onPublisherChange(5);
-    responses[1].next({ board_url: 'https://board/5' });
-    responses[0].next({ board_url: 'https://board/all' });
-
-    const url = page.boardUrl() as unknown as { changingThisBreaksApplicationSecurity: string };
-    expect(url.changingThisBreaksApplicationSecurity).toBe('https://board/5');
   });
 
   it('writes a range picked on the Recitations tab to the URL, shared with the Dashboard tab', () => {
