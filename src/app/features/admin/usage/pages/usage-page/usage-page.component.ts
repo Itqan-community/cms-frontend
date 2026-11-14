@@ -107,7 +107,7 @@ export class UsagePageComponent implements OnInit {
     }
   }
 
-  /** A range picked on the Recitations tab becomes the page's range (and the Dashboard's). */
+  /** A range picked on the Recitations or Text assets tab becomes the page's range (and the Dashboard's). */
   onRangeChange(range: UsageRange): void {
     const custom = range.preset === 'custom';
     void this.router.navigate([], {
