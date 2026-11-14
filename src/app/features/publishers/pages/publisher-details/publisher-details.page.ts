@@ -98,9 +98,9 @@ export class PublisherDetailsPage implements OnInit, OnDestroy {
   }
 
   private setSeoFromPublisher(publisher: Publisher): void {
-    const description = publisher.description || `${publisher.name} on ITQAN.`;
+    const description = publisher.description || `${publisher.name} on Fanar.`;
     this.seo.setSeo({
-      title: `${publisher.name} | ITQAN`,
+      title: `${publisher.name} | Fanar`,
       description,
       path: `/publisher/${publisher.id}`,
       image: publisher.icon_url || undefined,

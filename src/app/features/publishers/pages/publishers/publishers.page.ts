@@ -23,10 +23,10 @@ export class PublishersPage implements OnInit {
   private setSeo(lang: string): void {
     const isAr = lang === 'ar';
     this.seo.setSeo({
-      title: isAr ? 'الناشرون | إتقان' : 'Publishers | ITQAN',
+      title: isAr ? 'الناشرون | فنار' : 'Publishers | Fanar',
       description: isAr
-        ? 'تصفح الجهات الناشرة للمحتوى القرآني على منصة إتقان.'
-        : 'Browse the publishers contributing Quranic content on ITQAN.',
+        ? 'تصفح الجهات الناشرة للمحتوى القرآني على منصة فنار.'
+        : 'Browse the publishers contributing Quranic content on Fanar.',
       path: '/publishers',
     });
   }

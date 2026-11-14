@@ -180,9 +180,9 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
 
   private setSeoFromAsset(asset: AssetDetails): void {
     const description =
-      asset.description || asset.long_description || `${asset.name} - available on ITQAN.`;
+      asset.description || asset.long_description || `${asset.name} - available on Fanar.`;
     this.seo.setSeo({
-      title: `${asset.name} | ITQAN`,
+      title: `${asset.name} | Fanar`,
       description,
       path: `/gallery/asset/${asset.id}`,
       image: asset.thumbnail_url || undefined,
