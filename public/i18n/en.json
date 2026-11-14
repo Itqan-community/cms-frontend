@@ -1,5 +1,5 @@
 {
-  "APP_TITLE": "Itqan CMS",
+  "APP_TITLE": "Fanar",
   "WELCOME": "Welcome to the Store",
   "INVITATION": {
     "ACCEPT": {
@@ -40,7 +40,7 @@
     },
     "LOGIN": {
       "TITLE": "Welcome back",
-      "SUBTITLE": "Sign in to continue to Itqan",
+      "SUBTITLE": "Sign in to continue to Fanar",
       "EMAIL_LABEL": "Email",
       "PASSWORD_LABEL": "Password",
       "SUBMIT_BUTTON": "Sign in",
@@ -64,7 +64,7 @@
     },
     "REGISTER": {
       "TITLE": "Create your account",
-      "SUBTITLE": "Join Itqan to access our resources",
+      "SUBTITLE": "Join Fanar to access our resources",
       "FIRST_NAME_LABEL": "First Name",
       "LAST_NAME_LABEL": "Last Name",
       "EMAIL_LABEL": "Email",
@@ -434,8 +434,8 @@
     "LANG_SWITCH_TO_AR": "العربية",
     "THEME_SWITCH_TO_DARK": "Dark mode",
     "THEME_SWITCH_TO_LIGHT": "Light mode",
-    "LOGO_ALT": "Itqan",
-    "LOGO_ALT_CMS": "Itqan CMS",
+    "LOGO_ALT": "Fanar",
+    "LOGO_ALT_CMS": "Fanar",
     "USER_AVATAR_ALT": "User avatar",
     "USER_AVATAR_INITIAL": "U",
     "EM_DASH": "—",
@@ -516,13 +516,13 @@
     "CONTENT_STANDARDS": "Content Standards",
     "API_DOCS": "API Docs",
     "PUBLISHER_DASHBOARD": "Publisher Dashboard",
-    "ASSET_REQUEST_FORM": "Add Quranic Content to ITQAN",
+    "ASSET_REQUEST_FORM": "Add Quranic Content to Fanar",
     "ADMIN_PORTAL": "Admin Portal",
     "MUSHAF": "Quran",
     "RECITERS": "Reciters"
   },
   "HOME": {
-    "WELCOME": "Welcome to Itqan CMS",
+    "WELCOME": "Welcome to Fanar",
     "DESCRIPTION": "A modern CMS experience built with Angular.",
     "GET_STARTED": "Get Started",
     "LEARN_MORE": "Learn More",
@@ -719,12 +719,12 @@
     "VIEW_DOCUMENT": "View License Document"
   },
   "PUBLISHERS": {
-    "DESCRIPTION": "Explore the network of certified publishers and providers on the Itqan platform.",
+    "DESCRIPTION": "Explore the network of certified publishers and providers on the Fanar platform.",
     "COMING_SOON": "Coming Soon - Publishers list will be displayed here"
   },
   "ABOUT": {
-    "PROJECT_TITLE": "About Itqan Project",
-    "PROJECT_DESCRIPTION": "Itqan is a modern content management system designed to provide an exceptional experience in managing digital assets and educational resources.",
+    "PROJECT_TITLE": "About Fanar Project",
+    "PROJECT_DESCRIPTION": "Fanar is a modern content management system designed to provide an exceptional experience in managing digital assets and educational resources.",
     "VISION_TITLE": "Vision",
     "VISION_DESCRIPTION": "To be the leading platform for digital content management and educational resources in the region.",
     "MISSION_TITLE": "Mission",
@@ -1231,8 +1231,8 @@
       "CHANNELS": {
         "TITLE": "Distribution channels",
         "HELP": "Choose where this asset is available.",
-        "GALLERY": "Itqan gallery",
-        "GALLERY_HELP": "Listed on the public Itqan gallery website.",
+        "GALLERY": "Fanar gallery",
+        "GALLERY_HELP": "Listed on the public Fanar gallery website.",
         "PUBLIC_API": "Public API",
         "PUBLIC_API_HELP": "Available to developers through the public API.",
         "CLI": "Itqan CLI",
@@ -2957,7 +2957,7 @@
     },
     "DEVELOPER": {
       "TITLE": "API usage",
-      "SUBTITLE": "How your apps use Itqan: API calls, plays and downloads attributed to your API keys.",
+      "SUBTITLE": "How your apps use Fanar: API calls, plays and downloads attributed to your API keys.",
       "BACK_TO_KEYS": "Back to API keys",
       "VIEW_USAGE": "View the usage of your apps"
     },
@@ -3007,7 +3007,7 @@
         "qiraah": "Qira'ah"
       },
       "COVERAGE_TITLE": "Incomplete recitations",
-      "COVERAGE_HINT": "Missing surahs are ordered by how much each surah is played across Itqan (last {{days}} days).",
+      "COVERAGE_HINT": "Missing surahs are ordered by how much each surah is played across Fanar (last {{days}} days).",
       "SURAHS": "Surahs",
       "MISSING": "Missing (most wanted first)",
       "TIMINGS": "Ayah timings",
@@ -3067,7 +3067,7 @@
   },
   "RECITERS": {
     "PAGE_TITLE": "Quran Reciters",
-    "PAGE_SUBTITLE": "Browse and search Quran reciters on ITQAN.",
+    "PAGE_SUBTITLE": "Browse and search Quran reciters on Fanar.",
     "SEARCH_PLACEHOLDER": "Search reciters by name...",
     "NATIONALITY_FILTER_PLACEHOLDER": "Nationality",
     "NO_RESULTS_TITLE": "No reciters found",
