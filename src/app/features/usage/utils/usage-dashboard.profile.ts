@@ -31,6 +31,7 @@ const ALL_METRICS: UsageMetric[] = [
   'plays',
   'downloads',
   'installs',
+  'updates',
   'api_calls',
   'views',
   'requests',
@@ -43,6 +44,7 @@ const ALL_METRICS: UsageMetric[] = [
 const FILE_METRICS: UsageMetric[] = [
   'downloads',
   'installs',
+  'updates',
   'unique_downloaders',
   'api_calls',
   'requests',
@@ -51,6 +53,7 @@ const FILE_METRICS: UsageMetric[] = [
 const FILE_HEADLINE: UsageHeadline[] = [
   'downloads',
   'installs',
+  'updates',
   'unique_downloaders',
   'latest_version_share',
 ];
