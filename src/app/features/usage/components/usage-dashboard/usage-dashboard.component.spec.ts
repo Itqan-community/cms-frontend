@@ -30,6 +30,7 @@ const SUMMARY: UsageSummary = {
     downloads: metric(4),
     installs: metric(2),
     updates: metric(1),
+    usage: metric(1600),
     api_calls: metric(9),
     requests: metric(40),
     bytes: metric(10),
@@ -134,7 +135,7 @@ describe('UsageDashboardComponent', () => {
     const [scope, filters] = api.summary.calls.mostRecent().args;
     expect(scope).toBe('publisher');
     expect(filters.channel).toBe('cli');
-    expect(api.timeseries.calls.mostRecent().args[2].metric).toBe('plays');
+    expect(api.timeseries.calls.mostRecent().args[2].metric).toBe('usage');
     expect(api.breakdown.calls.count()).toBe(5);
   });
 

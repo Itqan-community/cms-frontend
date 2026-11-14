@@ -120,6 +120,11 @@ describe('usage-filters.util', () => {
     expect(usageStateToParams(state)['reciter']).toBe('12');
   });
 
+  it('usageStateFromParams keeps every metric the dashboards offer', () => {
+    expect(usageStateFromParams({ metric: 'usage' }).metric).toBe('usage');
+    expect(usageStateFromParams({ metric: 'updates' }).metric).toBe('updates');
+  });
+
   it('usageStateFromParams ignores an invalid custom range and unknown metric', () => {
     const state = usageStateFromParams(
       { range: 'custom', start: 'x', end: '2026-01-31', metric: 'nope' },

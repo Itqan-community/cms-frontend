@@ -11,6 +11,7 @@ export type UsageMetric =
   | 'installs'
   | 'updates'
   | 'api_calls'
+  | 'usage'
   | 'requests'
   | 'bytes'
   | 'unique_listeners'
