@@ -123,6 +123,7 @@ describe('usage-filters.util', () => {
   it('usageStateFromParams keeps every metric the dashboards offer', () => {
     expect(usageStateFromParams({ metric: 'usage' }).metric).toBe('usage');
     expect(usageStateFromParams({ metric: 'updates' }).metric).toBe('updates');
+    expect(usageStateFromParams({ metric: 'public_api_calls' }).metric).toBe('public_api_calls');
   });
 
   it('usageStateFromParams ignores an invalid custom range and unknown metric', () => {

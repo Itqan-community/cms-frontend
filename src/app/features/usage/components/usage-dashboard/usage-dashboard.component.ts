@@ -66,6 +66,7 @@ import {
 } from '../../utils/usage-filters.util';
 import { RecitationCatalogComponent } from '../recitation-catalog/recitation-catalog.component';
 import { RecitationInsightsComponent } from '../recitation-insights/recitation-insights.component';
+import { TextInsightsComponent } from '../text-insights/text-insights.component';
 import { UsageChartComponent, UsageTableRow } from '../usage-chart/usage-chart.component';
 
 interface Loadable<T> {
@@ -139,6 +140,7 @@ function displayValue(metric: UsageMetric, value: number | string | null): numbe
     TranslateModule,
     RecitationCatalogComponent,
     RecitationInsightsComponent,
+    TextInsightsComponent,
     UsageChartComponent,
   ],
   templateUrl: './usage-dashboard.component.html',
@@ -576,7 +578,7 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
       this.track(
         `panel:${panel.by}`,
         this.api.breakdown(scope, filters, {
-          metric,
+          metric: panel.metric ?? metric,
           by: panel.by,
           limit: panel.limit,
           tz: panel.by === 'hour_of_week' ? tz : undefined,
