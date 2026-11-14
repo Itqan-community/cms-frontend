@@ -13,9 +13,15 @@ describe('initializeAppTranslations', () => {
       'use',
     ]);
     localStorage.removeItem('lang');
+    document.cookie = 'lang=; Path=/; Max-Age=0';
     TestBed.configureTestingModule({
       providers: [{ provide: TranslateService, useValue: translate }],
     });
+  });
+
+  afterEach(() => {
+    localStorage.removeItem('lang');
+    document.cookie = 'lang=; Path=/; Max-Age=0';
   });
 
   it('loads the default language on success', async () => {
@@ -47,6 +53,20 @@ describe('initializeAppTranslations', () => {
 
   it('uses localStorage lang when set', async () => {
     localStorage.setItem('lang', 'en');
+    translate.use.and.returnValue(of({}));
+    await TestBed.runInInjectionContext(() => initializeAppTranslations());
+    expect(translate.use).toHaveBeenCalledOnceWith('en');
+  });
+
+  it('copies the language into the cookie the SSR server reads', async () => {
+    localStorage.setItem('lang', 'en');
+    translate.use.and.returnValue(of({}));
+    await TestBed.runInInjectionContext(() => initializeAppTranslations());
+    expect(document.cookie).toContain('lang=en');
+  });
+
+  it('falls back to the cookie when localStorage has no language', async () => {
+    document.cookie = 'lang=en; Path=/';
     translate.use.and.returnValue(of({}));
     await TestBed.runInInjectionContext(() => initializeAppTranslations());
     expect(translate.use).toHaveBeenCalledOnceWith('en');

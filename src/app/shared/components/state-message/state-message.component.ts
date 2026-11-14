@@ -25,7 +25,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
       <div class="state-message__actions">
         @if (secondaryActionLabel()) {
           <a nz-button [routerLink]="secondaryRouterLink()">
-            {{ secondaryActionLabel() }}
+            <span>{{ secondaryActionLabel() }}</span>
           </a>
         }
         @if (actionLabel()) {
@@ -38,7 +38,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
             @if (actionIcon()) {
               <ng-icon [name]="actionIcon()" aria-hidden="true" />
             }
-            {{ actionLabel() }}
+            <span>{{ actionLabel() }}</span>
           </button>
         }
       </div>

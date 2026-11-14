@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { inject, Injectable } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
+import { LANG_QUERY_PARAM, UI_LANGUAGE, UiLanguage } from '../i18n/ui-language';
 
 const DEFAULT_TITLE_AR = 'إتقان | نظام إدارة المحتوى';
 const DEFAULT_TITLE_EN = 'ITQAN | Content Management System';
@@ -9,6 +10,8 @@ const DEFAULT_DESCRIPTION_AR =
   'إتقان - منصة إدارة المحتوى القرآني: تصفح وابحث في المصاحف والتلاوات والتفاسير والقراء.';
 const DEFAULT_DESCRIPTION_EN =
   'ITQAN - Quranic content management platform: browse and search Mushafs, recitations, tafsir, and reciters.';
+const OG_LOCALES: Record<UiLanguage, string> = { ar: 'ar_AR', en: 'en_US' };
+const SITE_NAMES: Record<UiLanguage, string> = { ar: 'إتقان', en: 'ITQAN' };
 
 export interface SeoConfig {
   title: string;
@@ -28,6 +31,7 @@ export class SeoService {
   private readonly title = inject(Title);
   private readonly meta = inject(Meta);
   private readonly document = inject(DOCUMENT);
+  private readonly lang = inject(UI_LANGUAGE);
 
   private siteOrigin(): string {
     if (environment.SITE_URL) {
@@ -36,8 +40,14 @@ export class SeoService {
     return typeof window !== 'undefined' ? window.location.origin : '';
   }
 
+  /** Arabic is the default (no query); English pages carry `?lang=en`. */
+  private pageUrl(path: string, lang: UiLanguage): string {
+    const base = `${this.siteOrigin()}${path}`;
+    return lang === 'ar' ? base : `${base}?${LANG_QUERY_PARAM}=${lang}`;
+  }
+
   setSeo(config: SeoConfig): void {
-    const url = `${this.siteOrigin()}${config.path}`;
+    const url = this.pageUrl(config.path, this.lang);
 
     this.title.setTitle(config.title);
 
@@ -51,6 +61,12 @@ export class SeoService {
     this.meta.updateTag({ property: 'og:description', content: config.description });
     this.meta.updateTag({ property: 'og:url', content: url });
     this.meta.updateTag({ property: 'og:type', content: config.type ?? 'website' });
+    this.meta.updateTag({ property: 'og:site_name', content: SITE_NAMES[this.lang] });
+    this.meta.updateTag({ property: 'og:locale', content: OG_LOCALES[this.lang] });
+    this.meta.updateTag({
+      property: 'og:locale:alternate',
+      content: OG_LOCALES[this.lang === 'ar' ? 'en' : 'ar'],
+    });
 
     this.meta.updateTag({
       name: 'twitter:card',
@@ -67,17 +83,37 @@ export class SeoService {
       this.meta.removeTag('name="twitter:image"');
     }
 
-    this.setCanonicalUrl(url);
+    this.setLink('link[rel="canonical"]', { rel: 'canonical' }, url);
+    this.setAlternates(config.path, !!config.noIndex);
   }
 
-  private setCanonicalUrl(url: string): void {
-    let link = this.document.querySelector<HTMLLinkElement>('link[rel="canonical"]');
+  /** hreflang links for both languages, plus x-default (Arabic). Not for noindex pages. */
+  private setAlternates(path: string, noIndex: boolean): void {
+    const alternates: [string, string][] = [
+      ['ar', this.pageUrl(path, 'ar')],
+      ['en', this.pageUrl(path, 'en')],
+      ['x-default', this.pageUrl(path, 'ar')],
+    ];
+    for (const [hreflang, href] of alternates) {
+      const selector = `link[rel="alternate"][hreflang="${hreflang}"]`;
+      if (noIndex) {
+        this.document.head.querySelector(selector)?.remove();
+      } else {
+        this.setLink(selector, { rel: 'alternate', hreflang }, href);
+      }
+    }
+  }
+
+  private setLink(selector: string, attrs: Record<string, string>, href: string): void {
+    let link = this.document.head.querySelector<HTMLLinkElement>(selector);
     if (!link) {
       link = this.document.createElement('link');
-      link.setAttribute('rel', 'canonical');
+      for (const [name, value] of Object.entries(attrs)) {
+        link.setAttribute(name, value);
+      }
       this.document.head.appendChild(link);
     }
-    link.setAttribute('href', url);
+    link.setAttribute('href', href);
   }
 
   /** Restores the app-wide default title/description so leaving an entity page doesn't leak its tags. */

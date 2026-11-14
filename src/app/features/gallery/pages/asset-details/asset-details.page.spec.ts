@@ -125,3 +125,57 @@ describe('AssetDetailsPage actions', () => {
     expect(requestButton(el)).toBeNull();
   });
 });
+
+describe('AssetDetailsPage after a server render', () => {
+  const guestAsset = { id: 7, access_status: null, snapshots: [] } as unknown as AssetDetails;
+  const userAsset = { ...guestAsset, access_status: 'approved' } as AssetDetails;
+  let serverMarker: HTMLElement;
+
+  beforeEach(() => {
+    serverMarker = document.createElement('div');
+    serverMarker.setAttribute('ng-server-context', 'ssr');
+    document.body.appendChild(serverMarker);
+  });
+
+  afterEach(() => serverMarker.remove());
+
+  function create(signedIn: boolean) {
+    const getAssetDetails = jasmine
+      .createSpy('getAssetDetails')
+      .and.callFake((_id: string, options?: { skipTransferCache?: boolean }) =>
+        of(options?.skipTransferCache ? userAsset : guestAsset)
+      );
+    TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AssetsService, useValue: { getAssetDetails } },
+        { provide: IssuesService, useValue: {} },
+        {
+          provide: AuthService,
+          useValue: { isLoggedIn: () => false, canActivateAsLoggedIn: () => signedIn },
+        },
+      ],
+    });
+    TestBed.overrideComponent(AssetDetailsPage, { set: { template: '', imports: [] } });
+    TestBed.overrideProvider(NzModalService, { useValue: {} });
+    const page = TestBed.createComponent(AssetDetailsPage).componentInstance;
+    page.ngOnInit();
+    return { page, getAssetDetails };
+  }
+
+  it('fetches the asset again for a signed-in user, past the transfer cache', () => {
+    const { page, getAssetDetails } = create(true);
+
+    expect(getAssetDetails).toHaveBeenCalledWith(page.id, { skipTransferCache: true });
+    expect(page.asset()?.access_status).toBe('approved');
+  });
+
+  it('keeps the server data for a guest', () => {
+    const { getAssetDetails } = create(false);
+
+    expect(getAssetDetails).toHaveBeenCalledTimes(1);
+  });
+});
