@@ -751,6 +751,10 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
   `FetchBackend` (keep-alive), bundled translations, `HTTP_TRANSFER_CACHE_ORIGIN_MAP` when proxying.
   Server renders as a guest (no auth bootstrap); `<app-header ngSkipHydration>`; asset detail
   refetches `access_status` for signed-in users after hydration. Missing asset/reciter → HTTP 404.
+- **Hydration rules:** server and first browser render must build the same DOM. `ViewportService`
+  renders for a desktop width (`BREAKPOINTS.xl`) on the server and keeps it until a server-rendered
+  page is stable; `nz-button` labels next to an icon go in a `<span>` (NG-ZORRO wraps bare text
+  itself, which breaks hydration).
 - **SEO:** `SeoService` canonical (`?lang=en` for English), hreflang ar/en/x-default, og:locale,
   og:site_name; sitemap lists static, reciter, asset and publisher pages in both languages.
 - **Cache:** hashed files + `/assets/` 1y immutable; HTML `public, max-age=0, must-revalidate`, or
