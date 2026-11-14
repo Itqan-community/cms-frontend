@@ -2792,7 +2792,6 @@
     "TOP_ENDPOINTS": "Top endpoints",
     "TOP_ENTITIES": "Top entities",
     "NO_DATA": "No data for the selected period",
-    "ERROR_UNAVAILABLE": "Usage stats are temporarily unavailable. Please try again later.",
     "LOAD_ERROR": "Could not load this report.",
     "RETRY": "Retry",
     "VIEW_AS_TABLE": "View as table",
@@ -2919,7 +2918,6 @@
       "DASHBOARD": "Dashboard",
       "LEADERBOARD": "Leaderboard",
       "UNSEEN": "Unseen traffic",
-      "LEGACY": "Legacy board",
       "RECITATIONS": "Recitations",
       "TEXT_ASSETS": "Text assets"
     },

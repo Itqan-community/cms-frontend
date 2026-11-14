@@ -581,8 +581,7 @@ and catalog; Text assets = the dashboard fixed to the text category: CLI install
 public API calls per surah, gallery views, text insights (the asset Analytics tab of a text asset
 shows the same); picking either in the Dashboard category filter shows the same profile; Itqan staff
 also get a publisher picker, Leaderboard and Unseen traffic (bucketed like the dashboard trend: the
-`granularity` URL param is shared by the tabs); the Mixpanel iframe is the "Legacy board" tab
-(loaded when opened) until the usage-reports cutover. `/account/api-keys` shows and edits each key's
+`granularity` URL param is shared by the tabs). `/account/api-keys` shows and edits each key's
 public app slug (`app_slug`). The global error toast skips `usage_counts_disabled`.
 
 ### 6. Error (`src/app/features/error/`)
