@@ -1,10 +1,14 @@
 /**
- * On Cloudflare Pages staging (`staging.cms.itqan.dev`, `cms-frontend-staging.pages.dev`),
+ * On Cloudflare Pages staging (`staging.cms.itqan.dev`, `staging.fanar.itqan.dev`, `cms-frontend-staging.pages.dev`),
  * API traffic is same-origin via repo-root `functions/` proxies so Django session cookies from
  * `/accounts/.../callback` are visible to `/cms-api/...` XHR (split-host + SameSite=Lax fix).
  * Google/GitHub console + Django must allow `https://<staging-host>/accounts/.../callback`.
  */
-const STAGING_CMS_HOSTS = ['staging.cms.itqan.dev', 'cms-frontend-staging.pages.dev'] as const;
+const STAGING_CMS_HOSTS = [
+  'staging.cms.itqan.dev',
+  'staging.fanar.itqan.dev',
+  'cms-frontend-staging.pages.dev',
+] as const;
 const STAGING_CMS_HOST = STAGING_CMS_HOSTS[0];
 
 function stagingCmsOrigin(): string | undefined {
