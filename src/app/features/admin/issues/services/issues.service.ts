@@ -45,7 +45,10 @@ export class IssuesService {
     if (search.trim()) {
       params = params.set('search', search.trim());
     }
-    return this.http.get<PagedIssueReportAssets>(`${this.baseUrl}-assets/`, { params });
+    return this.http.get<PagedIssueReportAssets>(
+      `${environment.ADMIN_API_BASE_URL}/issue-report-assets/`,
+      { params }
+    );
   }
 
   get(id: number): Observable<IssueReportOut> {
