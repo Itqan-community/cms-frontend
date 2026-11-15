@@ -17,6 +17,19 @@ export interface IssueReportContext {
   glyph?: string;
 }
 
+/** An asset a report can be filed against (the selected publisher's). */
+export interface IssueReportAsset {
+  id: number;
+  name: string;
+  category: string;
+  mushaf_layout: { page_count: number } | null;
+}
+
+export interface PagedIssueReportAssets {
+  results: IssueReportAsset[];
+  count: number;
+}
+
 export interface IssueReportOut {
   id: number;
   reporter: IssueReportReporter;
