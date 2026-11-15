@@ -8,6 +8,7 @@ import {
   IssueReportListFilters,
   IssueReportOut,
   IssueReportUpdateIn,
+  PagedIssueReportAssets,
   PagedIssueReportOut,
 } from '../models/issues.models';
 
@@ -36,6 +37,15 @@ export class IssuesService {
     }
 
     return this.http.get<PagedIssueReportOut>(`${this.baseUrl}/`, { params });
+  }
+
+  /** The selected publisher's assets (X-Tenant) a report can be filed against, searched by name. */
+  searchAssets(search: string): Observable<PagedIssueReportAssets> {
+    let params = new HttpParams().set('page_size', '20');
+    if (search.trim()) {
+      params = params.set('search', search.trim());
+    }
+    return this.http.get<PagedIssueReportAssets>(`${this.baseUrl}-assets/`, { params });
   }
 
   get(id: number): Observable<IssueReportOut> {
