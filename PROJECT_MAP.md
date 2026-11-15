@@ -576,8 +576,7 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 reciter / riwayah filters, listening hours, recitation insights and catalog; picking "Recitations"
 in the Dashboard category filter shows the same profile); Itqan staff also get a publisher picker,
 Leaderboard and Unseen traffic (bucketed like the dashboard trend: the `granularity` URL param is
-shared by the tabs); the Mixpanel iframe is the "Legacy board" tab (loaded when opened) until the
-usage-reports cutover. `/account/api-keys` shows and edits each key's public app slug (`app_slug`).
+shared by the tabs). `/account/api-keys` shows and edits each key's public app slug (`app_slug`).
 The global error toast skips `usage_counts_disabled`.
 
 ### 6. Error (`src/app/features/error/`)

@@ -16,7 +16,7 @@
     }
   </header>
 
-  <nz-tabset (nzSelectedIndexChange)="onTabChange($event, isStaff() ? 4 : 2)">
+  <nz-tabset>
     <nz-tab [nzTitle]="'USAGE.TABS.DASHBOARD' | translate">
       <app-usage-dashboard [scope]="scope()" [publisherId]="selectedPublisherId()" />
     </nz-tab>
@@ -44,26 +44,5 @@
         </ng-template>
       </nz-tab>
     }
-    <nz-tab [nzTitle]="'USAGE.TABS.LEGACY' | translate">
-      <nz-spin [nzSpinning]="boardLoading()">
-        @if (boardError()) {
-          <nz-alert
-            nzType="warning"
-            [nzMessage]="'USAGE.ERROR_UNAVAILABLE' | translate"
-            nzShowIcon
-          ></nz-alert>
-        } @else if (boardUrl()) {
-          <iframe
-            class="usage-page__board"
-            title="Mixpanel"
-            [src]="boardUrl()!"
-            frameborder="0"
-            allowfullscreen
-          ></iframe>
-        } @else if (!boardLoading()) {
-          <nz-empty [nzNotFoundContent]="'USAGE.NO_DATA' | translate"></nz-empty>
-        }
-      </nz-spin>
-    </nz-tab>
   </nz-tabset>
 </div>
