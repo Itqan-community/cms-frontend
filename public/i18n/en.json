@@ -1908,6 +1908,8 @@
       "DETAIL": {
         "BREADCRUMB": "Issue Management",
         "ASSET_ID": "Asset ID",
+        "CONTACT_REPORTER": "Contact reporter",
+        "CONTACT_SUBJECT": "Issue #{{id}}: {{asset}}",
         "DESCRIPTION_TITLE": "Description",
         "NOT_FOUND": "This issue report could not be found."
       },

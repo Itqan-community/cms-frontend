@@ -1908,6 +1908,8 @@
       "DETAIL": {
         "BREADCRUMB": "إدارة البلاغات",
         "ASSET_ID": "معرّف الأصل",
+        "CONTACT_REPORTER": "التواصل مع المُبلِّغ",
+        "CONTACT_SUBJECT": "البلاغ رقم {{id}}: {{asset}}",
         "DESCRIPTION_TITLE": "الوصف",
         "NOT_FOUND": "تعذر العثور على هذا البلاغ."
       },
