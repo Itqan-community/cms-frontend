@@ -15,7 +15,7 @@ Disallow: /accounts/
 Disallow: /complete-profile
 Disallow: /unauthorized
 
-Sitemap: https://cms.itqan.dev/sitemap.xml
+Sitemap: https://fanar.itqan.dev/sitemap.xml
 `;
 
 const DISALLOW_ALL_ROBOTS = `User-agent: *

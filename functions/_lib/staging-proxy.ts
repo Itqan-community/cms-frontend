@@ -1,4 +1,5 @@
 export const STAGING_PROXY_HOSTS = [
+  'staging.fanar.itqan.dev',
   'staging.cms.itqan.dev',
   'cms-frontend-staging.pages.dev',
 ] as const;

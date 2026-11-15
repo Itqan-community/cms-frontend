@@ -104,10 +104,10 @@ export class RecitersPage implements OnInit {
   private setSeo(lang: string): void {
     const isAr = lang === 'ar';
     this.seo.setSeo({
-      title: isAr ? 'القراء | إتقان' : 'Quran Reciters | ITQAN',
+      title: isAr ? 'القراء | فنار' : 'Quran Reciters | Fanar',
       description: isAr
-        ? 'تصفح وابحث في قائمة قراء القرآن الكريم على منصة إتقان.'
-        : 'Browse and search Quran reciters on the ITQAN platform.',
+        ? 'تصفح وابحث في قائمة قراء القرآن الكريم على منصة فنار.'
+        : 'Browse and search Quran reciters on Fanar.',
       path: '/reciters',
     });
   }

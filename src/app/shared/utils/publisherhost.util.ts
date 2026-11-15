@@ -14,7 +14,7 @@ const publisherMap: Record<string, number> = {
 };
 
 // Main CMS domains that should NOT be treated as publisher hosts
-const mainDomains = ['cms.itqan.dev', 'localhost'];
+const mainDomains = ['fanar.itqan.dev', 'staging.fanar.itqan.dev', 'cms.itqan.dev', 'localhost'];
 
 export function getPublisher(): string | null {
   // Check if it's a main CMS domain

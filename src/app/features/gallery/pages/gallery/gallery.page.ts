@@ -26,10 +26,10 @@ export class GalleryPage implements OnInit {
   private setSeo(lang: string): void {
     const isAr = lang === 'ar';
     this.seo.setSeo({
-      title: isAr ? 'مكتبة الأصول القرآنية | إتقان' : 'Assets Library | ITQAN',
+      title: isAr ? 'مكتبة الأصول القرآنية | فنار' : 'Assets Library | Fanar',
       description: isAr
         ? 'تصفح وابحث في مكتبة الأصول القرآنية: مصاحف، تلاوات، تفاسير، وترجمات مفتوحة المصدر.'
-        : 'Browse and search the ITQAN assets library: Mushafs, recitations, tafsir, and translations, open for reuse.',
+        : 'Browse and search the Fanar assets library: Mushafs, recitations, tafsir, and translations, open for reuse.',
       path: '/gallery',
     });
   }
