@@ -49,6 +49,10 @@
 
       <div class="admin-hero-actions">
         @if (canUpdateIssue()) {
+          <a nz-button class="issue-detail__contact" [href]="contactHref(issue()!)">
+            <ng-icon name="lucideMail" />
+            {{ 'ADMIN.ISSUES.DETAIL.CONTACT_REPORTER' | translate }}
+          </a>
           <button nz-button nzType="primary" type="button" (click)="onEdit()">
             <ng-icon name="lucideSquarePen" />
             {{ 'ADMIN.COMMON.EDIT' | translate }}

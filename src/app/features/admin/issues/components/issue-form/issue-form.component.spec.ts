@@ -5,22 +5,18 @@ import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { of, throwError } from 'rxjs';
-import { AssetsService } from '../../../../gallery/services/assets.service';
 import { AdminAuthService } from '../../../services/admin-auth.service';
-import { AdminTenantService } from '../../../services/admin-tenant.service';
 import { IssuesService } from '../../services/issues.service';
 import { IssueFormComponent } from './issue-form.component';
 
 describe('IssueFormComponent', () => {
   const isStaff = signal(false);
-  const selectedPublisherId = signal<number | null>(7);
   let getAssets: jasmine.Spy;
   let create: jasmine.Spy;
   let message: jasmine.SpyObj<NzMessageService>;
 
   beforeEach(() => {
     isStaff.set(false);
-    selectedPublisherId.set(7);
     getAssets = jasmine.createSpy('getAssets').and.returnValue(of({ results: [] }));
     create = jasmine.createSpy('create').and.returnValue(of({ id: 5 }));
     message = jasmine.createSpyObj('NzMessageService', ['error', 'success']);
@@ -32,11 +28,9 @@ describe('IssueFormComponent', () => {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: new Map(), routeConfig: { path: 'new' } } },
         },
-        { provide: AssetsService, useValue: { getAssets } },
-        { provide: IssuesService, useValue: { create } },
+        { provide: IssuesService, useValue: { create, searchAssets: getAssets } },
         { provide: NzMessageService, useValue: message },
         { provide: AdminAuthService, useValue: { isStaff } },
-        { provide: AdminTenantService, useValue: { selectedPublisherId } },
       ],
     });
   });
@@ -48,23 +42,12 @@ describe('IssueFormComponent', () => {
     tick(300);
   }
 
-  it("searches only the selected publisher's assets for publisher users", fakeAsync(() => {
+  it("searches through the portal's publisher-scoped asset search", fakeAsync(() => {
     // Act
     search('mushaf');
 
     // Assert
-    expect(getAssets).toHaveBeenCalledWith([], 'mushaf', [], 7);
-  }));
-
-  it("searches the selected publisher's assets for Itqan staff too", fakeAsync(() => {
-    // Arrange — the saved report opens on a detail page scoped to the selected publisher
-    isStaff.set(true);
-
-    // Act
-    search('mushaf');
-
-    // Assert
-    expect(getAssets).toHaveBeenCalledWith([], 'mushaf', [], 7);
+    expect(getAssets).toHaveBeenCalledWith('mushaf');
   }));
 
   function formWithAsset(category: string) {
