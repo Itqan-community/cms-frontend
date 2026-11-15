@@ -11,13 +11,8 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSkeletonModule } from 'ng-zorro-antd/skeleton';
 import { Subject, debounceTime, distinctUntilChanged, finalize, switchMap } from 'rxjs';
-import { Categories } from '../../../../../core/enums/categories.enum';
-import { Licenses } from '../../../../../core/enums/licenses.enum';
 import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-resolver.util';
-import { Asset } from '../../../../gallery/models/assets.model';
-import { AssetsService } from '../../../../gallery/services/assets.service';
-import { AdminTenantService } from '../../../services/admin-tenant.service';
-import { IssueReportStatus } from '../../models/issues.models';
+import { IssueReportAsset, IssueReportStatus } from '../../models/issues.models';
 import { IssuesService } from '../../services/issues.service';
 import {
   createIssueContextForm,
@@ -51,8 +46,6 @@ export class IssueFormComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
   private readonly issuesService = inject(IssuesService);
-  private readonly assetsService = inject(AssetsService);
-  private readonly tenant = inject(AdminTenantService);
   private readonly message = inject(NzMessageService);
   private readonly translate = inject(TranslateService);
   private readonly destroyRef = inject(DestroyRef);
@@ -62,7 +55,7 @@ export class IssueFormComponent implements OnInit {
   readonly isEditMode = signal(false);
   readonly loadingDetail = signal(false);
   readonly submitting = signal(false);
-  readonly assetOptions = signal<Asset[]>([]);
+  readonly assetOptions = signal<IssueReportAsset[]>([]);
   readonly assetsLoading = signal(false);
 
   readonly statusOptions: IssueReportStatus[] = [
@@ -110,8 +103,9 @@ export class IssueFormComponent implements OnInit {
         distinctUntilChanged(),
         switchMap((q) => {
           this.assetsLoading.set(true);
-          return this.assetsService
-            .getAssets([], q ?? '', [], this.assetPublisherId())
+          // Portal-scoped: the selected publisher's assets only (X-Tenant), not the gallery's.
+          return this.issuesService
+            .searchAssets(q ?? '')
             .pipe(finalize(() => this.assetsLoading.set(false)));
         }),
         takeUntilDestroyed(this.destroyRef)
@@ -137,14 +131,6 @@ export class IssueFormComponent implements OnInit {
     this.assetPageCount.set(asset?.mushaf_layout?.page_count ?? null);
     this.contextForm.reset();
     setIssueContextRequired(this.contextKind(), this.contextForm);
-  }
-
-  /**
-   * The selected publisher's assets, for staff too: the report's detail page (opened after saving)
-   * is scoped to the selected publisher, so a report on another publisher's asset would not open.
-   */
-  private assetPublisherId(): number | null {
-    return this.tenant.selectedPublisherId();
   }
 
   onAssetSearch(query: string): void {
@@ -254,18 +240,9 @@ export class IssueFormComponent implements OnInit {
           this.assetOptions.set([
             {
               id: issue.asset_id,
-              category: Categories.TEXT,
-              tags: [],
               name: issue.asset_name,
-              description: '',
-              publisher: { id: 0, name: '' },
-              license: Licenses.CC0,
-              // The issue record carries only the asset's id and name, so the
-              // content template is genuinely unknown here. Null is honest: the
-              // badge renders nothing rather than guessing a template.
-              template: null,
+              category: issue.asset_category ?? '',
               mushaf_layout: null,
-              has_ayah_timings: false,
             },
           ]);
           this.loadingDetail.set(false);
