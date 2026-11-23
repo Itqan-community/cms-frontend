@@ -64,6 +64,24 @@ describe('CsvTemplateDownloadComponent', () => {
     expect(anchor.click).toHaveBeenCalled();
   });
 
+  it("sends the new asset's column keys, and is not ready while they are invalid", () => {
+    // Arrange
+    fixture.componentRef.setInput('template', 'ayah');
+    fixture.componentRef.setInput('columnKeys', []);
+
+    // Assert
+    expect(component.ready()).toBeFalse();
+
+    // Act
+    fixture.componentRef.setInput('columnKeys', ['question', 'answer']);
+    component.download();
+    const req = httpMock.expectOne((r) => r.url.endsWith('/content/text-assets/csv-template/'));
+    req.flush(new Blob(['surah,ayah,question,answer\n']));
+
+    // Assert
+    expect(req.request.params.getAll('columns')).toEqual(['question', 'answer']);
+  });
+
   it("downloads an existing asset's template by slug, named after the asset", () => {
     // Arrange
     fixture.componentRef.setInput('slug', 'tabari');

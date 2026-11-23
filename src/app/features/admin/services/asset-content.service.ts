@@ -331,15 +331,20 @@ export class AssetContentService {
   }
 
   /** An empty CSV to fill in for a template, before the asset exists (one row
-   *  per surah / ayah / word / page, blank text). `page` needs the layout. */
+   *  per surah / ayah / word / page, a blank cell per column: `columnKeys`, else
+   *  `text`). `page` needs the layout. */
   downloadCsvTemplate(
     kind: AssetVersionParentKind,
     template: AssetTemplate,
-    mushafLayoutId?: number | null
+    mushafLayoutId?: number | null,
+    columnKeys?: string[] | null
   ): Observable<Blob> {
     let params = new HttpParams().set('template', template);
     if (mushafLayoutId != null) {
       params = params.set('mushaf_layout_id', mushafLayoutId);
+    }
+    for (const key of columnKeys ?? []) {
+      params = params.append('columns', key);
     }
     return this.http.get(`${this.base}/content/text-assets/csv-template/`, {
       params,

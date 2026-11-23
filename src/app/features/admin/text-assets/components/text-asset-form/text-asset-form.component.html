@@ -386,6 +386,113 @@
         </nz-form-item>
       </div>
 
+      @if (!isEditMode() && canManageColumns()) {
+        <div class="admin-form-card" formArrayName="columns">
+          <h3 class="admin-form-card__title">
+            <ng-icon name="lucideLayoutGrid" />
+            {{ 'ADMIN.TEXT_ASSETS.FORM.SECTION_COLUMNS' | translate }}
+          </h3>
+          <p class="text-asset-form__columns-hint">
+            {{ 'ADMIN.TEXT_ASSETS.FORM.COLUMNS_HINT' | translate }}
+          </p>
+          <div class="text-asset-form__columns-scroll">
+            <table class="text-asset-form__columns">
+              <thead>
+                <tr>
+                  <th>{{ 'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.KEY' | translate }}</th>
+                  <th>{{ 'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.LABEL_EN' | translate }}</th>
+                  <th>{{ 'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.LABEL_AR' | translate }}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of columns.controls; track row; let i = $index; let last = $last) {
+                  <tr [formGroupName]="i">
+                    <td>
+                      <input
+                        nz-input
+                        dir="ltr"
+                        formControlName="key"
+                        [placeholder]="
+                          'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.KEY_PLACEHOLDER' | translate
+                        "
+                        [nzStatus]="
+                          row.controls.key.invalid && row.controls.key.dirty ? 'error' : ''
+                        "
+                      />
+                    </td>
+                    <td>
+                      <input
+                        nz-input
+                        dir="ltr"
+                        formControlName="label_en"
+                        [placeholder]="
+                          'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.LABEL_OPTIONAL' | translate
+                        "
+                      />
+                    </td>
+                    <td>
+                      <input
+                        nz-input
+                        dir="rtl"
+                        formControlName="label_ar"
+                        [placeholder]="
+                          'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.LABEL_OPTIONAL' | translate
+                        "
+                      />
+                    </td>
+                    <td class="text-asset-form__column-actions">
+                      <button
+                        nz-button
+                        nzSize="small"
+                        type="button"
+                        [attr.aria-label]="
+                          'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.MOVE_UP' | translate
+                        "
+                        [disabled]="i === 0"
+                        (click)="moveColumn(i, -1)"
+                      >
+                        <ng-icon name="lucideChevronUp" />
+                      </button>
+                      <button
+                        nz-button
+                        nzSize="small"
+                        type="button"
+                        [attr.aria-label]="
+                          'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.MOVE_DOWN' | translate
+                        "
+                        [disabled]="last"
+                        (click)="moveColumn(i, 1)"
+                      >
+                        <ng-icon name="lucideChevronDown" />
+                      </button>
+                      <button
+                        nz-button
+                        nzSize="small"
+                        nzDanger
+                        type="button"
+                        [attr.aria-label]="'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.DELETE' | translate"
+                        [disabled]="columns.length === 1"
+                        (click)="removeColumn(i)"
+                      >
+                        <ng-icon name="lucideTrash2" />
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          @if (columnKeyError(); as errorKey) {
+            <p class="text-asset-form__columns-error" role="alert">{{ errorKey | translate }}</p>
+          }
+          <button nz-button nzType="dashed" type="button" (click)="addColumn()">
+            <ng-icon name="lucidePlus" />
+            {{ 'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.ADD_COLUMN' | translate }}
+          </button>
+        </div>
+      }
+
       @if (!isEditMode()) {
         <app-asset-initial-version-fields
           [versionFile]="versionFile()"
@@ -393,6 +500,7 @@
           contentKind="text"
           [contentTemplate]="form.controls.template.value"
           [mushafLayoutId]="form.controls.mushaf_layout_id.value"
+          [columnKeys]="templateColumnKeys()"
         />
       }
 

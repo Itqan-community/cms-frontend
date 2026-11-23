@@ -37,6 +37,8 @@ export class AssetInitialVersionFieldsComponent {
   readonly contentKind = input<AssetVersionParentKind | null>(null);
   readonly contentTemplate = input<AssetTemplate | null>(null);
   readonly mushafLayoutId = input<number | null>(null);
+  /** The columns the new asset will have, for the template (unset: just `text`). */
+  readonly columnKeys = input<string[] | null>(null);
 
   readonly i18n = I18N;
 
