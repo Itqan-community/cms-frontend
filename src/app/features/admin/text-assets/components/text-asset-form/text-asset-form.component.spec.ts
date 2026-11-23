@@ -9,6 +9,8 @@ import { of, throwError } from 'rxjs';
 
 import { Licenses } from '../../../../../core/enums/licenses.enum';
 import type { MushafLayout } from '../../../models/asset-content.models';
+import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
+import { AdminAuthService } from '../../../services/admin-auth.service';
 import { AdminTenantService } from '../../../services/admin-tenant.service';
 import { MushafLayoutsService } from '../../../services/mushaf-layouts.service';
 import type { TextAssetDetails } from '../../models/text-assets.models';
@@ -19,6 +21,8 @@ import { TextAssetFormComponent } from './text-asset-form.component';
 describe('TextAssetFormComponent template controls', () => {
   let textAssetsServiceMock: jasmine.SpyObj<TextAssetsService>;
   let layoutsServiceMock: jasmine.SpyObj<MushafLayoutsService>;
+  /** The selected publisher's permissions (a signal, as the real service's are). */
+  const grantedPermissions = signal<string[]>([]);
 
   const layouts: MushafLayout[] = [
     { id: 1, name: 'Standard 15-line', page_count: 604, assets_count: 3 },
@@ -51,7 +55,13 @@ describe('TextAssetFormComponent template controls', () => {
     created_at: '2026-01-01T00:00:00Z',
   };
 
-  function configure(routeParams: Record<string, string>): void {
+  const COLUMN_PERMISSIONS = [
+    PORTAL_PERMISSIONS.PORTAL_MANAGE_ASSET_COLUMNS,
+    PORTAL_PERMISSIONS.PORTAL_ACCESS_ALL_LANGUAGES,
+  ];
+
+  function configure(routeParams: Record<string, string>, permissions: string[] = []): void {
+    grantedPermissions.set(permissions);
     textAssetsServiceMock = jasmine.createSpyObj<TextAssetsService>('TextAssetsService', [
       'getDetail',
       'create',
@@ -85,6 +95,10 @@ describe('TextAssetFormComponent template controls', () => {
           useValue: { publishers: signal([]), selectedPublisherId: signal(null) },
         },
         { provide: MushafLayoutsService, useValue: layoutsServiceMock },
+        {
+          provide: AdminAuthService,
+          useValue: { hasPermission: (code: string) => grantedPermissions().includes(code) },
+        },
         {
           provide: NzMessageService,
           useValue: jasmine.createSpyObj<NzMessageService>('NzMessageService', [
@@ -303,5 +317,154 @@ describe('TextAssetFormComponent template controls', () => {
     expect(fixture.componentInstance.form.controls.long_description_ar.valid).toBeTrue();
     expect(fixture.componentInstance.form.controls.long_description_en.valid).toBeTrue();
     expect(textAssetsServiceMock.create).toHaveBeenCalled();
+  });
+
+  describe('columns', () => {
+    function fillRequired(component: TextAssetFormComponent): void {
+      component.form.patchValue({
+        name_ar: 'اسم',
+        description_ar: 'وصف',
+        description_en: 'Description',
+        license: Licenses.CC0,
+        language: 'ar',
+        publisher_id: 1,
+        slug: 'tafsir-sample',
+        tags: ['tafsir'],
+        template: 'ayah',
+      });
+    }
+
+    it('sends the columns in order, with trimmed labels, when the user may manage them', () => {
+      // Arrange
+      configure({}, COLUMN_PERMISSIONS);
+      textAssetsServiceMock.create.and.returnValue(of(detail));
+      const fixture = TestBed.createComponent(TextAssetFormComponent);
+      fixture.detectChanges();
+      const component = fixture.componentInstance;
+      fillRequired(component);
+      component.columns.at(0).patchValue({ key: 'question', label_en: ' Question ' });
+      component.addColumn();
+      component.columns.at(1).patchValue({ key: 'answer', label_ar: 'الجواب' });
+      component.addColumn();
+      component.columns.at(2).patchValue({ key: 'note' });
+
+      // Act
+      component.moveColumn(2, -1);
+      component.removeColumn(2);
+      component.onSubmit();
+
+      // Assert
+      const body = textAssetsServiceMock.create.calls.mostRecent().args[0];
+      expect(body.columns).toEqual([
+        { key: 'question', label_en: 'Question', label_ar: '' },
+        { key: 'note', label_en: '', label_ar: '' },
+      ]);
+      expect(component.templateColumnKeys()).toEqual(['question', 'note']);
+    });
+
+    it('neither shows nor sends columns without the permissions', () => {
+      // Arrange
+      configure({}, [PORTAL_PERMISSIONS.PORTAL_MANAGE_ASSET_COLUMNS]);
+      textAssetsServiceMock.create.and.returnValue(of(detail));
+      const fixture = TestBed.createComponent(TextAssetFormComponent);
+      fixture.detectChanges();
+      const component = fixture.componentInstance;
+      fillRequired(component);
+
+      // Act
+      component.onSubmit();
+
+      // Assert
+      expect(component.canManageColumns()).toBeFalse();
+      expect(component.templateColumnKeys()).toBeNull();
+      expect(textAssetsServiceMock.create.calls.mostRecent().args[0].columns).toBeUndefined();
+    });
+
+    it('blocks saving on a repeated or invalid key and offers no template meanwhile', () => {
+      // Arrange
+      configure({}, COLUMN_PERMISSIONS);
+      const fixture = TestBed.createComponent(TextAssetFormComponent);
+      fixture.detectChanges();
+      const component = fixture.componentInstance;
+      fillRequired(component);
+
+      // Act
+      component.addColumn();
+      component.columns.at(1).patchValue({ key: 'text' });
+
+      // Assert
+      expect(component.columnKeyError()).toBe('ADMIN.TEXT_ASSETS.FORM.COLUMN_KEY_DUPLICATE');
+      expect(component.templateColumnKeys()).toEqual([]);
+
+      // Act
+      component.columns.at(1).patchValue({ key: 'Bad Key' });
+      component.onSubmit();
+
+      // Assert
+      expect(component.columnKeyError()).toBe(
+        'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.ERRORS.COLUMN_KEY_INVALID'
+      );
+      expect(textAssetsServiceMock.create).not.toHaveBeenCalled();
+    });
+
+    it('stops sending columns when another publisher without the permissions is selected', () => {
+      // Arrange
+      configure({}, COLUMN_PERMISSIONS);
+      const fixture = TestBed.createComponent(TextAssetFormComponent);
+      fixture.detectChanges();
+      const component = fixture.componentInstance;
+      expect(component.columns.enabled).toBeTrue();
+
+      // Act
+      grantedPermissions.set([]);
+      fixture.detectChanges();
+
+      // Assert
+      expect(component.columns.disabled).toBeTrue();
+    });
+
+    it('does not call two blank new keys repeated', () => {
+      // Arrange
+      configure({}, COLUMN_PERMISSIONS);
+      const fixture = TestBed.createComponent(TextAssetFormComponent);
+      fixture.detectChanges();
+      const component = fixture.componentInstance;
+
+      // Act
+      component.addColumn();
+      component.addColumn();
+
+      // Assert
+      expect(component.columnKeyError()).toBeNull();
+      expect(component.columns.invalid).toBeTrue();
+    });
+
+    it('keeps the last column', () => {
+      // Arrange
+      configure({}, COLUMN_PERMISSIONS);
+      const fixture = TestBed.createComponent(TextAssetFormComponent);
+      fixture.detectChanges();
+
+      // Act
+      fixture.componentInstance.removeColumn(0);
+
+      // Assert
+      expect(fixture.componentInstance.columns.length).toBe(1);
+    });
+
+    it('leaves columns out of an update', () => {
+      // Arrange
+      configure({ slug: 'existing-tafsir' }, COLUMN_PERMISSIONS);
+      textAssetsServiceMock.patch.and.returnValue(of(detail));
+      const fixture = TestBed.createComponent(TextAssetFormComponent);
+      fixture.detectChanges();
+
+      // Act
+      fixture.componentInstance.onSubmit();
+
+      // Assert
+      expect(fixture.componentInstance.columns.disabled).toBeTrue();
+      expect(textAssetsServiceMock.patch.calls.mostRecent().args[1].columns).toBeUndefined();
+    });
   });
 });

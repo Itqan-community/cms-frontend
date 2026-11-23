@@ -142,6 +142,16 @@ export interface TextAssetFormValue extends AssetChannelFormFlags {
   /** Create-only: package slug suggested by `POST /portal/ai/slug/`. */
   slug?: string;
   file?: File;
+  /** Create-only (manage-columns permission): the asset's text columns, in order,
+   *  in place of the default `text` column; the first version's file may carry them. */
+  columns?: TextAssetColumnInput[];
+}
+
+/** One text column given when creating a text asset. */
+export interface TextAssetColumnInput {
+  key: string;
+  label_en: string;
+  label_ar: string;
 }
 
 /** Publisher option returned by /portal/filters/publishers/ */

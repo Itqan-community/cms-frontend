@@ -1,6 +1,44 @@
 .text-asset-form {
   padding: 8px 0;
 
+  &__columns-hint {
+    color: var(--admin-text-500);
+    margin-bottom: 8px;
+  }
+
+  &__columns-scroll {
+    overflow-x: auto;
+  }
+
+  &__columns {
+    width: 100%;
+    min-width: 560px;
+    border-collapse: separate;
+    border-spacing: 0 6px;
+
+    th {
+      text-align: start;
+      font-weight: 600;
+      padding-inline-end: 8px;
+    }
+
+    td {
+      padding-inline-end: 8px;
+      vertical-align: middle;
+    }
+  }
+
+  &__column-actions {
+    display: flex;
+    gap: 4px;
+    white-space: nowrap;
+  }
+
+  &__columns-error {
+    color: var(--color-red-600);
+    margin: 4px 0 8px;
+  }
+
   &__thumbnail-area {
     max-width: 320px;
   }
