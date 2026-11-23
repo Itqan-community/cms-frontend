@@ -31,8 +31,17 @@ export interface MinimalRiwayah {
   qiraah_id?: number;
 }
 
-/** GET /portal/recitations/ row */
-export interface RecitationListItem extends AssetChannelFlags {
+/** Ayah-timing coverage: ayahs of the uploaded surahs vs those with a timing. */
+export type TimingStatus = 'none' | 'partial' | 'full';
+
+export interface TimingCoverage {
+  timing_status: TimingStatus;
+  timed_ayahs_count: number;
+  ayahs_count: number;
+}
+
+/** GET /portal/recitations/ row (timing coverage summed over every quality) */
+export interface RecitationListItem extends AssetChannelFlags, TimingCoverage {
   id: number;
   slug?: string;
   name: string;

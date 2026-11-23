@@ -27,6 +27,7 @@ import { AdminAuthService } from '../../../services/admin-auth.service';
 import { AdminListBase } from '../../../utils/admin-list-base';
 import { AdminHijriYearPipe } from '../../../pipes/admin-hijri-year.pipe';
 import { AssetChannelTagsComponent } from '../../../components/asset-channels/asset-channels.component';
+import { TimingCoverageTagComponent } from '../timing-coverage-tag/timing-coverage-tag.component';
 
 @Component({
   selector: 'app-recitations-list',
@@ -46,6 +47,7 @@ import { AssetChannelTagsComponent } from '../../../components/asset-channels/as
     RecitationFiltersComponent,
     AdminColumnPickerComponent,
     TranslateModule,
+    TimingCoverageTagComponent,
     AdminHijriYearPipe,
   ],
   templateUrl: './recitations-list.component.html',
@@ -70,6 +72,7 @@ export class RecitationsListComponent extends AdminListBase<
   readonly recitationTableColumns: AdminTableColumnOption[] = [
     { key: 'name', label: 'ADMIN.RECITATIONS.COLUMNS.NAME' },
     { key: 'access', label: 'ADMIN.COMMON.COLUMN_ACCESS' },
+    { key: 'timing', label: 'ADMIN.RECITATIONS.COLUMNS.TIMING' },
     { key: 'description', label: 'ADMIN.RECITATIONS.COLUMNS.DESCRIPTION' },
     { key: 'publisher', label: 'ADMIN.RECITATIONS.COLUMNS.PUBLISHER' },
     { key: 'reciter', label: 'ADMIN.RECITATIONS.COLUMNS.RECITER' },

@@ -144,6 +144,9 @@
         <h2 class="admin-panel__title">
           <ng-icon name="lucideClock" />
           {{ 'ADMIN.RECITATIONS.TIMINGS.SECTION_TITLE' | translate }}
+          @if (selectedQualityTimingCoverage(); as coverage) {
+            <app-timing-coverage-tag [coverage]="coverage" />
+          }
         </h2>
 
         <div class="recitation-detail__timings-panel">
@@ -541,6 +544,7 @@
                 <th>{{ 'ADMIN.RECITATIONS.TRACKS.COL_FILENAME' | translate }}</th>
                 <th>{{ 'ADMIN.RECITATIONS.TRACKS.COL_DURATION' | translate }}</th>
                 <th>{{ 'ADMIN.RECITATIONS.TRACKS.COL_SIZE' | translate }}</th>
+                <th>{{ 'ADMIN.RECITATIONS.TRACKS.COL_TIMING' | translate }}</th>
                 <th>{{ 'ADMIN.RECITATIONS.TRACKS.COL_PREVIEW' | translate }}</th>
                 <th>{{ 'ADMIN.RECITATIONS.TRACKS.COL_ACTIONS' | translate }}</th>
               </tr>
@@ -556,6 +560,7 @@
                   </td>
                   <td>{{ formatDurationMs(track.duration_ms) }}</td>
                   <td>{{ formatBytes(track.size_bytes) }}</td>
+                  <td><app-timing-coverage-tag [coverage]="track" /></td>
                   <td>
                     @if (track.audio_url) {
                       <audio controls preload="none" class="recitation-detail__audio">
