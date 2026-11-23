@@ -59,6 +59,11 @@ type ColumnRow = FormGroup<{
   label_ar: FormControl<string>;
 }>;
 
+/** The key rule, on the trimmed key (it is sent trimmed); a blank key fails it too. */
+function columnKeyPattern(control: AbstractControl): ValidationErrors | null {
+  return COLUMN_KEY_PATTERN.test(String(control.value ?? '').trim()) ? null : { pattern: true };
+}
+
 /** Every column key appears once. Blank keys are left to each row's `required`. */
 function uniqueColumnKeys(control: AbstractControl): ValidationErrors | null {
   const keys = (control.value as TextAssetColumnInput[])
@@ -348,7 +353,7 @@ export class TextAssetFormComponent implements OnInit {
 
   private columnRow(key: string): ColumnRow {
     return this.fb.nonNullable.group({
-      key: [key, [Validators.required, Validators.pattern(COLUMN_KEY_PATTERN)]],
+      key: [key, [Validators.required, columnKeyPattern]],
       label_en: ['', [Validators.maxLength(255)]],
       label_ar: ['', [Validators.maxLength(255)]],
     });
