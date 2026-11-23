@@ -734,6 +734,17 @@ Release 2.1.0.
 
 ---
 
+## [2.2.0] - 2026-11-23
+
+Release 2.2.0.
+
+## Changes
+
+- feat(admin): show recitation ayah-timing coverage
+- feat(i18n): rename text assets to tafsirs, translations and Quranic sciences
+
+---
+
 ## [Unreleased]
 
 ### Added
