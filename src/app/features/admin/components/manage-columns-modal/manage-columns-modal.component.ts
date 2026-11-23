@@ -22,7 +22,7 @@ import type { AssetColumn, AssetVersionParentKind } from '../../models/asset-con
 import { AssetContentService } from '../../services/asset-content.service';
 
 /** Same rule as the backend's `validate_column_key` (reserved names are checked there). */
-const KEY_PATTERN = /^[a-z][a-z0-9_]{0,63}$/;
+export const COLUMN_KEY_PATTERN = /^[a-z][a-z0-9_]{0,63}$/;
 
 /** What an edit changed: only display labels, or the columns themselves (keys, order, set). */
 export type ColumnsChange = 'labels' | 'structure';
@@ -81,7 +81,7 @@ export class ManageColumnsModalComponent {
 
   add(): void {
     const key = this.newKey().trim();
-    if (!KEY_PATTERN.test(key)) {
+    if (!COLUMN_KEY_PATTERN.test(key)) {
       this.error.set(this.errorMessage('column_key_invalid'));
       return;
     }
@@ -103,7 +103,7 @@ export class ManageColumnsModalComponent {
   save(column: AssetColumn, field: 'key' | 'label_en' | 'label_ar', value: string): void {
     const next = value.trim();
     if (next === column[field]) return;
-    if (field === 'key' && !KEY_PATTERN.test(next)) {
+    if (field === 'key' && !COLUMN_KEY_PATTERN.test(next)) {
       this.error.set(this.errorMessage('column_key_invalid'));
       return;
     }
