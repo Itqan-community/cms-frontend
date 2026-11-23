@@ -11,7 +11,7 @@ import { writeFileSync } from 'node:fs';
 
 const context = process.env.CONTEXT ?? 'local';
 const outPath = 'dist/browser/sitemap.xml';
-const SITE_URL = 'https://cms.itqan.dev';
+const SITE_URL = 'https://fanar.itqan.dev';
 const API_BASE_URL = 'https://api.cms.itqan.dev/cms-api';
 const RECITERS_PAGE_SIZE = 100;
 
