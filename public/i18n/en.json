@@ -1458,7 +1458,10 @@
         "TAGS_LOAD_ERROR": "Could not load the tags.",
         "TAGS_RETRY": "Try again",
         "PLACEHOLDER_TAGS": "e.g. Tafsir, Translation",
-        "TAGS_HINT": "The package name starts with the first tag (e.g. tafsir-…). Itqan staff add new tags."
+        "TAGS_HINT": "The package name starts with the first tag (e.g. tafsir-…). Itqan staff add new tags.",
+        "SECTION_COLUMNS": "Columns",
+        "COLUMNS_HINT": "The text columns of the asset's file, in order. Each key is a column header in the CSV, so a first version uploaded below must have these columns. You can change them later from the content editor.",
+        "COLUMN_KEY_DUPLICATE": "Each column needs its own key."
       },
       "DELETE": {
         "CONFIRM_TITLE": "Delete this text asset?",

@@ -73,6 +73,9 @@ export class CsvTemplateDownloadComponent {
   /** Asset being created: the chosen template (and layout, for `page`). */
   readonly template = input<AssetTemplate | null>(null);
   readonly mushafLayoutId = input<number | null>(null);
+  /** Asset being created: the columns it will have (unset: just `text`). An empty
+   *  list means they aren't valid yet, so there is nothing to download. */
+  readonly columnKeys = input<string[] | null>(null);
   /** Base of the saved file's name for an existing asset (falls back to the slug). */
   readonly assetName = input<string | null>(null);
 
@@ -80,6 +83,7 @@ export class CsvTemplateDownloadComponent {
   readonly ready = computed(() => {
     if (this.slug()) return true;
     const template = this.template();
+    if (this.columnKeys()?.length === 0) return false;
     return !!template && (template !== 'page' || this.mushafLayoutId() != null);
   });
 
@@ -91,7 +95,8 @@ export class CsvTemplateDownloadComponent {
       : this.contentService.downloadCsvTemplate(
           this.kind(),
           this.template()!,
-          this.mushafLayoutId()
+          this.mushafLayoutId(),
+          this.columnKeys()
         );
     // The backend's Content-Disposition isn't exposed cross-origin, so name it here.
     const base = slug ? this.assetName()?.trim() || slug : this.template()!;

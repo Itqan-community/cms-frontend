@@ -1,6 +1,15 @@
 import { Component, DestroyRef, OnInit, computed, effect, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  AbstractControl,
+  FormArray,
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+  type FormControl,
+} from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -16,7 +25,11 @@ import { NzSwitchModule } from 'ng-zorro-antd/switch';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { NzUploadFile, NzUploadModule } from 'ng-zorro-antd/upload';
 import { Licenses } from '../../../../../core/enums/licenses.enum';
-import { AssetTag, TextAssetFormValue } from '../../models/text-assets.models';
+import {
+  AssetTag,
+  TextAssetColumnInput,
+  TextAssetFormValue,
+} from '../../models/text-assets.models';
 import { AssetTagsService } from '../../services/asset-tags.service';
 import { TextAssetsService } from '../../services/text-assets.service';
 import { AssetChannelsFieldsComponent } from '../../../components/asset-channels/asset-channels.component';
@@ -24,7 +37,10 @@ import {
   confirmChannelChange,
   getChannelConsumersConflict,
 } from '../../../utils/asset-channels.util';
+import { AdminAuthService } from '../../../services/admin-auth.service';
 import { AdminTenantService } from '../../../services/admin-tenant.service';
+import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
+import { COLUMN_KEY_PATTERN } from '../../../components/manage-columns-modal/manage-columns-modal.component';
 import { MushafLayoutsService } from '../../../services/mushaf-layouts.service';
 import { AssetTemplate, MushafLayout } from '../../../models/asset-content.models';
 import {
@@ -36,6 +52,25 @@ import { resolveApiErrorMessage } from '../../../../../shared/utils/api-error-re
 import { AssetInitialVersionFieldsComponent } from '../../../components/asset-initial-version-fields/asset-initial-version-fields.component';
 import { AiTranslateActionsComponent } from '../../../components/ai-translate-actions/ai-translate-actions.component';
 import { assetSlugValidators } from '../../../utils/asset-slug.util';
+
+type ColumnRow = FormGroup<{
+  key: FormControl<string>;
+  label_en: FormControl<string>;
+  label_ar: FormControl<string>;
+}>;
+
+/** The key rule, on the trimmed key (it is sent trimmed); a blank key fails it too. */
+function columnKeyPattern(control: AbstractControl): ValidationErrors | null {
+  return COLUMN_KEY_PATTERN.test(String(control.value ?? '').trim()) ? null : { pattern: true };
+}
+
+/** Every column key appears once. Blank keys are left to each row's `required`. */
+function uniqueColumnKeys(control: AbstractControl): ValidationErrors | null {
+  const keys = (control.value as TextAssetColumnInput[])
+    .map((column) => column.key.trim())
+    .filter((key) => key !== '');
+  return new Set(keys).size === keys.length ? null : { duplicateKey: true };
+}
 
 @Component({
   selector: 'app-text-asset-form',
@@ -74,6 +109,14 @@ export class TextAssetFormComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly translate = inject(TranslateService);
   private readonly assetTagsService = inject(AssetTagsService);
+  private readonly adminAuth = inject(AdminAuthService);
+
+  /** Same rule as the content editor's column dialog: a column applies to every language. */
+  readonly canManageColumns = computed(
+    () =>
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_MANAGE_ASSET_COLUMNS) &&
+      this.adminAuth.hasPermission(PORTAL_PERMISSIONS.PORTAL_ACCESS_ALL_LANGUAGES)
+  );
 
   readonly tagOptions = signal<AssetTag[]>([]);
   readonly tagsLoading = signal(false);
@@ -121,6 +164,37 @@ export class TextAssetFormComponent implements OnInit {
     version_summary_ar: [''],
     /** Filled by the AI translate actions; sent on create only. */
     slug: [''],
+    /** Create-only, with the manage-columns permission: the asset's text columns. */
+    columns: this.fb.array<ColumnRow>([this.columnRow('text')], {
+      validators: uniqueColumnKeys,
+    }),
+  });
+
+  get columns(): FormArray<ColumnRow> {
+    return this.form.controls.columns;
+  }
+
+  private readonly columnsValue = toSignal(this.form.controls.columns.valueChanges, {
+    initialValue: this.form.controls.columns.getRawValue(),
+  });
+
+  /** The keys for the CSV template: unset without the section, empty while any is invalid. */
+  readonly templateColumnKeys = computed<string[] | null>(() => {
+    if (!this.canManageColumns()) return null;
+    const keys = (this.columnsValue() ?? []).map((column) => (column.key ?? '').trim());
+    const valid =
+      keys.every((key) => COLUMN_KEY_PATTERN.test(key)) && new Set(keys).size === keys.length;
+    return valid ? keys : [];
+  });
+
+  /** Columns are sent only on create with the permissions (which follow the selected
+   *  publisher); otherwise they are disabled so they never block saving. */
+  private readonly columnsAvailability = effect(() => {
+    if (!this.isEditMode() && this.canManageColumns()) {
+      this.columns.enable();
+    } else {
+      this.columns.disable();
+    }
   });
 
   /** A first version's number is required once a file is attached to the create form. */
@@ -250,6 +324,41 @@ export class TextAssetFormComponent implements OnInit {
     return false;
   };
 
+  addColumn(): void {
+    this.columns.push(this.columnRow(''));
+  }
+
+  removeColumn(index: number): void {
+    if (this.columns.length > 1) this.columns.removeAt(index);
+  }
+
+  /** Move the column at ``index`` by ``delta`` places. */
+  moveColumn(index: number, delta: number): void {
+    const target = index + delta;
+    if (target < 0 || target >= this.columns.length) return;
+    const row = this.columns.at(index);
+    this.columns.removeAt(index);
+    this.columns.insert(target, row);
+  }
+
+  /** The message for the columns' first problem: a bad key the user touched, or a repeated key. */
+  columnKeyError(): string | null {
+    if (this.columns.controls.some((row) => row.controls.key.invalid && row.controls.key.dirty)) {
+      return 'ADMIN.CONTENT_EDITOR.COLUMNS_MANAGE.ERRORS.COLUMN_KEY_INVALID';
+    }
+    return this.columns.hasError('duplicateKey')
+      ? 'ADMIN.TEXT_ASSETS.FORM.COLUMN_KEY_DUPLICATE'
+      : null;
+  }
+
+  private columnRow(key: string): ColumnRow {
+    return this.fb.nonNullable.group({
+      key: [key, [Validators.required, columnKeyPattern]],
+      label_en: ['', [Validators.maxLength(255)]],
+      label_ar: ['', [Validators.maxLength(255)]],
+    });
+  }
+
   removeThumbnail(): void {
     this.thumbnailFile.set(null);
     this.thumbnailPreview.set(null);
@@ -266,6 +375,7 @@ export class TextAssetFormComponent implements OnInit {
         c.markAsDirty();
         c.updateValueAndValidity({ onlySelf: true });
       });
+      for (const row of this.columns.controls) row.controls.key.markAsDirty();
       return;
     }
 
@@ -346,6 +456,13 @@ export class TextAssetFormComponent implements OnInit {
       ] as const) {
         const value = v[key]?.trim();
         if (value) body[key] = value;
+      }
+      if (this.columns.enabled) {
+        body.columns = this.columns.getRawValue().map((column) => ({
+          key: column.key.trim(),
+          label_en: column.label_en.trim(),
+          label_ar: column.label_ar.trim(),
+        }));
       }
       if (this.versionFile()) {
         body.file = this.versionFile()!;
