@@ -745,6 +745,17 @@ Release 2.2.0.
 
 ---
 
+## [2.3.0] - 2026-11-23
+
+Release 2.3.0.
+
+## Changes
+
+- fix(text-assets): trim a column key before checking it
+- feat(text-assets): set the columns when creating a text asset
+
+---
+
 ## [Unreleased]
 
 ### Added
