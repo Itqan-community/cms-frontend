@@ -423,6 +423,31 @@ describe('TextAssetFormComponent template controls', () => {
       expect(component.columns.disabled).toBeTrue();
     });
 
+    it('accepts a padded key and sends it trimmed, but not a blank one', () => {
+      // Arrange
+      configure({}, COLUMN_PERMISSIONS);
+      textAssetsServiceMock.create.and.returnValue(of(detail));
+      const fixture = TestBed.createComponent(TextAssetFormComponent);
+      fixture.detectChanges();
+      const component = fixture.componentInstance;
+      fillRequired(component);
+      component.addColumn();
+      component.columns.at(1).patchValue({ key: '   ' });
+
+      // Assert
+      expect(component.columns.at(1).valid).toBeFalse();
+
+      // Act
+      component.columns.at(1).patchValue({ key: ' answer ' });
+      component.onSubmit();
+
+      // Assert
+      expect(component.templateColumnKeys()).toEqual(['text', 'answer']);
+      expect(textAssetsServiceMock.create.calls.mostRecent().args[0].columns?.[1].key).toBe(
+        'answer'
+      );
+    });
+
     it('does not call two blank new keys repeated', () => {
       // Arrange
       configure({}, COLUMN_PERMISSIONS);
