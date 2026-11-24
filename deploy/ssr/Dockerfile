@@ -16,7 +16,8 @@ COPY . .
 # staging:    npm run build:ssr:staging (+ disallow-all robots.txt)
 ARG BUILD=production
 ENV CONTEXT=${BUILD}
-RUN if [ "$BUILD" = "staging" ]; then npm run build:ssr:staging; else npm run build:ssr; fi
+RUN if [ "$BUILD" = "staging" ]; then npm run build:ssr:staging; else npm run build:ssr; fi \
+  && find dist -name '*.map' -delete
 
 FROM node:${NODE_VERSION}
 WORKDIR /app
@@ -26,5 +27,5 @@ COPY --from=build --chown=node:node /app/dist ./dist
 USER node
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
-  CMD wget -qO- http://127.0.0.1:4000/robots.txt >/dev/null || exit 1
+  CMD wget -qO- "http://127.0.0.1:${PORT:-4000}/robots.txt" >/dev/null || exit 1
 CMD ["node", "dist/server/server.mjs"]

@@ -1,7 +1,20 @@
 User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /account/
 Disallow: /accounts/
+Disallow: /portal/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /login-by-code
+Disallow: /mfa
+Disallow: /passkey
+Disallow: /reauthenticate
+Disallow: /provider-signup
+Disallow: /auth/
 Disallow: /complete-profile
 Disallow: /unauthorized
 

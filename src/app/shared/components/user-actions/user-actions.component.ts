@@ -38,6 +38,7 @@ import { UserAvatarComponent } from '../../components/user-avatar/user-avatar.co
       <a
         [routerLink]="['/account/login']"
         [queryParams]="loginQueryParams"
+        rel="nofollow"
         nz-button
         class="ant-btn-floating"
       >

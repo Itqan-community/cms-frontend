@@ -1,6 +1,6 @@
 @if (!hideHeader()) {
-  <!-- Header: login state, permissions and theme live in the browser, so it renders client-side -->
-  <app-header ngSkipHydration />
+  <!-- Header nav hydrates cleanly; only client-only theme and auth actions skip hydration -->
+  <app-header />
 }
 <div [class]="fullWidth() ? '' : 'app-container'">
   <!-- Content -->

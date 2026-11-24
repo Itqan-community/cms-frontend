@@ -3,7 +3,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { provideRouter, Router } from '@angular/router';
+import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzModalService } from 'ng-zorro-antd/modal';
 import { of } from 'rxjs';
@@ -177,5 +177,81 @@ describe('AssetDetailsPage after a server render', () => {
     const { getAssetDetails } = create(false);
 
     expect(getAssetDetails).toHaveBeenCalledTimes(1);
+  });
+
+  it('refetches access_status when cookie-backed auth finishes after hydration', () => {
+    const loggedIn = signal(false);
+    const getAssetDetails = jasmine
+      .createSpy('getAssetDetails')
+      .and.callFake((_id: string, options?: { skipTransferCache?: boolean }) =>
+        of(options?.skipTransferCache ? userAsset : guestAsset)
+      );
+    TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AssetsService, useValue: { getAssetDetails } },
+        { provide: IssuesService, useValue: {} },
+        {
+          provide: AuthService,
+          useValue: { isLoggedIn: () => loggedIn(), canActivateAsLoggedIn: () => loggedIn() },
+        },
+      ],
+    });
+    TestBed.overrideComponent(AssetDetailsPage, { set: { template: '', imports: [] } });
+    TestBed.overrideProvider(NzModalService, { useValue: {} });
+    const fixture = TestBed.createComponent(AssetDetailsPage);
+    fixture.detectChanges();
+
+    expect(getAssetDetails).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.asset()?.access_status).toBeNull();
+
+    loggedIn.set(true);
+    TestBed.flushEffects();
+
+    expect(getAssetDetails).toHaveBeenCalledWith(fixture.componentInstance.id, {
+      skipTransferCache: true,
+    });
+    expect(fixture.componentInstance.asset()?.access_status).toBe('approved');
+  });
+
+  it('opens the report issue modal after auth bootstrap resolves for ?reportIssue=1', () => {
+    const loggedIn = signal(false);
+    const getAssetDetails = jasmine.createSpy('getAssetDetails').and.returnValue(of(guestAsset));
+    TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: { id: '7' },
+              queryParamMap: new Map([['reportIssue', '1']]),
+            },
+          },
+        },
+        { provide: AssetsService, useValue: { getAssetDetails } },
+        { provide: IssuesService, useValue: {} },
+        {
+          provide: AuthService,
+          useValue: { isLoggedIn: () => loggedIn(), canActivateAsLoggedIn: () => loggedIn() },
+        },
+      ],
+    });
+    TestBed.overrideComponent(AssetDetailsPage, { set: { template: '', imports: [] } });
+    TestBed.overrideProvider(NzModalService, { useValue: {} });
+    const fixture = TestBed.createComponent(AssetDetailsPage);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.isReportIssueModalVisible()).toBeFalse();
+
+    loggedIn.set(true);
+    TestBed.flushEffects();
+
+    expect(fixture.componentInstance.isReportIssueModalVisible()).toBeTrue();
   });
 });

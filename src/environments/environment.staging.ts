@@ -7,7 +7,7 @@
 const STAGING_CMS_HOSTS = ['staging.cms.itqan.dev', 'cms-frontend-staging.pages.dev'] as const;
 const STAGING_CMS_HOST = STAGING_CMS_HOSTS[0];
 /** Local SSR server against staging (`API_PROXY_ORIGIN=https://staging.api.cms.itqan.dev PORT=4281 npm run serve:ssr`). */
-const LOCAL_SSR_HOST = 'localhost:4281';
+const LOCAL_SSR_HOSTS = ['localhost:4281', 'localhost:4000'] as const;
 
 function stagingCmsOrigin(): string | undefined {
   if (typeof window === 'undefined' || !window.location?.hostname) {
@@ -15,7 +15,7 @@ function stagingCmsOrigin(): string | undefined {
   }
 
   return (STAGING_CMS_HOSTS as readonly string[]).includes(window.location.hostname) ||
-    window.location.host === LOCAL_SSR_HOST
+    (LOCAL_SSR_HOSTS as readonly string[]).includes(window.location.host)
     ? window.location.origin
     : undefined;
 }

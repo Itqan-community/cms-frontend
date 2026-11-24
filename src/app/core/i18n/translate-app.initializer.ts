@@ -2,7 +2,13 @@ import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import { inject, PLATFORM_ID } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
-import { DEFAULT_UI_LANGUAGE, persistUiLanguage, UI_LANGUAGE, UI_LANGUAGES } from './ui-language';
+import {
+  DEFAULT_UI_LANGUAGE,
+  persistUiLanguage,
+  resolveBrowserLanguageWithSource,
+  UI_LANGUAGE,
+  UI_LANGUAGES,
+} from './ui-language';
 
 export { DEFAULT_UI_LANGUAGE } from './ui-language';
 
@@ -10,6 +16,14 @@ const LANG_RELOAD_FLAG = 'itqan-lang-ssr-reload';
 
 async function loadLanguage(translate: TranslateService, lang: string): Promise<unknown> {
   return firstValueFrom(translate.use(lang));
+}
+
+function clearReloadFlag(): void {
+  try {
+    sessionStorage.removeItem(LANG_RELOAD_FLAG);
+  } catch {
+    /* ignore storage failures */
+  }
 }
 
 /**
@@ -20,6 +34,9 @@ async function loadLanguage(translate: TranslateService, lang: string): Promise<
 function reloadIfServerRenderedOtherLanguage(document: Document, lang: string): boolean {
   const serverRendered = document.querySelector('[ng-server-context]') !== null;
   if (!serverRendered || document.documentElement.lang === lang) {
+    if (document.documentElement.lang === lang) {
+      clearReloadFlag();
+    }
     return false;
   }
   try {
@@ -45,9 +62,15 @@ export async function initializeAppTranslations(): Promise<unknown> {
   translate.setFallbackLang(DEFAULT_UI_LANGUAGE);
 
   if (isPlatformBrowser(inject(PLATFORM_ID))) {
-    persistUiLanguage(lang);
-    if (reloadIfServerRenderedOtherLanguage(inject(DOCUMENT), lang)) {
-      return new Promise<never>(() => undefined);
+    const doc = inject(DOCUMENT);
+    const { source } = resolveBrowserLanguageWithSource();
+    if (source === 'storage') {
+      persistUiLanguage(lang);
+      if (reloadIfServerRenderedOtherLanguage(doc, lang)) {
+        return new Promise<never>(() => undefined);
+      }
+    } else if (doc.documentElement.lang === lang) {
+      clearReloadFlag();
     }
   }
 

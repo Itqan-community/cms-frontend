@@ -5,7 +5,8 @@
       <div class="app-header__brand">
         <a
           class="app-header__logo"
-          [routerLink]="['/']"
+          [routerLink]="['/gallery']"
+          [queryParams]="langParams"
           [attr.aria-label]="'COMMON.HOME_ARIA' | translate"
         >
           @if (isPublisherHost) {
@@ -29,7 +30,6 @@
           } @else {
             <img
               [alt]="'COMMON.LOGO_ALT_CMS' | translate"
-              loading="lazy"
               width="120"
               height="40"
               decoding="async"
@@ -45,9 +45,9 @@
       <div class="app-header__actions">
         <!-- Desktop Actions -->
         <div class="app-header__actions-desktop">
-          <app-theme-switch></app-theme-switch>
+          <app-theme-switch ngSkipHydration></app-theme-switch>
           <app-lang-switch></app-lang-switch>
-          <app-user-actions (logoutClicked)="onLogout()"></app-user-actions>
+          <app-user-actions ngSkipHydration (logoutClicked)="onLogout()"></app-user-actions>
         </div>
 
         <!-- Mobile Menu Button -->
@@ -65,8 +65,8 @@
   </div>
 </header>
 
-<!-- Browser only: the closed drawer's placement timer would hold every server render for 300 ms -->
-@defer (on idle) {
+<!-- Browser only: load drawer only on open/idle so SSR never runs closed drawer timers -->
+@defer (when isMobileMenuOpen(); on idle) {
   <app-mobile-menu
     [(isOpen)]="isMobileMenuOpen"
     [links]="navLinks()"

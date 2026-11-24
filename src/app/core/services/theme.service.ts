@@ -1,9 +1,11 @@
 import { DOCUMENT } from '@angular/common';
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { THEME_COOKIE } from '../i18n/ui-language';
 
 export type AppTheme = 'light' | 'dark';
 
 const STORAGE_KEY = 'theme';
+const THEME_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
 
 declare global {
   interface Window {
@@ -54,6 +56,10 @@ export class ThemeService {
       localStorage.setItem(STORAGE_KEY, theme);
     } catch (err: unknown) {
       console.warn('Could not save the theme preference', err);
+    }
+    if (typeof document !== 'undefined') {
+      const secure = window.location?.protocol === 'https:' ? '; Secure' : '';
+      document.cookie = `${THEME_COOKIE}=${theme}; Path=/; Max-Age=${THEME_COOKIE_MAX_AGE_SECONDS}; SameSite=Lax${secure}`;
     }
   }
 }

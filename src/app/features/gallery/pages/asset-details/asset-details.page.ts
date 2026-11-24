@@ -1,15 +1,17 @@
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import {
   Component,
   computed,
   DestroyRef,
+  effect,
   inject,
   OnDestroy,
   OnInit,
   PLATFORM_ID,
   RESPONSE_INIT,
   signal,
+  TransferState,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -33,9 +35,15 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { Licenses } from '../../../../core/enums/licenses.enum';
+import { LANG_QUERY_PARAMS, UI_LANGUAGE } from '../../../../core/i18n/ui-language';
 import { AssetTemplateBadgeComponent } from '../../../../shared/components/asset-template-badge/asset-template-badge.component';
 import { JsonLdService } from '../../../../core/services/json-ld.service';
 import { SeoService } from '../../../../core/services/seo.service';
+import {
+  consumeSsrStatus,
+  recordSsrError,
+  ssrStatusKey,
+} from '../../../../core/ssr/ssr-http-status.util';
 import { AssetDetailSkeletonComponent } from '../../../../shared/components/asset-detail-skeleton/asset-detail-skeleton.component';
 import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/breadcrumb.component';
 import { ImageCarouselComponent } from '../../../../shared/components/image-carousel/image-carousel.component';
@@ -105,12 +113,18 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   private readonly seo = inject(SeoService);
   private readonly jsonLd = inject(JsonLdService);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly transferState = inject(TransferState);
   private readonly responseInit = inject(RESPONSE_INIT, { optional: true });
+  private readonly uiLanguage = inject(UI_LANGUAGE);
+  readonly langParams = inject(LANG_QUERY_PARAMS);
   /** First page of a server-rendered visit: the asset comes from the server's guest render. */
   private readonly hydratingServerRender =
-    isPlatformBrowser(inject(PLATFORM_ID)) &&
+    isPlatformBrowser(this.platformId) &&
     !this.router.navigated &&
     inject(DOCUMENT).querySelector('[ng-server-context]') !== null;
+  private accessRefreshed = false;
+  private reportIssueHandled = false;
 
   readonly id = this.route.snapshot.params['id'];
   asset = signal<AssetDetails | null>(null);
@@ -144,9 +158,43 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
     this.reportIssueForm = this.fb.group({
       description: ['', [Validators.required, Validators.minLength(10)]],
     });
+
+    if (isPlatformBrowser(this.platformId)) {
+      effect(() => {
+        const asset = this.asset();
+        if (!asset) {
+          return;
+        }
+        const loggedIn = this.authService.isLoggedIn();
+        const canActivate = loggedIn || (this.authService.canActivateAsLoggedIn?.() ?? false);
+        if (this.hydratingServerRender && !this.accessRefreshed && canActivate) {
+          this.refreshUserAccessAfterHydration();
+        }
+        if (!this.reportIssueHandled && loggedIn) {
+          this.maybeOpenReportIssueModal();
+        }
+      });
+    }
   }
 
   ngOnInit() {
+    const ssrStatus = consumeSsrStatus(
+      this.platformId,
+      this.transferState,
+      ssrStatusKey('asset', this.id)
+    );
+    if (ssrStatus === 'not_found') {
+      this.notFound.set(true);
+      this.loading.set(false);
+      this.setNotFoundSeo();
+      return;
+    }
+    if (ssrStatus === 'error') {
+      this.errorState.set(true);
+      this.loading.set(false);
+      return;
+    }
+
     this.getAssetDetails(this.id);
     this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({ lang }) => {
       const asset = this.asset();
@@ -183,11 +231,16 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.loading.set(false);
-          if (err instanceof HttpErrorResponse && err.status === 404) {
+          const ssrStatus = recordSsrError(
+            this.platformId,
+            this.transferState,
+            this.responseInit,
+            ssrStatusKey('asset', id),
+            err
+          );
+          if (ssrStatus === 'not_found') {
             this.notFound.set(true);
-            if (this.responseInit) {
-              this.responseInit.status = 404;
-            }
+            this.setNotFoundSeo();
           } else {
             this.errorState.set(true);
           }
@@ -197,16 +250,20 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.jsonLd.remove();
+    this.seo.resetToDefault(this.translate.currentLang || this.uiLanguage);
   }
 
   /**
    * The server renders as a guest, so its asset has no `access_status` for this user. A signed-in
-   * user gets it fetched again (past the transfer cache) once the page is on screen.
+   * user gets it fetched again (past the transfer cache) once auth state is available.
    */
   private refreshUserAccessAfterHydration(): void {
-    if (!this.hydratingServerRender || !this.authService.canActivateAsLoggedIn()) {
+    const canActivate =
+      this.authService.isLoggedIn() || (this.authService.canActivateAsLoggedIn?.() ?? false);
+    if (!this.hydratingServerRender || this.accessRefreshed || !canActivate) {
       return;
     }
+    this.accessRefreshed = true;
     this.assetsService
       .getAssetDetails(this.id, { skipTransferCache: true })
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -216,11 +273,29 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
       });
   }
 
-  private setSeoFromAsset(asset: AssetDetails): void {
-    const description =
-      asset.description || asset.long_description || `${asset.name} - available on ITQAN.`;
+  private setNotFoundSeo(): void {
+    const title = this.translate.instant('UI.ASSET_NOT_FOUND');
+    const description = this.translate.instant('ERRORS.NOT_FOUND');
     this.seo.setSeo({
-      title: `${asset.name} | ITQAN`,
+      title: `${title} | ${this.seo.brandName()}`,
+      description,
+      path: `/gallery/asset/${this.id}`,
+      noIndex: true,
+    });
+    this.jsonLd.remove();
+  }
+
+  private setSeoFromAsset(asset: AssetDetails): void {
+    const isAr = (this.translate.currentLang || this.uiLanguage) === 'ar';
+    const brand = this.seo.brandName();
+    const fallback = isAr
+      ? `${asset.name} — متاح على منصة ${brand}.`
+      : `${asset.name} — available on ${brand}.`;
+    const description = asset.description || asset.long_description || fallback;
+    const licenseUrl = this.licenseUrl(asset.license);
+
+    this.seo.setSeo({
+      title: `${asset.name} | ${brand}`,
       description,
       path: `/gallery/asset/${asset.id}`,
       image: asset.thumbnail_url || undefined,
@@ -230,13 +305,30 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
       '@type': 'CreativeWork',
       name: asset.name,
       description,
-      url: `${environment.SITE_URL}/gallery/asset/${asset.id}`,
+      url: this.seo.canonicalUrl(`/gallery/asset/${asset.id}`),
+      inLanguage: this.uiLanguage,
+      license: licenseUrl,
       image: asset.thumbnail_url || undefined,
-      creator: {
-        '@type': 'Organization',
-        name: asset.publisher?.name,
-      },
+      creator: asset.publisher?.name
+        ? {
+            '@type': 'Organization',
+            name: asset.publisher.name,
+          }
+        : undefined,
     });
+  }
+
+  private licenseUrl(code: string | undefined): string | undefined {
+    const map: Record<string, string> = {
+      CC0: 'https://creativecommons.org/publicdomain/zero/1.0/',
+      'CC-BY': 'https://creativecommons.org/licenses/by/4.0/',
+      'CC-BY-SA': 'https://creativecommons.org/licenses/by-sa/4.0/',
+      'CC-BY-ND': 'https://creativecommons.org/licenses/by-nd/4.0/',
+      'CC-BY-NC': 'https://creativecommons.org/licenses/by-nc/4.0/',
+      'CC-BY-NC-SA': 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+      'CC-BY-NC-ND': 'https://creativecommons.org/licenses/by-nc-nd/4.0/',
+    };
+    return code ? map[code] : undefined;
   }
 
   retryLoad() {
@@ -397,8 +489,12 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
   }
 
   private maybeOpenReportIssueModal(): void {
+    if (this.reportIssueHandled || !this.authService.isLoggedIn() || !this.asset()) {
+      return;
+    }
     const reportIssue = this.route.snapshot.queryParamMap.get('reportIssue');
-    if (reportIssue !== '1' || !this.authService.isLoggedIn() || !this.asset()) {
+    this.reportIssueHandled = true;
+    if (reportIssue !== '1') {
       return;
     }
 

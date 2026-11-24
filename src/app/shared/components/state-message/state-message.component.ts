@@ -1,7 +1,8 @@
-import { Component, input, output } from '@angular/core';
+import { Component, inject, input, output } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { NzButtonModule } from 'ng-zorro-antd/button';
+import { LANG_QUERY_PARAMS } from '../../../core/i18n/ui-language';
 
 @Component({
   selector: 'app-state-message',
@@ -24,7 +25,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
       }
       <div class="state-message__actions">
         @if (secondaryActionLabel()) {
-          <a nz-button [routerLink]="secondaryRouterLink()">
+          <a nz-button [routerLink]="secondaryRouterLink()" [queryParams]="langParams">
             <span>{{ secondaryActionLabel() }}</span>
           </a>
         }
@@ -47,6 +48,7 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
   styleUrl: './state-message.component.less',
 })
 export class StateMessageComponent {
+  readonly langParams = inject(LANG_QUERY_PARAMS);
   /** Registered ng-icons name, e.g. lucideSearch */
   icon = input('');
   iconVariant = input<'default' | 'error'>('default');

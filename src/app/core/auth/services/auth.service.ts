@@ -20,6 +20,7 @@ import {
   timeout,
 } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { UI_LANGUAGE_FROM_QUERY } from '../../i18n/ui-language';
 import {
   clearReadableDjangoAuthCookies,
   getCookie,
@@ -87,6 +88,7 @@ export class AuthService {
   private readonly authBus = inject(AllauthAuthChangeBus);
   private readonly translate = inject(TranslateService);
   private readonly message = inject(NzMessageService);
+  private readonly uiLanguageFromQuery = inject(UI_LANGUAGE_FROM_QUERY);
 
   private readonly API_BASE_URL = environment.API_BASE_URL;
   private readonly USER_KEY = 'user';
@@ -706,6 +708,9 @@ export class AuthService {
    * The profile loads on boot and login, so a switch (which reloads the page) lands here.
    */
   private syncPreferredLanguage(profile: UpdateProfileResponse): void {
+    if (this.uiLanguageFromQuery) {
+      return;
+    }
     const uiLang = this.translate.getCurrentLang();
     if (!profile.preferred_language || (uiLang !== 'en' && uiLang !== 'ar')) {
       return;

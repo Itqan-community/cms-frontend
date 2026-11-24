@@ -4,23 +4,37 @@ import {
   computed,
   DestroyRef,
   inject,
+  OnDestroy,
   OnInit,
   PLATFORM_ID,
+  RESPONSE_INIT,
   signal,
+  TransferState,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 import { NzInputModule } from 'ng-zorro-antd/input';
-import { NzPaginationModule } from 'ng-zorro-antd/pagination';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, skip } from 'rxjs';
+import { UI_LANGUAGE } from '../../../../core/i18n/ui-language';
 import { NATIONALITY } from '../../../admin/reciters/nationality.enum';
 import { localizeCountryCodeOrName } from '../../../admin/utils/display-localization.util';
+import { JsonLdService } from '../../../../core/services/json-ld.service';
 import { SeoService } from '../../../../core/services/seo.service';
 import { ViewportService } from '../../../../core/services/viewport.service';
+import {
+  consumeSsrStatus,
+  recordSsrError,
+  ssrStatusKey,
+} from '../../../../core/ssr/ssr-http-status.util';
 import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/breadcrumb.component';
+import {
+  CrawlablePaginationComponent,
+  parsePositivePageParam,
+} from '../../../../shared/components/crawlable-pagination/crawlable-pagination.component';
 import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
 import { ReciterCardComponent } from '../../components/reciter-card/reciter-card.component';
 import { Reciter } from '../../models/reciter.model';
@@ -42,18 +56,24 @@ interface NationalityOption {
     NgIcon,
     NzInputModule,
     NzSelectModule,
-    NzPaginationModule,
+    CrawlablePaginationComponent,
   ],
   templateUrl: './reciters.page.html',
   styleUrl: './reciters.page.less',
 })
-export class RecitersPage implements OnInit {
+export class RecitersPage implements OnInit, OnDestroy {
   private readonly reciterService = inject(ReciterService);
   private readonly seo = inject(SeoService);
+  private readonly jsonLd = inject(JsonLdService);
   private readonly translate = inject(TranslateService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly uiLanguage = inject(UI_LANGUAGE);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly viewportService = inject(ViewportService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly transferState = inject(TransferState);
+  private readonly responseInit = inject(RESPONSE_INIT, { optional: true });
   private readonly searchSubject$ = new Subject<string>();
 
   isServer = isPlatformServer(this.platformId);
@@ -65,7 +85,7 @@ export class RecitersPage implements OnInit {
   searchQuery = signal<string>('');
   nationalitySelection = signal<string>('');
 
-  readonly page = signal(1);
+  readonly page = signal(parsePositivePageParam(this.route.snapshot.queryParamMap.get('page')));
   readonly pageSize = signal(12);
   readonly total = signal(0);
   readonly pageSizeOptions: number[] = [12, 24, 48];
@@ -84,31 +104,76 @@ export class RecitersPage implements OnInit {
   });
 
   ngOnInit(): void {
-    this.setSeo(this.translate.currentLang || 'ar');
+    this.setSeo(this.translate.currentLang || this.uiLanguage);
     this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((e) => {
       this.setSeo(e.lang);
       this.languageTick.update((n) => n + 1);
     });
+
+    this.route.queryParamMap
+      .pipe(skip(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const nextPage = parsePositivePageParam(params.get('page'));
+        if (nextPage !== this.page()) {
+          this.page.set(nextPage);
+          this.setSeo(this.translate.currentLang || this.uiLanguage);
+          this.getReciters();
+        }
+      });
 
     this.searchSubject$
       .pipe(debounceTime(300), distinctUntilChanged(), takeUntilDestroyed(this.destroyRef))
       .subscribe((query) => {
         this.searchQuery.set(query);
         this.page.set(1);
+        this.syncPageQueryParam(1);
+        this.setSeo(this.translate.currentLang || this.uiLanguage);
         this.getReciters();
       });
+
+    const ssrStatus = consumeSsrStatus(
+      this.platformId,
+      this.transferState,
+      ssrStatusKey('reciters-list', `p${this.page()}`)
+    );
+    if (ssrStatus === 'error') {
+      this.errorState.set(true);
+      this.loading.set(false);
+      return;
+    }
 
     this.getReciters();
   }
 
+  ngOnDestroy(): void {
+    this.jsonLd.remove();
+    this.seo.resetToDefault(this.translate.currentLang || this.uiLanguage);
+  }
+
   private setSeo(lang: string): void {
-    const isAr = lang === 'ar';
+    const isAr = (lang || this.uiLanguage) === 'ar';
+    const page = this.page();
+    const brand = this.seo.brandName();
+    const baseTitle = isAr ? `القراء | ${brand}` : `Quran Reciters | ${brand}`;
+    const title = page > 1 ? `${baseTitle} (${isAr ? `صفحة ${page}` : `Page ${page}`})` : baseTitle;
+    const description = isAr
+      ? 'تصفح وابحث في قائمة قراء القرآن الكريم على منصة إتقان.'
+      : 'Browse and search Quran reciters on the ITQAN platform.';
+    const inLanguage = isAr ? 'ar' : 'en';
+
     this.seo.setSeo({
-      title: isAr ? 'القراء | إتقان' : 'Quran Reciters | ITQAN',
-      description: isAr
-        ? 'تصفح وابحث في قائمة قراء القرآن الكريم على منصة إتقان.'
-        : 'Browse and search Quran reciters on the ITQAN platform.',
+      title,
+      description,
       path: '/reciters',
+      page,
+    });
+    this.jsonLd.setSchema({
+      '@context': 'https://schema.org',
+      '@type': 'CollectionPage',
+      name: title,
+      description,
+      url: this.seo.canonicalUrl('/reciters', page),
+      inLanguage,
     });
   }
 
@@ -132,11 +197,19 @@ export class RecitersPage implements OnInit {
           this.total.set(response.count ?? response.results.length);
           this.loading.set(false);
         },
-        error: () => {
+        error: (err) => {
           this.reciters.set([]);
           this.total.set(0);
           this.loading.set(false);
           this.errorState.set(true);
+          recordSsrError(
+            this.platformId,
+            this.transferState,
+            this.responseInit,
+            ssrStatusKey('reciters-list', `p${this.page()}`),
+            err,
+            { allow404: false }
+          );
         },
       });
   }
@@ -148,17 +221,31 @@ export class RecitersPage implements OnInit {
   onNationalityChange(value: string | null): void {
     this.nationalitySelection.set(value ?? '');
     this.page.set(1);
+    this.syncPageQueryParam(1);
+    this.setSeo(this.translate.currentLang || this.uiLanguage);
     this.getReciters();
   }
 
   onPageChange(index: number): void {
     this.page.set(index);
+    this.syncPageQueryParam(index);
+    this.setSeo(this.translate.currentLang || this.uiLanguage);
     this.getReciters();
   }
 
   onPageSizeChange(size: number): void {
     this.pageSize.set(size);
     this.page.set(1);
+    this.syncPageQueryParam(1);
+    this.setSeo(this.translate.currentLang || this.uiLanguage);
     this.getReciters();
+  }
+
+  private syncPageQueryParam(page: number): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { page: page > 1 ? page : null },
+      queryParamsHandling: 'merge',
+    });
   }
 }

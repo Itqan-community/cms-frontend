@@ -15,7 +15,7 @@ export class JsonLdService {
     const script = this.document.createElement('script');
     script.type = 'application/ld+json';
     script.id = SCRIPT_ID;
-    script.text = JSON.stringify(schema);
+    script.text = JSON.stringify(schema).replace(/</g, '\\u003c');
     this.document.head.appendChild(script);
   }
 

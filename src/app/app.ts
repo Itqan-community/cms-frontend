@@ -1,11 +1,11 @@
-import { DOCUMENT, Location } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { DOCUMENT, isPlatformBrowser, Location } from '@angular/common';
+import { Component, inject, PLATFORM_ID, REQUEST_CONTEXT, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRouteSnapshot, NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { TranslateService } from '@ngx-translate/core';
 import { ar_EG, en_US, NzI18nService } from 'ng-zorro-antd/i18n';
 import { filter, firstValueFrom } from 'rxjs';
-import { persistUiLanguage, UI_LANGUAGE } from './core/i18n/ui-language';
+import { persistUiLanguage, SsrRequestContext, UI_LANGUAGE } from './core/i18n/ui-language';
 import { GoogleAnalyticsService } from './core/services/google-analytics.service';
 import { WebVitalsService } from './core/services/web-vitals.service';
 import { HeaderComponent } from './shared/components/header/header.component';
@@ -26,12 +26,37 @@ export class App {
   private readonly googleAnalyticsService = inject(GoogleAnalyticsService);
   private readonly document = inject(DOCUMENT);
   private readonly uiLanguage = inject(UI_LANGUAGE);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly requestContext = inject(REQUEST_CONTEXT, {
+    optional: true,
+  }) as SsrRequestContext | null;
 
   protected readonly title = signal('ITQAN | إتقان');
   protected hideHeader = signal(false);
   protected fullWidth = signal(false);
 
   constructor() {
+    if (!isPlatformBrowser(this.platformId) && this.requestContext?.theme === 'dark') {
+      this.document.documentElement.setAttribute('data-theme', 'dark');
+      this.document.documentElement.setAttribute('data-ag-theme-mode', 'dark');
+      if (!this.document.getElementById('antd-dark')) {
+        const darkLink = this.document.createElement('link');
+        darkLink.id = 'antd-dark';
+        darkLink.rel = 'stylesheet';
+        // Query string skips Beasties `.endsWith('.css')` inlining so light-mode toggle can remove it.
+        darkLink.href = 'antd-dark.css?theme=dark';
+        const antdLinks = this.document.head.querySelectorAll(
+          'link[rel="stylesheet"][href*="antd"]'
+        );
+        const lightLink = antdLinks[antdLinks.length - 1];
+        if (lightLink?.parentNode) {
+          lightLink.parentNode.insertBefore(darkLink, lightLink.nextSibling);
+        } else {
+          this.document.head.appendChild(darkLink);
+        }
+      }
+    }
+
     void this.webVitalsService;
     this.googleAnalyticsService.init();
 

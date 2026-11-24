@@ -1,4 +1,4 @@
-import { PLATFORM_ID } from '@angular/core';
+import { Component, PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { BREAKPOINTS } from '../constants/breakpoints';
 import { ViewportService } from './viewport.service';
@@ -20,14 +20,20 @@ describe('ViewportService', () => {
     expect(viewport.width()).toBe(window.innerWidth);
   });
 
-  it('keeps the server width until a server-rendered page is hydrated', async () => {
+  it('keeps the server width until a server-rendered page finishes initial render', async () => {
     const marker = document.createElement('div');
     marker.setAttribute('ng-server-context', 'ssr');
     document.body.appendChild(marker);
+
+    @Component({ standalone: true, template: '' })
+    class Host {}
+
+    const fixture = TestBed.createComponent(Host);
     const viewport = TestBed.inject(ViewportService);
 
     expect(viewport.width()).toBe(BREAKPOINTS.xl);
-    await new Promise((resolve) => setTimeout(resolve));
+    fixture.detectChanges();
+    await fixture.whenStable();
     expect(viewport.width()).toBe(window.innerWidth);
   });
 });

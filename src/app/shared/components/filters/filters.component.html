@@ -1,4 +1,4 @@
-@if (isMobileView()) {
+<div class="filters__container">
   <ng-container *ngTemplateOutlet="searchFilter"></ng-container>
 
   <button
@@ -9,9 +9,15 @@
     [attr.aria-label]="'UI.FILTERS' | translate"
   >
     <ng-icon name="lucideFilter" aria-hidden="true" />
-    {{ 'UI.FILTERS' | translate }}
+    <span>{{ 'UI.FILTERS' | translate }}</span>
   </button>
 
+  <div class="filters__desktop-others">
+    <ng-container *ngTemplateOutlet="otherFilters"></ng-container>
+  </div>
+</div>
+
+@if (showFiltersDrawer()) {
   <nz-drawer
     [nzVisible]="showFiltersDrawer()"
     [nzTitle]="'UI.FILTERS' | translate"
@@ -23,11 +29,6 @@
       <ng-container *ngTemplateOutlet="otherFilters"></ng-container>
     </ng-container>
   </nz-drawer>
-} @else {
-  <div class="filters__container">
-    <ng-container *ngTemplateOutlet="searchFilter"></ng-container>
-    <ng-container *ngTemplateOutlet="otherFilters"></ng-container>
-  </div>
 }
 
 <ng-template #searchFilter>
@@ -88,7 +89,7 @@
               <app-license-tag
                 [license]="license.value"
                 [id]="license.value"
-                [mode]="isMobileView() ? 'inline' : 'default'"
+                [mode]="showFiltersDrawer() ? 'inline' : 'default'"
               />
             </div>
           }

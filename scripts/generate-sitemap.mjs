@@ -18,7 +18,7 @@ const SITE_URL = 'https://cms.itqan.dev';
 const API_BASE_URL = 'https://api.cms.itqan.dev/cms-api';
 const PAGE_SIZE = 100;
 
-const STATIC_ROUTES = ['/gallery', '/publishers', '/reciters', '/content-standards'];
+const STATIC_ROUTES = ['/gallery', '/reciters', '/content-standards'];
 
 function xmlEscape(value) {
   return String(value)
@@ -108,17 +108,31 @@ async function main() {
 
   const entries = [
     ...STATIC_ROUTES.flatMap((path) => urlEntries({ path, changefreq: 'weekly' })),
-    ...reciters.flatMap((reciter) =>
-      urlEntries({
-        path: `/reciters/${reciter.slug}`,
-        lastmod: reciter.updated_at,
-        changefreq: 'weekly',
-      })
-    ),
-    ...assets.flatMap((asset) =>
-      urlEntries({ path: `/gallery/asset/${asset.id}`, changefreq: 'weekly' })
-    ),
-    ...publisherIds.flatMap((id) => urlEntries({ path: `/publisher/${id}`, changefreq: 'weekly' })),
+    ...reciters
+      .filter((reciter) => reciter?.slug != null && String(reciter.slug).trim() !== '')
+      .flatMap((reciter) =>
+        urlEntries({
+          path: `/reciters/${encodeURIComponent(String(reciter.slug).trim())}`,
+          lastmod: reciter.updated_at,
+          changefreq: 'weekly',
+        })
+      ),
+    ...assets
+      .filter((asset) => asset?.id != null && String(asset.id).trim() !== '')
+      .flatMap((asset) =>
+        urlEntries({
+          path: `/gallery/asset/${encodeURIComponent(String(asset.id).trim())}`,
+          changefreq: 'weekly',
+        })
+      ),
+    ...publisherIds
+      .filter((id) => String(id).trim() !== '')
+      .flatMap((id) =>
+        urlEntries({
+          path: `/publisher/${encodeURIComponent(String(id).trim())}`,
+          changefreq: 'weekly',
+        })
+      ),
   ];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${entries.join('\n')}\n</urlset>\n`;

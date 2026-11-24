@@ -1,6 +1,6 @@
 import { DOCUMENT, isPlatformBrowser } from '@angular/common';
 import {
-  ApplicationRef,
+  afterNextRender,
   computed,
   inject,
   Injectable,
@@ -40,9 +40,7 @@ export class ViewportService implements OnDestroy {
       return;
     }
     if (inject(DOCUMENT).querySelector('[ng-server-context]')) {
-      void inject(ApplicationRef)
-        .whenStable()
-        .then(() => this.initResizeListener());
+      afterNextRender(() => this.initResizeListener());
     } else {
       this.initResizeListener();
     }

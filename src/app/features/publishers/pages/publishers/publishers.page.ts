@@ -28,6 +28,7 @@ export class PublishersPage implements OnInit {
         ? 'تصفح الجهات الناشرة للمحتوى القرآني على منصة إتقان.'
         : 'Browse the publishers contributing Quranic content on ITQAN.',
       path: '/publishers',
+      noIndex: true,
     });
   }
 }

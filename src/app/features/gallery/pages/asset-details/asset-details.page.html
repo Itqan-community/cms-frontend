@@ -90,13 +90,13 @@
 
           <div class="card-content">
             <div class="actions-list">
-              <a routerLink="/content-standards">
+              <a routerLink="/content-standards" [queryParams]="langParams">
                 <button nz-button nzBlock class="action-button">
                   <ng-icon name="lucideFileText" />
                   <span>{{ 'UI.USAGE_STANDARDS' | translate }}</span>
                 </button>
               </a>
-              <a [routerLink]="['/license', asset()!.license]">
+              <a [routerLink]="['/license', asset()!.license]" [queryParams]="langParams">
                 <button nz-button nzBlock class="action-button">
                   <ng-icon name="lucideFileText" />
                   <span>{{ 'GALLERY.VIEW_LICENSE' | translate }}</span>
@@ -178,7 +178,11 @@
           </div>
 
           <div class="card-content">
-            <a [routerLink]="['/publisher', asset()!.publisher.id]" class="publisher-link">
+            <a
+              [routerLink]="['/publisher', asset()!.publisher.id]"
+              [queryParams]="langParams"
+              class="publisher-link"
+            >
               {{ asset()!.publisher.name }}
             </a>
             <p class="publisher-description">{{ asset()!.publisher.description }}</p>

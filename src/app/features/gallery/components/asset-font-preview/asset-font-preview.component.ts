@@ -1,5 +1,5 @@
-import { DOCUMENT } from '@angular/common';
-import { Component, computed, DestroyRef, inject, input } from '@angular/core';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { Component, computed, DestroyRef, inject, input, PLATFORM_ID } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule } from '@ngx-translate/core';
@@ -32,6 +32,7 @@ export class AssetFontPreviewComponent {
   readonly language = input<string | null>(null);
 
   private readonly assetsService = inject(AssetsService);
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly fonts = inject(DOCUMENT).fonts;
   private readonly faces: FontFace[] = [];
 
@@ -42,18 +43,20 @@ export class AssetFontPreviewComponent {
       // switchMap: a newer language cancels the previous request. The old
       // language's preview hides at once instead of showing until the new one loads.
       switchMap(({ id, language }) =>
-        this.assetsService.getFontPreview(id, language).pipe(
-          switchMap((preview) => this.loadFont(preview)),
-          catchError(() => of(null)),
-          startWith(null)
-        )
+        this.isBrowser
+          ? this.assetsService.getFontPreview(id, language).pipe(
+              switchMap((preview) => this.loadFont(preview)),
+              catchError(() => of(null)),
+              startWith(null)
+            )
+          : of(null)
       )
     ),
     { initialValue: null as LoadedFont | null }
   );
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => this.faces.forEach((face) => this.fonts.delete(face)));
+    inject(DestroyRef).onDestroy(() => this.faces.forEach((face) => this.fonts?.delete(face)));
   }
 
   /** An ayah number in Arabic-Indic digits, which Quran fonts draw as the ayah marker. */

@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { NzDrawerModule, NzDrawerPlacement } from 'ng-zorro-antd/drawer';
 import { NgIcon } from '@ng-icons/core';
+import { LANG_QUERY_PARAMS } from '../../../core/i18n/ui-language';
 import { LangSwitchComponent } from '../lang-switch/lang-switch.component';
 import { ThemeSwitchComponent } from '../theme-switch/theme-switch.component';
 import { NavigationLink } from '../navigation-menu/navigation-menu.component';
@@ -27,6 +28,7 @@ import { UserActionsComponent } from '../user-actions/user-actions.component';
 })
 export class MobileMenuComponent {
   private translate = inject(TranslateService);
+  readonly langParams = inject(LANG_QUERY_PARAMS);
 
   isOpen = input.required<boolean>();
   links = input.required<NavigationLink[]>();

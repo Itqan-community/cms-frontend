@@ -32,6 +32,7 @@ import { credentialsInterceptor } from './core/interceptors/credentials.intercep
 import { csrfResponseInterceptor } from './core/interceptors/csrf-response.interceptor';
 import { appSessionTokenInterceptor } from './core/interceptors/app-session-token.interceptor';
 import { tenantHeaderInterceptor } from './core/interceptors/tenant-header.interceptor';
+import { ssrTimeoutInterceptor } from './core/interceptors/ssr-timeout.interceptor';
 import { AuthService } from './core/auth/services/auth.service';
 import { initializeAppTranslations } from './core/i18n/translate-app.initializer';
 import { createAppSentryErrorHandler } from './core/sentry/sentry-error-handler';
@@ -53,7 +54,9 @@ export const appConfig: ApplicationConfig = {
             deps: [Router],
           },
           provideAppInitializer(() => {
-            inject(Sentry.TraceService);
+            if (isPlatformBrowser(inject(PLATFORM_ID))) {
+              inject(Sentry.TraceService);
+            }
           }),
         ]
       : []),
@@ -70,6 +73,7 @@ export const appConfig: ApplicationConfig = {
         appSessionTokenInterceptor,
         tenantHeaderInterceptor,
         headersInterceptor,
+        ssrTimeoutInterceptor,
         authErrorInterceptor,
         errorInterceptor,
       ])

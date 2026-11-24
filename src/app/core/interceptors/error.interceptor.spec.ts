@@ -1,5 +1,6 @@
 import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { TranslateService } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
@@ -193,5 +194,38 @@ describe('errorInterceptor', () => {
         { error_name: 'group_in_use', message: 'This role is assigned to members.' },
         { status: 400, statusText: 'Bad Request' }
       );
+  });
+
+  it('does not invoke NzMessageService on the server', (done) => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: PLATFORM_ID, useValue: 'server' },
+        provideHttpClient(withInterceptors([errorInterceptor])),
+        provideHttpClientTesting(),
+        { provide: NzMessageService, useValue: messageSpy },
+        {
+          provide: TranslateService,
+          useValue: {
+            currentLang: 'en',
+            instant: (key: string) => key,
+          },
+        },
+      ],
+    });
+    const serverHttp = TestBed.inject(HttpClient);
+    const serverMock = TestBed.inject(HttpTestingController);
+    const url = `${api || 'https://example.com'}/assets/999/`;
+
+    serverHttp.get(url).subscribe({
+      error: () => {
+        expect(messageSpy.error).not.toHaveBeenCalled();
+        serverMock.verify();
+        done();
+      },
+    });
+    serverMock
+      .expectOne(url)
+      .flush({ detail: 'Not found' }, { status: 404, statusText: 'Not Found' });
   });
 });

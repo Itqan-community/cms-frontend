@@ -1,5 +1,11 @@
 import { FetchBackend, HTTP_TRANSFER_CACHE_ORIGIN_MAP, HttpBackend } from '@angular/common/http';
-import { ApplicationConfig, inject, mergeApplicationConfig, REQUEST_CONTEXT } from '@angular/core';
+import {
+  ApplicationConfig,
+  ErrorHandler,
+  inject,
+  mergeApplicationConfig,
+  REQUEST_CONTEXT,
+} from '@angular/core';
 import { provideServerRendering, withRoutes } from '@angular/ssr';
 import { TranslateLoader, TranslationObject } from '@ngx-translate/core';
 import { from, Observable } from 'rxjs';
@@ -19,6 +25,8 @@ class ServerTranslateLoader implements TranslateLoader {
 const serverConfig: ApplicationConfig = {
   providers: [
     provideServerRendering(withRoutes(serverRoutes)),
+    // Override the browser Sentry ErrorHandler so SSR never touches browser globals on error.
+    { provide: ErrorHandler, useClass: ErrorHandler },
     { provide: TranslateLoader, useClass: ServerTranslateLoader },
     // Node's fetch keeps API connections alive between renders (the XHR backend opens a new TLS
     // connection per request). Server only: the browser keeps XHR for upload progress events.

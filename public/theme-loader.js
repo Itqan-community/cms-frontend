@@ -11,12 +11,67 @@
     root.setAttribute('data-ag-theme-mode', theme);
   }
 
+  function persistThemeCookie(theme) {
+    try {
+      var secure = window.location && window.location.protocol === 'https:' ? '; Secure' : '';
+      document.cookie = 'theme=' + theme + '; Path=/; Max-Age=31536000; SameSite=Lax' + secure;
+    } catch (e) {}
+  }
+
   // Resolves true once antd-dark.css is in, false if it failed (the link is then removed).
   function loadDarkStyles() {
     var link = document.getElementById('antd-dark');
-    if (link) return link.loaded;
-    var links = document.querySelectorAll('link[rel="stylesheet"][href*="antd"]');
-    var light = links[links.length - 1];
+    if (link) {
+      if (link.loaded) return link.loaded;
+      if (link.sheet) {
+        link.loaded = Promise.resolve(true);
+        return link.loaded;
+      }
+      if (document.readyState === 'complete') {
+        link.remove();
+        link.loaded = Promise.resolve(false);
+        return link.loaded;
+      }
+      link.loaded = new Promise(function (resolve) {
+        var settled = false;
+        function finish(ok) {
+          if (settled) return;
+          settled = true;
+          if (!ok && link.parentNode) link.remove();
+          resolve(ok);
+        }
+        link.addEventListener(
+          'load',
+          function () {
+            finish(true);
+          },
+          { once: true }
+        );
+        link.addEventListener(
+          'error',
+          function () {
+            finish(false);
+          },
+          { once: true }
+        );
+        window.addEventListener(
+          'load',
+          function () {
+            finish(!!link.sheet);
+          },
+          { once: true }
+        );
+      });
+      return link.loaded;
+    }
+    var links = document.head.querySelectorAll('link[rel="stylesheet"][href*="antd"]');
+    var light = null;
+    for (var i = links.length - 1; i >= 0; i--) {
+      if (links[i].parentElement === document.head && links[i].id !== 'antd-dark') {
+        light = links[i];
+        break;
+      }
+    }
     link = document.createElement('link');
     link.id = 'antd-dark';
     link.rel = 'stylesheet';
@@ -55,6 +110,9 @@
   try {
     saved = localStorage.getItem('theme');
   } catch (e) {}
+  if (saved === 'dark' || saved === 'light') {
+    persistThemeCookie(saved);
+  }
   var prefersDark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches;
   var initial = saved === 'dark' || (saved !== 'light' && prefersDark) ? 'dark' : 'light';
   // Paint the dark page background at once; NG-ZORRO waits for its styles via itqanThemeReady.

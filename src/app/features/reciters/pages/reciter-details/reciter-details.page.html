@@ -10,6 +10,16 @@
       [secondaryActionLabel]="'RECITERS.BACK_TO_RECITERS' | translate"
       secondaryRouterLink="/reciters"
     />
+  } @else if (errorState()) {
+    <app-state-message
+      icon="lucideAlertTriangle"
+      iconVariant="error"
+      [title]="'UI.SOMETHING_WENT_WRONG' | translate"
+      [message]="'ERRORS.SERVER_ERROR' | translate"
+      [actionLabel]="'UI.TRY_AGAIN' | translate"
+      actionIcon="lucideRotateCw"
+      (actionClick)="getReciterDetails()"
+    />
   } @else {
     <div class="reciter-details-grid">
       <!-- Reciter Info Card -->
@@ -91,15 +101,13 @@
           }
           @if (!assetsLoading() && assetsTotal() > 0) {
             <div class="admin-pagination assets-section__pagination">
-              <nz-pagination
-                [nzPageIndex]="page()"
-                [nzTotal]="assetsTotal()"
-                [nzPageSize]="pageSize()"
-                [nzShowSizeChanger]="true"
-                [nzPageSizeOptions]="pageSizeOptions"
-                nzShowQuickJumper
-                (nzPageIndexChange)="onPageChange($event)"
-                (nzPageSizeChange)="onPageSizeChange($event)"
+              <app-crawlable-pagination
+                [pageIndex]="page()"
+                [total]="assetsTotal()"
+                [pageSize]="pageSize()"
+                [pageSizeOptions]="pageSizeOptions"
+                (pageIndexChange)="onPageChange($event)"
+                (pageSizeChange)="onPageSizeChange($event)"
               />
             </div>
           }

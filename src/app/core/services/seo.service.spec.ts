@@ -18,8 +18,16 @@ describe('SeoService', () => {
 
   afterEach(() => {
     document.head
-      .querySelectorAll('link[rel="canonical"], link[rel="alternate"][hreflang]')
-      .forEach((link) => link.remove());
+      .querySelectorAll(
+        'link[rel="canonical"], link[rel="alternate"][hreflang], meta[property="og:image"], meta[name="twitter:image"]'
+      )
+      .forEach((node) => node.remove());
+  });
+
+  it('exposes localized brand names', () => {
+    expect(setup('ar').seo.brandName()).toBe('إتقان');
+    TestBed.resetTestingModule();
+    expect(setup('en').seo.brandName()).toBe('ITQAN');
   });
 
   it('points an Arabic page at the URL without a query, with hreflang for both languages', () => {
@@ -33,6 +41,12 @@ describe('SeoService', () => {
     expect(doc.head.querySelector('meta[property="og:locale"]')?.getAttribute('content')).toBe(
       'ar_AR'
     );
+    expect(doc.head.querySelector('meta[property="og:image"]')?.getAttribute('content')).toBe(
+      `${site}/assets/images/og-default.png`
+    );
+    expect(doc.head.querySelector('meta[name="twitter:card"]')?.getAttribute('content')).toBe(
+      'summary_large_image'
+    );
   });
 
   it('gives an English page a ?lang=en canonical', () => {
@@ -45,7 +59,18 @@ describe('SeoService', () => {
     );
   });
 
-  it('updates the links in place and drops hreflang on noindex pages', () => {
+  it('includes ?page=N on canonical and hreflang when page > 1', () => {
+    const { seo, doc } = setup('en');
+    seo.setSeo({ title: 'T', description: 'D', path: '/gallery', page: 2 });
+
+    expect(seo.canonicalUrl('/gallery', 2)).toBe(`${site}/gallery?lang=en&page=2`);
+    expect(href(doc, 'link[rel="canonical"]')).toBe(`${site}/gallery?lang=en&page=2`);
+    expect(href(doc, 'link[hreflang="ar"]')).toBe(`${site}/gallery?page=2`);
+    expect(href(doc, 'link[hreflang="en"]')).toBe(`${site}/gallery?lang=en&page=2`);
+    expect(href(doc, 'link[hreflang="x-default"]')).toBe(`${site}/gallery?page=2`);
+  });
+
+  it('updates the links in place and drops hreflang and default og:image on noindex pages', () => {
     const { seo, doc } = setup('ar');
     seo.setSeo({ title: 'T', description: 'D', path: '/gallery' });
     seo.setSeo({ title: 'T', description: 'D', path: '/reciters' });
@@ -55,5 +80,10 @@ describe('SeoService', () => {
 
     seo.setSeo({ title: 'T', description: 'D', path: '/x', noIndex: true });
     expect(doc.head.querySelector('link[rel="alternate"][hreflang]')).toBeNull();
+    expect(doc.head.querySelector('meta[property="og:image"]')).toBeNull();
+    expect(doc.head.querySelector('meta[name="twitter:image"]')).toBeNull();
+    expect(doc.head.querySelector('meta[name="twitter:card"]')?.getAttribute('content')).toBe(
+      'summary'
+    );
   });
 });

@@ -11,9 +11,17 @@
     gap: 16px;
   }
 
+  &__desktop-others {
+    display: block;
+
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
   &__toggle-btn {
     width: 100%;
-    display: flex;
+    display: none;
     align-items: center;
     justify-content: center;
     gap: 8px;
@@ -24,6 +32,10 @@
     border: 1px solid var(--admin-border-200);
     border-radius: 8px;
     background-color: var(--admin-surface-white);
+
+    @media (max-width: 768px) {
+      display: flex;
+    }
 
     i {
       font-size: 20px;

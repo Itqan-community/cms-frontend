@@ -742,23 +742,32 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
 - **Build:** `npm run build:ssr` (`production,ssr`) / `npm run build:ssr:staging`; the `ssr`
   configuration adds `server`, `outputMode: server`, `ssr.entry`. The plain `build:{env}` static
   builds are unchanged (still `dist/browser/index.html`).
-- **Run:** `npm run serve:ssr` (`node dist/server/server.mjs`, `PORT`, optional `API_PROXY_ORIGIN`
-  to proxy `/cms-api`, `/accounts`, `/portal` like `functions/`). Image: `deploy/ssr/Dockerfile`.
+- **Run:** `npm run serve:ssr` (`node dist/server/server.mjs`, `PORT`, `ALLOWED_HOSTS` /
+  `NG_ALLOWED_HOSTS`, `TRUST_PROXY_HOPS`, optional `API_PROXY_ORIGIN` to proxy `/cms-api`,
+  `/accounts`, `/portal` like `functions/`). Image: `deploy/ssr/Dockerfile`.
 - **Render modes:** `app.routes.server.ts` — Server for `/gallery`, `/gallery/asset/:id`,
-  `/publishers`, `/publisher/:id`, `/reciters`, `/reciters/:slug`, `/license/:id`,
-  `/content-standards`; Client (shell) for everything else (portal, account, auth).
+  `/publisher/:id`, `/reciters`, `/reciters/:slug`, `/license/:id`, `/content-standards`, plus HTTP
+  404 `NotFoundPage` (`**`); `GET /` → `301 /gallery` (preserving `?lang=en`); Client (shell) for
+  everything else (portal, account, auth, and the empty `noindex` `/publishers` stub).
 - **Data:** `provideClientHydration(withEventReplay(), withHttpTransferCacheOptions)`; server uses
-  `FetchBackend` (keep-alive), bundled translations, `HTTP_TRANSFER_CACHE_ORIGIN_MAP` when proxying.
-  Server renders as a guest (no auth bootstrap); `<app-header ngSkipHydration>`; asset detail
-  refetches `access_status` for signed-in users after hydration. Missing asset/reciter → HTTP 404.
-- **Hydration rules:** server and first browser render must build the same DOM. `ViewportService`
-  renders for a desktop width (`BREAKPOINTS.xl`) on the server and keeps it until a server-rendered
-  page is stable; `nz-button` labels next to an icon go in a `<span>` (NG-ZORRO wraps bare text
-  itself, which breaks hydration).
-- **SEO:** `SeoService` canonical (`?lang=en` for English), hreflang ar/en/x-default, og:locale,
-  og:site_name; sitemap lists static, reciter, asset and publisher pages in both languages.
-- **Cache:** hashed files + `/assets/` 1y immutable; HTML `public, max-age=0, must-revalidate`, or
-  `private, no-cache` when the language came from the cookie.
+  `FetchBackend` (keep-alive), 10 s SSR HTTP timeout, bundled translations,
+  `HTTP_TRANSFER_CACHE_ORIGIN_MAP` (validated against `allowedHosts`) when proxying. Server renders
+  as a guest (no auth bootstrap); `<app-header>` hydrates nav while only `<app-theme-switch>` and
+  `<app-user-actions>` use `ngSkipHydration`; asset detail refetches `access_status` after
+  hydration. Missing asset/reciter/publisher/license or backend 5xx → real HTTP 404 / 503.
+- **Hydration & UX rules:** server and first browser render must build the same DOM. Mobile filters
+  use CSS `@media (max-width: 768px)` with a lazy `@if` drawer; `ViewportService` uses
+  `afterNextRender`; `nz-button` labels next to an icon go in a `<span>`; `theme` cookie lets SSR
+  paint dark mode (`data-theme="dark"` + `antd-dark.css`) without flash; `?lang=en` never overwrites
+  saved user preference in `localStorage`/cookie/profile.
+- **SEO:** `SeoService` canonical (`?lang=en` / `?page=N`), hreflang ar/en/x-default, default
+  `og:image` (`assets/images/og-default.png`), localized JSON-LD, crawlable `<a href="?page=N">`
+  pagination (`CrawlablePaginationComponent`), dynamic 15-min cached `/sitemap.xml` (prod only,
+  falling back to build-time `dist/browser/sitemap.xml`, excluding `/publishers`), and
+  `X-Robots-Tag: noindex, nofollow` on staging / non-public / error responses.
+- **Cache:** hashed files + `/assets/` 1y immutable (`.map` requests return 404); SSR HTML sets
+  `Vary: Cookie` and uses `public, max-age=0, must-revalidate` or `private, no-cache` when rendered
+  from `lang` / `theme` cookies or error statuses.
 
 ---
 
@@ -766,7 +775,7 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
 
 | Item                                    | Status            | Notes                                                                                                                                                            |
 | --------------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `features/error/pages/unautorized/`     | Partial           | `UnauthorizedPage`: full UX + countdown redirect (directory spelling still misses `h`). `not-found` page unchanged.                                              |
+| `features/error/pages/unautorized/`     | Partial           | `UnauthorizedPage` + `NotFoundPage` (`features/error/pages/not-found/`, HTTP 404 + `noindex`; `unautorized` directory spelling kept).                            |
 | `features/publishers/pages/publishers/` | Stub              | Publishers directory listing page is empty.                                                                                                                      |
 | `features/dashify/`                     | Unknown           | Minimal implementation, purpose unclear.                                                                                                                         |
 | `features/admin/` guards                | Implemented       | `portal-access`, `permission`, `itqan-admin` guards active on admin routes.                                                                                      |

@@ -55,22 +55,20 @@
     } @else {
       <div class="reciters-grid">
         @for (reciter of reciters(); track reciter.id) {
-          <app-reciter-card [reciter]="reciter" />
+          <app-reciter-card [reciter]="reciter" [eager]="$index < 4" />
         }
       </div>
     }
 
     @if (!loading() && total() > 0) {
       <div class="admin-pagination reciters-page__pagination">
-        <nz-pagination
-          [nzPageIndex]="page()"
-          [nzTotal]="total()"
-          [nzPageSize]="pageSize()"
-          [nzShowSizeChanger]="true"
-          [nzPageSizeOptions]="pageSizeOptions"
-          nzShowQuickJumper
-          (nzPageIndexChange)="onPageChange($event)"
-          (nzPageSizeChange)="onPageSizeChange($event)"
+        <app-crawlable-pagination
+          [pageIndex]="page()"
+          [total]="total()"
+          [pageSize]="pageSize()"
+          [pageSizeOptions]="pageSizeOptions"
+          (pageIndexChange)="onPageChange($event)"
+          (pageSizeChange)="onPageSizeChange($event)"
         />
       </div>
     }

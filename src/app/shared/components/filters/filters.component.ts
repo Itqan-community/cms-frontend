@@ -12,8 +12,6 @@ import { Licenses } from '../../../core/enums/licenses.enum';
 import { NgIcon } from '@ng-icons/core';
 import { LicenseTagComponent } from '../license-tag/license-tag.component';
 
-import { ViewportService } from '../../../core/services/viewport.service';
-
 @Component({
   selector: 'app-filters',
   imports: [
@@ -33,7 +31,6 @@ import { ViewportService } from '../../../core/services/viewport.service';
 })
 export class FiltersComponent implements OnDestroy {
   private readonly translate = inject(TranslateService);
-  private readonly viewportService = inject(ViewportService);
   private readonly destroy$ = new Subject<void>();
   private readonly searchSubject$ = new Subject<string>();
 
@@ -80,7 +77,6 @@ export class FiltersComponent implements OnDestroy {
   licensesSelection = signal<string[]>([]);
   licensesSelectionChange = output<string[]>();
 
-  readonly isMobileView = this.viewportService.isMobile;
   showFiltersDrawer = signal(false);
 
   constructor() {
