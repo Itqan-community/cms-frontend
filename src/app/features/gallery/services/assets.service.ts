@@ -58,7 +58,7 @@ export class AssetsService {
     }
 
     if (publisherId) {
-      params = params.set('publisher', String(publisherId));
+      params = params.set('publisher_id', String(publisherId));
     }
 
     return this.http.get<ApiAssets>(`${this.BASE_URL}/assets/`, { params });
