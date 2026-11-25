@@ -304,13 +304,14 @@ function proxyToApi(origin: string) {
       return;
     }
 
+    // `res` closes once, on finish or client disconnect, including mid-stream. `req` emits `close`
+    // as soon as its body is read, which would abort every POST before the upstream answers.
     const clientAbort = new AbortController();
-    const onClientClose = (): void => {
+    res.on('close', () => {
       if (!res.writableEnded) {
         clientAbort.abort();
       }
-    };
-    req.on('close', onClientClose);
+    });
 
     try {
       const headers = new Headers();
@@ -360,8 +361,6 @@ function proxyToApi(origin: string) {
       }
       console.error(`API proxy failed for ${req.method} ${req.originalUrl}`, err);
       if (!res.headersSent) res.status(502).json({ detail: 'Bad gateway' });
-    } finally {
-      req.off('close', onClientClose);
     }
   };
 }
