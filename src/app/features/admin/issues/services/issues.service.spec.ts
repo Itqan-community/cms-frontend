@@ -22,4 +22,24 @@ describe('IssuesService', () => {
     expect(req.request.params.get('search')).toBe('warsh');
     http.verify();
   });
+
+  it('listComments and addComment call the report comments endpoint', () => {
+    // Arrange
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    });
+    const http = TestBed.inject(HttpTestingController);
+    const service = TestBed.inject(IssuesService);
+    const url = `${environment.ADMIN_API_BASE_URL}/issue-reports/42/comments/`;
+
+    // Act
+    service.listComments(42).subscribe();
+    service.addComment(42, { body: 'Hello' }).subscribe();
+
+    // Assert
+    expect(http.expectOne((r) => r.method === 'GET' && r.url === url)).toBeTruthy();
+    const post = http.expectOne((r) => r.method === 'POST' && r.url === url);
+    expect(post.request.body).toEqual({ body: 'Hello' });
+    http.verify();
+  });
 });

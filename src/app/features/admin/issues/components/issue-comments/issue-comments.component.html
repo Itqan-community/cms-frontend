@@ -1,0 +1,65 @@
+<section class="issue-comments">
+  <h3 class="admin-desc-title">
+    <ng-icon name="lucideMessageSquareText" />
+    {{ 'ADMIN.ISSUES.COMMENTS.TITLE' | translate }}
+  </h3>
+
+  @if (loading()) {
+    <nz-skeleton [nzActive]="true" [nzParagraph]="{ rows: 2 }"></nz-skeleton>
+  } @else if (loadError()) {
+    <nz-alert nzType="error" [nzMessage]="loadError()!" nzShowIcon class="issue-comments__alert" />
+  } @else {
+    @if (comments().length) {
+      <ol class="issue-comments__list">
+        @for (comment of comments(); track comment.id) {
+          <li class="issue-comments__item">
+            <div class="issue-comments__meta">
+              <strong class="issue-comments__author">{{
+                comment.author
+                  ? comment.author.name || ('ADMIN.ISSUES.COMMENTS.UNNAMED_AUTHOR' | translate)
+                  : ('ADMIN.ISSUES.COMMENTS.DELETED_AUTHOR' | translate)
+              }}</strong>
+              @if (comment.author?.is_reporter) {
+                <nz-tag>{{ 'ADMIN.ISSUES.COMMENTS.REPORTER_TAG' | translate }}</nz-tag>
+              }
+              <span class="issue-comments__date">{{
+                comment.created_at | date: 'dd/MM/yyyy HH:mm'
+              }}</span>
+            </div>
+            <p class="issue-comments__body">{{ comment.body }}</p>
+          </li>
+        }
+      </ol>
+    } @else {
+      <p class="issue-comments__empty">{{ 'ADMIN.ISSUES.COMMENTS.EMPTY' | translate }}</p>
+    }
+  }
+
+  @if (canComment()) {
+    <form class="issue-comments__form" (ngSubmit)="send()">
+      <textarea
+        nz-input
+        name="body"
+        rows="3"
+        [maxlength]="maxLength"
+        [ngModel]="draft()"
+        (ngModelChange)="draft.set($event)"
+        [placeholder]="'ADMIN.ISSUES.COMMENTS.PLACEHOLDER' | translate"
+        [attr.aria-label]="'ADMIN.ISSUES.COMMENTS.PLACEHOLDER' | translate"
+      ></textarea>
+      <div class="issue-comments__actions">
+        <span class="issue-comments__hint">{{ 'ADMIN.ISSUES.COMMENTS.HINT' | translate }}</span>
+        <button
+          nz-button
+          nzType="primary"
+          type="submit"
+          [disabled]="!canSend()"
+          [nzLoading]="sending()"
+        >
+          <ng-icon name="lucideMail" />
+          {{ 'ADMIN.ISSUES.COMMENTS.SEND' | translate }}
+        </button>
+      </div>
+    </form>
+  }
+</section>

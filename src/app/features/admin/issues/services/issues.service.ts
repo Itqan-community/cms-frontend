@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { callerShowsErrors } from '../../../../core/interceptors/caller-shows-errors.context';
 import {
+  IssueReportComment,
+  IssueReportCommentIn,
   IssueReportCreateIn,
   IssueReportListFilters,
   IssueReportOut,
@@ -64,6 +66,20 @@ export class IssuesService {
 
   patch(id: number, body: IssueReportUpdateIn): Observable<IssueReportOut> {
     return this.http.patch<IssueReportOut>(`${this.baseUrl}/${id}/`, body, {
+      context: callerShowsErrors(),
+    });
+  }
+
+  /** The report's comment thread, oldest first. The caller shows a failure inline. */
+  listComments(id: number): Observable<IssueReportComment[]> {
+    return this.http.get<IssueReportComment[]>(`${this.baseUrl}/${id}/comments/`, {
+      context: callerShowsErrors(),
+    });
+  }
+
+  /** Add a comment; the backend emails it to the reporter. */
+  addComment(id: number, body: IssueReportCommentIn): Observable<IssueReportComment> {
+    return this.http.post<IssueReportComment>(`${this.baseUrl}/${id}/comments/`, body, {
       context: callerShowsErrors(),
     });
   }

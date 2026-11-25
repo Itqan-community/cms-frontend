@@ -1911,8 +1911,6 @@
       "DETAIL": {
         "BREADCRUMB": "إدارة البلاغات",
         "ASSET_ID": "معرّف الأصل",
-        "CONTACT_REPORTER": "التواصل مع المُبلِّغ",
-        "CONTACT_SUBJECT": "البلاغ رقم {{id}}: {{asset}}",
         "DESCRIPTION_TITLE": "الوصف",
         "NOT_FOUND": "تعذر العثور على هذا البلاغ.",
         "REPORTER_FALLBACK": "المُبلِّغ رقم {{id}}"
@@ -1950,6 +1948,19 @@
         "DESCRIPTION_LABEL": "الوصف",
         "DESCRIPTION_PLACEHOLDER": "صف المشكلة…",
         "ERR_DESCRIPTION": "أدخل وصفاً لا يقل عن 10 أحرف"
+      },
+      "COMMENTS": {
+        "TITLE": "التعليقات",
+        "EMPTY": "لا توجد تعليقات بعد. اكتب إلى المُبلِّغ أدناه.",
+        "PLACEHOLDER": "اكتب تعليقًا إلى المُبلِّغ",
+        "HINT": "يصل تعليقك إلى المُبلِّغ بالبريد الإلكتروني من فنار، ويبقى عنوانه مخفيًا.",
+        "SEND": "إرسال",
+        "SENT": "أُرسل التعليق إلى المُبلِّغ.",
+        "SEND_ERROR": "تعذر إرسال التعليق.",
+        "LOAD_ERROR": "تعذر تحميل التعليقات.",
+        "REPORTER_TAG": "المُبلِّغ",
+        "UNNAMED_AUTHOR": "عضو",
+        "DELETED_AUTHOR": "حساب محذوف"
       }
     },
     "MEMBERS": {

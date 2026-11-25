@@ -1911,8 +1911,6 @@
       "DETAIL": {
         "BREADCRUMB": "Issue Management",
         "ASSET_ID": "Asset ID",
-        "CONTACT_REPORTER": "Contact reporter",
-        "CONTACT_SUBJECT": "Issue #{{id}}: {{asset}}",
         "DESCRIPTION_TITLE": "Description",
         "NOT_FOUND": "This issue report could not be found.",
         "REPORTER_FALLBACK": "Reporter #{{id}}"
@@ -1950,6 +1948,19 @@
         "DESCRIPTION_LABEL": "Description",
         "DESCRIPTION_PLACEHOLDER": "Describe the issue…",
         "ERR_DESCRIPTION": "Enter a description (at least 10 characters)"
+      },
+      "COMMENTS": {
+        "TITLE": "Comments",
+        "EMPTY": "No comments yet. Write to the reporter below.",
+        "PLACEHOLDER": "Write a comment to the reporter",
+        "HINT": "The reporter gets your comment by email from Fanar. Their address stays hidden.",
+        "SEND": "Send",
+        "SENT": "Comment sent to the reporter.",
+        "SEND_ERROR": "The comment could not be sent.",
+        "LOAD_ERROR": "The comments could not be loaded.",
+        "REPORTER_TAG": "Reporter",
+        "UNNAMED_AUTHOR": "Member",
+        "DELETED_AUTHOR": "Deleted account"
       }
     },
     "MEMBERS": {
