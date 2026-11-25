@@ -74,6 +74,7 @@ export class ReciterDetailsPage implements OnInit, OnDestroy {
   assets = signal<Asset[]>([]);
   reciterLoading = signal<boolean>(true);
   assetsLoading = signal<boolean>(true);
+  private serverAssetsFailed = false;
   notFound = signal<boolean>(false);
   errorState = signal<boolean>(false);
 
@@ -115,6 +116,18 @@ export class ReciterDetailsPage implements OnInit, OnDestroy {
       this.assetsLoading.set(false);
       return;
     }
+    // The server already failed the assets call and rendered the empty state; keep it on hydration.
+    this.serverAssetsFailed =
+      consumeSsrStatus(
+        this.platformId,
+        this.transferState,
+        ssrStatusKey('reciter-assets', `${this.slug}:p${this.page()}`)
+      ) === 'error';
+    if (this.serverAssetsFailed) {
+      this.assets.set([]);
+      this.assetsTotal.set(0);
+      this.assetsLoading.set(false);
+    }
     this.getReciterDetails();
   }
 
@@ -137,6 +150,10 @@ export class ReciterDetailsPage implements OnInit, OnDestroy {
         next: (reciter) => {
           this.reciter.set(reciter);
           this.setSeoFromReciter(reciter);
+          if (this.serverAssetsFailed) {
+            this.serverAssetsFailed = false;
+            return;
+          }
           this.getAssets(reciter.id);
         },
         error: (err) => {
