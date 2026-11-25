@@ -656,9 +656,9 @@ export class AssetVersionsManagerComponent implements OnInit {
         error: (err: unknown) => {
           if (err instanceof HttpErrorResponse && err.status === 0) return;
           const errorName = err instanceof HttpErrorResponse ? err.error?.error_name : undefined;
-          const key =
+          const fallbackKey =
             SAVE_ERROR_KEYS[errorName as string] ?? `${this.i18nPrefix}.MESSAGES.SAVE_ERROR`;
-          this.message.error(this.translate.instant(key));
+          this.message.error(resolveApiErrorMessage(err, { fallbackKey }, this.translate));
         },
       });
   }

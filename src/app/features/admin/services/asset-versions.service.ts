@@ -101,7 +101,10 @@ export class AssetVersionsService {
     slug: string,
     payload: AssetVersionFormPayload
   ): Observable<AssetVersion> {
-    return this.http.post<AssetVersion>(this.listUrl(kind, slug), this.toFormData(payload));
+    // The versions manager shows the failure itself (the backend's message).
+    return this.http.post<AssetVersion>(this.listUrl(kind, slug), this.toFormData(payload), {
+      context: callerShowsErrors(),
+    });
   }
 
   update(
@@ -112,7 +115,8 @@ export class AssetVersionsService {
   ): Observable<AssetVersion> {
     return this.http.patch<AssetVersion>(
       this.versionItemUrl(kind, slug, versionId),
-      this.toFormData(payload)
+      this.toFormData(payload),
+      { context: callerShowsErrors() }
     );
   }
 
