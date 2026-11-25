@@ -12,6 +12,7 @@ import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constan
 import { IssueReportOut, IssueReportStatus } from '../../models/issues.models';
 import { IssuesService } from '../../services/issues.service';
 import { formatIssueContext } from '../../utils/issue-context.util';
+import { reporterLabel } from '../../utils/issue-reporter.util';
 
 @Component({
   selector: 'app-issue-detail',
@@ -63,6 +64,10 @@ export class IssueDetailComponent implements OnInit {
   });
 
   private issueId!: number;
+
+  reporterLabel(issue: IssueReportOut): string {
+    return reporterLabel(issue.reporter, this.translate);
+  }
 
   /** "Al-Baqarah 2:255", "Page 12", …; empty when the report has no location. */
   contextLabel(issue: IssueReportOut): string {

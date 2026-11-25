@@ -1914,7 +1914,8 @@
         "CONTACT_REPORTER": "Contact reporter",
         "CONTACT_SUBJECT": "Issue #{{id}}: {{asset}}",
         "DESCRIPTION_TITLE": "Description",
-        "NOT_FOUND": "This issue report could not be found."
+        "NOT_FOUND": "This issue report could not be found.",
+        "REPORTER_FALLBACK": "Reporter #{{id}}"
       },
       "DELETE": {
         "CONFIRM_TITLE": "Delete this issue report?",

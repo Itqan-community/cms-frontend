@@ -24,6 +24,7 @@ import {
 } from '../../models/issues.models';
 import { IssuesService } from '../../services/issues.service';
 import { formatIssueContext } from '../../utils/issue-context.util';
+import { reporterLabel } from '../../utils/issue-reporter.util';
 
 @Component({
   selector: 'app-issues-list',
@@ -136,6 +137,10 @@ export class IssuesListComponent extends AdminListBase<IssueReportOut, IssueRepo
       default:
         return 'default';
     }
+  }
+
+  reporterLabel(row: IssueReportOut): string {
+    return reporterLabel(row.reporter, this.translate);
   }
 
   /** "Al-Baqarah 2:255", "Page 12", …; an em dash on description-only reports. */

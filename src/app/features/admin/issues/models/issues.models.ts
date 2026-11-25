@@ -3,7 +3,9 @@ export type IssueReportStatus = 'pending' | 'under_review' | 'resolved' | 'dismi
 
 export interface IssueReportReporter {
   id: number;
-  email: string;
+  name: string;
+  /** Staff only; null for publisher members, who reach the reporter through comments. */
+  email: string | null;
 }
 
 /**
