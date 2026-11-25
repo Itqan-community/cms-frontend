@@ -15,7 +15,7 @@ import type {
   QuranPosition,
   QuranRangeResponse,
 } from '../models/asset-content.models';
-import type { VersionBump } from '../models/asset-versions.models';
+import type { ImportColumnMapping, VersionBump } from '../models/asset-versions.models';
 import type { VersionText } from '../utils/version-text.util';
 
 /**
@@ -40,12 +40,16 @@ export class AssetContentService {
     slug: string,
     language: string,
     file?: File | null,
-    version?: { label_en: string; label_ar: string; number: string }
+    version?: { label_en: string; label_ar: string; number: string },
+    columnMapping?: ImportColumnMapping | null
   ): Observable<AssetLanguage> {
     const data = new FormData();
     data.append('language', language);
     if (file) {
       data.append('file', file);
+      if (columnMapping) {
+        data.append('column_mapping', JSON.stringify(columnMapping));
+      }
       // The file becomes the language's first version, which starts its numbering.
       if (version) {
         data.append('version_label_en', version.label_en);

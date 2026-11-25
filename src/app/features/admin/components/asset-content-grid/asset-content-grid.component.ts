@@ -74,7 +74,7 @@ import type {
 import { isGroupTemplate } from '../../models/asset-content.models';
 import { PORTAL_PERMISSIONS } from '../../constants/portal-permission.constants';
 import { AdminAuthService } from '../../services/admin-auth.service';
-import type { VersionBump } from '../../models/asset-versions.models';
+import type { ImportColumnMapping, VersionBump } from '../../models/asset-versions.models';
 import { AssetContentService } from '../../services/asset-content.service';
 import { AssetVersionsService } from '../../services/asset-versions.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
@@ -89,6 +89,7 @@ import { ISO_639_LANGUAGES, localizedLanguageName } from '../../utils/iso-639.ut
 import { isVersionNumber } from '../../utils/version-number.util';
 import { ContentChangesComponent } from '../content-changes/content-changes.component';
 import { VersionNumberFieldComponent } from '../version-number-field/version-number-field.component';
+import { ImportColumnMappingComponent } from '../import-column-mapping/import-column-mapping.component';
 import {
   ManageColumnsModalComponent,
   type ColumnsChange,
@@ -227,6 +228,7 @@ function cellChanged(row: ContentEntry | undefined, key: string): boolean {
     NzToolTipModule,
     ManageColumnsModalComponent,
     VersionNumberFieldComponent,
+    ImportColumnMappingComponent,
     GroupRangeModalComponent,
   ],
   templateUrl: './asset-content-grid.component.html',
@@ -392,6 +394,12 @@ export class AssetContentGridComponent implements OnInit {
   /** Optional file to seed the new language with (uploaded as its first version). */
   private newLanguageFile: File | null = null;
   readonly newLanguageFileName = signal<string | null>(null);
+  /** The seed file, whose columns are matched to the asset's fields. */
+  readonly newLanguageImportFile = signal<File | null>(null);
+  /** Columns mapped by hand for the seed file (null: its headers are used). */
+  private newLanguageColumnMapping: ImportColumnMapping | null = null;
+  /** False until the seed file's columns cover the asset's required fields. */
+  readonly newLanguageColumnsReady = signal(true);
   /** The seed file becomes the language's first version: its name and starting number. */
   /** The new language's first version name, per language. */
   readonly newLanguageLabels = signal({ label_en: '', label_ar: '' });
@@ -399,7 +407,8 @@ export class AssetContentGridComponent implements OnInit {
   readonly addLanguageBlocked = computed(
     () =>
       !this.newLanguage() ||
-      (this.newLanguageFileName() !== null && !isVersionNumber(this.newLanguageStart()))
+      (this.newLanguageFileName() !== null &&
+        (!isVersionNumber(this.newLanguageStart()) || !this.newLanguageColumnsReady()))
   );
   /** ISO options not already on the asset, labelled + sorted in the UI language. */
   readonly addableLanguages = computed(() => {
@@ -1030,11 +1039,21 @@ export class AssetContentGridComponent implements OnInit {
     input.value = '';
     this.newLanguageFile = file;
     this.newLanguageFileName.set(file?.name ?? null);
+    this.newLanguageColumnMapping = null;
+    this.newLanguageImportFile.set(file);
+    this.newLanguageColumnsReady.set(true);
   }
 
   clearNewLanguageFile(): void {
     this.newLanguageFile = null;
     this.newLanguageFileName.set(null);
+    this.newLanguageColumnMapping = null;
+    this.newLanguageImportFile.set(null);
+    this.newLanguageColumnsReady.set(true);
+  }
+
+  onNewLanguageColumnMappingChange(mapping: ImportColumnMapping | null): void {
+    this.newLanguageColumnMapping = mapping;
   }
 
   /** Confirm adding a translation language (optionally seeded from a file) and edit it. */
@@ -1043,11 +1062,18 @@ export class AssetContentGridComponent implements OnInit {
     if (!language || this.addLanguageBlocked()) return;
     this.addLanguageBusy.set(true);
     this.contentService
-      .addLanguage(this.kind, this.slug, language, this.newLanguageFile, {
-        label_en: this.newLanguageLabels().label_en.trim(),
-        label_ar: this.newLanguageLabels().label_ar.trim(),
-        number: this.newLanguageStart().trim(),
-      })
+      .addLanguage(
+        this.kind,
+        this.slug,
+        language,
+        this.newLanguageFile,
+        {
+          label_en: this.newLanguageLabels().label_en.trim(),
+          label_ar: this.newLanguageLabels().label_ar.trim(),
+          number: this.newLanguageStart().trim(),
+        },
+        this.newLanguageColumnMapping
+      )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (added) => {

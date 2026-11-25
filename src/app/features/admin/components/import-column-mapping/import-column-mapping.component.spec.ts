@@ -1,0 +1,211 @@
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { TranslateModule } from '@ngx-translate/core';
+import { NzMessageService } from 'ng-zorro-antd/message';
+import type { ImportColumnMapping, ImportColumnsPreview } from '../../models/asset-versions.models';
+import { IMPORT_PREVIEW_BYTES } from '../../services/asset-versions.service';
+import { ImportColumnMappingComponent } from './import-column-mapping.component';
+
+const PREVIEW: ImportColumnsPreview = {
+  header_row: 1,
+  headers: ['chapter', 'verse', 'meaning', 'notes'],
+  samples: [['1', '1', 'In the name', '']],
+  fields: [
+    { key: 'surah', kind: 'unit', label_en: '', label_ar: '' },
+    { key: 'ayah', kind: 'unit', label_en: '', label_ar: '' },
+    { key: 'text', kind: 'text', label_en: 'Text', label_ar: '' },
+  ],
+  required: [['surah', 'ayah', 'text']],
+  mapping: {},
+  complete: false,
+};
+
+describe('ImportColumnMappingComponent', () => {
+  let fixture: ComponentFixture<ImportColumnMappingComponent>;
+  let component: ImportColumnMappingComponent;
+  let httpMock: HttpTestingController;
+  let message: { error: jasmine.Spy };
+  let mappings: (ImportColumnMapping | null)[];
+  let readiness: boolean[];
+
+  const url = (r: { url: string }) => r.url.endsWith('/text-assets/my-asset/import-columns/');
+
+  function pick(content = 'chapter,verse,meaning,notes\n1,1,x,\n'): File {
+    const file = new File([content], 'data.csv', { type: 'text/csv' });
+    fixture.componentRef.setInput('file', file);
+    fixture.detectChanges();
+    return file;
+  }
+
+  beforeEach(async () => {
+    message = { error: jasmine.createSpy('error') };
+    await TestBed.configureTestingModule({
+      imports: [ImportColumnMappingComponent, TranslateModule.forRoot()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: NzMessageService, useValue: message },
+      ],
+    })
+      // The behaviour under test is in the class; skip the modal markup.
+      .overrideComponent(ImportColumnMappingComponent, { set: { template: '' } })
+      .compileComponents();
+    fixture = TestBed.createComponent(ImportColumnMappingComponent);
+    component = fixture.componentInstance;
+    fixture.componentRef.setInput('slug', 'my-asset');
+    httpMock = TestBed.inject(HttpTestingController);
+    mappings = [];
+    readiness = [];
+    component.mappingChange.subscribe((m) => mappings.push(m));
+    component.readyChange.subscribe((r) => readiness.push(r));
+    fixture.detectChanges();
+  });
+
+  afterEach(() => httpMock.verify());
+
+  it('sends only the start of the file to the preview', () => {
+    // Arrange
+    const big = 'a'.repeat(IMPORT_PREVIEW_BYTES * 2);
+
+    // Act
+    pick(big);
+    const req = httpMock.expectOne(url);
+
+    // Assert
+    const sent = (req.request.body as FormData).get('file') as Blob;
+    expect(sent.size).toBe(IMPORT_PREVIEW_BYTES);
+    req.flush({ ...PREVIEW, complete: true });
+  });
+
+  it('opens the dialog and blocks import when required fields are unmatched', () => {
+    // Act
+    pick();
+    expect(component.ready()).toBeFalse();
+    httpMock.expectOne(url).flush({ ...PREVIEW, mapping: { surah: 0 } });
+    fixture.detectChanges();
+
+    // Assert
+    expect(component.dialogOpen()).toBeTrue();
+    expect(component.ready()).toBeFalse();
+    expect(component.draft()).toEqual(['surah', null, null, null]);
+    expect(component.draftMissing()).toEqual(['ayah', 'text']);
+    expect(readiness[readiness.length - 1]).toBeFalse();
+  });
+
+  it('emits the mapping and unblocks import once every required field has a column', () => {
+    // Arrange
+    pick();
+    httpMock.expectOne(url).flush(PREVIEW);
+
+    // Act
+    component.assign(0, 'surah');
+    component.assign(1, 'ayah');
+    component.assign(2, 'text');
+    component.confirm();
+    fixture.detectChanges();
+
+    // Assert
+    expect(mappings).toEqual([{ surah: 0, ayah: 1, text: 2 }]);
+    expect(component.dialogOpen()).toBeFalse();
+    expect(component.ready()).toBeTrue();
+    expect(readiness[readiness.length - 1]).toBeTrue();
+  });
+
+  it('moves a field to the column it was last assigned to', () => {
+    // Arrange
+    pick();
+    httpMock.expectOne(url).flush(PREVIEW);
+
+    // Act
+    component.assign(0, 'text');
+    component.assign(2, 'text');
+
+    // Assert
+    expect(component.draft()).toEqual([null, null, 'text', null]);
+  });
+
+  it('does not confirm an incomplete mapping', () => {
+    // Arrange
+    pick();
+    httpMock.expectOne(url).flush(PREVIEW);
+    component.assign(0, 'surah');
+
+    // Act
+    component.confirm();
+
+    // Assert
+    expect(mappings).toEqual([]);
+    expect(component.ready()).toBeFalse();
+  });
+
+  it('accepts either required set for word files', () => {
+    // Arrange
+    pick();
+    httpMock.expectOne(url).flush({
+      ...PREVIEW,
+      fields: [
+        { key: 'word_id', kind: 'unit', label_en: '', label_ar: '' },
+        ...PREVIEW.fields,
+        { key: 'word', kind: 'unit', label_en: '', label_ar: '' },
+      ],
+      required: [
+        ['word_id', 'text'],
+        ['surah', 'ayah', 'word', 'text'],
+      ],
+    });
+
+    // Act
+    component.assign(0, 'word_id');
+    component.assign(2, 'text');
+
+    // Assert
+    expect(component.hasAlternatives()).toBeTrue();
+    expect(component.draftComplete()).toBeTrue();
+  });
+
+  it('leaves the file headers in charge when they already match', () => {
+    // Act
+    pick();
+    httpMock.expectOne(url).flush({ ...PREVIEW, complete: true });
+
+    // Assert
+    expect(component.dialogOpen()).toBeFalse();
+    expect(component.ready()).toBeTrue();
+    expect(mappings).toEqual([]);
+  });
+
+  it("shows the backend's message when the preview fails and does not block", () => {
+    // Act
+    pick();
+    httpMock
+      .expectOne(url)
+      .flush(
+        { error_name: 'content_file_unparseable', message: 'Header row unreadable.' },
+        { status: 400, statusText: 'Bad Request' }
+      );
+
+    // Assert
+    expect(message.error).toHaveBeenCalledWith('Header row unreadable.');
+    expect(component.ready()).toBeTrue();
+  });
+
+  it('forgets a confirmed mapping when the file is cleared', () => {
+    // Arrange
+    pick();
+    httpMock.expectOne(url).flush(PREVIEW);
+    component.assign(0, 'surah');
+    component.assign(1, 'ayah');
+    component.assign(2, 'text');
+    component.confirm();
+
+    // Act
+    fixture.componentRef.setInput('file', null);
+    fixture.detectChanges();
+
+    // Assert
+    expect(mappings[mappings.length - 1]).toBeNull();
+    expect(component.preview()).toBeNull();
+    expect(component.ready()).toBeTrue();
+  });
+});

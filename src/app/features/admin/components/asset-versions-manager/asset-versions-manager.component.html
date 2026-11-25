@@ -271,6 +271,14 @@
               <p class="asset-versions-manager__file-preview">
                 <span class="admin-mono">{{ selectedFileName() }}</span>
               </p>
+              @if (kind === 'text') {
+                <app-import-column-mapping
+                  [slug]="slug"
+                  [file]="importFile()"
+                  (mappingChange)="onColumnMappingChange($event)"
+                  (readyChange)="columnsReady.set($event)"
+                />
+              }
             } @else if (modalMode() === 'edit') {
               <p class="asset-versions-manager__hint">{{ t('EDIT_FILE_HINT') | translate }}</p>
             } @else {
@@ -325,7 +333,9 @@
           nzType="primary"
           type="button"
           [nzLoading]="saving()"
-          [disabled]="form.invalid || missingVersionLanguage() || versionNumberIncomplete()"
+          [disabled]="
+            form.invalid || missingVersionLanguage() || versionNumberIncomplete() || !columnsReady()
+          "
           (click)="submit()"
         >
           @if (modalMode() === 'create') {

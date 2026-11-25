@@ -9,7 +9,11 @@ import type {
   AssetVersionParentKind,
   AssetVersionsListParams,
   AssetVersionsListResponse,
+  ImportColumnsPreview,
 } from '../models/asset-versions.models';
+
+/** The backend reads only this much of a file to preview its header row. */
+export const IMPORT_PREVIEW_BYTES = 64 * 1024;
 
 @Injectable({ providedIn: 'root' })
 export class AssetVersionsService {
@@ -93,6 +97,18 @@ export class AssetVersionsService {
   ): Observable<string | null> {
     return this.list(kind, slug, { page: 1, page_size: 1, language: language ?? undefined }).pipe(
       map((res) => res.results[0]?.name ?? null)
+    );
+  }
+
+  /** Read a content file's header row and match it to the text asset's fields.
+   *  Only the file's start is sent, so a large file is not uploaded twice. */
+  previewImportColumns(slug: string, file: File): Observable<ImportColumnsPreview> {
+    const data = new FormData();
+    data.append('file', file.slice(0, IMPORT_PREVIEW_BYTES), file.name);
+    return this.http.post<ImportColumnsPreview>(
+      `${this.base}/text-assets/${encodeURIComponent(slug)}/import-columns/`,
+      data,
+      { context: callerShowsErrors() }
     );
   }
 
@@ -217,6 +233,9 @@ export class AssetVersionsService {
     }
     if (payload.publish !== undefined) {
       data.append('publish', String(payload.publish));
+    }
+    if (payload.file && payload.column_mapping) {
+      data.append('column_mapping', JSON.stringify(payload.column_mapping));
     }
     return data;
   }

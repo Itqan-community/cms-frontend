@@ -90,6 +90,33 @@ export interface AssetVersionFormPayload {
   pre_approved?: boolean;
   /** Mushafs/fonts, create only: publish the upload right away (needs the publish permission). */
   publish?: boolean;
+  /** Translations/tafsirs with a file: field key -> file column index, overriding header matching. */
+  column_mapping?: ImportColumnMapping | null;
+}
+
+/** Field key -> 0-based column index of the file's header row (null: not in the file). */
+export type ImportColumnMapping = Record<string, number | null>;
+
+export interface ImportColumnField {
+  key: string;
+  /** `unit`: where a row sits (surah, ayah, …); `text`: one of the asset's text columns. */
+  kind: 'unit' | 'text';
+  label_en: string;
+  label_ar: string;
+}
+
+/** `POST text-assets/{slug}/import-columns/`: a content file's header row, read from its start. */
+export interface ImportColumnsPreview {
+  /** 1-based row number of the header row. */
+  header_row: number;
+  headers: string[];
+  samples: string[][];
+  fields: ImportColumnField[];
+  /** Mapping every field of any one list is enough to import. */
+  required: string[][];
+  /** Fields matched by header name. */
+  mapping: Record<string, number>;
+  complete: boolean;
 }
 
 export type AssetVersionParentKind = 'text' | 'mushaf' | 'font' | 'program';
