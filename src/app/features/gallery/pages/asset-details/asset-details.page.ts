@@ -31,7 +31,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTagModule } from 'ng-zorro-antd/tag';
-import { Observable } from 'rxjs';
+import { Observable, retry } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { Licenses } from '../../../../core/enums/licenses.enum';
@@ -69,6 +69,9 @@ import { AssetGetCtaComponent } from '../../components/asset-get-cta/asset-get-c
 import { preferredLanguage } from '../../utils/preferred-language.util';
 import { AssetsService } from '../../services/assets.service';
 import { AssetUsageCountsComponent } from '../../../usage/components/asset-usage-counts/asset-usage-counts.component';
+
+const ACCESS_REFRESH_RETRIES = 2;
+const ACCESS_REFRESH_RETRY_DELAY_MS = 1000;
 
 @Component({
   selector: 'app-asset-details-page',
@@ -123,6 +126,7 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
     isPlatformBrowser(this.platformId) &&
     !this.router.navigated &&
     inject(DOCUMENT).querySelector('[ng-server-context]') !== null;
+  /** True while the post-hydration access refresh is in flight or after it succeeded. */
   private accessRefreshed = false;
   private reportIssueHandled = false;
 
@@ -266,10 +270,17 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
     this.accessRefreshed = true;
     this.assetsService
       .getAssetDetails(this.id, { skipTransferCache: true })
-      .pipe(takeUntilDestroyed(this.destroyRef))
+      .pipe(
+        retry({ count: ACCESS_REFRESH_RETRIES, delay: ACCESS_REFRESH_RETRY_DELAY_MS }),
+        takeUntilDestroyed(this.destroyRef)
+      )
       .subscribe({
         next: (asset) => this.applyRefreshedAsset(asset),
-        error: (err: unknown) => console.warn('Could not refresh the access status', err),
+        error: (err: unknown) => {
+          // Allow a later auth or asset change to try again instead of keeping the guest status.
+          this.accessRefreshed = false;
+          console.warn('Could not refresh the access status', err);
+        },
       });
   }
 

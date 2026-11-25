@@ -1,12 +1,12 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzModalService } from 'ng-zorro-antd/modal';
-import { of } from 'rxjs';
+import { defer, of, throwError } from 'rxjs';
 
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { appLucideIconsProvider } from '../../../../icons/provide-app-lucide-icons';
@@ -172,6 +172,40 @@ describe('AssetDetailsPage after a server render', () => {
     expect(getAssetDetails).toHaveBeenCalledWith(page.id, { skipTransferCache: true });
     expect(page.asset()?.access_status).toBe('approved');
   });
+
+  it('retries a failed access refresh before giving up', fakeAsync(() => {
+    let attempts = 0;
+    const getAssetDetails = jasmine
+      .createSpy('getAssetDetails')
+      .and.callFake((_id: string, options?: { skipTransferCache?: boolean }) =>
+        options?.skipTransferCache
+          ? defer(() => (attempts++ === 0 ? throwError(() => new Error('offline')) : of(userAsset)))
+          : of(guestAsset)
+      );
+    TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AssetsService, useValue: { getAssetDetails } },
+        { provide: IssuesService, useValue: {} },
+        {
+          provide: AuthService,
+          useValue: { isLoggedIn: () => false, canActivateAsLoggedIn: () => true },
+        },
+      ],
+    });
+    TestBed.overrideComponent(AssetDetailsPage, { set: { template: '', imports: [] } });
+    TestBed.overrideProvider(NzModalService, { useValue: {} });
+    const page = TestBed.createComponent(AssetDetailsPage).componentInstance;
+    page.ngOnInit();
+
+    expect(page.asset()?.access_status).toBeNull();
+    tick(1000);
+    expect(attempts).toBe(2);
+    expect(page.asset()?.access_status).toBe('approved');
+  }));
 
   it('keeps the server data for a guest', () => {
     const { getAssetDetails } = create(false);
