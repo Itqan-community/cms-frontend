@@ -1,12 +1,13 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
-import { defer, of, throwError } from 'rxjs';
+import { defer, of, Subject, throwError } from 'rxjs';
 
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { appLucideIconsProvider } from '../../../../icons/provide-app-lucide-icons';
@@ -206,6 +207,52 @@ describe('AssetDetailsPage after a server render', () => {
     expect(attempts).toBe(2);
     expect(page.asset()?.access_status).toBe('approved');
   }));
+
+  it('does not let a late hydration refresh overwrite a submitted access request', () => {
+    const hydrationRefresh = new Subject<AssetDetails>();
+    let plainCalls = 0;
+    const pendingAsset = { ...guestAsset, access_status: 'pending' } as AssetDetails;
+    const getAssetDetails = jasmine
+      .createSpy('getAssetDetails')
+      .and.callFake((_id: string, options?: { skipTransferCache?: boolean }) =>
+        options?.skipTransferCache
+          ? hydrationRefresh
+          : of(plainCalls++ === 0 ? guestAsset : pendingAsset)
+      );
+    TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AssetsService, useValue: { getAssetDetails } },
+        { provide: IssuesService, useValue: {} },
+        {
+          provide: AuthService,
+          useValue: { isLoggedIn: () => true, canActivateAsLoggedIn: () => true },
+        },
+      ],
+    });
+    TestBed.overrideComponent(AssetDetailsPage, { set: { template: '', imports: [] } });
+    TestBed.overrideProvider(NzModalService, { useValue: {} });
+    TestBed.overrideProvider(NzMessageService, {
+      useValue: { success: () => undefined, error: () => undefined },
+    });
+    const page = TestBed.createComponent(AssetDetailsPage).componentInstance;
+    page.ngOnInit();
+    expect(hydrationRefresh.observed).toBeTrue();
+
+    page.accessRequestForm.setValue({ intended_use: 'research', purpose: 'Study tafsir' });
+    page.handleModalOk();
+    TestBed.inject(HttpTestingController)
+      .expectOne((req) => req.url.endsWith('/assets/7/request-access/'))
+      .flush({});
+
+    expect(page.asset()?.access_status).toBe('pending');
+    expect(hydrationRefresh.observed).toBeFalse();
+    hydrationRefresh.next({ ...guestAsset, access_status: 'not_requested' } as AssetDetails);
+    expect(page.asset()?.access_status).toBe('pending');
+  });
 
   it('keeps the server data for a guest', () => {
     const { getAssetDetails } = create(false);

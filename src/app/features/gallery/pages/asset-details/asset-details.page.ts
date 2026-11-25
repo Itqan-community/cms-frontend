@@ -31,7 +31,7 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTagModule } from 'ng-zorro-antd/tag';
-import { Observable, retry } from 'rxjs';
+import { Observable, retry, Subscription } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { Licenses } from '../../../../core/enums/licenses.enum';
@@ -128,6 +128,7 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
     inject(DOCUMENT).querySelector('[ng-server-context]') !== null;
   /** True while the post-hydration access refresh is in flight or after it succeeded. */
   private accessRefreshed = false;
+  private hydrationAccessRefresh?: Subscription;
   private reportIssueHandled = false;
 
   readonly id = this.route.snapshot.params['id'];
@@ -268,7 +269,7 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
       return;
     }
     this.accessRefreshed = true;
-    this.assetsService
+    this.hydrationAccessRefresh = this.assetsService
       .getAssetDetails(this.id, { skipTransferCache: true })
       .pipe(
         retry({ count: ACCESS_REFRESH_RETRIES, delay: ACCESS_REFRESH_RETRY_DELAY_MS }),
@@ -550,6 +551,8 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
+            // The request result is newer than the guest snapshot the hydration refresh would apply.
+            this.hydrationAccessRefresh?.unsubscribe();
             this.isSubmittingRequest.set(false);
             this.closeAccessRequestModal();
             this.refreshAssetDetails()
