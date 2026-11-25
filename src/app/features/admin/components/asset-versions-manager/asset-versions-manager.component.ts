@@ -52,6 +52,7 @@ import type { AssetLanguage, ContentChange } from '../../models/asset-content.mo
 import type {
   AssetVersion,
   AssetVersionParentKind,
+  ImportColumnMapping,
   VersionBump,
 } from '../../models/asset-versions.models';
 import { resolveApiErrorMessage } from '../../../../shared/utils/api-error-resolver.util';
@@ -65,6 +66,7 @@ import { AdminTablePaginationComponent } from '../admin-table-pagination/admin-t
 import { AdminTitleCountComponent } from '../admin-title-count/admin-title-count.component';
 import { ContentChangesComponent } from '../content-changes/content-changes.component';
 import { CsvTemplateDownloadComponent } from '../csv-template-download/csv-template-download.component';
+import { ImportColumnMappingComponent } from '../import-column-mapping/import-column-mapping.component';
 import { UniversalAssetPreviewerComponent } from '../universal-asset-previewer/universal-asset-previewer.component';
 import { VersionNumberFieldComponent } from '../version-number-field/version-number-field.component';
 import {
@@ -134,6 +136,7 @@ const VERSION_PERMISSIONS: Record<
   imports: [
     DatePipe,
     CsvTemplateDownloadComponent,
+    ImportColumnMappingComponent,
     ReactiveFormsModule,
     TranslateModule,
     NgIcon,
@@ -255,6 +258,12 @@ export class AssetVersionsManagerComponent implements OnInit {
   readonly searchTerm = signal('');
   readonly selectedFileName = signal<string | null>(null);
   private selectedFile: File | null = null;
+  /** Text assets: the picked file, whose columns are matched to the asset's fields. */
+  readonly importFile = signal<File | null>(null);
+  /** Columns the user mapped by hand (null: the file's headers are used). */
+  private columnMapping: ImportColumnMapping | null = null;
+  /** False until the file's columns cover the asset's required fields. */
+  readonly columnsReady = signal(true);
 
   /** Create/edit popup visibility. */
   readonly versionModalOpen = signal(false);
@@ -566,11 +575,20 @@ export class AssetVersionsManagerComponent implements OnInit {
     if (!file) return;
     this.selectedFile = file;
     this.selectedFileName.set(file.name);
+    this.columnMapping = null;
+    this.importFile.set(this.kind === 'text' ? file : null);
   }
 
   clearFile(): void {
     this.selectedFile = null;
     this.selectedFileName.set(null);
+    this.columnMapping = null;
+    this.importFile.set(null);
+    this.columnsReady.set(true);
+  }
+
+  onColumnMappingChange(mapping: ImportColumnMapping | null): void {
+    this.columnMapping = mapping;
   }
 
   submit(): void {
@@ -594,7 +612,7 @@ export class AssetVersionsManagerComponent implements OnInit {
       this.message.warning(this.translate.instant(`${this.i18nPrefix}.MESSAGES.LANGUAGE_REQUIRED`));
       return;
     }
-    if (this.versionNumberIncomplete()) {
+    if (this.versionNumberIncomplete() || !this.columnsReady()) {
       return;
     }
 
@@ -612,6 +630,7 @@ export class AssetVersionsManagerComponent implements OnInit {
           }
         : { name, summary }),
       file: this.selectedFile ?? undefined,
+      column_mapping: this.selectedFile ? this.columnMapping : null,
       // Language only applies when creating a new (uploaded) version.
       language:
         creating && this.supportsLanguages() ? (this.versionLanguage() ?? undefined) : undefined,

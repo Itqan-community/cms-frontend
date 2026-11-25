@@ -2796,6 +2796,40 @@
       },
       "INCLUDED_BY": "Included with: {{names}}",
       "DELETE_TITLE": "Delete the role \"{{name}}\"?"
+    },
+    "IMPORT_COLUMNS": {
+      "READING": "Reading the file's columns…",
+      "STATUS_MATCHED": "The file's columns match this asset's fields.",
+      "STATUS_MAPPED": "You matched the file's columns to this asset's fields.",
+      "STATUS_UNMATCHED": "Some fields don't match a column in this file. Match them before you upload.",
+      "REVIEW": "Review columns",
+      "MAP_COLUMNS": "Match columns",
+      "TITLE": "Match file columns",
+      "INTRO": "Choose the field each column of {{name}} fills (header in row {{row}}). Columns set to \"Ignore\" are not imported.",
+      "FILE_COLUMN": "File column",
+      "SAMPLES": "Sample values",
+      "ASSET_FIELD": "Field",
+      "IGNORE": "Ignore",
+      "UNNAMED_COLUMN": "Column {{n}} (no header)",
+      "TEXT_FIELD": "Text: {{name}}",
+      "WORD_HINT": "Word rows need either Word ID, or Surah, Ayah and Word position.",
+      "IGNORED_HINT": "Columns ignored: {{count}}",
+      "MISSING": "Choose a column for: {{fields}}",
+      "CONFIRM": "Use these columns",
+      "PREVIEW_ERROR": "The file's columns could not be read.",
+      "FIELDS": {
+        "SURAH": "Surah",
+        "AYAH": "Ayah",
+        "WORD": "Word position",
+        "WORD_ID": "Word ID",
+        "PAGE": "Page",
+        "FROM_SURAH": "From surah",
+        "FROM_AYAH": "From ayah",
+        "FROM_WORD": "From word",
+        "TO_SURAH": "To surah",
+        "TO_AYAH": "To ayah",
+        "TO_WORD": "To word"
+      }
     }
   },
   "USAGE": {

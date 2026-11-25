@@ -294,6 +294,12 @@
         </div>
         @if (newLanguageFileName()) {
           <p class="content-grid__add-language-file-name admin-mono">{{ newLanguageFileName() }}</p>
+          <app-import-column-mapping
+            [slug]="slug"
+            [file]="newLanguageImportFile()"
+            (mappingChange)="onNewLanguageColumnMappingChange($event)"
+            (readyChange)="newLanguageColumnsReady.set($event)"
+          />
         } @else {
           <p class="content-grid__add-language-file-hint">
             {{ 'ADMIN.CONTENT_EDITOR.LANGUAGE.FILE_HINT' | translate }}

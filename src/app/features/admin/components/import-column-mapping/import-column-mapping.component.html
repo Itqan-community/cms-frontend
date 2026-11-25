@@ -1,0 +1,122 @@
+@if (loading()) {
+  <p class="import-columns__status">{{ 'ADMIN.IMPORT_COLUMNS.READING' | translate }}</p>
+} @else if (preview(); as p) {
+  <div
+    class="import-columns__status"
+    [class.import-columns__status--warning]="!ready()"
+    data-testid="import-columns-status"
+  >
+    <span>
+      @if (confirmed()) {
+        {{ 'ADMIN.IMPORT_COLUMNS.STATUS_MAPPED' | translate }}
+      } @else if (p.complete) {
+        {{ 'ADMIN.IMPORT_COLUMNS.STATUS_MATCHED' | translate }}
+      } @else {
+        {{ 'ADMIN.IMPORT_COLUMNS.STATUS_UNMATCHED' | translate }}
+      }
+    </span>
+    <button
+      nz-button
+      [nzType]="ready() ? 'link' : 'primary'"
+      nzSize="small"
+      type="button"
+      (click)="openDialog()"
+    >
+      {{
+        (ready() ? 'ADMIN.IMPORT_COLUMNS.REVIEW' : 'ADMIN.IMPORT_COLUMNS.MAP_COLUMNS') | translate
+      }}
+    </button>
+  </div>
+}
+
+<nz-modal
+  [nzVisible]="dialogOpen()"
+  [nzTitle]="'ADMIN.IMPORT_COLUMNS.TITLE' | translate"
+  [nzWidth]="720"
+  [nzMaskClosable]="false"
+  (nzOnCancel)="closeDialog()"
+>
+  <ng-container *nzModalContent>
+    @if (preview(); as p) {
+      <p class="import-columns__intro">
+        {{
+          'ADMIN.IMPORT_COLUMNS.INTRO' | translate: { name: file()?.name ?? '', row: p.header_row }
+        }}
+      </p>
+      <div class="import-columns__table-wrap">
+        <table class="import-columns__table">
+          <thead>
+            <tr>
+              <th scope="col">{{ 'ADMIN.IMPORT_COLUMNS.FILE_COLUMN' | translate }}</th>
+              <th scope="col">{{ 'ADMIN.IMPORT_COLUMNS.SAMPLES' | translate }}</th>
+              <th scope="col">{{ 'ADMIN.IMPORT_COLUMNS.ASSET_FIELD' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of rows(); track row.index) {
+              <tr [class.import-columns__row--ignored]="draft()[row.index] === null">
+                <td class="import-columns__header admin-mono">
+                  {{ columnName(row.header, row.index) }}
+                </td>
+                <td class="import-columns__samples">
+                  @for (sample of row.samples; track $index) {
+                    <span class="import-columns__sample" [title]="sample">{{ sample }}</span>
+                  }
+                </td>
+                <td class="import-columns__field">
+                  <nz-select
+                    class="import-columns__select"
+                    [nzPlaceHolder]="'ADMIN.IMPORT_COLUMNS.IGNORE' | translate"
+                    [ngModel]="draft()[row.index]"
+                    (ngModelChange)="assign(row.index, $event)"
+                    [attr.aria-label]="columnName(row.header, row.index)"
+                    [attr.data-testid]="'import-columns-select-' + row.index"
+                  >
+                    <nz-option
+                      [nzValue]="null"
+                      [nzLabel]="'ADMIN.IMPORT_COLUMNS.IGNORE' | translate"
+                    ></nz-option>
+                    @for (field of p.fields; track field.key) {
+                      <nz-option [nzValue]="field.key" [nzLabel]="fieldLabel(field)"></nz-option>
+                    }
+                  </nz-select>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (hasAlternatives()) {
+        <p class="import-columns__hint">{{ 'ADMIN.IMPORT_COLUMNS.WORD_HINT' | translate }}</p>
+      }
+      @if (ignoredCount() > 0) {
+        <p class="import-columns__hint">
+          {{ 'ADMIN.IMPORT_COLUMNS.IGNORED_HINT' | translate: { count: ignoredCount() } }}
+        </p>
+      }
+      @if (!draftComplete()) {
+        <nz-alert
+          nzType="warning"
+          nzShowIcon
+          data-testid="import-columns-missing"
+          [nzMessage]="'ADMIN.IMPORT_COLUMNS.MISSING' | translate: { fields: missingLabels() }"
+        ></nz-alert>
+      }
+    }
+  </ng-container>
+  <ng-container *nzModalFooter>
+    <button nz-button nzType="default" type="button" (click)="closeDialog()">
+      {{ 'ADMIN.COMMON.CANCEL' | translate }}
+    </button>
+    <button
+      nz-button
+      nzType="primary"
+      type="button"
+      data-testid="import-columns-confirm"
+      [disabled]="!draftComplete()"
+      (click)="confirm()"
+    >
+      {{ 'ADMIN.IMPORT_COLUMNS.CONFIRM' | translate }}
+    </button>
+  </ng-container>
+</nz-modal>
