@@ -332,7 +332,7 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
     this.isSubmittingReportIssue.set(true);
 
     this.issuesService
-      .create({ asset_id: asset.id, description, context })
+      .create({ asset_id: asset.id, description, context }, { fromGallery: true })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {

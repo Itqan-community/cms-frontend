@@ -3,6 +3,7 @@ import { inject, Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { callerShowsErrors } from '../../../../core/interceptors/caller-shows-errors.context';
+import { SKIP_TENANT_HEADER } from '../../../../core/interceptors/tenant-header.interceptor';
 import {
   IssueReportComment,
   IssueReportCommentIn,
@@ -57,10 +58,14 @@ export class IssuesService {
     return this.http.get<IssueReportOut>(`${this.baseUrl}/${id}/`);
   }
 
-  create(body: IssueReportCreateIn): Observable<IssueReportOut> {
+  /**
+   * File a report. The portal form sends X-Tenant, so the backend allows only the selected
+   * publisher's assets; the gallery passes `fromGallery` to send none and report any asset.
+   */
+  create(body: IssueReportCreateIn, { fromGallery = false } = {}): Observable<IssueReportOut> {
     // Callers show the backend's message (e.g. an invalid issue location) themselves.
     return this.http.post<IssueReportOut>(`${this.baseUrl}/`, body, {
-      context: callerShowsErrors(),
+      context: callerShowsErrors().set(SKIP_TENANT_HEADER, fromGallery),
     });
   }
 
