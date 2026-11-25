@@ -32,7 +32,7 @@ describe('sitemap.util', () => {
       fetchMock as unknown as typeof fetch
     );
 
-    expect(result.fetchedAny).toBeTrue();
+    expect(result.complete).toBeTrue();
     expect(result.xml).toContain('<loc>https://cms.itqan.dev/gallery</loc>');
     expect(result.xml).toContain('<loc>https://cms.itqan.dev/reciters/al%20afasy</loc>');
     expect(result.xml).toContain('<loc>https://cms.itqan.dev/gallery/asset/12?lang=en</loc>');
@@ -75,5 +75,63 @@ describe('sitemap.util', () => {
 
     spyOn(console, 'warn');
     expect(await fallbackLoader.get()).toBe('<urlset>fallback</urlset>');
+  });
+
+  it('keeps the complete cached sitemap when one endpoint fails on refresh', async () => {
+    let time = 1000;
+    let assetsUp = true;
+    const fetchMock = jasmine.createSpy('fetch').and.callFake((input: RequestInfo | URL) => {
+      const url = String(input);
+      if (url.includes('/assets/') && !assetsUp) {
+        return Promise.resolve(new Response('', { status: 503 }));
+      }
+      const results = url.includes('/reciters/')
+        ? [{ slug: 'afasy' }]
+        : [{ id: 12, publisher: { id: 3 } }];
+      return Promise.resolve(new Response(JSON.stringify({ count: 1, results }), { status: 200 }));
+    });
+    const loader = createCachedSitemapLoader({
+      apiBaseUrl: 'https://api.cms.itqan.dev/cms-api',
+      siteUrl: 'https://cms.itqan.dev',
+      ttlMs: 5000,
+      now: () => time,
+      readFallback: () => '<urlset>fallback</urlset>',
+      fetchImpl: fetchMock as unknown as typeof fetch,
+    });
+    spyOn(console, 'warn');
+
+    const complete = await loader.get();
+    expect(complete).toContain('/gallery/asset/12');
+
+    assetsUp = false;
+    time += 6000;
+    expect(await loader.get()).toBe(complete);
+  });
+
+  it('prefers the disk fallback over a partial sitemap when nothing is cached', async () => {
+    const fetchMock = jasmine
+      .createSpy('fetch')
+      .and.callFake((input: RequestInfo | URL) =>
+        String(input).includes('/assets/')
+          ? Promise.resolve(new Response('', { status: 503 }))
+          : Promise.resolve(
+              new Response(JSON.stringify({ count: 0, results: [] }), { status: 200 })
+            )
+      );
+    spyOn(console, 'warn');
+    const withFallback = createCachedSitemapLoader({
+      apiBaseUrl: 'https://api.cms.itqan.dev/cms-api',
+      siteUrl: 'https://cms.itqan.dev',
+      readFallback: () => '<urlset>fallback</urlset>',
+      fetchImpl: fetchMock as unknown as typeof fetch,
+    });
+    expect(await withFallback.get()).toBe('<urlset>fallback</urlset>');
+
+    const withoutFallback = createCachedSitemapLoader({
+      apiBaseUrl: 'https://api.cms.itqan.dev/cms-api',
+      siteUrl: 'https://cms.itqan.dev',
+      fetchImpl: fetchMock as unknown as typeof fetch,
+    });
+    expect(await withoutFallback.get()).toContain('<loc>https://cms.itqan.dev/gallery</loc>');
   });
 });

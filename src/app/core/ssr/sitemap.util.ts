@@ -110,7 +110,7 @@ export async function buildSitemapXml(
   apiBaseUrl: string,
   siteUrl: string,
   fetchImpl: typeof fetch = fetch
-): Promise<{ xml: string; fetchedAny: boolean }> {
+): Promise<{ xml: string; complete: boolean }> {
   const cleanSiteUrl = siteUrl.replace(/\/+$/, '');
   const [recitersRes, assetsRes] = await Promise.all([
     fetchEndpoint<ReciterSummary>(apiBaseUrl, 'reciters', fetchImpl),
@@ -155,7 +155,7 @@ export async function buildSitemapXml(
   ];
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n${entries.join('\n')}\n</urlset>\n`;
-  return { xml, fetchedAny: recitersRes.ok || assetsRes.ok };
+  return { xml, complete: recitersRes.ok && assetsRes.ok };
 }
 
 export interface CachedSitemapLoaderOptions {
@@ -188,15 +188,17 @@ export function createCachedSitemapLoader(options: CachedSitemapLoaderOptions): 
 
       inFlight = (async () => {
         try {
-          const { xml, fetchedAny } = await buildSitemapXml(
+          const { xml, complete } = await buildSitemapXml(
             options.apiBaseUrl,
             options.siteUrl,
             fetchImpl
           );
-          if (fetchedAny) {
+          if (complete) {
             cache = { xml, expiresAt: now() + ttlMs };
             return xml;
           }
+          // A partial refresh never replaces a complete sitemap; it is served only when there is
+          // no complete one to fall back to.
           if (cache) {
             return cache.xml;
           }
