@@ -111,10 +111,10 @@ export class ReciterDetailsPage implements OnInit, OnDestroy {
     const name = isAr ? reciter.name_ar : reciter.name_en;
     const alternateName = isAr ? reciter.name_en : reciter.name_ar;
     const bio = isAr ? reciter.bio_ar : reciter.bio_en;
-    const description = bio || `${name} - Quran reciter on ITQAN.`;
+    const description = bio || `${name} - Quran reciter on Fanar.`;
 
     this.seo.setSeo({
-      title: `${name} | ITQAN`,
+      title: `${name} | ${isAr ? 'فنار' : 'Fanar'}`,
       description,
       path: `/reciters/${reciter.slug}`,
       image: reciter.image_url || undefined,

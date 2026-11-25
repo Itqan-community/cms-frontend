@@ -3,12 +3,12 @@ import { inject, Injectable } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { environment } from '../../../environments/environment';
 
-const DEFAULT_TITLE_AR = 'إتقان | نظام إدارة المحتوى';
-const DEFAULT_TITLE_EN = 'ITQAN | Content Management System';
+const DEFAULT_TITLE_AR = 'فنار | نظام إدارة المحتوى';
+const DEFAULT_TITLE_EN = 'Fanar | Content Management System';
 const DEFAULT_DESCRIPTION_AR =
-  'إتقان - منصة إدارة المحتوى القرآني: تصفح وابحث في المصاحف والتلاوات والتفاسير والقراء.';
+  'فنار - منصة إدارة المحتوى القرآني: تصفح وابحث في المصاحف والتلاوات والتفاسير والقراء.';
 const DEFAULT_DESCRIPTION_EN =
-  'ITQAN - Quranic content management platform: browse and search Mushafs, recitations, tafsir, and reciters.';
+  'Fanar - Quranic content management platform: browse and search Mushafs, recitations, tafsir, and reciters.';
 
 export interface SeoConfig {
   title: string;

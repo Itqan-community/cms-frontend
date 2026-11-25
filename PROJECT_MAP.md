@@ -1,4 +1,4 @@
-# PROJECT_MAP — Itqan CMS Frontend
+# PROJECT_MAP — Fanar Frontend
 
 > Last updated: 2026-08-30 Generated for AI-assisted development. Provide this doc to any LLM to
 > give full project context.
@@ -719,17 +719,17 @@ since the record belongs to the previous publisher and would 404. `create`, list
 
 ## [DEPLOYMENT]
 
-| Platform          | Cloudflare Pages                                                                                                |
-| ----------------- | --------------------------------------------------------------------------------------------------------------- |
-| Production        | `https://cms.itqan.dev` / `cms-frontend-bdh.pages.dev` (master branch)                                          |
-| Staging           | `https://staging.cms.itqan.dev` / `cms-frontend-staging.pages.dev` (staging branch)                             |
-| Build cmd         | `npm run build:{env}`                                                                                           |
-| Publish dir       | `dist/browser`                                                                                                  |
-| SPA fallback      | `deploy/cloudflare/staging/_redirects` (staging); `deploy/netlify/production/_redirects` (production)           |
-| Staging API proxy | Pages Functions in `functions/` → `https://staging.api.cms.itqan.dev` (same-origin cookies on staging hosts)    |
-| OAuth callbacks   | Allow `https://staging.cms.itqan.dev/accounts/.../callback` and preview URL on `cms-frontend-staging.pages.dev` |
-| Security headers  | X-Frame-Options: DENY, X-Content-Type-Options: nosniff, X-XSS-Protection, Referrer-Policy, Permissions-Policy   |
-| Cache             | Static assets under `/assets/` — 1 year immutable                                                               |
+| Platform          | Cloudflare Pages                                                                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Production        | `https://fanar.itqan.dev` (also `https://cms.itqan.dev` during migration) / `cms-frontend-bdh.pages.dev` (master branch)                                                 |
+| Staging           | `https://staging.fanar.itqan.dev` (also `https://staging.cms.itqan.dev`) / `cms-frontend-staging.pages.dev` (staging branch)                                             |
+| Build cmd         | `npm run build:{env}`                                                                                                                                                    |
+| Publish dir       | `dist/browser`                                                                                                                                                           |
+| SPA fallback      | `deploy/cloudflare/staging/_redirects` (staging); `deploy/netlify/production/_redirects` (production)                                                                    |
+| Staging API proxy | Pages Functions in `functions/` → `https://staging.api.cms.itqan.dev` (same-origin cookies on staging hosts)                                                             |
+| OAuth callbacks   | Allow `https://staging.cms.itqan.dev/accounts/.../callback`, `https://staging.fanar.itqan.dev/accounts/.../callback` and preview URL on `cms-frontend-staging.pages.dev` |
+| Security headers  | X-Frame-Options: DENY, X-Content-Type-Options: nosniff, X-XSS-Protection, Referrer-Policy, Permissions-Policy                                                            |
+| Cache             | Static assets under `/assets/` — 1 year immutable                                                                                                                        |
 
 Legacy Netlify config remains in `netlify.toml` and `deploy/netlify/*` for reference; staging deploy
 uses Cloudflare Pages Functions instead of Netlify external redirects.

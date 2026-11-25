@@ -24,7 +24,7 @@ export class App {
   private readonly webVitalsService = inject(WebVitalsService);
   private readonly googleAnalyticsService = inject(GoogleAnalyticsService);
 
-  protected readonly title = signal('ITQAN | إتقان');
+  protected readonly title = signal('Fanar | فنار');
   protected hideHeader = signal(false);
   protected fullWidth = signal(false);
 
