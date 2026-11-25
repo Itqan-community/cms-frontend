@@ -12,6 +12,8 @@ import type { ReadableStream as NodeWebReadableStream } from 'node:stream/web';
 import {
   hasRequestLanguageQuery,
   isPublicSsrPath,
+  LANG_QUERY_PARAM,
+  normalizeUiLanguage,
   resolveRequestLanguage,
   resolveRequestTheme,
   SsrRequestContext,
@@ -164,7 +166,9 @@ app.use(
 
 app.get('/', (req, res) => {
   const url = new URL(req.originalUrl, 'http://localhost');
-  const target = url.searchParams.get('lang') === 'en' ? '/gallery?lang=en' : '/gallery';
+  // An explicit ?lang= wins over the cookie, so it has to survive the redirect (ar included).
+  const lang = normalizeUiLanguage(url.searchParams.get(LANG_QUERY_PARAM));
+  const target = lang ? `/gallery?${LANG_QUERY_PARAM}=${lang}` : '/gallery';
   res.setHeader('Vary', 'Cookie');
   res.setHeader('Cache-Control', 'public, max-age=3600');
   if (!environment.production) {
