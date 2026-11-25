@@ -4,7 +4,11 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { en_US, provideNzI18n } from 'ng-zorro-antd/i18n';
 import { UI_LANGUAGE, UiLanguage } from '../../../core/i18n/ui-language';
-import { CrawlablePaginationComponent } from './crawlable-pagination.component';
+import {
+  CrawlablePaginationComponent,
+  paginationQueryParams,
+  parsePageSizeParam,
+} from './crawlable-pagination.component';
 
 @Component({ template: '' })
 class DummyRouteComponent {}
@@ -38,6 +42,24 @@ describe('CrawlablePaginationComponent', () => {
 
     expect(pageLinks).toEqual(['/', '/?page=2', '/?page=3']);
     expect(el.querySelector('.ant-pagination-next a')?.getAttribute('href')).toBe('/?page=2');
+  });
+
+  it('keeps a non-default page size in the page links', async () => {
+    const fixture = await render('ar', 1, 144, 48);
+    const el: HTMLElement = fixture.nativeElement;
+    const pageLinks = Array.from(el.querySelectorAll('li.ant-pagination-item a')).map((a) =>
+      a.getAttribute('href')
+    );
+
+    expect(pageLinks).toEqual(['/?page_size=48', '/?page=2&page_size=48', '/?page=3&page_size=48']);
+  });
+
+  it('parses only offered page sizes and omits defaults from query params', () => {
+    expect(parsePageSizeParam('48')).toBe(48);
+    expect(parsePageSizeParam('1000')).toBe(12);
+    expect(parsePageSizeParam(null)).toBe(12);
+    expect(paginationQueryParams(1, 12)).toEqual({ page: null, page_size: null });
+    expect(paginationQueryParams(2, 24)).toEqual({ page: 2, page_size: 24 });
   });
 
   it('preserves ?lang=en alongside ?page=N and emits pageIndexChange on click', async () => {

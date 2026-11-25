@@ -9,6 +9,30 @@ export function parsePositivePageParam(raw: string | null | undefined): number {
   return Number.isInteger(n) && n >= 1 ? n : 1;
 }
 
+export const DEFAULT_PAGE_SIZE = 12;
+export const PAGE_SIZE_OPTIONS: readonly number[] = [12, 24, 48];
+export const PAGE_SIZE_QUERY_PARAM = 'page_size';
+
+/** Only the offered sizes are accepted, so a crafted URL cannot ask the API for huge pages. */
+export function parsePageSizeParam(
+  raw: string | null | undefined,
+  options: readonly number[] = PAGE_SIZE_OPTIONS
+): number {
+  const n = Number(raw);
+  return options.includes(n) ? n : DEFAULT_PAGE_SIZE;
+}
+
+/** Query params for a page/size pair; defaults are omitted so page 1 at size 12 stays clean. */
+export function paginationQueryParams(
+  page: number,
+  pageSize: number
+): { page: number | null; page_size: number | null } {
+  return {
+    page: page > 1 ? page : null,
+    page_size: pageSize !== DEFAULT_PAGE_SIZE ? pageSize : null,
+  };
+}
+
 @Component({
   selector: 'app-crawlable-pagination',
   standalone: true,
@@ -112,7 +136,7 @@ export class CrawlablePaginationComponent {
   pageIndex = input.required<number>();
   total = input.required<number>();
   pageSize = input.required<number>();
-  pageSizeOptions = input<number[]>([12, 24, 48]);
+  pageSizeOptions = input<number[]>([...PAGE_SIZE_OPTIONS]);
   showSizeChanger = input(true);
   showQuickJumper = input(true);
 
@@ -130,7 +154,7 @@ export class CrawlablePaginationComponent {
       relativeTo: this.route,
       queryParams: {
         ...langOverrides,
-        page: clamped > 1 ? clamped : null,
+        ...paginationQueryParams(clamped, this.pageSize()),
       },
       queryParamsHandling: 'merge',
     });

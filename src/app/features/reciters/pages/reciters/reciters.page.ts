@@ -33,6 +33,9 @@ import {
 import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/breadcrumb.component';
 import {
   CrawlablePaginationComponent,
+  PAGE_SIZE_QUERY_PARAM,
+  paginationQueryParams,
+  parsePageSizeParam,
   parsePositivePageParam,
 } from '../../../../shared/components/crawlable-pagination/crawlable-pagination.component';
 import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
@@ -86,7 +89,9 @@ export class RecitersPage implements OnInit, OnDestroy {
   nationalitySelection = signal<string>('');
 
   readonly page = signal(parsePositivePageParam(this.route.snapshot.queryParamMap.get('page')));
-  readonly pageSize = signal(12);
+  readonly pageSize = signal(
+    parsePageSizeParam(this.route.snapshot.queryParamMap.get(PAGE_SIZE_QUERY_PARAM))
+  );
   readonly total = signal(0);
   readonly pageSizeOptions: number[] = [12, 24, 48];
 
@@ -114,8 +119,10 @@ export class RecitersPage implements OnInit, OnDestroy {
       .pipe(skip(1), takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
         const nextPage = parsePositivePageParam(params.get('page'));
-        if (nextPage !== this.page()) {
+        const nextPageSize = parsePageSizeParam(params.get(PAGE_SIZE_QUERY_PARAM));
+        if (nextPage !== this.page() || nextPageSize !== this.pageSize()) {
           this.page.set(nextPage);
+          this.pageSize.set(nextPageSize);
           this.setSeo(this.translate.currentLang || this.uiLanguage);
           this.getReciters();
         }
@@ -244,7 +251,7 @@ export class RecitersPage implements OnInit, OnDestroy {
   private syncPageQueryParam(page: number): void {
     void this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: { page: page > 1 ? page : null },
+      queryParams: paginationQueryParams(page, this.pageSize()),
       queryParamsHandling: 'merge',
     });
   }
