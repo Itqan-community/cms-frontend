@@ -55,4 +55,29 @@ describe('CrawlablePaginationComponent', () => {
     page3.click();
     expect(emitted).toEqual([3]);
   });
+
+  it('leaves a Ctrl/Cmd-click to the browser without changing the current page', async () => {
+    const fixture = await render('ar', 1, 36, 12);
+    const emitted: number[] = [];
+    fixture.componentInstance.pageIndexChange.subscribe((p) => emitted.push(p));
+    const page2 = fixture.nativeElement.querySelectorAll(
+      'li.ant-pagination-item a'
+    )[1] as HTMLAnchorElement;
+    // Runs after the component's handler: record what it did, then keep the runner on its page.
+    const prevented: boolean[] = [];
+    page2.addEventListener('click', (e) => {
+      prevented.push(e.defaultPrevented);
+      e.preventDefault();
+    });
+
+    page2.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, cancelable: true, ctrlKey: true })
+    );
+    page2.dispatchEvent(
+      new MouseEvent('click', { bubbles: true, cancelable: true, metaKey: true })
+    );
+
+    expect(prevented).toEqual([false, false]);
+    expect(emitted).toEqual([]);
+  });
 });

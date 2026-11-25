@@ -137,15 +137,16 @@ export class CrawlablePaginationComponent {
     return this.router.serializeUrl(tree);
   }
 
+  /**
+   * A plain click stays in the SPA: the default navigation is cancelled and nz-pagination emits the
+   * page change. A modified click (new tab/window) keeps the browser default but must not reach the
+   * nz-pagination item, which would otherwise change the page in the current tab too.
+   */
   onLinkClick(event: MouseEvent): void {
-    if (
-      !event.metaKey &&
-      !event.ctrlKey &&
-      !event.shiftKey &&
-      !event.altKey &&
-      event.button === 0
-    ) {
-      event.preventDefault();
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
+      event.stopPropagation();
+      return;
     }
+    event.preventDefault();
   }
 }
