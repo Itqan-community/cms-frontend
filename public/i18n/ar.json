@@ -1914,7 +1914,8 @@
         "CONTACT_REPORTER": "التواصل مع المُبلِّغ",
         "CONTACT_SUBJECT": "البلاغ رقم {{id}}: {{asset}}",
         "DESCRIPTION_TITLE": "الوصف",
-        "NOT_FOUND": "تعذر العثور على هذا البلاغ."
+        "NOT_FOUND": "تعذر العثور على هذا البلاغ.",
+        "REPORTER_FALLBACK": "المُبلِّغ رقم {{id}}"
       },
       "DELETE": {
         "CONFIRM_TITLE": "حذف هذا البلاغ؟",

@@ -10,7 +10,7 @@ describe('IssueDetailComponent', () => {
   const issue = {
     id: 42,
     asset_name: 'Warsh & Hafs',
-    reporter: { id: 1, email: 'reporter@example.com' },
+    reporter: { id: 1, name: '', email: 'reporter@example.com' },
     status: 'pending',
     context: null,
     context_label: '',
