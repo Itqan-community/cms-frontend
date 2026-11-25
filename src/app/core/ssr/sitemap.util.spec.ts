@@ -134,4 +134,26 @@ describe('sitemap.util', () => {
     });
     expect(await withoutFallback.get()).toContain('<loc>https://cms.itqan.dev/gallery</loc>');
   });
+
+  it('waits out the retry delay after a failed refresh instead of refetching on every request', async () => {
+    let time = 1000;
+    const failingFetch = jasmine.createSpy('fetch').and.rejectWith(new Error('offline'));
+    const loader = createCachedSitemapLoader({
+      apiBaseUrl: 'https://api.cms.itqan.dev/cms-api',
+      siteUrl: 'https://cms.itqan.dev',
+      retryDelayMs: 1000,
+      now: () => time,
+      readFallback: () => '<urlset>fallback</urlset>',
+      fetchImpl: failingFetch as unknown as typeof fetch,
+    });
+    spyOn(console, 'warn');
+
+    expect(await loader.get()).toBe('<urlset>fallback</urlset>');
+    expect(await loader.get()).toBe('<urlset>fallback</urlset>');
+    expect(failingFetch).toHaveBeenCalledTimes(2); // one attempt: reciters + assets
+
+    time += 1500;
+    await loader.get();
+    expect(failingFetch).toHaveBeenCalledTimes(4);
+  });
 });

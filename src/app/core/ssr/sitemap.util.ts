@@ -3,6 +3,7 @@ export const SITEMAP_STATIC_ROUTES = ['/gallery', '/reciters', '/content-standar
 const DEFAULT_PAGE_SIZE = 100;
 const DEFAULT_REQUEST_TIMEOUT_MS = 10_000;
 const DEFAULT_CACHE_TTL_MS = 15 * 60_000;
+const DEFAULT_RETRY_DELAY_MS = 60_000;
 
 interface ReciterSummary {
   slug?: string | null;
@@ -162,6 +163,8 @@ export interface CachedSitemapLoaderOptions {
   apiBaseUrl: string;
   siteUrl: string;
   ttlMs?: number;
+  /** After a failed or partial refresh, the fallback is served this long before fetching again. */
+  retryDelayMs?: number;
   readFallback?: () => string | null;
   fetchImpl?: typeof fetch;
   now?: () => number;
@@ -171,16 +174,26 @@ export function createCachedSitemapLoader(options: CachedSitemapLoaderOptions): 
   get(): Promise<string | null>;
 } {
   const ttlMs = options.ttlMs ?? DEFAULT_CACHE_TTL_MS;
+  const retryDelayMs = options.retryDelayMs ?? DEFAULT_RETRY_DELAY_MS;
   const fetchImpl = options.fetchImpl ?? fetch;
   const now = options.now ?? (() => Date.now());
 
   let cache: { xml: string; expiresAt: number } | null = null;
+  let fallback: { xml: string | null; retryAt: number } | null = null;
   let inFlight: Promise<string | null> | null = null;
+
+  const serveFallback = (xml: string | null): string | null => {
+    fallback = { xml, retryAt: now() + retryDelayMs };
+    return xml;
+  };
 
   return {
     get(): Promise<string | null> {
       if (cache && now() < cache.expiresAt) {
         return Promise.resolve(cache.xml);
+      }
+      if (fallback && now() < fallback.retryAt) {
+        return Promise.resolve(fallback.xml);
       }
       if (inFlight) {
         return inFlight;
@@ -195,21 +208,18 @@ export function createCachedSitemapLoader(options: CachedSitemapLoaderOptions): 
           );
           if (complete) {
             cache = { xml, expiresAt: now() + ttlMs };
+            fallback = null;
             return xml;
           }
           // A partial refresh never replaces a complete sitemap; it is served only when there is
           // no complete one to fall back to.
           if (cache) {
-            return cache.xml;
+            return serveFallback(cache.xml);
           }
-          const fallback = options.readFallback?.() ?? null;
-          return fallback || xml;
+          return serveFallback(options.readFallback?.() || xml);
         } catch (err) {
           console.error('dynamic-sitemap: unexpected failure', err);
-          if (cache) {
-            return cache.xml;
-          }
-          return options.readFallback?.() ?? null;
+          return serveFallback(cache?.xml ?? options.readFallback?.() ?? null);
         } finally {
           inFlight = null;
         }
