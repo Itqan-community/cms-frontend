@@ -1,4 +1,4 @@
-import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpClient, HttpContext, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
@@ -7,7 +7,7 @@ import {
   ADMIN_TENANT_STORAGE_KEY,
   AdminTenantService,
 } from '../../features/admin/services/admin-tenant.service';
-import { tenantHeaderInterceptor } from './tenant-header.interceptor';
+import { SKIP_TENANT_HEADER, tenantHeaderInterceptor } from './tenant-header.interceptor';
 
 describe('tenantHeaderInterceptor', () => {
   const adminApi = environment.ADMIN_API_BASE_URL;
@@ -138,16 +138,50 @@ describe('tenantHeaderInterceptor', () => {
     });
   });
 
-  it('skips tenant header for consumer issue report create', () => {
+  it('adds X-Tenant to the portal issue report create', () => {
     if (!adminApi) {
       pending('ADMIN_API_BASE_URL');
       return;
     }
 
+    // Arrange
+    localStorage.setItem(ADMIN_TENANT_STORAGE_KEY, '77');
+    const { http, httpMock } = setup();
+    const url = `${adminApi}/issue-reports/`;
+
+    // Act
+    http.post(url, { asset_id: 1, description: 'test issue' }).subscribe();
+
+    // Assert
+    const req = httpMock.expectOne(url);
+    expect(req.request.headers.get('X-Tenant')).toBe('77');
+    req.flush({ id: 1 });
+    httpMock.verify();
+  });
+
+  it('skips X-Tenant on a request marked SKIP_TENANT_HEADER (gallery issue report create)', () => {
+    if (!adminApi) {
+      pending('ADMIN_API_BASE_URL');
+      return;
+    }
+
+    // Arrange
+    localStorage.setItem(ADMIN_TENANT_STORAGE_KEY, '77');
     const { http, httpMock, router } = setup();
     const url = `${adminApi}/issue-reports/`;
 
-    http.post(url, { asset_id: 1, description: 'test issue' }).subscribe();
+    // Act
+    http
+      .post(
+        url,
+        { asset_id: 1, description: 'test issue' },
+        {
+          context: new HttpContext().set(SKIP_TENANT_HEADER, true),
+        }
+      )
+      .subscribe();
+
+    // Assert
     const req = httpMock.expectOne(url);
     expect(req.request.headers.get('X-Tenant')).toBeNull();
     expect(router.navigate).not.toHaveBeenCalled();

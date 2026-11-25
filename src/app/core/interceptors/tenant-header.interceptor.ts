@@ -1,4 +1,10 @@
-import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
+import {
+  HttpErrorResponse,
+  HttpEvent,
+  HttpHandlerFn,
+  HttpContextToken,
+  HttpRequest,
+} from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, throwError } from 'rxjs';
@@ -20,14 +26,12 @@ function isInvitationRequest(url: string, adminApi: string): boolean {
   return url.startsWith(`${adminApi}/invitations/`);
 }
 
-/** Consumer issue reports from gallery — no admin tenant context. */
-function isConsumerIssueReportCreate(url: string, method: string, adminApi: string): boolean {
-  if (method !== 'POST') {
-    return false;
-  }
-  const base = `${adminApi}/issue-reports`;
-  return url === base || url === `${base}/`;
-}
+/**
+ * Set on a portal-API request made outside the portal (the gallery's issue report), so it goes
+ * without X-Tenant: a consumer, or staff, can then report any publisher's asset. The portal's own
+ * issue form leaves it unset, so the backend limits it to the selected publisher's assets.
+ */
+export const SKIP_TENANT_HEADER = new HttpContextToken<boolean>(() => false);
 
 export function tenantHeaderInterceptor(
   req: HttpRequest<unknown>,
@@ -46,7 +50,7 @@ export function tenantHeaderInterceptor(
     return next(req);
   }
 
-  if (isConsumerIssueReportCreate(req.url, req.method, adminApi)) {
+  if (req.context.get(SKIP_TENANT_HEADER)) {
     return next(req);
   }
 
