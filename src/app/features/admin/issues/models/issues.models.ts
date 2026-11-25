@@ -47,6 +47,26 @@ export interface IssueReportOut {
   updated_at: string;
 }
 
+export interface IssueReportCommentAuthor {
+  id: number;
+  name: string;
+  /** True on the reporter's own comments. */
+  is_reporter: boolean;
+}
+
+/** A message on a report's thread; the backend emails other members' comments to the reporter. */
+export interface IssueReportComment {
+  id: number;
+  /** Null when the author's account was deleted. */
+  author: IssueReportCommentAuthor | null;
+  body: string;
+  created_at: string;
+}
+
+export interface IssueReportCommentIn {
+  body: string;
+}
+
 export interface PagedIssueReportOut {
   results: IssueReportOut[];
   count: number;

@@ -11,6 +11,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constants';
 import { IssueReportOut, IssueReportStatus } from '../../models/issues.models';
 import { IssuesService } from '../../services/issues.service';
+import { IssueCommentsComponent } from '../issue-comments/issue-comments.component';
 import { formatIssueContext } from '../../utils/issue-context.util';
 import { reporterLabel } from '../../utils/issue-reporter.util';
 
@@ -26,6 +27,7 @@ import { reporterLabel } from '../../utils/issue-reporter.util';
     NzSkeletonModule,
     NzTagModule,
     TranslateModule,
+    IssueCommentsComponent,
   ],
   templateUrl: './issue-detail.component.html',
   styleUrl: './issue-detail.component.less',
@@ -40,15 +42,6 @@ export class IssueDetailComponent implements OnInit {
 
   readonly issue = signal<IssueReportOut | null>(null);
   readonly loading = signal(true);
-
-  /** A mail to the reporter whose subject names the asset and the issue number. */
-  contactHref(issue: IssueReportOut): string {
-    const subject = this.translate.instant('ADMIN.ISSUES.DETAIL.CONTACT_SUBJECT', {
-      asset: issue.asset_name,
-      id: issue.id,
-    });
-    return `mailto:${issue.reporter.email}?subject=${encodeURIComponent(subject)}`;
-  }
 
   /** Placeholder until backend seeds portal_*_issue_report permissions. */
   readonly canUpdateIssue = computed(() => {
