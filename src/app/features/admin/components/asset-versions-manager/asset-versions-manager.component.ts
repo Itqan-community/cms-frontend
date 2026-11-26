@@ -11,7 +11,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import {
   type AbstractControl,
   FormBuilder,
@@ -42,6 +42,7 @@ import {
   distinctUntilChanged,
   finalize,
   forkJoin,
+  map,
   takeUntil,
 } from 'rxjs';
 import {
@@ -49,6 +50,7 @@ import {
   type PortalPermissionCode,
 } from '../../constants/portal-permission.constants';
 import type { AssetLanguage, ContentChange } from '../../models/asset-content.models';
+import type { AiTranslateCategory } from '../../services/ai-translate.service';
 import type {
   AssetVersion,
   AssetVersionParentKind,
@@ -62,6 +64,7 @@ import { AssetVersionsService } from '../../services/asset-versions.service';
 import { LastActiveLanguageService } from '../../services/last-active-language.service';
 import { localizedLanguageName } from '../../utils/iso-639.util';
 import { isVersionNumber } from '../../utils/version-number.util';
+import { AiTranslateVersionTextComponent } from '../ai-translate-version-text/ai-translate-version-text.component';
 import { AdminTablePaginationComponent } from '../admin-table-pagination/admin-table-pagination.component';
 import { AdminTitleCountComponent } from '../admin-title-count/admin-title-count.component';
 import { ContentChangesComponent } from '../content-changes/content-changes.component';
@@ -70,6 +73,7 @@ import { ImportColumnMappingComponent } from '../import-column-mapping/import-co
 import { UniversalAssetPreviewerComponent } from '../universal-asset-previewer/universal-asset-previewer.component';
 import { VersionNumberFieldComponent } from '../version-number-field/version-number-field.component';
 import {
+  type VersionText,
   hasVersionSummary,
   localizedVersionText,
   trimVersionText,
@@ -157,6 +161,7 @@ const VERSION_PERMISSIONS: Record<
     ContentChangesComponent,
     RouterLink,
     VersionNumberFieldComponent,
+    AiTranslateVersionTextComponent,
   ],
   templateUrl: './asset-versions-manager.component.html',
   styleUrl: './asset-versions-manager.component.less',
@@ -323,6 +328,29 @@ export class AssetVersionsManagerComponent implements OnInit {
     // Other kinds: a single summary.
     summary: ['', [Validators.required]],
   });
+
+  /** The version's name and summary as typed, for "Translate to English". */
+  readonly typedText = toSignal(this.form.valueChanges.pipe(map(() => this.typedVersionText())), {
+    initialValue: this.typedVersionText(),
+  });
+
+  /** The translate endpoint's category for this asset kind (prompt wording only). */
+  aiCategory(): AiTranslateCategory {
+    return this.kind === 'mushaf' || this.kind === 'font' ? this.kind : 'text';
+  }
+
+  /** Sets the English name/summary the AI translated. */
+  applyTranslation(values: Partial<VersionText>): void {
+    this.form.patchValue(values);
+    for (const key of Object.keys(values) as (keyof VersionText)[]) {
+      this.form.controls[key].markAsDirty();
+    }
+  }
+
+  private typedVersionText(): VersionText {
+    const { label_en, label_ar, summary_en, summary_ar } = this.form.getRawValue();
+    return { label_en, label_ar, summary_en, summary_ar };
+  }
 
   /** Admin route segment of the parent asset list (e.g. `text-assets`). */
   listSegment(): string {
