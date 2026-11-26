@@ -1,0 +1,55 @@
+:host {
+  display: block;
+}
+
+.journey {
+  margin-bottom: 1rem;
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    font-size: 14px;
+  }
+
+  &__item {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--fanar-muted);
+
+    &--current .journey__link {
+      color: var(--fanar-ink);
+      font-weight: 700;
+      background: var(--fanar-accent-soft);
+    }
+  }
+
+  &__link,
+  &__link:visited {
+    display: inline-flex;
+    align-items: center;
+    min-height: 32px;
+    padding: 0 12px;
+    border-radius: 999px;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  &__link:hover {
+    color: var(--fanar-accent);
+  }
+
+  &__sep {
+    display: inline-block;
+  }
+}
+
+// The chevron points forward in reading order.
+:host-context(html[dir='rtl']) .journey__sep {
+  transform: scaleX(-1);
+}

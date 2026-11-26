@@ -331,3 +331,42 @@
   flex-direction: column;
   gap: 1rem;
 }
+
+// Phones: the install command stays pinned at the bottom (B9 mockup); desktop keeps the side card.
+.install-bar {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .install-bar {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: var(--fanar-navy);
+    color: #e8eff0;
+    box-shadow: 0 -4px 16px rgba(11, 40, 51, 0.25);
+
+    &__cmd {
+      flex: 1;
+      min-width: 0;
+      overflow-x: auto;
+      white-space: nowrap;
+      font-family: var(--fanar-font-mono);
+      font-size: 13px;
+      color: var(--fanar-mint);
+    }
+
+    button {
+      flex: none;
+    }
+  }
+
+  .asset-details-container.has-install-bar {
+    padding-bottom: 88px;
+  }
+}

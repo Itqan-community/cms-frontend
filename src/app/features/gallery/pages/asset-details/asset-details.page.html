@@ -1,4 +1,5 @@
-<div class="asset-details-container">
+<div class="asset-details-container" [class.has-install-bar]="!!installCommand()">
+  <app-developer-journey current="try" />
   <app-breadcrumb />
 
   @if (loading()) {
@@ -25,6 +26,18 @@
       (actionClick)="retryLoad()"
     />
   } @else if (asset()) {
+    @if (installCommand(); as command) {
+      <div
+        class="install-bar"
+        role="region"
+        [attr.aria-label]="'GALLERY.GET_ASSET.TITLE' | translate"
+      >
+        <code class="install-bar__cmd" dir="ltr">{{ command }}</code>
+        <button nz-button nzType="primary" type="button" (click)="copyInstallCommand(command)">
+          {{ 'GALLERY.ITQAN_CLI.COPY' | translate }}
+        </button>
+      </div>
+    }
     <div class="asset-details-content">
       <!-- Main Content -->
       <div class="main-content">

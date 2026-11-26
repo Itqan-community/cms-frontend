@@ -9,6 +9,17 @@ import type { AssetPackage } from '../../models/assets.model';
 /** Where users get the itqan CLI, until it has its own landing page. */
 export const ITQAN_CLI_URL = 'https://github.com/Itqan-community/itqan-cli';
 
+/** `itqan add <slug>`, with `--language` when the chosen language isn't the source one. */
+export function itqanAddCommand(pkg: AssetPackage, language: string | null): string {
+  const chosen =
+    pkg.languages.find((lang) => lang.language === language) ??
+    pkg.languages.find((lang) => lang.is_source) ??
+    pkg.languages[0];
+  return chosen && !chosen.is_source
+    ? `itqan add ${pkg.slug} --language ${chosen.language}`
+    : `itqan add ${pkg.slug}`;
+}
+
 /** The `itqan add` command that installs an asset, with a copy button and a link to get the CLI. */
 @Component({
   selector: 'app-itqan-add-command',
@@ -27,16 +38,7 @@ export class ItqanAddCommandComponent {
   readonly cliUrl = ITQAN_CLI_URL;
   readonly copied = signal(false);
 
-  readonly command = computed(() => {
-    const pkg = this.package();
-    const chosen =
-      pkg.languages.find((lang) => lang.language === this.language()) ??
-      pkg.languages.find((lang) => lang.is_source) ??
-      pkg.languages[0];
-    return chosen && !chosen.is_source
-      ? `itqan add ${pkg.slug} --language ${chosen.language}`
-      : `itqan add ${pkg.slug}`;
-  });
+  readonly command = computed(() => itqanAddCommand(this.package(), this.language()));
 
   async copy(): Promise<void> {
     try {

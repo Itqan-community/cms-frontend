@@ -1,0 +1,81 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.join-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 28px;
+  border-radius: 18px;
+  background: var(--fanar-surface);
+  border: 1px solid var(--fanar-line);
+
+  &--sent {
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    label {
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    input,
+    select,
+    textarea {
+      min-height: 48px;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 1px solid var(--fanar-line);
+      background: var(--fanar-bg);
+      color: var(--fanar-ink);
+      font: inherit;
+      font-size: 16px;
+
+      &::placeholder {
+        color: var(--fanar-muted);
+        opacity: 0.8;
+      }
+
+      &:focus-visible {
+        outline: 3px solid var(--fanar-mint);
+        outline-offset: 1px;
+      }
+
+      &[aria-invalid='true'] {
+        border-color: var(--color-danger-text, #b42318);
+      }
+    }
+
+    textarea {
+      resize: vertical;
+    }
+  }
+
+  &__err,
+  &__failed {
+    color: var(--color-danger-text, #b42318);
+    font-size: 14px;
+  }
+
+  // Honeypot: off screen for people, still in the DOM for bots.
+  &__trap {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .fl-btn {
+    align-self: flex-start;
+  }
+}

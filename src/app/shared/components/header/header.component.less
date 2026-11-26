@@ -34,6 +34,11 @@
     height: auto;
   }
 
+  &__logo {
+    display: inline-flex;
+    align-items: center;
+  }
+
   &__actions {
     display: flex;
     align-items: center;
@@ -77,5 +82,51 @@
     &__actions-mobile {
       display: none;
     }
+  }
+}
+
+// Brand lockup from the deck: the Itqan mark, "Fanar" in the display face and "by the Itqan community".
+.fanar-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--fanar-ink);
+
+  &__mark {
+    width: 36px;
+    height: 36px;
+    object-fit: contain;
+
+    &--dark {
+      display: none;
+    }
+  }
+
+  &__text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.05;
+  }
+
+  &__name {
+    font-family: var(--fanar-font-display);
+    font-weight: 500;
+    font-size: 24px;
+  }
+
+  &__by {
+    font-size: 11px;
+    color: var(--fanar-muted);
+  }
+}
+
+// :host-context, since emulated encapsulation would also scope the html selector.
+:host-context(html[data-theme='dark']) .fanar-brand__mark {
+  &--light {
+    display: none;
+  }
+
+  &--dark {
+    display: block;
   }
 }

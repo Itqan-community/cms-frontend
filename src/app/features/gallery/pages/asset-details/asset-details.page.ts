@@ -50,6 +50,8 @@ import { AssetGetCtaComponent } from '../../components/asset-get-cta/asset-get-c
 import { preferredLanguage } from '../../utils/preferred-language.util';
 import { AssetsService } from '../../services/assets.service';
 import { AssetUsageCountsComponent } from '../../../usage/components/asset-usage-counts/asset-usage-counts.component';
+import { DeveloperJourneyComponent } from '../../components/developer-journey/developer-journey.component';
+import { itqanAddCommand } from '../../components/itqan-add-command/itqan-add-command.component';
 
 @Component({
   selector: 'app-asset-details-page',
@@ -77,6 +79,7 @@ import { AssetUsageCountsComponent } from '../../../usage/components/asset-usage
     FormsModule,
     AssetGetCtaComponent,
     IssueContextFieldsComponent,
+    DeveloperJourneyComponent,
   ],
   templateUrl: './asset-details.page.html',
   styleUrl: './asset-details.page.less',
@@ -117,6 +120,13 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
   readonly reportIssueContextForm = createIssueContextForm();
   readonly reportIssueContextKind = computed(() => issueContextKind(this.asset()?.category));
 
+  /** The install command pinned to the bottom of the screen on phones (B9); none for recitations. */
+  readonly installCommand = computed(() => {
+    const asset = this.asset();
+    if (!asset?.package || asset.category === 'recitation') return null;
+    return itqanAddCommand(asset.package, this.selectedLanguage());
+  });
+
   usageOptions = [{ value: 'commercial' }, { value: 'non-commercial' }];
 
   constructor() {
@@ -140,6 +150,15 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
   }
 
   /** The user chose a language (language select or preview switch): keep it. */
+  async copyInstallCommand(command: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(command);
+      this.message.success(this.translate.instant('GALLERY.ITQAN_CLI.COPIED'));
+    } catch (err: unknown) {
+      console.warn('[AssetDetails] clipboard unavailable', err);
+    }
+  }
+
   pickLanguage(language: string | null): void {
     this.languagePicked = true;
     this.selectedLanguage.set(language);

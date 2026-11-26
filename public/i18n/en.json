@@ -447,7 +447,8 @@
       "COMING_SOON": "Coming soon: {{title}} management",
       "DEFAULT_TITLE": "Content"
     },
-    "MOCK_PUBLISHER_LABEL": "Publisher"
+    "MOCK_PUBLISHER_LABEL": "Publisher",
+    "BY_ITQAN": "by the Itqan community"
   },
   "FORMS": {
     "PLACEHOLDERS": {
@@ -516,10 +517,11 @@
     "CONTENT_STANDARDS": "Content Standards",
     "API_DOCS": "API Docs",
     "PUBLISHER_DASHBOARD": "Publisher Dashboard",
-    "ASSET_REQUEST_FORM": "Add Quranic Content to Fanar",
     "ADMIN_PORTAL": "Admin Portal",
     "MUSHAF": "Quran",
-    "RECITERS": "Reciters"
+    "RECITERS": "Reciters",
+    "FOR_PUBLISHERS": "For publishers",
+    "FOR_DEVELOPERS": "For developers"
   },
   "HOME": {
     "WELCOME": "Welcome to Fanar",
@@ -3157,5 +3159,531 @@
     "ERR_AYAH": "Choose an ayah",
     "ERR_PAGE": "Enter the page",
     "ERR_PAGE_OR_GLYPH": "Enter a page, a glyph, or both"
+  },
+  "LANDING": {
+    "COMMON": {
+      "AS_OF": "Figures as of {{date}}, refreshed each time the site is built.",
+      "COPY": "Copy",
+      "COPIED": "Copied",
+      "COPY_FAILED": "Could not copy. Select the text and copy it yourself.",
+      "IM_DEV": "I build apps",
+      "IM_PUB": "I publish content",
+      "PAGE_SECTIONS": "Page sections",
+      "LIVE_EX": "Live example"
+    },
+    "ENTRY": {
+      "SEO_TITLE": "Fanar | Trusted Quranic content, from its source to every app",
+      "SEO_DESC": "Fanar is an open-source platform from the Itqan community that connects Quranic content publishers with developers: recitations, mushafs, tafsirs, translations and fonts.",
+      "EYEBROW": "Fanar · an open-source platform from the Itqan community",
+      "TITLE": "Trusted Quranic content, from its source to every app",
+      "SUB": "Fanar connects Quranic content publishers with the developers who build apps. Recitations, mushafs, tafsirs, translations and fonts, published by their owners, who stay in charge.",
+      "WHO": "Who are you?",
+      "TAB_PUB": "I publish content",
+      "TAB_DEV": "I build apps",
+      "LIVE_EX_D": "Tahbeer’s site for the Warsh ʿan Nafiʿ recitations runs on the publisher’s own domain and brand, served entirely from Fanar.",
+      "STATS_LABEL": "Fanar in numbers",
+      "STAT_ASSETS": "published assets",
+      "STAT_PUBLISHERS": "publishers",
+      "STAT_RECITATIONS": "recitations by {{reciters}} reciters",
+      "STAT_PACKAGES": "packages via quran-cli",
+      "TRUSTED": "Publishers on Fanar",
+      "PUB_NAMES": "King Fahd Glorious Qur’an Printing Complex · Saudi Center for Quranic Recitations and Prophetic Hadiths · Tahbeer for the Ten Qira’at · Quran Qiraat · Mknoon · Tafsir Center · Dar Almukhtasar · IslamHouse",
+      "PUB": {
+        "EYEBROW": "For publishers",
+        "TITLE": "Publish with confidence. Corrections are always possible.",
+        "SUB": "Upload your content once. Fanar handles storage, delivery and reporting, and you decide what goes out, where it appears and who can use it.",
+        "CTA": "What Fanar does for you",
+        "CTA2": "Contact us to join",
+        "NOTE": "Publishers join by contacting us. We set up your organisation’s account and help with your first release.",
+        "STEPS": {
+          "1": {
+            "H": "Publish",
+            "D": "Recitations, mushafs, text assets and fonts, with numbered versions."
+          },
+          "2": {
+            "H": "Control",
+            "D": "Review before release, roles, channels and licences."
+          },
+          "3": {
+            "H": "Reach",
+            "D": "Your own website, the gallery, the public API and quran-cli."
+          },
+          "4": {
+            "H": "Prove",
+            "D": "Usage reports for your board and supporters."
+          }
+        }
+      },
+      "DEV": {
+        "EYEBROW": "For developers",
+        "TITLE": "Quranic assets in your app with one command",
+        "SUB": "Find an asset in the gallery, try it, then add it to your project like any library. When the publisher ships a correction, you get a pull request.",
+        "CTA": "Start for free",
+        "CTA2": "Browse the gallery",
+        "NOTE": "The public API is free. Sign up for a free account to get your key.",
+        "STEPS": {
+          "1": {
+            "H": "Discover",
+            "D": "Search the gallery by type, language and publisher."
+          },
+          "2": {
+            "H": "Try",
+            "D": "A live preview from the asset file itself."
+          },
+          "3": {
+            "H": "Integrate",
+            "D": "quran-cli add, or the public API with your key."
+          },
+          "4": {
+            "H": "Stay updated",
+            "D": "An automatic pull request on every new release."
+          }
+        }
+      },
+      "FOOTER": "Fanar is an Itqan community project in service of the Quran"
+    },
+    "PUB": {
+      "SEO_TITLE": "Fanar for publishers | Publish with confidence",
+      "SEO_DESC": "Fanar handles storage, delivery and reporting for Quranic content, and the publisher stays in charge. Contact us to join.",
+      "HERO_EYEBROW": "Fanar for publishers",
+      "HERO_TITLE": "Publish with confidence. Corrections are always possible.",
+      "HERO_SUB": "Fanar handles storage, delivery and reporting. You stay the owner: you decide what is published, where it appears and who can use it, and you see the results in numbers.",
+      "CONTACT_JOIN": "Contact us to join",
+      "HOW_START": "How it works",
+      "CH_LABEL": "Portal example: the channels of one asset",
+      "CH_TITLE": "Distribution channels",
+      "CH_ALL": "Applies to every version",
+      "CH_WARN": "Turning a channel off shows how many developers it affects before you confirm.",
+      "CH_ON": "On",
+      "CH_OFF": "Off",
+      "CHANNELS": {
+        "SITE": {
+          "H": "Publisher website",
+          "D": "your site, on your domain"
+        },
+        "GALLERY": {
+          "H": "Gallery",
+          "D": "the public Fanar gallery"
+        },
+        "API": {
+          "H": "Public API",
+          "D": "for developers’ apps"
+        },
+        "CLI": {
+          "H": "quran-cli",
+          "D": "off for this asset"
+        }
+      },
+      "PROB_EYEBROW": "Why Fanar",
+      "PROB_TITLE": "Publishers have three options today, and each has a cost",
+      "PROBLEMS": {
+        "1": {
+          "H": "Your own website and apps",
+          "D": "Development, hosting and constant upkeep, and the content still only reaches people who find the site."
+        },
+        "2": {
+          "H": "Your own API",
+          "D": "It costs more, and few developers build a custom integration for one publisher’s catalogue."
+        },
+        "3": {
+          "H": "Letting files be copied",
+          "D": "The content spreads, but your name is lost, corrections never arrive and there are no numbers."
+        }
+      },
+      "FOURTH": "Fanar is a fourth option:",
+      "FOURTH_B": "one place to upload, and many outlets that carry your content under your name and your terms.",
+      "STEP_OF": "Step {{n}} of 4",
+      "PILLARS": {
+        "PUBLISH": {
+          "VERB": "Publish",
+          "PROMISE": "Every kind of Quranic content in one portal.",
+          "WHY": "You don’t need a technical team to publish: an editor for each content type, and numbered versions that keep the history of every correction.",
+          "ITEMS": {
+            "1": {
+              "H": "Recitations with ayah timings",
+              "D": "Upload surahs, quality levels and timing files. Fanar shows what is still missing."
+            },
+            "2": {
+              "H": "Mushafs and fonts",
+              "D": "Mushaf page layouts and versioned fonts, with a font preview."
+            },
+            "3": {
+              "H": "Text: tafsirs and translations",
+              "D": "One text asset, tagged, in several languages, at word, ayah or surah level."
+            },
+            "4": {
+              "H": "Versions and drafts",
+              "D": "Every change is a new version. Keep an asset as a hidden draft until it is ready."
+            }
+          }
+        },
+        "CONTROL": {
+          "VERB": "Control",
+          "PROMISE": "Every decision stays with you.",
+          "WHY": "You decide who on your team can edit, what is published, where it appears and who may use it.",
+          "ITEMS": {
+            "1": {
+              "H": "Review before release",
+              "D": "A review table with filters on every column."
+            },
+            "2": {
+              "H": "Roles and members",
+              "D": "Invite your team and give each person only the permissions they need."
+            },
+            "3": {
+              "H": "Four channels per asset",
+              "D": "Your site, the gallery, the public API and quran-cli. Turn on the ones you want."
+            },
+            "4": {
+              "H": "Licences and access requests",
+              "D": "Each asset has its licence. Approve or decline requests for restricted assets."
+            }
+          }
+        },
+        "REACH": {
+          "VERB": "Reach",
+          "PROMISE": "One upload, four outlets.",
+          "WHY": "Your content reaches readers, listeners and developers’ apps without you building anything, and your name and licence travel with it.",
+          "ITEMS": {
+            "1": {
+              "H": "Your own website",
+              "D": "A site for readers and listeners on your domain and brand."
+            },
+            "2": {
+              "H": "The Fanar gallery",
+              "D": "Developers find your asset with your name, licence and a live preview."
+            },
+            "3": {
+              "H": "The public API",
+              "D": "One integration connects apps to recitations down to the ayah."
+            },
+            "4": {
+              "H": "Corrections arrive",
+              "D": "Developers see the new version and get an automatic pull request."
+            }
+          }
+        },
+        "PROVE": {
+          "VERB": "Prove",
+          "PROMISE": "Numbers for your board and supporters.",
+          "WHY": "Every play, download, install and API request is counted and attributed to the app that made it.",
+          "ITEMS": {
+            "1": {
+              "H": "Usage metrics",
+              "D": "Plays, listening hours, downloads, installs and API requests."
+            },
+            "2": {
+              "H": "Broken down as you need",
+              "D": "By country, platform, app, surah, reciter and version."
+            },
+            "3": {
+              "H": "Daily, weekly or monthly",
+              "D": "A dashboard per asset and for the whole publisher, with CSV export."
+            },
+            "4": {
+              "H": "What people ask for",
+              "D": "Missing surahs ranked by demand, so you know what to upload next."
+            }
+          }
+        }
+      },
+      "LIVE_EX_D": "Tahbeer’s site serves its Warsh ʿan Nafiʿ recitations from Fanar, on the publisher’s own domain and brand.",
+      "J_EYEBROW": "Your journey on Fanar",
+      "J_TITLE": "From first contact to first report",
+      "JOURNEY": {
+        "1": {
+          "H": "Contact us",
+          "D": "We set up your organisation’s account and publisher profile with your name, logo and description."
+        },
+        "2": {
+          "H": "Upload",
+          "D": "Recitations with ayah timings, mushafs, text assets and fonts."
+        },
+        "3": {
+          "H": "Review and publish",
+          "D": "Review in a table, then release a numbered version, or keep a draft until it is ready."
+        },
+        "4": {
+          "H": "Choose channels and access",
+          "D": "Where the asset appears, and who needs your approval."
+        },
+        "5": {
+          "H": "Follow up",
+          "D": "Usage reports, error reports and correction releases."
+        }
+      },
+      "JOIN_EYEBROW": "Joining",
+      "JOIN_TITLE": "Your content deserves to reach people, under your name",
+      "JOIN_SUB": "Publishers join Fanar by contacting us. Tell us about your organisation and your content, and we will get back to you.",
+      "JOIN_STEPS": {
+        "1": "Send your request.",
+        "2": "We get in touch to learn about your content and answer your questions.",
+        "3": "We set up your account, and you upload your first asset."
+      },
+      "PROOF": "{{assets}} published assets from {{publishers}} publishers, including the King Fahd Glorious Qur’an Printing Complex, Tafsir Center and Tahbeer.",
+      "EMAIL_LABEL": "Prefer email? Write to us at",
+      "COPY_EMAIL": "Copy email",
+      "HAVE_ACCOUNT": "Already a publisher? Sign in to the portal",
+      "FORM": {
+        "LABEL": "Contact form for joining",
+        "NAME": "Your name",
+        "ORG": "Organisation",
+        "ORG_PH": "For example a centre, complex or publishing house",
+        "EMAIL": "Email",
+        "KIND": "What content do you publish?",
+        "KINDS": {
+          "RECITATIONS": "Recitations",
+          "MUSHAFS": "Mushafs",
+          "TEXT": "Tafsirs or translations",
+          "FONTS": "Fonts",
+          "SEVERAL": "More than one type"
+        },
+        "MSG": "Your message",
+        "MSG_PH": "Tell us about your organisation and what you would like to publish",
+        "HONEYPOT": "Leave this field empty",
+        "SEND": "Send your request",
+        "SENDING": "Sending…",
+        "NOTE": "Your request goes to the Fanar team at connect@itqan.dev, and we reply to your email.",
+        "REQUIRED": "This field is required.",
+        "INVALID_EMAIL": "Enter a valid email address.",
+        "SENT_TITLE": "We have your request",
+        "SENT_BODY": "Thank you. We will write to you at {{email}} soon.",
+        "SEND_ANOTHER": "Send another request",
+        "FAILED": "Your request could not be sent. Try again, or write to us at connect@itqan.dev."
+      }
+    },
+    "DEV": {
+      "SEO_TITLE": "Fanar for developers | Trusted Quranic assets you add like a library",
+      "SEO_DESC": "Mushafs, tafsirs, translations, fonts and recitations from their publishers, through quran-cli and the free public API.",
+      "NAV_START": "Get started",
+      "NAV_API": "API reference",
+      "NAV_CLI": "quran-cli guide",
+      "SIGNUP": "Sign up for free",
+      "HERO_EYEBROW": "Fanar for developers",
+      "HERO_TITLE": "Trusted Quranic assets you add like a library",
+      "HERO_SUB": "Mushafs, tafsirs, translations, fonts and recitations from their verified publishers, with pinned versions and corrections that reach you automatically.",
+      "START": "Start in five minutes",
+      "BROWSE": "Browse the gallery",
+      "CHIPS": {
+        "1": "Free public API",
+        "2": "Free account",
+        "3": "Open-source CLI (MIT)"
+      },
+      "STAGES_LABEL": "Journey stages",
+      "STAGES": {
+        "DISCOVER": "Discover",
+        "TRY": "Try",
+        "INTEGRATE": "Integrate",
+        "SHIP": "Ship",
+        "UPDATE": "Stay updated"
+      },
+      "D1_TITLE": "What can you build with Fanar?",
+      "D1_SUB": "Every asset comes straight from its publisher, with a clear licence and a live preview.",
+      "TYPES": {
+        "RECITATIONS": {
+          "H": "Recitations",
+          "D": "By {{reciters}} reciters, with ayah timings and quality levels."
+        },
+        "MUSHAFS": {
+          "H": "Mushafs",
+          "D": "The Madinah Mushaf in the Hafs, Warsh, Qalun, Shuʿbah and al-Duri narrations, and more."
+        },
+        "FONTS": {
+          "H": "Fonts",
+          "D": "Unicode Uthmani fonts for each narration."
+        },
+        "TAFSIRS": {
+          "H": "Tafsirs",
+          "D": "Ibn Kathir, al-Tabari, al-Saʿdi, al-Baghawi, and Al Mokhtasar in 22 languages."
+        },
+        "TRANSLATIONS": {
+          "H": "Translations",
+          "D": "Translations of the meanings of the Quran, added through quran-cli."
+        }
+      },
+      "D2_TITLE": "Pick your stack and copy three commands",
+      "D2_SUB": "Text assets, mushafs and fonts arrive through quran-cli at build time. Recitations come through the public API, down to the ayah.",
+      "ENV_LABEL": "Environment",
+      "PANELS": {
+        "NODE": {
+          "H": "Node / web",
+          "S1": "Install the CLI",
+          "S2": "Add an asset to your project",
+          "N2": "The command writes the lockfile with exact versions.",
+          "S3": "Use it"
+        },
+        "FLUTTER": {
+          "H": "Flutter / Dart",
+          "S1": "Install the CLI",
+          "S2": "Add an asset and update pubspec.yaml",
+          "N2": "The CLI manages the flutter: assets: block in pubspec.yaml for you.",
+          "S3": "Use it"
+        },
+        "PYTHON": {
+          "H": "Python",
+          "S1": "Install the CLI",
+          "S2": "Search and add",
+          "S3": "Use it"
+        },
+        "BREW": {
+          "H": "macOS / Linux",
+          "S1": "Install the CLI",
+          "S2": "Start a project",
+          "S3": "Restricted asset?",
+          "N3": "Request access from the asset page. Once approved, save your key with this command."
+        },
+        "API": {
+          "H": "Public API: recitations",
+          "D": "REST, free with a free account",
+          "S1": "Sign up for free and get your key",
+          "N1": "The API is free. No card, no plan to choose.",
+          "S2": "Find a recitation",
+          "S3": "Audio for Ayat al-Kursi",
+          "N3": "Keep c=your-app in the URL. It is how the publisher sees that your app uses their content."
+        }
+      },
+      "D4_TITLE": "What works on your machine works in CI and for your team",
+      "SHIP": {
+        "1": {
+          "H": "A lockfile",
+          "D": "itqan-assets.lock gives every teammate and every build the same files."
+        },
+        "2": {
+          "H": "Every platform",
+          "D": "npm, PyPI, pub.dev and Homebrew, on macOS, Linux and Windows."
+        },
+        "3": {
+          "H": "No silent breakage",
+          "D": "The lockfile is only written after every download succeeds."
+        },
+        "4": {
+          "H": "Credit for your app",
+          "D": "Your app ID shows up in the publisher’s reports."
+        }
+      },
+      "D5_TITLE": "When a publisher fixes a mistake, you get a pull request",
+      "D5_SUB": "One command writes a GitHub Actions workflow that checks every week and opens a pull request when a new version within your chosen range is released.",
+      "WHY_TITLE": "Why Fanar, and not a file copied from some repository?",
+      "WHY": {
+        "1": {
+          "H": "From the source",
+          "D": "Every asset is published by its verified owner, under their name and licence."
+        },
+        "2": {
+          "H": "Reviewed before release",
+          "D": "The publisher reviews each version before it reaches you."
+        },
+        "3": {
+          "H": "Version ranges",
+          "D": "Pick ^, ~ or an exact version, as with npm."
+        },
+        "4": {
+          "H": "Report a mistake",
+          "D": "A report form by surah and ayah goes straight to the publisher."
+        },
+        "5": {
+          "H": "Restricted assets by approval",
+          "D": "Request access once, then use one key for everything."
+        },
+        "6": {
+          "H": "Free and open source",
+          "D": "The public API is free with a free account, and quran-cli is MIT-licensed by the Itqan community."
+        }
+      },
+      "END_TITLE": "The public API is free",
+      "END_SUB": "Sign up for a free account, get your key and build on a trusted source."
+    },
+    "FEATURES": {
+      "EYEBROW": "What Fanar does today",
+      "TITLE": "Some of what Fanar does",
+      "PREV": "Previous",
+      "NEXT": "Next",
+      "STOP": "Stop auto-rotation",
+      "PLAY": "Start auto-rotation",
+      "CTRL": "Feature navigation",
+      "SET": "Set {{n}}",
+      "ITEMS": {
+        "F1": {
+          "H": "Versions, drafts, changelogs",
+          "D": "Every correction is a numbered version with a changelog; drafts stay hidden until ready."
+        },
+        "F2": {
+          "H": "Upload any CSV",
+          "D": "Fanar reads your columns and lets you match them to your asset’s fields before import."
+        },
+        "F3": {
+          "H": "Review before release",
+          "D": "A table with filters on every column, and “Approve all” respects them."
+        },
+        "F4": {
+          "H": "Channels per asset",
+          "D": "Gallery, public API, CLI and your website: turn on the ones you want."
+        },
+        "F5": {
+          "H": "Publisher website",
+          "D": "A site for readers and listeners on your own domain and brand."
+        },
+        "F6": {
+          "H": "Tagged text assets",
+          "D": "Tafsirs and translations as one asset type, in many languages."
+        },
+        "F7": {
+          "H": "Ayah timings",
+          "D": "Recitations with a timing for every ayah and several quality levels."
+        },
+        "F8": {
+          "H": "Mushafs and fonts",
+          "D": "Mushaf page layouts and versioned fonts, with a preview."
+        },
+        "F9": {
+          "H": "Usage reports per asset",
+          "D": "Plays, downloads, installs and API calls, broken down by app."
+        },
+        "F10": {
+          "H": "Daily, weekly or monthly",
+          "D": "Pick the chart granularity and export the numbers as CSV."
+        },
+        "F11": {
+          "H": "Issue reports from users",
+          "D": "Mistakes reported by surah and ayah, page or glyph, ready to fix."
+        },
+        "F12": {
+          "H": "Roles and invitations",
+          "D": "Invite your team and give each member only the access they need."
+        },
+        "F13": {
+          "H": "Open licences, access requests",
+          "D": "Each asset carries its licence; restricted ones need your approval."
+        },
+        "F14": {
+          "H": "AI-written descriptions",
+          "D": "One button drafts the Arabic and English description for you to review."
+        },
+        "F15": {
+          "H": "Install with a lockfile",
+          "D": "quran-cli install fetches the same versions for every teammate and build."
+        },
+        "F16": {
+          "H": "Updates as pull requests",
+          "D": "A weekly workflow opens a pull request for each new release."
+        },
+        "F17": {
+          "H": "Ayah-level text API",
+          "D": "Text from several assets for one ayah in a single request."
+        },
+        "F18": {
+          "H": "Recitations API",
+          "D": "Audio for any ayah of any recitation in one API call."
+        },
+        "F19": {
+          "H": "Arabic and English",
+          "D": "The portal and gallery in both languages, in light and dark."
+        },
+        "F20": {
+          "H": "Open source",
+          "D": "The platform and quran-cli are open source, from the Itqan community."
+        }
+      }
+    }
   }
 }

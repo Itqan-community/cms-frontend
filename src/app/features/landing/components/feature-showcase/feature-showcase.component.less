@@ -1,0 +1,152 @@
+:host {
+  display: block;
+}
+
+.showcase {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+
+  &__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 16px 32px;
+  }
+
+  &__controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+  }
+
+  &__arrow,
+  &__toggle {
+    min-width: 44px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 999px;
+    border: 1px solid var(--fanar-line);
+    background: transparent;
+    color: var(--fanar-ink);
+    font: inherit;
+    font-size: 14px;
+    cursor: pointer;
+
+    svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+
+      &.filled {
+        width: 14px;
+        height: 14px;
+        fill: currentColor;
+        stroke: none;
+      }
+    }
+  }
+
+  &__toggle {
+    padding: 0 16px;
+  }
+
+  &__dots {
+    display: flex;
+    align-items: center;
+  }
+
+  &__dot {
+    width: 32px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+
+    span {
+      display: block;
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: var(--fanar-line);
+      transition: width 0.2s;
+    }
+
+    &--current span {
+      width: 28px;
+      background: var(--fanar-accent);
+    }
+  }
+
+  &__list {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 16px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 200px), 1fr));
+  }
+
+  &__item {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 22px;
+    border-radius: 18px;
+    background: var(--fanar-surface);
+    border: 1px solid var(--fanar-line);
+
+    b {
+      font-size: 17px;
+      line-height: 1.4;
+    }
+
+    .fl-muted {
+      font-size: 15px;
+    }
+  }
+
+  &__icon {
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: var(--fanar-accent-soft);
+    color: var(--fanar-accent);
+
+    svg {
+      width: 22px;
+      height: 22px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+  }
+}
+
+// Arrows point "back" and "forward" in reading order.
+:host-context(html[dir='ltr']) .flip-with-dir {
+  transform: scaleX(-1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .showcase__dot span {
+    transition: none;
+  }
+}

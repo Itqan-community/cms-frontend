@@ -48,7 +48,6 @@ import {
   TextFilterModule,
   TooltipModule,
   ValidationModule,
-  themeQuartz,
 } from 'ag-grid-community';
 import { AgGridAngular } from 'ag-grid-angular';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -117,6 +116,7 @@ import {
   trimVersionText,
   type VersionText,
 } from '../../utils/version-text.util';
+import { fanarGridTheme } from '../../../../shared/utils/grid-theme';
 
 // Only the features this grid uses, not `AllCommunityModule`: it keeps the editor's
 // download smaller. Dev builds add `ValidationModule`, which names any module a
@@ -488,7 +488,7 @@ export class AssetContentGridComponent implements OnInit {
 
   readonly rtl = computed(() => this.translate.currentLang === 'ar');
 
-  readonly theme = themeQuartz;
+  readonly theme = fanarGridTheme;
 
   /** Grid-owned text in the UI language. `localeText` is an @initial grid
    *  option, read once when the grid is created (after translations load;

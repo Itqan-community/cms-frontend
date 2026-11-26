@@ -19,17 +19,18 @@ export interface ChartItem {
   value: number | string;
 }
 
+// Fanar deck colours first (teal, mint, green), then distinct hues readable in both themes.
 const PALETTE = [
-  '#527c66',
-  '#22433d',
-  '#a3c3b3',
+  '#156375',
+  '#86ccac',
+  '#66997f',
   '#d4a03a',
   '#6c8ebf',
   '#b5654d',
   '#8f7bb5',
-  '#4e6964',
-  '#c2d7cc',
-  '#7a8e8b',
+  '#2f8392',
+  '#b9c3c6',
+  '#8fa9b1',
 ];
 
 /** Privacy-floor strings ("<3") plot as 0; their text is shown as a label instead. */
@@ -433,7 +434,9 @@ export function buildHourOfWeekOptions(
       left: 'center',
       bottom: 0,
       // Empty cells blend into the card: pale on light, the dark primary-50 tint on dark.
-      inRange: { color: [options.dark ? '#17221d' : '#f0f5f2', '#527c66', '#22433d'] },
+      inRange: {
+        color: options.dark ? ['#0f3540', '#4a9a94', '#86ccac'] : ['#eef5f6', '#156375', '#0b2833'],
+      },
     },
     series: [{ type: 'heatmap', data, emphasis: { itemStyle: { borderColor: '#333' } } }],
   };

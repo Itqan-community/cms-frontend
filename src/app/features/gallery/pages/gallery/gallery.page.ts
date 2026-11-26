@@ -3,13 +3,14 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SeoService } from '../../../../core/services/seo.service';
 import { AssetsListingComponent } from '../../components/assets-listing/assets-listing.component';
+import { DeveloperJourneyComponent } from '../../components/developer-journey/developer-journey.component';
 
 @Component({
   selector: 'app-gallery-page',
   standalone: true,
   templateUrl: './gallery.page.html',
   styleUrls: ['./gallery.page.less'],
-  imports: [AssetsListingComponent, TranslateModule],
+  imports: [AssetsListingComponent, DeveloperJourneyComponent, TranslateModule],
 })
 export class GalleryPage implements OnInit {
   private readonly seo = inject(SeoService);
