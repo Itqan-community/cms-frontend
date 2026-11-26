@@ -250,6 +250,9 @@ Trust, Profile, CompleteProfile
 
 | Path                                    | Component              | Guards                                   | Notes                                                                                                                                                                   |
 | --------------------------------------- | ---------------------- | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                                     | `EntryPage`            | `publisherHostGuard`                     | Landing (B9): "who are you?" toggle (publisher/developer), build-time counts; publisher hosts go to `/gallery`                                                          |
+| `/for-publishers`                       | `ForPublishersPage`    | `publisherHostGuard`                     | Publisher journey + feature showcase + contact form (`POST /cms-api/publisher-inquiries/`) + connect@itqan.dev                                                          |
+| `/for-developers`                       | `ForDevelopersPage`    | `publisherHostGuard`                     | Developer journey (discover/try/integrate/ship/update), stack tabs with `quran-cli` commands, feature showcase                                                          |
 | `/gallery`                              | `GalleryPage`          | —                                        | Main listing                                                                                                                                                            |
 | `/gallery/asset/:id`                    | `AssetDetailsPage`     | —                                        | Detail + access request + "Use this asset" (API / itqan CLI) + report issue modal                                                                                       |
 | `/publishers`                           | `PublishersPage`       | `publisherHostGuard`                     | Stub                                                                                                                                                                    |
@@ -282,6 +285,25 @@ Trust, Profile, CompleteProfile
 
 ## [FEATURES]
 
+### 0. Landing pages (`src/app/features/landing/`)
+
+**Purpose:** The B9 design (mockups v15, deck identity): entry page with a "who are you?" toggle,
+publisher and developer journeys, a 20-feature showcase (5 at a time), and the publisher contact
+form.
+
+| File                                                        | Type      | Purpose                                                                                                                     |
+| ----------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `pages/entry/entry.page.ts`                                 | Page      | `/`: hero, persona toggle (publisher/developer copy + steps), counts, publisher names                                       |
+| `pages/for-publishers/for-publishers.page.ts`               | Page      | `/for-publishers`: channels card, problems, 4 pillars, live example, journey, showcase, join (email + form)                 |
+| `pages/for-developers/for-developers.page.ts`               | Page      | `/for-developers`: type counts, 5 stack tabs (WAI-ARIA tabs) with copyable code, CI + autoupdate, why, showcase             |
+| `components/feature-showcase/feature-showcase.component.ts` | Component | Rotates every 6 s; pauses on hover/focus; stop/start; starts stopped under `prefers-reduced-motion`                         |
+| `components/join-form/join-form.component.ts`               | Component | Contact form (name, organisation, email, content kind, message, hidden honeypot); inline backend error                      |
+| `components/code-block/code-block.component.ts`             | Component | Terminal-style block; copy button copies the commands without `$`                                                           |
+| `data/features.ts`                                          | Data      | The 20 showcase features (copy in `LANDING.FEATURES.ITEMS`); ask before adding/removing                                     |
+| `data/landing-stats.json` (+ `.ts`)                         | Data      | Counts written by `scripts/generate-landing-stats.mjs` on `prebuild` from the production API; kept as committed if it fails |
+| `data/cli.ts`                                               | Data      | CLI name (`quran-cli`, C11) and install commands shown on the pages; API host; contact email                                |
+| `styles/landing.less`                                       | Styles    | Global `fl-*` building blocks (imported by `src/styles.less`) on the `--fanar-*` tokens                                     |
+
 ### 1. Gallery (`src/app/features/gallery/`)
 
 **Purpose:** Browse, search and filter Quranic assets; request access; point to the API / itqan CLI.
@@ -296,6 +318,7 @@ Trust, Profile, CompleteProfile
 | `components/asset-card/asset-card.component.ts`               | Component  | Single asset card (icon, license, name, desc, publisher, link)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | `components/asset-get-cta/asset-get-cta.component.ts`         | Component  | "Use this asset": recitations -> API docs; others -> `<app-itqan-add-command>` (or a CLI link when not installable) + API docs link                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 | `components/itqan-add-command/itqan-add-command.component.ts` | Component  | `itqan add <slug> [--language]` + copy + "get the CLI" link (GitHub)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `components/developer-journey/developer-journey.component.ts` | Component  | Discover › Try › Integrate › Ship › Stay updated strip (links to `/for-developers` sections) on the gallery and asset pages; the asset page also pins its install command to the bottom on phones                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 **States:** loading (skeleton), empty (no results with/without filters), error, not-found (404),
 success.
@@ -697,6 +720,7 @@ public app slug (`app_slug`). The global error toast skips `usage_counts_disable
 - `GET /assets/{id}/font-preview/?language=` — A font's file + Al-Fatiha to render in it (404 when
   unavailable)
 - `GET /developers/usage/{summary,timeseries,breakdown}/` — Developer usage reports
+- `POST /publisher-inquiries/` — Landing "contact us to join" form (anonymous, throttled per IP)
 
 ### Admin Portal (`/portal/`)
 
@@ -787,11 +811,15 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
     flash) set `data-theme` and `data-ag-theme-mode` on `<html>` and insert `antd-dark.css` right
     after `antd-*.css`; `main.ts` waits for `window.itqanThemeReady` before bootstrapping. If
     `antd-dark.css` fails to load the theme stays light. Choice saved in `localStorage.theme` (only
-    once applied), else OS preference. New colours: use an existing token, or
-    `var(--dark-only-token, <light literal>)` with the token defined only under
+    once applied), else OS preference. Dark values follow the Fanar navy palette (deck identity:
+    navy `#0b2833`, teal `#156375`, mint `#86ccac`); text on a `--color-primary-700/800` fill uses
+    `--color-on-primary` (white in light, navy on the mint dark primary). Brand tokens `--fanar-*`
+    (both themes) drive the landing pages and the header lockup. New colours: use an existing token,
+    or `var(--dark-only-token, <light literal>)` with the token defined only under
     `html[data-theme='dark']` in `theme.less` — never a bare hex. AG Grid quartz follows
-    `data-ag-theme-mode` itself; ECharts uses the `dark` theme via `UsageChartComponent`; canvas
-    code re-reads tokens on `ThemeService.theme()` changes
+    `data-ag-theme-mode` (grids use `shared/utils/grid-theme.ts` for the navy dark params); ECharts
+    uses the `dark` theme via `UsageChartComponent`; canvas code re-reads tokens on
+    `ThemeService.theme()` changes
 11. **RTL support** — Logical CSS properties throughout, `ltr-flip`/`rtl-flip` transform utilities
 12. **Responsive** — Mobile-first with breakpoints at 480/576/768/992/1200/1600px
 13. **Error classification** — `resolveAuthErrorMessage()` for auth pages (code map → localized
