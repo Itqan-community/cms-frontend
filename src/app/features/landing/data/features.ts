@@ -1,5 +1,6 @@
 /**
- * The landing-page feature showcase: 20 features that work today, shown 5 at a time. Copy lives in
+ * The landing-page feature showcase: features that work today, shown 5 at a time. The page never
+ * states the total, so add or remove entries freely (with their copy). Copy lives in
  * i18n under LANDING.FEATURES.ITEMS.<key>; `icon` is a 24×24 stroke path. When a big feature ships,
  * ask whether it belongs here (TODO B9).
  */

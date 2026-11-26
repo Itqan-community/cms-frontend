@@ -3,7 +3,8 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { SHOWCASE_FEATURES, SHOWCASE_INTERVAL_MS, SHOWCASE_PAGE_SIZE } from '../../data/features';
 
 /**
- * "What Fanar does today": the 20 showcase features, 5 at a time. Rotates every 6 s; pauses while
+ * "Some of what Fanar does": samples from SHOWCASE_FEATURES, 5 at a time. The copy never states how
+ * many there are, so features can be added or removed in data/features.ts alone. Rotates every 6 s; pauses while
  * hovered or focused, has a stop/start button, and starts stopped for prefers-reduced-motion.
  */
 @Component({
@@ -15,7 +16,6 @@ import { SHOWCASE_FEATURES, SHOWCASE_INTERVAL_MS, SHOWCASE_PAGE_SIZE } from '../
 })
 export class FeatureShowcaseComponent {
   readonly pageCount = Math.ceil(SHOWCASE_FEATURES.length / SHOWCASE_PAGE_SIZE);
-  readonly total = SHOWCASE_FEATURES.length;
   readonly pages = Array.from({ length: this.pageCount }, (_, i) => i);
 
   readonly page = signal(0);
@@ -28,8 +28,6 @@ export class FeatureShowcaseComponent {
       this.page() * SHOWCASE_PAGE_SIZE + SHOWCASE_PAGE_SIZE
     )
   );
-  readonly from = computed(() => this.page() * SHOWCASE_PAGE_SIZE + 1);
-  readonly to = computed(() => Math.min(this.total, (this.page() + 1) * SHOWCASE_PAGE_SIZE));
 
   constructor() {
     const timer = setInterval(() => {

@@ -23,14 +23,24 @@ describe('FeatureShowcaseComponent', () => {
     );
   }
 
-  it('lists 20 features and shows 5 at a time in 4 sets', () => {
+  it('shows 5 features at a time, one dot per set, from whatever the data holds', () => {
     setReducedMotion(true);
     const fixture = render();
 
-    expect(SHOWCASE_FEATURES.length).toBe(20);
-    expect(new Set(SHOWCASE_FEATURES.map((f) => f.key)).size).toBe(20);
+    expect(new Set(SHOWCASE_FEATURES.map((f) => f.key)).size).toBe(SHOWCASE_FEATURES.length);
     expect(shownKeys(fixture.nativeElement)).toEqual(['F1', 'F2', 'F3', 'F4', 'F5']);
-    expect(fixture.nativeElement.querySelectorAll('.showcase__dot').length).toBe(4);
+    expect(fixture.nativeElement.querySelectorAll('.showcase__dot').length).toBe(
+      Math.ceil(SHOWCASE_FEATURES.length / 5)
+    );
+  });
+
+  it('never states how many features there are', () => {
+    setReducedMotion(true);
+    const fixture = render();
+
+    const text: string = fixture.nativeElement.textContent;
+    expect(text).not.toContain(String(SHOWCASE_FEATURES.length));
+    expect(text).not.toContain('COUNT');
   });
 
   it('rotates to the next set on its own and wraps around', fakeAsync(() => {
@@ -80,6 +90,7 @@ describe('FeatureShowcaseComponent', () => {
     fixture.componentInstance.go(-1);
     fixture.detectChanges();
 
-    expect(shownKeys(fixture.nativeElement)).toEqual(['F16', 'F17', 'F18', 'F19', 'F20']);
+    const lastSet = SHOWCASE_FEATURES.slice((fixture.componentInstance.pageCount - 1) * 5);
+    expect(shownKeys(fixture.nativeElement)).toEqual(lastSet.map((f) => f.key));
   });
 });

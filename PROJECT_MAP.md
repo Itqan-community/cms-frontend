@@ -288,8 +288,8 @@ Trust, Profile, CompleteProfile
 ### 0. Landing pages (`src/app/features/landing/`)
 
 **Purpose:** The B9 design (mockups v15, deck identity): entry page with a "who are you?" toggle,
-publisher and developer journeys, a 20-feature showcase (5 at a time), and the publisher contact
-form.
+publisher and developer journeys, a feature showcase (samples, 5 at a time, no total shown), and the
+publisher contact form.
 
 | File                                                        | Type      | Purpose                                                                                                                     |
 | ----------------------------------------------------------- | --------- | --------------------------------------------------------------------------------------------------------------------------- |
@@ -299,7 +299,7 @@ form.
 | `components/feature-showcase/feature-showcase.component.ts` | Component | Rotates every 6 s; pauses on hover/focus; stop/start; starts stopped under `prefers-reduced-motion`                         |
 | `components/join-form/join-form.component.ts`               | Component | Contact form (name, organisation, email, content kind, message, hidden honeypot); inline backend error                      |
 | `components/code-block/code-block.component.ts`             | Component | Terminal-style block; copy button copies the commands without `$`                                                           |
-| `data/features.ts`                                          | Data      | The 20 showcase features (copy in `LANDING.FEATURES.ITEMS`); ask before adding/removing                                     |
+| `data/features.ts`                                          | Data      | Showcase features (copy in `LANDING.FEATURES.ITEMS`); the page never shows the total; ask before adding                     |
 | `data/landing-stats.json` (+ `.ts`)                         | Data      | Counts written by `scripts/generate-landing-stats.mjs` on `prebuild` from the production API; kept as committed if it fails |
 | `data/cli.ts`                                               | Data      | CLI name (`quran-cli`, C11) and install commands shown on the pages; API host; contact email                                |
 | `styles/landing.less`                                       | Styles    | Global `fl-*` building blocks (imported by `src/styles.less`) on the `--fanar-*` tokens                                     |
@@ -811,8 +811,9 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
     flash) set `data-theme` and `data-ag-theme-mode` on `<html>` and insert `antd-dark.css` right
     after `antd-*.css`; `main.ts` waits for `window.itqanThemeReady` before bootstrapping. If
     `antd-dark.css` fails to load the theme stays light. Choice saved in `localStorage.theme` (only
-    once applied), else OS preference. Dark values follow the Fanar navy palette (deck identity:
-    navy `#0b2833`, teal `#156375`, mint `#86ccac`); text on a `--color-primary-700/800` fill uses
+    once applied), else OS preference. Light values use the deck teal/navy (primary `#156375`,
+    NG-ZORRO `@primary-color` too); dark values follow the Fanar navy palette (deck identity: navy
+    `#0b2833`, teal `#156375`, mint `#86ccac`); text on a `--color-primary-700/800` fill uses
     `--color-on-primary` (white in light, navy on the mint dark primary). Brand tokens `--fanar-*`
     (both themes) drive the landing pages and the header lockup. New colours: use an existing token,
     or `var(--dark-only-token, <light literal>)` with the token defined only under

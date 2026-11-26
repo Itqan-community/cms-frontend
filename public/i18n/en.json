@@ -3541,8 +3541,7 @@
     },
     "FEATURES": {
       "EYEBROW": "What Fanar does today",
-      "TITLE": "Twenty features, working now",
-      "COUNT": "Features {{from}}–{{to}} of {{total}}",
+      "TITLE": "Some of what Fanar does",
       "PREV": "Previous",
       "NEXT": "Next",
       "STOP": "Stop auto-rotation",
