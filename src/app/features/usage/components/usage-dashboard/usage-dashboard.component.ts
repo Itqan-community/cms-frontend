@@ -7,7 +7,6 @@ import {
   computed,
   inject,
   input,
-  output,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -82,7 +81,8 @@ interface PanelView {
   rows: UsageTableRow[];
 }
 
-const URL_KEYS = [
+/** Every query parameter a URL-synced dashboard owns. */
+export const USAGE_URL_KEYS = [
   'range',
   'start',
   'end',
@@ -156,11 +156,10 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
   /** Keep filters in the URL (page dashboards) or locally (embedded sections). */
   readonly syncUrl = input(true);
   /**
-   * Local dashboards only: a date range owned by the page (e.g. shared between tabs). The
-   * dashboard follows it and reports its own range changes through `rangeChange`.
+   * URL dashboards on a page tab: `false` while the tab is hidden. A hidden dashboard ignores the
+   * URL; when shown again it writes its own view back, keeping the URL's date range.
    */
-  readonly sharedRange = input<UsageRange | null>(null);
-  readonly rangeChange = output<UsageRange>();
+  readonly active = input(true);
 
   private readonly api = inject(UsageApiService);
   private readonly route = inject(ActivatedRoute);
@@ -172,6 +171,8 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
   private initialized = false;
   /** Set once the URL state has loaded every report; later bucket-only changes reload the trend. */
   private loaded = false;
+  /** The last URL seen, applied when a hidden dashboard is shown. */
+  private latestParams: ParamMap | null = null;
 
   readonly categories = CATEGORIES;
   readonly channels = CHANNELS;
@@ -446,16 +447,17 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
       this.load();
     });
     if (this.syncUrl()) {
-      this.route.queryParamMap
-        .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe((params) => this.applyParams(params));
+      this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+        // A new `tab` means the page is switching tabs; the `active` input handles that.
+        const tabChanged =
+          !!this.latestParams && params.get('tab') !== this.latestParams.get('tab');
+        this.latestParams = params;
+        if (this.active() && !tabChanged) {
+          this.applyParams(params);
+        }
+      });
     } else {
-      this.state.set(
-        this.withRange(
-          { ...usageStateFromParams({}), metric: this.profile().defaultMetric },
-          this.sharedRange()
-        )
-      );
+      this.state.set({ ...usageStateFromParams({}), metric: this.profile().defaultMetric });
       this.load();
     }
     this.initialized = true;
@@ -465,12 +467,15 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
     if (!this.initialized) {
       return;
     }
-    const range = this.sharedRange();
-    const rangeMoved = !!changes['sharedRange'] && !!range && !this.hasRange(range);
-    if (rangeMoved) {
-      this.state.set(this.withRange(this.state(), range));
+    if (changes['active'] && this.active() && this.syncUrl() && this.latestParams) {
+      this.showAgain(this.latestParams);
+      return;
     }
-    if (rangeMoved || changes['publisherId'] || changes['assetId']) {
+    // A URL dashboard that has not loaded yet loads when it is shown.
+    if (this.syncUrl() && !this.loaded) {
+      return;
+    }
+    if (changes['publisherId'] || changes['assetId']) {
       this.load();
     }
   }
@@ -620,6 +625,13 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
     }
   }
 
+  /** Whether both states put the same view in the URL. */
+  private sameView(previous: UsageViewState, next: UsageViewState): boolean {
+    return (
+      JSON.stringify(usageStateToParams(previous)) === JSON.stringify(usageStateToParams(next))
+    );
+  }
+
   /** Whether `next` differs from `previous` in the bucket size only. */
   private onlyGranularityChanged(previous: UsageViewState, next: UsageViewState): boolean {
     const keys = Object.keys({ ...previous.filters, ...next.filters }) as (keyof UsageFilters)[];
@@ -646,21 +658,27 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
     };
   }
 
-  /** Whether the current state already shows `range`. */
-  private hasRange(range: UsageRange): boolean {
-    const { preset, filters, granularity } = this.state();
-    return (
-      preset === range.preset &&
-      filters.start_date === range.start_date &&
-      filters.end_date === range.end_date &&
-      granularity === (range.granularity ?? null)
+  /**
+   * A hidden tab's dashboard is shown: the first time it opens on the URL; after that it puts its
+   * own view back in the URL (with the URL's date range, shared by every tab).
+   */
+  private showAgain(params: ParamMap): void {
+    if (!this.loaded) {
+      this.applyParams(params);
+      return;
+    }
+    const { preset, filters, granularity } = usageStateFromParams(this.rawParams(params));
+    this.update(
+      this.withRange(this.state(), {
+        preset,
+        start_date: filters.start_date,
+        end_date: filters.end_date,
+        granularity,
+      })
     );
   }
 
-  private withRange(state: UsageViewState, range: UsageRange | null): UsageViewState {
-    if (!range) {
-      return state;
-    }
+  private withRange(state: UsageViewState, range: UsageRange): UsageViewState {
     const { preset, start_date, end_date } = range;
     return {
       ...state,
@@ -676,17 +694,25 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
       .map((item) => ({ id: Number(item.key), name: item.label ?? item.key }));
   }
 
-  private applyParams(params: ParamMap): void {
+  private rawParams(params: ParamMap): Record<string, string> {
     const raw: Record<string, string> = {};
     for (const key of params.keys) {
       raw[key] = params.get(key) ?? '';
     }
+    return raw;
+  }
+
+  private applyParams(params: ParamMap): void {
+    const raw = this.rawParams(params);
     const parsed = usageStateFromParams(raw);
     const category =
       this.assetId() != null ? this.category() : (this.category() ?? parsed.filters.category);
     const defaultMetric = dashboardProfile(this.scope(), category, this.assetId()).defaultMetric;
     const state = raw['metric'] ? parsed : { ...parsed, metric: defaultMetric };
     const previous = this.state();
+    if (this.loaded && this.sameView(previous, state)) {
+      return;
+    }
     this.state.set(state);
     if (this.loaded && this.onlyGranularityChanged(previous, state)) {
       this.loadTrend();
@@ -706,24 +732,17 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
       } else {
         this.load();
       }
-      if (this.sharedRange() && !this.hasRange(this.sharedRange()!)) {
-        this.rangeChange.emit({
-          preset: next.preset,
-          start_date: next.filters.start_date,
-          end_date: next.filters.end_date,
-          granularity: next.granularity,
-        });
-      }
       return;
     }
     const queryParams: Record<string, string | null> = Object.fromEntries(
-      URL_KEYS.map((key) => [key, null])
+      USAGE_URL_KEYS.map((key) => [key, null])
     );
     Object.assign(queryParams, usageStateToParams(next));
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams,
       queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   }
 

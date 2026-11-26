@@ -5,7 +5,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTabsModule } from 'ng-zorro-antd/tabs';
-import { UsageDashboardComponent } from '../../../../usage/components/usage-dashboard/usage-dashboard.component';
+import {
+  USAGE_URL_KEYS,
+  UsageDashboardComponent,
+} from '../../../../usage/components/usage-dashboard/usage-dashboard.component';
 import { UsageLeaderboardComponent } from '../../../../usage/components/usage-leaderboard/usage-leaderboard.component';
 import { UsageUnseenTrafficComponent } from '../../../../usage/components/usage-unseen-traffic/usage-unseen-traffic.component';
 import { UsageFilters, UsageRange, UsageScope } from '../../../../usage/models/usage.models';
@@ -16,6 +19,13 @@ import {
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import { PublisherFilterItem } from '../../../text-assets/models/text-assets.models';
 import { PublishersFilterService } from '../../../text-assets/services/publishers-filter.service';
+
+/** The page's tabs, in order; the URL names the open one in `tab` (none for the Dashboard). */
+const TABS = ['dashboard', 'recitations', 'text', 'leaderboard', 'unseen'] as const;
+type UsageTab = (typeof TABS)[number];
+const STAFF_TABS: ReadonlySet<UsageTab> = new Set(['leaderboard', 'unseen']);
+/** URL keys every tab shares; the others belong to the open tab and reset when it changes. */
+const SHARED_KEYS = new Set(['range', 'start', 'end', 'granularity']);
 
 /**
  * Admin → Usage: the usage dashboard for the publisher in the request. Itqan staff also get a
@@ -47,9 +57,25 @@ export class UsagePageComponent implements OnInit {
   readonly isStaff = computed(() => this.adminAuth.isStaff());
   readonly scope = computed<UsageScope>(() => (this.isStaff() ? 'admin' : 'publisher'));
   readonly publishers = signal<PublisherFilterItem[]>([]);
-  readonly selectedPublisherId = signal<number | null>(null);
 
-  /** The date range every tab shows, kept in the URL by the Dashboard tab. */
+  /** The tabs this user sees. */
+  readonly tabs = computed<UsageTab[]>(() =>
+    TABS.filter((tab) => this.isStaff() || !STAFF_TABS.has(tab))
+  );
+  /** The tab the URL names; unknown and staff-only tabs (for publishers) fall back to the Dashboard. */
+  readonly tab = computed<UsageTab>(() => {
+    const tab = this.queryParams()?.get('tab') as UsageTab;
+    return this.tabs().includes(tab) ? tab : 'dashboard';
+  });
+  readonly tabIndex = computed(() => this.tabs().indexOf(this.tab()));
+
+  /** Staff only: the publisher the reports cover, kept in the URL (`publisher`). */
+  readonly selectedPublisherId = computed<number | null>(() => {
+    const id = Number(this.queryParams()?.get('publisher'));
+    return this.isStaff() && Number.isInteger(id) && id > 0 ? id : null;
+  });
+
+  /** The date range every tab shows, kept in the URL by the dashboards. */
   readonly range = computed<UsageRange>(() => {
     const params = this.queryParams();
     const raw: Record<string, string> = {};
@@ -83,21 +109,28 @@ export class UsagePageComponent implements OnInit {
   }
 
   onPublisherChange(publisherId: number | null): void {
-    this.selectedPublisherId.set(publisherId);
+    this.navigate({ publisher: publisherId });
   }
 
-  /** A range picked on the Recitations or Text assets tab becomes the page's range (and the Dashboard's). */
-  onRangeChange(range: UsageRange): void {
-    const custom = range.preset === 'custom';
+  /** Opens a tab, keeping the shared date range and dropping the previous tab's view. */
+  onTabChange(index: number): void {
+    const tab = this.tabs()[index];
+    if (!tab || tab === this.tab()) {
+      return;
+    }
+    const queryParams: Record<string, string | null> = Object.fromEntries(
+      USAGE_URL_KEYS.filter((key) => !SHARED_KEYS.has(key)).map((key) => [key, null])
+    );
+    queryParams['tab'] = tab === 'dashboard' ? null : tab;
+    this.navigate(queryParams);
+  }
+
+  private navigate(queryParams: Record<string, string | number | null>): void {
     void this.router.navigate([], {
       relativeTo: this.route,
-      queryParams: {
-        range: range.preset,
-        start: custom ? range.start_date : null,
-        end: custom ? range.end_date : null,
-        granularity: range.granularity ?? null,
-      },
+      queryParams,
       queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   }
 }

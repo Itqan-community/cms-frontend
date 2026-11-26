@@ -380,31 +380,59 @@ describe('UsageDashboardComponent', () => {
     );
   });
 
-  it('follows a shared range and reports its own range changes', () => {
-    fixture.componentRef.setInput('syncUrl', false);
-    fixture.componentRef.setInput('sharedRange', {
-      preset: '90d',
-      start_date: '2026-07-25',
-      end_date: '2026-10-22',
-    });
-    const emitted: unknown[] = [];
-    fixture.componentInstance.rangeChange.subscribe((range) => emitted.push(range));
+  it('replaces the URL entry instead of adding one per change', () => {
     fixture.detectChanges();
-    expect(api.summary.calls.mostRecent().args[1].start_date).toBe('2026-07-25');
 
-    fixture.componentRef.setInput('sharedRange', {
-      preset: 'custom',
-      start_date: '2026-09-01',
-      end_date: '2026-09-30',
-    });
+    fixture.componentInstance.setMetric('downloads');
+
+    expect(router.navigate.calls.mostRecent().args[1]?.replaceUrl).toBeTrue();
+  });
+
+  it('a hidden dashboard does not load and ignores the URL until it is shown', () => {
+    fixture.componentRef.setInput('active', false);
     fixture.detectChanges();
-    expect(api.summary.calls.mostRecent().args[1].start_date).toBe('2026-09-01');
-    expect(emitted).toEqual([]);
+    queryParams.next(convertToParamMap({ range: '7d', metric: 'downloads' }));
+    expect(api.summary).not.toHaveBeenCalled();
 
-    fixture.componentInstance.setPreset('7d');
-    expect(emitted).toEqual([jasmine.objectContaining({ preset: '7d' })]);
+    fixture.componentRef.setInput('active', true);
+    fixture.detectChanges();
 
-    fixture.componentInstance.setGranularity('hour');
-    expect(emitted[1]).toEqual(jasmine.objectContaining({ preset: '7d', granularity: 'hour' }));
+    expect(api.summary).toHaveBeenCalledTimes(1);
+    expect(api.timeseries.calls.mostRecent().args[2].metric).toBe('downloads');
+  });
+
+  it('ignores the URL change that switches tabs', () => {
+    fixture.detectChanges();
+    const summaries = api.summary.calls.count();
+
+    queryParams.next(convertToParamMap({ range: '7d', tab: 'text' }));
+
+    expect(api.summary.calls.count()).toBe(summaries);
+  });
+
+  it('shown again, writes its own view back to the URL with the shared range', () => {
+    queryParams.next(convertToParamMap({ range: '7d', metric: 'downloads', split: 'country' }));
+    fixture.detectChanges();
+    fixture.componentRef.setInput('active', false);
+    fixture.detectChanges();
+    queryParams.next(convertToParamMap({ range: '90d', tab: 'text' }));
+    router.navigate.calls.reset();
+
+    fixture.componentRef.setInput('active', true);
+    fixture.detectChanges();
+
+    expect(router.navigate.calls.mostRecent().args[1]?.queryParams).toEqual(
+      jasmine.objectContaining({ range: '90d', metric: 'downloads', split: 'country' })
+    );
+  });
+
+  it('does not reload when the URL shows the view it already has', () => {
+    queryParams.next(convertToParamMap({ range: '7d', metric: 'downloads' }));
+    fixture.detectChanges();
+    const summaries = api.summary.calls.count();
+
+    queryParams.next(convertToParamMap({ range: '7d', metric: 'downloads', publisher: '3' }));
+
+    expect(api.summary.calls.count()).toBe(summaries);
   });
 });
