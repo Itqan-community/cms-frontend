@@ -599,8 +599,9 @@ picking either in the Dashboard category filter shows the same profile; Itqan st
 publisher picker, Leaderboard and Unseen traffic (bucketed like the dashboard trend: the
 `granularity` URL param is shared by the tabs). The whole view is in the URL (shareable): `tab`
 (`recitations` / `text` / `leaderboard` / `unseen`, none = Dashboard; unknown or, for publishers,
-staff-only tabs fall back to the Dashboard), staff `publisher`, and the open tab's dashboard state
-(`metric`, `split`, `compare`, filters). `range` / `start` / `end` / `granularity` are shared by the
+staff-only tabs fall back to the Dashboard), staff `publisher` (fetched by id when not on the
+picker's first page), and the open tab's dashboard state (`metric`, `split`, `compare`, filters,
+`calendar=hijri` for Hijri axis labels). `range` / `start` / `end` / `granularity` are shared by the
 tabs; switching tabs drops the other keys and a tab shown again writes its view back (dashboard
 `active` input). Every change uses `replaceUrl`. `/account/api-keys` shows and edits each key's
 public app slug (`app_slug`). The global error toast skips `usage_counts_disabled`.
