@@ -37,7 +37,6 @@ import {
   RowSelectionModule,
   TextFilterModule,
   ValidationModule,
-  themeQuartz,
 } from 'ag-grid-community';
 import { Subject, takeUntil } from 'rxjs';
 import { NzButtonModule } from 'ng-zorro-antd/button';
@@ -77,6 +76,7 @@ import {
   type ReviewGridContext,
   type RowCompare,
 } from './review-grid-cells.component';
+import { fanarGridTheme } from '../../../../shared/utils/grid-theme';
 
 export type { ReviewActionType } from './review-grid-cells.component';
 
@@ -261,7 +261,7 @@ export class AssetReviewGridComponent implements OnInit, ReviewGridContext {
   }
 
   readonly rtl = computed(() => this.translate.currentLang === 'ar');
-  readonly theme = themeQuartz;
+  readonly theme = fanarGridTheme;
   /** The cells' view of this component (`ReviewGridContext`). */
   readonly gridContext: ReviewGridContext = this;
 
