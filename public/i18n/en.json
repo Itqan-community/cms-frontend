@@ -1112,6 +1112,14 @@
         "GROW": "Extend the range by one",
         "SHRINK": "Shorten the range by one",
         "POSITION_INVALID": "Write a position as surah:ayah (or surah:ayah:word for word groups), e.g. 2:255."
+      },
+      "ISSUES": {
+        "SHOW": "Show reported issues",
+        "COLUMN": "Issues",
+        "MARKER": "{{count}} open issue report(s): click to list them",
+        "TITLE": "Open issues · {{label}}",
+        "OPEN": "Open issue",
+        "LOAD_ERROR": "Could not load the asset's issue reports."
       }
     },
     "REVIEW": {

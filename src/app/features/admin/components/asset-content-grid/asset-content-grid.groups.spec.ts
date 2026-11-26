@@ -69,6 +69,7 @@ describe('AssetContentGridComponent groups', () => {
   beforeEach(async () => {
     service = jasmine.createSpyObj<AssetContentService>('AssetContentService', [
       'listColumns',
+      'listIssues',
       'listLanguages',
       'createDraft',
       'pendingChanges',
@@ -81,6 +82,7 @@ describe('AssetContentGridComponent groups', () => {
       'commit',
     ]);
     service.listColumns.and.returnValue(of([]));
+    service.listIssues.and.returnValue(of([]));
     service.listLanguages.and.returnValue(of([SOURCE, ENGLISH]));
     service.createDraft.and.returnValue(of(draft('ayah_group')));
     service.pendingChanges.and.returnValue(of({ results: [], count: 0 }));

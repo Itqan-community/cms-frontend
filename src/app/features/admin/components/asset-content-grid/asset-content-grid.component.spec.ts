@@ -330,6 +330,7 @@ describe('AssetContentGridComponent column definitions', () => {
     httpMock
       .expectOne((req) => req.url.endsWith('/columns/'))
       .flush([{ key: 'text', label_en: '', label_ar: '', order: 0, committed: false }]);
+    httpMock.expectOne((req) => req.url.endsWith('/issues/')).flush([]);
     httpMock
       .expectOne((req) => req.url.includes('languages/'))
       .flush([{ language: 'ar', is_source: true, is_available: true }]);

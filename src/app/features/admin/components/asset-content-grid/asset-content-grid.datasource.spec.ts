@@ -23,6 +23,8 @@ function flushDraft(httpMock: HttpTestingController, slug: string, id: number): 
   httpMock
     .expectOne((r) => r.url.includes(slug) && r.url.endsWith('/columns/'))
     .flush([{ key: 'text', label_en: '', label_ar: '', order: 0, committed: false }]);
+  // ...and its open issue reports, to mark their rows.
+  httpMock.expectOne((r) => r.url.includes(slug) && r.url.endsWith('/issues/')).flush([]);
   httpMock
     .expectOne((r) => r.url.includes(slug) && r.url.includes('languages/'))
     .flush([{ language: 'ar', is_source: true, is_available: true }]);
@@ -405,6 +407,7 @@ describe('AssetContentGridComponent opening', () => {
     httpMock
       .expectOne((r) => r.url.includes(slug) && r.url.endsWith('/columns/'))
       .flush([{ key: 'text', label_en: '', label_ar: '', order: 0, committed: false }]);
+    httpMock.expectOne((r) => r.url.includes(slug) && r.url.endsWith('/issues/')).flush([]);
     return fixture;
   }
 

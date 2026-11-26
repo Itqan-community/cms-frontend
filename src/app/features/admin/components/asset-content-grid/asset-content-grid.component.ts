@@ -11,8 +11,9 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { DatePipe, UpperCasePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import type {
@@ -58,6 +59,7 @@ import { NzModalModule, NzModalService } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzSpinModule } from 'ng-zorro-antd/spin';
 import { NzSwitchModule } from 'ng-zorro-antd/switch';
+import { NzTagModule } from 'ng-zorro-antd/tag';
 import { NzToolTipModule } from 'ng-zorro-antd/tooltip';
 import { Subject, catchError, debounceTime, forkJoin, of, takeUntil, type Observable } from 'rxjs';
 import type {
@@ -69,6 +71,8 @@ import type {
   ContentDraftVersion,
   ContentEntry,
   ContentEntryPatch,
+  ContentIssue,
+  ContentIssueGroup,
   QuranPosition,
 } from '../../models/asset-content.models';
 import { isGroupTemplate } from '../../models/asset-content.models';
@@ -109,7 +113,12 @@ import {
   ContentTextCellEditorComponent,
   type ContentTextEditorParams,
 } from './content-text-cell-editor.component';
+import {
+  IssueMarkerCellComponent,
+  type IssueMarkerCellParams,
+} from './issue-marker-cell.component';
 import { surahLabel } from '../../models/quran-metadata';
+import { resolveApiErrorMessage } from '../../../../shared/utils/api-error-resolver.util';
 import { SurahFloatingFilterComponent } from './surah-floating-filter.component';
 import {
   EMPTY_VERSION_TEXT,
@@ -204,6 +213,11 @@ const NUMBER_FILTER_PARAMS: INumberFilterParams = {
   allowedCharPattern: '\\d',
 };
 
+/** Orders Quran positions: surah, then ayah, then word (0 = the whole ayah). */
+function positionKey(surah: number, ayah: number, word?: number | null): number {
+  return surah * 1_000_000 + ayah * 1_000 + (word ?? 0);
+}
+
 /** Whether `row`'s cell in column `key` differs from the published version:
  *  per column when the backend names them, else the whole row's flag. */
 function cellChanged(row: ContentEntry | undefined, key: string): boolean {
@@ -217,6 +231,8 @@ function cellChanged(row: ContentEntry | undefined, key: string): boolean {
   imports: [
     AgGridAngular,
     ContentChangesComponent,
+    DatePipe,
+    UpperCasePipe,
     TranslateModule,
     NgIcon,
     FormsModule,
@@ -226,7 +242,9 @@ function cellChanged(row: ContentEntry | undefined, key: string): boolean {
     NzSelectModule,
     NzSpinModule,
     NzSwitchModule,
+    NzTagModule,
     NzToolTipModule,
+    RouterLink,
     ManageColumnsModalComponent,
     VersionNumberFieldComponent,
     ImportColumnMappingComponent,
@@ -320,6 +338,24 @@ export class AssetContentGridComponent implements OnInit {
   readonly columnKeys = signal<string[]>(DEFAULT_COLUMN_KEYS);
   /** Translating: show each source column beside its translation. */
   readonly showSource = signal(false);
+  /** The asset's open issue reports by surah:ayah; every language shares them. */
+  readonly issueGroups = signal<ContentIssueGroup[]>([]);
+  readonly issueCount = computed(() =>
+    this.issueGroups().reduce((count, group) => count + group.issues.length, 0)
+  );
+  /** Show the issue markers column (remembered per user). */
+  readonly showIssues = signal(true);
+  /** The issues of the row whose marker was clicked, listed in a dialog. */
+  readonly issuesDialog = signal<{ label: string; issues: ContentIssue[] } | null>(null);
+  /** Issues by the `unit_id` of the row they land on (every template but groups). */
+  private readonly issuesByUnit = computed(() => {
+    const byUnit = new Map<number, ContentIssue[]>();
+    for (const group of this.issueGroups()) {
+      if (group.unit_id === null) continue;
+      byUnit.set(group.unit_id, [...(byUnit.get(group.unit_id) ?? []), ...group.issues]);
+    }
+    return byUnit;
+  });
   /** Adding, labelling, reordering and deleting columns: few users may, and only
    *  with access to every language (a column applies to all of them). */
   readonly canManageColumns = computed(
@@ -525,7 +561,9 @@ export class AssetContentGridComponent implements OnInit {
       .pipe(debounceTime(AUTOSAVE_DEBOUNCE_MS), takeUntilDestroyed(this.destroyRef))
       .subscribe(() => void this.flushPending());
     this.showSource.set(this.readShowSource());
+    this.showIssues.set(this.readShowIssues());
     this.loadColumns();
+    this.loadIssues();
     this.loadLanguages();
   }
 
@@ -602,6 +640,82 @@ export class AssetContentGridComponent implements OnInit {
 
   private showSourceKey(): string {
     return `content-grid:show-source:${this.slug}`;
+  }
+
+  /** Load the asset's open issues, to mark their rows. */
+  loadIssues(): void {
+    this.contentService
+      .listIssues(this.kind, this.slug)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (groups) => {
+          this.issueGroups.set(groups);
+          this.gridApi?.refreshCells({ columns: ['issues'], force: true });
+        },
+        // A backend without the endpoint (404) shows no markers, silently.
+        error: (err: HttpErrorResponse) => {
+          if (err?.status === 404) return;
+          this.message.error(
+            resolveApiErrorMessage(
+              err,
+              { fallbackKey: 'ADMIN.CONTENT_EDITOR.ISSUES.LOAD_ERROR' },
+              this.translate
+            )
+          );
+        },
+      });
+  }
+
+  /**
+   * The open issues that land on `row`. Ayah-level issues sit on the ayah's row, its
+   * surah's row (surah assets), its first word's row (word assets) or its page's row
+   * (page assets); the backend names that row. A group row holds the issues whose
+   * ayah it covers (word groups: the ayah's first word).
+   */
+  issuesFor(row: ContentEntry): ContentIssue[] {
+    if (!this.isGroup()) return this.issuesByUnit().get(row.unit_id) ?? [];
+    const from = row.group_from;
+    const to = row.group_to;
+    if (!from || !to) return [];
+    const words = this.effectiveTemplate() === 'word_group';
+    const start = positionKey(from.surah, from.ayah, words ? from.word : 0);
+    const end = positionKey(to.surah, to.ayah, words ? to.word : 0);
+    return this.issueGroups()
+      .filter((group) => {
+        const at = positionKey(group.surah, group.ayah, words ? 1 : 0);
+        return start <= at && at <= end;
+      })
+      .flatMap((group) => group.issues);
+  }
+
+  openIssues(row: ContentEntry, issues: ContentIssue[]): void {
+    this.issuesDialog.set({ label: row.label, issues });
+  }
+
+  closeIssues(): void {
+    this.issuesDialog.set(null);
+  }
+
+  /** Show or hide the issue markers (remembered per user, on this browser). */
+  setShowIssues(show: boolean): void {
+    this.showIssues.set(show);
+    try {
+      localStorage.setItem(this.showIssuesKey(), show ? '1' : '0');
+    } catch {
+      // Storage unavailable (private mode): the choice lasts for this page only.
+    }
+  }
+
+  private readShowIssues(): boolean {
+    try {
+      return localStorage.getItem(this.showIssuesKey()) !== '0';
+    } catch {
+      return true;
+    }
+  }
+
+  private showIssuesKey(): string {
+    return `content-grid:show-issues:${this.adminAuth.currentUser?.()?.id ?? ''}`;
   }
 
   /** True while there are edits not yet persisted to the draft. */
@@ -1764,6 +1878,21 @@ export class AssetContentGridComponent implements OnInit {
             }),
       },
     ];
+
+    if (this.showIssues() && this.issueCount() > 0) {
+      columns.push({
+        colId: 'issues',
+        headerName: this.translate.instant('ADMIN.CONTENT_EDITOR.ISSUES.COLUMN'),
+        width: 80,
+        editable: false,
+        pinned: this.rtl() ? 'right' : 'left',
+        cellRenderer: IssueMarkerCellComponent,
+        cellRendererParams: {
+          issuesFor: (row: ContentEntry) => this.issuesFor(row),
+          onOpen: (row: ContentEntry, issues: ContentIssue[]) => this.openIssues(row, issues),
+        } satisfies Partial<IssueMarkerCellParams>,
+      });
+    }
 
     if (template === 'ayah' || template === 'word') {
       columns.push(
