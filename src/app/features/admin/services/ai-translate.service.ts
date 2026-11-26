@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
+import { callerShowsErrors } from '../../../core/interceptors/caller-shows-errors.context';
 import { environment } from '../../../../environments/environment';
 
 export type AiTranslateMode = 'translate' | 'web';
@@ -63,6 +64,7 @@ export class AiTranslateService {
   private readonly apiUrl = `${environment.ADMIN_API_BASE_URL}/ai/translate/`;
 
   translate(req: AiTranslateRequest): Observable<AiTranslateResponse> {
-    return this.http.post<AiTranslateResponse>(this.apiUrl, req);
+    // Callers show the error themselves (quota, rate limit or the backend's message).
+    return this.http.post<AiTranslateResponse>(this.apiUrl, req, { context: callerShowsErrors() });
   }
 }
