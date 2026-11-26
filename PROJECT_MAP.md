@@ -397,12 +397,14 @@ container owns the API calls and the single picker modal. Quality tab menu suppo
   keys, else `text`; an empty `columnKeys` (invalid keys) disables it), by asset in the version
   upload/edit modal (`content/{category}/{slug}/csv-template/`)
 - `import-column-mapping/` — Text-asset content uploads (version upload/replace, add-language seed
-  file): sends the file's first 64 KB to `text-assets/{slug}/import-columns/`, which returns the
-  header row, sample rows, the asset's fields, the name-matched columns and the required field sets
-  (word files: `word_id` or surah + ayah + word). When a required field is unmatched it opens the
-  "Match file columns" dialog (one select per file column: a field or Ignore) and keeps the upload
-  blocked (`readyChange`) until every required field has a column; the confirmed mapping goes out as
-  the `column_mapping` form field (JSON, field → column index). Matched files send none
+  file, and the create form's first file via `asset-initial-version-fields` — there by `template` +
+  `columns` to `content/text-assets/import-columns/`, re-read without reopening when they change):
+  sends the file's first 64 KB to `text-assets/{slug}/import-columns/`, which returns the header
+  row, sample rows, the asset's fields, the name-matched columns and the required field sets (word
+  files: `word_id` or surah + ayah + word). When a required field is unmatched it opens the "Match
+  file columns" dialog (one select per file column: a field or Ignore) and keeps the upload blocked
+  (`readyChange`) until every required field has a column; the confirmed mapping goes out as the
+  `column_mapping` form field (JSON, field → column index). Matched files send none
 - `asset-versions-manager/` — Version CRUD (text asset/mushaf/font; program when re-enabled); CSV
   `export/` then `file_url` fallback. Text asset/mushaf/font (`numbered()`): `name` is the locked
   version number and `label` the editable version name — the package registry (`itqan` CLI) only

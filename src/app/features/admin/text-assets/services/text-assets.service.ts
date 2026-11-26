@@ -111,6 +111,9 @@ export class TextAssetsService {
     }
     if (payload.file) {
       data.append('file', payload.file);
+      if (payload.column_mapping) {
+        data.append('column_mapping', JSON.stringify(payload.column_mapping));
+      }
     }
 
     return data;

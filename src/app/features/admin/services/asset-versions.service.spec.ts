@@ -77,4 +77,17 @@ describe('Content import column mapping requests', () => {
     expect((req.request.body as FormData).get('column_mapping')).toBe('{"text":2}');
     req.flush({});
   });
+
+  it('previews the columns for a text asset being created', () => {
+    // Act
+    versions.previewNewAssetImportColumns('page', null, file).subscribe();
+    const req = httpMock.expectOne(`${base}/content/text-assets/import-columns/`);
+
+    // Assert
+    const body = req.request.body as FormData;
+    expect(body.get('template')).toBe('page');
+    expect(body.has('columns')).toBeFalse();
+    expect(req.request.context.get(CALLER_SHOWS_ERRORS)).toBeTrue();
+    req.flush({});
+  });
 });

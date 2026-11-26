@@ -1,6 +1,7 @@
 import type { AssetChannelFlags, AssetChannelFormFlags } from '../../utils/asset-channels.util';
 import { Licenses } from '../../../../core/enums/licenses.enum';
 import type { AssetTemplate } from '../../models/asset-content.models';
+import type { ImportColumnMapping } from '../../models/asset-versions.models';
 
 export type AssetSortingQuery =
   | 'id'
@@ -145,6 +146,8 @@ export interface TextAssetFormValue extends AssetChannelFormFlags {
   /** Create-only (manage-columns permission): the asset's text columns, in order,
    *  in place of the default `text` column; the first version's file may carry them. */
   columns?: TextAssetColumnInput[];
+  /** With `file`: field key -> file column index, overriding the file's header matching. */
+  column_mapping?: ImportColumnMapping | null;
 }
 
 /** One text column given when creating a text asset. */

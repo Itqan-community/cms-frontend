@@ -208,4 +208,45 @@ describe('ImportColumnMappingComponent', () => {
     expect(component.preview()).toBeNull();
     expect(component.ready()).toBeTrue();
   });
+  it('previews against the template and columns of an asset being created', () => {
+    // Arrange
+    fixture.componentRef.setInput('slug', null);
+    fixture.componentRef.setInput('template', 'ayah');
+    fixture.componentRef.setInput('columns', [{ key: 'q', label_en: 'Q', label_ar: '' }]);
+    fixture.detectChanges();
+
+    // Act
+    pick();
+    const req = httpMock.expectOne((r) => r.url.endsWith('/content/text-assets/import-columns/'));
+
+    // Assert
+    const body = req.request.body as FormData;
+    expect(body.get('template')).toBe('ayah');
+    expect(body.get('columns')).toBe('[{"key":"q","label_en":"Q","label_ar":""}]');
+    req.flush(PREVIEW);
+    expect(component.dialogOpen()).toBeTrue();
+  });
+
+  it('re-reads the file when the columns change, without reopening the dialog', () => {
+    // Arrange
+    fixture.componentRef.setInput('slug', null);
+    fixture.componentRef.setInput('template', 'ayah');
+    fixture.detectChanges();
+    pick();
+    httpMock
+      .expectOne((r) => r.url.endsWith('/content/text-assets/import-columns/'))
+      .flush(PREVIEW);
+    component.closeDialog();
+
+    // Act
+    fixture.componentRef.setInput('columns', [{ key: 'answer', label_en: '', label_ar: '' }]);
+    fixture.detectChanges();
+    httpMock
+      .expectOne((r) => r.url.endsWith('/content/text-assets/import-columns/'))
+      .flush(PREVIEW);
+
+    // Assert
+    expect(component.dialogOpen()).toBeFalse();
+    expect(component.ready()).toBeFalse();
+  });
 });
