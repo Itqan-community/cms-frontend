@@ -19,6 +19,13 @@
     margin: 0;
   }
 
+  // NG-ZORRO gives headings a fixed dark colour; on the navy surfaces they must follow the text.
+  h1,
+  h2,
+  h3 {
+    color: inherit;
+  }
+
   a:focus-visible,
   button:focus-visible {
     outline: 3px solid var(--fanar-mint);
@@ -211,6 +218,7 @@
     font-size: 14px;
     line-height: 1.85;
     overflow-x: auto;
+    scrollbar-color: var(--fanar-hero-line) transparent;
   }
 
   &__line {
