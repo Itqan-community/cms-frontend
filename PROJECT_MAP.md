@@ -135,6 +135,9 @@ Create forms (font/mushaf/text asset/recitation/reciter) also show
 `ai-translate-actions`: POST /portal/ai/translate/ (Gemini free tier, backend-side key)
 -> fills only the empty *_en controls from the *_ar ones; "web" mode also writes the
 description/bio fields from Wikipedia (backend-side) and lists the source links.
+The add/edit version modal (`asset-versions-manager`) and the content editor's commit dialog
+(`asset-content-grid`) show `ai-translate-version-text` for the version name and summary / commit
+message (same endpoint).
 The same request (one Gemini call per click) sends `slug_for` and returns the package `slug`
 (not for reciters): it is shown read-only and stored in the form's required `slug` control
 (`utils/asset-slug.util.ts`), so Save is blocked until Translate is clicked; when generation
@@ -364,6 +367,10 @@ container owns the API calls and the single picker modal. Quality tab menu suppo
 **Shared admin components:**
 
 - `admin-column-picker/` — Column visibility toggles for tables
+- `ai-translate-version-text/` — "Translate to English" button for a `VersionText` (version name +
+  summary / commit message): translates empty English fields from the Arabic ones (filled Arabic
+  goes as `reference`); when every English field is filled it confirms before replacing them. Emits
+  `translated` only for fields not edited while the request ran. Same error UX as below.
 - `ai-translate-actions/` — "Translate from Arabic" / "Write from the web" buttons on create forms
   (font/mushaf/text asset/recitation/reciter; placed under the English name field so it is
   discoverable; hidden on edit). Fills only empty `<key>_en` controls from `<key>_ar` (`name`,
