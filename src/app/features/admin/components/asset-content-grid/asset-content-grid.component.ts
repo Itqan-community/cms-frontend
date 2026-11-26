@@ -88,6 +88,7 @@ import { columnLabel } from '../../utils/column-label.util';
 import { ISO_639_LANGUAGES, localizedLanguageName } from '../../utils/iso-639.util';
 import { isVersionNumber } from '../../utils/version-number.util';
 import { ContentChangesComponent } from '../content-changes/content-changes.component';
+import { AiTranslateVersionTextComponent } from '../ai-translate-version-text/ai-translate-version-text.component';
 import { VersionNumberFieldComponent } from '../version-number-field/version-number-field.component';
 import { ImportColumnMappingComponent } from '../import-column-mapping/import-column-mapping.component';
 import {
@@ -229,6 +230,7 @@ function cellChanged(row: ContentEntry | undefined, key: string): boolean {
     ManageColumnsModalComponent,
     VersionNumberFieldComponent,
     ImportColumnMappingComponent,
+    AiTranslateVersionTextComponent,
     GroupRangeModalComponent,
   ],
   templateUrl: './asset-content-grid.component.html',
@@ -1383,6 +1385,11 @@ export class AssetContentGridComponent implements OnInit {
 
   setCommitText(key: keyof VersionText, value: string): void {
     this.commitText.update((text) => ({ ...text, [key]: value }));
+  }
+
+  /** Sets the English version name / commit message the AI translated. */
+  applyCommitTranslation(values: Partial<VersionText>): void {
+    this.commitText.update((text) => ({ ...text, ...values }));
   }
 
   setNewLanguageLabel(key: 'label_en' | 'label_ar', value: string): void {
