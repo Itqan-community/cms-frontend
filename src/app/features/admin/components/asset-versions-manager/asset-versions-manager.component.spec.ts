@@ -283,6 +283,26 @@ describe('AssetVersionsManagerComponent', () => {
       expect(component.versionText(version, 'label')).toBe('الأولى');
       expect(component.versionText(version, 'summary')).toBe('notes');
     });
+
+    it('feeds the typed text to "Translate to English" and fills the English it returns', () => {
+      fixture.detectChanges();
+      component.openCreateModal();
+      component.form.patchValue({ label_ar: 'الأولى', summary_ar: 'تصحيح أخطاء' });
+
+      expect(component.typedText()).toEqual({
+        label_en: '',
+        label_ar: 'الأولى',
+        summary_en: '',
+        summary_ar: 'تصحيح أخطاء',
+      });
+
+      component.applyTranslation({ summary_en: 'Fix typos' });
+
+      expect(component.form.controls.summary_en.value).toBe('Fix typos');
+      expect(component.form.controls.summary_en.dirty).toBeTrue();
+      expect(component.form.controls.label_en.value).toBe('');
+      expect(component.aiCategory()).toBe('text');
+    });
   });
 
   describe('default language', () => {

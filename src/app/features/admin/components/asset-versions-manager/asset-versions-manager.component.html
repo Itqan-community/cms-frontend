@@ -208,6 +208,11 @@
               </nz-form-item>
             </div>
           </div>
+          <app-ai-translate-version-text
+            [text]="typedText()"
+            [category]="aiCategory()"
+            (translated)="applyTranslation($event)"
+          />
           @if (
             form.hasError('summaryRequired') &&
             (form.controls.summary_ar.touched || form.controls.summary_en.touched)
