@@ -5,6 +5,7 @@ import { Router, provideRouter } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { UsageApiService } from '../../../../usage/services/usage-api.service';
+import { PublishersService } from '../../../publishers/services/publishers.service';
 import { PublishersFilterService } from '../../../text-assets/services/publishers-filter.service';
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import { UsagePageComponent } from './usage-page.component';
@@ -43,6 +44,10 @@ describe('UsagePageComponent', () => {
         provideRouter([]),
         { provide: UsageApiService, useValue: api },
         { provide: AdminAuthService, useValue: { isStaff } },
+        {
+          provide: PublishersService,
+          useValue: { getDetail: (id: number) => of({ id, name: 'Linked' }) },
+        },
         {
           provide: PublishersFilterService,
           useValue: { search: () => of({ results: [{ id: 3, name: 'Pub' }], count: 1 }) },
@@ -126,6 +131,19 @@ describe('UsagePageComponent', () => {
     navigate.calls.reset();
     fixture.componentInstance.onTabChange(0);
     expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it("names a linked publisher that is not on the picker's first page", async () => {
+    isStaff.set(true);
+    await open('/?publisher=9');
+
+    expect(fixture.componentInstance.publishers()).toEqual([
+      { id: 9, name: 'Linked' },
+      { id: 3, name: 'Pub' },
+    ]);
+
+    await open('/?publisher=3');
+    expect(fixture.componentInstance.publishers()).toEqual([{ id: 3, name: 'Pub' }]);
   });
 
   it('writes the picked publisher to the URL', async () => {

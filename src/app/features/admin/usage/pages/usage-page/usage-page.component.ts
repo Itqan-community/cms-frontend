@@ -16,6 +16,7 @@ import {
   resolveGranularity,
   usageStateFromParams,
 } from '../../../../usage/utils/usage-filters.util';
+import { PublishersService } from '../../../publishers/services/publishers.service';
 import { AdminAuthService } from '../../../services/admin-auth.service';
 import { PublisherFilterItem } from '../../../text-assets/models/text-assets.models';
 import { PublishersFilterService } from '../../../text-assets/services/publishers-filter.service';
@@ -49,6 +50,7 @@ const SHARED_KEYS = new Set(['range', 'start', 'end', 'granularity']);
 export class UsagePageComponent implements OnInit {
   private readonly adminAuth = inject(AdminAuthService);
   private readonly publishersFilterService = inject(PublishersFilterService);
+  private readonly publishersService = inject(PublishersService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -104,7 +106,12 @@ export class UsagePageComponent implements OnInit {
       this.publishersFilterService
         .search('', 1)
         .pipe(takeUntilDestroyed(this.destroyRef))
-        .subscribe({ next: (res) => this.publishers.set(res.results) });
+        .subscribe({
+          next: (res) => {
+            this.publishers.set(res.results);
+            this.addLinkedPublisher(res.results);
+          },
+        });
     }
   }
 
@@ -123,6 +130,20 @@ export class UsagePageComponent implements OnInit {
     );
     queryParams['tab'] = tab === 'dashboard' ? null : tab;
     this.navigate(queryParams);
+  }
+
+  /** A linked `publisher` beyond the picker's first page: fetch it so the picker shows its name. */
+  private addLinkedPublisher(listed: PublisherFilterItem[]): void {
+    const id = this.selectedPublisherId();
+    if (id === null || listed.some((publisher) => publisher.id === id)) {
+      return;
+    }
+    this.publishersService
+      .getDetail(id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ name }) => this.publishers.update((list) => [{ id, name }, ...list]),
+      });
   }
 
   private navigate(queryParams: Record<string, string | number | null>): void {
