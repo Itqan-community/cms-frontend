@@ -33,7 +33,7 @@
   </div>
 }
 
-@if (isMobileView() && mode() !== 'inline') {
+@if (isMobileView() && mode() !== 'inline' && showPopover()) {
   <nz-drawer
     [nzVisible]="showPopover()"
     [nzTitle]="licenseFullTitle"

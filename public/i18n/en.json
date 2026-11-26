@@ -485,6 +485,10 @@
       "MESSAGE": "The page you are looking for does not exist or may have been moved.",
       "CTA": "Back to library"
     },
+    "PUBLISHER_NOT_FOUND_TITLE": "Publisher not found",
+    "PUBLISHER_NOT_FOUND_MESSAGE": "The requested publisher does not exist or could not be found.",
+    "LICENSE_NOT_FOUND_TITLE": "License not found",
+    "LICENSE_NOT_FOUND_MESSAGE": "The requested license identifier is not valid.",
     "RESTRICTED_FOR_TENANT_CONFLICT": "This asset has pending access requests. Resolve them before enabling tenant restriction.",
     "TENANT_REQUIRED": "Select a publisher before continuing.",
     "REQUEST_FAILED": "The request could not be completed. Please review and try again.",

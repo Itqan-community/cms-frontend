@@ -1,5 +1,6 @@
+import { isPlatformBrowser } from '@angular/common';
 import { HttpErrorResponse, HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
-import { inject } from '@angular/core';
+import { inject, PLATFORM_ID } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { catchError, Observable, throwError } from 'rxjs';
@@ -20,11 +21,16 @@ export function errorInterceptor(
   req: HttpRequest<unknown>,
   next: HttpHandlerFn
 ): Observable<HttpEvent<unknown>> {
+  const platformId = inject(PLATFORM_ID);
   const message = inject(NzMessageService);
   const translate = inject(TranslateService);
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
+      // NzMessageService schedules Zone timers (3000ms + 200ms) that hold SSR stability; skip toasts on the server.
+      if (!isPlatformBrowser(platformId)) {
+        return throwError(() => error);
+      }
       // Ignore auth errors as they are handled by authErrorInterceptor
       if (error.status === 401 || error.status === 403) {
         return throwError(() => error);

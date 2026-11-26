@@ -1,10 +1,32 @@
 import { isPlatformServer } from '@angular/common';
-import { Component, computed, DestroyRef, inject, PLATFORM_ID, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  PLATFORM_ID,
+  RESPONSE_INIT,
+  signal,
+  TransferState,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
-import { NzPaginationModule } from 'ng-zorro-antd/pagination';
+import { skip } from 'rxjs';
 import { ViewportService } from '../../../../core/services/viewport.service';
+import {
+  consumeSsrStatus,
+  recordSsrError,
+  ssrStatusKey,
+} from '../../../../core/ssr/ssr-http-status.util';
 import { AssetCardSkeletonComponent } from '../../../../shared/components/asset-card-skeleton/asset-card-skeleton.component';
+import {
+  CrawlablePaginationComponent,
+  PAGE_SIZE_QUERY_PARAM,
+  paginationQueryParams,
+  parsePageSizeParam,
+  parsePositivePageParam,
+} from '../../../../shared/components/crawlable-pagination/crawlable-pagination.component';
 import { FiltersComponent } from '../../../../shared/components/filters/filters.component';
 import { StateMessageComponent } from '../../../../shared/components/state-message/state-message.component';
 import { getPublisherId } from '../../../../shared/utils/publisherhost.util';
@@ -20,16 +42,20 @@ import { AssetCardComponent } from '../asset-card/asset-card.component';
     AssetCardSkeletonComponent,
     StateMessageComponent,
     TranslateModule,
-    NzPaginationModule,
+    CrawlablePaginationComponent,
   ],
   templateUrl: './assets-listing.component.html',
   styleUrl: './assets-listing.component.less',
 })
 export class AssetsListingComponent {
   private readonly assetsService = inject(AssetsService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly platformId = inject(PLATFORM_ID);
   private readonly viewportService = inject(ViewportService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly transferState = inject(TransferState);
+  private readonly responseInit = inject(RESPONSE_INIT, { optional: true });
 
   isServer = isPlatformServer(this.platformId);
   publisherId = getPublisherId();
@@ -41,8 +67,10 @@ export class AssetsListingComponent {
   searchQuery = signal<string>('');
   licensesSelection = signal<string[]>([]);
 
-  readonly page = signal(1);
-  readonly pageSize = signal(12);
+  readonly page = signal(parsePositivePageParam(this.route.snapshot.queryParamMap.get('page')));
+  readonly pageSize = signal(
+    parsePageSizeParam(this.route.snapshot.queryParamMap.get(PAGE_SIZE_QUERY_PARAM))
+  );
   readonly total = signal(0);
   readonly pageSizeOptions: number[] = [12, 24, 48];
 
@@ -54,6 +82,28 @@ export class AssetsListingComponent {
   );
 
   constructor() {
+    this.route.queryParamMap
+      .pipe(skip(1), takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const nextPage = parsePositivePageParam(params.get('page'));
+        const nextPageSize = parsePageSizeParam(params.get(PAGE_SIZE_QUERY_PARAM));
+        if (nextPage !== this.page() || nextPageSize !== this.pageSize()) {
+          this.page.set(nextPage);
+          this.pageSize.set(nextPageSize);
+          this.getAssets();
+        }
+      });
+
+    const ssrStatus = consumeSsrStatus(
+      this.platformId,
+      this.transferState,
+      ssrStatusKey('gallery-assets', `${this.publisherId ?? 'all'}:p${this.page()}`)
+    );
+    if (ssrStatus === 'error') {
+      this.errorState.set(true);
+      this.loading.set(false);
+      return;
+    }
     this.getAssets();
   }
 
@@ -84,11 +134,19 @@ export class AssetsListingComponent {
           this.total.set(response.count ?? response.results.length);
           this.loading.set(false);
         },
-        error: () => {
+        error: (err) => {
           this.loading.set(false);
           this.errorState.set(true);
           this.assets.set([]);
           this.total.set(0);
+          recordSsrError(
+            this.platformId,
+            this.transferState,
+            this.responseInit,
+            ssrStatusKey('gallery-assets', `${this.publisherId ?? 'all'}:p${this.page()}`),
+            err,
+            { allow404: false }
+          );
         },
       });
   }
@@ -96,27 +154,40 @@ export class AssetsListingComponent {
   searchQueryChange(event: string) {
     this.searchQuery.set(event);
     this.page.set(1);
+    this.syncPageQueryParam(1);
     this.getAssets();
   }
   categoriesSelectionChange(event: string[]) {
     this.categoriesSelection.set(event);
     this.page.set(1);
+    this.syncPageQueryParam(1);
     this.getAssets();
   }
   licensesSelectionChange(event: string[]) {
     this.licensesSelection.set(event);
     this.page.set(1);
+    this.syncPageQueryParam(1);
     this.getAssets();
   }
 
   onPageChange(index: number): void {
     this.page.set(index);
+    this.syncPageQueryParam(index);
     this.getAssets();
   }
 
   onPageSizeChange(size: number): void {
     this.pageSize.set(size);
     this.page.set(1);
+    this.syncPageQueryParam(1);
     this.getAssets();
+  }
+
+  private syncPageQueryParam(page: number): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: paginationQueryParams(page, this.pageSize()),
+      queryParamsHandling: 'merge',
+    });
   }
 }

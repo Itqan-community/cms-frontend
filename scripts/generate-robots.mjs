@@ -1,8 +1,6 @@
-// Writes dist/browser/robots.txt based on Netlify's CONTEXT env var, so
-// PR previews (deploy-preview), arbitrary branch deploys, and any
-// non-production context never ship the production sitemap URL.
-// Netlify sets CONTEXT to 'production', 'deploy-preview', 'branch-deploy',
-// or the matching [context.<name>] key (e.g. 'staging', 'publisher').
+// Writes dist/browser/robots.txt based on the deployment CONTEXT env var so
+// PR previews, staging, and arbitrary branch deploys never advertise indexing or
+// point crawlers at the production sitemap URL.
 import { writeFileSync } from 'node:fs';
 
 const context = process.env.CONTEXT ?? 'local';
@@ -11,7 +9,20 @@ const outPath = 'dist/browser/robots.txt';
 const PRODUCTION_ROBOTS = `User-agent: *
 Allow: /
 Disallow: /admin/
+Disallow: /account/
 Disallow: /accounts/
+Disallow: /portal/
+Disallow: /login
+Disallow: /register
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /verify-email
+Disallow: /login-by-code
+Disallow: /mfa
+Disallow: /passkey
+Disallow: /reauthenticate
+Disallow: /provider-signup
+Disallow: /auth/
 Disallow: /complete-profile
 Disallow: /unauthorized
 

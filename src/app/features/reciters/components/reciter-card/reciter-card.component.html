@@ -1,7 +1,12 @@
-<a class="reciter-card" [routerLink]="['/reciters', reciter().slug]">
+<a class="reciter-card" [routerLink]="['/reciters', reciter().slug]" [queryParams]="langParams">
   <div class="reciter-card__avatar">
     @if (reciter().image_url) {
-      <img [src]="reciter().image_url" [alt]="reciter().name" loading="lazy" />
+      <img
+        [src]="reciter().image_url"
+        [alt]="reciter().name"
+        [attr.loading]="eager() ? 'eager' : 'lazy'"
+        [attr.fetchpriority]="eager() ? 'high' : null"
+      />
     } @else {
       <ng-icon name="lucideMic" aria-hidden="true" />
     }

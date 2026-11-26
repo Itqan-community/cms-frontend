@@ -1,5 +1,18 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Component, computed, DestroyRef, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { DOCUMENT, isPlatformBrowser } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import {
+  Component,
+  computed,
+  DestroyRef,
+  effect,
+  inject,
+  OnDestroy,
+  OnInit,
+  PLATFORM_ID,
+  RESPONSE_INIT,
+  signal,
+  TransferState,
+} from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   FormBuilder,
@@ -18,13 +31,19 @@ import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
 import { NzTagModule } from 'ng-zorro-antd/tag';
-import { Observable } from 'rxjs';
+import { Observable, retry, Subscription } from 'rxjs';
 import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { Licenses } from '../../../../core/enums/licenses.enum';
+import { LANG_QUERY_PARAMS, UI_LANGUAGE } from '../../../../core/i18n/ui-language';
 import { AssetTemplateBadgeComponent } from '../../../../shared/components/asset-template-badge/asset-template-badge.component';
 import { JsonLdService } from '../../../../core/services/json-ld.service';
 import { SeoService } from '../../../../core/services/seo.service';
+import {
+  consumeSsrStatus,
+  recordSsrError,
+  ssrStatusKey,
+} from '../../../../core/ssr/ssr-http-status.util';
 import { AssetDetailSkeletonComponent } from '../../../../shared/components/asset-detail-skeleton/asset-detail-skeleton.component';
 import { BreadcrumbComponent } from '../../../../shared/components/breadcrumb/breadcrumb.component';
 import { ImageCarouselComponent } from '../../../../shared/components/image-carousel/image-carousel.component';
@@ -50,6 +69,9 @@ import { AssetGetCtaComponent } from '../../components/asset-get-cta/asset-get-c
 import { preferredLanguage } from '../../utils/preferred-language.util';
 import { AssetsService } from '../../services/assets.service';
 import { AssetUsageCountsComponent } from '../../../usage/components/asset-usage-counts/asset-usage-counts.component';
+
+const ACCESS_REFRESH_RETRIES = 2;
+const ACCESS_REFRESH_RETRY_DELAY_MS = 1000;
 
 @Component({
   selector: 'app-asset-details-page',
@@ -94,6 +116,20 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   private readonly seo = inject(SeoService);
   private readonly jsonLd = inject(JsonLdService);
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly transferState = inject(TransferState);
+  private readonly responseInit = inject(RESPONSE_INIT, { optional: true });
+  private readonly uiLanguage = inject(UI_LANGUAGE);
+  readonly langParams = inject(LANG_QUERY_PARAMS);
+  /** First page of a server-rendered visit: the asset comes from the server's guest render. */
+  private readonly hydratingServerRender =
+    isPlatformBrowser(this.platformId) &&
+    !this.router.navigated &&
+    inject(DOCUMENT).querySelector('[ng-server-context]') !== null;
+  /** True while the post-hydration access refresh is in flight or after it succeeded. */
+  private accessRefreshed = false;
+  private hydrationAccessRefresh?: Subscription;
+  private reportIssueHandled = false;
 
   readonly id = this.route.snapshot.params['id'];
   asset = signal<AssetDetails | null>(null);
@@ -127,9 +163,43 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
     this.reportIssueForm = this.fb.group({
       description: ['', [Validators.required, Validators.minLength(10)]],
     });
+
+    if (isPlatformBrowser(this.platformId)) {
+      effect(() => {
+        const asset = this.asset();
+        if (!asset) {
+          return;
+        }
+        const loggedIn = this.authService.isLoggedIn();
+        const canActivate = loggedIn || (this.authService.canActivateAsLoggedIn?.() ?? false);
+        if (this.hydratingServerRender && !this.accessRefreshed && canActivate) {
+          this.refreshUserAccessAfterHydration();
+        }
+        if (!this.reportIssueHandled && loggedIn) {
+          this.maybeOpenReportIssueModal();
+        }
+      });
+    }
   }
 
   ngOnInit() {
+    const ssrStatus = consumeSsrStatus(
+      this.platformId,
+      this.transferState,
+      ssrStatusKey('asset', this.id)
+    );
+    if (ssrStatus === 'not_found') {
+      this.notFound.set(true);
+      this.loading.set(false);
+      this.setNotFoundSeo();
+      return;
+    }
+    if (ssrStatus === 'error') {
+      this.errorState.set(true);
+      this.loading.set(false);
+      return;
+    }
+
     this.getAssetDetails(this.id);
     this.translate.onLangChange.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(({ lang }) => {
       const asset = this.asset();
@@ -162,11 +232,20 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
           this.loading.set(false);
           this.setSeoFromAsset(asset);
           this.maybeOpenReportIssueModal();
+          this.refreshUserAccessAfterHydration();
         },
         error: (err) => {
           this.loading.set(false);
-          if (err instanceof HttpErrorResponse && err.status === 404) {
+          const ssrStatus = recordSsrError(
+            this.platformId,
+            this.transferState,
+            this.responseInit,
+            ssrStatusKey('asset', id),
+            err
+          );
+          if (ssrStatus === 'not_found') {
             this.notFound.set(true);
+            this.setNotFoundSeo();
           } else {
             this.errorState.set(true);
           }
@@ -176,13 +255,59 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.jsonLd.remove();
+    this.seo.resetToDefault(this.translate.currentLang || this.uiLanguage);
+  }
+
+  /**
+   * The server renders as a guest, so its asset has no `access_status` for this user. A signed-in
+   * user gets it fetched again (past the transfer cache) once auth state is available.
+   */
+  private refreshUserAccessAfterHydration(): void {
+    const canActivate =
+      this.authService.isLoggedIn() || (this.authService.canActivateAsLoggedIn?.() ?? false);
+    if (!this.hydratingServerRender || this.accessRefreshed || !canActivate) {
+      return;
+    }
+    this.accessRefreshed = true;
+    this.hydrationAccessRefresh = this.assetsService
+      .getAssetDetails(this.id, { skipTransferCache: true })
+      .pipe(
+        retry({ count: ACCESS_REFRESH_RETRIES, delay: ACCESS_REFRESH_RETRY_DELAY_MS }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe({
+        next: (asset) => this.applyRefreshedAsset(asset),
+        error: (err: unknown) => {
+          // Allow a later auth or asset change to try again instead of keeping the guest status.
+          this.accessRefreshed = false;
+          console.warn('Could not refresh the access status', err);
+        },
+      });
+  }
+
+  private setNotFoundSeo(): void {
+    const title = this.translate.instant('UI.ASSET_NOT_FOUND');
+    const description = this.translate.instant('ERRORS.NOT_FOUND');
+    this.seo.setSeo({
+      title: `${title} | ${this.seo.brandName()}`,
+      description,
+      path: `/gallery/asset/${this.id}`,
+      noIndex: true,
+    });
+    this.jsonLd.remove();
   }
 
   private setSeoFromAsset(asset: AssetDetails): void {
-    const description =
-      asset.description || asset.long_description || `${asset.name} - available on ITQAN.`;
+    const isAr = (this.translate.currentLang || this.uiLanguage) === 'ar';
+    const brand = this.seo.brandName();
+    const fallback = isAr
+      ? `${asset.name} — متاح على منصة ${brand}.`
+      : `${asset.name} — available on ${brand}.`;
+    const description = asset.description || asset.long_description || fallback;
+    const licenseUrl = this.licenseUrl(asset.license);
+
     this.seo.setSeo({
-      title: `${asset.name} | ITQAN`,
+      title: `${asset.name} | ${brand}`,
       description,
       path: `/gallery/asset/${asset.id}`,
       image: asset.thumbnail_url || undefined,
@@ -192,12 +317,30 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
       '@type': 'CreativeWork',
       name: asset.name,
       description,
+      url: this.seo.canonicalUrl(`/gallery/asset/${asset.id}`),
+      inLanguage: this.uiLanguage,
+      license: licenseUrl,
       image: asset.thumbnail_url || undefined,
-      creator: {
-        '@type': 'Organization',
-        name: asset.publisher?.name,
-      },
+      creator: asset.publisher?.name
+        ? {
+            '@type': 'Organization',
+            name: asset.publisher.name,
+          }
+        : undefined,
     });
+  }
+
+  private licenseUrl(code: string | undefined): string | undefined {
+    const map: Record<string, string> = {
+      CC0: 'https://creativecommons.org/publicdomain/zero/1.0/',
+      'CC-BY': 'https://creativecommons.org/licenses/by/4.0/',
+      'CC-BY-SA': 'https://creativecommons.org/licenses/by-sa/4.0/',
+      'CC-BY-ND': 'https://creativecommons.org/licenses/by-nd/4.0/',
+      'CC-BY-NC': 'https://creativecommons.org/licenses/by-nc/4.0/',
+      'CC-BY-NC-SA': 'https://creativecommons.org/licenses/by-nc-sa/4.0/',
+      'CC-BY-NC-ND': 'https://creativecommons.org/licenses/by-nc-nd/4.0/',
+    };
+    return code ? map[code] : undefined;
   }
 
   retryLoad() {
@@ -358,8 +501,12 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
   }
 
   private maybeOpenReportIssueModal(): void {
+    if (this.reportIssueHandled || !this.authService.isLoggedIn() || !this.asset()) {
+      return;
+    }
     const reportIssue = this.route.snapshot.queryParamMap.get('reportIssue');
-    if (reportIssue !== '1' || !this.authService.isLoggedIn() || !this.asset()) {
+    this.reportIssueHandled = true;
+    if (reportIssue !== '1') {
       return;
     }
 
@@ -404,6 +551,8 @@ export class AssetDetailsPage implements OnInit, OnDestroy {
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
           next: () => {
+            // The request result is newer than the guest snapshot the hydration refresh would apply.
+            this.hydrationAccessRefresh?.unsubscribe();
             this.isSubmittingRequest.set(false);
             this.closeAccessRequestModal();
             this.refreshAssetDetails()

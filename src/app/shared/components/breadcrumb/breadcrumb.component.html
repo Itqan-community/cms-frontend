@@ -1,7 +1,7 @@
 @if (breadcrumbs.length > 0) {
   <nz-breadcrumb>
     <nz-breadcrumb-item>
-      <a routerLink="/" class="va-top">
+      <a [routerLink]="['/gallery']" [queryParams]="langParams" class="va-top">
         <ng-icon name="lucideHouse" aria-hidden="true" />
       </a>
     </nz-breadcrumb-item>
@@ -12,7 +12,7 @@
             {{ crumb.label }}
           </span>
         } @else {
-          <a [routerLink]="crumb.url">
+          <a [routerLink]="crumb.url" [queryParams]="langParams">
             {{ crumb.label }}
           </a>
         }

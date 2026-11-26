@@ -45,20 +45,25 @@ export function isChunkLoadError(error: unknown): boolean {
  */
 export function tryRecoverFromChunkLoadError(
   error: unknown,
-  storage: Storage = sessionStorage,
-  reload: () => void = () => location.reload()
+  storage?: Storage,
+  reload?: () => void
 ): boolean {
   if (!isChunkLoadError(error)) {
     return false;
   }
+  if (typeof window === 'undefined' && !storage && !reload) {
+    return false;
+  }
+  const targetStorage = storage ?? (typeof sessionStorage !== 'undefined' ? sessionStorage : null);
+  const doReload = reload ?? (() => location.reload());
   try {
-    if (storage.getItem(CHUNK_LOAD_RECOVERY_FLAG) === '1') {
+    if (targetStorage?.getItem(CHUNK_LOAD_RECOVERY_FLAG) === '1') {
       return false;
     }
-    storage.setItem(CHUNK_LOAD_RECOVERY_FLAG, '1');
+    targetStorage?.setItem(CHUNK_LOAD_RECOVERY_FLAG, '1');
   } catch {
     // Private mode / blocked storage: still attempt a single reload path via flag miss.
   }
-  reload();
+  doReload();
   return true;
 }

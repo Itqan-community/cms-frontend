@@ -1,8 +1,9 @@
 import { NgClass } from '@angular/common';
-import { Component, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
+import { LANG_QUERY_PARAMS } from '../../../core/i18n/ui-language';
 
 export interface NavigationLink {
   link: string;
@@ -25,6 +26,7 @@ export interface NavigationLink {
           @if (!link.isExternal) {
             <a
               [routerLink]="link.link"
+              [queryParams]="langParams"
               routerLinkActive="nav-menu__link--active"
               class="nav-menu__link"
               [ngClass]="{ 'nav-menu__link--disabled': link.disabled }"
@@ -53,5 +55,6 @@ export interface NavigationLink {
   `,
 })
 export class NavigationMenuComponent {
+  readonly langParams = inject(LANG_QUERY_PARAMS);
   links = input.required<NavigationLink[]>();
 }

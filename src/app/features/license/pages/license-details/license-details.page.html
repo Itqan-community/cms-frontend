@@ -1,17 +1,28 @@
 <div class="license-details-container">
   <app-breadcrumb />
 
-  <div class="license-content">
-    <h1 class="license-code">{{ licenseId }}</h1>
-    <h2 class="license-description">{{ getLicenseTranslationKey(licenseId) | translate }}</h2>
+  @if (!isValidLicense) {
+    <app-state-message
+      icon="lucideCircleX"
+      iconVariant="error"
+      [title]="'ERRORS.LICENSE_NOT_FOUND_TITLE' | translate"
+      [message]="'ERRORS.LICENSE_NOT_FOUND_MESSAGE' | translate"
+      [secondaryActionLabel]="'UI.BACK_TO_GALLERY' | translate"
+      secondaryRouterLink="/gallery"
+    />
+  } @else {
+    <div class="license-content">
+      <h1 class="license-code">{{ licenseId }}</h1>
+      <h2 class="license-description">{{ getLicenseTranslationKey(licenseId) | translate }}</h2>
 
-    <div class="license-actions">
-      <a [href]="getLicenseUrl(licenseId)" target="_blank" rel="noopener noreferrer">
-        <button nz-button nzType="primary" nzBlock class="license-button">
-          <ng-icon name="lucideExternalLink" aria-hidden="true" />
-          {{ 'LICENSE.VIEW_DOCUMENT' | translate }}
-        </button>
-      </a>
+      <div class="license-actions">
+        <a [href]="getLicenseUrl(licenseId)" target="_blank" rel="noopener noreferrer">
+          <button nz-button nzType="primary" nzBlock class="license-button">
+            <ng-icon name="lucideExternalLink" aria-hidden="true" />
+            <span>{{ 'LICENSE.VIEW_DOCUMENT' | translate }}</span>
+          </button>
+        </a>
+      </div>
     </div>
-  </div>
+  }
 </div>

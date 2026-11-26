@@ -1,4 +1,5 @@
-import { Injectable, isDevMode } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { inject, Injectable, isDevMode, PLATFORM_ID } from '@angular/core';
 import { Metric, onCLS, onINP, onLCP } from 'web-vitals';
 
 @Injectable({ providedIn: 'root' })
@@ -12,7 +13,7 @@ export class WebVitalsService {
   private hasStarted = false;
 
   constructor() {
-    if (isDevMode() && !this.isKarmaTestRun()) {
+    if (isDevMode() && isPlatformBrowser(inject(PLATFORM_ID)) && !this.isKarmaTestRun()) {
       this.monitorCoreWebVitals();
     }
   }

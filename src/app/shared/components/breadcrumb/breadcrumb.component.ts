@@ -5,6 +5,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NzBreadCrumbModule } from 'ng-zorro-antd/breadcrumb';
 import { NgIcon } from '@ng-icons/core';
 import { filter } from 'rxjs/operators';
+import { LANG_QUERY_PARAMS } from '../../../core/i18n/ui-language';
 
 interface Breadcrumb {
   label: string;
@@ -23,6 +24,7 @@ export class BreadcrumbComponent implements OnInit {
   private router = inject(Router);
   private translate = inject(TranslateService);
   private destroyRef = inject(DestroyRef);
+  readonly langParams = inject(LANG_QUERY_PARAMS);
 
   breadcrumbs: Breadcrumb[] = [];
 

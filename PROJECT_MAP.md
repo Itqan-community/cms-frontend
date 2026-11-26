@@ -655,11 +655,15 @@ public app slug (`app_slug`). The global error toast skips `usage_counts_disable
 - **Library:** @ngx-translate/core (HTTP loader, JSON files at `/i18n/{lang}.json`)
 - **Languages:** English (`en`), Arabic (`ar`)
 - **Default:** Arabic (`ar`) — set in both `index.html` and `app.config.ts`
-- **Persistence:** `localStorage.getItem('lang')`
+- **Persistence:** `localStorage.lang` mirrored into a `lang` cookie (`core/i18n/ui-language.ts`,
+  `persistUiLanguage`) so the SSR server renders the chosen language
+- **Resolution:** `UI_LANGUAGE` token. Browser: `?lang=` > localStorage > cookie > `ar`. Server:
+  `?lang=` > cookie > `ar` (`resolveRequestLanguage`, passed in `REQUEST_CONTEXT`). A server render
+  in another language than the saved one (pre-cookie users) reloads once
 - **Bootstrap:** `initializeAppTranslations()` retries once; on final failure boots anyway (no
   unhandled ErrorHandler) so flaky mobile loads of `/i18n/*.json` do not crash the app
-- **Switch:** Full page reload on language toggle (`LangSwitchComponent`); `App.switchLang` catches
-  failed `translate.use`
+- **Switch:** Full page reload on language toggle (`LangSwitchComponent`); on a `?lang=` URL it
+  swaps the param instead; `App.switchLang` catches failed `translate.use`
 - **RTL:** `<html dir="rtl">` with logical CSS properties (`margin-inline`, `padding-inline`)
 - **Keys:** 1486 per language (parity verified); domains include auth, navigation, gallery, admin,
   content standards, licenses, errors, forms, access-request license terms
@@ -737,13 +741,45 @@ since the record belongs to the previous publisher and would 404. `create`, list
 Legacy Netlify config remains in `netlify.toml` and `deploy/netlify/*` for reference; staging deploy
 uses Cloudflare Pages Functions instead of Netlify external redirects.
 
+### SSR (built, not deployed yet)
+
+- **Build:** `npm run build:ssr` (`production,ssr`) / `npm run build:ssr:staging`; the `ssr`
+  configuration adds `server`, `outputMode: server`, `ssr.entry`. The plain `build:{env}` static
+  builds are unchanged (still `dist/browser/index.html`).
+- **Run:** `npm run serve:ssr` (`node dist/server/server.mjs`, `PORT`, `ALLOWED_HOSTS` /
+  `NG_ALLOWED_HOSTS`, `TRUST_PROXY_HOPS`, optional `API_PROXY_ORIGIN` to proxy `/cms-api`,
+  `/accounts`, `/portal` like `functions/`). Image: `deploy/ssr/Dockerfile`.
+- **Render modes:** `app.routes.server.ts` — Server for `/gallery`, `/gallery/asset/:id`,
+  `/publisher/:id`, `/reciters`, `/reciters/:slug`, `/license/:id`, `/content-standards`, plus HTTP
+  404 `NotFoundPage` (`**`); `GET /` → `301 /gallery` (preserving `?lang=en`); Client (shell) for
+  everything else (portal, account, auth, and the empty `noindex` `/publishers` stub).
+- **Data:** `provideClientHydration(withEventReplay(), withHttpTransferCacheOptions)`; server uses
+  `FetchBackend` (keep-alive), 10 s SSR HTTP timeout, bundled translations,
+  `HTTP_TRANSFER_CACHE_ORIGIN_MAP` (validated against `allowedHosts`) when proxying. Server renders
+  as a guest (no auth bootstrap); `<app-header>` hydrates nav while only `<app-theme-switch>` and
+  `<app-user-actions>` use `ngSkipHydration`; asset detail refetches `access_status` after
+  hydration. Missing asset/reciter/publisher/license or backend 5xx → real HTTP 404 / 503.
+- **Hydration & UX rules:** server and first browser render must build the same DOM. Mobile filters
+  use CSS `@media (max-width: 768px)` with a lazy `@if` drawer; `ViewportService` uses
+  `afterNextRender`; `nz-button` labels next to an icon go in a `<span>`; `theme` cookie lets SSR
+  paint dark mode (`data-theme="dark"` + `antd-dark.css`) without flash; `?lang=en` never overwrites
+  saved user preference in `localStorage`/cookie/profile.
+- **SEO:** `SeoService` canonical (`?lang=en` / `?page=N`), hreflang ar/en/x-default, default
+  `og:image` (`assets/images/og-default.png`), localized JSON-LD, crawlable `<a href="?page=N">`
+  pagination (`CrawlablePaginationComponent`), dynamic 15-min cached `/sitemap.xml` (prod only,
+  falling back to build-time `dist/browser/sitemap.xml`, excluding `/publishers`), and
+  `X-Robots-Tag: noindex, nofollow` on staging / non-public / error responses.
+- **Cache:** hashed files + `/assets/` 1y immutable (`.map` requests return 404); SSR HTML sets
+  `Vary: Cookie` and uses `public, max-age=0, must-revalidate` or `private, no-cache` when rendered
+  from `lang` / `theme` cookies or error statuses.
+
 ---
 
 ## [ORPHANS & PENDING]
 
 | Item                                    | Status            | Notes                                                                                                                                                            |
 | --------------------------------------- | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `features/error/pages/unautorized/`     | Partial           | `UnauthorizedPage`: full UX + countdown redirect (directory spelling still misses `h`). `not-found` page unchanged.                                              |
+| `features/error/pages/unautorized/`     | Partial           | `UnauthorizedPage` + `NotFoundPage` (`features/error/pages/not-found/`, HTTP 404 + `noindex`; `unautorized` directory spelling kept).                            |
 | `features/publishers/pages/publishers/` | Stub              | Publishers directory listing page is empty.                                                                                                                      |
 | `features/dashify/`                     | Unknown           | Minimal implementation, purpose unclear.                                                                                                                         |
 | `features/admin/` guards                | Implemented       | `portal-access`, `permission`, `itqan-admin` guards active on admin routes.                                                                                      |
@@ -760,6 +796,7 @@ uses Cloudflare Pages Functions instead of Netlify external redirects.
 | Recitation quality variant taxonomy     | Frontend-owned    | Quality×effects vocabulary lives in `recitation-quality.util.ts` and is carried in quality names; no server-side uniqueness enforcement.                         |
 | Recitation quality variant relabelling  | Constrained       | Non-default classified qualities with tracks cannot change variant (slug is public `?quality=`); default quality always editable (`?quality=default`).           |
 | Sentry `tracesSampleRate`               | Staging overrides | 1.0 (100%) in staging — may be too high for non-production.                                                                                                      |
+| SSR hosting                             | Pending infra     | SSR build + `deploy/ssr/Dockerfile` ready; cms.itqan.dev still serves the static build until hosting moves to the Node server.                                   |
 | Usage reports API                       | Pending backend   | Needs cms-backend#557 deployed; until then the dashboards show their error state.                                                                                |
 | Multi-column text assets                | Pending backend   | Editor columns, column management, file structure need the cms-backend multi-column release (`feat/multi-column-text-assets`); remove once deployed.             |
 | Group tafsir templates                  | Pending backend   | `ayah_group` / `word_group` editing, `groups/` and `content/quran-range/` need the cms-backend `feat/group-templates` release; remove once deployed.             |

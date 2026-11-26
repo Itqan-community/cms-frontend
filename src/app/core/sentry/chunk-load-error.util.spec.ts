@@ -74,5 +74,10 @@ describe('chunk-load-error.util', () => {
       expect(tryRecoverFromChunkLoadError(new Error('boom'), storage, reload)).toBe(false);
       expect(reload).not.toHaveBeenCalled();
     });
+
+    it('returns false safely without evaluating sessionStorage for non-chunk errors when omitted', () => {
+      expect(() => tryRecoverFromChunkLoadError(new Error('boom'))).not.toThrow();
+      expect(tryRecoverFromChunkLoadError(new Error('boom'))).toBe(false);
+    });
   });
 });

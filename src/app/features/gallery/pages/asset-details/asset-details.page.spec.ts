@@ -1,12 +1,13 @@
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { provideRouter, Router } from '@angular/router';
+import { ActivatedRoute, provideRouter, Router } from '@angular/router';
 import { TranslateModule } from '@ngx-translate/core';
+import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalService } from 'ng-zorro-antd/modal';
-import { of } from 'rxjs';
+import { defer, of, Subject, throwError } from 'rxjs';
 
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { appLucideIconsProvider } from '../../../../icons/provide-app-lucide-icons';
@@ -123,5 +124,215 @@ describe('AssetDetailsPage actions', () => {
     const el: HTMLElement = render(asset({ is_open_access: true }), false).nativeElement;
 
     expect(requestButton(el)).toBeNull();
+  });
+});
+
+describe('AssetDetailsPage after a server render', () => {
+  const guestAsset = { id: 7, access_status: null, snapshots: [] } as unknown as AssetDetails;
+  const userAsset = { ...guestAsset, access_status: 'approved' } as AssetDetails;
+  let serverMarker: HTMLElement;
+
+  beforeEach(() => {
+    serverMarker = document.createElement('div');
+    serverMarker.setAttribute('ng-server-context', 'ssr');
+    document.body.appendChild(serverMarker);
+  });
+
+  afterEach(() => serverMarker.remove());
+
+  function create(signedIn: boolean) {
+    const getAssetDetails = jasmine
+      .createSpy('getAssetDetails')
+      .and.callFake((_id: string, options?: { skipTransferCache?: boolean }) =>
+        of(options?.skipTransferCache ? userAsset : guestAsset)
+      );
+    TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AssetsService, useValue: { getAssetDetails } },
+        { provide: IssuesService, useValue: {} },
+        {
+          provide: AuthService,
+          useValue: { isLoggedIn: () => false, canActivateAsLoggedIn: () => signedIn },
+        },
+      ],
+    });
+    TestBed.overrideComponent(AssetDetailsPage, { set: { template: '', imports: [] } });
+    TestBed.overrideProvider(NzModalService, { useValue: {} });
+    const page = TestBed.createComponent(AssetDetailsPage).componentInstance;
+    page.ngOnInit();
+    return { page, getAssetDetails };
+  }
+
+  it('fetches the asset again for a signed-in user, past the transfer cache', () => {
+    const { page, getAssetDetails } = create(true);
+
+    expect(getAssetDetails).toHaveBeenCalledWith(page.id, { skipTransferCache: true });
+    expect(page.asset()?.access_status).toBe('approved');
+  });
+
+  it('retries a failed access refresh before giving up', fakeAsync(() => {
+    let attempts = 0;
+    const getAssetDetails = jasmine
+      .createSpy('getAssetDetails')
+      .and.callFake((_id: string, options?: { skipTransferCache?: boolean }) =>
+        options?.skipTransferCache
+          ? defer(() => (attempts++ === 0 ? throwError(() => new Error('offline')) : of(userAsset)))
+          : of(guestAsset)
+      );
+    TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AssetsService, useValue: { getAssetDetails } },
+        { provide: IssuesService, useValue: {} },
+        {
+          provide: AuthService,
+          useValue: { isLoggedIn: () => false, canActivateAsLoggedIn: () => true },
+        },
+      ],
+    });
+    TestBed.overrideComponent(AssetDetailsPage, { set: { template: '', imports: [] } });
+    TestBed.overrideProvider(NzModalService, { useValue: {} });
+    const page = TestBed.createComponent(AssetDetailsPage).componentInstance;
+    page.ngOnInit();
+
+    expect(page.asset()?.access_status).toBeNull();
+    tick(1000);
+    expect(attempts).toBe(2);
+    expect(page.asset()?.access_status).toBe('approved');
+  }));
+
+  it('does not let a late hydration refresh overwrite a submitted access request', () => {
+    const hydrationRefresh = new Subject<AssetDetails>();
+    let plainCalls = 0;
+    const pendingAsset = { ...guestAsset, access_status: 'pending' } as AssetDetails;
+    const getAssetDetails = jasmine
+      .createSpy('getAssetDetails')
+      .and.callFake((_id: string, options?: { skipTransferCache?: boolean }) =>
+        options?.skipTransferCache
+          ? hydrationRefresh
+          : of(plainCalls++ === 0 ? guestAsset : pendingAsset)
+      );
+    TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AssetsService, useValue: { getAssetDetails } },
+        { provide: IssuesService, useValue: {} },
+        {
+          provide: AuthService,
+          useValue: { isLoggedIn: () => true, canActivateAsLoggedIn: () => true },
+        },
+      ],
+    });
+    TestBed.overrideComponent(AssetDetailsPage, { set: { template: '', imports: [] } });
+    TestBed.overrideProvider(NzModalService, { useValue: {} });
+    TestBed.overrideProvider(NzMessageService, {
+      useValue: { success: () => undefined, error: () => undefined },
+    });
+    const page = TestBed.createComponent(AssetDetailsPage).componentInstance;
+    page.ngOnInit();
+    expect(hydrationRefresh.observed).toBeTrue();
+
+    page.accessRequestForm.setValue({ intended_use: 'research', purpose: 'Study tafsir' });
+    page.handleModalOk();
+    TestBed.inject(HttpTestingController)
+      .expectOne((req) => req.url.endsWith('/assets/7/request-access/'))
+      .flush({});
+
+    expect(page.asset()?.access_status).toBe('pending');
+    expect(hydrationRefresh.observed).toBeFalse();
+    hydrationRefresh.next({ ...guestAsset, access_status: 'not_requested' } as AssetDetails);
+    expect(page.asset()?.access_status).toBe('pending');
+  });
+
+  it('keeps the server data for a guest', () => {
+    const { getAssetDetails } = create(false);
+
+    expect(getAssetDetails).toHaveBeenCalledTimes(1);
+  });
+
+  it('refetches access_status when cookie-backed auth finishes after hydration', () => {
+    const loggedIn = signal(false);
+    const getAssetDetails = jasmine
+      .createSpy('getAssetDetails')
+      .and.callFake((_id: string, options?: { skipTransferCache?: boolean }) =>
+        of(options?.skipTransferCache ? userAsset : guestAsset)
+      );
+    TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        { provide: AssetsService, useValue: { getAssetDetails } },
+        { provide: IssuesService, useValue: {} },
+        {
+          provide: AuthService,
+          useValue: { isLoggedIn: () => loggedIn(), canActivateAsLoggedIn: () => loggedIn() },
+        },
+      ],
+    });
+    TestBed.overrideComponent(AssetDetailsPage, { set: { template: '', imports: [] } });
+    TestBed.overrideProvider(NzModalService, { useValue: {} });
+    const fixture = TestBed.createComponent(AssetDetailsPage);
+    fixture.detectChanges();
+
+    expect(getAssetDetails).toHaveBeenCalledTimes(1);
+    expect(fixture.componentInstance.asset()?.access_status).toBeNull();
+
+    loggedIn.set(true);
+    TestBed.flushEffects();
+
+    expect(getAssetDetails).toHaveBeenCalledWith(fixture.componentInstance.id, {
+      skipTransferCache: true,
+    });
+    expect(fixture.componentInstance.asset()?.access_status).toBe('approved');
+  });
+
+  it('opens the report issue modal after auth bootstrap resolves for ?reportIssue=1', () => {
+    const loggedIn = signal(false);
+    const getAssetDetails = jasmine.createSpy('getAssetDetails').and.returnValue(of(guestAsset));
+    TestBed.configureTestingModule({
+      imports: [TranslateModule.forRoot()],
+      providers: [
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: { id: '7' },
+              queryParamMap: new Map([['reportIssue', '1']]),
+            },
+          },
+        },
+        { provide: AssetsService, useValue: { getAssetDetails } },
+        { provide: IssuesService, useValue: {} },
+        {
+          provide: AuthService,
+          useValue: { isLoggedIn: () => loggedIn(), canActivateAsLoggedIn: () => loggedIn() },
+        },
+      ],
+    });
+    TestBed.overrideComponent(AssetDetailsPage, { set: { template: '', imports: [] } });
+    TestBed.overrideProvider(NzModalService, { useValue: {} });
+    const fixture = TestBed.createComponent(AssetDetailsPage);
+    fixture.detectChanges();
+    expect(fixture.componentInstance.isReportIssueModalVisible()).toBeFalse();
+
+    loggedIn.set(true);
+    TestBed.flushEffects();
+
+    expect(fixture.componentInstance.isReportIssueModalVisible()).toBeTrue();
   });
 });

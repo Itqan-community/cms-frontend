@@ -219,5 +219,9 @@ export const routes: Routes = [
   //   loadChildren: () => import('./features/mushaf/mushaf.routes').then((m) => m.mushafRoutes),
   // },
 
-  { path: '**', redirectTo: 'gallery' },
+  {
+    path: '**',
+    loadComponent: () =>
+      import('./features/error/pages/not-found/not-found.page').then((m) => m.NotFoundPage),
+  },
 ];

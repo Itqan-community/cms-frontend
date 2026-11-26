@@ -2,6 +2,7 @@ import { Component, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
+import { LANG_QUERY_PARAMS } from '../../../../core/i18n/ui-language';
 import { localizeCountryCodeOrName } from '../../../admin/utils/display-localization.util';
 import { Reciter } from '../../models/reciter.model';
 
@@ -13,8 +14,10 @@ import { Reciter } from '../../models/reciter.model';
 })
 export class ReciterCardComponent {
   private readonly translate = inject(TranslateService);
+  readonly langParams = inject(LANG_QUERY_PARAMS);
 
   reciter = input.required<Reciter>();
+  eager = input(false);
 
   get nationalityLabel(): string {
     return localizeCountryCodeOrName(this.reciter().nationality, this.translate.currentLang, {

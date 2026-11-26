@@ -1,6 +1,8 @@
 import { HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
+import { inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { UI_LANGUAGE } from '../i18n/ui-language';
 import { getDjangoCsrfTokenForRequest, isUnsafeHttpMethod } from '../utils/csrf.util';
 
 /**
@@ -27,7 +29,7 @@ export function headersInterceptor(
     setHeaders: {
       // ...(addBearer ? { Authorization: `Bearer ${access}` } : {}),
       ...(csrf ? { 'X-CSRFToken': csrf } : {}),
-      'Accept-Language': localStorage.getItem('lang') || 'ar',
+      'Accept-Language': inject(UI_LANGUAGE),
     },
   });
   return next(req);

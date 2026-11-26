@@ -1,5 +1,5 @@
 @if (!hideHeader()) {
-  <!-- Header -->
+  <!-- Header nav hydrates cleanly; only client-only theme and auth actions skip hydration -->
   <app-header />
 }
 <div [class]="fullWidth() ? '' : 'app-container'">

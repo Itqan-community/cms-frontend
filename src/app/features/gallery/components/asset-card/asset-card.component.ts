@@ -1,10 +1,11 @@
-import { Component, input } from '@angular/core';
+import { Component, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslatePipe } from '@ngx-translate/core';
 import { NgIcon } from '@ng-icons/core';
 import { NzButtonComponent } from 'ng-zorro-antd/button';
 import { NzTagModule } from 'ng-zorro-antd/tag';
 import { assetKindIcon } from '../../../../core/enums/categories.enum';
+import { LANG_QUERY_PARAMS } from '../../../../core/i18n/ui-language';
 import { AssetTemplateBadgeComponent } from '../../../../shared/components/asset-template-badge/asset-template-badge.component';
 import { LicenseTagComponent } from '../../../../shared/components/license-tag/license-tag.component';
 import { Asset } from '../../models/assets.model';
@@ -46,7 +47,7 @@ import { Asset } from '../../models/assets.model';
             <div class="publisher-info">
               <div class="publisher-text">
                 <span class="label">{{ 'UI.PUBLISHER_LABEL' | translate }}</span>
-                <a routerLink="/publisher/{{ asset().publisher.id }}">{{
+                <a [routerLink]="['/publisher', asset().publisher.id]" [queryParams]="langParams">{{
                   asset().publisher.name
                 }}</a>
               </div>
@@ -65,9 +66,15 @@ import { Asset } from '../../models/assets.model';
                 }
               </div>
             }
-            <a nz-button nzSize="large" routerLink="/gallery/asset/{{ asset().id }}" class="w-full">
+            <a
+              nz-button
+              nzSize="large"
+              [routerLink]="['/gallery/asset', asset().id]"
+              [queryParams]="langParams"
+              class="w-full"
+            >
               <ng-icon name="lucideEye" />
-              {{ 'GALLERY.VIEW_DETAILS' | translate }}
+              <span>{{ 'GALLERY.VIEW_DETAILS' | translate }}</span>
             </a>
           </div>
         </div>
@@ -76,6 +83,7 @@ import { Asset } from '../../models/assets.model';
   `,
 })
 export class AssetCardComponent {
+  readonly langParams = inject(LANG_QUERY_PARAMS);
   asset = input.required<Asset>();
 
   get categoryIconName(): string {
