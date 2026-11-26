@@ -591,3 +591,53 @@ describe('AssetContentGridComponent column definitions', () => {
     });
   });
 });
+
+describe('AssetContentGridComponent add-language seed file', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [AssetContentGridComponent, TranslateModule.forRoot()],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideNoopAnimations(),
+        { provide: NzMessageService, useValue: { error: () => void 0 } },
+        { provide: NzModalService, useValue: { confirm: () => void 0, info: () => void 0 } },
+        { provide: AdminAuthService, useValue: { hasPermission: () => true } },
+        { provide: LastActiveLanguageService, useValue: { get: () => null, set: () => void 0 } },
+        { provide: Router, useValue: { navigate: () => Promise.resolve(true) } },
+      ],
+    }).compileComponents();
+  });
+
+  function pick(component: AssetContentGridComponent, file: File | null): void {
+    const input = document.createElement('input');
+    Object.defineProperty(input, 'files', { value: file ? [file] : [] });
+    component.onPickNewLanguageFile({ target: input } as unknown as Event);
+  }
+
+  it('keeps a replacement file blocked until its columns are ready', () => {
+    // Arrange — file A left the columns unmatched
+    const component = TestBed.createComponent(AssetContentGridComponent).componentInstance;
+    pick(component, new File(['a'], 'a.csv'));
+    component.newLanguageColumnsReady.set(false);
+
+    // Act
+    pick(component, new File(['b'], 'b.csv'));
+
+    // Assert
+    expect(component.newLanguageColumnsReady()).toBeFalse();
+  });
+
+  it('unblocks once the file is cleared', () => {
+    // Arrange
+    const component = TestBed.createComponent(AssetContentGridComponent).componentInstance;
+    pick(component, new File(['a'], 'a.csv'));
+    component.newLanguageColumnsReady.set(false);
+
+    // Act
+    component.clearNewLanguageFile();
+
+    // Assert
+    expect(component.newLanguageColumnsReady()).toBeTrue();
+  });
+});

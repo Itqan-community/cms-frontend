@@ -1041,7 +1041,9 @@ export class AssetContentGridComponent implements OnInit {
     this.newLanguageFileName.set(file?.name ?? null);
     this.newLanguageColumnMapping = null;
     this.newLanguageImportFile.set(file);
-    this.newLanguageColumnsReady.set(true);
+    // A replacement file stays blocked: the mapping component (kept on screen) is
+    // already not ready and emits again only once the new file's preview settles.
+    if (!file) this.newLanguageColumnsReady.set(true);
   }
 
   clearNewLanguageFile(): void {
