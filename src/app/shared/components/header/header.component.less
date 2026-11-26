@@ -120,7 +120,8 @@
   }
 }
 
-html[data-theme='dark'] .fanar-brand__mark {
+// :host-context, since emulated encapsulation would also scope the html selector.
+:host-context(html[data-theme='dark']) .fanar-brand__mark {
   &--light {
     display: none;
   }
