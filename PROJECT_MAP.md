@@ -592,12 +592,17 @@ behind `authGuard` + `publisherHostGuard`; no backend calls.
 `/admin/usage` (`features/admin/usage/`): Dashboard, Recitations and Text assets tabs for everyone
 with `portal_read_usage`. The Dashboard trend defaults to `usage` (every channel: plays, downloads,
 CLI installs and updates, public API calls, gallery views). Recitations = the dashboard fixed to the
-recitation category, local state: reciter / riwayah filters, listening hours, recitation insights
-and catalog; Text assets = the dashboard fixed to the text category: CLI installs and updates,
-public API calls per surah, gallery views, text insights (the asset Analytics tab of a text asset
-shows the same); picking either in the Dashboard category filter shows the same profile; Itqan staff
-also get a publisher picker, Leaderboard and Unseen traffic (bucketed like the dashboard trend: the
-`granularity` URL param is shared by the tabs). `/account/api-keys` shows and edits each key's
+recitation category: reciter / riwayah filters, listening hours, recitation insights and catalog;
+Text assets = the dashboard fixed to the text category: CLI installs and updates, public API calls
+per surah, gallery views, text insights (the asset Analytics tab of a text asset shows the same);
+picking either in the Dashboard category filter shows the same profile; Itqan staff also get a
+publisher picker, Leaderboard and Unseen traffic (bucketed like the dashboard trend: the
+`granularity` URL param is shared by the tabs). The whole view is in the URL (shareable): `tab`
+(`recitations` / `text` / `leaderboard` / `unseen`, none = Dashboard; unknown or, for publishers,
+staff-only tabs fall back to the Dashboard), staff `publisher`, and the open tab's dashboard state
+(`metric`, `split`, `compare`, filters). `range` / `start` / `end` / `granularity` are shared by the
+tabs; switching tabs drops the other keys and a tab shown again writes its view back (dashboard
+`active` input). Every change uses `replaceUrl`. `/account/api-keys` shows and edits each key's
 public app slug (`app_slug`). The global error toast skips `usage_counts_disabled`.
 
 ### 6. Error (`src/app/features/error/`)
