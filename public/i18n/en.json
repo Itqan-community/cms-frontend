@@ -2754,7 +2754,13 @@
       "SLUG_REQUIRED": "Click \"Translate from Arabic\" to generate the identifier before saving.",
       "SLUG_MANUAL": "The identifier could not be generated. Type it in lowercase words joined by hyphens, starting with the asset type (e.g. tafsir-ibn-kathir).",
       "SLUG_FORMAT": "Use lowercase letters, digits and single hyphens, starting with the asset type (e.g. tafsir-ibn-kathir); max 50 characters.",
-      "SLUG_PLACEHOLDER": "e.g. tafsir-ibn-kathir"
+      "SLUG_PLACEHOLDER": "e.g. tafsir-ibn-kathir",
+      "TO_ENGLISH": "Translate to English",
+      "NEED_VERSION_ARABIC": "Enter the Arabic name or summary first.",
+      "VERSION_DONE": "English filled from the Arabic. Please review it.",
+      "REPLACE_TITLE": "Replace the English text?",
+      "REPLACE_BODY": "The English fields are already filled. Translating again replaces them with a new translation of the Arabic.",
+      "REPLACE_OK": "Replace"
     },
     "ROLES": {
       "TITLE": "Roles",
