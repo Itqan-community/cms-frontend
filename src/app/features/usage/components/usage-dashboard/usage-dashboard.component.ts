@@ -97,6 +97,7 @@ export const USAGE_URL_KEYS = [
   'split',
   'compare',
   'granularity',
+  'calendar',
 ];
 const COMPARISONS: UsageComparison[] = ['previous', 'year', 'hijri_year'];
 const PRESETS: UsagePreset[] = ['7d', '30d', '90d', '12m', 'custom'];
@@ -192,7 +193,7 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
     const scope = this.scope();
     return scope === 'developer' ? null : scope;
   });
-  /** Label the time axes in the Hijri calendar (buckets stay Gregorian). */
+  /** Label the time axes in the Hijri calendar (buckets stay Gregorian); `calendar=hijri` in the URL. */
   readonly hijri = signal(false);
   readonly calendarOptions = computed(() => {
     this.lang();
@@ -507,6 +508,21 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
     this.update({ granularity });
   }
 
+  /** Axis labels only: no report reloads. */
+  setCalendar(calendar: string): void {
+    const hijri = calendar === 'hijri';
+    if (!this.syncUrl()) {
+      this.hijri.set(hijri);
+      return;
+    }
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { calendar: hijri ? 'hijri' : null },
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
+    });
+  }
+
   setFilter(
     name: 'category' | 'channel' | 'platform' | 'app' | 'reciter_id' | 'riwayah_id',
     value: string | number | null
@@ -704,6 +720,7 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
 
   private applyParams(params: ParamMap): void {
     const raw = this.rawParams(params);
+    this.hijri.set(raw['calendar'] === 'hijri');
     const parsed = usageStateFromParams(raw);
     const category =
       this.assetId() != null ? this.category() : (this.category() ?? parsed.filters.category);
@@ -738,6 +755,9 @@ export class UsageDashboardComponent implements OnInit, OnChanges {
       USAGE_URL_KEYS.map((key) => [key, null])
     );
     Object.assign(queryParams, usageStateToParams(next));
+    if (this.hijri()) {
+      queryParams['calendar'] = 'hijri';
+    }
     void this.router.navigate([], {
       relativeTo: this.route,
       queryParams,

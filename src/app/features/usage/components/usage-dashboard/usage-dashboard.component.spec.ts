@@ -435,4 +435,22 @@ describe('UsageDashboardComponent', () => {
 
     expect(api.summary.calls.count()).toBe(summaries);
   });
+
+  it('keeps the Hijri axis labels in the URL without reloading the reports', () => {
+    fixture.detectChanges();
+    const summaries = api.summary.calls.count();
+
+    fixture.componentInstance.setCalendar('hijri');
+    expect(router.navigate.calls.mostRecent().args[1]?.queryParams).toEqual({ calendar: 'hijri' });
+    queryParams.next(convertToParamMap({ range: '7d', channel: 'cli', calendar: 'hijri' }));
+
+    expect(fixture.componentInstance.hijri()).toBeTrue();
+    expect(api.summary.calls.count()).toBe(summaries);
+
+    fixture.componentInstance.setMetric('downloads');
+    expect(router.navigate.calls.mostRecent().args[1]?.queryParams?.['calendar']).toBe('hijri');
+
+    fixture.componentInstance.setCalendar('gregorian');
+    expect(router.navigate.calls.mostRecent().args[1]?.queryParams).toEqual({ calendar: null });
+  });
 });
