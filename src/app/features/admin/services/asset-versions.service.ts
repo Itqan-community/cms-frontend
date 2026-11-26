@@ -9,8 +9,10 @@ import type {
   AssetVersionParentKind,
   AssetVersionsListParams,
   AssetVersionsListResponse,
+  ImportColumnInput,
   ImportColumnsPreview,
 } from '../models/asset-versions.models';
+import type { AssetTemplate } from '../models/asset-content.models';
 
 /** The backend reads only this much of a file to preview its header row. */
 export const IMPORT_PREVIEW_BYTES = 64 * 1024;
@@ -107,6 +109,26 @@ export class AssetVersionsService {
     data.append('file', file.slice(0, IMPORT_PREVIEW_BYTES), file.name);
     return this.http.post<ImportColumnsPreview>(
       `${this.base}/text-assets/${encodeURIComponent(slug)}/import-columns/`,
+      data,
+      { context: callerShowsErrors() }
+    );
+  }
+
+  /** The same preview for a text asset being created: its template and the
+   *  columns the create form will send (null: just `text`). */
+  previewNewAssetImportColumns(
+    template: AssetTemplate,
+    columns: ImportColumnInput[] | null,
+    file: File
+  ): Observable<ImportColumnsPreview> {
+    const data = new FormData();
+    data.append('template', template);
+    if (columns) {
+      data.append('columns', JSON.stringify(columns));
+    }
+    data.append('file', file.slice(0, IMPORT_PREVIEW_BYTES), file.name);
+    return this.http.post<ImportColumnsPreview>(
+      `${this.base}/content/text-assets/import-columns/`,
       data,
       { context: callerShowsErrors() }
     );

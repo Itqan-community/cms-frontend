@@ -114,6 +114,15 @@
       <p class="asset-initial-version-fields__file-preview">
         <span class="admin-mono">{{ selectedFileName() }}</span>
       </p>
+      @if (mapColumns()) {
+        <app-import-column-mapping
+          [template]="contentTemplate()"
+          [columns]="importColumns()"
+          [file]="mappingFile()"
+          (mappingChange)="columnMappingChange.emit($event)"
+          (readyChange)="columnsReadyChange.emit($event)"
+        />
+      }
     } @else {
       <p class="asset-initial-version-fields__file-hint">
         {{ i18n + '.FILE_OPTIONAL_HINT' | translate }}

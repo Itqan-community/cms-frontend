@@ -19,10 +19,12 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzMessageService } from 'ng-zorro-antd/message';
 import { NzModalModule } from 'ng-zorro-antd/modal';
 import { NzSelectModule } from 'ng-zorro-antd/select';
-import { Subject, catchError, finalize, of, switchMap } from 'rxjs';
+import { Subject, catchError, finalize, map, of, switchMap } from 'rxjs';
 import { resolveApiErrorMessage } from '../../../../shared/utils/api-error-resolver.util';
+import type { AssetTemplate } from '../../models/asset-content.models';
 import type {
   ImportColumnField,
+  ImportColumnInput,
   ImportColumnMapping,
   ImportColumnsPreview,
 } from '../../models/asset-versions.models';
@@ -50,6 +52,10 @@ const UNIT_FIELD_KEYS: Record<string, string> = {
  * unmatched the mapping dialog opens; the upload stays blocked (`readyChange`
  * false) until the user maps every required field. A confirmed mapping is
  * emitted through `mappingChange`; `null` means "use the file's headers".
+ *
+ * Give `slug` for an existing text asset, or `template` (plus the `columns` the
+ * create form will send; unset: just `text`) for one that is being created.
+ * Changing the template or columns re-reads the file without reopening the dialog.
  */
 @Component({
   selector: 'app-import-column-mapping',
@@ -72,7 +78,9 @@ export class ImportColumnMappingComponent {
   private readonly message = inject(NzMessageService);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly slug = input.required<string>();
+  readonly slug = input<string | null>(null);
+  readonly template = input<AssetTemplate | null>(null);
+  readonly columns = input<ImportColumnInput[] | null>(null);
   readonly file = input<File | null>(null);
   readonly mappingChange = output<ImportColumnMapping | null>();
   readonly readyChange = output<boolean>();
@@ -113,16 +121,22 @@ export class ImportColumnMappingComponent {
     }));
   });
 
-  private readonly load$ = new Subject<File | null>();
+  private readonly load$ = new Subject<{ file: File | null; autoOpen: boolean }>();
+  /** What the file is matched against: the asset, or the new asset's template and columns. */
+  private readonly target = computed(() =>
+    JSON.stringify([this.slug(), this.template(), this.columns()])
+  );
 
   constructor() {
     this.load$
       .pipe(
-        switchMap((file) => {
+        switchMap(({ file, autoOpen }) => {
           this.reset();
-          if (!file) return of(null);
+          const request$ = file ? this.request(file) : null;
+          if (!request$) return of(null);
           this.loading.set(true);
-          return this.versions.previewImportColumns(this.slug(), file).pipe(
+          return request$.pipe(
+            map((preview) => ({ preview, autoOpen })),
             catchError((err: unknown) => {
               if (!(err instanceof HttpErrorResponse && err.status === 0)) {
                 this.message.error(
@@ -140,15 +154,20 @@ export class ImportColumnMappingComponent {
         }),
         takeUntilDestroyed(this.destroyRef)
       )
-      .subscribe((preview) => {
-        if (!preview) return;
-        this.preview.set(preview);
-        if (!preview.complete) this.openDialog();
+      .subscribe((loaded) => {
+        if (!loaded) return;
+        this.preview.set(loaded.preview);
+        if (loaded.autoOpen && !loaded.preview.complete) this.openDialog();
       });
 
+    let lastFile: File | null = null;
     effect(() => {
       const file = this.file();
-      untracked(() => this.load$.next(file));
+      this.target();
+      untracked(() => {
+        this.load$.next({ file, autoOpen: file !== lastFile });
+        lastFile = file;
+      });
     });
     effect(() => this.readyChange.emit(this.ready()));
   }
@@ -213,6 +232,14 @@ export class ImportColumnMappingComponent {
     return (
       header || this.translate.instant('ADMIN.IMPORT_COLUMNS.UNNAMED_COLUMN', { n: index + 1 })
     );
+  }
+
+  private request(file: File) {
+    const slug = this.slug();
+    if (slug) return this.versions.previewImportColumns(slug, file);
+    const template = this.template();
+    if (template) return this.versions.previewNewAssetImportColumns(template, this.columns(), file);
+    return null;
   }
 
   private reset(): void {

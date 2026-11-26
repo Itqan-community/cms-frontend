@@ -43,6 +43,7 @@ import { PORTAL_PERMISSIONS } from '../../../constants/portal-permission.constan
 import { COLUMN_KEY_PATTERN } from '../../../components/manage-columns-modal/manage-columns-modal.component';
 import { MushafLayoutsService } from '../../../services/mushaf-layouts.service';
 import { AssetTemplate, MushafLayout } from '../../../models/asset-content.models';
+import type { ImportColumnMapping } from '../../../models/asset-versions.models';
 import {
   createDisplayLocalizationLabels,
   localizeLanguageCode,
@@ -186,6 +187,20 @@ export class TextAssetFormComponent implements OnInit {
       keys.every((key) => COLUMN_KEY_PATTERN.test(key)) && new Set(keys).size === keys.length;
     return valid ? keys : [];
   });
+
+  /** The create form's columns with labels, for matching the file (unset: just `text`). */
+  readonly importColumns = computed<TextAssetColumnInput[] | null>(() => {
+    if (!this.templateColumnKeys()?.length) return null;
+    return (this.columnsValue() ?? []).map((column) => ({
+      key: (column.key ?? '').trim(),
+      label_en: (column.label_en ?? '').trim(),
+      label_ar: (column.label_ar ?? '').trim(),
+    }));
+  });
+  /** File columns the user mapped by hand (null: the file's headers are used). */
+  readonly columnMapping = signal<ImportColumnMapping | null>(null);
+  /** False until the first file's columns cover the template's required fields. */
+  readonly columnsReady = signal(true);
 
   /** Columns are sent only on create with the permissions (which follow the selected
    *  publisher); otherwise they are disabled so they never block saving. */
@@ -366,7 +381,7 @@ export class TextAssetFormComponent implements OnInit {
   }
 
   canSubmit(): boolean {
-    return this.form.valid;
+    return this.form.valid && this.columnsReady();
   }
 
   onSubmit(): void {
@@ -378,6 +393,7 @@ export class TextAssetFormComponent implements OnInit {
       for (const row of this.columns.controls) row.controls.key.markAsDirty();
       return;
     }
+    if (!this.columnsReady()) return;
 
     this.save(this.buildBody());
   }
@@ -467,6 +483,7 @@ export class TextAssetFormComponent implements OnInit {
       if (this.versionFile()) {
         body.file = this.versionFile()!;
         body.version_number = (v.version_number ?? '').trim();
+        if (this.columnMapping()) body.column_mapping = this.columnMapping();
       }
     }
 

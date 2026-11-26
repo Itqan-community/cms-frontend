@@ -94,6 +94,13 @@ export interface AssetVersionFormPayload {
   column_mapping?: ImportColumnMapping | null;
 }
 
+/** A text column of an asset being created, as the create form sends it. */
+export interface ImportColumnInput {
+  key: string;
+  label_en: string;
+  label_ar: string;
+}
+
 /** Field key -> 0-based column index of the file's header row (null: not in the file). */
 export type ImportColumnMapping = Record<string, number | null>;
 

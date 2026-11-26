@@ -501,6 +501,10 @@
           [contentTemplate]="form.controls.template.value"
           [mushafLayoutId]="form.controls.mushaf_layout_id.value"
           [columnKeys]="templateColumnKeys()"
+          [mapColumns]="templateColumnKeys()?.length !== 0"
+          [importColumns]="importColumns()"
+          (columnMappingChange)="columnMapping.set($event)"
+          (columnsReadyChange)="columnsReady.set($event)"
         />
       }
 
