@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { map, startWith } from 'rxjs';
 import { FeatureShowcaseComponent } from '../../components/feature-showcase/feature-showcase.component';
+import { JoinFormComponent } from '../../components/join-form/join-form.component';
 import { CONTACT_EMAIL } from '../../data/cli';
 import { LANDING_STATS, formatStatsDate } from '../../data/landing-stats';
 import { useLandingSeo } from '../../landing-seo';
@@ -16,7 +17,7 @@ const PILLARS = ['PUBLISH', 'CONTROL', 'REACH', 'PROVE'] as const;
 @Component({
   selector: 'app-for-publishers-page',
   standalone: true,
-  imports: [RouterLink, TranslatePipe, FeatureShowcaseComponent],
+  imports: [RouterLink, TranslatePipe, FeatureShowcaseComponent, JoinFormComponent],
   styleUrls: ['./for-publishers.page.less'],
   templateUrl: './for-publishers.page.html',
 })

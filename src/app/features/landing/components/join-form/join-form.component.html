@@ -1,0 +1,97 @@
+@if (sentTo(); as email) {
+  <div class="join-form join-form--sent" role="status">
+    <h3 class="fl-h3">{{ 'LANDING.PUB.FORM.SENT_TITLE' | translate }}</h3>
+    <p>{{ 'LANDING.PUB.FORM.SENT_BODY' | translate: { email: email } }}</p>
+    <button type="button" class="fl-btn fl-btn--ghost" (click)="sendAnother()">
+      {{ 'LANDING.PUB.FORM.SEND_ANOTHER' | translate }}
+    </button>
+  </div>
+} @else {
+  <form
+    class="join-form"
+    [formGroup]="form"
+    [attr.aria-label]="'LANDING.PUB.FORM.LABEL' | translate"
+    (ngSubmit)="submit()"
+    novalidate
+  >
+    <div class="join-form__field">
+      <label for="join-name">{{ 'LANDING.PUB.FORM.NAME' | translate }}</label>
+      <input
+        id="join-name"
+        type="text"
+        formControlName="name"
+        autocomplete="name"
+        [attr.aria-invalid]="showError('name') ? 'true' : null"
+        [attr.aria-describedby]="showError('name') ? 'join-name-err' : null"
+      />
+      @if (showError('name'); as key) {
+        <span id="join-name-err" class="join-form__err">{{ key | translate }}</span>
+      }
+    </div>
+    <div class="join-form__field">
+      <label for="join-org">{{ 'LANDING.PUB.FORM.ORG' | translate }}</label>
+      <input
+        id="join-org"
+        type="text"
+        formControlName="organization"
+        autocomplete="organization"
+        [placeholder]="'LANDING.PUB.FORM.ORG_PH' | translate"
+        [attr.aria-invalid]="showError('organization') ? 'true' : null"
+        [attr.aria-describedby]="showError('organization') ? 'join-org-err' : null"
+      />
+      @if (showError('organization'); as key) {
+        <span id="join-org-err" class="join-form__err">{{ key | translate }}</span>
+      }
+    </div>
+    <div class="join-form__field">
+      <label for="join-email">{{ 'LANDING.PUB.FORM.EMAIL' | translate }}</label>
+      <input
+        id="join-email"
+        type="email"
+        dir="ltr"
+        formControlName="email"
+        autocomplete="email"
+        placeholder="name@example.org"
+        [attr.aria-invalid]="showError('email') ? 'true' : null"
+        [attr.aria-describedby]="showError('email') ? 'join-email-err' : null"
+      />
+      @if (showError('email'); as key) {
+        <span id="join-email-err" class="join-form__err">{{ key | translate }}</span>
+      }
+    </div>
+    <div class="join-form__field">
+      <label for="join-kind">{{ 'LANDING.PUB.FORM.KIND' | translate }}</label>
+      <select id="join-kind" formControlName="content_kind">
+        @for (k of kinds; track k.value) {
+          <option [value]="k.value">{{ 'LANDING.PUB.FORM.KINDS.' + k.key | translate }}</option>
+        }
+      </select>
+    </div>
+    <div class="join-form__field">
+      <label for="join-msg">{{ 'LANDING.PUB.FORM.MSG' | translate }}</label>
+      <textarea
+        id="join-msg"
+        rows="4"
+        formControlName="message"
+        [placeholder]="'LANDING.PUB.FORM.MSG_PH' | translate"
+      ></textarea>
+    </div>
+    <div class="join-form__trap" aria-hidden="true">
+      <label for="join-website">{{ 'LANDING.PUB.FORM.HONEYPOT' | translate }}</label>
+      <input
+        id="join-website"
+        type="text"
+        formControlName="website"
+        tabindex="-1"
+        autocomplete="off"
+      />
+    </div>
+    @if (error(); as message) {
+      <p class="join-form__failed" role="alert">{{ message }}</p>
+    }
+    <button type="submit" class="fl-btn fl-btn--primary" [disabled]="sending()">
+      {{ (sending() ? 'LANDING.PUB.FORM.SENDING' : 'LANDING.PUB.FORM.SEND') | translate }}
+    </button>
+    <p class="fl-small">{{ 'LANDING.PUB.FORM.NOTE' | translate }}</p>
+  </form>
+}
