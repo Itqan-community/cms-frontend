@@ -439,6 +439,13 @@
           ></textarea>
         </div>
       </div>
+      <!-- The content editor edits text assets only. -->
+      <app-ai-translate-version-text
+        class="content-grid__commit-translate"
+        [text]="commitText()"
+        category="text"
+        (translated)="applyCommitTranslation($event)"
+      />
       @if (!commitHasMessage()) {
         <p class="content-grid__commit-hint">
           {{ 'ADMIN.COMMON.VERSION_TEXT.MESSAGE_REQUIRED' | translate }}

@@ -589,6 +589,26 @@ describe('AssetContentGridComponent column definitions', () => {
       // Assert
       expect(commitButton(fixture).disabled).toBeFalse();
     });
+
+    it('fills the English commit message from "Translate to English", keeping the rest', () => {
+      // Arrange
+      const fixture = openEditor(2);
+      const grid = fixture.componentInstance;
+      grid.setCommitText('summary_ar', 'تصحيح أخطاء');
+      grid.setCommitText('label_en', 'Typed name');
+
+      // Act
+      grid.applyCommitTranslation({ summary_en: 'Fix typos' });
+
+      // Assert
+      expect(grid.commitText()).toEqual({
+        label_en: 'Typed name',
+        label_ar: '',
+        summary_en: 'Fix typos',
+        summary_ar: 'تصحيح أخطاء',
+      });
+      expect(grid.commitHasMessage()).toBeTrue();
+    });
   });
 });
 
