@@ -59,18 +59,17 @@ export class AssetInitialVersionFieldsComponent {
   onPickFile(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0] ?? null;
-    this.resetColumnMapping();
+    // A replacement file stays blocked until its own preview settles (the mapping
+    // component stays on screen and only emits when its readiness changes).
+    this.columnMappingChange.emit(null);
+    if (!file) this.columnsReadyChange.emit(true);
     this.versionFile.set(file);
     input.value = '';
   }
 
   clearFile(): void {
-    this.resetColumnMapping();
-    this.versionFile.set(null);
-  }
-
-  private resetColumnMapping(): void {
     this.columnMappingChange.emit(null);
     this.columnsReadyChange.emit(true);
+    this.versionFile.set(null);
   }
 }
