@@ -27,15 +27,28 @@
               </svg>
             </div>
           } @else {
-            <img
-              [alt]="'COMMON.LOGO_ALT_CMS' | translate"
-              loading="lazy"
-              width="120"
-              height="40"
-              decoding="async"
-              class="app-header__logo-img"
-              src="assets/images/logo.svg"
-            />
+            <span class="fanar-brand">
+              <img
+                class="fanar-brand__mark fanar-brand__mark--light"
+                src="assets/images/itqan-mark.svg"
+                alt=""
+                width="36"
+                height="36"
+                decoding="async"
+              />
+              <img
+                class="fanar-brand__mark fanar-brand__mark--dark"
+                src="assets/images/itqan-mark-dark.svg"
+                alt=""
+                width="36"
+                height="36"
+                decoding="async"
+              />
+              <span class="fanar-brand__text">
+                <span class="fanar-brand__name">{{ 'COMMON.LOGO_ALT_CMS' | translate }}</span>
+                <span class="fanar-brand__by">{{ 'COMMON.BY_ITQAN' | translate }}</span>
+              </span>
+            </span>
           }
         </a>
         <app-navigation-menu [links]="navLinks()"></app-navigation-menu>

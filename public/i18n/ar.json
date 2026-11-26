@@ -447,7 +447,8 @@
       "COMING_SOON": "قريباً: إدارة {{title}}",
       "DEFAULT_TITLE": "المحتوى"
     },
-    "MOCK_PUBLISHER_LABEL": "الناشر"
+    "MOCK_PUBLISHER_LABEL": "الناشر",
+    "BY_ITQAN": "من مجتمع إتقان"
   },
   "FORMS": {
     "PLACEHOLDERS": {
@@ -516,10 +517,11 @@
     "CONTENT_STANDARDS": "معايير المحتوى والتقنية",
     "API_DOCS": "وثائق الواجهات البرمجية (API)",
     "PUBLISHER_DASHBOARD": "لوحة التحكم للناشر",
-    "ASSET_REQUEST_FORM": "أضف محتوى قرآني في فنار",
     "ADMIN_PORTAL": "لوحة الإدارة",
     "MUSHAF": "القرآن",
-    "RECITERS": "القراء"
+    "RECITERS": "القراء",
+    "FOR_PUBLISHERS": "للناشرين",
+    "FOR_DEVELOPERS": "للمطورين"
   },
   "HOME": {
     "WELCOME": "مرحبًا بك في فنار",

@@ -447,7 +447,8 @@
       "COMING_SOON": "Coming soon: {{title}} management",
       "DEFAULT_TITLE": "Content"
     },
-    "MOCK_PUBLISHER_LABEL": "Publisher"
+    "MOCK_PUBLISHER_LABEL": "Publisher",
+    "BY_ITQAN": "by the Itqan community"
   },
   "FORMS": {
     "PLACEHOLDERS": {
@@ -516,10 +517,11 @@
     "CONTENT_STANDARDS": "Content Standards",
     "API_DOCS": "API Docs",
     "PUBLISHER_DASHBOARD": "Publisher Dashboard",
-    "ASSET_REQUEST_FORM": "Add Quranic Content to Fanar",
     "ADMIN_PORTAL": "Admin Portal",
     "MUSHAF": "Quran",
-    "RECITERS": "Reciters"
+    "RECITERS": "Reciters",
+    "FOR_PUBLISHERS": "For publishers",
+    "FOR_DEVELOPERS": "For developers"
   },
   "HOME": {
     "WELCOME": "Welcome to Fanar",
