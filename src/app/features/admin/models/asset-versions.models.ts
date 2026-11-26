@@ -124,6 +124,9 @@ export interface ImportColumnsPreview {
   /** Fields matched by header name. */
   mapping: Record<string, number>;
   complete: boolean;
+  /** 1-based rows between the header and the data that the import will report as
+   *  errors; judged by the sent `column_mapping`, else by the matched headers. */
+  attention_rows: number[];
 }
 
 export type AssetVersionParentKind = 'text' | 'mushaf' | 'font' | 'program';

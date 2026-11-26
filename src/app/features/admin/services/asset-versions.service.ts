@@ -10,12 +10,19 @@ import type {
   AssetVersionsListParams,
   AssetVersionsListResponse,
   ImportColumnInput,
+  ImportColumnMapping,
   ImportColumnsPreview,
 } from '../models/asset-versions.models';
 import type { AssetTemplate } from '../models/asset-content.models';
 
 /** The backend reads only this much of a file to preview its header row. */
 export const IMPORT_PREVIEW_BYTES = 64 * 1024;
+
+/** The mapping the upload will send: the preview then judges the file by it
+ *  (header in the first row, `attention_rows` for those columns). */
+function appendColumnMapping(data: FormData, columnMapping: ImportColumnMapping | null): void {
+  if (columnMapping) data.append('column_mapping', JSON.stringify(columnMapping));
+}
 
 @Injectable({ providedIn: 'root' })
 export class AssetVersionsService {
@@ -104,9 +111,14 @@ export class AssetVersionsService {
 
   /** Read a content file's header row and match it to the text asset's fields.
    *  Only the file's start is sent, so a large file is not uploaded twice. */
-  previewImportColumns(slug: string, file: File): Observable<ImportColumnsPreview> {
+  previewImportColumns(
+    slug: string,
+    file: File,
+    columnMapping: ImportColumnMapping | null = null
+  ): Observable<ImportColumnsPreview> {
     const data = new FormData();
     data.append('file', file.slice(0, IMPORT_PREVIEW_BYTES), file.name);
+    appendColumnMapping(data, columnMapping);
     return this.http.post<ImportColumnsPreview>(
       `${this.base}/text-assets/${encodeURIComponent(slug)}/import-columns/`,
       data,
@@ -119,7 +131,8 @@ export class AssetVersionsService {
   previewNewAssetImportColumns(
     template: AssetTemplate,
     columns: ImportColumnInput[] | null,
-    file: File
+    file: File,
+    columnMapping: ImportColumnMapping | null = null
   ): Observable<ImportColumnsPreview> {
     const data = new FormData();
     data.append('template', template);
@@ -127,6 +140,7 @@ export class AssetVersionsService {
       data.append('columns', JSON.stringify(columns));
     }
     data.append('file', file.slice(0, IMPORT_PREVIEW_BYTES), file.name);
+    appendColumnMapping(data, columnMapping);
     return this.http.post<ImportColumnsPreview>(
       `${this.base}/content/text-assets/import-columns/`,
       data,

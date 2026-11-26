@@ -30,6 +30,13 @@ import type {
 } from '../../models/asset-versions.models';
 import { AssetVersionsService } from '../../services/asset-versions.service';
 
+/** The file previewed with a mapping: the rows it flags, or why it failed. */
+interface MappingCheck {
+  key: string;
+  rows: number[];
+  error: string | null;
+}
+
 const UNIT_FIELD_KEYS: Record<string, string> = {
   surah: 'SURAH',
   ayah: 'AYAH',
@@ -52,6 +59,10 @@ const UNIT_FIELD_KEYS: Record<string, string> = {
  * unmatched the mapping dialog opens; the upload stays blocked (`readyChange`
  * false) until the user maps every required field. A confirmed mapping is
  * emitted through `mappingChange`; `null` means "use the file's headers".
+ *
+ * While the dialog holds a complete mapping, the file is previewed again with
+ * that mapping, and the rows the import would report as errors (text between
+ * the header and the data) are listed.
  *
  * Give `slug` for an existing text asset, or `template` (plus the `columns` the
  * create form will send; unset: just `text`) for one that is being created.
@@ -92,6 +103,8 @@ export class ImportColumnMappingComponent {
   readonly draft = signal<(string | null)[]>([]);
   /** The mapping the user confirmed; null while the file's own headers are used. */
   readonly confirmed = signal<ImportColumnMapping | null>(null);
+  /** The last preview made with a mapping (`key`: that mapping as JSON). */
+  readonly check = signal<MappingCheck | null>(null);
 
   /** Import may run: no file, the headers matched, or the user mapped the columns. */
   readonly ready = computed(() => {
@@ -107,6 +120,20 @@ export class ImportColumnMappingComponent {
   /** Word files name their word by `word_id` or by surah + ayah + word. */
   readonly hasAlternatives = computed(() => (this.preview()?.required.length ?? 0) > 1);
   readonly ignoredCount = computed(() => this.draft().filter((key) => key === null).length);
+  /** The dialog's check of the draft mapping; null until it has come back. */
+  readonly draftCheck = computed(() => {
+    const check = this.check();
+    return check && check.key === JSON.stringify(this.fullMapping(this.draftMapping()))
+      ? check
+      : null;
+  });
+  /** Rows the import will report as errors, for the mapping the upload will send. */
+  readonly attentionRows = computed(() => {
+    const confirmed = this.confirmed();
+    if (!confirmed) return this.preview()?.attention_rows ?? [];
+    const check = this.check();
+    return check && check.key === JSON.stringify(confirmed) ? check.rows : [];
+  });
 
   readonly rows = computed(() => {
     const preview = this.preview();
@@ -122,6 +149,8 @@ export class ImportColumnMappingComponent {
   });
 
   private readonly load$ = new Subject<{ file: File | null; autoOpen: boolean }>();
+  /** A mapping to preview the file with; null cancels the pending one. */
+  private readonly check$ = new Subject<ImportColumnMapping | null>();
   /** What the file is matched against: the asset, or the new asset's template and columns. */
   private readonly target = computed(() =>
     JSON.stringify([this.slug(), this.template(), this.columns()])
@@ -160,6 +189,40 @@ export class ImportColumnMappingComponent {
         if (loaded.autoOpen && !loaded.preview.complete) this.openDialog();
       });
 
+    this.check$
+      .pipe(
+        switchMap((mapping) => {
+          const file = this.file();
+          const request$ = mapping && file ? this.request(file, mapping) : null;
+          if (!mapping || !request$) return of(null);
+          const key = JSON.stringify(mapping);
+          return request$.pipe(
+            map(
+              (preview): MappingCheck => ({ key, rows: preview.attention_rows ?? [], error: null })
+            ),
+            catchError((err: unknown) =>
+              of<MappingCheck>({
+                key,
+                rows: [],
+                // Offline: the global handler already said so.
+                error:
+                  err instanceof HttpErrorResponse && err.status === 0
+                    ? null
+                    : resolveApiErrorMessage(
+                        err,
+                        { fallbackKey: 'ADMIN.IMPORT_COLUMNS.PREVIEW_ERROR' },
+                        this.translate
+                      ),
+              })
+            )
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((check) => {
+        if (check) this.check.set(check);
+      });
+
     let lastFile: File | null = null;
     effect(() => {
       const file = this.file();
@@ -170,6 +233,13 @@ export class ImportColumnMappingComponent {
       });
     });
     effect(() => this.readyChange.emit(this.ready()));
+    // Each complete draft in the open dialog is checked; a result that comes back
+    // after the dialog closed still counts for the mapping it was made with.
+    effect(() => {
+      if (!this.dialogOpen() || !this.draftComplete()) return;
+      const mapping = this.fullMapping(this.draftMapping());
+      untracked(() => this.check$.next(mapping));
+    });
   }
 
   openDialog(): void {
@@ -197,11 +267,7 @@ export class ImportColumnMappingComponent {
 
   confirm(): void {
     if (!this.draftComplete()) return;
-    const preview = this.preview();
-    const mapping: ImportColumnMapping = {};
-    for (const field of preview?.fields ?? []) {
-      mapping[field.key] = this.draftMapping()[field.key] ?? null;
-    }
+    const mapping = this.fullMapping(this.draftMapping());
     this.confirmed.set(mapping);
     this.mappingChange.emit(mapping);
     this.dialogOpen.set(false);
@@ -228,17 +294,23 @@ export class ImportColumnMappingComponent {
       .join(this.translate.currentLang === 'ar' ? '، ' : ', ');
   }
 
+  rowList(rows: number[]): string {
+    return rows.join(this.translate.currentLang === 'ar' ? '، ' : ', ');
+  }
+
   columnName(header: string, index: number): string {
     return (
       header || this.translate.instant('ADMIN.IMPORT_COLUMNS.UNNAMED_COLUMN', { n: index + 1 })
     );
   }
 
-  private request(file: File) {
+  private request(file: File, mapping: ImportColumnMapping | null = null) {
     const slug = this.slug();
-    if (slug) return this.versions.previewImportColumns(slug, file);
+    if (slug) return this.versions.previewImportColumns(slug, file, mapping);
     const template = this.template();
-    if (template) return this.versions.previewNewAssetImportColumns(template, this.columns(), file);
+    if (template) {
+      return this.versions.previewNewAssetImportColumns(template, this.columns(), file, mapping);
+    }
     return null;
   }
 
@@ -246,10 +318,21 @@ export class ImportColumnMappingComponent {
     this.preview.set(null);
     this.draft.set([]);
     this.dialogOpen.set(false);
+    this.check$.next(null);
+    this.check.set(null);
     if (this.confirmed() !== null) {
       this.confirmed.set(null);
       this.mappingChange.emit(null);
     }
+  }
+
+  /** Every field, with its column or null: what the upload sends. */
+  private fullMapping(draft: Record<string, number>): ImportColumnMapping {
+    const mapping: ImportColumnMapping = {};
+    for (const field of this.preview()?.fields ?? []) {
+      mapping[field.key] = draft[field.key] ?? null;
+    }
+    return mapping;
   }
 
   private toMapping(draft: (string | null)[]): Record<string, number> {

@@ -19,6 +19,7 @@ const PREVIEW: ImportColumnsPreview = {
   required: [['surah', 'ayah', 'text']],
   mapping: {},
   complete: false,
+  attention_rows: [],
 };
 
 describe('ImportColumnMappingComponent', () => {
@@ -248,5 +249,78 @@ describe('ImportColumnMappingComponent', () => {
     // Assert
     expect(component.dialogOpen()).toBeFalse();
     expect(component.ready()).toBeFalse();
+  });
+
+  it('previews the file again with a complete draft and lists the rows it flags', () => {
+    // Arrange
+    pick();
+    httpMock.expectOne(url).flush(PREVIEW);
+    component.assign(0, 'surah');
+    component.assign(1, 'ayah');
+    component.assign(2, 'text');
+
+    // Act
+    fixture.detectChanges();
+    const req = httpMock.expectOne(url);
+    req.flush({ ...PREVIEW, attention_rows: [2, 3] });
+
+    // Assert
+    expect((req.request.body as FormData).get('column_mapping')).toBe(
+      '{"surah":0,"ayah":1,"text":2}'
+    );
+    expect(component.draftCheck()?.rows).toEqual([2, 3]);
+    component.confirm();
+    expect(component.attentionRows()).toEqual([2, 3]);
+  });
+
+  it('forgets the check once the draft changes', () => {
+    // Arrange
+    pick();
+    httpMock.expectOne(url).flush(PREVIEW);
+    component.assign(0, 'surah');
+    component.assign(1, 'ayah');
+    component.assign(2, 'text');
+    fixture.detectChanges();
+    httpMock.expectOne(url).flush({ ...PREVIEW, attention_rows: [2] });
+
+    // Act
+    component.assign(3, 'text');
+
+    // Assert
+    expect(component.draftCheck()).toBeNull();
+    fixture.detectChanges();
+    httpMock.expectOne(url).flush(PREVIEW);
+    expect(component.draftCheck()?.rows).toEqual([]);
+  });
+
+  it("shows the check's backend message in the dialog, without a toast", () => {
+    // Arrange
+    pick();
+    httpMock.expectOne(url).flush(PREVIEW);
+    component.assign(0, 'surah');
+    component.assign(1, 'ayah');
+    component.assign(2, 'text');
+
+    // Act
+    fixture.detectChanges();
+    httpMock
+      .expectOne(url)
+      .flush(
+        { error_name: 'content_file_unparseable', message: 'Header must be the first row.' },
+        { status: 400, statusText: 'Bad Request' }
+      );
+
+    // Assert
+    expect(component.draftCheck()?.error).toBe('Header must be the first row.');
+    expect(message.error).not.toHaveBeenCalled();
+  });
+
+  it("lists the first preview's flagged rows when the headers already match", () => {
+    // Act
+    pick();
+    httpMock.expectOne(url).flush({ ...PREVIEW, complete: true, attention_rows: [4] });
+
+    // Assert
+    expect(component.attentionRows()).toEqual([4]);
   });
 });

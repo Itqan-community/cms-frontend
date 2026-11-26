@@ -411,7 +411,11 @@ container owns the API calls and the single picker modal. Quality tab menu suppo
   files: `word_id` or surah + ayah + word). When a required field is unmatched it opens the "Match
   file columns" dialog (one select per file column: a field or Ignore) and keeps the upload blocked
   (`readyChange`) until every required field has a column; the confirmed mapping goes out as the
-  `column_mapping` form field (JSON, field → column index). Matched files send none
+  `column_mapping` form field (JSON, field → column index). Matched files send none. Each complete
+  draft in the open dialog re-sends the preview with that `column_mapping` (header must then be the
+  first row); the returned `attention_rows` (text rows between the header and the data, which the
+  import reports as errors) are listed in the dialog and, for the mapping in use, under the status
+  line; a failed check shows the backend's message inline (no toast) and does not block
 - `asset-versions-manager/` — Version CRUD (text asset/mushaf/font; program when re-enabled); CSV
   `export/` then `file_url` fallback. Text asset/mushaf/font (`numbered()`): `name` is the locked
   version number and `label` the editable version name — the package registry (`itqan` CLI) only

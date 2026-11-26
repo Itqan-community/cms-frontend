@@ -2823,6 +2823,7 @@
       "MISSING": "Choose a column for: {{fields}}",
       "CONFIRM": "Use these columns",
       "PREVIEW_ERROR": "The file's columns could not be read.",
+      "ATTENTION_ROWS": "Rows between the header row and the data: {{rows}}. The import will report them as errors; remove them from the file before you upload.",
       "FIELDS": {
         "SURAH": "Surah",
         "AYAH": "Ayah",
