@@ -194,8 +194,8 @@ describe('usage-chart-options', () => {
       asBuilt(buildHourOfWeekOptions([], { rtl: false, dayLabels: [], dark })) as unknown as {
         visualMap: { inRange: { color: string[] } };
       };
-    expect(build(false).visualMap.inRange.color).toEqual(['#f0f5f2', '#527c66', '#22433d']);
-    expect(build(true).visualMap.inRange.color[0]).toBe('#17221d');
+    expect(build(false).visualMap.inRange.color).toEqual(['#eef5f6', '#156375', '#0b2833']);
+    expect(build(true).visualMap.inRange.color[0]).toBe('#0f3540');
   });
 
   describe('localized tooltips', () => {
