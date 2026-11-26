@@ -185,7 +185,7 @@
         nzSize="small"
         [nzOptions]="calendarOptions()"
         [ngModel]="hijri() ? 'hijri' : 'gregorian'"
-        (ngModelChange)="hijri.set($event === 'hijri')"
+        (ngModelChange)="setCalendar($event)"
       ></nz-segmented>
     }
   </div>

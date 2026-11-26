@@ -16,9 +16,13 @@
     }
   </header>
 
-  <nz-tabset>
+  <nz-tabset [nzSelectedIndex]="tabIndex()" (nzSelectedIndexChange)="onTabChange($event)">
     <nz-tab [nzTitle]="'USAGE.TABS.DASHBOARD' | translate">
-      <app-usage-dashboard [scope]="scope()" [publisherId]="selectedPublisherId()" />
+      <app-usage-dashboard
+        [scope]="scope()"
+        [publisherId]="selectedPublisherId()"
+        [active]="tab() === 'dashboard'"
+      />
     </nz-tab>
     <nz-tab [nzTitle]="'USAGE.TABS.RECITATIONS' | translate">
       <ng-template nz-tab>
@@ -26,9 +30,7 @@
           [scope]="scope()"
           [publisherId]="selectedPublisherId()"
           category="recitation"
-          [syncUrl]="false"
-          [sharedRange]="range()"
-          (rangeChange)="onRangeChange($event)"
+          [active]="tab() === 'recitations'"
         />
       </ng-template>
     </nz-tab>
@@ -38,9 +40,7 @@
           [scope]="scope()"
           [publisherId]="selectedPublisherId()"
           category="text"
-          [syncUrl]="false"
-          [sharedRange]="range()"
-          (rangeChange)="onRangeChange($event)"
+          [active]="tab() === 'text'"
         />
       </ng-template>
     </nz-tab>
