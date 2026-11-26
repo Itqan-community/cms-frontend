@@ -1,0 +1,35 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.fl-code__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.fl-code__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.fl-code__copy {
+  flex: none;
+  margin: 10px;
+  min-height: 36px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--fanar-hero-line);
+  background: transparent;
+  color: var(--fanar-code-text);
+  font: inherit;
+  font-family: var(--fanar-font-sans);
+  font-size: 13px;
+  cursor: pointer;
+
+  &:focus-visible {
+    outline: 3px solid var(--fanar-mint);
+    outline-offset: 2px;
+  }
+}

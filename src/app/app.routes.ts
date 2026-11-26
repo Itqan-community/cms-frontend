@@ -9,10 +9,32 @@ import { tenantReadyGuard } from './features/admin/guards/tenant-ready.guard';
 import { PORTAL_PERMISSIONS } from './features/admin/constants/portal-permission.constants';
 
 export const routes: Routes = [
+  // The landing pages (B9). Publisher hosts keep their gallery as the home page.
   {
     path: '',
-    redirectTo: 'gallery',
     pathMatch: 'full',
+    canActivate: [publisherHostGuard],
+    loadComponent: () =>
+      import('./features/landing/pages/entry/entry.page').then((m) => m.EntryPage),
+    data: { fullWidth: true },
+  },
+  {
+    path: 'for-publishers',
+    canActivate: [publisherHostGuard],
+    loadComponent: () =>
+      import('./features/landing/pages/for-publishers/for-publishers.page').then(
+        (m) => m.ForPublishersPage
+      ),
+    data: { fullWidth: true },
+  },
+  {
+    path: 'for-developers',
+    canActivate: [publisherHostGuard],
+    loadComponent: () =>
+      import('./features/landing/pages/for-developers/for-developers.page').then(
+        (m) => m.ForDevelopersPage
+      ),
+    data: { fullWidth: true },
   },
   {
     path: 'gallery',

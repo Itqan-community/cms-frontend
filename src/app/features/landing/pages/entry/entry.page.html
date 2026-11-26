@@ -1,0 +1,128 @@
+<div class="fl-page">
+  <section class="fl-hero">
+    <div class="fl-container entry-hero">
+      <p class="fl-eyebrow">{{ 'LANDING.ENTRY.EYEBROW' | translate }}</p>
+      <h1 class="fl-h1 entry-hero__title">{{ 'LANDING.ENTRY.TITLE' | translate }}</h1>
+      <p class="fl-lead entry-hero__sub">{{ 'LANDING.ENTRY.SUB' | translate }}</p>
+
+      <div class="who">
+        <span id="who-label" class="who__label">{{ 'LANDING.ENTRY.WHO' | translate }}</span>
+        <div class="who__toggle" role="group" aria-labelledby="who-label">
+          <button
+            type="button"
+            class="who__btn"
+            [class.who__btn--on]="persona() === 'pub'"
+            [attr.aria-pressed]="persona() === 'pub'"
+            (click)="pick('pub')"
+          >
+            {{ 'LANDING.ENTRY.TAB_PUB' | translate }}
+          </button>
+          <button
+            type="button"
+            class="who__btn"
+            [class.who__btn--on]="persona() === 'dev'"
+            [attr.aria-pressed]="persona() === 'dev'"
+            (click)="pick('dev')"
+          >
+            {{ 'LANDING.ENTRY.TAB_DEV' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <main class="fl-container entry-main">
+    <section class="persona" aria-live="polite">
+      <div class="persona__copy">
+        <p class="fl-eyebrow">{{ prefix() + '.EYEBROW' | translate }}</p>
+        <h2 class="fl-h2">{{ prefix() + '.TITLE' | translate }}</h2>
+        <p class="fl-muted persona__sub">{{ prefix() + '.SUB' | translate }}</p>
+        <div class="fl-actions persona__actions">
+          @if (persona() === 'pub') {
+            <a class="fl-btn fl-btn--primary" routerLink="/for-publishers">
+              {{ 'LANDING.ENTRY.PUB.CTA' | translate }}
+            </a>
+            <a class="fl-btn fl-btn--ghost" routerLink="/for-publishers" fragment="join">
+              {{ 'LANDING.ENTRY.PUB.CTA2' | translate }}
+            </a>
+          } @else {
+            <a class="fl-btn fl-btn--primary" routerLink="/for-developers">
+              {{ 'LANDING.ENTRY.DEV.CTA' | translate }}
+            </a>
+            <a class="fl-btn fl-btn--ghost" routerLink="/gallery">
+              {{ 'LANDING.ENTRY.DEV.CTA2' | translate }}
+            </a>
+          }
+        </div>
+        <p class="fl-small">{{ prefix() + '.NOTE' | translate }}</p>
+      </div>
+
+      <div class="persona__side">
+        @if (persona() === 'pub') {
+          <div class="fl-mint-card">
+            <p class="persona__ex-label">{{ 'LANDING.COMMON.LIVE_EX' | translate }}</p>
+            <a
+              class="fl-mono persona__ex-host"
+              href="https://tahbeer.net"
+              dir="ltr"
+              target="_blank"
+              rel="noopener"
+            >
+              tahbeer.net
+            </a>
+            <p>{{ 'LANDING.ENTRY.LIVE_EX_D' | translate }}</p>
+          </div>
+        } @else {
+          <app-landing-code heading="~/my-quran-app" [lines]="devCode" [copyable]="true" />
+        }
+        <ol class="fl-steps">
+          @for (n of steps; track n) {
+            <li>
+              <svg class="fl-octagon" viewBox="0 0 26 26" aria-hidden="true">
+                <polygon [attr.points]="octagon" />
+              </svg>
+              <span class="fl-step-text">
+                <b>{{ prefix() + '.STEPS.' + n + '.H' | translate }}</b>
+                <span class="fl-muted">{{ prefix() + '.STEPS.' + n + '.D' | translate }}</span>
+              </span>
+            </li>
+          }
+        </ol>
+      </div>
+    </section>
+
+    <section class="stats" [attr.aria-label]="'LANDING.ENTRY.STATS_LABEL' | translate">
+      <div class="stats__item stats__item--lead">
+        <div class="stats__n">{{ stats.assets }}</div>
+        <div class="fl-muted">{{ 'LANDING.ENTRY.STAT_ASSETS' | translate }}</div>
+      </div>
+      <div class="stats__item">
+        <div class="stats__n">{{ stats.publishers }}</div>
+        <div class="fl-muted">{{ 'LANDING.ENTRY.STAT_PUBLISHERS' | translate }}</div>
+      </div>
+      <div class="stats__item">
+        <div class="stats__n">{{ stats.recitations }}</div>
+        <div class="fl-muted">
+          {{ 'LANDING.ENTRY.STAT_RECITATIONS' | translate: { reciters: stats.reciters } }}
+        </div>
+      </div>
+      <div class="stats__item">
+        <div class="stats__n">{{ stats.packages }}</div>
+        <div class="fl-muted">{{ 'LANDING.ENTRY.STAT_PACKAGES' | translate }}</div>
+      </div>
+    </section>
+
+    <section class="trusted">
+      <p class="fl-eyebrow">{{ 'LANDING.ENTRY.TRUSTED' | translate }}</p>
+      <p class="trusted__names">{{ 'LANDING.ENTRY.PUB_NAMES' | translate }}</p>
+      <p class="fl-small">{{ 'LANDING.COMMON.AS_OF' | translate: { date: asOf() } }}</p>
+    </section>
+  </main>
+
+  <footer class="entry-footer">
+    <div class="fl-container entry-footer__row">
+      <span>{{ 'LANDING.ENTRY.FOOTER' | translate }}</span>
+      <span class="fl-mono" dir="ltr">cms.itqan.dev</span>
+    </div>
+  </footer>
+</div>

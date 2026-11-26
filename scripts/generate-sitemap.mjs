@@ -15,7 +15,14 @@ const SITE_URL = 'https://cms.itqan.dev';
 const API_BASE_URL = 'https://api.cms.itqan.dev/cms-api';
 const RECITERS_PAGE_SIZE = 100;
 
-const STATIC_ROUTES = ['/', '/gallery', '/publishers', '/reciters'];
+const STATIC_ROUTES = [
+  '/',
+  '/for-publishers',
+  '/for-developers',
+  '/gallery',
+  '/publishers',
+  '/reciters',
+];
 
 function xmlEscape(value) {
   return String(value)

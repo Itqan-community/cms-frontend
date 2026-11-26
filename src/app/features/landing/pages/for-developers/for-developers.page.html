@@ -1,0 +1,194 @@
+<div class="fl-page">
+  <section class="fl-hero">
+    <div class="fl-container dev-hero">
+      <div class="dev-hero__copy">
+        <p class="fl-eyebrow">{{ 'LANDING.DEV.HERO_EYEBROW' | translate }}</p>
+        <h1 class="fl-h1">{{ 'LANDING.DEV.HERO_TITLE' | translate }}</h1>
+        <p class="fl-lead">{{ 'LANDING.DEV.HERO_SUB' | translate }}</p>
+        <div class="fl-actions">
+          <a class="fl-btn fl-btn--primary" routerLink="." fragment="try">
+            {{ 'LANDING.DEV.START' | translate }}
+          </a>
+          <a class="fl-btn fl-btn--ghost" routerLink="/gallery">{{
+            'LANDING.DEV.BROWSE' | translate
+          }}</a>
+        </div>
+        <ul class="dev-hero__chips">
+          @for (c of chips; track c) {
+            <li class="fl-chip">{{ 'LANDING.DEV.CHIPS.' + c | translate }}</li>
+          }
+        </ul>
+      </div>
+      <app-landing-code heading="~/my-quran-app" [lines]="heroCode" [copyable]="true" />
+    </div>
+  </section>
+
+  <nav class="dev-nav" [attr.aria-label]="'LANDING.DEV.STAGES_LABEL' | translate">
+    <div class="fl-container">
+      <ol class="dev-nav__list">
+        @for (st of stages; track st.key; let first = $first) {
+          <li>
+            <a class="dev-nav__link" routerLink="." [fragment]="st.id">
+              <svg
+                class="fl-octagon"
+                [class.fl-octagon--filled]="first"
+                viewBox="0 0 26 26"
+                aria-hidden="true"
+              >
+                <polygon [attr.points]="octagon" />
+              </svg>
+              <span>{{ 'LANDING.DEV.STAGES.' + st.key | translate }}</span>
+            </a>
+          </li>
+        }
+        <li class="dev-nav__alt">
+          <a class="dev-nav__link" routerLink="/for-publishers">{{
+            'LANDING.COMMON.IM_PUB' | translate
+          }}</a>
+        </li>
+      </ol>
+    </div>
+  </nav>
+
+  <main class="fl-container">
+    <section id="discover" class="fl-section">
+      <div class="fl-section-head">
+        <p class="fl-eyebrow">{{ 'LANDING.DEV.STAGES.DISCOVER' | translate }}</p>
+        <h2 class="fl-h2">{{ 'LANDING.DEV.D1_TITLE' | translate }}</h2>
+        <p class="fl-muted">{{ 'LANDING.DEV.D1_SUB' | translate }}</p>
+      </div>
+      <div class="types">
+        @for (ty of types; track ty.key) {
+          <a class="fl-card types__card" routerLink="/gallery">
+            <span class="types__count">{{ ty.count }}</span>
+            <b class="fl-h3">{{ 'LANDING.DEV.TYPES.' + ty.key + '.H' | translate }}</b>
+            <span class="fl-muted">
+              {{ 'LANDING.DEV.TYPES.' + ty.key + '.D' | translate: { reciters: stats.reciters } }}
+            </span>
+            <span class="types__how fl-mono" dir="ltr">{{ ty.how }}</span>
+          </a>
+        }
+      </div>
+      <p class="fl-small">{{ 'LANDING.COMMON.AS_OF' | translate: { date: asOf() } }}</p>
+    </section>
+
+    <section id="try" class="fl-section try">
+      <div class="try__intro">
+        <p class="fl-eyebrow">
+          {{ 'LANDING.DEV.STAGES.TRY' | translate }} ·
+          {{ 'LANDING.DEV.STAGES.INTEGRATE' | translate }}
+        </p>
+        <h2 class="fl-h2">{{ 'LANDING.DEV.D2_TITLE' | translate }}</h2>
+        <p class="fl-muted">{{ 'LANDING.DEV.D2_SUB' | translate }}</p>
+        <div
+          #tablist
+          class="try__tabs"
+          role="tablist"
+          [attr.aria-label]="'LANDING.DEV.ENV_LABEL' | translate"
+        >
+          @for (p of panels; track p.key; let i = $index) {
+            <button
+              type="button"
+              role="tab"
+              class="try__tab"
+              [id]="'tab-' + p.key"
+              [attr.aria-selected]="i === tab()"
+              [attr.aria-controls]="'panel-' + p.key"
+              [attr.tabindex]="i === tab() ? 0 : -1"
+              [class.try__tab--on]="i === tab()"
+              (click)="pick(i)"
+              (keydown)="onTabKey($event, tablist)"
+            >
+              <b [attr.dir]="'auto'">{{ 'LANDING.DEV.PANELS.' + p.key + '.H' | translate }}</b>
+              <span class="fl-muted">{{ p.subIsKey ? (p.sub | translate) : p.sub }}</span>
+            </button>
+          }
+        </div>
+      </div>
+      <div
+        class="try__panel"
+        role="tabpanel"
+        [id]="'panel-' + panel().key"
+        [attr.aria-labelledby]="'tab-' + panel().key"
+      >
+        @for (st of panel().steps; track st.title; let i = $index) {
+          <div class="try__step">
+            <div class="try__step-head">
+              <span class="try__n">{{ i + 1 }}</span>
+              <b>{{ 'LANDING.DEV.PANELS.' + panel().key + '.' + st.title | translate }}</b>
+            </div>
+            <app-landing-code [lines]="st.code" [copyable]="true" [snippet]="!!st.snippet" />
+            @if (st.note) {
+              <p class="fl-small">
+                {{ 'LANDING.DEV.PANELS.' + panel().key + '.' + st.note | translate }}
+              </p>
+            }
+          </div>
+        }
+      </div>
+    </section>
+
+    <section id="ship" class="fl-section">
+      <div class="fl-section-head">
+        <p class="fl-eyebrow">{{ 'LANDING.DEV.STAGES.SHIP' | translate }}</p>
+        <h2 class="fl-h2">{{ 'LANDING.DEV.D4_TITLE' | translate }}</h2>
+      </div>
+      <div class="ship">
+        <app-landing-code [lines]="ciCode" [copyable]="true" [snippet]="true" />
+        <div class="fl-grid ship__items">
+          @for (n of ship; track n) {
+            <div class="fl-card">
+              <b class="fl-h3">{{ 'LANDING.DEV.SHIP.' + n + '.H' | translate }}</b>
+              <p class="fl-muted">{{ 'LANDING.DEV.SHIP.' + n + '.D' | translate }}</p>
+            </div>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section id="update" class="fl-section update">
+      <div class="fl-section-head">
+        <p class="fl-eyebrow">{{ 'LANDING.DEV.STAGES.UPDATE' | translate }}</p>
+        <h2 class="fl-h2">{{ 'LANDING.DEV.D5_TITLE' | translate }}</h2>
+        <p class="fl-muted">{{ 'LANDING.DEV.D5_SUB' | translate }}</p>
+      </div>
+      <app-landing-code [lines]="updateCode" [copyable]="true" />
+    </section>
+
+    <section class="fl-section">
+      <h2 class="fl-h2">{{ 'LANDING.DEV.WHY_TITLE' | translate }}</h2>
+      <div class="fl-grid">
+        @for (n of why; track n) {
+          <div class="fl-card">
+            <b class="fl-h3">{{ 'LANDING.DEV.WHY.' + n + '.H' | translate }}</b>
+            <p class="fl-muted">{{ 'LANDING.DEV.WHY.' + n + '.D' | translate }}</p>
+          </div>
+        }
+      </div>
+    </section>
+
+    <div class="fl-section">
+      <app-feature-showcase />
+    </div>
+
+    <section class="fl-section end">
+      <div class="end__box">
+        <div class="end__copy">
+          <h2 class="fl-h2">{{ 'LANDING.DEV.END_TITLE' | translate }}</h2>
+          <p>{{ 'LANDING.DEV.END_SUB' | translate }}</p>
+        </div>
+        <div class="fl-actions">
+          <a class="fl-btn end__primary" routerLink="/register">{{
+            'LANDING.DEV.SIGNUP' | translate
+          }}</a>
+          <a class="fl-btn end__ghost" [href]="docsUrl" target="_blank" rel="noopener">
+            {{ 'LANDING.DEV.NAV_API' | translate }}
+          </a>
+          <a class="fl-btn end__ghost" routerLink="/gallery">{{
+            'LANDING.DEV.BROWSE' | translate
+          }}</a>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>

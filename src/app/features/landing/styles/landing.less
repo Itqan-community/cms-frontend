@@ -1,0 +1,296 @@
+// Shared building blocks of the Fanar landing pages (mockups v15, deck identity). Global (imported
+// by src/styles.less), all prefixed fl-; colours come from the --fanar-* tokens in src/theme.less.
+
+.fl-page {
+  display: block;
+  min-height: 100vh;
+  background: var(--fanar-bg);
+  color: var(--fanar-ink);
+  font-family: var(--fanar-font-sans);
+  font-size: 16px;
+  line-height: 1.6;
+
+  h1,
+  h2,
+  h3,
+  p,
+  ol,
+  ul {
+    margin: 0;
+  }
+
+  a:focus-visible,
+  button:focus-visible {
+    outline: 3px solid var(--fanar-mint);
+    outline-offset: 2px;
+  }
+}
+
+.fl-container {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 24px;
+
+  @media (max-width: 600px) {
+    padding: 0 16px;
+  }
+}
+
+.fl-hero {
+  background:
+    radial-gradient(900px 560px at 100% 0%, rgba(21, 99, 117, 0.55), transparent 70%),
+    radial-gradient(820px 520px at 0% 100%, rgba(102, 153, 127, 0.4), transparent 70%),
+    var(--fanar-hero);
+  color: var(--fanar-hero-text);
+
+  .fl-eyebrow {
+    color: var(--fanar-mint);
+  }
+
+  .fl-lead {
+    color: var(--fanar-hero-muted);
+  }
+}
+
+.fl-eyebrow {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--fanar-accent);
+}
+
+.fl-display {
+  font-family: var(--fanar-font-display);
+  font-weight: 500;
+  text-wrap: balance;
+}
+
+.fl-h1 {
+  .fl-display();
+  font-size: clamp(36px, 5.6vw, 76px);
+  line-height: 1.15;
+}
+
+.fl-h2 {
+  .fl-display();
+  font-size: clamp(28px, 3.4vw, 46px);
+  line-height: 1.2;
+}
+
+.fl-h3 {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.fl-lead {
+  font-size: clamp(17px, 1.7vw, 22px);
+  color: var(--fanar-muted);
+}
+
+.fl-muted {
+  color: var(--fanar-muted);
+}
+
+.fl-small {
+  font-size: 15px;
+  color: var(--fanar-muted);
+}
+
+.fl-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.fl-btn {
+  min-height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 26px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: opacity 0.15s;
+
+  &:hover {
+    opacity: 0.88;
+  }
+
+  &--primary,
+  &--primary:hover,
+  &--primary:visited {
+    background: var(--fanar-btn);
+    color: var(--fanar-on-btn);
+  }
+
+  &--ghost,
+  &--ghost:hover,
+  &--ghost:visited {
+    background: transparent;
+    border-color: var(--fanar-line);
+    color: inherit;
+    font-weight: 500;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// In the navy hero the primary button is mint, the ghost button white-on-navy.
+.fl-hero .fl-btn--primary {
+  background: var(--fanar-mint);
+  color: var(--fanar-navy);
+}
+.fl-hero .fl-btn--ghost {
+  border-color: var(--fanar-hero-line);
+  color: var(--fanar-hero-text);
+}
+
+.fl-section {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 64px 0;
+
+  @media (max-width: 600px) {
+    padding: 44px 0;
+  }
+}
+
+.fl-section-head {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 820px;
+}
+
+.fl-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+}
+
+.fl-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 24px;
+  border-radius: 18px;
+  background: var(--fanar-surface);
+  border: 1px solid var(--fanar-line);
+  min-width: 0;
+}
+
+.fl-code {
+  direction: ltr;
+  text-align: left;
+  border-radius: 18px;
+  background: var(--fanar-code);
+  border: 1px solid var(--fanar-code-line);
+  overflow: hidden;
+  font-family: var(--fanar-font-mono);
+  color: var(--fanar-code-text);
+
+  &__title {
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--fanar-hero-line);
+    font-size: 12px;
+    color: var(--fanar-code-muted);
+  }
+
+  &__body {
+    padding: 16px 18px;
+    font-size: 14px;
+    line-height: 1.85;
+    overflow-x: auto;
+  }
+
+  &__line {
+    white-space: pre;
+
+    &--cmd {
+      color: var(--fanar-mint);
+    }
+    &--comment {
+      color: var(--fanar-code-muted);
+    }
+  }
+}
+
+.fl-mono {
+  font-family: var(--fanar-font-mono);
+}
+
+.fl-octagon {
+  flex: none;
+  width: 24px;
+  height: 24px;
+
+  polygon {
+    fill: var(--fanar-bg);
+    stroke: var(--fanar-accent);
+    stroke-width: 2;
+    stroke-linejoin: round;
+  }
+
+  &--filled polygon {
+    fill: var(--fanar-accent);
+  }
+}
+
+.fl-steps {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+
+  > li {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 16px 0;
+    border-top: 1px solid var(--fanar-line);
+  }
+
+  .fl-octagon {
+    margin-top: 3px;
+  }
+}
+
+.fl-step-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+
+  b {
+    font-size: 18px;
+  }
+}
+
+.fl-chip {
+  display: inline-flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 14px;
+  border-radius: 999px;
+  border: 1px solid var(--fanar-hero-line);
+  font-size: 14px;
+}
+
+.fl-mint-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 28px;
+  border-radius: 18px;
+  background: var(--fanar-mint);
+  color: var(--fanar-navy);
+}

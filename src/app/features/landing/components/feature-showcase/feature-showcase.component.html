@@ -1,0 +1,91 @@
+<section
+  #host
+  class="showcase"
+  aria-roledescription="carousel"
+  aria-labelledby="showcase-title"
+  (mouseenter)="hold(true)"
+  (mouseleave)="hold(false)"
+  (focusin)="hold(true)"
+  (focusout)="onFocusOut($event, host)"
+>
+  <div class="showcase__head">
+    <div class="fl-section-head">
+      <p class="fl-eyebrow">{{ 'LANDING.FEATURES.EYEBROW' | translate }}</p>
+      <h2 id="showcase-title" class="fl-h2">{{ 'LANDING.FEATURES.TITLE' | translate }}</h2>
+    </div>
+    <div
+      class="showcase__controls"
+      role="group"
+      [attr.aria-label]="'LANDING.FEATURES.CTRL' | translate"
+    >
+      <button
+        type="button"
+        class="showcase__arrow"
+        [attr.aria-label]="'LANDING.FEATURES.PREV' | translate"
+        (click)="go(page() - 1)"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="flip-with-dir">
+          <path d="M9 6l6 6-6 6" />
+        </svg>
+      </button>
+      <div class="showcase__dots">
+        @for (p of pages; track p) {
+          <button
+            type="button"
+            class="showcase__dot"
+            [class.showcase__dot--current]="p === page()"
+            [attr.aria-current]="p === page() ? 'true' : null"
+            [attr.aria-label]="'LANDING.FEATURES.SET' | translate: { n: p + 1 }"
+            (click)="go(p)"
+          >
+            <span></span>
+          </button>
+        }
+      </div>
+      <button
+        type="button"
+        class="showcase__arrow"
+        [attr.aria-label]="'LANDING.FEATURES.NEXT' | translate"
+        (click)="go(page() + 1)"
+      >
+        <svg viewBox="0 0 24 24" aria-hidden="true" class="flip-with-dir">
+          <path d="M15 6l-6 6 6 6" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        class="showcase__toggle"
+        [attr.aria-pressed]="stopped()"
+        (click)="toggle()"
+      >
+        @if (stopped()) {
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="filled">
+            <path d="M7 5v14l12-7L7 5Z" />
+          </svg>
+          <span>{{ 'LANDING.FEATURES.PLAY' | translate }}</span>
+        } @else {
+          <svg viewBox="0 0 24 24" aria-hidden="true" class="filled">
+            <rect x="6" y="5" width="4" height="14" rx="1" />
+            <rect x="14" y="5" width="4" height="14" rx="1" />
+          </svg>
+          <span>{{ 'LANDING.FEATURES.STOP' | translate }}</span>
+        }
+      </button>
+    </div>
+  </div>
+
+  <ul class="showcase__list" [attr.aria-live]="stopped() ? 'polite' : 'off'">
+    @for (f of items(); track f.key) {
+      <li class="showcase__item">
+        <span class="showcase__icon">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path [attr.d]="f.icon" /></svg>
+        </span>
+        <b>{{ 'LANDING.FEATURES.ITEMS.' + f.key + '.H' | translate }}</b>
+        <span class="fl-muted">{{ 'LANDING.FEATURES.ITEMS.' + f.key + '.D' | translate }}</span>
+      </li>
+    }
+  </ul>
+  <p class="fl-small">
+    {{ 'LANDING.FEATURES.COUNT' | translate: { from: from(), to: to(), total: total } }}
+  </p>
+</section>

@@ -1,0 +1,33 @@
+<div class="fl-code">
+  @if (heading()) {
+    <div class="fl-code__title">{{ heading() }}</div>
+  }
+  <div class="fl-code__row">
+    <div class="fl-code__body">
+      @for (line of lines(); track $index) {
+        <div
+          class="fl-code__line"
+          [class.fl-code__line--cmd]="line.kind === 'cmd'"
+          [class.fl-code__line--comment]="line.kind === 'comment'"
+        >
+          {{ line.text }}
+        </div>
+      }
+    </div>
+    @if (copyable()) {
+      <button type="button" class="fl-code__copy" (click)="copy()">
+        @switch (copyState()) {
+          @case ('copied') {
+            {{ 'LANDING.COMMON.COPIED' | translate }}
+          }
+          @case ('failed') {
+            {{ 'LANDING.COMMON.COPY_FAILED' | translate }}
+          }
+          @default {
+            {{ 'LANDING.COMMON.COPY' | translate }}
+          }
+        }
+      </button>
+    }
+  </div>
+</div>

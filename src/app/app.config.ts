@@ -6,7 +6,7 @@ import {
   provideBrowserGlobalErrorListeners,
   provideZoneChangeDetection,
 } from '@angular/core';
-import { provideRouter, Router } from '@angular/router';
+import { provideRouter, Router, withInMemoryScrolling } from '@angular/router';
 import * as Sentry from '@sentry/angular';
 import { environment } from '../environments/environment';
 
@@ -35,7 +35,8 @@ export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideRouter(routes),
+    // anchorScrolling: the landing pages link to their own sections (routerLink + fragment).
+    provideRouter(routes, withInMemoryScrolling({ anchorScrolling: 'enabled' })),
     ...(environment.sentryDsn
       ? [
           {

@@ -1,0 +1,182 @@
+<div class="fl-page">
+  <section class="fl-hero">
+    <div class="fl-container pub-hero">
+      <div class="pub-hero__copy">
+        <p class="fl-eyebrow">{{ 'LANDING.PUB.HERO_EYEBROW' | translate }}</p>
+        <h1 class="fl-h1">{{ 'LANDING.PUB.HERO_TITLE' | translate }}</h1>
+        <p class="fl-lead">{{ 'LANDING.PUB.HERO_SUB' | translate }}</p>
+        <div class="fl-actions">
+          <a class="fl-btn fl-btn--primary" routerLink="." fragment="join">
+            {{ 'LANDING.PUB.CONTACT_JOIN' | translate }}
+          </a>
+          <a class="fl-btn fl-btn--ghost" routerLink="." fragment="journey">
+            {{ 'LANDING.PUB.HOW_START' | translate }}
+          </a>
+        </div>
+      </div>
+      <div class="channels" role="group" [attr.aria-label]="'LANDING.PUB.CH_LABEL' | translate">
+        <div class="channels__head">
+          <b>{{ 'LANDING.PUB.CH_TITLE' | translate }}</b>
+          <span>{{ 'LANDING.PUB.CH_ALL' | translate }}</span>
+        </div>
+        @for (c of channels; track c.key) {
+          <div class="channels__row">
+            <span class="channels__box" [class.channels__box--on]="c.on">
+              @if (c.on) {
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12l5 5 9-10" /></svg>
+              }
+              <span class="sr-only">
+                {{ (c.on ? 'LANDING.PUB.CH_ON' : 'LANDING.PUB.CH_OFF') | translate }}
+              </span>
+            </span>
+            <span>
+              <b [attr.dir]="c.key === 'CLI' ? 'ltr' : null">
+                {{ 'LANDING.PUB.CHANNELS.' + c.key + '.H' | translate }}
+              </b>
+              <span class="channels__d">{{
+                'LANDING.PUB.CHANNELS.' + c.key + '.D' | translate
+              }}</span>
+            </span>
+          </div>
+        }
+        <p class="channels__warn">{{ 'LANDING.PUB.CH_WARN' | translate }}</p>
+      </div>
+    </div>
+  </section>
+
+  <nav class="pub-nav" [attr.aria-label]="'LANDING.COMMON.PAGE_SECTIONS' | translate">
+    <div class="fl-container pub-nav__row">
+      @for (p of pillars; track p.key) {
+        <a class="pub-nav__link" routerLink="." [fragment]="p.id">
+          {{ 'LANDING.PUB.PILLARS.' + p.key + '.VERB' | translate }}
+        </a>
+      }
+      <a class="pub-nav__link pub-nav__link--alt" routerLink="/for-developers">
+        {{ 'LANDING.COMMON.IM_DEV' | translate }}
+      </a>
+    </div>
+  </nav>
+
+  <main class="fl-container">
+    <section class="fl-section" aria-labelledby="problem-h">
+      <div class="fl-section-head">
+        <p class="fl-eyebrow">{{ 'LANDING.PUB.PROB_EYEBROW' | translate }}</p>
+        <h2 id="problem-h" class="fl-h2">{{ 'LANDING.PUB.PROB_TITLE' | translate }}</h2>
+      </div>
+      <div class="fl-grid">
+        @for (n of problems; track n) {
+          <div class="fl-card">
+            <h3 class="fl-h3">{{ 'LANDING.PUB.PROBLEMS.' + n + '.H' | translate }}</h3>
+            <p class="fl-muted">{{ 'LANDING.PUB.PROBLEMS.' + n + '.D' | translate }}</p>
+          </div>
+        }
+      </div>
+      <p class="pub-fourth">
+        {{ 'LANDING.PUB.FOURTH' | translate }}
+        <b>{{ 'LANDING.PUB.FOURTH_B' | translate }}</b>
+      </p>
+    </section>
+
+    @for (p of pillars; track p.key) {
+      <section class="fl-section pillar" [id]="p.id" [attr.aria-labelledby]="p.id + '-h'">
+        <div class="pillar__intro">
+          <span class="pillar__n">{{ 'LANDING.PUB.STEP_OF' | translate: { n: p.n } }}</span>
+          <h2 class="fl-h2" [id]="p.id + '-h'">
+            {{ 'LANDING.PUB.PILLARS.' + p.key + '.VERB' | translate }}
+          </h2>
+          <p class="pillar__promise">
+            {{ 'LANDING.PUB.PILLARS.' + p.key + '.PROMISE' | translate }}
+          </p>
+          <p class="fl-muted">{{ 'LANDING.PUB.PILLARS.' + p.key + '.WHY' | translate }}</p>
+        </div>
+        <div class="fl-grid pillar__items">
+          @for (i of items; track i) {
+            <div class="fl-card">
+              <h3 class="fl-h3">
+                {{ 'LANDING.PUB.PILLARS.' + p.key + '.ITEMS.' + i + '.H' | translate }}
+              </h3>
+              <p class="fl-muted">
+                {{ 'LANDING.PUB.PILLARS.' + p.key + '.ITEMS.' + i + '.D' | translate }}
+              </p>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <section class="live-ex">
+      <div class="live-ex__copy">
+        <p class="live-ex__label">{{ 'LANDING.COMMON.LIVE_EX' | translate }}</p>
+        <p>{{ 'LANDING.PUB.LIVE_EX_D' | translate }}</p>
+      </div>
+      <a
+        class="fl-btn live-ex__link fl-mono"
+        href="https://tahbeer.net"
+        target="_blank"
+        rel="noopener"
+        dir="ltr"
+      >
+        tahbeer.net
+      </a>
+    </section>
+
+    <section id="journey" class="fl-section" aria-labelledby="journey-h">
+      <div class="fl-section-head">
+        <p class="fl-eyebrow">{{ 'LANDING.PUB.J_EYEBROW' | translate }}</p>
+        <h2 id="journey-h" class="fl-h2">{{ 'LANDING.PUB.J_TITLE' | translate }}</h2>
+      </div>
+      <ol class="journey">
+        @for (j of journey; track j; let first = $first) {
+          <li class="journey__step">
+            <div class="journey__mark" aria-hidden="true">
+              <svg class="fl-octagon" [class.fl-octagon--filled]="first" viewBox="0 0 26 26">
+                <polygon [attr.points]="octagon" />
+              </svg>
+              <span class="journey__line"></span>
+            </div>
+            <div class="fl-step-text">
+              <b>{{ 'LANDING.PUB.JOURNEY.' + j + '.H' | translate }}</b>
+              <span class="fl-muted">{{ 'LANDING.PUB.JOURNEY.' + j + '.D' | translate }}</span>
+            </div>
+          </li>
+        }
+      </ol>
+    </section>
+
+    <div class="fl-section">
+      <app-feature-showcase />
+    </div>
+
+    <section id="join" class="fl-section join" aria-labelledby="join-h">
+      <div class="join__copy">
+        <p class="fl-eyebrow">{{ 'LANDING.PUB.JOIN_EYEBROW' | translate }}</p>
+        <h2 id="join-h" class="fl-h2">{{ 'LANDING.PUB.JOIN_TITLE' | translate }}</h2>
+        <p class="fl-muted">{{ 'LANDING.PUB.JOIN_SUB' | translate }}</p>
+        <ol class="join__steps">
+          @for (s of joinSteps; track s) {
+            <li>
+              <b class="join__n">{{ s }}</b>
+              <span>{{ 'LANDING.PUB.JOIN_STEPS.' + s | translate }}</span>
+            </li>
+          }
+        </ol>
+        <div class="join__email">
+          <span class="fl-small">{{ 'LANDING.PUB.EMAIL_LABEL' | translate }}</span>
+          <div class="join__email-row">
+            <a class="fl-mono join__email-link" [href]="'mailto:' + email" dir="ltr">{{ email }}</a>
+            <button type="button" class="fl-btn fl-btn--ghost join__copy-btn" (click)="copyEmail()">
+              {{ (emailCopied() ? 'LANDING.COMMON.COPIED' : 'LANDING.PUB.COPY_EMAIL') | translate }}
+            </button>
+          </div>
+        </div>
+        <p class="fl-small">
+          {{
+            'LANDING.PUB.PROOF' | translate: { assets: stats.assets, publishers: stats.publishers }
+          }}
+          {{ 'LANDING.COMMON.AS_OF' | translate: { date: asOf() } }}
+        </p>
+        <a class="join__portal" routerLink="/login">{{ 'LANDING.PUB.HAVE_ACCOUNT' | translate }}</a>
+      </div>
+    </section>
+  </main>
+</div>
