@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { callerShowsErrors } from '../../../core/interceptors/caller-shows-errors.context';
 import type {
   AssetColumn,
   AssetLanguage,
@@ -12,6 +13,7 @@ import type {
   ContentEntriesResponse,
   ContentEntry,
   ContentEntryPatch,
+  ContentIssueGroup,
   QuranPosition,
   QuranRangeResponse,
 } from '../models/asset-content.models';
@@ -76,6 +78,13 @@ export class AssetContentService {
   /** The asset's text columns, in file order. */
   listColumns(kind: AssetVersionParentKind, slug: string): Observable<AssetColumn[]> {
     return this.http.get<AssetColumn[]>(`${this.draftBase(kind, slug)}columns/`);
+  }
+
+  /** The asset's open issue reports, grouped by surah:ayah (every language shares them). */
+  listIssues(kind: AssetVersionParentKind, slug: string): Observable<ContentIssueGroup[]> {
+    return this.http.get<ContentIssueGroup[]>(`${this.draftBase(kind, slug)}issues/`, {
+      context: callerShowsErrors(),
+    });
   }
 
   /** Add a text column at the end (needs the manage-columns permission). */

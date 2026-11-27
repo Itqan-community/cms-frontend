@@ -117,6 +117,24 @@ export interface ContentEntriesResponse {
   count: number;
 }
 
+/** An open (pending / under review) issue report, as the editor grid lists it. */
+export interface ContentIssue {
+  id: number;
+  description: string;
+  status: 'pending' | 'under_review';
+  created_at: string;
+}
+
+/** The open issues reported on one ayah, and the grid row they land on. */
+export interface ContentIssueGroup {
+  surah: number;
+  ayah: number;
+  /** The row's `unit_id` (ayah, surah, first word of the ayah, or page). Null for
+   *  group templates, whose rows are matched by range, and for a page past the layout. */
+  unit_id: number | null;
+  issues: ContentIssue[];
+}
+
 /** A single dirty row sent to the PATCH entries endpoint. */
 export interface ContentEntryPatch {
   unit_id: number;

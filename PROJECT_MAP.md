@@ -451,12 +451,18 @@ container owns the API calls and the single picker modal. Quality tab menu suppo
   draft's `column_keys` (colId `cell__<key>`, reading/writing `row.cells[key]`; filters keyed
   `cell__<key>` / `source__<key>`); unsaved cells are keyed `unit:column` and PATCHed as
   `{unit_id, column, text}`. Translating, a remembered "Show source" switch inserts each read-only
-  `source__<key>` column before its translation. Users with `portal_manage_asset_columns` +
-  `portal_access_all_languages` get "+ Add column" and a ⚙ in each text column header
-  (`content-column-header.component.ts`, which also marks a filtered column) opening
-  `manage-columns-modal/` (add, optional labels en/ar, reorder, delete uncommitted; a label edit
-  only reloads the headers). Changed cells are highlighted per column (`changed_columns`). After a
-  reorder the commit dialog allows only a major version (`requires_major`, or a
+  `source__<key>` column before its translation. **Issue markers:** `GET …/issues/` (the asset's
+  pending / under-review reports by surah:ayah, shared by every language) adds a pinned "Issues"
+  column (`issue-marker-cell.component.ts`, a warning badge with the count) on the row each group
+  lands on (backend `unit_id`: the ayah, surah, first word of the ayah, or `Ayah.page`; group rows
+  match by range, word groups on the ayah's first word); clicking lists the issues (status, date,
+  description, link to `/admin/issues/{id}` in a new tab). A toolbar switch "Show reported issues
+  (N)" hides them, remembered per user (`content-grid:show-issues:<user id>`). Users with
+  `portal_manage_asset_columns` + `portal_access_all_languages` get "+ Add column" and a ⚙ in each
+  text column header (`content-column-header.component.ts`, which also marks a filtered column)
+  opening `manage-columns-modal/` (add, optional labels en/ar, reorder, delete uncommitted; a label
+  edit only reloads the headers). Changed cells are highlighted per column (`changed_columns`).
+  After a reorder the commit dialog allows only a major version (`requires_major`, or a
   `major_bump_required` answer). Diffs and review rows name each change's column when the asset has
   several. Column set is driven by `effectiveTemplate()` (the `template` input, else the draft's
   `template`, else a one-row probe's `unit_type` for older backends). The draft is opened alongside

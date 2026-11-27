@@ -60,6 +60,17 @@
           {{ 'ADMIN.CONTENT_EDITOR.SHOW_SOURCE' | translate }}
         </span>
       }
+      @if (issueCount() > 0) {
+        <span class="content-grid__show-issues">
+          <nz-switch
+            [attr.aria-label]="'ADMIN.CONTENT_EDITOR.ISSUES.SHOW' | translate"
+            nzSize="small"
+            [ngModel]="showIssues()"
+            (ngModelChange)="setShowIssues($event)"
+          ></nz-switch>
+          {{ 'ADMIN.CONTENT_EDITOR.ISSUES.SHOW' | translate }} ({{ issueCount() }})
+        </span>
+      }
     </div>
 
     @if (!readOnly()) {
@@ -468,6 +479,42 @@
           </div>
         }
       </div>
+    </ng-container>
+  </nz-modal>
+
+  <nz-modal
+    [nzVisible]="issuesDialog() !== null"
+    [nzTitle]="
+      'ADMIN.CONTENT_EDITOR.ISSUES.TITLE' | translate: { label: issuesDialog()?.label ?? '' }
+    "
+    [nzFooter]="null"
+    (nzOnCancel)="closeIssues()"
+  >
+    <ng-container *nzModalContent>
+      <ul class="content-grid__issues">
+        @for (issue of issuesDialog()?.issues ?? []; track issue.id) {
+          <li class="content-grid__issue">
+            <div class="content-grid__issue-meta">
+              <nz-tag [nzColor]="issue.status === 'pending' ? 'gold' : 'processing'">{{
+                'ADMIN.ISSUES.STATUS.' + (issue.status | uppercase) | translate
+              }}</nz-tag>
+              <span class="content-grid__issue-date">{{
+                issue.created_at | date: 'dd/MM/yyyy'
+              }}</span>
+              <a
+                class="content-grid__issue-link"
+                [routerLink]="['/admin/issues', issue.id]"
+                target="_blank"
+                rel="noopener"
+              >
+                {{ 'ADMIN.CONTENT_EDITOR.ISSUES.OPEN' | translate }}
+                <ng-icon name="lucideExternalLink" />
+              </a>
+            </div>
+            <p class="content-grid__issue-description" dir="auto">{{ issue.description }}</p>
+          </li>
+        }
+      </ul>
     </ng-container>
   </nz-modal>
 </div>

@@ -206,7 +206,8 @@
   }
 }
 
-.content-grid__show-source {
+.content-grid__show-source,
+.content-grid__show-issues {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -234,4 +235,44 @@
   // The admin theme rounds every button's corners; a FAB is a circle.
   border-radius: 50%;
   box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
+}
+
+.content-grid__issues {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.content-grid__issue {
+  padding: 10px 0;
+
+  & + & {
+    border-top: 1px solid var(--admin-border, #f0f0f0);
+  }
+}
+
+.content-grid__issue-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.content-grid__issue-date {
+  color: var(--admin-text-500);
+}
+
+.content-grid__issue-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-inline-start: auto;
+}
+
+.content-grid__issue-description {
+  margin: 6px 0 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
