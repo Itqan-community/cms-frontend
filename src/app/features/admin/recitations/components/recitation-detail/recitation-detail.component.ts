@@ -75,6 +75,7 @@ import {
 } from '../../utils/timing-upload-result.format';
 import { QualitySwitcherComponent } from '../quality-switcher/quality-switcher.component';
 import { TimingCoverageTagComponent } from '../timing-coverage-tag/timing-coverage-tag.component';
+import { TimingLevelBadgeComponent } from '../../../../../shared/components/timing-level-badge/timing-level-badge.component';
 import { AssetDetailTabsComponent } from '../../../components/asset-detail-tabs/asset-detail-tabs.component';
 import { AssetChannelTagsComponent } from '../../../components/asset-channels/asset-channels.component';
 
@@ -108,6 +109,7 @@ const MAX_MP3_FILES = 114;
     ReactiveFormsModule,
     QualitySwitcherComponent,
     TimingCoverageTagComponent,
+    TimingLevelBadgeComponent,
   ],
   templateUrl: './recitation-detail.component.html',
   styleUrl: './recitation-detail.component.less',

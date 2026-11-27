@@ -139,7 +139,10 @@
               }
 
               @if (showCol('timing')) {
-                <td><app-timing-coverage-tag [coverage]="item" /></td>
+                <td>
+                  <app-timing-level-badge [level]="item.timing_level" />
+                  <app-timing-coverage-tag [coverage]="item" />
+                </td>
               }
               @if (showCol('description')) {
                 <td class="admin-list-desc">{{ truncate(item.description) }}</td>

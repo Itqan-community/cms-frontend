@@ -28,6 +28,7 @@ import { AdminListBase } from '../../../utils/admin-list-base';
 import { AdminHijriYearPipe } from '../../../pipes/admin-hijri-year.pipe';
 import { AssetChannelTagsComponent } from '../../../components/asset-channels/asset-channels.component';
 import { TimingCoverageTagComponent } from '../timing-coverage-tag/timing-coverage-tag.component';
+import { TimingLevelBadgeComponent } from '../../../../../shared/components/timing-level-badge/timing-level-badge.component';
 
 @Component({
   selector: 'app-recitations-list',
@@ -48,6 +49,7 @@ import { TimingCoverageTagComponent } from '../timing-coverage-tag/timing-covera
     AdminColumnPickerComponent,
     TranslateModule,
     TimingCoverageTagComponent,
+    TimingLevelBadgeComponent,
     AdminHijriYearPipe,
   ],
   templateUrl: './recitations-list.component.html',

@@ -1,6 +1,7 @@
 import { Categories } from '../../../core/enums/categories.enum';
 import { Licenses } from '../../../core/enums/licenses.enum';
 import type { AssetTemplate } from '../../admin/models/asset-content.models';
+import type { TimingLevel } from '../../../shared/components/timing-level-badge/timing-level-badge.component';
 
 export type AssetAccessStatus = 'not_requested' | 'pending' | 'approved' | 'rejected';
 
@@ -32,6 +33,8 @@ export interface Asset {
   mushaf_layout: { id: number; name: string; page_count: number } | null;
   /** True when a recitation has per-ayah timings in a visible quality. */
   has_ayah_timings: boolean;
+  /** Finest timing of a recitation (visible qualities); null without timings. */
+  timing_level?: TimingLevel | null;
 }
 
 export interface AssetDetails {
@@ -61,6 +64,8 @@ export interface AssetDetails {
   mushaf_layout: { id: number; name: string; page_count: number } | null;
   /** How the itqan CLI installs the asset; null when it can't. */
   package?: AssetPackage | null;
+  /** Finest timing of a recitation (visible qualities); null without timings. */
+  timing_level?: TimingLevel | null;
 }
 
 export interface AssetPackage {

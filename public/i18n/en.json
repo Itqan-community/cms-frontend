@@ -561,7 +561,6 @@
     "VIEW_DETAILS": "View Details",
     "VIEW_LICENSE": "View License",
     "OPEN_ACCESS_BADGE": "Open access",
-    "AYAH_TIMED_BADGE": "Ayah-timed",
     "OPEN_ACCESS_HINT": "No access request required for this resource.",
     "REQUEST_ACCESS_BUTTON": "Request Access",
     "ACCESS_PENDING_HINT": "Your access request is being reviewed. You will be able to use this resource once it is approved.",
@@ -3137,6 +3136,14 @@
     "NOT_FOUND_TITLE": "Reciter not found",
     "NOT_FOUND_MESSAGE": "The reciter you're looking for doesn't exist or is no longer available.",
     "BACK_TO_RECITERS": "Back to Reciters"
+  },
+  "TIMING_LEVEL": {
+    "AYAH": "Timed per ayah",
+    "WORD": "Timed per word",
+    "SENTENCE": "Timed per sentence",
+    "AYAH_TOOLTIP": "The timings mark where each ayah starts and ends in the audio.",
+    "WORD_TOOLTIP": "The timings mark where each word starts and ends in the audio.",
+    "SENTENCE_TOOLTIP": "The timings mark where each sentence starts and ends in the audio."
   },
   "ISSUE_CONTEXT": {
     "TITLE": "Location",

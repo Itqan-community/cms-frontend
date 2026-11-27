@@ -40,6 +40,7 @@
               [template]="asset()!.template"
               [layoutName]="asset()!.mushaf_layout?.name ?? null"
             />
+            <app-timing-level-badge [level]="asset()!.timing_level" />
             @if (asset()!.is_open_access) {
               <nz-tag nzColor="green">{{ 'GALLERY.OPEN_ACCESS_BADGE' | translate }}</nz-tag>
             }

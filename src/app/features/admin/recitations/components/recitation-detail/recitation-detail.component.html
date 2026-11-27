@@ -37,6 +37,7 @@
           @if (recitation()!.is_open_access) {
             <nz-tag nzColor="green">{{ 'ADMIN.COMMON.TAG_OPEN_ACCESS' | translate }}</nz-tag>
           }
+          <app-timing-level-badge [level]="recitation()!.timing_level" />
           <app-asset-channel-tags [asset]="recitation()!" />
           @if (recitation()!.status === 'draft') {
             <nz-tag>{{ 'ADMIN.COMMON.TAG_DRAFT' | translate }}</nz-tag>

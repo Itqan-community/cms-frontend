@@ -1,6 +1,7 @@
 import type { AssetChannelFlags, AssetChannelFormFlags } from '../../utils/asset-channels.util';
 import { PublisherRef } from '../../text-assets/models/text-assets.models';
 import type { RecitationDetailQualityRef } from './recitation-qualities.models';
+import type { TimingLevel } from '../../../../shared/components/timing-level-badge/timing-level-badge.component';
 
 export enum MaddLevel {
   TWASSUT = 'twassut',
@@ -58,6 +59,8 @@ export interface RecitationListItem extends AssetChannelFlags, TimingCoverage {
   is_open_access: boolean;
   /** Draft assets stay in the portal but are hidden from consumers. */
   status?: AssetStatus;
+  /** Finest timing across every quality; null without timings. */
+  timing_level?: TimingLevel | null;
 }
 
 export interface RecitationDetails extends AssetChannelFlags {
@@ -81,6 +84,8 @@ export interface RecitationDetails extends AssetChannelFlags {
   is_open_access: boolean;
   /** Draft assets stay in the portal but are hidden from consumers. */
   status?: AssetStatus;
+  /** Finest timing across every quality; null without timings. */
+  timing_level?: TimingLevel | null;
   created_at: string;
   updated_at: string;
 }
