@@ -3138,6 +3138,14 @@
     "NOT_FOUND_MESSAGE": "The reciter you're looking for doesn't exist or is no longer available.",
     "BACK_TO_RECITERS": "Back to Reciters"
   },
+  "TIMING_LEVEL": {
+    "AYAH": "Timed per ayah",
+    "WORD": "Timed per word",
+    "SENTENCE": "Timed per sentence",
+    "AYAH_TOOLTIP": "The timings mark where each ayah starts and ends in the audio.",
+    "WORD_TOOLTIP": "The timings mark where each word starts and ends in the audio.",
+    "SENTENCE_TOOLTIP": "The timings mark where each sentence starts and ends in the audio."
+  },
   "ISSUE_CONTEXT": {
     "TITLE": "Location",
     "HINT": "Point to where the issue is.",
