@@ -103,8 +103,9 @@ export class ImportColumnMappingComponent {
   readonly draft = signal<(string | null)[]>([]);
   /** The mapping the user confirmed; null while the file's own headers are used. */
   readonly confirmed = signal<ImportColumnMapping | null>(null);
-  /** The last preview made with a mapping (`key`: that mapping as JSON). */
-  readonly check = signal<MappingCheck | null>(null);
+  /** Previews made with a mapping, by that mapping as JSON: a draft's check never
+   *  replaces the confirmed mapping's, and confirming a checked draft reuses its result. */
+  readonly checks = signal<Record<string, MappingCheck>>({});
 
   /** Import may run: no file, the headers matched, or the user mapped the columns. */
   readonly ready = computed(() => {
@@ -122,17 +123,13 @@ export class ImportColumnMappingComponent {
   readonly ignoredCount = computed(() => this.draft().filter((key) => key === null).length);
   /** The dialog's check of the draft mapping; null until it has come back. */
   readonly draftCheck = computed(() => {
-    const check = this.check();
-    return check && check.key === JSON.stringify(this.fullMapping(this.draftMapping()))
-      ? check
-      : null;
+    return this.checks()[JSON.stringify(this.fullMapping(this.draftMapping()))] ?? null;
   });
   /** Rows the import will report as errors, for the mapping the upload will send. */
   readonly attentionRows = computed(() => {
     const confirmed = this.confirmed();
     if (!confirmed) return this.preview()?.attention_rows ?? [];
-    const check = this.check();
-    return check && check.key === JSON.stringify(confirmed) ? check.rows : [];
+    return this.checks()[JSON.stringify(confirmed)]?.rows ?? [];
   });
 
   readonly rows = computed(() => {
@@ -220,7 +217,7 @@ export class ImportColumnMappingComponent {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((check) => {
-        if (check) this.check.set(check);
+        if (check) this.checks.update((checks) => ({ ...checks, [check.key]: check }));
       });
 
     let lastFile: File | null = null;
@@ -319,7 +316,7 @@ export class ImportColumnMappingComponent {
     this.draft.set([]);
     this.dialogOpen.set(false);
     this.check$.next(null);
-    this.check.set(null);
+    this.checks.set({});
     if (this.confirmed() !== null) {
       this.confirmed.set(null);
       this.mappingChange.emit(null);

@@ -273,6 +273,28 @@ describe('ImportColumnMappingComponent', () => {
     expect(component.attentionRows()).toEqual([2, 3]);
   });
 
+  it("keeps the confirmed mapping's rows when a later draft is checked and cancelled", () => {
+    // Arrange
+    pick();
+    httpMock.expectOne(url).flush(PREVIEW);
+    component.assign(0, 'surah');
+    component.assign(1, 'ayah');
+    component.assign(2, 'text');
+    fixture.detectChanges();
+    httpMock.expectOne(url).flush({ ...PREVIEW, attention_rows: [2] });
+    component.confirm();
+
+    // Act
+    component.openDialog();
+    component.assign(3, 'text');
+    fixture.detectChanges();
+    httpMock.expectOne(url).flush(PREVIEW);
+    component.closeDialog();
+
+    // Assert
+    expect(component.attentionRows()).toEqual([2]);
+  });
+
   it('forgets the check once the draft changes', () => {
     // Arrange
     pick();
