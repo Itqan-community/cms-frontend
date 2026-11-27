@@ -115,6 +115,7 @@ import {
 } from './content-text-cell-editor.component';
 import {
   IssueMarkerCellComponent,
+  suppressIssueKeys,
   type IssueMarkerCellParams,
 } from './issue-marker-cell.component';
 import { surahLabel } from '../../models/quran-metadata';
@@ -1887,6 +1888,8 @@ export class AssetContentGridComponent implements OnInit {
         editable: false,
         pinned: this.rtl() ? 'right' : 'left',
         cellRenderer: IssueMarkerCellComponent,
+        // Keyboard: the focused cell opens its issues on Enter or Space (see the renderer).
+        suppressKeyboardEvent: suppressIssueKeys,
         cellRendererParams: {
           issuesFor: (row: ContentEntry) => this.issuesFor(row),
           onOpen: (row: ContentEntry, issues: ContentIssue[]) => this.openIssues(row, issues),

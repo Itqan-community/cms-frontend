@@ -18,6 +18,7 @@ import { LastActiveLanguageService } from '../../services/last-active-language.s
 import { AssetContentGridComponent } from './asset-content-grid.component';
 import {
   IssueMarkerCellComponent,
+  suppressIssueKeys,
   type IssueMarkerCellParams,
 } from './issue-marker-cell.component';
 
@@ -153,6 +154,19 @@ describe('AssetContentGridComponent issue markers', () => {
     expect(ids()).not.toContain('issues');
   });
 
+  it('leaves Enter and Space on the issues column to its marker', () => {
+    // Arrange
+    groups = [{ surah: 1, ayah: 1, unit_id: 1, issues: [issue(1)] }];
+
+    // Act
+    const column = componentFor('ayah')
+      .buildColumnDefs()
+      .find((col) => col.colId === 'issues');
+
+    // Assert
+    expect(column?.suppressKeyboardEvent).toBe(suppressIssueKeys);
+  });
+
   it('remembers hiding the markers per user', () => {
     // Arrange
     groups = [{ surah: 1, ayah: 1, unit_id: 1, issues: [issue(1)] }];
@@ -206,14 +220,62 @@ describe('IssueMarkerCellComponent', () => {
     const fixture = TestBed.createComponent(IssueMarkerCellComponent);
     const onOpen = jasmine.createSpy('onOpen');
     const data = row({});
+    const cell = document.createElement('div');
     fixture.componentInstance.agInit({
       data,
+      eGridCell: cell,
       issuesFor: () => issues,
       onOpen,
     } as unknown as IssueMarkerCellParams);
     fixture.detectChanges();
-    return { el: fixture.nativeElement as HTMLElement, onOpen, data };
+    return { el: fixture.nativeElement as HTMLElement, onOpen, data, cell, fixture };
   }
+
+  it('opens the list on Enter or Space in the focused cell', () => {
+    for (const key of ['Enter', ' ']) {
+      // Arrange
+      const { onOpen, data, cell } = render([issue(1)]);
+      const event = new KeyboardEvent('keydown', { key, cancelable: true });
+
+      // Act
+      cell.dispatchEvent(event);
+
+      // Assert
+      expect(onOpen)
+        .withContext(key)
+        .toHaveBeenCalledOnceWith(data, [issue(1)]);
+      expect(event.defaultPrevented).withContext(key).toBeTrue();
+    }
+  });
+
+  it('ignores other keys, rows without issues, and keys after it is destroyed', () => {
+    // Arrange
+    const withIssues = render([issue(1)]);
+    const empty = render([]);
+
+    // Act
+    withIssues.cell.dispatchEvent(new KeyboardEvent('keydown', { key: 'a' }));
+    empty.cell.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+    withIssues.fixture.destroy();
+    withIssues.cell.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }));
+
+    // Assert
+    expect(withIssues.onOpen).not.toHaveBeenCalled();
+    expect(empty.onOpen).not.toHaveBeenCalled();
+  });
+
+  it('keeps Enter and Space from the grid on the issues column, outside an editor', () => {
+    // Arrange
+    const press = (key: string, editing = false) =>
+      suppressIssueKeys({ editing, event: new KeyboardEvent('keydown', { key }) } as never);
+
+    // Act / Assert
+    expect(press('Enter')).toBeTrue();
+    expect(press(' ')).toBeTrue();
+    expect(press('Tab')).toBeFalse();
+    expect(press('ArrowDown')).toBeFalse();
+    expect(press('Enter', true)).toBeFalse();
+  });
 
   it('shows the count and opens the list on click', () => {
     // Arrange
