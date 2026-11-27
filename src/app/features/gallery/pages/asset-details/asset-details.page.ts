@@ -23,6 +23,7 @@ import { environment } from '../../../../../environments/environment';
 import { AuthService } from '../../../../core/auth/services/auth.service';
 import { Licenses } from '../../../../core/enums/licenses.enum';
 import { AssetTemplateBadgeComponent } from '../../../../shared/components/asset-template-badge/asset-template-badge.component';
+import { TimingLevelBadgeComponent } from '../../../../shared/components/timing-level-badge/timing-level-badge.component';
 import { JsonLdService } from '../../../../core/services/json-ld.service';
 import { SeoService } from '../../../../core/services/seo.service';
 import { AssetDetailSkeletonComponent } from '../../../../shared/components/asset-detail-skeleton/asset-detail-skeleton.component';
@@ -63,6 +64,7 @@ import { AssetUsageCountsComponent } from '../../../usage/components/asset-usage
     BreadcrumbComponent,
     LicenseTagComponent,
     AssetTemplateBadgeComponent,
+    TimingLevelBadgeComponent,
     StateMessageComponent,
     AssetDetailSkeletonComponent,
     TranslateModule,

@@ -7,6 +7,7 @@ import { NzTagModule } from 'ng-zorro-antd/tag';
 import { assetKindIcon } from '../../../../core/enums/categories.enum';
 import { AssetTemplateBadgeComponent } from '../../../../shared/components/asset-template-badge/asset-template-badge.component';
 import { LicenseTagComponent } from '../../../../shared/components/license-tag/license-tag.component';
+import { TimingLevelBadgeComponent } from '../../../../shared/components/timing-level-badge/timing-level-badge.component';
 import { Asset } from '../../models/assets.model';
 
 @Component({
@@ -19,6 +20,7 @@ import { Asset } from '../../models/assets.model';
     NzButtonComponent,
     NgIcon,
     NzTagModule,
+    TimingLevelBadgeComponent,
   ],
   styleUrl: './asset-card.component.less',
   template: `
@@ -53,16 +55,12 @@ import { Asset } from '../../models/assets.model';
             </div>
           </div>
           <div class="button-container">
-            @if (asset().is_open_access || asset().has_ayah_timings) {
+            @if (asset().is_open_access || asset().timing_level) {
               <div class="asset-card__access-row">
                 @if (asset().is_open_access) {
                   <nz-tag nzColor="green">{{ 'GALLERY.OPEN_ACCESS_BADGE' | translate }}</nz-tag>
                 }
-                @if (asset().has_ayah_timings) {
-                  <nz-tag nzColor="blue" class="asset-card__timed">{{
-                    'GALLERY.AYAH_TIMED_BADGE' | translate
-                  }}</nz-tag>
-                }
+                <app-timing-level-badge class="asset-card__timed" [level]="asset().timing_level" />
               </div>
             }
             <a nz-button nzSize="large" routerLink="/gallery/asset/{{ asset().id }}" class="w-full">

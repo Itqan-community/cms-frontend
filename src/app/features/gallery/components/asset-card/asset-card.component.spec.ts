@@ -41,28 +41,29 @@ describe('AssetCardComponent', () => {
     expect(el.querySelector('.asset-card__header-license app-asset-template-badge')).toBeNull();
   });
 
-  it('marks a recitation that has ayah timings as timed', () => {
+  it('shows the timing level of a timed recitation', () => {
     const fixture = TestBed.createComponent(AssetCardComponent);
     fixture.componentRef.setInput('asset', {
       ...asset,
       category: Categories.RECITATION,
       template: null,
       has_ayah_timings: true,
+      timing_level: 'ayah',
     });
     fixture.detectChanges();
     const el: HTMLElement = fixture.nativeElement;
 
-    expect(el.querySelector('.asset-card__timed')?.textContent).toContain(
-      'GALLERY.AYAH_TIMED_BADGE'
+    expect(el.querySelector('.asset-card__timed .timing-level-badge')?.textContent).toContain(
+      'TIMING_LEVEL.AYAH'
     );
   });
 
-  it('does not mark an asset without ayah timings as timed', () => {
+  it('shows no timing level for an asset without timings', () => {
     const fixture = TestBed.createComponent(AssetCardComponent);
-    fixture.componentRef.setInput('asset', asset);
+    fixture.componentRef.setInput('asset', { ...asset, timing_level: null });
     fixture.detectChanges();
     const el: HTMLElement = fixture.nativeElement;
 
-    expect(el.querySelector('.asset-card__timed')).toBeNull();
+    expect(el.querySelector('.timing-level-badge')).toBeNull();
   });
 });
