@@ -27,6 +27,14 @@
       }}
     </button>
   </div>
+  @if (attentionRows().length) {
+    <p
+      class="import-columns__status import-columns__status--warning"
+      data-testid="import-columns-attention"
+    >
+      {{ 'ADMIN.IMPORT_COLUMNS.ATTENTION_ROWS' | translate: { rows: rowList(attentionRows()) } }}
+    </p>
+  }
 }
 
 <nz-modal
@@ -101,6 +109,25 @@
           data-testid="import-columns-missing"
           [nzMessage]="'ADMIN.IMPORT_COLUMNS.MISSING' | translate: { fields: missingLabels() }"
         ></nz-alert>
+      }
+      @if (draftCheck(); as check) {
+        @if (check.error) {
+          <nz-alert
+            nzType="error"
+            nzShowIcon
+            data-testid="import-columns-check-error"
+            [nzMessage]="check.error"
+          ></nz-alert>
+        } @else if (check.rows.length) {
+          <nz-alert
+            nzType="warning"
+            nzShowIcon
+            data-testid="import-columns-attention-rows"
+            [nzMessage]="
+              'ADMIN.IMPORT_COLUMNS.ATTENTION_ROWS' | translate: { rows: rowList(check.rows) }
+            "
+          ></nz-alert>
+        }
       }
     }
   </ng-container>

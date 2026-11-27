@@ -81,6 +81,11 @@
       </nz-form-item>
     </div>
   </div>
+  <app-ai-translate-version-text
+    [text]="typedText()"
+    [category]="aiCategory()"
+    (translated)="applyTranslation($event)"
+  />
 
   <div class="asset-initial-version-fields__upload">
     <nz-form-label>{{ i18n + '.FORM_FILE' | translate }}</nz-form-label>

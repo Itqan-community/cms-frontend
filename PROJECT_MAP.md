@@ -135,9 +135,9 @@ Create forms (font/mushaf/text asset/recitation/reciter) also show
 `ai-translate-actions`: POST /portal/ai/translate/ (Gemini free tier, backend-side key)
 -> fills only the empty *_en controls from the *_ar ones; "web" mode also writes the
 description/bio fields from Wikipedia (backend-side) and lists the source links.
-The add/edit version modal (`asset-versions-manager`) and the content editor's commit dialog
-(`asset-content-grid`) show `ai-translate-version-text` for the version name and summary / commit
-message (same endpoint).
+The add/edit version modal (`asset-versions-manager`), the content editor's commit dialog
+(`asset-content-grid`) and the create forms' first version (`asset-initial-version-fields`) show
+`ai-translate-version-text` for the version name and summary / commit message (same endpoint).
 The same request (one Gemini call per click) sends `slug_for` and returns the package `slug`
 (not for reciters): it is shown read-only and stored in the form's required `slug` control
 (`utils/asset-slug.util.ts`), so Save is blocked until Translate is clicked; when generation
@@ -392,7 +392,9 @@ container owns the API calls and the single picker modal. Quality tab menu suppo
 - `asset-initial-version-fields/` — Optional first version (starting number, bilingual name/summary,
   file) on asset create forms (font/mushaf/text asset); the number is required once a file is
   attached. Text assets also pass `contentKind`/`contentTemplate`/`mushafLayoutId`/`columnKeys` to
-  offer the empty CSV template for the chosen template and columns
+  offer the empty CSV template for the chosen template and columns. Shows
+  `ai-translate-version-text` for the version name/summary, read from and written to the parent
+  form's `version_*` controls (`aiCategory`: `text` default, `font`/`mushaf` from their forms)
 - `version-number-field/` — Version numbering for text asset/mushaf/font (`major.minor`, issued by
   the server, per language; mushafs/fonts have one sequence): a starting number for a language's
   first version, else a minor/major bump previewed from the latest number
@@ -411,7 +413,11 @@ container owns the API calls and the single picker modal. Quality tab menu suppo
   files: `word_id` or surah + ayah + word). When a required field is unmatched it opens the "Match
   file columns" dialog (one select per file column: a field or Ignore) and keeps the upload blocked
   (`readyChange`) until every required field has a column; the confirmed mapping goes out as the
-  `column_mapping` form field (JSON, field → column index). Matched files send none
+  `column_mapping` form field (JSON, field → column index). Matched files send none. Each complete
+  draft in the open dialog re-sends the preview with that `column_mapping` (header must then be the
+  first row); the returned `attention_rows` (text rows between the header and the data, which the
+  import reports as errors) are listed in the dialog and, for the mapping in use, under the status
+  line; a failed check shows the backend's message inline (no toast) and does not block
 - `asset-versions-manager/` — Version CRUD (text asset/mushaf/font; program when re-enabled); CSV
   `export/` then `file_url` fallback. Text asset/mushaf/font (`numbered()`): `name` is the locked
   version number and `label` the editable version name — the package registry (`itqan` CLI) only

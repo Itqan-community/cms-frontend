@@ -1,4 +1,15 @@
-import { Component, computed, input, model, output } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnInit,
+  computed,
+  inject,
+  input,
+  model,
+  output,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ControlContainer, FormGroupDirective, ReactiveFormsModule } from '@angular/forms';
 import { NgIcon } from '@ng-icons/core';
 import { TranslateModule } from '@ngx-translate/core';
@@ -6,12 +17,24 @@ import { NzButtonModule } from 'ng-zorro-antd/button';
 import { NzFormModule } from 'ng-zorro-antd/form';
 import { NzGridModule } from 'ng-zorro-antd/grid';
 import { NzInputModule } from 'ng-zorro-antd/input';
+import { startWith } from 'rxjs';
 import type { AssetTemplate, AssetVersionParentKind } from '../../models/asset-content.models';
 import type { ImportColumnInput, ImportColumnMapping } from '../../models/asset-versions.models';
+import type { AiTranslateCategory } from '../../services/ai-translate.service';
+import { EMPTY_VERSION_TEXT, type VersionText } from '../../utils/version-text.util';
+import { AiTranslateVersionTextComponent } from '../ai-translate-version-text/ai-translate-version-text.component';
 import { CsvTemplateDownloadComponent } from '../csv-template-download/csv-template-download.component';
 import { ImportColumnMappingComponent } from '../import-column-mapping/import-column-mapping.component';
 
 const I18N = 'ADMIN.COMMON.INITIAL_VERSION';
+
+/** The create form's controls for each part of the version's name and summary. */
+const VERSION_TEXT_CONTROLS: Record<keyof VersionText, string> = {
+  label_ar: 'version_name_ar',
+  label_en: 'version_name_en',
+  summary_ar: 'version_summary_ar',
+  summary_en: 'version_summary_en',
+};
 
 @Component({
   selector: 'app-asset-initial-version-fields',
@@ -24,6 +47,7 @@ const I18N = 'ADMIN.COMMON.INITIAL_VERSION';
     NzFormModule,
     NzGridModule,
     NzInputModule,
+    AiTranslateVersionTextComponent,
     CsvTemplateDownloadComponent,
     ImportColumnMappingComponent,
   ],
@@ -31,7 +55,10 @@ const I18N = 'ADMIN.COMMON.INITIAL_VERSION';
   templateUrl: './asset-initial-version-fields.component.html',
   styleUrl: './asset-initial-version-fields.component.less',
 })
-export class AssetInitialVersionFieldsComponent {
+export class AssetInitialVersionFieldsComponent implements OnInit {
+  private readonly formDirective = inject(FormGroupDirective, { optional: true });
+  private readonly destroyRef = inject(DestroyRef);
+
   /** Content file for the first asset version (distinct from thumbnail). */
   readonly versionFile = model<File | null>(null);
   readonly selectedFileName = computed(() => this.versionFile()?.name ?? null);
@@ -54,7 +81,40 @@ export class AssetInitialVersionFieldsComponent {
     this.mapColumns() && this.contentTemplate() ? this.versionFile() : null
   );
 
+  /** The translate endpoint's category for "Translate to English" (prompt wording only). */
+  readonly aiCategory = input<AiTranslateCategory>('text');
+  /** The version's name and summary as typed, for "Translate to English". */
+  readonly typedText = signal<VersionText>(EMPTY_VERSION_TEXT);
+
   readonly i18n = I18N;
+
+  ngOnInit(): void {
+    const form = this.formDirective?.form;
+    if (!form) return;
+    form.valueChanges
+      .pipe(startWith(null), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.typedText.set(this.readVersionText()));
+  }
+
+  /** Sets the English name/summary the AI translated. */
+  applyTranslation(values: Partial<VersionText>): void {
+    const form = this.formDirective?.form;
+    if (!form) return;
+    for (const [key, value] of Object.entries(values) as [keyof VersionText, string][]) {
+      const control = form.get(VERSION_TEXT_CONTROLS[key]);
+      control?.setValue(value);
+      control?.markAsDirty();
+    }
+  }
+
+  private readVersionText(): VersionText {
+    const form = this.formDirective?.form;
+    const text = { ...EMPTY_VERSION_TEXT };
+    for (const key of Object.keys(VERSION_TEXT_CONTROLS) as (keyof VersionText)[]) {
+      text[key] = (form?.get(VERSION_TEXT_CONTROLS[key])?.value as string | null) ?? '';
+    }
+    return text;
+  }
 
   onPickFile(event: Event): void {
     const input = event.target as HTMLInputElement;
